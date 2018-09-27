@@ -1,0 +1,13 @@
+node_modules
+/.temp
+/.vscode
+/scripts/*
+!build.bat
+!mklink.bat
+!start.bat
+!.conf
+/dst
+/src/.depend
+/src/pi_pt
+/src/pi
+
