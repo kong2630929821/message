@@ -12,59 +12,41 @@ type DbType = "memory" | "file";
 export type KeyType = Type;
 export type ValueType = Type;
 
-export const createPersistBucket = (bucketName: string, keyType: KeyType, valueType: ValueType): Bucket => {
+const createBucket = (dbType: DbType, bucketName: string, bucketMetaInfo: TabMeta): Bucket => {
     const dbMgr = getEnv().getDbMgr();
 
     try {
         write(dbMgr, (tr: Tr) => {
-            alter(tr, "file", bucketName, new TabMeta(new EnumType(keyType), new EnumType(valueType)));
+            alter(tr, dbType, bucketName, bucketMetaInfo);
         });
 
     } catch(e) {
-        console.log("create persist bucket failed with error: ", e);
-        throw new Error("Create persist bucket");
+        console.log("create bucket failed with error: ", e);
+        throw new Error("Create bucket failed");
     }
 
-    return new Bucket("file", bucketName, keyType, valueType);
+    return new Bucket(dbType, bucketName, bucketMetaInfo);
 }
 
-export const createMemoryBucket = (bucketName: string, keyType: KeyType, valueType: ValueType): Bucket => {
-    const dbMgr = getEnv().getDbMgr();
-
-    try {
-        write(dbMgr, (tr: Tr) => {
-            alter(tr, "memory", bucketName, new TabMeta(new EnumType(keyType), new EnumType(valueType)));
-        });
-
-    } catch(e) {
-        console.log("create memory bucket failed with error: ", e);
-        throw new Error("Create persist bucket");
-    }
-
-    return new Bucket("memory", bucketName, keyType, valueType);
+export const createPersistBucket = (bucketName: string, bucketMetaInfo: TabMeta): Bucket => {
+    return createBucket("file", bucketName, bucketMetaInfo);
 }
 
-// export const getPersistBucket = (bucketName: string): Bucket => {
-
-// }
-
-// export const getMemoryBucket = (buckName: string): Bucket => {
-
-// }
+export const createMemoryBucket = (bucketName: string, bucketMetaInfo: TabMeta): Bucket => {
+    return createBucket("memory", bucketName, bucketMetaInfo);
+}
 
 class Bucket {
 
     private bucketName: string;
     private dbType: DbType;
-    private keyType: KeyType;
-    private valueType: ValueType;
     private dbManager: any;
+    private tabMeta: TabMeta;
 
-    constructor(dbType: DbType, bucketName: string, keyType: KeyType, valueType: ValueType) {
+    constructor(dbType: DbType, bucketName: string, bucketMetaInfo: TabMeta) {
         this.bucketName = bucketName;
         this.dbType = dbType;
-        this.keyType = keyType;
-        this.valueType = valueType;
+        this.tabMeta = bucketMetaInfo;
         this.dbManager = getEnv().getDbMgr();
     }
 
