@@ -2,37 +2,55 @@
  * logger functions
  */
 enum LogLevel {
-    TRACE,
+    DEBUG,
     INFO,
     WARN,
-    CRIT,
+    ERROR,
     FATAL
 }
 
-class Logger {
-    private lvl: LogLevel;
 
-    constructor(lvl: LogLevel = LogLevel.INFO) {
-        this.lvl = lvl;
+// TODO: make DEFAULT_LOGGER_LEVEL configurable
+const DEFAULT_LOGGER_LEVEL = LogLevel.INFO;
+
+// TODO: use format string
+export class Logger {
+    private level: LogLevel;
+    private moduleName: string;
+
+    constructor(moduleName: string, level: LogLevel = DEFAULT_LOGGER_LEVEL) {
+        this.level = level;
+        this.moduleName = moduleName;
     }
 
-    info(): void {
-
+    info(...message: any[]): void {
+        if (this.level <= LogLevel.INFO) {
+            console.log(new Date().toLocaleString(), this.moduleName, "INFO", ...message);
+        }
     }
 
-    trace(): void {
-
+    debug(message: string): void {
+        if (this.level <= LogLevel.DEBUG) {
+            console.log(new Date().toLocaleString(), this.moduleName, "DEBUG", message);
+        }
     }
 
-    warn(): void {
-
+    warn(...message: any[]): void {
+        if (this.level <= LogLevel.WARN) {
+            console.log(new Date().toLocaleString(), this.moduleName, "WARN", ...message);
+        }
     }
 
-    crit(): void {
-
+    error(message: string): void {
+        if (this.level <= LogLevel.ERROR) {
+            console.log(new Date().toLocaleString(), this.moduleName, "CRIT", message);
+        }
     }
 
-    fatal(): void {
-
+    fatal(message: string): void {
+        if (this.level <= LogLevel.FATAL) {
+            console.log(new Date().toLocaleString(), this.moduleName, "FATAL", message);
+            throw new Error("FATAL error deteced");
+        }
     }
 }
