@@ -9,8 +9,8 @@ import { TabMeta, EnumType, Type } from "../pi/struct/sinfo";
 
 type DbType = "memory" | "file";
 
-export type KeyType = Type;
-export type ValueType = Type;
+export type KeyType = any;
+export type ValueType = any;
 
 const createBucket = (dbType: DbType, bucketName: string, bucketMetaInfo: TabMeta): Bucket => {
     const dbMgr = getEnv().getDbMgr();
@@ -50,23 +50,21 @@ class Bucket {
         this.dbManager = getEnv().getDbMgr();
     }
 
-    get(key: KeyType, timeout: number = 100): any {
+    get(key: KeyType, timeout: number = 1000): ValueType {
         let value: any;
 
         try {
             read(this.dbManager, (tr: Tr) => {
                 value = query(tr, [{ware: this.dbType, tab: this.bucketName, key: key}], timeout, false);
             });
-
-            return value;
         } catch(e) {
             console.log("create memory bucket failed with error: ", e);
         }
 
-        return null;
+        return value[0].value ? value[0].value : undefined;
     }
 
-    put(key: KeyType, value: ValueType, timeout: number = 100): boolean {
+    put(key: KeyType, value: ValueType, timeout: number = 1000): boolean {
         try {
             write(this.dbManager, (tr: Tr) => {
                 modify(tr, [{ware: this.dbType, tab: this.bucketName, key: key, value: value}], timeout, false);
@@ -80,11 +78,18 @@ class Bucket {
         return false;
     }
 
-    update(key: KeyType, value: ValueType, timeout: number = 100): boolean {
+    update(key: KeyType, value: ValueType, timeout: number = 1000): boolean {
+        if(this.get(key) === undefined) {
+            return false;
+        }
+
         return this.put(key, value, timeout);
     }
 
-    delete(key: KeyType, timeout: number = 100): boolean {
+    delete(key: KeyType, timeout: number = 1000): boolean {
+        if(this.get(key) === undefined) {
+            return false;
+        }
         try {
             write(this.dbManager, (tr: Tr) => {
                 modify(tr, [{ware: this.dbType, tab: this.bucketName, key: key}], timeout, false);
