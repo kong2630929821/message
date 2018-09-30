@@ -25,31 +25,31 @@ export class Logger {
 
     info(...message: any[]): void {
         if (this.level <= LogLevel.INFO) {
-            console.log(new Date().toLocaleString(), this.moduleName, "INFO", ...message);
+            console.log('[', new Date().toLocaleString(), ']', '[ INFO ]', this.moduleName + ':', ...message);
         }
     }
 
-    debug(message: string): void {
+    debug(...message: any[]): void {
         if (this.level <= LogLevel.DEBUG) {
-            console.log(new Date().toLocaleString(), this.moduleName, "DEBUG", message);
+            console.log('[', new Date().toLocaleString(), ']', '[ DEBUG ]', this.moduleName + ':', ...message);
         }
     }
 
     warn(...message: any[]): void {
         if (this.level <= LogLevel.WARN) {
-            console.log(new Date().toLocaleString(), this.moduleName, "WARN", ...message);
+            console.log('[', new Date().toLocaleString(), ']', '[ WARN ]', this.moduleName + ':', ...message);
         }
     }
 
-    error(message: string): void {
+    error(...message: any[]): void {
         if (this.level <= LogLevel.ERROR) {
-            console.log(new Date().toLocaleString(), this.moduleName, "CRIT", message);
+            console.log('[', new Date().toLocaleString(), ']', '[ ERROR ]', this.moduleName + ':', ...message);
         }
     }
 
-    fatal(message: string): void {
+    fatal(...message: any[]): void {
         if (this.level <= LogLevel.FATAL) {
-            console.log(new Date().toLocaleString(), this.moduleName, "FATAL", message);
+            console.log('[', new Date().toLocaleString(), ']', '[ FATAL ]', this.moduleName + ':', ...message);
             throw new Error("FATAL error deteced");
         }
     }
