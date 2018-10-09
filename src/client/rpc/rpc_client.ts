@@ -3,6 +3,7 @@ import {Client} from "../../pi/net/mqtt_c";
 import {Error} from "../../pi_pt/net/rpc_r.s";
 import {create} from "../../pi/net/rpc";
 import { FooRpc, FooRpcResp } from "../../server/rpc/foo.s"
+import { sendMessage as Message, messageReceivedAck } from '../../server/rpc/send_message.s';
 
 const SERVER_IP = "127.0.0.1";
 const SERVER_PORT = 1234;
@@ -29,7 +30,6 @@ const rpcFn = (client: Client, req: Struct, resp: Function, timeout: number, cal
 }
 
 const rpcFunc = (rpc: any, req:Struct, respClass:Function, callback:Function, timeout: number) => {
-    console.log(req, respClass)
 	rpc(req, (r:Struct) =>{
 		if(!respClass || r instanceof respClass){
 			return callback(r);
@@ -58,4 +58,18 @@ const testFooRpc = () => {
     })
 }
 
+const testSendMessage = () => {
+    let msg = new Message();
+    msg.src = "uid-123";
+    msg.dst = "uid-456";
+    msg.msgType = 1;
+    msg.msgId = 1;
+    msg.payload = "hello world";
+
+    callRemoteRpc(msg, messageReceivedAck, (r) => {
+        console.log(r);
+    })
+}
+
 testFooRpc();
+testSendMessage();
