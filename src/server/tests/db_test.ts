@@ -1,12 +1,17 @@
 import { createPersistBucket,createMemoryBucket } from '../../utils/db';
 import { Type, EnumType, TabMeta } from "../../pi/struct/sinfo";
 import { UserInfo } from '../schema/userinfo.s';
+import { getEnv } from '../../pi_pt/init/init';
+import { cloneDbMgr, DBToMqttMonitor } from '../../pi_pt/rust/pi_serv/js_db';
+
+const dbMgr = getEnv().getDbMgr();
 
 const test_basic_db_operation = () => {
+
     let m = new TabMeta(new EnumType(Type.Str), new EnumType(Type.Str));
 
     // memory db
-    let memBucket = createPersistBucket("hello", m);
+    let memBucket = createPersistBucket("hello", m, dbMgr);
     memBucket.put("hi", "Hello");
 
     //write different key type and value type
@@ -30,7 +35,7 @@ const test_basic_db_operation = () => {
     }
 
     // file db
-    let persistBucket = createMemoryBucket("hello", m);
+    let persistBucket = createMemoryBucket("hello", m, dbMgr);
     persistBucket.put("11", "22");
     console.log(persistBucket.get("11"));
     // console.assert(persistBucket.delete(1) === true, "delete failed");
@@ -38,7 +43,7 @@ const test_basic_db_operation = () => {
 
 const test_write_structInfo = () => {
     let meta = new TabMeta(new EnumType(Type.U32), new EnumType(Type.Struct, UserInfo._$info))
-    let m = createMemoryBucket("TEST", meta);
+    let m = createMemoryBucket("TEST", meta, dbMgr);
 
     let v = new UserInfo()
     v.uid = 99202;
