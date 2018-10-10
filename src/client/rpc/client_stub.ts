@@ -2,9 +2,7 @@ import {Struct} from "../../pi/struct/struct_mgr";
 import {Client} from "../../pi/net/mqtt_c";
 import {Error} from "../../pi_pt/net/rpc_r.s";
 import {create} from "../../pi/net/rpc";
-import { FooRpc, FooRpcResp } from "../../server/rpc/foo.s"
-import { sendMessage as Message, messageReceivedAck } from '../../server/rpc/send_message.s';
-import { userLogin, userLoginResponse } from '../../server/rpc/user_login.s';
+import { BonBuffer } from "../../pi/util/bon";
 
 const SERVER_IP = "127.0.0.1";
 const SERVER_PORT = 1234;
@@ -50,73 +48,26 @@ export const callRemoteRpc = (rpcName: RpcName, rpcResponseType: RpcResponseType
     });
 }
 
-const testFooRpc = () => {
-    let rpcName = new FooRpc();
-    rpcName.age = 10;
-    rpcName.name = "jfb";
-    callRemoteRpc(rpcName, FooRpcResp, (r) => {
-        console.log(r);
-    })
-}
-
-const testSendMessage = () => {
-    let msg = new Message();
-    msg.src = "uid-123";
-    msg.dst = "uid-456";
-    msg.msgType = 1;
-    msg.msgId = 1;
-    msg.payload = "hello world";
-
-    callRemoteRpc(msg, messageReceivedAck, (r) => {
-        console.log(r);
-    })
-}
-
-const testUserLogin = () => {
-    let user = new userLogin();
-    user.uid = 'uid-123';
-    user.passwdHash = '0xFF';
-
-    callRemoteRpc(user, userLoginResponse, (r) => {
-        console.log(r);
-    });
-}
-
-const testClinetPublishMessage = () => {
+export const subscribeChannel = (channelName: string) => {
     let mqttClient = createMqqtClient(() => {
         mqttClient.onMessage((topic: string, payload: Uint8Array) => {
-            console.log("topic", topic);
-            console.log("payload", payload);
+            // TODO: payload is a `Message` object, parse it...
+            if(topic === channelName) {
+                let bon = new BonBuffer(payload);
+                console.log('receive message: ', bon.readUtf8());
+            }
         });
-        let option1 = {
+        mqttClient.subscribe(channelName, {
             qos: 0,
             onSuccess : () => {
-                mqttClient.publish("uid-123", new Uint8Array([1,2,3]), 0, false);
+
             },
             onFailure: (e) => {
                 console.log(e);
             }
-        }
-
-        let option2 = {
-            qos: 0,
-            onSuccess : () => {
-                mqttClient.publish("uid-456", new Uint8Array([4,5,6]), 0, false);
-            },
-            onFailure: (e) => {
-                console.log(e);
-            }
-
-        }
-        mqttClient.subscribe("uid-123", option1);
-        mqttClient.subscribe("uid-456", option2);
+        });
 
     }, error => {
         console.log(error);
     });
 }
-
-testUserLogin();
-testFooRpc();
-testSendMessage();
-testClinetPublishMessage()

@@ -56,7 +56,7 @@ winit.initNext = function() {
 		//debugger;
 		// 加载基础及初始目录，显示加载目录的进度动画
 		//util.loadDir(["pi/ui/","app/ui/"].concat(flags.userinfo?["app/start/"]:["app/start/","app/title/"]), flags, function(fileMap) {
-		util.loadDir(["client/rpc/rpc_client.js", "pi/struct"], flags, fm, undefined, function(fileMap) {
+		util.loadDir(["client/rpc/client_stub.js", "client/rpc/rpcs.js", "pi/struct"], flags, fm, undefined, function(fileMap) {
 			console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
 			var tab = util.loadCssRes(fileMap);
 			// 将预加载的资源缓冲90秒，释放
