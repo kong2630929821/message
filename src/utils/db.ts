@@ -3,15 +3,11 @@
  */
 
 import { read, write, query, alter, modify, iterDb } from "../pi_pt/db";
-import { getNativeObj, getEnv } from "../pi_pt/init/init";
-import {Tr} from "../pi_pt/rust/pi_db/mgr";
-import { TabMeta, EnumType, Type } from "../pi/struct/sinfo";
+import { Tr } from "../pi_pt/rust/pi_db/mgr";
+import { TabMeta } from "../pi/struct/sinfo";
 import { Mgr } from "../pi_pt/rust/pi_db/mgr";
 
 type DbType = "memory" | "file";
-
-export type KeyType = any;
-export type ValueType = any;
 
 const createBucket = (dbType: DbType, bucketName: string, bucketMetaInfo: TabMeta, dbMgr: Mgr): Bucket => {
     try {
@@ -49,7 +45,7 @@ class Bucket {
         this.dbManager = dbMgr;
     }
 
-    get(key: KeyType, timeout: number = 1000): ValueType {
+    get<K, V>(key: K, timeout: number = 1000): V {
         let value: any;
 
         try {
@@ -63,7 +59,7 @@ class Bucket {
         return value[0].value ? value[0].value : undefined;
     }
 
-    put(key: KeyType, value: ValueType, timeout: number = 1000): boolean {
+    put<K, V>(key: K, value: V, timeout: number = 1000): boolean {
         try {
             write(this.dbManager, (tr: Tr) => {
                 modify(tr, [{ware: this.dbType, tab: this.bucketName, key: key, value: value}], timeout, false);
@@ -77,16 +73,16 @@ class Bucket {
         return false;
     }
 
-    update(key: KeyType, value: ValueType, timeout: number = 1000): boolean {
-        if(this.get(key) === undefined) {
+    update<K, V>(key: K, value: V, timeout: number = 1000): boolean {
+        if(this.get<K, V>(key) === undefined) {
             return false;
         }
 
-        return this.put(key, value, timeout);
+        return this.put<K, V>(key, value, timeout);
     }
 
-    delete(key: KeyType, timeout: number = 1000): boolean {
-        if(this.get(key) === undefined) {
+    delete<K>(key: K, timeout: number = 1000): boolean {
+        if(this.get<K, any>(key) === undefined) {
             return false;
         }
         try {

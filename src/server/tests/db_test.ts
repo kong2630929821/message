@@ -2,7 +2,6 @@ import { createPersistBucket,createMemoryBucket } from '../../utils/db';
 import { Type, EnumType, TabMeta } from "../../pi/struct/sinfo";
 import { UserInfo } from '../schema/userinfo.s';
 import { getEnv } from '../../pi_pt/init/init';
-import { cloneDbMgr, DBToMqttMonitor } from '../../pi_pt/rust/pi_serv/js_db';
 
 const dbMgr = getEnv().getDbMgr();
 
@@ -12,33 +11,30 @@ const test_basic_db_operation = () => {
 
     // memory db
     let memBucket = createPersistBucket("hello", m, dbMgr);
-    memBucket.put("hi", "Hello");
+    memBucket.put<string, string>("hi", "Hello");
 
     //write different key type and value type
-    memBucket.put(1, 100);
-    // panic as expected
-    // memBucket.get(1);
-    console.log(memBucket.get("hi"));
-    // console.assert(memBucket.delete(1) === true, "delete failed");
+    memBucket.put<number, number>(1, 100);
+    // memBucket.get(1);   // should panic
+    console.log( memBucket.get<string, string>("hi"));
 
-    if(memBucket.delete("hi")) {
-        console.log("delete success");
+    if(memBucket.delete<string>("hi")) {
+        console.log("delete exist key success");
     } else {
-        console.log("delete failed");
+        console.log("delete exist key failed");
     }
 
     // delete not exist key
-    if(memBucket.delete("wtf")) {
-        console.log("delete success");
+    if(memBucket.delete<string>("wtf")) {
+        console.log("delete non-exist key success");
     } else {
-        console.log("delete failed");
+        console.log("delete non-exist key failed");
     }
 
     // file db
     let persistBucket = createMemoryBucket("hello", m, dbMgr);
-    persistBucket.put("11", "22");
-    console.log(persistBucket.get("11"));
-    // console.assert(persistBucket.delete(1) === true, "delete failed");
+    persistBucket.put<string, string>("11", "22");
+    console.log(persistBucket.get<string, string>("11"));
 }
 
 const test_write_structInfo = () => {
@@ -49,7 +45,7 @@ const test_write_structInfo = () => {
     v.uid = 99202;
     v.phone = "你是谁";
 
-    m.put(123, v);
+    m.put<Type.Struct, any>(123, v);
     console.log(m.get(123));
 }
 
