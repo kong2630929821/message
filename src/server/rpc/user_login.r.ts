@@ -12,6 +12,11 @@ export const userLogin = (userLoginRequest: UserLoginRequest): userLoginResponse
     // TODO: how to delete topic when user offline ?
     setMqttTopic(mqttServer, uid, true, true);
 
+    // this is only for test purpose
+    if (uid === 'group') {
+        setMqttTopic(mqttServer, 'gid-123', true, true);
+    }
+
     let response = new userLoginResponse();
     response.ack = true;
 

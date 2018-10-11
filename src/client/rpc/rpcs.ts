@@ -34,5 +34,8 @@ const login = (uid: string) => {
 
 (<any>self).login = (userId: string) => {
     login(userId);
-    subscribeChannel(userId);
+}
+
+(<any>self).subscribe = (channleId: string) => {
+    subscribeChannel(channleId);
 }
