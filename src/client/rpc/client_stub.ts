@@ -3,6 +3,7 @@ import {Client} from "../../pi/net/mqtt_c";
 import {Error} from "../../pi_pt/net/rpc_r.s";
 import {create} from "../../pi/net/rpc";
 import { BonBuffer } from "../../pi/util/bon";
+import { sendMessage as Message } from '../../server/rpc/send_message.s';
 
 const SERVER_IP = "127.0.0.1";
 const SERVER_PORT = 1234;
@@ -10,7 +11,7 @@ const SERVER_PORT = 1234;
 type RpcName = Struct;
 type RpcResponseType = Function;
 
-const createMqqtClient = (onSuccess: Function, onFailure: Function): Client => {
+const createMqttClient = (onSuccess: Function, onFailure: Function): Client => {
     var options = {
         timeout: 3,
         keepAliveInterval: 60,
@@ -41,23 +42,25 @@ const rpcFunc = (rpc: any, req:Struct, respClass:Function, callback:Function, ti
 }
 
 export const callRemoteRpc = (rpcName: RpcName, rpcResponseType: RpcResponseType, callback: Function, timeout: number = 1000) => {
-    let mqttClient = createMqqtClient(() => {
+    let mqttClient = createMqttClient(() => {
         rpcFn(mqttClient, rpcName, rpcResponseType, timeout, callback);
     }, error => {
         console.log(error);
     });
 }
 
-export const subscribeChannel = (channelName: string) => {
-    let mqttClient = createMqqtClient(() => {
+export const subscribeChannel = (channelId: string) => {
+    let mqttClient = createMqttClient(() => {
         mqttClient.onMessage((topic: string, payload: Uint8Array) => {
-            // TODO: payload is a `Message` object, parse it...
-            if(topic === channelName) {
+            if(topic === channelId) {
                 let bon = new BonBuffer(payload);
-                console.log('receive message: ', bon.readUtf8());
+                let message = new Message();
+                message.bonDecode(bon);
+
+                console.log('received message: ', message);
             }
         });
-        mqttClient.subscribe(channelName, {
+        mqttClient.subscribe(channelId, {
             qos: 0,
             onSuccess : () => {
 

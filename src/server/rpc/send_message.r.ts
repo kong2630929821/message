@@ -10,7 +10,6 @@ import {BonBuffer} from "../../pi/util/bon";
 export const sendMessage = (message: Message): messageReceivedAck => {
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
 
-    let payload = message.payload;
     let dst = message.dst;
     let msgAck = new messageReceivedAck();
     msgAck.ack = true;
@@ -18,7 +17,7 @@ export const sendMessage = (message: Message): messageReceivedAck => {
     messgeHandler(message);
 
     let buf = new BonBuffer();
-    buf.writeUtf8(payload);
+    message.bonEncode(buf);
 
     mqttPublish(mqttServer, true, QoS.AtMostOnce, dst, buf.getBuffer());
 
