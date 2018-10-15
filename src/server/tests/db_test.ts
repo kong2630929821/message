@@ -1,4 +1,4 @@
-import { createPersistBucket,createMemoryBucket } from '../../utils/db';
+import { createPersistBucket, createMemoryBucket, Bucket } from '../../utils/db';
 import { Type, EnumType, TabMeta } from "../../pi/struct/sinfo";
 import { UserInfo } from '../schema/userinfo.s';
 import { getEnv } from '../../pi_pt/init/init';
@@ -71,8 +71,15 @@ const test_iterdb = () => {
     }
 }
 
+const read_from_exist_bucket = () => {
+    let bkt = new Bucket("file", "foo", dbMgr);
+
+    console.log('read_from_exist_bucket', bkt.get("hi1"));
+}
+
 export const test_db = () => {
     test_basic_db_operation();
     test_write_structInfo();
-    test_iterdb();
+    test_iterdb()
+    read_from_exist_bucket();
 }

@@ -20,7 +20,7 @@ const createBucket = (dbType: DbType, bucketName: string, bucketMetaInfo: TabMet
         throw new Error("Create bucket failed");
     }
 
-    return new Bucket(dbType, bucketName, bucketMetaInfo, dbMgr);
+    return new Bucket(dbType, bucketName, dbMgr);
 }
 
 export const createPersistBucket = (bucketName: string, bucketMetaInfo: TabMeta, dbMgr: Mgr): Bucket => {
@@ -31,17 +31,16 @@ export const createMemoryBucket = (bucketName: string, bucketMetaInfo: TabMeta, 
     return createBucket("memory", bucketName, bucketMetaInfo, dbMgr);
 }
 
-class Bucket {
+export class Bucket {
 
     private bucketName: string;
     private dbType: DbType;
     private dbManager: any;
     private tabMeta: TabMeta;
 
-    constructor(dbType: DbType, bucketName: string, bucketMetaInfo: TabMeta, dbMgr: Mgr) {
+    constructor(dbType: DbType, bucketName: string, dbMgr: Mgr) {
         this.bucketName = bucketName;
         this.dbType = dbType;
-        this.tabMeta = bucketMetaInfo;
         this.dbManager = dbMgr;
     }
 
