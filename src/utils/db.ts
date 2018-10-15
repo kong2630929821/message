@@ -97,4 +97,17 @@ class Bucket {
 
         return false;
     }
+
+    iter<K>(key: K, desc: boolean = false, filter: string = ""): any {
+        let iter;
+        try {
+            read(this.dbManager, (tr: Tr) => {
+                iter = iterDb(tr, this.dbType, this.bucketName, key, desc, filter);
+            })
+        } catch (e) {
+            console.log("failed to iter db with error: ", e);
+        }
+
+        return iter;
+    }
 }

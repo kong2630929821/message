@@ -49,7 +49,30 @@ const test_write_structInfo = () => {
     console.log(m.get(123));
 }
 
+const test_iterdb = () => {
+    let m = new TabMeta(new EnumType(Type.Str), new EnumType(Type.Str));
+
+    // memory db
+    let memBucket = createPersistBucket("foo", m, dbMgr);
+    memBucket.put<string, string>("hi1", "world1");
+    memBucket.put<string, string>('hi2', 'world2');
+    memBucket.put<string, string>('hi3', 'world3');
+
+    let it = memBucket.iter<string>("hi");
+
+    let item1 = it.nextElem();
+    let item2 = it.nextElem();
+    let item3 = it.nextElem();
+
+    if (item1[1] != "world1" && item2[1] != "world2" && item3[1] != "world3") {
+        throw new Error("Test iterdb failed");
+    } else {
+        console.log("Test iterDb successed");
+    }
+}
+
 export const test_db = () => {
     test_basic_db_operation();
     test_write_structInfo();
+    test_iterdb();
 }
