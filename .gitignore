@@ -12,6 +12,6 @@ node_modules
 /src/pi
 src/server/rpc/*.c.ts
 src/server/rpc/*.s.ts
-src/server/schema/*.s.ts
+src/server/data/db/*.s.ts
 
 
