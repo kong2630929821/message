@@ -46,22 +46,45 @@ export class Bucket {
 
     get<K, V>(key: K, timeout: number = 1000): V {
         let value: any;
+        let items = [];
 
         try {
+
+            if (Array.isArray(key)) {
+                for (let i = 0; i < key.length; i++) {
+                    items.push({ware: this.dbType, tab: this.bucketName, key: key[i]})
+                }
+            } else {
+                items.push({ware: this.dbType, tab: this.bucketName, key: key})
+            }
             read(this.dbManager, (tr: Tr) => {
-                value = query(tr, [{ware: this.dbType, tab: this.bucketName, key: key}], timeout, false);
+                value = query(tr, items, timeout, false);
             });
+
         } catch(e) {
             console.log("read key from bucket failed with error: ", e);
         }
 
-        return value[0].value ? value[0].value : undefined;
+        if (Array.isArray(value)) {
+            value = value.map(v => v.value);
+        }
+
+        return value;
     }
 
     put<K, V>(key: K, value: V, timeout: number = 1000): boolean {
+        let items = [];
+
         try {
+            if (Array.isArray(key) && Array.isArray(value) && key.length === value.length) {
+                for (let i = 0; i < key.length; i++) {
+                    items.push({ware: this.dbType, tab: this.bucketName, key: key[i], value: value[i]})
+                }
+            } else {
+                items.push({ware: this.dbType, tab: this.bucketName, key: key, value: value})
+            }
             write(this.dbManager, (tr: Tr) => {
-                modify(tr, [{ware: this.dbType, tab: this.bucketName, key: key, value: value}], timeout, false);
+                modify(tr, items, timeout, false);
             });
 
             return true;
