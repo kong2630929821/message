@@ -1,6 +1,6 @@
 import { createPersistBucket, createMemoryBucket, Bucket } from '../../utils/db';
 import { Type, EnumType, TabMeta } from "../../pi/struct/sinfo";
-import { UserInfo } from '../schema/userinfo.s';
+import { UserInfo } from './foo.s';
 import { getEnv } from '../../pi_pt/init/init';
 
 const dbMgr = getEnv().getDbMgr();
