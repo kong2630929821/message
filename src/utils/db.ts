@@ -36,7 +36,6 @@ export class Bucket {
     private bucketName: string;
     private dbType: DbType;
     private dbManager: any;
-    private tabMeta: TabMeta;
 
     constructor(dbType: DbType, bucketName: string, dbMgr: Mgr) {
         this.bucketName = bucketName;
