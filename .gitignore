@@ -6,6 +6,7 @@ node_modules
 !mklink.bat
 !start.bat
 !.conf
+!clean.bat
 /dst
 /src/.depend
 /src/pi_pt
