@@ -6,12 +6,12 @@ node_modules
 !mklink.bat
 !start.bat
 !.conf
+!clean.bat
 /dst
 /src/.depend
 /src/pi_pt
 /src/pi
 src/server/rpc/*.c.ts
 src/server/rpc/*.s.ts
-src/server/schema/*.s.ts
-
-
+src/server/data/db/*.s.ts
+src/server/tests/*.s.ts

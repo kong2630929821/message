@@ -1,6 +1,6 @@
 import { createPersistBucket, createMemoryBucket, Bucket } from '../../utils/db';
 import { Type, EnumType, TabMeta } from "../../pi/struct/sinfo";
-import { UserInfo } from '../schema/userinfo.s';
+import { UserInfo } from './foo.s';
 import { getEnv } from '../../pi_pt/init/init';
 
 const dbMgr = getEnv().getDbMgr();
@@ -12,12 +12,10 @@ const test_basic_db_operation = () => {
     // memory db
     let memBucket = createPersistBucket("hello", m, dbMgr);
     memBucket.put<string, string>("hi", "Hello");
-
     //write different key type and value type
     memBucket.put<number, number>(1, 100);
     // memBucket.get(1);   // should panic
     console.log( memBucket.get<string, string>("hi"));
-
     if(memBucket.delete<string>("hi")) {
         console.log("delete exist key success");
     } else {
@@ -71,15 +69,44 @@ const test_iterdb = () => {
     }
 }
 
-const read_from_exist_bucket = () => {
+const test_read_from_exist_bucket = () => {
     let bkt = new Bucket("file", "foo", dbMgr);
 
     console.log('read_from_exist_bucket', bkt.get("hi1"));
+}
+
+const test_batch_read = () => {
+    let bkt = new Bucket("file", "foo", dbMgr);
+
+    let v = bkt.get(["hi1", "hi2", "hi3"]);
+
+    console.log('test_batch_read', v)
+}
+
+const test_batch_write_then_read = () => {
+    let bkt = new Bucket("file", "foo", dbMgr);
+
+    let keys = ["batch1", "batch2", "batch3"];
+    let vals = ["batch_value1", "batch_value2", "batch_value3"];
+
+    bkt.put(keys, vals);
+
+    let v = bkt.get(keys);
+
+    console.log("batch_write_then_read:", v);
+
+    if (v[0] === vals[0] && v[1] === vals[1] && v[2] === vals[2]) {
+        console.log("test batch write then read success");
+    } else {
+        console.log("test batch write then read failed")
+    }
 }
 
 export const test_db = () => {
     test_basic_db_operation();
     test_write_structInfo();
     test_iterdb()
-    read_from_exist_bucket();
+    test_read_from_exist_bucket();
+    test_batch_read();
+    test_batch_write_then_read();
 }

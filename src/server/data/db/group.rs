@@ -7,20 +7,15 @@
 */
 enum GROUP_STATE {
     CREATED = 0,//已创建
-    DISSOLVE = 1//已解散
+    DISSOLVE = 1,//已解散
 }
 
 /**
 *入群方式
 */
-enum JOIN_METHOD{
+enum JOIN_METHOD {
     USER_APPLY = 0,//用户主动申请
-    MEMBER_INVITE = 1//群成员邀请
-}
-
-struct Guid {
-    gid:u32,
-    uid:u32
+    MEMBER_INVITE = 1,//群成员邀请
 }
 
 /**
@@ -39,6 +34,13 @@ struct GroupInfo {
     state:GROUP_STATE//当前状态
 }
 
+/**
+*群组中的用户id
+*/
+struct Guid{
+    gid:u32,
+    uid:u32
+}
 
 /**
 *群组中的用户信息

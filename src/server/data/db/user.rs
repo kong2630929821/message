@@ -5,9 +5,9 @@
 /**
 *性别
 */
-enum SEXY{
+enum SEXY {
     FAMALE = 0,//女性
-    MALE = 1//男性
+    MALE = 1,//男性
 }
 
 
@@ -15,21 +15,21 @@ enum SEXY{
 *用户本人的基本信息
 */
 #[primary=uid,db=file,dbMonitor=true]
-struct UserInfo {
+struct User {
     uid: u32,//用户id,自增
-    name:String,//用户自己设置的用户名
-    avator:String,//头像
-    sex:SEXY,//性别
+    name: String,//用户自己设置的用户名
+    avator: String,//头像
+    sex: SEXY,//性别
     tel: String,//电话
-    note: String//用户自己的备注信息
+    note: String,//用户自己的备注信息
 }
 
 /**
 *单聊两人的id
 */
 struct Uuid {
-    uid1:u32,//当前用户id
-    uid2:u32//对方id
+    uid1: u32,//当前用户id
+    uid2: u32,//对方id
 }
 /**
 *好友链接信息
@@ -50,7 +50,6 @@ struct Contact {
     friends:&[u32],//好友id
     temp_chat:&[u32],//临时用户id
     group:&[u32],//群组id
-    apply:&[u32]//申请添加自己为好友的其他用户
 }
 
 
