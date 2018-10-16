@@ -3,16 +3,6 @@
 */
 
 /**
-*群组链接信息
-*/
-#[primary=gid,db=file,dbMonitor=true]
-struct GroupLink{
-    gid:u32,//群组id
-    alias：String,//群组别名
-    hid:u64,//历史记录id
-}
-
-/**
 *群组状态
 */
 enum GROUP_STATE {
@@ -28,36 +18,36 @@ enum JOIN_METHOD{
     MEMBER_INVITE = 1//群成员邀请
 }
 
+struct Guid {
+    gid:u32,
+    uid:u32
+}
+
 /**
 *群组信息
 */
 #[primary=gid,db=file,dbMonitor=true]
-struct Group {
+struct GroupInfo {
     gid:u32,//群组id,全局唯一
     ownerid:u32,//群主id
     adminids:&[u32],//管理员id
     memberids:&[u32],//成员id
-    annoceids:u32,//公告id
+    annoceid:usize,//公告id
     create_time:u32,//创建时间
     dissolve_time:u32,//解散时间
     join_method:JOIN_METHOD,//加入方式
     state:GROUP_STATE//当前状态
 }
 
-/**
-*群组中的用户id
-*/
-struct Guid{
-    gid:u32,
-    uid:u32
-}
 
 /**
 *群组中的用户信息
 */
 #[primary=guid,db=file,dbMonitor=true]
 struct GroupUserLink {
-    guid:Guid,//用户在当前群组的唯一id
-    alias:String,//别名
-    join_time：u32//加入时间
+    guid:Guid,//用户在当前群组的唯一id    
+    groupAlias:String,//群在该用户账号上的别名
+    userAlias:String,//该用户在群里的别名
+    hid:usize,//群历史记录id
+    join_time：u32//加入时间    
 }
