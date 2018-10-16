@@ -2,24 +2,6 @@
 *聊天信息表
 */
 
-/**
-*用户历史记录
-*/
-#[primary=hid,,db=file,dbMonitor=true]
-struct UserHistory{
-    hid:u64,//历史记录id全局唯一
-    msg:&[UserMsg]
-}
-
-
-/**
-*群组历史记录
-*/
-#[primary=hid,,db=file,dbMonitor=true]
-struct GroupHistory{
-    hid:u64,//历史记录id全局唯一
-    msg:&[GroupMsg]
-}
 
 /**
 *消息类型
@@ -30,6 +12,7 @@ enum MSG_TYPE {
     VOICE = 3,//声音
     TXT_IMG = 4//文本和图片
 }
+
 /**
 * 用户消息
 */
@@ -58,15 +41,40 @@ struct GroupMsg{
 /**
 *群组公告
 */
-#[primary=aid,,db=file,dbMonitor=true]
 struct Announcement{
-    aid:u32,//公告id全局唯一
-    type: MSG_TYPE,
     sid:u32,//发布者id
-    time:u32,//时间    
+    type: MSG_TYPE,
     msg:String,//内容
+    time:u32,//时间    
     send:bool,//是否发送
     cancel:bool,//是否撤销
+}
+
+
+/**
+*用户历史记录
+*/
+#[primary=hid,,db=file,dbMonitor=true]
+struct UserHistory{
+    hid:usize,//历史记录id全局唯一,使用底层接口
+    msg:&[UserMsg]
+}
+
+
+/**
+*群组历史记录
+*/
+#[primary=hid,,db=file,dbMonitor=true]
+struct GroupHistory{
+    hid:u64,//历史记录id全局唯一
+    msg:&[GroupMsg]
+}
+
+
+#[primary=hid,,db=file,dbMonitor=true]
+struct AnnounceHistory{
+    aid:u32,//历史记录id全局唯一
+    announce:&[Announcement]
 }
 
 /**

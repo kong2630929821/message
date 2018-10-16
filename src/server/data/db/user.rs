@@ -14,9 +14,9 @@ enum SEXY{
 /**
 *用户本人的基本信息
 */
-#[primary=uid,,db=file,dbMonitor=true]
+#[primary=uid,db=file,dbMonitor=true]
 struct User {
-    uid: u32,//用户id
+    uid: u32,//用户id,自增
     name:String,//用户自己设置的用户名
     avator:String,//头像
     sex:SEXY,//性别
@@ -24,25 +24,29 @@ struct User {
     note: String//用户自己的备注信息
 }
 
+struct Uuid {
+    uid1:u32,//当前用户id
+    uid2:u32//对方id
+}
 /**
 *好友链接信息
 */
-#[primary=uid,,db=file,dbMonitor=true]
+#[primary=uuid,db=file,dbMonitor=true]
 struct FriendLink {
-    uid:u32,//用户id
+    uuid:Uuid,//两个用户的id进行hash
     alias:String,//别名    
-    hid:u64,//历史记录id
+    hid:usize//历史记录id 53位，直接使用底层接口
 }
 
 /**
 *联系人信息
 */
-#[primary=uid,,db=file,dbMonitor=true]
+#[primary=uid,db=file,dbMonitor=true]
 struct Contact {
     uid:u32,//用户id
-    friends:&[FriendLink],//好友
-    temp_chat:&[FriendLink],//临时会话
-    group:&[GroupLink]//群组
+    friends:&[u32],//好友id
+    temp_chat:&[u32],//临时用户id
+    group:&[u32]//群组id
 }
 
 
