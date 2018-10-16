@@ -66,7 +66,7 @@ struct UserHistory {
 */
 #[primary=hid,db=file,dbMonitor=true]
 struct GroupHistory {
-    hid: u64,//历史记录id全局唯一
+    hid: usize,//历史记录id全局唯一
     msg: &[GroupMsg],
 }
 
@@ -82,6 +82,6 @@ struct AnnounceHistory {
 */
 #[primary=hid,db=file,dbMonitor=true]
 struct MsgLock {
-    hid: u64,//历史记录id
+    hid: usize,//历史记录id
     current: u32,//当前消息锁编号
 }
