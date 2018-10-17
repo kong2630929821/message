@@ -23,48 +23,48 @@ export const registerUser = (registerInfo:userLogin):Result => {
 
 /**
  * 获取用户基本信息
- * @param uid 
+ * @param uid
  */
 //#[rpc]
 export const getUsersInfo = (uidArr: Array<number>):UserArray => {
 
-  return 
+  return
 }
 
 /**
  * 获取群组基本信息
- * @param uid 
+ * @param uid
  */
 //#[rpc]
 export const getGroupsInfo = (gidArr: Array<number>):GroupArray => {
 
-  return 
+  return
 }
 
 /**
  * 设置用户基本信息
- * @param param 
+ * @param param
  */
 //#[rpc]
 export const setUsersInfo = (param:UserInfo): Result => {
 
-  return 
+  return
 }
 
 
 /**
  * 获取联系人信息
- * @param uid 
+ * @param uid
  */
 //#[rpc]
 export const getContact = (uid: number): Contact => {
 
-  return 
+  return
 }
 
 /**
  * 获取好友别名和历史记录
- * @param uuidArr 
+ * @param uuidArr
  */
 //#[rpc]
 export const getFriendLinks = (uuidArr: Array<Uuid>): FriendLinkArray => {
@@ -74,7 +74,7 @@ export const getFriendLinks = (uuidArr: Array<Uuid>): FriendLinkArray => {
 
 /**
  * 获取好友别名和历史记录
- * @param uuidArr 
+ * @param uuidArr
  */
 //#[rpc]
 export const getGroupUserLinks = (uuidArr: Array<Guid>): GroupUserLinkArray => {
@@ -85,17 +85,17 @@ export const getGroupUserLinks = (uuidArr: Array<Guid>): GroupUserLinkArray => {
 
 /**
  * 申请添加其他用户为好友
- * @param apply 
+ * @param apply
  */
 //#[rpc]
 export const applyFriend = (apply:Uuid): Result => {
-  
-  return 
+
+  return
 }
 
 /**
  * 获取群组聊天的历史记录
- * @param hid 
+ * @param hid
  */
 //#[rpc]
 export const getGroupHistory = (param:MessageFragment): GroupHistoryArray => {
@@ -106,7 +106,7 @@ export const getGroupHistory = (param:MessageFragment): GroupHistoryArray => {
 
 /**
  * 获取单聊的历史记录
- * @param hid 
+ * @param hid
  */
 //#[rpc]
 export const getUserHistory = (param:MessageFragment): UserHistoryArray => {
@@ -116,10 +116,11 @@ export const getUserHistory = (param:MessageFragment): UserHistoryArray => {
 
 /**
  * 获取公告
- * @param param 
+ * @param param
  */
 //#[rpc]
 export const getAnnouceMent = (param:AnnouceFragment): AnnounceHistoryArray => {
 
   return
 }
+
