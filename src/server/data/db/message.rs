@@ -75,7 +75,6 @@ struct UserHistory{
     msg:UserMsg
 }
 
-
 /**
 *群组历史记录
 */

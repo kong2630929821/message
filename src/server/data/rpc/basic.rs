@@ -20,8 +20,8 @@ use message.s::{AnnounceHistory};
 use group.s::{GroupUserLink}; 
 
 
-struct RSBoolean{
-    b:boolean
+struct Result{
+    r:u32//1代表成功，其他值都有特殊意义，需要后端提供一个映射表
 }
 
 enum ORDER {
@@ -44,29 +44,29 @@ struct AnnouceFragment{
 }
 
 struct UserArray{
-    arr:&[UserInfo]
+    arr:&[UserInfo]//用户信息表
 }
 
 struct GroupArray{
-    arr:&[GroupInfo]
+    arr:&[GroupInfo]//群组信息表
 }
 
 struct FriendLinkArray{
-    arr:&[FriendLink]
+    arr:&[FriendLink]//好友链接表
 }
 
 struct GroupUserLinkArray{
-    arr:&[GroupUserLink]
+    arr:&[GroupUserLink]//群组链接表
 }
 
 struct GroupHistoryArray{
-    arr:&[GroupHistory]
+    arr:&[GroupHistory]//群组历史记录表
 }
 
 struct UserHistoryArray{
-    arr:&[UserHistory]
+    arr:&[UserHistory]//用户历史记录表
 }
 
 struct AnnounceHistoryArray{
-    arr:&[AnnounceHistory]
+    arr:&[AnnounceHistory]//公告表
 }

@@ -1,13 +1,24 @@
 /**
  * 获取客户的基本信息
  */
+// ================================================================= 导入
 import {UserInfo, Contact, Uuid, FriendLink} from "../db/user.s";
-import {RSBoolean, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray,
+import {Result, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray,
   GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray} from "./basic.s";
 import {GroupHistory} from "../db/message.s";
 import {Guid} from "../db/group.s";
+import {userLogin} from "../../rpc/user_login.s"
 
+// ================================================================= 导出
+/**
+ * 用户注册
+ * @param registerInfo 
+ */
+//#[rpc]
+export const registerUser = (registerInfo:userLogin):Result => {
 
+  return
+}
 
 
 /**
@@ -35,7 +46,7 @@ export const getGroupsInfo = (gidArr: Array<number>):GroupArray => {
  * @param param 
  */
 //#[rpc]
-export const setUsersInfo = (param:UserInfo): RSBoolean => {
+export const setUsersInfo = (param:UserInfo): Result => {
 
   return 
 }
@@ -77,7 +88,7 @@ export const getGroupUserLinks = (uuidArr: Array<Guid>): GroupUserLinkArray => {
  * @param apply 
  */
 //#[rpc]
-export const applyFriend = (apply:Uuid): RSBoolean => {
+export const applyFriend = (apply:Uuid): Result => {
   
   return 
 }
@@ -112,4 +123,3 @@ export const getAnnouceMent = (param:AnnouceFragment): AnnounceHistoryArray => {
 
   return
 }
-
