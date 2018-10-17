@@ -17,3 +17,4 @@ src/server/data/db/*.s.ts
 src/server/data/rpc/*.s.ts
 src/server/data/rpc/*.c.ts
 src/server/tests/*.s.ts
+*.p.ts
