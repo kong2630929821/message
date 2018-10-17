@@ -5,7 +5,7 @@
 import {Guid, GroupInfo} from "../db/group.s";
 import {Result} from "./basic.s";
 import {UserId} from "./user.s";
-import {MemberIdArray, GroupAgree, Invite} from "./group.s";
+import {GroupCreate, GroupAgree, Invite} from "./group.s";
 
 // ================================================================= 导出
 
@@ -14,7 +14,7 @@ import {MemberIdArray, GroupAgree, Invite} from "./group.s";
  * @param guid 
  */
 //#[rpc]
-export const applyJoinGroup = (guid:Guid): Result => {
+export const applyJoinGroup = (gid:number): Result => {
 
     return
 }
@@ -24,7 +24,7 @@ export const applyJoinGroup = (guid:Guid): Result => {
  * @param agree 
  */
 //#[rpc]
-export const acceptUser = (agree:GroupAgree): MemberIdArray|Result => {
+export const acceptUser = (agree:GroupAgree): Result => {
 
     return
 }
@@ -54,7 +54,7 @@ export const agreeJoinGroup = (agree:GroupAgree): GroupInfo|Result => {
  * @param guid 
  */
 //#[rpc]
-export const setOwner = (guid:Guid): Guid|Result => {
+export const setOwner = (guid:Guid): Result => {
 
     return
 }
@@ -64,7 +64,7 @@ export const setOwner = (guid:Guid): Guid|Result => {
  * @param guid 
  */
 //#[rpc]
-export const addAdmin = (guid:Guid): MemberIdArray|Result => {
+export const addAdmin = (guid:Guid): Result => {
 
     return 
 }
@@ -74,7 +74,7 @@ export const addAdmin = (guid:Guid): MemberIdArray|Result => {
  * @param guid 
  */
 //#[rpc]
-export const delAdmin = (guid:Guid): MemberIdArray|Result => {
+export const delAdmin = (guid:Guid): Result => {
 
     return 
 }
@@ -84,7 +84,7 @@ export const delAdmin = (guid:Guid): MemberIdArray|Result => {
  * @param guid 
  */
 //#[rpc]
-export const delMember = (guid:Guid): MemberIdArray|Result => {
+export const delMember = (guid:Guid): Result => {
 
     return
 }
@@ -94,7 +94,7 @@ export const delMember = (guid:Guid): MemberIdArray|Result => {
  * @param uid 
  */
 //#[rpc]
-export const createGroup = (uid:number): Guid|Result => {
+export const createGroup = (groupInfo:GroupCreate): Guid|Result => {
 
     return 
 }
@@ -104,7 +104,7 @@ export const createGroup = (uid:number): Guid|Result => {
  * @param guid 
  */
 //#[rpc]
-export const dissolveGroup = (guid:Guid): Result => {
+export const dissolveGroup = (gid:number): Result => {
 
     return 
 }

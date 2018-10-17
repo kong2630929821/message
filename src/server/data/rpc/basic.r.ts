@@ -1,9 +1,10 @@
 /**
  * 获取客户的基本信息
+ * 后端不应该相信前端发送的uid信息，应该自己从会话中获取
  */
 // ================================================================= 导入
-import {UserInfo, Contact, Uuid, FriendLink} from "../db/user.s";
-import {Result, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray,
+import {Contact, Uuid, FriendLink} from "../db/user.s";
+import {Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray,
   GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray} from "./basic.s";
 import {GroupHistory} from "../db/message.s";
 import {Guid} from "../db/group.s";
@@ -23,6 +24,7 @@ export const registerUser = (registerInfo:userLogin):Result => {
 
 /**
  * 获取用户基本信息
+ * 
  * @param uid
  */
 //#[rpc]
@@ -46,7 +48,7 @@ export const getGroupsInfo = (gidArr: Array<number>):GroupArray => {
  * @param param
  */
 //#[rpc]
-export const setUsersInfo = (param:UserInfo): Result => {
+export const setUserInfo = (param:UserInfoSet): Result => {
 
   return
 }
@@ -73,22 +75,11 @@ export const getFriendLinks = (uuidArr: Array<Uuid>): FriendLinkArray => {
 }
 
 /**
- * 获取好友别名和历史记录
+ * 获取好友别名和历史记录id
  * @param uuidArr
  */
 //#[rpc]
 export const getGroupUserLinks = (uuidArr: Array<Guid>): GroupUserLinkArray => {
-
-  return
-}
-
-
-/**
- * 申请添加其他用户为好友
- * @param apply
- */
-//#[rpc]
-export const applyFriend = (apply:Uuid): Result => {
 
   return
 }
@@ -119,8 +110,7 @@ export const getUserHistory = (param:MessageFragment): UserHistoryArray => {
  * @param param
  */
 //#[rpc]
-export const getAnnouceMent = (param:AnnouceFragment): AnnounceHistoryArray => {
-
+export const getAnnoucement = (param:AnnouceFragment): AnnounceHistoryArray => {
   return
 }
 

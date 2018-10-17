@@ -9,6 +9,14 @@ struct Result{
     r:u32//1代表成功，其他值都有特殊意义，需要后端提供一个映射表
 }
 
+struct UserInfoSet {
+    name: String,//用户自己设置的用户名
+    avator: String,//头像
+    sex: SEXY,//性别
+    tel: String,//电话
+    note: String,//用户自己的备注信息
+}
+
 enum ORDER {
     INC = 0,//顺序
     DEC = 1,//逆序

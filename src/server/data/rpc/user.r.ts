@@ -4,7 +4,6 @@
 // ================================================================= 导入
 import {Uuid} from "../db/user.s";
 import {Result} from "./basic.s";
-import {MemberIdArray} from "./group.s";
 import {UserAgree} from "./userAgree.s";
 
 
@@ -14,7 +13,7 @@ import {UserAgree} from "./userAgree.s";
  * @param uuid 
  */
 //#[rpc]
-export const applyFriend = (uuid:Uuid): Result => {
+export const applyFriend = (uid:number): Result => {
 
 }
 
@@ -23,7 +22,7 @@ export const applyFriend = (uuid:Uuid): Result => {
  * @param agree 
  */
 //#[rpc]
-export const acceptFriend = (agree:UserAgree): MemberIdArray|Result => {
+export const acceptFriend = (agree:UserAgree): Result => {
 
 }
 
@@ -32,7 +31,7 @@ export const acceptFriend = (agree:UserAgree): MemberIdArray|Result => {
  * @param uuid 
  */
 //#[rpc]
-export const delFriend = (uuid:Uuid): MemberIdArray|Result => {
+export const delFriend = (uid:number): Result => {
 
 }
 
