@@ -29,7 +29,7 @@ struct Guid {
 /**
 *群组信息
 */
-#[primary=gid,db=file,dbMonitor=true]
+#[primary=gid,db=file,dbMonitor=true,hasmgr=false]
 struct GroupInfo {
     gid:u32,//群组id,全局唯一
     ownerid:u32,//群主id
@@ -39,7 +39,7 @@ struct GroupInfo {
     create_time:u32,//创建时间
     dissolve_time:u32,//解散时间
     join_method:JOIN_METHOD,//加入方式
-    state:GROUP_STATE//当前状态
+    state:GROUP_STATE,//当前状态
 }
 
 /**
@@ -51,5 +51,5 @@ struct GroupUserLink {
     groupAlias:String,//群在该用户账号上的别名
     userAlias:String,//该用户在群里的别名
     hid:usize,//群历史记录id
-    join_time: u32//加入时间
+    join_time: u32,//加入时间
 }
