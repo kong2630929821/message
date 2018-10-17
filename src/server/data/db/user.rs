@@ -14,7 +14,7 @@ enum SEXY {
 /**
 *用户本人的基本信息
 */
-#[primary=uid,db=file,dbMonitor=true]
+#[primary=uid,db=file,dbMonitor=true,hasmgr=false]
 struct UserInfo {
     uid: u32,//用户id,自增
     name: String,//用户自己设置的用户名
