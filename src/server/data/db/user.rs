@@ -50,6 +50,7 @@ struct Contact {
     friends:&[u32],//好友id
     temp_chat:&[u32],//临时用户id
     group:&[u32],//群组id
+    apply:&[u32]//其他用户申请添加当前用户为好友
 }
 
 
