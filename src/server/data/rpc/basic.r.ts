@@ -11,10 +11,10 @@ import {Guid} from "../db/group.s";
 // ================================================================= 导出
 /**
  * 用户注册
- * @param registerInfo 
+ * @param registerInfo
  */
 //#[rpc]
-export const registerUser = (registerInfo:UserRegister):UserInfo|Result => {
+export const registerUser = (registerInfo:UserRegister):UserInfo => {
 
   return
 }
@@ -22,7 +22,7 @@ export const registerUser = (registerInfo:UserRegister):UserInfo|Result => {
 
 /**
  * 获取用户基本信息
- * 
+ *
  * @param uid
  */
 //#[rpc]

@@ -2,7 +2,7 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import {Result, MemberIdArray} from "./basic.s";
+import {Result} from "./basic.s";
 import {AnnounceHistory,UserHistory, GroupHistory, HIncId, AIncId} from "../db/message.s";
 import {AnnounceSend, GroupSend, UserSend} from "./message.s";
 
@@ -11,7 +11,7 @@ import {AnnounceSend, GroupSend, UserSend} from "./message.s";
 // ================================================================= 导出
 /**
  * 发布公告
- * @param announce 
+ * @param announce
  */
 //#[rpc]
 export const sendAnnouncement = (announce:AnnounceSend): AnnounceHistory|Result => {
@@ -21,17 +21,17 @@ export const sendAnnouncement = (announce:AnnounceSend): AnnounceHistory|Result 
 
 /**
  * 撤销公告
- * @param aIncId 
+ * @param aIncId
  */
 //#[rpc]
 export const cancelAnnouncement = (aIncId:HIncId): Result => {
-    
+
     return
 }
 
 /**
  * 发送群组消息
- * @param message 
+ * @param message
  */
 //#[rpc]
 export const sendGroupMessage = (message:GroupSend): GroupHistory|Result => {
@@ -41,27 +41,27 @@ export const sendGroupMessage = (message:GroupSend): GroupHistory|Result => {
 
 /**
  * 撤销群组消息
- * @param hIncId 
+ * @param hIncId
  */
 //#[rpc]
 export const cancelGroupMessage = (hIncId:HIncId): Result => {
 
-    return 
+    return
 }
 
 /**
  * 发送单聊消息
- * @param message 
+ * @param message
  */
 //#[rpc]
 export const sendUserMessage = (message:UserSend): UserHistory|Result => {
 
-    return 
+    return
 }
 
 /**
  * 撤销群组消息
- * @param hIncId 
+ * @param hIncId
  */
 //#[rpc]
 export const cancelUserMessage = (hIncId:HIncId): Result => {

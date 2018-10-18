@@ -39,7 +39,7 @@ struct GroupInfo {
     create_time:u32,//创建时间
     dissolve_time:u32,//解散时间
     join_method:JOIN_METHOD,//加入方式
-    note:string,//群描述
+    note:String,//群描述
     state:GROUP_STATE,//当前状态
 }
 

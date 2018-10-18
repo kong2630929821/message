@@ -1,5 +1,5 @@
-#[path=../db/]
-use user.s::{UserInfo, FriendLink};
+#[path=../db/,enumc=SEXY]
+use user.s::{UserInfo, FriendLink, SEXY};
 #[path=../db/]
 use group.s::{GroupInfo, GroupUserLink};
 #[path=../db/]

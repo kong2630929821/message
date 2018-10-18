@@ -4,14 +4,13 @@
 // ================================================================= 导入
 import {Guid, GroupInfo} from "../db/group.s";
 import {Result} from "./basic.s";
-import {UserId} from "./user.s";
 import {GroupCreate, GroupAgree, Invite} from "./group.s";
 
 // ================================================================= 导出
 
 /**
  * 用户主动申请加入群组
- * @param guid 
+ * @param guid
  */
 //#[rpc]
 export const applyJoinGroup = (gid:number): Result => {
@@ -21,7 +20,7 @@ export const applyJoinGroup = (gid:number): Result => {
 
 /**
  * 管理员接受/拒绝用户的加群申请
- * @param agree 
+ * @param agree
  */
 //#[rpc]
 export const acceptUser = (agree:GroupAgree): Result => {
@@ -31,7 +30,7 @@ export const acceptUser = (agree:GroupAgree): Result => {
 
 /**
  * 群成员邀请其他用户加入群
- * @param invite 
+ * @param invite
  */
 //#[rpc]
 export const inviteUser = (invite:Invite): Result => {
@@ -41,7 +40,7 @@ export const inviteUser = (invite:Invite): Result => {
 
 /**
  * 用户同意加入群组
- * @param agree 
+ * @param agree
  */
 //#[rpc]
 export const agreeJoinGroup = (agree:GroupAgree): GroupInfo|Result => {
@@ -51,7 +50,7 @@ export const agreeJoinGroup = (agree:GroupAgree): GroupInfo|Result => {
 
 /**
  * 转移群主
- * @param guid 
+ * @param guid
  */
 //#[rpc]
 export const setOwner = (guid:Guid): Result => {
@@ -61,27 +60,27 @@ export const setOwner = (guid:Guid): Result => {
 
 /**
  * 添加管理员
- * @param guid 
+ * @param guid
  */
 //#[rpc]
 export const addAdmin = (guid:Guid): Result => {
 
-    return 
+    return
 }
 
 /**
  * 删除管理员
- * @param guid 
+ * @param guid
  */
 //#[rpc]
 export const delAdmin = (guid:Guid): Result => {
 
-    return 
+    return
 }
 
 /**
  * 剔除用户
- * @param guid 
+ * @param guid
  */
 //#[rpc]
 export const delMember = (guid:Guid): Result => {
@@ -91,20 +90,20 @@ export const delMember = (guid:Guid): Result => {
 
 /**
  * 创建群
- * @param uid 
+ * @param uid
  */
 //#[rpc]
 export const createGroup = (groupInfo:GroupCreate): GroupInfo|Result => {
 
-    return 
+    return
 }
 
 /**
  * 解散群
- * @param guid 
+ * @param guid
  */
 //#[rpc]
 export const dissolveGroup = (gid:number): Result => {
 
-    return 
+    return
 }
