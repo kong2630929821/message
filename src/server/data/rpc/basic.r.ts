@@ -4,9 +4,18 @@
  */
 // ================================================================= 导入
 import {Contact, Uuid, FriendLink, UserInfo} from "../db/user.s";
-import {Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister} from "./basic.s";
+import {GetFriendLinksReq, GetContactReq, Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister, GetUserInfoReq, GetGroupInfoReq} from "./basic.s";
 import {GroupHistory} from "../db/message.s";
 import {Guid} from "../db/group.s";
+
+import { Bucket } from "../../../utils/db";
+import { getEnv } from '../../../pi_pt/init/init';
+
+const dbMgr = getEnv().getDbMgr();
+const userInfoBucket = new Bucket("file", "user.UserInfo", dbMgr);
+const groupInfoBucket = new Bucket("file", "group.Group", dbMgr);
+const contactBucket = new Bucket("file", "user.Contact", dbMgr);
+const frindLinkBucket = new Bucket("file", "user.FriendLink", dbMgr);
 
 // ================================================================= 导出
 /**
@@ -16,7 +25,15 @@ import {Guid} from "../db/group.s";
 //#[rpc]
 export const registerUser = (registerInfo:UserRegister):UserInfo => {
 
-  return
+  let userInfo = new UserInfo();
+  userInfo.name = registerInfo.name;
+  userInfo.note = "";
+  userInfo.tel = "";
+  userInfo.uid = 1000000;
+
+  userInfoBucket.put(userInfo.uid, userInfo);
+
+  return userInfo;
 }
 
 
@@ -26,9 +43,14 @@ export const registerUser = (registerInfo:UserRegister):UserInfo => {
  * @param uid
  */
 //#[rpc]
-export const getUsersInfo = (uidArr: Array<number>):UserArray => {
+export const getUsersInfo = (getUserInfoReq: GetUserInfoReq):UserArray => {
+  let uids = getUserInfoReq.uids;
+  let values:any = userInfoBucket.get(uids);
 
-  return
+  let res = new UserArray();
+  res.arr = values;
+
+  return res;
 }
 
 /**
@@ -36,9 +58,14 @@ export const getUsersInfo = (uidArr: Array<number>):UserArray => {
  * @param uid
  */
 //#[rpc]
-export const getGroupsInfo = (gidArr: Array<number>):GroupArray => {
+export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq):GroupArray => {
+  let gids = getGroupInfoReq.gids;
+  let values: any = groupInfoBucket.get(gids);
 
-  return
+  let res = new GroupArray();
+  res.arr = values;
+
+  return res;
 }
 
 /**
@@ -57,9 +84,14 @@ export const setUserInfo = (param:UserInfoSet): Result => {
  * @param uid
  */
 //#[rpc]
-export const getContact = (uid: number): Contact => {
+export const getContact = (getContactReq: GetContactReq): Contact => {
+  let uid = getContactReq.uid;
+  let value = contactBucket.get(uid);
 
-  return
+  // TODO: fill more fields
+  let res = new Contact();
+
+  return res;
 }
 
 /**
@@ -67,9 +99,14 @@ export const getContact = (uid: number): Contact => {
  * @param uuidArr
  */
 //#[rpc]
-export const getFriendLinks = (uuidArr: Array<Uuid>): FriendLinkArray => {
+export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLinkArray => {
+  let uuids = getFriendLinksReq.uuid;
+  let values: any = frindLinkBucket.get(uuids);
 
-  return
+  let res = new FriendLinkArray();
+  res.arr = values;
+
+  return res;
 }
 
 /**

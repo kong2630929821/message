@@ -68,3 +68,19 @@ struct UserHistoryArray{
 struct AnnounceHistoryArray{
     arr:&[AnnounceHistory]//公告表
 }
+
+struct GetUserInfoReq {
+    uids: &[usize]
+}
+
+struct GetGroupInfoReq {
+    gids: &[usize]
+}
+
+struct GetContactReq {
+    uid: usize
+}
+
+struct GetFriendLinksReq {
+    uuid: &[u32]
+}
