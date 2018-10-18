@@ -3,12 +3,10 @@
  * 后端不应该相信前端发送的uid信息，应该自己从会话中获取
  */
 // ================================================================= 导入
-import {Contact, Uuid, FriendLink} from "../db/user.s";
-import {Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray,
-  GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray} from "./basic.s";
+import {Contact, Uuid, FriendLink, UserInfo} from "../db/user.s";
+import {Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister} from "./basic.s";
 import {GroupHistory} from "../db/message.s";
 import {Guid} from "../db/group.s";
-import {userLogin} from "../../rpc/user_login.s"
 
 // ================================================================= 导出
 /**
@@ -16,7 +14,7 @@ import {userLogin} from "../../rpc/user_login.s"
  * @param registerInfo 
  */
 //#[rpc]
-export const registerUser = (registerInfo:userLogin):Result => {
+export const registerUser = (registerInfo:UserRegister):UserInfo|Result => {
 
   return
 }

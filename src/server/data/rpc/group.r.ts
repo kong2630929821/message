@@ -94,7 +94,7 @@ export const delMember = (guid:Guid): Result => {
  * @param uid 
  */
 //#[rpc]
-export const createGroup = (groupInfo:GroupCreate): Guid|Result => {
+export const createGroup = (groupInfo:GroupCreate): GroupInfo|Result => {
 
     return 
 }
