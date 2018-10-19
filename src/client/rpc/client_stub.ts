@@ -1,15 +1,12 @@
 import {Struct} from "../../pi/struct/struct_mgr";
 import {Client} from "../../pi/net/mqtt_c";
 import {Error} from "../../pi_pt/net/rpc_r.s";
-import {create} from "../../pi/net/rpc";
+import {create, Rpc} from "../../pi/net/rpc";
 import { BonBuffer } from "../../pi/util/bon";
 import { sendMessage as Message } from '../../server/rpc/send_message.s';
 
 const SERVER_IP = "127.0.0.1";
 const SERVER_PORT = 1234;
-
-type RpcName = Struct;
-type RpcResponseType = Function;
 
 const createMqttClient = (onSuccess: Function, onFailure: Function): Client => {
     var options = {
@@ -24,13 +21,13 @@ const createMqttClient = (onSuccess: Function, onFailure: Function): Client => {
     return new Client(SERVER_IP, SERVER_PORT, "clientId-wcd14PDgoZ", null, options);
 }
 
-const rpcFn = (client: Client, req: Struct, resp: Function, timeout: number, callback: Function) => {
+const rpcFn = (rpcName: string, client: Client, req: Struct, resp: Function, timeout: number, callback: Function) => {
     let rpc = create(client, (<any>self).__mgr);
-    rpcFunc(rpc, req, resp, callback, timeout);
+    rpcFunc(rpcName, rpc, req, resp, callback, timeout);
 }
 
-const rpcFunc = (rpc: any, req:Struct, respClass:Function, callback:Function, timeout: number) => {
-	rpc(req, (r:Struct) =>{
+const rpcFunc = (rpcName: string, rpc: Rpc, req:Struct, respClass:Function, callback:Function, timeout: number) => {
+	rpc(rpcName, req, (r:Struct) =>{
 		if(!respClass || r instanceof respClass){
 			return callback(r);
 		}else if(r instanceof Error){
@@ -41,9 +38,9 @@ const rpcFunc = (rpc: any, req:Struct, respClass:Function, callback:Function, ti
 	}, timeout);
 }
 
-export const callRemoteRpc = (rpcName: RpcName, rpcResponseType: RpcResponseType, callback: Function, timeout: number = 1000) => {
+export const callRemoteRpc = (rpcName: string, rpcRequest: Struct, rpcResponseType: Function, callback: Function, timeout: number = 1000) => {
     let mqttClient = createMqttClient(() => {
-        rpcFn(mqttClient, rpcName, rpcResponseType, timeout, callback);
+        rpcFn(rpcName, mqttClient, rpcRequest, rpcResponseType, timeout, callback);
     }, error => {
         console.log(error);
     });

@@ -3,7 +3,7 @@ import { setMqttTopic, mqttPublish, QoS } from "../../pi_pt/rust/pi_serv/js_net"
 import { getEnv } from "../../pi_pt/net/rpc_server";
 import { ServerNode } from "../../pi_pt/rust/mqtt/server";
 
-//#[rpc]
+//#[rpc=rpcServer]
 export const userLogin = (userLoginRequest: UserLoginRequest): userLoginResponse => {
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
 
