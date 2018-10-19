@@ -15,7 +15,7 @@ const dbMgr = getEnv().getDbMgr();
 const userInfoBucket = new Bucket("file", "user.UserInfo", dbMgr);
 const groupInfoBucket = new Bucket("file", "group.Group", dbMgr);
 const contactBucket = new Bucket("file", "user.Contact", dbMgr);
-const frindLinkBucket = new Bucket("file", "user.FriendLink", dbMgr);
+const friendLinkBucket = new Bucket("file", "user.FriendLink", dbMgr);
 
 // ================================================================= 导出
 /**
@@ -101,7 +101,7 @@ export const getContact = (getContactReq: GetContactReq): Contact => {
 //#[rpc]
 export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLinkArray => {
   let uuids = getFriendLinksReq.uuid;
-  let values: any = frindLinkBucket.get(uuids);
+  let values: any = friendLinkBucket.get(uuids);
 
   let res = new FriendLinkArray();
   res.arr = values;
