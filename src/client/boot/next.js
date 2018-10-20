@@ -44,6 +44,8 @@ winit.initNext = function() {
 		dirProcess.value = r*0.8;
 		divProcess.style.width = (modProcess.value + dirProcess.value) * 100 + "%";
 	});
+
+	var DOWNLOAD_CFG = { png: "download", jpg: "download", jpeg: "download", webp: "download", gif: "download", svg: "download", mp3: "download", ogg: "download", aac: "download" }
 	pi_modules.commonjs.exports.require(["pi/util/html", "pi/widget/util"], {}, function(mods, fm) {
 		console.log("first mods time:", Date.now() - startTime, mods, Date.now());
 		var html = mods[0], util = mods[1];
@@ -51,51 +53,56 @@ winit.initNext = function() {
 		var userinfo = html.getCookie("userinfo");
 		pi_modules.commonjs.exports.flags = html.userAgent(flags);
 		flags.userinfo = userinfo;
+		//注册各种数据结构监听器
+		var structRegister = function () {
+			util.loadDir(["pi/struct/"], flags, fm, undefined, function (fileMap, mods) {
+				var structMgr = pi_modules["pi/struct/struct_mgr"].exports;
+				var mgr1 = new structMgr.StructMgr();
+	
+				for (var k in fileMap) {
+					var filePath = k.slice(0, k.length - pi_modules.butil.exports.fileSuffix(k).length - 1);
+					var exp = pi_modules[filePath].exports;
+					for(var kk in exp){
+						if(pi_modules["pi/struct/struct_mgr"].exports.Struct.isPrototypeOf(exp[kk]) && exp[kk]._$info){
+							mgr1.register(exp[kk]._$info.nameHash, exp[kk], exp[kk]._$info.name);
+						}
+					}
+	
+				}
+			}, function (r) {
+				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
+			}, dirProcess.handler);
+		};
+		//加载框架代码
+		var loadFramework = function(){
+			util.loadDir(["pi/lang/", "pi/net/", "pi/ui/", "pi/util/"], flags, fm, undefined, function (fileMap) {
+				loadApp()
+			}, function (r) {
+				alert("加载目录失败, " + r.error + ":" + r.reason);
+			}, dirProcess.handler);
+		}
+		//加载APP部分代码，实际项目中会分的更细致
+		var loadApp = function () {
+			util.loadDir(["client/app/view/"], flags, fm, undefined, function (fileMap) {
+				console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
+				var tab = util.loadCssRes(fileMap);
+				// 将预加载的资源缓冲90秒，释放
+				tab.timeout = 90000;
+				tab.release();
+				console.log("res time:", Date.now() - startTime);
+	
+				var index = pi_modules.commonjs.exports.relativeGet("client/app/view/index/index").exports;
+				index.run();
+	
+				document.body.removeChild(div);
+			}, function (r) {
+				alert("加载目录失败, " + r.error + ":" + r.reason);
+			}, dirProcess.handler);
+		}
+
 		html.checkWebpFeature(function(r) {
 		flags.webp = flags.webp || r;
-		//debugger;
-		// 加载基础及初始目录，显示加载目录的进度动画
-		//util.loadDir(["pi/ui/","app/ui/"].concat(flags.userinfo?["app/start/"]:["app/start/","app/title/"]), flags, function(fileMap) {
-		util.loadDir(["client/rpc/client_stub.js", "client/rpc/rpcs.js", "pi/struct"], flags, fm, undefined, function(fileMap) {
-			console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
-			var tab = util.loadCssRes(fileMap);
-			// 将预加载的资源缓冲90秒，释放
-			tab.timeout = 90000;
-			tab.release();
-			//clear();
-			console.log("res time:", Date.now() - startTime);
-
-            console.log(pi_modules);
-			//测试struct
-			var structMgr = pi_modules["pi/struct/struct_mgr"].exports;
-            var mgr1 = new structMgr.StructMgr();
-
-            for (var k in fileMap) {
-                var filePath = k.slice(0, k.length - pi_modules.butil.exports.fileSuffix(k).length - 1);
-                var exp = pi_modules[filePath].exports;
-                for(var kk in exp){
-                    if(pi_modules["pi/struct/struct_mgr"].exports.Struct.isPrototypeOf(exp[kk]) && exp[kk]._$info){
-                        mgr1.register(exp[kk]._$info.nameHash, exp[kk], exp[kk]._$info.name);
-                    }
-                }
-
-            }
-			// var mgr2 = new structMgr.StructMgr();
-			//structUtil.registerToMgr(fileMap, mgr1);
-			// structUtil.registerToMgr(fileMap, mgr2);
-			// //structUtil.addLisner(mgr1, mgr2);
-			self.__mgr = mgr1;
-			// self.__mgr2 = mgr2;
-
-			//测试rpc
-			// var structUtil = pi_modules.commonjs.exports.relativeGet("pi/struct/util").exports;
-			// var structMgr = pi_modules.commonjs.exports.relativeGet("pi/struct/struct_mgr").exports;
-			// var rpcMgr = new structMgr.StructMgr();
-			// structUtil.registerRpc(fileMap, rpcMgr);
-			// self.rpcMgr = rpcMgr;
-		}, function(r){
-			alert("加载目录失败, "+r.error + ":" + r.reason);
-		}, dirProcess.handler);
+			loadFramework()
 		});
 	}, function(result){
 		alert("加载基础模块失败, "+result.error + ":" + result.reason);
