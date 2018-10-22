@@ -1,9 +1,10 @@
 import { callRemoteRpc, subscribeChannel } from './client_stub';
 import { sendMessage as sendMessageRequest, messageReceivedAck } from '../../server/rpc/send_message.s';
 import { sendMessage as sMessage } from '../../server/rpc/send_message.p';
-import { userLogin as userLoginRequest, userLoginResponse } from '../../server/rpc/user_login.s';
-// import { BonBuffer } from "../../pi/util/bon";  what happend when import this file ?
-import { userLogin } from '../../server/rpc/user_login.p';
+import { UserRegister, GetUserInfoReq, UserArray, LoginReq, LoginReply } from '../../server/data/rpc/basic.s';
+import { registerUser, getUsersInfo, login as userLogin } from '../../server/data/rpc/basic.p';
+import { UserInfo } from '../../server/data/db/user.s'
+
 
 const sendMessage = (uid: string, message: string) => {
     let msg = new sendMessageRequest();
@@ -18,14 +19,34 @@ const sendMessage = (uid: string, message: string) => {
     })
 }
 
-const login = (uid: string) => {
-    let user = new userLoginRequest();
-    user.uid = uid;
-    user.passwdHash = '0xFFFFFFFFFF';
+const login = (uid: number, passwd: string) => {
+    let loginReq = new LoginReq();
+    loginReq.uid = uid;
+    loginReq.passwdHash = '0xacef123';
 
-    callRemoteRpc(userLogin, user, userLoginResponse, (r) => {
+    callRemoteRpc(userLogin, loginReq, LoginReply, (r) => {
         console.log(r);
-    });
+    })
+}
+
+
+const registry = (userName: string) => {
+    let u = new UserRegister();
+    u.name = userName;
+    u.passwdHash = '0xacef123';
+
+    callRemoteRpc(registerUser, u, UserInfo, (r) => {
+        console.log(r);
+    })
+}
+
+const getUserInfo = (uid: number) => {
+    let info = new GetUserInfoReq();
+    info.uids = [uid];
+
+    callRemoteRpc(getUsersInfo, info, UserArray, (r) => {
+        console.log(r);
+    })
 }
 
 // ---------------------------  console test purpose -------------------------
@@ -34,10 +55,18 @@ const login = (uid: string) => {
     sendMessage(channleId, msg);
 }
 
-(<any>self).login = (userId: string) => {
-    login(userId);
+(<any>self).login = (uid: number, passwd: string) => {
+    login(uid, passwd);
 }
 
 (<any>self).subscribe = (channleId: string) => {
     subscribeChannel(channleId);
+}
+
+(<any>self).registry = (userName: string) => {
+    registry(userName);
+}
+
+(<any>self).getUserInfo = (uid: number) => {
+    getUserInfo(uid);
 }

@@ -84,3 +84,12 @@ struct GetContactReq {
 struct GetFriendLinksReq {
     uuid: &[u32]
 }
+
+struct LoginReq {
+    uid: u32,
+    passwdHash: String
+}
+
+struct LoginReply {
+    status: u8
+}

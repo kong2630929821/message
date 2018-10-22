@@ -25,6 +25,15 @@ struct UserInfo {
 }
 
 /**
+ * User credential table
+ */
+#[primary=uid,db=file,dbMonitor=true,hasmgr=false]
+struct UserCredential {
+    uid: u32,
+    passwdHash: String
+}
+
+/**
 *单聊两人的id
 */
 struct Uuid {
