@@ -53,28 +53,7 @@ winit.initNext = function() {
 		var userinfo = html.getCookie("userinfo");
 		pi_modules.commonjs.exports.flags = html.userAgent(flags);
 		flags.userinfo = userinfo;
-		//注册各种数据结构监听器
-		var structRegister = function () {
-			util.loadDir(["pi/struct/"], flags, fm, undefined, function (fileMap, mods) {
-				var structMgr = pi_modules["pi/struct/struct_mgr"].exports;
-				var mgr1 = new structMgr.StructMgr();
-
-				for (var k in fm) {
-					if(!k.endsWith(".s.js"))
-						continue;
-					var filePath = k.slice(0, k.length - pi_modules.butil.exports.fileSuffix(k).length - 1);
-					var exp = pi_modules[filePath].exports;
-					for(var kk in exp){
-						if(pi_modules["pi/struct/struct_mgr"].exports.Struct.isPrototypeOf(exp[kk]) && exp[kk]._$info){
-							mgr1.register(exp[kk]._$info.nameHash, exp[kk], exp[kk]._$info.name);
-						}
-					}
-				}
-				self.__mgr = mgr1;
-			}, function (r) {
-				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
-			}, dirProcess.handler);
-		};
+		
 		//加载框架代码
 		var loadFramework = function(){
 			util.loadDir(["client/rpc/","pi/lang/", "pi/net/", "pi/ui/", "pi/util/"], flags, fm, undefined, function (fileMap) {
@@ -83,9 +62,10 @@ winit.initNext = function() {
 				alert("加载目录失败, " + r.error + ":" + r.reason);
 			}, dirProcess.handler);
 		}
+
 		//加载APP部分代码，实际项目中会分的更细致
 		var loadApp = function () {
-			util.loadDir(["client/app/view/"], flags, fm, undefined, function (fileMap) {
+			util.loadDir(["client/app/"], flags, fm, undefined, function (fileMap) {
 				console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
 				var tab = util.loadCssRes(fileMap);
 				// 将预加载的资源缓冲90秒，释放
@@ -102,6 +82,16 @@ winit.initNext = function() {
 				alert("加载目录失败, " + r.error + ":" + r.reason);
 			}, dirProcess.handler);
 		}
+
+		//初始化rpc服务
+		var structRegister = function () {
+			util.loadDir(["client/app/net/","pi/struct/"], flags, fm, undefined, function (fileMap, mods) {
+				pi_modules.commonjs.exports.relativeGet("client/app/net/init").exports.registerRpcStruct(fm);
+				pi_modules.commonjs.exports.relativeGet("client/app/net/init").exports.initClient();
+			}, function (r) {
+				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
+			}, dirProcess.handler);
+		};				
 
 		html.checkWebpFeature(function(r) {
 		flags.webp = flags.webp || r;
