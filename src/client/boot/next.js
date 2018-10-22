@@ -58,7 +58,7 @@ winit.initNext = function() {
 			util.loadDir(["pi/struct/"], flags, fm, undefined, function (fileMap, mods) {
 				var structMgr = pi_modules["pi/struct/struct_mgr"].exports;
 				var mgr1 = new structMgr.StructMgr();
-	
+
 				for (var k in fileMap) {
 					var filePath = k.slice(0, k.length - pi_modules.butil.exports.fileSuffix(k).length - 1);
 					var exp = pi_modules[filePath].exports;
@@ -67,7 +67,7 @@ winit.initNext = function() {
 							mgr1.register(exp[kk]._$info.nameHash, exp[kk], exp[kk]._$info.name);
 						}
 					}
-	
+
 				}
 			}, function (r) {
 				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
@@ -75,7 +75,7 @@ winit.initNext = function() {
 		};
 		//加载框架代码
 		var loadFramework = function(){
-			util.loadDir(["pi/lang/", "pi/net/", "pi/ui/", "pi/util/"], flags, fm, undefined, function (fileMap) {
+			util.loadDir(["client/rpc/client_stub.js", "client/rpc/rpcs.js","pi/lang/", "pi/net/", "pi/ui/", "pi/util/"], flags, fm, undefined, function (fileMap) {
 				loadApp()
 			}, function (r) {
 				alert("加载目录失败, " + r.error + ":" + r.reason);
@@ -90,10 +90,10 @@ winit.initNext = function() {
 				tab.timeout = 90000;
 				tab.release();
 				console.log("res time:", Date.now() - startTime);
-	
+
 				var index = pi_modules.commonjs.exports.relativeGet("client/app/view/index/index").exports;
 				index.run();
-	
+
 				document.body.removeChild(div);
 			}, function (r) {
 				alert("加载目录失败, " + r.error + ":" + r.reason);
