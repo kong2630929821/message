@@ -59,7 +59,9 @@ winit.initNext = function() {
 				var structMgr = pi_modules["pi/struct/struct_mgr"].exports;
 				var mgr1 = new structMgr.StructMgr();
 
-				for (var k in fileMap) {
+				for (var k in fm) {
+					if(!k.endsWith(".s.js"))
+						continue;
 					var filePath = k.slice(0, k.length - pi_modules.butil.exports.fileSuffix(k).length - 1);
 					var exp = pi_modules[filePath].exports;
 					for(var kk in exp){
@@ -67,15 +69,15 @@ winit.initNext = function() {
 							mgr1.register(exp[kk]._$info.nameHash, exp[kk], exp[kk]._$info.name);
 						}
 					}
-
 				}
+				self.__mgr = mgr1;
 			}, function (r) {
 				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
 			}, dirProcess.handler);
 		};
 		//加载框架代码
 		var loadFramework = function(){
-			util.loadDir(["client/rpc/client_stub.js", "client/rpc/rpcs.js","pi/lang/", "pi/net/", "pi/ui/", "pi/util/"], flags, fm, undefined, function (fileMap) {
+			util.loadDir(["client/rpc/","pi/lang/", "pi/net/", "pi/ui/", "pi/util/"], flags, fm, undefined, function (fileMap) {
 				loadApp()
 			}, function (r) {
 				alert("加载目录失败, " + r.error + ":" + r.reason);
@@ -95,6 +97,7 @@ winit.initNext = function() {
 				index.run();
 
 				document.body.removeChild(div);
+				structRegister();
 			}, function (r) {
 				alert("加载目录失败, " + r.error + ":" + r.reason);
 			}, dirProcess.handler);
