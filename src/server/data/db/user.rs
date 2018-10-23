@@ -34,6 +34,15 @@ struct UserCredential {
 }
 
 /**
+ * User account generator
+ */
+#[primary=index,db=file,dbMonitor=true,hasmgr=false]
+struct AccountGenerator {
+    index: String,
+    nextIndex: u32
+}
+
+/**
 *单聊两人的id
 */
 struct Uuid {

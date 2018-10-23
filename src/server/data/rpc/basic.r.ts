@@ -3,7 +3,7 @@
  * 后端不应该相信前端发送的uid信息，应该自己从会话中获取
  */
 // ================================================================= 导入
-import {Contact, Uuid, FriendLink, UserInfo, UserCredential} from "../db/user.s";
+import { Contact, Uuid, FriendLink, UserInfo, UserCredential, AccountGenerator } from "../db/user.s";
 import {LoginReq, LoginReply, GetFriendLinksReq, GetContactReq, Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister, GetUserInfoReq, GetGroupInfoReq} from "./basic.s";
 import {GroupHistory} from "../db/message.s";
 import {Guid} from "../db/group.s";
@@ -27,6 +27,7 @@ export const registerUser = (registerInfo:UserRegister):UserInfo => {
   const dbMgr = getEnv().getDbMgr();
   const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
   const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
+  const accountGeneratorBucket = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
 
   let userInfo = new UserInfo();
   let userCredential = new UserCredential();
@@ -35,8 +36,13 @@ export const registerUser = (registerInfo:UserRegister):UserInfo => {
   userInfo.note = "Talk is cheap, show me the code!";
   userInfo.tel = "13912113456";
 
+  let accountGenerator = new AccountGenerator();
+  let nextAccount = accountGeneratorBucket.get("index")[0].nextIndex + 1;
+  accountGenerator.nextIndex = nextAccount;
+  accountGeneratorBucket.put("index", accountGenerator);
+
   // FBI warning: if the struct has a field with integer type, you must explicit specify it, wtf
-  userInfo.uid = 10001; // TODO: this is the test purpose id
+  userInfo.uid = nextAccount;
   userInfo.sex = 1;
 
   userCredential.uid = userInfo.uid;
