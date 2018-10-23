@@ -72,12 +72,15 @@ export const login = (loginReq: LoginReq): LoginReply => {
 
     if (expectedPasswdHash[0] === undefined) {
         loginReply.status = 0;
-    return loginReply;
+        return loginReply;
     }
 
     // FIXME: constant time equality check
     if (passwdHash === expectedPasswdHash[0].passwdHash) {
         loginReply.status = 1;
+        let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+        let uid = loginReq.uid;
+        setMqttTopic(mqttServer, uid.toString(), true, true);
     } else {
         loginReply.status = 0;
     }
