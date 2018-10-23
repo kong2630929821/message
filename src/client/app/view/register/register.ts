@@ -21,6 +21,7 @@
         this.props.passwd = e.text;
     }
     register(e){
+        
         alert(`name is : ${this.props.name}, passwd is : ${this.props.passwd}`)
     }
  }

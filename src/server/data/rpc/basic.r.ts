@@ -10,6 +10,11 @@ import {Guid} from "../db/group.s";
 
 import { Bucket } from "../../../utils/db";
 import { getEnv } from '../../../pi_pt/net/rpc_server';
+import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
+import { ab2hex } from '../../../pi/util/util';
+import { BonBuffer } from '../../../pi/util/bon';
+import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
+import { WARE_NAME } from "../constant";
 
 // const dbMgr = getEnv().getDbMgr();
 // const userInfoBucket = new Bucket("file", "user.UserInfo", dbMgr);
@@ -197,5 +202,13 @@ export const getUserHistory = (param:MessageFragment): UserHistoryArray => {
 //#[rpc=rpcServer]
 export const getAnnoucement = (param:AnnouceFragment): AnnounceHistoryArray => {
   return
+}
+
+// ================================================================= 本地
+
+const setDBMonitorAccordingUid = (uid:number)=>{
+    const mqttServer: ServerNode = getEnv().getNativeObject('mqttServer');
+    const key = ab2hex(new BonBuffer().write(uid).getBuffer());
+    setMqttTopic(mqttServer, `${WARE_NAME}.${RoleBase._$info.name}.${key}`, true, true);
 }
 
