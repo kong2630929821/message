@@ -1,9 +1,20 @@
-import { test_db } from '../server/tests/db_test';
-import { test_logger } from '../server/tests/logger_test';
-import { setTopic } from '../utils/net';
+import { AccountGenerator } from './data/db/user.s';
 
+import { Bucket } from '../utils/db';
+import { getEnv } from '../pi_pt/init/init';
 
-// test_db();
-// test_logger();
+const ACCOUNT_START = 10000;
+const dbMgr = getEnv().getDbMgr();
 
-// setTopic("a/b/c");
+const initAccountGenerator = () => {
+    let accountGenerator = new AccountGenerator();
+    accountGenerator.index = "index";
+    accountGenerator.nextIndex = ACCOUNT_START;
+
+    const bkt = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
+    bkt.put("index", accountGenerator);
+
+    console.log("in main.i.ts: ", bkt.get("index"))
+}
+
+initAccountGenerator();
