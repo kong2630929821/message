@@ -96,6 +96,7 @@ export const initStore = () => {
  * Store的声明
  */
 export interface Store {
+    uid:number;
     groupInfoMap: Map<number, GroupInfo>,
     groupUserLinkMap: Map<Guid, GroupUserLink>,
     userHistoryMap: Map<HIncId, UserHistory>,

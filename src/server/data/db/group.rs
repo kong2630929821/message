@@ -31,7 +31,7 @@ struct Guid {
 */
 #[primary=gid,db=file,dbMonitor=true,hasmgr=false]
 struct GroupInfo {
-    gid:u32,//群组id,全局唯一
+    gid:u32,//群组id,全局唯一,-1代表不存在
     ownerid:u32,//群主id
     adminids:&[u32],//管理员id
     memberids:&[u32],//成员id
@@ -48,7 +48,7 @@ struct GroupInfo {
 */
 #[primary=guid,db=file,dbMonitor=true]
 struct GroupUserLink {
-    guid:Guid,//用户在当前群组的唯一id
+    guid:Guid,//用户在当前群组的唯一id,{gid:-1, uid:-1}代表不存在
     groupAlias:String,//群在该用户账号上的别名
     userAlias:String,//该用户在群里的别名
     hid:usize,//群历史记录id

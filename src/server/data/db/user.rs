@@ -16,7 +16,7 @@ enum SEXY {
 */
 #[primary=uid,db=file,dbMonitor=true,hasmgr=false]
 struct UserInfo {
-    uid: u32,//用户id,自增
+    uid: u32,//用户id,自增,-1代表不存在
     name: String,//用户自己设置的用户名
     avator: String,//头像
     sex: SEXY,//性别
@@ -29,7 +29,7 @@ struct UserInfo {
  */
 #[primary=uid,db=file,dbMonitor=true,hasmgr=false]
 struct UserCredential {
-    uid: u32,
+    uid: u32,//-1代表不存在
     passwdHash: String
 }
 
@@ -54,7 +54,7 @@ struct Uuid {
 */
 #[primary=uuid,db=file,dbMonitor=true]
 struct FriendLink {
-    uuid: Uuid,//两个用户的id
+    uuid: Uuid,//两个用户的id{uid1:-1,uid2:-1}代表不存在
     alias: String,//别名
     hid: usize//历史记录id 53位，直接使用底层接口
 }
@@ -64,7 +64,7 @@ struct FriendLink {
 */
 #[primary=uid,db=file,dbMonitor=true]
 struct Contact {
-    uid: u32,//用户id
+    uid: u32,//用户id,-1代表不存在
     friends: &[u32],//好友id
     temp_chat: &[u32],//临时用户id
     group: &[u32],//群组id

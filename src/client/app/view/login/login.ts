@@ -33,9 +33,9 @@
         let user = new userLoginRequest();
         user.uid = this.props.name;
         user.passwdHash = '0xFFFFFFFFFF';
-        clientRpcFunc(userLogin, user, userLoginResponse, (r) => {
-            console.log(r);
-        })
+        // clientRpcFunc(userLogin, user, userLoginResponse, (r) => {
+        //     console.log(r);
+        // })
         alert(`name is : ${this.props.name}, passwd is : ${this.props.passwd}`)
     }
  }

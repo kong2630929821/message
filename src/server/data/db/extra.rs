@@ -7,6 +7,6 @@
 */
 #[primary=uid,db=file,dbMonitor=true]
 struct AddressInfo{
-    uid: u32,//用户id
+    uid: u32,//用户id,-1代表不存在
     addr: String//eth地址
 }

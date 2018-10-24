@@ -71,7 +71,7 @@ struct AIncId {
 */
 #[primary=hIncid,db=file,dbMonitor=true]
 struct UserHistory {
-    hIncid: HIncId,
+    hIncid: HIncId,//{hid:-1, index:-1}代表不存在
     msg: UserMsg,
 }
 
@@ -80,7 +80,7 @@ struct UserHistory {
 */
 #[primary=hIncid,db=file,dbMonitor=true]
 struct GroupHistory {
-    hIncid: HIncId,
+    hIncid: HIncId,//{hid:-1, index:-1}代表不存在
     msg: GroupMsg,
 }
 
@@ -89,7 +89,7 @@ struct GroupHistory {
 */
 #[primary=aIncId,db=file,dbMonitor=true]
 struct AnnounceHistory {
-    aIncId: AIncId,
+    aIncId: AIncId,//{aid:-1, index:-1}代表不存在
     announce: Announcement,
 }
 
@@ -98,6 +98,6 @@ struct AnnounceHistory {
 */
 #[primary=hid,db=file,dbMonitor=true]
 struct MsgLock {
-    hid: usize,//历史记录id
+    hid: usize,//历史记录id,-1代表不存在
     current: u32,//当前消息锁编号
 }
