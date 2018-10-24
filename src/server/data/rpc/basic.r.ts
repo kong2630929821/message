@@ -16,6 +16,9 @@ import { BonBuffer } from '../../../pi/util/bon';
 import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { WARE_NAME } from "../constant";
 
+import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
+import { ServerNode } from "../../../pi_pt/rust/mqtt/server";
+
 // const dbMgr = getEnv().getDbMgr();
 // const userInfoBucket = new Bucket("file", "user.UserInfo", dbMgr);
 // const groupInfoBucket = new Bucket("file", "group.Group", dbMgr);
@@ -29,62 +32,65 @@ import { WARE_NAME } from "../constant";
  */
 //#[rpc=rpcServer]
 export const registerUser = (registerInfo:UserRegister):UserInfo => {
-  const dbMgr = getEnv().getDbMgr();
-  const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
-  const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
-  const accountGeneratorBucket = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
+    const dbMgr = getEnv().getDbMgr();
+    const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
+    const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
+    const accountGeneratorBucket = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
 
-  let userInfo = new UserInfo();
-  let userCredential = new UserCredential();
+    let userInfo = new UserInfo();
+    let userCredential = new UserCredential();
 
-  userInfo.name = registerInfo.name;
-  userInfo.note = "Talk is cheap, show me the code!";
-  userInfo.tel = "13912113456";
+    userInfo.name = registerInfo.name;
+    userInfo.note = "Talk is cheap, show me the code!";
+    userInfo.tel = "13912113456";
 
-  let accountGenerator = new AccountGenerator();
-  let nextAccount = accountGeneratorBucket.get("index")[0].nextIndex + 1;
-  accountGenerator.nextIndex = nextAccount;
-  accountGeneratorBucket.put("index", accountGenerator);
+    let accountGenerator = new AccountGenerator();
+    let nextAccount = accountGeneratorBucket.get("index")[0].nextIndex + 1;
+    accountGenerator.nextIndex = nextAccount;
+    accountGeneratorBucket.put("index", accountGenerator);
 
-  // FBI warning: if the struct has a field with integer type, you must explicit specify it, wtf
-  userInfo.uid = nextAccount;
-  userInfo.sex = 1;
+    // FBI warning: if the struct has a field with integer type, you must explicit specify it, wtf
+    userInfo.uid = nextAccount;
+    userInfo.sex = 1;
 
-  userCredential.uid = userInfo.uid;
-  userCredential.passwdHash = registerInfo.passwdHash;
+    userCredential.uid = userInfo.uid;
+    userCredential.passwdHash = registerInfo.passwdHash;
 
-  userInfoBucket.put(userInfo.uid, userInfo);
-  // TODO: check potential error
-  userCredentialBucket.put(userInfo.uid, userCredential);
+    userInfoBucket.put(userInfo.uid, userInfo);
+    // TODO: check potential error
+    userCredentialBucket.put(userInfo.uid, userCredential);
 
 
-  return userInfo;
+    return userInfo;
 }
 
 //#[rpc=rpcServer]
 export const login = (loginReq: LoginReq): LoginReply => {
-  const dbMgr = getEnv().getDbMgr();
-  const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
+    const dbMgr = getEnv().getDbMgr();
+    const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
 
-  let uid = loginReq.uid;
-  let passwdHash = loginReq.passwdHash;
-  let expectedPasswdHash = userCredentialBucket.get(uid);
+    let uid = loginReq.uid;
+    let passwdHash = loginReq.passwdHash;
+    let expectedPasswdHash = userCredentialBucket.get(uid);
 
-  let loginReply = new LoginReply();
+    let loginReply = new LoginReply();
 
-  if (expectedPasswdHash[0] === undefined) {
-    loginReply.status = 0;
+    if (expectedPasswdHash[0] === undefined) {
+        loginReply.status = 0;
+        return loginReply;
+    }
+
+    // FIXME: constant time equality check
+    if (passwdHash === expectedPasswdHash[0].passwdHash) {
+        loginReply.status = 1;
+        let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+        let uid = loginReq.uid;
+        setMqttTopic(mqttServer, uid.toString(), true, true);
+    } else {
+        loginReply.status = 0;
+    }
+
     return loginReply;
-  }
-
-  // FIXME: constant time equality check
-  if (passwdHash === expectedPasswdHash[0].passwdHash) {
-    loginReply.status = 1;
-  } else {
-    loginReply.status = 0;
-  }
-
-  return loginReply;
 }
 
 
@@ -95,17 +101,17 @@ export const login = (loginReq: LoginReq): LoginReply => {
  */
 //#[rpc=rpcServer]
 export const getUsersInfo = (getUserInfoReq: GetUserInfoReq):UserArray => {
-  const dbMgr = getEnv().getDbMgr();
-  const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
+    const dbMgr = getEnv().getDbMgr();
+    const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
 
-  let uids = getUserInfoReq.uids;
-  let values:any = userInfoBucket.get(uids);
+    let uids = getUserInfoReq.uids;
+    let values:any = userInfoBucket.get(uids);
 
-  //FIXME: check if `values` have undefined element, or will crash
-  let res = new UserArray();
-  res.arr = values;
+    //FIXME: check if `values` have undefined element, or will crash
+    let res = new UserArray();
+    res.arr = values;
 
-  return res;
+    return res;
 }
 
 /**
@@ -114,13 +120,13 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq):UserArray => {
  */
 //#[rpc=rpcServer]
 export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq):GroupArray => {
-  let gids = getGroupInfoReq.gids;
-  let values: any = groupInfoBucket.get(gids);
+    let gids = getGroupInfoReq.gids;
+    let values: any = groupInfoBucket.get(gids);
 
-  let res = new GroupArray();
-  res.arr = values;
+    let res = new GroupArray();
+    res.arr = values;
 
-  return res;
+    return res;
 }
 
 /**
@@ -130,7 +136,7 @@ export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq):GroupArray => {
 //#[rpc=rpcServer]
 export const setUserInfo = (param:UserInfoSet): Result => {
 
-  return
+    return
 }
 
 
@@ -140,13 +146,13 @@ export const setUserInfo = (param:UserInfoSet): Result => {
  */
 //#[rpc=rpcServer]
 export const getContact = (getContactReq: GetContactReq): Contact => {
-  let uid = getContactReq.uid;
-  let value = contactBucket.get(uid);
+    let uid = getContactReq.uid;
+    let value = contactBucket.get(uid);
 
-  // TODO: fill more fields
-  let res = new Contact();
+    // TODO: fill more fields
+    let res = new Contact();
 
-  return res;
+    return res;
 }
 
 /**
@@ -155,13 +161,13 @@ export const getContact = (getContactReq: GetContactReq): Contact => {
  */
 //#[rpc=rpcServer]
 export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLinkArray => {
-  let uuids = getFriendLinksReq.uuid;
-  let values: any = friendLinkBucket.get(uuids);
+    let uuids = getFriendLinksReq.uuid;
+    let values: any = friendLinkBucket.get(uuids);
 
-  let res = new FriendLinkArray();
-  res.arr = values;
+    let res = new FriendLinkArray();
+    res.arr = values;
 
-  return res;
+    return res;
 }
 
 /**
@@ -171,7 +177,7 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
 //#[rpc=rpcServer]
 export const getGroupUserLinks = (uuidArr: Array<Guid>): GroupUserLinkArray => {
 
-  return
+    return
 }
 
 /**
@@ -181,7 +187,7 @@ export const getGroupUserLinks = (uuidArr: Array<Guid>): GroupUserLinkArray => {
 //#[rpc=rpcServer]
 export const getGroupHistory = (param:MessageFragment): GroupHistoryArray => {
 
-  return
+    return
 }
 
 
@@ -192,7 +198,7 @@ export const getGroupHistory = (param:MessageFragment): GroupHistoryArray => {
 //#[rpc=rpcServer]
 export const getUserHistory = (param:MessageFragment): UserHistoryArray => {
 
-  return
+    return
 }
 
 /**
@@ -201,7 +207,7 @@ export const getUserHistory = (param:MessageFragment): UserHistoryArray => {
  */
 //#[rpc=rpcServer]
 export const getAnnoucement = (param:AnnouceFragment): AnnounceHistoryArray => {
-  return
+    return
 }
 
 // ================================================================= 本地

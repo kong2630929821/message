@@ -5,6 +5,10 @@ import { UserRegister, GetUserInfoReq, UserArray, LoginReq, LoginReply } from '.
 import { registerUser, getUsersInfo, login as userLogin } from '../../server/data/rpc/basic.p';
 import { UserInfo } from '../../server/data/db/user.s'
 
+import { UserSend } from '../../server/data/rpc/message.s'
+import { UserHistory } from '../../server/data/db/message.s'
+import { sendUserMessage } from '../../server/data/rpc/message.p'
+
 
 const sendMessage = (uid: string, message: string) => {
     let msg = new sendMessageRequest();
@@ -15,6 +19,18 @@ const sendMessage = (uid: string, message: string) => {
     msg.payload = message;
 
     callRemoteRpc(sMessage, msg, messageReceivedAck, (r) => {
+        console.log(r);
+    })
+}
+
+const sendP2PMessage = (uid: number, txt: string) => {
+    let msg = new UserSend();
+    msg.rid = uid;
+    msg.time = 0;
+    msg.mtype = 0;
+    msg.msg = txt;
+
+    callRemoteRpc(sendUserMessage, msg, UserHistory, (r) => {
         console.log(r);
     })
 }
@@ -69,4 +85,8 @@ const getUserInfo = (uid: number) => {
 
 (<any>self).getUserInfo = (uid: number) => {
     getUserInfo(uid);
+}
+
+(<any>self).sendP2PMessage = (uid: number, txt: string) => {
+    sendP2PMessage(uid, txt);
 }

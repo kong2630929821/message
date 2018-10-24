@@ -26,8 +26,6 @@ const initAccountGenerator = () => {
 
     const bkt = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
     bkt.put("index", accountGenerator);
-
-    console.log("in main.i.ts: ", bkt.get("index"))
 }
 
 // 数据库监听器， 需要初始化配置， 启动mqtt服务， rpc服务
