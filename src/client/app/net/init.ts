@@ -47,7 +47,7 @@ export const initClient = function () {
  * @param callback 
  * @param timeout 
  */
-export const clientRpcFunc = (name: string, req: Struct, respClass: Function, callback: Function, timeout: number = 2000) => {
+export const clientRpcFunc = (name: string, req: any, respClass: Function, callback: Function, timeout: number = 2000) => {
     if (!clientRpc) return;
     clientRpc(name, req, (r: Struct) => {
         if (!r || !respClass || r instanceof respClass) {

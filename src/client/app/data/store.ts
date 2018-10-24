@@ -2,9 +2,13 @@
  * 数据存储
  */
 
- // ============================================ 导入
- import { HandlerMap } from '../../../pi/util/event';
- import { depCopy } from "../util/util";
+// ============================================ 导入
+import { HandlerMap } from '../../../pi/util/event';
+import { depCopy } from "../../../utils/util";
+import { GroupInfo, GroupUserLink, Guid } from "../../../server/data/db/group.s";
+import { UserHistory, GroupHistory, AnnounceHistory, MsgLock, HIncId, AIncId } from "../../../server/data/db/message.s";
+import { UserInfo, UserCredential, AccountGenerator, FriendLink, Contact, Uuid } from "../../../server/data/db/user.s";
+import { AddressInfo } from "../../../server/data/db/extra.s";
 
 // ============================================ 导出
 
@@ -13,20 +17,19 @@
  * @param keyName 
  * @param id 
  */
-export const find = (keyName: KeyName, id?: number | string): any => {
+export const find = (keyName: KeyName, id?: any): any => {
     if (!id) {
         const value = store[keyName];
         if (!(value instanceof Map)) {
-            return value instanceof Object ? depCopy(value) : value;
+            return <any>value instanceof Object ? depCopy(value) : value;
         }
         const arr = [];
         for (const [, v] of value) {
             arr.push(v);
         }
-
         return depCopy(arr);
     }
-    const value = store[keyName].get(id);
+    const value = (<any>store[keyName]).get(id);
     if (value instanceof Map) {
         const result = value.get(id);
 
@@ -93,17 +96,27 @@ export const initStore = () => {
  * Store的声明
  */
 export interface Store {
-
+    groupInfoMap: Map<number, GroupInfo>,
+    groupUserLinkMap: Map<Guid, GroupUserLink>,
+    userHistoryMap: Map<HIncId, UserHistory>,
+    groupHistoryMap: Map<HIncId, GroupHistory>,
+    announceHistoryMap: Map<AIncId, AnnounceHistory>,
+    msgLockMap: Map<number, MsgLock>,
+    userInfoMap: Map<number, UserInfo>,
+    userCredentialMap: Map<number, UserCredential>, 
+    accountGeneratorMap: Map<String, AccountGenerator>,
+    friendLinkMap: Map<Uuid, FriendLink>,
+    contactMap: Map<number, Contact>,
+    addressInfoMap: Map<number, AddressInfo>
 }
 
 // ============================================ 本地
 
 // 本质上是主键
-type KeyName = 'user';
+type KeyName = MapName;
+type MapName = "groupInfoMap" | "groupUserLinkMap" | "userHistoryMap" | "groupHistoryMap" | "announceHistoryMap" | "msgLockMap" | "userInfoMap" | "userCredentialMap" | "accountGeneratorMap" | "friendLinkMap" | "contactMap" | "addressInfoMap";
 
 const store = <Store>{
-    
 }
-
 // ============================================ 可执行
 const handlerMap: HandlerMap = new HandlerMap();

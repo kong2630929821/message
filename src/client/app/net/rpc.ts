@@ -3,7 +3,7 @@
  */
 // ================================================ 导入
 import {clientRpcFunc} from "./init";
-import {notEmptyString} from "../util/util";
+import {notEmptyString} from "../../../utils/util";
 import {registerUser} from "../../../server/data/rpc/basic.p";
 import {UserRegister} from "../../../server/data/rpc/basic.s";
 import {UserInfo} from "../../../server/data/db/user.s";
