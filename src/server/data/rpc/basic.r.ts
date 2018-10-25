@@ -10,10 +10,8 @@ import { Guid, GroupInfo, GroupUserLink } from "../db/group.s";
 
 import { Bucket } from "../../../utils/db";
 import { getEnv } from '../../../pi_pt/net/rpc_server';
-import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { ab2hex } from '../../../pi/util/util';
 import { BonBuffer } from '../../../pi/util/bon';
-import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { WARE_NAME } from "../constant";
 
 import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
@@ -59,7 +57,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
 }
 
 //#[rpc=rpcServer]
-export const login = (loginReq: LoginReq): LoginReply => {
+export const login = (loginReq: LoginReq): UserInfo => {
     const dbMgr = getEnv().getDbMgr();
     const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
 
@@ -67,24 +65,29 @@ export const login = (loginReq: LoginReq): LoginReply => {
     let passwdHash = loginReq.passwdHash;
     let expectedPasswdHash = userCredentialBucket.get(uid);
 
-    let loginReply = new LoginReply();
+    let userInfo = new UserInfo();
 
+    // user doesn't exist
     if (expectedPasswdHash[0] === undefined) {
-        loginReply.status = 0;
-        return loginReply;
+        userInfo.uid = -1;
+        userInfo.sex = 0;
+
+        return userInfo;
     }
 
     // FIXME: constant time equality check
     if (passwdHash === expectedPasswdHash[0].passwdHash) {
-        loginReply.status = 1;
+        userInfo.uid = loginReq.uid;
         let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
         let uid = loginReq.uid;
         setMqttTopic(mqttServer, uid.toString(), true, true);
     } else {
-        loginReply.status = 0;
+        userInfo.uid = -1;
     }
 
-    return loginReply;
+    userInfo.sex = 0;
+
+    return userInfo;
 }
 
 
