@@ -31,8 +31,8 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     let userCredential = new UserCredential();
 
     userInfo.name = registerInfo.name;
-    userInfo.note = "Talk is cheap, show me the code!";
-    userInfo.tel = "13912113456";
+    userInfo.note = "";
+    userInfo.tel = "";
 
     let accountGenerator = new AccountGenerator();
     let nextAccount = accountGeneratorBucket.get("index")[0].nextIndex + 1;
@@ -57,6 +57,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
 //#[rpc=rpcServer]
 export const login = (loginReq: LoginReq): UserInfo => {
     const dbMgr = getEnv().getDbMgr();
+    const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
     const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
 
     let uid = loginReq.uid;
@@ -75,10 +76,9 @@ export const login = (loginReq: LoginReq): UserInfo => {
 
     // FIXME: constant time equality check
     if (passwdHash === expectedPasswdHash[0].passwdHash) {
-        userInfo.uid = loginReq.uid;
+        userInfo = userInfoBucket.get(loginReq.uid)[0];
         let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
-        let uid = loginReq.uid;
-        setMqttTopic(mqttServer, uid.toString(), true, true);
+        setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
     } else {
         userInfo.uid = -1;
     }
