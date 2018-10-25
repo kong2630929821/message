@@ -3,7 +3,7 @@
  */
 // ================================================================= 导入
 import { Result } from "./basic.s";
-import { AnnounceHistory, UserHistory, GroupHistory, UserMsg, MsgLock } from "../db/message.s";
+import { AnnounceHistory, UserHistory, GroupHistory, UserMsg, MsgLock, Announcement, GroupMsg } from "../db/message.s";
 import { AnnounceSend, GroupSend, UserSend } from "./message.s";
 
 import { mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
@@ -21,8 +21,26 @@ import { Bucket } from "../../../utils/db";
  */
 //#[rpc=rpcServer]
 export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
+    const dbMgr = getEnv().getDbMgr();
+    const bkt = new Bucket("file", "server/data/db/message.AnnounceHistory", dbMgr);
 
-    return
+    let anmt = new Announcement();
+    anmt.cancel = false;
+    anmt.msg = announce.msg;
+    anmt.mtype = 1;
+    anmt.send = true;
+    anmt.time = Date.now();
+    anmt.sid = 0; // announce里面哪里知道发送者id是哪个？？？
+
+    let ah = new AnnounceHistory();
+    ah.aIncId = announce.gid + ":" + "1";
+    ah.announce = anmt;
+
+    bkt.put(ah.aIncId, ah);
+
+    // TODO: publish message
+
+    return ah;
 }
 
 /**
@@ -31,8 +49,20 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
  */
 //#[rpc=rpcServer]
 export const cancelAnnouncement = (aIncId: string): Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const bkt = new Bucket("file", "server/data/db/message.AnnounceHistory", dbMgr);
 
-    return
+    let v = bkt.get<string, AnnounceHistory>(aIncId);
+    if (v !== undefined) {
+        v.announce.cancel = true;
+    }
+
+    bkt.put(aIncId, v);
+
+    let res = new Result();
+    res.r = 1;
+
+    return res;
 }
 
 /**
@@ -41,8 +71,26 @@ export const cancelAnnouncement = (aIncId: string): Result => {
  */
 //#[rpc=rpcServer]
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
+    const dbMgr = getEnv().getDbMgr();
+    const bkt = new Bucket("file", "server/data/db/message.GroupHistory", dbMgr);
 
-    return
+    let gh = new GroupHistory();
+    let gmsg = new GroupMsg();
+    gmsg.msg = message.msg;
+    gmsg.mtype = 0;
+    gmsg.send = true;
+    gmsg.sid = 0; // ??????
+    gmsg.time = Date.now();
+    gmsg.cancel = false;
+
+    gh.hIncid = message.gid + ":" + "1"; // ?????
+    gh.msg = gmsg;
+
+    bkt.put(gh.hIncid, gh);
+
+    // TODO: publish message
+
+    return gh;
 }
 
 /**
@@ -51,8 +99,20 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
  */
 //#[rpc=rpcServer]
 export const cancelGroupMessage = (hIncId: string): Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const bkt = new Bucket("file", "server/data/db/message.GroupHistory", dbMgr);
 
-    return
+    let v = bkt.get<string, GroupHistory>(hIncId);
+    if (v !== undefined) {
+        v.msg.cancel = true;
+    }
+
+    bkt.put(hIncId, v);
+
+    let res = new Result();
+    res.r = 1;
+
+    return res;
 }
 
 /**
@@ -115,6 +175,18 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
  */
 //#[rpc=rpcServer]
 export const cancelUserMessage = (hIncId: string): Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const bkt = new Bucket("file", "server/data/db/message.UserHistory", dbMgr);
 
-    return
+    let v = bkt.get<string, UserHistory>(hIncId);
+    if (v !== undefined) {
+        v.msg.cancel = true;
+    }
+
+    bkt.put(hIncId, v);
+
+    let res = new Result();
+    res.r = 1;
+
+    return res;
 }
