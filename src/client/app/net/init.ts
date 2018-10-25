@@ -24,7 +24,7 @@ export const initClient = function () {
 	if (!rootClient) {
 		var options = {
 			timeout: 3,
-			keepAliveInterval: 60,
+			keepAliveInterval: 30,
 			cleanSession: false,
 			useSSL: false,
 			mqttVersion: 3,

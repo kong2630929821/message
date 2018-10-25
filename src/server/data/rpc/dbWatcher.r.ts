@@ -2,9 +2,9 @@
  * 前端主动监听后端数据库的变化
  */
 // ================================================================= 导入
-import { GroupInfo, GroupUserLink, Guid } from "../db/group.s";
-import { UserHistory, GroupHistory, AnnounceHistory, MsgLock, HIncId, AIncId } from "../db/message.s";
-import { UserInfo, UserCredential, AccountGenerator, FriendLink, Contact, Uuid } from "../db/user.s";
+import { GroupInfo, GroupUserLink} from "../db/group.s";
+import { UserHistory, GroupHistory, AnnounceHistory, MsgLock} from "../db/message.s";
+import { UserInfo, UserCredential, AccountGenerator, FriendLink, Contact } from "../db/user.s";
 import { AddressInfo } from "../db/extra.s";
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { getEnv } from '../../../pi_pt/net/rpc_server';
@@ -22,8 +22,8 @@ import { toBonBuffer} from "../../../utils/util";
 export const watchGroupInfo = (gid: number): GroupInfo => {
     const mqttServer = getMqttServer();
     let key = toBonBuffer(gid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${GroupInfo._$info.name}.${key}`, true, true);    
-    return
+    setMqttTopic(mqttServer, `${WARE_NAME}.${GroupInfo._$info.name}.${key}`, true, true); 
+    return 
 }
 
 /**
@@ -31,7 +31,7 @@ export const watchGroupInfo = (gid: number): GroupInfo => {
  * @param guid 
  */
 //#[rpc]
-export const watchGroupUserLink = (guid: Guid): GroupUserLink => {
+export const watchGroupUserLink = (guid: string): GroupUserLink => {
     const mqttServer = getMqttServer();
     let key = toBonBuffer(guid);
     setMqttTopic(mqttServer, `${WARE_NAME}.${GroupUserLink._$info.name}.${key}`, true, true);
@@ -43,7 +43,7 @@ export const watchGroupUserLink = (guid: Guid): GroupUserLink => {
  * @param hIncid 
  */
 //#[rpc]
-export const watchUserHistory = (hIncid: HIncId): UserHistory => {
+export const watchUserHistory = (hIncid: string): UserHistory => {
     const mqttServer = getMqttServer();
     let key = toBonBuffer(hIncid);
     setMqttTopic(mqttServer, `${WARE_NAME}.${UserHistory._$info.name}.${key}`, true, true);
@@ -55,7 +55,7 @@ export const watchUserHistory = (hIncid: HIncId): UserHistory => {
  * @param hIncid 
  */
 //#[rpc]
-export const watchGroupHistory = (hIncid: HIncId): GroupHistory => {
+export const watchGroupHistory = (hIncid: string): GroupHistory => {
     const mqttServer = getMqttServer();
     let key = toBonBuffer(hIncid);
     setMqttTopic(mqttServer, `${WARE_NAME}.${GroupHistory._$info.name}.${key}`, true, true);
@@ -67,7 +67,7 @@ export const watchGroupHistory = (hIncid: HIncId): GroupHistory => {
  * @param aIncId 
  */
 //#[rpc]
-export const watchAnnounceHistory = (aIncId: AIncId): AnnounceHistory => {
+export const watchAnnounceHistory = (aIncId: string): AnnounceHistory => {
     const mqttServer = getMqttServer();
     let key = toBonBuffer(aIncId);
     setMqttTopic(mqttServer, `${WARE_NAME}.${AnnounceHistory._$info.name}.${key}`, true, true);
@@ -127,7 +127,7 @@ export const watchAccountGenerator = (index: String): AccountGenerator => {
  * @param uuid 
  */
 //#[rpc]
-export const watchFriendLink = (uuid: Uuid): FriendLink => {
+export const watchFriendLink = (uuid: string): FriendLink => {
     const mqttServer = getMqttServer();
     let key = toBonBuffer(uuid);
     setMqttTopic(mqttServer, `${WARE_NAME}.${FriendLink._$info.name}.${key}`, true, true);

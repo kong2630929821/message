@@ -17,16 +17,14 @@ import {updateStore, getBorn} from "../data/store";
  * @param cb 
  */
 export const register = (name:string,passwdHash:string,cb) => {
-    if(notEmptyString(name) && notEmptyString(passwdHash)){
-        let info = new UserRegister;
-        info.name = name;
-        info.passwdHash = passwdHash;
-        clientRpcFunc(registerUser,info,UserInfo,(r:UserInfo)=>{
-            let userInfoMap = getBorn("userInfoMap")
-            userInfoMap.set(r.uid, r)
-            updateStore("userInfoMap", userInfoMap);            
-        })
-    }
+    let info = new UserRegister;
+    info.name = name;
+    info.passwdHash = passwdHash;
+    clientRpcFunc(registerUser,info,UserInfo,(r:UserInfo)=>{
+        let userInfoMap = getBorn("userInfoMap")
+        userInfoMap.set(r.uid, r);
+        updateStore("userInfoMap", userInfoMap);
+    })
 }
 
 /**

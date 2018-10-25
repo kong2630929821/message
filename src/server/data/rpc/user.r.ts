@@ -2,7 +2,6 @@
  * 用户相关的rpc操作
  */
 // ================================================================= 导入
-import {Uuid} from "../db/user.s";
 import {Result} from "./basic.s";
 import {UserAgree} from "./user.s";
 

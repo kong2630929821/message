@@ -50,28 +50,13 @@ struct Announcement {
     cancel: bool,//是否撤销
 }
 
-/**
-*用来标识每一条聊天记录
-*/
-struct HIncId {
-    hid: usize,
-    index: u32,
-}
-
-/**
-*用来标识每一条公告
-*/
-struct AIncId {
-    aid: usize,
-    index:u32,
-}
 
 /**
 *用户历史记录
 */
 #[primary=hIncid,db=file,dbMonitor=true]
 struct UserHistory {
-    hIncid: HIncId,//{hid:-1, index:-1}代表不存在
+    hIncid: String,//"-1"代表不存在,历史记录的唯一id,"10001:111",前面代表hid后面代表index
     msg: UserMsg,
 }
 
@@ -80,7 +65,7 @@ struct UserHistory {
 */
 #[primary=hIncid,db=file,dbMonitor=true]
 struct GroupHistory {
-    hIncid: HIncId,//{hid:-1, index:-1}代表不存在
+    hIncid: String,//历史记录的唯一id,"10001:111",前面代表hid后面代表index
     msg: GroupMsg,
 }
 
@@ -89,7 +74,7 @@ struct GroupHistory {
 */
 #[primary=aIncId,db=file,dbMonitor=true]
 struct AnnounceHistory {
-    aIncId: AIncId,//{aid:-1, index:-1}代表不存在
+    aIncId: String,//公告记录的唯一id,"10001:111",前面代表aid后面代表index
     announce: Announcement,
 }
 

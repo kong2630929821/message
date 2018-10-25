@@ -3,7 +3,7 @@
  */
 // ================================================================= 导入
 import { Result } from "./basic.s";
-import { AnnounceHistory, UserHistory, GroupHistory, HIncId, AIncId, UserMsg, MsgLock } from "../db/message.s";
+import { AnnounceHistory, UserHistory, GroupHistory, UserMsg, MsgLock } from "../db/message.s";
 import { AnnounceSend, GroupSend, UserSend } from "./message.s";
 
 import { mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
@@ -30,7 +30,7 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
  * @param aIncId
  */
 //#[rpc=rpcServer]
-export const cancelAnnouncement = (aIncId: HIncId): Result => {
+export const cancelAnnouncement = (aIncId: string): Result => {
 
     return
 }
@@ -50,7 +50,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
  * @param hIncId
  */
 //#[rpc=rpcServer]
-export const cancelGroupMessage = (hIncId: HIncId): Result => {
+export const cancelGroupMessage = (hIncId: string): Result => {
 
     return
 }
@@ -66,7 +66,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const msgLockBucket = new Bucket("file", "server/data/db/message.MsgLock", dbMgr);
 
     let userHistory = new UserHistory();
-    let hId = new HIncId();
+    let hId = new string();
 
     // TODO: ways to generate hid?
     hId.hid = 100;
@@ -114,7 +114,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
  * @param hIncId
  */
 //#[rpc=rpcServer]
-export const cancelUserMessage = (hIncId: HIncId): Result => {
+export const cancelUserMessage = (hIncId: string): Result => {
 
     return
 }

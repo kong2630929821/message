@@ -6,9 +6,9 @@
 import { watchGroupInfo, watchGroupUserLink, watchUserHistory, watchGroupHistory } from "../../../server/data/rpc/dbWatcher.p"
 import { watchAnnounceHistory, watchMsgLock, watchUserInfo, watchUserCredential } from "../../../server/data/rpc/dbWatcher.p"
 import { watchAccountGenerator, watchFriendLink, watchContact, watchAddressInfo } from "../../../server/data/rpc/dbWatcher.p"
-import { GroupInfo, GroupUserLink, Guid } from "../../../server/data/db/group.s";
-import { UserHistory, GroupHistory, AnnounceHistory, MsgLock, HIncId, AIncId } from "../../../server/data/db/message.s";
-import { UserInfo, UserCredential, AccountGenerator, FriendLink, Contact, Uuid } from "../../../server/data/db/user.s";
+import { GroupInfo, GroupUserLink} from "../../../server/data/db/group.s";
+import { UserHistory, GroupHistory, AnnounceHistory, MsgLock} from "../../../server/data/db/message.s";
+import { UserInfo, UserCredential, AccountGenerator, FriendLink, Contact } from "../../../server/data/db/user.s";
 import { AddressInfo } from "../../../server/data/db/extra.s";
 import { clientRpcFunc, subscribe } from "./init";
 import { toBonBuffer } from "../../../utils/util";
@@ -35,7 +35,7 @@ export const subscribeGroupInfo = (gid: number) => {
  * 群组中的用户信息
  * @param guid 
  */
-export const subscribeGroupUserLink = (guid: Guid) => {
+export const subscribeGroupUserLink = (guid: string) => {
     clientRpcFunc(watchGroupInfo, guid, GroupUserLink, (r: GroupUserLink) => {
         //updateStore                        
     })
@@ -50,7 +50,7 @@ export const subscribeGroupUserLink = (guid: Guid) => {
  * 用户历史记录
  * @param hIncid 
  */
-export const subscribeUserHistory = (hIncid: HIncId) => {
+export const subscribeUserHistory = (hIncid: string) => {
     clientRpcFunc(watchGroupInfo, hIncid, UserHistory, (r: UserHistory) => {
         //updateStore                        
     })
@@ -65,7 +65,7 @@ export const subscribeUserHistory = (hIncid: HIncId) => {
  * 群组历史记录
  * @param hIncid 
  */
-export const subscribeGroupHistory = (hIncid: HIncId) => {
+export const subscribeGroupHistory = (hIncid: string) => {
     clientRpcFunc(watchGroupInfo, hIncid, GroupHistory, (r: GroupHistory) => {
         //updateStore                        
     })
@@ -80,7 +80,7 @@ export const subscribeGroupHistory = (hIncid: HIncId) => {
  * 所有公告
  * @param aIncId 
  */
-export const subscribeAnnounceHistory = (aIncId: AIncId) => {
+export const subscribeAnnounceHistory = (aIncId: string) => {
     clientRpcFunc(watchGroupInfo, aIncId, AnnounceHistory, (r: AnnounceHistory) => {
         //updateStore                        
     })
@@ -155,7 +155,7 @@ export const subscribeAccountGenerator = (index: String) => {
  * 好友链接信息
  * @param uuid 
  */
-export const subscribeFriendLink = (uuid: Uuid) => {
+export const subscribeFriendLink = (uuid: string) => {
     clientRpcFunc(watchGroupInfo, uuid, FriendLink, (r: FriendLink) => {
         //updateStore                        
     })

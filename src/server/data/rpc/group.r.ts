@@ -2,7 +2,7 @@
  * 群组相关的rpc操作
  */
 // ================================================================= 导入
-import {Guid, GroupInfo} from "../db/group.s";
+import {string, GroupInfo} from "../db/group.s";
 import {Result} from "./basic.s";
 import {GroupCreate, GroupAgree, Invite} from "./group.s";
 
@@ -53,7 +53,7 @@ export const agreeJoinGroup = (agree:GroupAgree): GroupInfo|Result => {
  * @param guid
  */
 //#[rpc]
-export const setOwner = (guid:Guid): Result => {
+export const setOwner = (guid:string): Result => {
 
     return
 }
@@ -63,7 +63,7 @@ export const setOwner = (guid:Guid): Result => {
  * @param guid
  */
 //#[rpc]
-export const addAdmin = (guid:Guid): Result => {
+export const addAdmin = (guid:string): Result => {
 
     return
 }
@@ -73,7 +73,7 @@ export const addAdmin = (guid:Guid): Result => {
  * @param guid
  */
 //#[rpc]
-export const delAdmin = (guid:Guid): Result => {
+export const delAdmin = (guid:string): Result => {
 
     return
 }
@@ -83,7 +83,7 @@ export const delAdmin = (guid:Guid): Result => {
  * @param guid
  */
 //#[rpc]
-export const delMember = (guid:Guid): Result => {
+export const delMember = (guid:string): Result => {
 
     return
 }

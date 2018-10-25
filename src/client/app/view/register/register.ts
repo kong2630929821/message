@@ -6,6 +6,8 @@
  import {Widget} from "../../../../pi/widget/widget";
  import {Forelet} from "../../../../pi/widget/forelet";
  import {open} from "../../../../pi/ui/root";
+ import {register as registerUser} from "../../net/rpc";
+ import {UserInfo} from "../../../../server/data/db/user.s";
 
  // ================================================ 导出
  export class Login extends Widget {
@@ -21,7 +23,9 @@
         this.props.passwd = e.text;
     }
     register(e){
-        
+        registerUser(this.props.name, this.props.passwd, (r:UserInfo)=>{            
+            alert(`${r.uid}`);
+        })
         alert(`name is : ${this.props.name}, passwd is : ${this.props.passwd}`)
     }
  }

@@ -19,14 +19,6 @@ enum JOIN_METHOD {
 }
 
 /**
-*群组中的用户id
-*/
-struct Guid {
-    gid: u32,
-    uid: u32,
-}
-
-/**
 *群组信息
 */
 #[primary=gid,db=file,dbMonitor=true,hasmgr=false]
@@ -48,7 +40,7 @@ struct GroupInfo {
 */
 #[primary=guid,db=file,dbMonitor=true]
 struct GroupUserLink {
-    guid:Guid,//用户在当前群组的唯一id,{gid:-1, uid:-1}代表不存在
+    guid:String,//用户在当前群组的唯一id"-1"代表不存在,"10001:10002",前面代表gid后面代表uid
     groupAlias:String,//群在该用户账号上的别名
     userAlias:String,//该用户在群里的别名
     hid:usize,//群历史记录id

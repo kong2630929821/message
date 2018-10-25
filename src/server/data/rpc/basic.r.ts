@@ -3,21 +3,19 @@
  * 后端不应该相信前端发送的uid信息，应该自己从会话中获取
  */
 // ================================================================= 导入
-import { Contact, Uuid, FriendLink, UserInfo, UserCredential, AccountGenerator } from "../db/user.s";
+import { Contact, FriendLink, UserInfo, UserCredential, AccountGenerator } from "../db/user.s";
 import { LoginReq, LoginReply, GetFriendLinksReq, GetContactReq, Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister, GetUserInfoReq, GetGroupInfoReq } from "./basic.s";
-import { GroupHistory, GroupMsg, HIncId, AIncId } from "../db/message.s";
-import { Guid, GroupInfo, GroupUserLink } from "../db/group.s";
+import { GroupHistory, GroupMsg} from "../db/message.s";
+import { GroupInfo, GroupUserLink } from "../db/group.s";
 
 import { Bucket } from "../../../utils/db";
 import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { ab2hex } from '../../../pi/util/util';
 import { BonBuffer } from '../../../pi/util/bon';
-import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { WARE_NAME } from "../constant";
 
 import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
-import { ServerNode } from "../../../pi_pt/rust/mqtt/server";
 
 // ================================================================= 导出
 /**
@@ -172,11 +170,11 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
  * @param uuidArr
  */
 //#[rpc=rpcServer]
-export const getGroupUserLinks = (uuidArr: Guid): GroupUserLinkArray => {
+export const getGroupUserLinks = (uuidArr: string): GroupUserLinkArray => {
     const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = new Bucket("file", "server/data/db/group.GroupInfo", dbMgr);
 
-    let groupInfo = groupInfoBucket.get<Guid, GroupInfo>(uuidArr);
+    let groupInfo = groupInfoBucket.get<string, GroupInfo>(uuidArr);
     let groupUserLink = new GroupUserLink();
     // TODO: fill more fields
 
@@ -192,7 +190,7 @@ export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
     const groupHistoryBucket = new Bucket("file", "server/data/db/message.GroupHistory", dbMgr);
 
-    let hincId = new HIncId();
+    let hincId = new string();
     let groupHistoryArray = new GroupHistoryArray();
 
     for (let i = 0; i < param.size; i++) {
@@ -216,7 +214,7 @@ export const getUserHistory = (param: MessageFragment): UserHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
     const userHistoryBucket = new Bucket("file", "server/data/db/message.UserHistory", dbMgr);
 
-    let hincId = new HIncId();
+    let hincId = new string();
     let userHistory = new UserHistoryArray();
 
     for (let i = 0; i < param.size; i++) {
@@ -239,7 +237,7 @@ export const getAnnoucement = (param: AnnouceFragment): AnnounceHistoryArray => 
     const dbMgr = getEnv().getDbMgr();
     const announceHistoryBucket = new Bucket("file", "server/data/db/message.AnnounceHistory", dbMgr);
 
-    let aincId = new AIncId();
+    let aincId = new string();
     let announceHistory = new AnnounceHistoryArray();
 
     for (let i = 0; i < param.size; i++) {

@@ -7,18 +7,17 @@
  import {Forelet} from "../../../../pi/widget/forelet";
  import {open} from "../../../../pi/ui/root";
  import {clientRpcFunc} from "../../net/init";
- import {userLogin} from '../../../../server/rpc/user_login.p';
- import {userLogin as userLoginRequest, userLoginResponse} from '../../../../server/rpc/user_login.s';
+ import { login as userLogin} from '../../net/rpc';
 
  // ================================================ 导出
  export class Login extends Widget {
      props = {
-         name:"",
+         uid:null,
          passwd:""
      } as Props
 
     inputName(e){
-        this.props.name = e.text;
+        this.props.uid = parseInt(e.text);
     }
 
     inputPasswd(e){
@@ -30,18 +29,15 @@
     }
 
     login(e){
-        let user = new userLoginRequest();
-        user.uid = this.props.name;
-        user.passwdHash = '0xFFFFFFFFFF';
-        // clientRpcFunc(userLogin, user, userLoginResponse, (r) => {
-        //     console.log(r);
-        // })
-        alert(`name is : ${this.props.name}, passwd is : ${this.props.passwd}`)
+        userLogin(this.props.uid,this.props.passwd, ()=>{
+
+        })
+        alert(`name is : ${this.props.uid}, passwd is : ${this.props.passwd}`)
     }
  }
 
  // ================================================ 本地
  interface Props  {
-     name:string,
+     uid:number,
      passwd:string
  }
