@@ -15,6 +15,7 @@ import { BonBuffer } from '../../../pi/util/bon';
 import { WARE_NAME } from "../constant";
 
 import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
+import { ServerNode } from "../../../pi_pt/rust/mqtt/server";
 
 // ================================================================= 导出
 /**
@@ -163,10 +164,11 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
     const dbMgr = getEnv().getDbMgr();
     const friendLinkBucket = new Bucket("file", "server/data/db/user.FriendLink", dbMgr);
 
-    let uuids = getFriendLinksReq.uuid;
-    let values: FriendLinkArray = friendLinkBucket.get(uuids);
+    let friendLinkArray = new FriendLinkArray();
+    let uuids = getFriendLinksReq.uuid.map(v => v.toString());
+    friendLinkArray.arr = friendLinkBucket.get(uuids);
 
-    return values;
+    return friendLinkArray;
 }
 
 /**
@@ -194,15 +196,25 @@ export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
     const groupHistoryBucket = new Bucket("file", "server/data/db/message.GroupHistory", dbMgr);
 
-    let hincId = new string();
     let groupHistoryArray = new GroupHistoryArray();
 
-    for (let i = 0; i < param.size; i++) {
-        hincId.hid = param.hid;
-        hincId.index = param.from + i;
-        // FIXME: i don't know if the master key works
-        let msg = groupHistoryBucket.get(hincId)[0].msg;
-        groupHistoryArray.arr.push(msg);
+    // we don't use param.order there, because `iter` is not bidirectional
+    let hid = param.hid
+    let from = param.from;
+    let size = param.size;
+
+    let keyPrefix = hid + ":";
+    let value = groupHistoryBucket.get(keyPrefix + from);
+
+    if (value[0] !== undefined) {
+        for (let i = from; i < from + size; i++) {
+            let v = groupHistoryBucket.get(keyPrefix + i);
+            if (v[0] !== undefined) {
+                groupHistoryArray.arr.push(v[0]);
+            } else {
+                break;
+            }
+        }
     }
 
     return groupHistoryArray;
@@ -218,18 +230,28 @@ export const getUserHistory = (param: MessageFragment): UserHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
     const userHistoryBucket = new Bucket("file", "server/data/db/message.UserHistory", dbMgr);
 
-    let hincId = new string();
     let userHistory = new UserHistoryArray();
 
-    for (let i = 0; i < param.size; i++) {
-        hincId.hid = param.hid;
-        hincId.index = param.from + i;
-        // FIXME: i don't know if the master key works
-        let msg = userHistoryBucket.get(hincId)[0].msg;
-        userHistory.arr.push(msg);
+    // we don't use param.order there, because `iter` is not bidirectional
+    let hid = param.hid
+    let from = param.from;
+    let size = param.size;
+
+    let keyPrefix = hid + ":";
+    let value = userHistoryBucket.get(keyPrefix + from);
+
+    if (value[0] !== undefined) {
+        for (let i = from; i < from + size; i++) {
+            let v = userHistoryBucket.get(keyPrefix + i);
+            if (v[0] !== undefined) {
+                userHistory.arr.push(v[0]);
+            } else {
+                break;
+            }
+        }
     }
 
-    return
+    return userHistory;
 }
 
 /**
@@ -241,14 +263,25 @@ export const getAnnoucement = (param: AnnouceFragment): AnnounceHistoryArray => 
     const dbMgr = getEnv().getDbMgr();
     const announceHistoryBucket = new Bucket("file", "server/data/db/message.AnnounceHistory", dbMgr);
 
-    let aincId = new string();
     let announceHistory = new AnnounceHistoryArray();
 
-    for (let i = 0; i < param.size; i++) {
-        aincId.aid = param.aid;
-        aincId.index = param.from + i;
-        let announce = announceHistoryBucket.get(aincId)[0].announce;
-        announceHistory.arr.push(announce);
+    // we don't use param.order there, because `iter` is not bidirectional
+    let aid = param.aid
+    let from = param.from;
+    let size = param.size;
+
+    let keyPrefix = aid + ":";
+    let value = announceHistoryBucket.get(keyPrefix + from);
+
+    if (value[0] !== undefined) {
+        for (let i = from; i < from + size; i++) {
+            let v = announceHistoryBucket.get(keyPrefix + i);
+            if (v[0] !== undefined) {
+                announceHistory.arr.push(v[0]);
+            } else {
+                break;
+            }
+        }
     }
 
     return announceHistory;
