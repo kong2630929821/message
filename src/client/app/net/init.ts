@@ -43,20 +43,13 @@ export const initClient = function () {
  * rpc 调用
  * @param name 
  * @param req 
- * @param respClass 
  * @param callback 
  * @param timeout 
  */
-export const clientRpcFunc = (name: string, req: any, respClass: Function, callback: Function, timeout: number = 2000) => {
+export const clientRpcFunc = (name: string, req: any, callback: Function, timeout: number = 2000) => {
     if (!clientRpc) return;
     clientRpc(name, req, (r: Struct) => {
-        if (!r || !respClass || r instanceof respClass) {
-            return callback(r);
-        } else if (r instanceof Error) {
-            console.log(`RPCError:${r.info}`);
-        } else {
-            console.log(`RPCError:返回类型${r.constructor.name}与${respClass.name}类型不匹配！`);
-        }
+		return callback(r);
     }, timeout);
 };
 
@@ -86,7 +79,7 @@ export const registerRpcStruct = (fileMap) => {
  * @param platerTopic 
  * @param cb 
  */
-export const subscribe = (platerTopic: string, mod: any, cb: Function) => {
+export const subscribe = (platerTopic: string, returnStruct: any, cb: Function) => {
 	if (!rootClient) return
 	let option = {
 		qos: 0,
@@ -99,7 +92,7 @@ export const subscribe = (platerTopic: string, mod: any, cb: Function) => {
 	}
 	rootClient.onMessage((topic: string, payload: Uint8Array) => {
 		if (topic === platerTopic) {
-			let o = new BonBuffer(payload).readBonCode(mod);
+			let o = new BonBuffer(payload).readBonCode(returnStruct);
 			cb(o);
 			console.log("listen db success!", o);
 		}

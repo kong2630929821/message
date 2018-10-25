@@ -21,7 +21,7 @@ import { WARE_NAME } from "../../../server/data/constant";
  * @param gid 
  */
 export const subscribeGroupInfo = (gid: number) => {
-    clientRpcFunc(watchGroupInfo, gid, GroupInfo, (r: GroupInfo) => {
+    clientRpcFunc(watchGroupInfo, gid, (r: GroupInfo) => {
         //updateStore                        
     })
     let key = toBonBuffer(gid);
@@ -36,7 +36,7 @@ export const subscribeGroupInfo = (gid: number) => {
  * @param guid 
  */
 export const subscribeGroupUserLink = (guid: string) => {
-    clientRpcFunc(watchGroupInfo, guid, GroupUserLink, (r: GroupUserLink) => {
+    clientRpcFunc(watchGroupInfo, guid, (r: GroupUserLink) => {
         //updateStore                        
     })
     let key = toBonBuffer(guid);
@@ -51,7 +51,7 @@ export const subscribeGroupUserLink = (guid: string) => {
  * @param hIncid 
  */
 export const subscribeUserHistory = (hIncid: string) => {
-    clientRpcFunc(watchGroupInfo, hIncid, UserHistory, (r: UserHistory) => {
+    clientRpcFunc(watchGroupInfo, hIncid, (r: UserHistory) => {
         //updateStore                        
     })
     let key = toBonBuffer(hIncid);
@@ -66,7 +66,7 @@ export const subscribeUserHistory = (hIncid: string) => {
  * @param hIncid 
  */
 export const subscribeGroupHistory = (hIncid: string) => {
-    clientRpcFunc(watchGroupInfo, hIncid, GroupHistory, (r: GroupHistory) => {
+    clientRpcFunc(watchGroupInfo, hIncid, (r: GroupHistory) => {
         //updateStore                        
     })
     let key = toBonBuffer(hIncid);
@@ -81,7 +81,7 @@ export const subscribeGroupHistory = (hIncid: string) => {
  * @param aIncId 
  */
 export const subscribeAnnounceHistory = (aIncId: string) => {
-    clientRpcFunc(watchGroupInfo, aIncId, AnnounceHistory, (r: AnnounceHistory) => {
+    clientRpcFunc(watchGroupInfo, aIncId, (r: AnnounceHistory) => {
         //updateStore                        
     })
     let key = toBonBuffer(aIncId);
@@ -96,7 +96,7 @@ export const subscribeAnnounceHistory = (aIncId: string) => {
  * @param hid 
  */
 export const subscribeMsgLock = (hid: number) => {
-    clientRpcFunc(watchGroupInfo, hid, MsgLock, (r: MsgLock) => {
+    clientRpcFunc(watchGroupInfo, hid, (r: MsgLock) => {
         //updateStore                        
     })
     let key = toBonBuffer(hid);
@@ -111,7 +111,7 @@ export const subscribeMsgLock = (hid: number) => {
  * @param uid 
  */
 export const subscribeUserInfo = (uid: number) => {
-    clientRpcFunc(watchGroupInfo, uid, UserInfo, (r: UserInfo) => {
+    clientRpcFunc(watchGroupInfo, uid, (r: UserInfo) => {
         //updateStore                        
     })
     let key = toBonBuffer(uid);
@@ -126,7 +126,7 @@ export const subscribeUserInfo = (uid: number) => {
  * @param uid 
  */
 export const subscribeUserCredential = (uid: number) => {
-    clientRpcFunc(watchGroupInfo, uid, UserCredential, (r: UserCredential) => {
+    clientRpcFunc(watchGroupInfo, uid, (r: UserCredential) => {
         //updateStore                        
     })
     let key = toBonBuffer(uid);
@@ -141,7 +141,7 @@ export const subscribeUserCredential = (uid: number) => {
  * @param index 
  */
 export const subscribeAccountGenerator = (index: String) => {
-    clientRpcFunc(watchGroupInfo, index, AccountGenerator, (r: AccountGenerator) => {
+    clientRpcFunc(watchGroupInfo, index, (r: AccountGenerator) => {
         //updateStore                        
     })
     let key = toBonBuffer(index);
@@ -156,7 +156,7 @@ export const subscribeAccountGenerator = (index: String) => {
  * @param uuid 
  */
 export const subscribeFriendLink = (uuid: string) => {
-    clientRpcFunc(watchGroupInfo, uuid, FriendLink, (r: FriendLink) => {
+    clientRpcFunc(watchGroupInfo, uuid, (r: FriendLink) => {
         //updateStore                        
     })
     let key = toBonBuffer(uuid);
@@ -171,7 +171,7 @@ export const subscribeFriendLink = (uuid: string) => {
  * @param uid 
  */
 export const subscribeContact = (uid: number) => {
-    clientRpcFunc(watchGroupInfo, uid, Contact, (r: Contact) => {
+    clientRpcFunc(watchGroupInfo, uid, (r: Contact) => {
         //updateStore                        
     })
     let key = toBonBuffer(uid);
@@ -186,7 +186,7 @@ export const subscribeContact = (uid: number) => {
  * @param uid 
  */
 export const subscribeAddressInfo = (uid: number) => {
-    clientRpcFunc(watchGroupInfo, uid, AddressInfo, (r: AddressInfo) => {
+    clientRpcFunc(watchGroupInfo, uid, (r: AddressInfo) => {
         //updateStore                        
     })
     let key = toBonBuffer(uid);

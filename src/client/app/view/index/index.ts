@@ -1,6 +1,6 @@
 // ============================== 导入
 import { addWidget } from "../../../../pi/widget/util";
-import { open, destory, popNew } from "../../../../pi/ui/root";
+import { destory, popNew } from "../../../../pi/ui/root";
 // ============================== 导出
 export const run = () => {
     let currentTime = (new Date).getTime();
@@ -9,5 +9,5 @@ export const run = () => {
         //或者return false;
         e.preventDefault();
     };
-    open("client-app-view-login-login");
+    popNew("client-app-view-login-login");
 }
