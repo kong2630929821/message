@@ -7,13 +7,12 @@ import { Contact, FriendLink, UserInfo, UserCredential, AccountGenerator } from 
 import { LoginReq, LoginReply, GetFriendLinksReq, GetContactReq, Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister, GetUserInfoReq, GetGroupInfoReq } from "./basic.s";
 import { GroupHistory, GroupMsg} from "../db/message.s";
 import { GroupInfo, GroupUserLink } from "../db/group.s";
-
 import { Bucket } from "../../../utils/db";
 import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { ab2hex } from '../../../pi/util/util';
 import { BonBuffer } from '../../../pi/util/bon';
 import { WARE_NAME } from "../constant";
-
+import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
 
 // ================================================================= 导出
