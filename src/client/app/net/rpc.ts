@@ -28,6 +28,7 @@ export const register = (name:string,passwdHash:string,cb:(r:UserInfo)=>void) =>
         userInfoMap.set(r.uid, r);
         updateStore("userInfoMap", userInfoMap);
         alert(JSON.stringify(r));
+        cb(r);
     })
 }
 
@@ -46,6 +47,7 @@ export const login = (uid:number, passwdHash:string,cb:(r:UserInfo)=>void) => {
         userInfoMap.set(r.uid, r);
         updateStore("userInfoMap", userInfoMap);
         alert(JSON.stringify(r));
+        cb(r);
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);            
         //todo
@@ -70,6 +72,7 @@ export const sendMessage = (rid:number, msg:string, cb:(r:UserHistory)=>void) =>
         userHistoryMap.set(r.hIncid, r);
         updateStore("userHistoryMap", userHistoryMap);
         alert(JSON.stringify(r));
+        cb(r);
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);            
         //todo

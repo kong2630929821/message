@@ -7,6 +7,7 @@
  import {Forelet} from "../../../../pi/widget/forelet";
  import {popNew} from "../../../../pi/ui/root";
  import { login as userLogin} from '../../net/rpc';
+ import {UserInfo} from "../../../../server/data/db/user.s";
 
  // ================================================ 导出
  export class Login extends Widget {
@@ -28,8 +29,10 @@
     }
 
     login(e){
-        userLogin(this.props.uid,this.props.passwd, ()=>{
-
+        userLogin(this.props.uid,this.props.passwd, (r:UserInfo)=>{
+            if(r.uid > 0){
+                popNew("client-app-view-chat-chat")
+            }
         })
     }
  }
