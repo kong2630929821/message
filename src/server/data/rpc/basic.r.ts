@@ -14,7 +14,6 @@ import { BonBuffer } from '../../../pi/util/bon';
 import { WARE_NAME } from "../constant";
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
-import { ServerNode } from "../../../pi_pt/rust/mqtt/server";
 
 // ================================================================= 导出
 /**
@@ -287,10 +286,4 @@ export const getAnnoucement = (param: AnnouceFragment): AnnounceHistoryArray => 
 }
 
 // ================================================================= 本地
-
-const setDBMonitorAccordingUid = (uid:number)=>{
-    const mqttServer: ServerNode = getEnv().getNativeObject('mqttServer');
-    const key = ab2hex(new BonBuffer().write(uid).getBuffer());
-    setMqttTopic(mqttServer, `${WARE_NAME}.${RoleBase._$info.name}.${key}`, true, true);
-}
 
