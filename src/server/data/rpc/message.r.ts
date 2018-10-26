@@ -57,7 +57,7 @@ export const cancelAnnouncement = (aIncId: string): Result => {
         v.announce.cancel = true;
     }
 
-    bkt.put(aIncId, v);
+    bkt.put(aIncId, v[0]);
 
     let res = new Result();
     res.r = 1;
@@ -107,7 +107,7 @@ export const cancelGroupMessage = (hIncId: string): Result => {
         v.msg.cancel = true;
     }
 
-    bkt.put(hIncId, v);
+    bkt.put(hIncId, v[0]);
 
     let res = new Result();
     res.r = 1;
@@ -183,7 +183,7 @@ export const cancelUserMessage = (hIncId: string): Result => {
         v.msg.cancel = true;
     }
 
-    bkt.put(hIncId, v);
+    bkt.put(hIncId, v[0]);
 
     let res = new Result();
     res.r = 1;
