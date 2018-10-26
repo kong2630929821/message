@@ -12,6 +12,8 @@ import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
 import * as CONSTANT from '../constant';
+import {Tr} from "../../../pi_pt/rust/pi_db/mgr";
+import { write, read } from "../../../pi_pt/db";
 
 
 // ================================================================= 导出
@@ -78,6 +80,17 @@ export const login = (loginReq: LoginReq): UserInfo => {
         userInfo = userInfoBucket.get(loginReq.uid)[0];
         let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
         setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
+
+        // save session
+        let session = getEnv().getSession();
+        write(dbMgr, (tr: Tr) => {
+            session.set(tr, "uid", loginReq.uid.toString());
+        });
+
+        read(dbMgr, (tr: Tr) => {
+            let v = session.get(tr, "uid");
+            console.log("read session value:", v);
+        });
     } else {
         userInfo.uid = -1;
     }

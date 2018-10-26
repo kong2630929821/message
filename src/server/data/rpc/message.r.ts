@@ -13,6 +13,9 @@ import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { Bucket } from "../../../utils/db";
 import * as CONSTANT from '../constant';
 
+import {Tr} from "../../../pi_pt/rust/pi_db/mgr";
+import { write, read } from "../../../pi_pt/db";
+
 
 // ================================================================= 导出
 /**
@@ -125,6 +128,16 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const userHistoryBucket = new Bucket("file", CONSTANT.USER_HISTORY_TABLE, dbMgr);
     const msgLockBucket = new Bucket("file", CONSTANT.MSG_LOCK_TABLE, dbMgr);
 
+    let sid;
+    let session = getEnv().getSession();
+    read(dbMgr, (tr: Tr) => {
+        sid = session.get(tr, "uid");
+        if (sid === undefined) {
+            sid = -1;
+        }
+        console.log('read uid for this session: ', sid);
+    });
+
     let userHistory = new UserHistory();
 
     // TODO: ways to generate hid?
@@ -151,7 +164,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userMsg.mtype = 0;
     userMsg.read = true;
     userMsg.send = true;
-    userMsg.sid = 1;
+    userMsg.sid = sid;
     userMsg.time = Date.now();
 
     userHistory.hIncid = hid.toString() + ":" + curId;
@@ -160,7 +173,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userHistoryBucket.put(userHistory.hIncid, userHistory);
 
     let buf = new BonBuffer();
-    message.bonEncode(buf);
+    userMsg.bonEncode(buf);
 
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
     mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
