@@ -9,11 +9,10 @@ import { GroupHistory, GroupMsg} from "../db/message.s";
 import { GroupInfo, GroupUserLink } from "../db/group.s";
 import { Bucket } from "../../../utils/db";
 import { getEnv } from '../../../pi_pt/net/rpc_server';
-import { ab2hex } from '../../../pi/util/util';
-import { BonBuffer } from '../../../pi/util/bon';
-import { WARE_NAME } from "../constant";
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
+import * as CONSTANT from '../constant';
+
 
 // ================================================================= 导出
 /**
@@ -23,9 +22,9 @@ import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_n
 //#[rpc=rpcServer]
 export const registerUser = (registerInfo: UserRegister): UserInfo => {
     const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
-    const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
-    const accountGeneratorBucket = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
+    const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
+    const userCredentialBucket = new Bucket("file", CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
+    const accountGeneratorBucket = new Bucket("file", CONSTANT.ACCOUNT_GENERATOR_TABLE, dbMgr);
 
     let userInfo = new UserInfo();
     let userCredential = new UserCredential();
@@ -57,8 +56,8 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
 //#[rpc=rpcServer]
 export const login = (loginReq: LoginReq): UserInfo => {
     const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
-    const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
+    const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
+    const userCredentialBucket = new Bucket("file", CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
 
     let uid = loginReq.uid;
     let passwdHash = loginReq.passwdHash;
@@ -97,7 +96,7 @@ export const login = (loginReq: LoginReq): UserInfo => {
 //#[rpc=rpcServer]
 export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
     const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
+    const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
 
     let uids = getUserInfoReq.uids;
     let values: any = userInfoBucket.get(uids);
@@ -116,7 +115,7 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
 //#[rpc=rpcServer]
 export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq): GroupArray => {
     const dbMgr = getEnv().getDbMgr();
-    const groupInfoBucket = new Bucket("file", "server/data/db/user.GroupInfo", dbMgr);
+    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
 
     let gids = getGroupInfoReq.gids;
     let values: any = groupInfoBucket.get(gids);
@@ -145,7 +144,7 @@ export const setUserInfo = (param: UserInfoSet): Result => {
 //#[rpc=rpcServer]
 export const getContact = (getContactReq: GetContactReq): Contact => {
     const dbMgr = getEnv().getDbMgr();
-    const contactBucket = new Bucket("file", "server/data/db/user.Contact", dbMgr);
+    const contactBucket = new Bucket("file", CONSTANT.CONTACT_TABLE, dbMgr);
 
     let uid = getContactReq.uid;
     let value = contactBucket.get<number, Contact>(uid);
@@ -160,7 +159,7 @@ export const getContact = (getContactReq: GetContactReq): Contact => {
 //#[rpc=rpcServer]
 export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLinkArray => {
     const dbMgr = getEnv().getDbMgr();
-    const friendLinkBucket = new Bucket("file", "server/data/db/user.FriendLink", dbMgr);
+    const friendLinkBucket = new Bucket("file", CONSTANT.FRIEND_LINK_TABLE, dbMgr);
 
     let friendLinkArray = new FriendLinkArray();
     let uuids = getFriendLinksReq.uuid.map(v => v.toString());
@@ -176,7 +175,7 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
 //#[rpc=rpcServer]
 export const getGroupUserLinks = (uuidArr: string): GroupUserLinkArray => {
     const dbMgr = getEnv().getDbMgr();
-    const groupInfoBucket = new Bucket("file", "server/data/db/group.GroupInfo", dbMgr);
+    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
 
     let groupInfo = groupInfoBucket.get<string, GroupInfo>(uuidArr);
     let groupUserLink = new GroupUserLink();
@@ -192,7 +191,7 @@ export const getGroupUserLinks = (uuidArr: string): GroupUserLinkArray => {
 //#[rpc=rpcServer]
 export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
-    const groupHistoryBucket = new Bucket("file", "server/data/db/message.GroupHistory", dbMgr);
+    const groupHistoryBucket = new Bucket("file", CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
 
     let groupHistoryArray = new GroupHistoryArray();
 
@@ -226,7 +225,7 @@ export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
 //#[rpc=rpcServer]
 export const getUserHistory = (param: MessageFragment): UserHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
-    const userHistoryBucket = new Bucket("file", "server/data/db/message.UserHistory", dbMgr);
+    const userHistoryBucket = new Bucket("file", CONSTANT.USER_HISTORY_TABLE, dbMgr);
 
     let userHistory = new UserHistoryArray();
 
@@ -259,7 +258,7 @@ export const getUserHistory = (param: MessageFragment): UserHistoryArray => {
 //#[rpc=rpcServer]
 export const getAnnoucement = (param: AnnouceFragment): AnnounceHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
-    const announceHistoryBucket = new Bucket("file", "server/data/db/message.AnnounceHistory", dbMgr);
+    const announceHistoryBucket = new Bucket("file", CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
 
     let announceHistory = new AnnounceHistoryArray();
 

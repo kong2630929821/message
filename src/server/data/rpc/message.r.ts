@@ -11,7 +11,7 @@ import { ServerNode } from "../../../pi_pt/rust/mqtt/server";
 import { BonBuffer } from "../../../pi/util/bon";
 import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { Bucket } from "../../../utils/db";
-
+import * as CONSTANT from '../constant';
 
 
 // ================================================================= 导出
@@ -22,7 +22,7 @@ import { Bucket } from "../../../utils/db";
 //#[rpc=rpcServer]
 export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
     const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket("file", "server/data/db/message.AnnounceHistory", dbMgr);
+    const bkt = new Bucket("file", CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
 
     let anmt = new Announcement();
     anmt.cancel = false;
@@ -50,7 +50,7 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
 //#[rpc=rpcServer]
 export const cancelAnnouncement = (aIncId: string): Result => {
     const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket("file", "server/data/db/message.AnnounceHistory", dbMgr);
+    const bkt = new Bucket("file", CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
 
     let v = bkt.get<string, AnnounceHistory>(aIncId);
     if (v !== undefined) {
@@ -72,7 +72,7 @@ export const cancelAnnouncement = (aIncId: string): Result => {
 //#[rpc=rpcServer]
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket("file", "server/data/db/message.GroupHistory", dbMgr);
+    const bkt = new Bucket("file", CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
 
     let gh = new GroupHistory();
     let gmsg = new GroupMsg();
@@ -100,7 +100,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 //#[rpc=rpcServer]
 export const cancelGroupMessage = (hIncId: string): Result => {
     const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket("file", "server/data/db/message.GroupHistory", dbMgr);
+    const bkt = new Bucket("file", CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
 
     let v = bkt.get<string, GroupHistory>(hIncId);
     if (v !== undefined) {
@@ -122,8 +122,8 @@ export const cancelGroupMessage = (hIncId: string): Result => {
 //#[rpc=rpcServer]
 export const sendUserMessage = (message: UserSend): UserHistory => {
     const dbMgr = getEnv().getDbMgr();
-    const userHistoryBucket = new Bucket("file", "server/data/db/message.UserHistory", dbMgr);
-    const msgLockBucket = new Bucket("file", "server/data/db/message.MsgLock", dbMgr);
+    const userHistoryBucket = new Bucket("file", CONSTANT.USER_HISTORY_TABLE, dbMgr);
+    const msgLockBucket = new Bucket("file", CONSTANT.MSG_LOCK_TABLE, dbMgr);
 
     let userHistory = new UserHistory();
 
@@ -175,7 +175,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
 //#[rpc=rpcServer]
 export const cancelUserMessage = (hIncId: string): Result => {
     const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket("file", "server/data/db/message.UserHistory", dbMgr);
+    const bkt = new Bucket("file", CONSTANT.USER_HISTORY_TABLE, dbMgr);
 
     let v = bkt.get<string, UserHistory>(hIncId);
     if (v !== undefined) {
