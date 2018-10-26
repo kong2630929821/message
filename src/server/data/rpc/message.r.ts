@@ -126,24 +126,23 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const msgLockBucket = new Bucket("file", "server/data/db/message.MsgLock", dbMgr);
 
     let userHistory = new UserHistory();
-    let hId = new string();
 
     // TODO: ways to generate hid?
-    hId.hid = 100;
-
-    let currentId = msgLockBucket.get(hId.hid);
-    if (currentId[0] === undefined) {
+    let hid = 10001;
+    let curId = 0;
+    let mLock = msgLockBucket.get(hid);
+    console.log('msgLock:', mLock);
+    if (mLock[0] === undefined) {
         let msgLock = new MsgLock();
-        msgLock.hid = hId.hid;
+        msgLock.hid = hid
         msgLock.current = 0;
-        hId.index = 0;
-        msgLockBucket.put(hId.hid, msgLock);
+        msgLockBucket.put(hid, msgLock);
     } else {
-        hId.index = currentId[0].current + 1;
         let msgLock = new MsgLock();
-        msgLock.hid = hId.hid;
-        msgLock.current = hId.index;
-        msgLockBucket.put(hId.hid, msgLock);
+        msgLock.hid = hid;
+        msgLock.current = mLock[0].current + 1;
+        curId =  msgLock.current;
+        msgLockBucket.put(hid, msgLock);
     }
 
     let userMsg = new UserMsg();
@@ -155,10 +154,10 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userMsg.sid = 1;
     userMsg.time = Date.now();
 
-    userHistory.hIncid = hId;
+    userHistory.hIncid = hid.toString() + ":" + curId;
     userHistory.msg = userMsg;
 
-    userHistoryBucket.put(hId, userHistory);
+    userHistoryBucket.put(userHistory.hIncid, userHistory);
 
     let buf = new BonBuffer();
     message.bonEncode(buf);

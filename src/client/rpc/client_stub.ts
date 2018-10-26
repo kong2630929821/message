@@ -3,7 +3,7 @@ import {Client} from "../../pi/net/mqtt_c";
 import {Error} from "../../pi_pt/net/rpc_r.s";
 import {create, Rpc} from "../../pi/net/rpc";
 import { BonBuffer } from "../../pi/util/bon";
-import { sendMessage as Message } from '../../server/rpc/send_message.s';
+import { UserSend } from '../../server/data/rpc/message.s';
 
 const SERVER_IP = "127.0.0.1";
 const SERVER_PORT = 1234;
@@ -51,7 +51,7 @@ export const subscribeChannel = (channelId: string) => {
         mqttClient.onMessage((topic: string, payload: Uint8Array) => {
             if(topic === channelId) {
                 let bon = new BonBuffer(payload);
-                let message = new Message();
+                let message = new UserSend();
                 message.bonDecode(bon);
 
                 console.log('received message: ', message);
@@ -60,7 +60,7 @@ export const subscribeChannel = (channelId: string) => {
         mqttClient.subscribe(channelId, {
             qos: 0,
             onSuccess : () => {
-
+                console.log('sub to channel success: ', channelId);
             },
             onFailure: (e) => {
                 console.log(e);
