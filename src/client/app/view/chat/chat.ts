@@ -7,37 +7,38 @@
  import {Forelet} from "../../../../pi/widget/forelet";
  import {sendMessage} from "../../net/rpc";
  import {subscribe as subscribeMsg} from "../../net/init";
- import {UserHistory} from "../../../../server/data/db/message.s";
+ import {UserHistory, UserMsg} from "../../../../server/data/db/message.s";
 
  // ================================================ 导出
  export class Chat extends Widget {
      props = {
-         uid:null,
+         sid:null,
+         rid:null,
          message:null
      } as Props
 
     inputUid(e){
-        this.props.uid = parseInt(e.text);
+        this.props.rid = parseInt(e.text);
     }
 
     inputMessage(e){
         this.props.message = e.text;
     }
-
     subscribe(){
-        subscribeMsg(this.props.uid.toString(),UserHistory,(r:UserHistory)=>{})
-        // open("client-app-view-register-register")
-    }
+        subscribeMsg(this.props.sid.toString(),UserMsg,(r:UserMsg)=>{
 
+        })
+    }
     send(e){
-        sendMessage(this.props.uid,this.props.message, ()=>{
-            
+        sendMessage(this.props.rid,this.props.message, (r:UserHistory)=>{
+            alert(`chat ${JSON.stringify(r)}`)
         })
     }
  }
 
  // ================================================ 本地
  interface Props  {
-     uid:number,
+     sid:number,
+     rid:number,
      message:string
  }

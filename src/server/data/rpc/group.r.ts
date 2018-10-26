@@ -2,7 +2,7 @@
  * 群组相关的rpc操作
  */
 // ================================================================= 导入
-import {string, GroupInfo} from "../db/group.s";
+import {GroupInfo} from "../db/group.s";
 import {Result} from "./basic.s";
 import {GroupCreate, GroupAgree, Invite} from "./group.s";
 

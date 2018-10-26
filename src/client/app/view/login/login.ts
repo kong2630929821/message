@@ -31,7 +31,7 @@
     login(e){
         userLogin(this.props.uid,this.props.passwd, (r:UserInfo)=>{
             if(r.uid > 0){
-                popNew("client-app-view-chat-chat")
+                popNew("client-app-view-chat-chat",{"sid":this.props.uid})
             }
         })
     }
