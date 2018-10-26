@@ -9,8 +9,9 @@ import { AddressInfo } from "../db/extra.s";
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
-import { WARE_NAME } from "../../data/constant"
 import { toBonBuffer} from "../../../utils/util";
+import { Bucket } from "../../../utils/db";
+import * as CONSTANT from '../constant';
 
 // ================================================================= 导出
 
@@ -18,144 +19,108 @@ import { toBonBuffer} from "../../../utils/util";
  * 群组信息
  * @param gid 
  */
-//#[rpc]
-export const watchGroupInfo = (gid: number): GroupInfo => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(gid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${GroupInfo._$info.name}.${key}`, true, true); 
-    return 
+//#[rpc=rpcServer]
+export const watchGroupInfo = (gid:number): GroupInfo => {
+    return watchInfo("gid", gid, GroupInfo, -1);
 }
 
 /**
  * 群组中的用户信息
  * @param guid 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchGroupUserLink = (guid: string): GroupUserLink => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(guid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${GroupUserLink._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("guid", guid, GroupUserLink, "-1");
 }
 
 /**
  * 用户历史记录
  * @param hIncid 
  */
-//#[rpc]
-export const watchUserHistory = (hIncid: string): UserHistory => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(hIncid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${UserHistory._$info.name}.${key}`, true, true);
-    return
+//#[rpc=rpcServer]
+export const watchUserHistory = (hIncid: string): UserHistory => {    
+    return watchInfo("hIncid", hIncid, UserHistory, "-1");
 }
 
 /**
  * 群组历史记录
  * @param hIncid 
  */
-//#[rpc]
-export const watchGroupHistory = (hIncid: string): GroupHistory => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(hIncid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${GroupHistory._$info.name}.${key}`, true, true);
-    return
+//#[rpc=rpcServer]
+export const watchGroupHistory = (hIncid: string): GroupHistory => {    
+    return watchInfo("hIncid", hIncid, GroupHistory, "-1");
 }
 
 /**
  * 所有公告
  * @param aIncId 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchAnnounceHistory = (aIncId: string): AnnounceHistory => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(aIncId);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${AnnounceHistory._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("aIncId", aIncId, AnnounceHistory, "-1");
 }
 
 /**
  * 消息锁
  * @param hid 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchMsgLock = (hid: number): MsgLock => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(hid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${MsgLock._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("hid", hid, MsgLock, -1);
 }
 
 /**
  * 用户本人的基本信息
  * @param uid 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchUserInfo = (uid: number): UserInfo => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(uid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${UserInfo._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("uid", uid, UserInfo, -1);
 }
 
 /**
  * User credential table
  * @param uid 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchUserCredential = (uid: number): UserCredential => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(uid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${UserCredential._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("uid", uid, UserCredential, -1);
 }
 
 /**
  * User account generator
  * @param index 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchAccountGenerator = (index: String): AccountGenerator => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(index);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${AccountGenerator._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("index", index, UserCredential, "-1");
 }
 
 /**
  * 好友链接信息
  * @param uuid 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchFriendLink = (uuid: string): FriendLink => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(uuid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${FriendLink._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("uuid", uuid, FriendLink, "-1");
 }
 
 /**
  * 联系人信息
  * @param uid 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchContact = (uid: number): Contact => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(uid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${Contact._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("uid", uid, Contact, -1);
 }
 
 /**
  * 地址信息
  * @param uid 
  */
-//#[rpc]
+//#[rpc=rpcServer]
 export const watchAddressInfo = (uid: number): AddressInfo => {
-    const mqttServer = getMqttServer();
-    let key = toBonBuffer(uid);
-    setMqttTopic(mqttServer, `${WARE_NAME}.${AddressInfo._$info.name}.${key}`, true, true);
-    return
+    return watchInfo("uid", uid, AddressInfo, -1);
 }
 
 
@@ -169,3 +134,22 @@ const getMqttServer = () => {
     return mqttServer
 }
 
+/**
+ * 一个通用的数据库监听器函数
+ * @param keyName 
+ * @param keyValue 
+ * @param tableStruct 
+ * @param defaultValue 
+ */
+export const watchInfo = (keyName:string, keyValue:any, tableStruct:any, keyDefaultValue:any):any => {
+    //监听数据库
+    const mqttServer = getMqttServer();
+    keyValue = toBonBuffer(keyValue);
+    setMqttTopic(mqttServer, `${CONSTANT.WARE_NAME}.${tableStruct._$info.name}.${keyValue}`, true, true); 
+    //返回当前值
+    const dbMgr = getEnv().getDbMgr();
+    const infoBucket = new Bucket(CONSTANT.WARE_NAME, tableStruct._$info.name, dbMgr);   
+    let info = infoBucket.get(keyValue)[0] || new tableStruct;
+    info[keyName] = info[keyName] || keyDefaultValue;
+    return info;
+}
