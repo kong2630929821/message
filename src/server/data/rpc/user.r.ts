@@ -46,7 +46,9 @@ export const applyFriend = (uid: number): Result => {
         contact.applyGroup = [];
         return contact;
     }
-    return
+    let result = new Result;
+    result.r = 1;
+    return result;
 }
 
 /**

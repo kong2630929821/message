@@ -140,6 +140,6 @@ const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyV
             oldMap.set(r[keyName],r);
             updateStore(mapName,oldMap)
         }
-        cb(r);
+        cb&&cb(r);
     }
 }

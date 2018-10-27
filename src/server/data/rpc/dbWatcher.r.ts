@@ -141,7 +141,7 @@ const getMqttServer = () => {
  * @param tableStruct 
  * @param defaultValue 
  */
-export const watchInfo = (keyName:string, keyValue:any, tableStruct:any, keyDefaultValue:any):any => {
+export const watchInfo = (keyName:string, keyValue:any, tableStruct:any, keyDefaultValue:any):any => {    
     //监听数据库
     const mqttServer = getMqttServer();
     keyValue = toBonBuffer(keyValue);

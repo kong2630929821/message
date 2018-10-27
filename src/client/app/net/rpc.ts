@@ -5,8 +5,9 @@
 import {clientRpcFunc} from "./init";
 import {notEmptyString} from "../../../utils/util";
 import {registerUser, login as loginUser, setUserInfo as setUserProfile} from "../../../server/data/rpc/basic.p";
-import {UserRegister, LoginReq, UserInfoSet} from "../../../server/data/rpc/basic.s";
+import {UserRegister, LoginReq, UserInfoSet, Result} from "../../../server/data/rpc/basic.s";
 import {UserInfo} from "../../../server/data/db/user.s";
+import {applyFriend as applyUserFriend} from "../../../server/data/rpc/user.p";
 import {updateStore, getBorn} from "../data/store";
 import {sendUserMessage} from "../../../server/data/rpc/message.p";
 import {UserSend} from "../../../server/data/rpc/message.s";
@@ -76,6 +77,17 @@ export const sendMessage = (rid:number, msg:string, cb:(r:UserHistory)=>void) =>
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);
         //todo
+    })
+}
+
+/**
+ * 申请添加rid为好友
+ * @param rid 
+ * @param cb 
+ */
+export const applyFriend = (rid:number, cb:(r)=>void) => {
+    clientRpcFunc(applyUserFriend, rid,(r:Result)=>{
+        cb(r)
     })
 }
 
