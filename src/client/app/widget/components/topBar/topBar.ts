@@ -7,9 +7,9 @@
  * nextImg:右侧图标路径
  */
 // ================================ 导入
-import { Json } from '../../../pi/lang/type';
-import { notify } from '../../../pi/widget/event';
-import { Widget } from '../../../pi/widget/widget';
+import { Json } from '../../../../../pi/lang/type';
+import { notify } from '../../../../../pi/widget/event';
+import { Widget } from '../../../../../pi/widget/widget';
 
 interface Props {
     title:string;

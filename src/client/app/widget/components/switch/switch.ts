@@ -5,9 +5,9 @@
  * activeColor:选中后的颜色
  * inactiveColor：未选中的颜色
  */
-import { Json } from '../../../pi/lang/type';
-import { notify } from '../../../pi/widget/event';
-import { Widget } from '../../../pi/widget/widget';
+import { Json } from '../../../../../pi/lang/type';
+import { notify } from '../../../../../pi/widget/event';
+import { Widget } from '../../../../../pi/widget/widget';
 
 interface Props {
     types: boolean;
