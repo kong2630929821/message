@@ -14,7 +14,9 @@ import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_n
 import * as CONSTANT from '../constant';
 import {Tr} from "../../../pi_pt/rust/pi_db/mgr";
 import { write, read } from "../../../pi_pt/db";
+import { Logger } from '../../../utils/logger';
 
+const logger = new Logger('BASIC');
 
 // ================================================================= 导出
 /**
@@ -23,6 +25,7 @@ import { write, read } from "../../../pi_pt/db";
  */
 //#[rpc=rpcServer]
 export const registerUser = (registerInfo: UserRegister): UserInfo => {
+    logger.debug("user try to register with: ", registerInfo);
     const dbMgr = getEnv().getDbMgr();
     const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
     const userCredentialBucket = new Bucket("file", CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
@@ -48,15 +51,16 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     userCredential.passwdHash = registerInfo.passwdHash;
 
     userInfoBucket.put(userInfo.uid, userInfo);
+    logger.debug("sucessfully registered user", userInfo);
     // TODO: check potential error
     userCredentialBucket.put(userInfo.uid, userCredential);
-
 
     return userInfo;
 }
 
 //#[rpc=rpcServer]
 export const login = (loginReq: LoginReq): UserInfo => {
+    logger.debug("user try to login with uid: ", loginReq.uid);
     const dbMgr = getEnv().getDbMgr();
     const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
     const userCredentialBucket = new Bucket("file", CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
@@ -71,7 +75,7 @@ export const login = (loginReq: LoginReq): UserInfo => {
     if (expectedPasswdHash[0] === undefined) {
         userInfo.uid = -1;
         userInfo.sex = 0;
-
+        logger.debug("user does not exist: ", loginReq.uid);
         return userInfo;
     }
 
@@ -85,13 +89,17 @@ export const login = (loginReq: LoginReq): UserInfo => {
         let session = getEnv().getSession();
         write(dbMgr, (tr: Tr) => {
             session.set(tr, "uid", loginReq.uid.toString());
+            logger.info("set session value of uid: ", loginReq.uid.toString());
         });
 
+        // TODO: debug purpose
         read(dbMgr, (tr: Tr) => {
             let v = session.get(tr, "uid");
-            console.log("read session value:", v);
+            logger.debug("read session value of uid: ", v);
+            logger.debug("user login session id: ", session.getId());
         });
     } else {
+        logger.debug("wrong password or uid");
         userInfo.uid = -1;
     }
 
@@ -145,8 +153,39 @@ export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq): GroupArray => {
  */
 //#[rpc=rpcServer]
 export const setUserInfo = (param: UserInfoSet): Result => {
+    logger.info("setUserInfo: ", param);
+    const dbMgr = getEnv().getDbMgr();
+    const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
 
-    return
+    let res = new Result();
+
+    let uid;
+    let session = getEnv().getSession();
+    logger.debug('sessionId: ', session.getId());
+    read(dbMgr, (tr: Tr) => {
+        uid = session.get(tr, "uid");
+    });
+    logger.info("read uid from seesion: ", uid);
+
+    if (uid === undefined) {
+        logger.info()
+        res.r = 0;
+        return res;
+    }
+
+    let userInfo = userInfoBucket.get<number, UserInfo>(parseInt(uid));
+    userInfo.name = param.name;
+    userInfo.note = param.note;
+    userInfo.sex = param.sex;
+    userInfo.tel = param.tel;
+    userInfo.avator = param.avator;
+
+    logger.debug("userInfo: ", userInfo);
+    userInfoBucket.put(uid, userInfo);
+    logger.info("Set user info success");
+    res.r = 1;
+
+    return res;
 }
 
 

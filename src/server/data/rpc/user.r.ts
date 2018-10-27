@@ -2,8 +2,8 @@
  * 用户相关的rpc操作
  */
 // ================================================================= 导入
-import {Result} from "./basic.s";
-import {UserAgree} from "./user.s";
+import { Result } from "./basic.s";
+import { UserAgree } from "./user.s";
 
 
 // ================================================================= 导出
@@ -12,7 +12,7 @@ import {UserAgree} from "./user.s";
  * @param uuid
  */
 //#[rpc]
-export const applyFriend = (uid:number): Result => {
+export const applyFriend = (uid: number): Result => {
     return
 }
 
@@ -21,7 +21,7 @@ export const applyFriend = (uid:number): Result => {
  * @param agree
  */
 //#[rpc]
-export const acceptFriend = (agree:UserAgree): Result => {
+export const acceptFriend = (agree: UserAgree): Result => {
     return
 }
 
@@ -30,7 +30,7 @@ export const acceptFriend = (agree:UserAgree): Result => {
  * @param uuid
  */
 //#[rpc]
-export const delFriend = (uid:number): Result => {
+export const delFriend = (uid: number): Result => {
     return
 }
 
