@@ -1,7 +1,7 @@
 /**
  * 带关闭按钮的提示模态框
  */
-import { Widget } from '../../../pi/widget/widget';
+import { Widget } from '../../../../../pi/widget/widget';
 interface Props {
     title:string;
     content:string;

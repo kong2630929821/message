@@ -1,9 +1,8 @@
 /**
  * 确认提示框
  */
-import { popNew } from '../../../pi/ui/root';
-import { Widget } from '../../../pi/widget/widget';
-import { copyToClipboard } from '../../utils/tools';
+import { popNew } from '../../../../../pi/ui/root';
+import { Widget } from '../../../../../pi/widget/widget';
 
 interface Props {
     title:string;
@@ -36,7 +35,7 @@ export class ModalBox2 extends Widget {
     }
 
     public copyBtnClick(e:any) {
-        copyToClipboard(this.props.extraInfo);
+        // copyToClipboard(this.props.extraInfo);
         popNew('app-components1-message-message', { itype: 'success', content: '复制成功', center: true });
         this.ok && this.ok();
     }
