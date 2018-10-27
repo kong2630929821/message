@@ -67,26 +67,26 @@ const getUserInfo = (uid: number) => {
 
 // ---------------------------  console test purpose -------------------------
 
-(<any>self).sendMessage = (channleId: string, msg: string) => {
-    sendMessage(channleId, msg);
-}
+// (<any>self).sendMessage = (channleId: string, msg: string) => {
+//     sendMessage(channleId, msg);
+// }
 
-(<any>self).login = (uid: number, passwd: string) => {
-    login(uid, passwd);
-}
+// (<any>self).login = (uid: number, passwd: string) => {
+//     login(uid, passwd);
+// }
 
-(<any>self).subscribe = (channleId: string) => {
-    subscribeChannel(channleId);
-}
+// (<any>self).subscribe = (channleId: string) => {
+//     subscribeChannel(channleId);
+// }
 
-(<any>self).registry = (userName: string) => {
-    registry(userName);
-}
+// (<any>self).registry = (userName: string) => {
+//     registry(userName);
+// }
 
-(<any>self).getUserInfo = (uid: number) => {
-    getUserInfo(uid);
-}
+// (<any>self).getUserInfo = (uid: number) => {
+//     getUserInfo(uid);
+// }
 
-(<any>self).sendP2PMessage = (uid: number, txt: string) => {
-    sendP2PMessage(uid, txt);
-}
+// (<any>self).sendP2PMessage = (uid: number, txt: string) => {
+//     sendP2PMessage(uid, txt);
+// }

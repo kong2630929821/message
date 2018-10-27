@@ -13,6 +13,10 @@ import {sendUserMessage} from "../../../server/data/rpc/message.p";
 import {UserSend} from "../../../server/data/rpc/message.s";
 import {UserHistory, MSG_TYPE} from "../../../server/data/db/message.s";
 
+import * as group from "../../../server/data/rpc/group.s";
+import * as groupp from "../../../server/data/rpc/group.p";
+import * as groupr from "../../../server/data/rpc/group.r";
+
 // ================================================ 导出
 /**
  * 普通用户注册
@@ -95,7 +99,7 @@ export const applyFriend = (rid:number, cb:(r)=>void) => {
 
 export const setUserInfo = () => {
     let userInfoSet = new UserInfoSet();
-    userInfoSet.avator = "";
+    userInfoSet.avator = "avatar";
     userInfoSet.name = "wtf";
     userInfoSet.note = "xxx";
     userInfoSet.sex = 0;
@@ -106,7 +110,18 @@ export const setUserInfo = () => {
     });
 }
 
+export const createGroup = () => {
+    let x = new group.GroupCreate();
+    x.note = "wtf";
+    x.name = "xxx";
+
+    clientRpcFunc(groupp.createGroup, x, (r) => {
+        console.log(r);
+    })
+}
+
 (<any>self).setUserInfo = () => {
+    alert("xxx")
     setUserInfo();
 }
 
@@ -117,7 +132,11 @@ export const setUserInfo = () => {
 }
 
 (<any>self).register = (name:string,passwdHash:string) => {
-    register(name, passwdHash, r => {
-        console.log(r)
+    register(name, passwdHash, (r) => {
+        console.log(r);
     });
+}
+
+(<any>self).createGroup = () => {
+    createGroup();
 }

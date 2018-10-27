@@ -55,6 +55,26 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     // TODO: check potential error
     userCredentialBucket.put(userInfo.uid, userCredential);
 
+    // write contact info
+    let contact = new Contact();
+    contact.uid = userInfo.uid;
+    contact.applyGroup = [];
+    contact.applyUser = [];
+    contact.friends = [];
+    contact.group = [];
+    contact.temp_chat = [];
+
+    const contactBucket = new Bucket("file", CONSTANT.CONTACT_TABLE, dbMgr);
+    let c = contactBucket.get(userInfo.uid)[0];
+    if (c === undefined) {
+        let v = contactBucket.put(userInfo.uid, contact);
+        if (v) {
+            logger.debug("Create user contact success");
+        } else {
+            logger.error("Create user contact failed");
+        }
+    }
+
     return userInfo;
 }
 
