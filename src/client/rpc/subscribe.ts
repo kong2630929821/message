@@ -26,7 +26,7 @@ applyFriend  //别人申请添加当前用户为好友
 acceptFriend //别人同意添加当前用户为好友
 inviteJoin //别人邀请当前用户加入群
 acceptJoin //群接受了当前用户的加入申请
- */
+ */   
 
 
 //  $r
