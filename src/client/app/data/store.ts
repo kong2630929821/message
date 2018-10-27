@@ -115,7 +115,7 @@ export interface Store {
 
 // 本质上是主键
 type KeyName = MapName;
-type MapName = "groupInfoMap" | "groupUserLinkMap" | "userHistoryMap" | "groupHistoryMap" | "announceHistoryMap" | "msgLockMap" | "userInfoMap" | "userCredentialMap" | "accountGeneratorMap" | "friendLinkMap" | "contactMap" | "addressInfoMap";
+export type MapName = "groupInfoMap" | "groupUserLinkMap" | "userHistoryMap" | "groupHistoryMap" | "announceHistoryMap" | "msgLockMap" | "userInfoMap" | "userCredentialMap" | "accountGeneratorMap" | "friendLinkMap" | "contactMap" | "addressInfoMap";
 
 const store = <Store>{
     uid:null,

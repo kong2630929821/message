@@ -4,7 +4,7 @@
 // ================================================================= 导入
 import {GroupInfo} from "../db/group.s";
 import {Result} from "./basic.s";
-import {GroupCreate, GroupAgree, Invite} from "./group.s";
+import {GroupCreate, GroupAgree, InviteArray} from "./group.s";
 
 // ================================================================= 导出
 
@@ -33,7 +33,7 @@ export const acceptUser = (agree:GroupAgree): Result => {
  * @param invite
  */
 //#[rpc]
-export const inviteUser = (invite:Invite): Result => {
+export const inviteUsers = (invites:InviteArray): Result => {
 
     return
 }
