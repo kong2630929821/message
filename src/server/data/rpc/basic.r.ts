@@ -210,7 +210,7 @@ export const getContact = (getContactReq: GetContactReq): Contact => {
  * 获取好友别名和历史记录
  * @param uuidArr
  */
-//#[rpc=rpcServer]
+//#[rpc=rpcServer]   
 export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLinkArray => {
     const dbMgr = getEnv().getDbMgr();
     const friendLinkBucket = new Bucket("file", CONSTANT.FRIEND_LINK_TABLE, dbMgr);
