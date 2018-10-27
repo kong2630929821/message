@@ -13,9 +13,8 @@ import {sendUserMessage} from "../../../server/data/rpc/message.p";
 import {UserSend} from "../../../server/data/rpc/message.s";
 import {UserHistory, MSG_TYPE} from "../../../server/data/db/message.s";
 
-import * as group from "../../../server/data/rpc/group.s";
-import * as groupp from "../../../server/data/rpc/group.p";
-import * as groupr from "../../../server/data/rpc/group.r";
+import { GroupCreate } from "../../../server/data/rpc/group.s";
+import { createGroup as createGroupp } from "../../../server/data/rpc/group.p";
 
 // ================================================ 导出
 /**
@@ -86,8 +85,8 @@ export const sendMessage = (rid:number, msg:string, cb:(r:UserHistory)=>void) =>
 
 /**
  * 申请添加rid为好友
- * @param rid 
- * @param cb 
+ * @param rid
+ * @param cb
  */
 export const applyFriend = (rid:number, cb:(r)=>void) => {
     clientRpcFunc(applyUserFriend, rid,(r:Result)=>{
@@ -111,11 +110,11 @@ export const setUserInfo = () => {
 }
 
 export const createGroup = () => {
-    let x = new group.GroupCreate();
+    let x = new GroupCreate();
     x.note = "wtf";
     x.name = "xxx";
 
-    clientRpcFunc(groupp.createGroup, x, (r) => {
+    clientRpcFunc(createGroupp, x, (r) => {
         console.log(r);
     })
 }
