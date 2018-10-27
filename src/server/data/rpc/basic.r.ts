@@ -121,6 +121,7 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
 
     let uids = getUserInfoReq.uids;
     let values: any = userInfoBucket.get(uids);
+    logger.debug("Read userinfo: ", uids, values);
 
     //FIXME: check if `values` have undefined element, or will crash
     let res = new UserArray();
@@ -182,7 +183,8 @@ export const setUserInfo = (param: UserInfoSet): Result => {
 
     logger.debug("userInfo: ", userInfo);
     userInfoBucket.put(uid, userInfo);
-    logger.info("Set user info success");
+    logger.info("Set user info success for uid: ", uid);
+    logger.debug("set user info: ", uid, userInfo);
     res.r = 1;
 
     return res;
