@@ -21,7 +21,7 @@ news/暂无
 /**
  * 消息推送
  * 
- //申请加入群
+ //申请加入群   
 applyFriend  //别人申请添加当前用户为好友
 acceptFriend //别人同意添加当前用户为好友
 inviteJoin //别人邀请当前用户加入群
