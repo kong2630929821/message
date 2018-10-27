@@ -3,6 +3,7 @@
  */
 import { Widget } from '../../../../../pi/widget/widget';
 
+
 interface Props {
     title: string;
     content: string;
@@ -17,9 +18,6 @@ export class ModalBox extends Widget {
 
     public create() {
         super.create();
-        this.state = {
-            // cfgData: getLanguage(this)
-        };
     }
     public cancelBtnClick(e: any) {
         this.cancel && this.cancel();
