@@ -162,29 +162,38 @@ export const setUserInfo = (param: UserInfoSet): Result => {
 
     let uid;
     let session = getEnv().getSession();
-    logger.debug('sessionId: ', session.getId());
+    logger.debug('setUserInfo for sessionId: ', session.getId());
     read(dbMgr, (tr: Tr) => {
         uid = session.get(tr, "uid");
     });
-    logger.info("read uid from seesion: ", uid);
+    logger.info("Read uid from seesion: ", uid);
 
     if (uid === undefined) {
-        logger.info()
+        logger.info("User doesn't login");
         res.r = 0;
         return res;
     }
 
-    let userInfo = userInfoBucket.get<number, UserInfo>(parseInt(uid));
+    let userInfo = new UserInfo();
+    userInfo = userInfoBucket.get<number, UserInfo>(parseInt(uid))[0];
+    logger.debug("userInfo before update: ",uid,  userInfo);
     userInfo.name = param.name;
     userInfo.note = param.note;
     userInfo.sex = param.sex;
     userInfo.tel = param.tel;
     userInfo.avator = param.avator;
 
-    logger.debug("userInfo: ", userInfo);
-    userInfoBucket.put(uid, userInfo);
-    logger.info("Set user info success for uid: ", uid);
-    logger.debug("set user info: ", uid, userInfo);
+    logger.debug("UserInfo to be written: ", uid, userInfo);
+    let v = userInfoBucket.put(uid, userInfo);
+    if (!v) {
+        logger.error("Can't write userInfo to db: ", uid, userInfo);
+    } else {
+        logger.debug("Write userInfo to db success: ", uid, userInfo);
+    }
+
+    // FIXME: fatal bug, can't update db
+    logger.debug("Read userInfo after write: ", uid, userInfoBucket.get(parseInt(uid))[0]);
+
     res.r = 1;
 
     return res;
@@ -203,14 +212,14 @@ export const getContact = (getContactReq: GetContactReq): Contact => {
     let uid = getContactReq.uid;
     let value = contactBucket.get<number, Contact>(uid);
 
-    return value;
+    return value[0];
 }
 
 /**
  * 获取好友别名和历史记录
  * @param uuidArr
  */
-//#[rpc=rpcServer]   
+//#[rpc=rpcServer]
 export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLinkArray => {
     const dbMgr = getEnv().getDbMgr();
     const friendLinkBucket = new Bucket("file", CONSTANT.FRIEND_LINK_TABLE, dbMgr);
@@ -250,7 +259,7 @@ export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
     let groupHistoryArray = new GroupHistoryArray();
 
     // we don't use param.order there, because `iter` is not bidirectional
-    let hid = param.hid
+    let hid = param.hid;
     let from = param.from;
     let size = param.size;
 
