@@ -24,6 +24,12 @@ log=`cat $1`
 key=`echo $log | awk '{print $1}'`
 #branchname=`git branch | grep "*" | awk '{print $2}'`
 user=`git var GIT_AUTHOR_IDENT | awk '{print $1}'`
+if [ "$key" == "#" ];then
+	exit 0
+fi
+if [ "$key" == "Merge" ];then
+	exit 0
+fi
 #echo "log: $log key: $key user: $user"
 v=`curl -u git:git -X GET -H "Content-Type: application/json" http://192.168.31.241:8080/rest/api/2/issue/$key`
 state=`echo $v | ./jira_script/jira_git/rely/jq '.fields.status.id'`
