@@ -5,20 +5,19 @@
  // ================================================ 导入
  import {Widget} from "../../../../pi/widget/widget";
  import {Forelet} from "../../../../pi/widget/forelet";
- import {open} from "../../../../pi/ui/root";
- import {clientRpcFunc} from "../../net/init";
- import {userLogin} from '../../../../server/rpc/user_login.p';
- import {userLogin as userLoginRequest, userLoginResponse} from '../../../../server/rpc/user_login.s';
+ import {popNew} from "../../../../pi/ui/root";
+ import { login as userLogin} from '../../net/rpc';
+ import {UserInfo} from "../../../../server/data/db/user.s";
 
  // ================================================ 导出
  export class Login extends Widget {
      props = {
-         name:"",
+         uid:null,
          passwd:""
      } as Props
 
     inputName(e){
-        this.props.name = e.text;
+        this.props.uid = parseInt(e.text);
     }
 
     inputPasswd(e){
@@ -26,22 +25,20 @@
     }
 
     openRegister(){
-        open("client-app-view-register-register")
+        popNew("client-app-view-register-register")
     }
 
     login(e){
-        let user = new userLoginRequest();
-        user.uid = this.props.name;
-        user.passwdHash = '0xFFFFFFFFFF';
-        // clientRpcFunc(userLogin, user, userLoginResponse, (r) => {
-        //     console.log(r);
-        // })
-        alert(`name is : ${this.props.name}, passwd is : ${this.props.passwd}`)
+        userLogin(this.props.uid,this.props.passwd, (r:UserInfo)=>{
+            if(r.uid > 0){
+                popNew("client-app-view-chat-chat",{"sid":this.props.uid})
+            }
+        })
     }
  }
 
  // ================================================ 本地
  interface Props  {
-     name:string,
+     uid:number,
      passwd:string
  }

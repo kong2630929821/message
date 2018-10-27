@@ -40,7 +40,7 @@ const login = (uid: number, passwd: string) => {
     loginReq.uid = uid;
     loginReq.passwdHash = '0xacef123';
 
-    callRemoteRpc(userLogin, loginReq, LoginReply, (r) => {
+    callRemoteRpc(userLogin, loginReq, UserInfo, (r) => {
         console.log(r);
     })
 }

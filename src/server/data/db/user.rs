@@ -43,18 +43,11 @@ struct AccountGenerator {
 }
 
 /**
-*单聊两人的id
-*/
-struct Uuid {
-    uid1: u32,//当前用户id
-    uid2: u32,//对方id
-}
-/**
 *好友链接信息
 */
 #[primary=uuid,db=file,dbMonitor=true]
 struct FriendLink {
-    uuid: Uuid,//两个用户的id{uid1:-1,uid2:-1}代表不存在
+    uuid: String,//两个用户的id"-1"代表不存在,"10001:10002",前面代表uid1后面代表uid2
     alias: String,//别名
     hid: usize//历史记录id 53位，直接使用底层接口
 }

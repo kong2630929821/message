@@ -17,3 +17,7 @@ struct Invite{
     gid:u32,//群组
     rid:u32//接受邀请方
 }
+
+struct InviteArray{
+    arr:&[Invite]//被邀请的用户数组
+}

@@ -5,9 +5,9 @@
 // ============================================ 导入
 import { HandlerMap } from '../../../pi/util/event';
 import { depCopy } from "../../../utils/util";
-import { GroupInfo, GroupUserLink, Guid } from "../../../server/data/db/group.s";
-import { UserHistory, GroupHistory, AnnounceHistory, MsgLock, HIncId, AIncId } from "../../../server/data/db/message.s";
-import { UserInfo, UserCredential, AccountGenerator, FriendLink, Contact, Uuid } from "../../../server/data/db/user.s";
+import { GroupInfo, GroupUserLink } from "../../../server/data/db/group.s";
+import { UserHistory, GroupHistory, AnnounceHistory, MsgLock } from "../../../server/data/db/message.s";
+import { UserInfo, UserCredential, AccountGenerator, FriendLink, Contact } from "../../../server/data/db/user.s";
 import { AddressInfo } from "../../../server/data/db/extra.s";
 
 // ============================================ 导出
@@ -96,17 +96,17 @@ export const initStore = () => {
  * Store的声明
  */
 export interface Store {
-    uid:number;
+    uid:number,
     groupInfoMap: Map<number, GroupInfo>,
-    groupUserLinkMap: Map<Guid, GroupUserLink>,
-    userHistoryMap: Map<HIncId, UserHistory>,
-    groupHistoryMap: Map<HIncId, GroupHistory>,
-    announceHistoryMap: Map<AIncId, AnnounceHistory>,
+    groupUserLinkMap: Map<string, GroupUserLink>,
+    userHistoryMap: Map<string, UserHistory>,
+    groupHistoryMap: Map<string, GroupHistory>,
+    announceHistoryMap: Map<string, AnnounceHistory>,
     msgLockMap: Map<number, MsgLock>,
     userInfoMap: Map<number, UserInfo>,
     userCredentialMap: Map<number, UserCredential>, 
-    accountGeneratorMap: Map<String, AccountGenerator>,
-    friendLinkMap: Map<Uuid, FriendLink>,
+    accountGeneratorMap: Map<string, AccountGenerator>,
+    friendLinkMap: Map<string, FriendLink>,
     contactMap: Map<number, Contact>,
     addressInfoMap: Map<number, AddressInfo>
 }
@@ -115,9 +115,22 @@ export interface Store {
 
 // 本质上是主键
 type KeyName = MapName;
-type MapName = "groupInfoMap" | "groupUserLinkMap" | "userHistoryMap" | "groupHistoryMap" | "announceHistoryMap" | "msgLockMap" | "userInfoMap" | "userCredentialMap" | "accountGeneratorMap" | "friendLinkMap" | "contactMap" | "addressInfoMap";
+export type MapName = "groupInfoMap" | "groupUserLinkMap" | "userHistoryMap" | "groupHistoryMap" | "announceHistoryMap" | "msgLockMap" | "userInfoMap" | "userCredentialMap" | "accountGeneratorMap" | "friendLinkMap" | "contactMap" | "addressInfoMap";
 
 const store = <Store>{
+    uid:null,
+    groupInfoMap: new Map(),
+    groupUserLinkMap: new Map(),
+    userHistoryMap: new Map(),
+    groupHistoryMap: new Map(),
+    announceHistoryMap: new Map(),
+    msgLockMap: new Map(),
+    userInfoMap: new Map(),
+    userCredentialMap: new Map(), 
+    accountGeneratorMap: new Map(),
+    friendLinkMap: new Map(),
+    contactMap: new Map(),
+    addressInfoMap: new Map()
 }
 // ============================================ 可执行
 const handlerMap: HandlerMap = new HandlerMap();

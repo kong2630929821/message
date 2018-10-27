@@ -3,21 +3,20 @@
  * 后端不应该相信前端发送的uid信息，应该自己从会话中获取
  */
 // ================================================================= 导入
-import { Contact, Uuid, FriendLink, UserInfo, UserCredential, AccountGenerator } from "../db/user.s";
+import { Contact, FriendLink, UserInfo, UserCredential, AccountGenerator } from "../db/user.s";
 import { LoginReq, LoginReply, GetFriendLinksReq, GetContactReq, Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister, GetUserInfoReq, GetGroupInfoReq } from "./basic.s";
-import { GroupHistory, GroupMsg, HIncId, AIncId } from "../db/message.s";
-import { Guid, GroupInfo, GroupUserLink } from "../db/group.s";
-
+import { GroupHistory, GroupMsg} from "../db/message.s";
+import { GroupInfo, GroupUserLink } from "../db/group.s";
 import { Bucket } from "../../../utils/db";
 import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
-import { ab2hex } from '../../../pi/util/util';
-import { BonBuffer } from '../../../pi/util/bon';
-import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
-import { WARE_NAME } from "../constant";
-
 import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
-import { ServerNode } from "../../../pi_pt/rust/mqtt/server";
+import * as CONSTANT from '../constant';
+import {Tr} from "../../../pi_pt/rust/pi_db/mgr";
+import { write, read } from "../../../pi_pt/db";
+import { Logger } from '../../../utils/logger';
+
+const logger = new Logger('BASIC');
 
 // ================================================================= 导出
 /**
@@ -26,17 +25,18 @@ import { ServerNode } from "../../../pi_pt/rust/mqtt/server";
  */
 //#[rpc=rpcServer]
 export const registerUser = (registerInfo: UserRegister): UserInfo => {
+    logger.debug("user try to register with: ", registerInfo);
     const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
-    const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
-    const accountGeneratorBucket = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
+    const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
+    const userCredentialBucket = new Bucket("file", CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
+    const accountGeneratorBucket = new Bucket("file", CONSTANT.ACCOUNT_GENERATOR_TABLE, dbMgr);
 
     let userInfo = new UserInfo();
     let userCredential = new UserCredential();
 
     userInfo.name = registerInfo.name;
-    userInfo.note = "Talk is cheap, show me the code!";
-    userInfo.tel = "13912113456";
+    userInfo.note = "";
+    userInfo.tel = "";
 
     let accountGenerator = new AccountGenerator();
     let nextAccount = accountGeneratorBucket.get("index")[0].nextIndex + 1;
@@ -51,40 +51,61 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     userCredential.passwdHash = registerInfo.passwdHash;
 
     userInfoBucket.put(userInfo.uid, userInfo);
+    logger.debug("sucessfully registered user", userInfo);
     // TODO: check potential error
     userCredentialBucket.put(userInfo.uid, userCredential);
-
 
     return userInfo;
 }
 
 //#[rpc=rpcServer]
-export const login = (loginReq: LoginReq): LoginReply => {
+export const login = (loginReq: LoginReq): UserInfo => {
+    logger.debug("user try to login with uid: ", loginReq.uid);
     const dbMgr = getEnv().getDbMgr();
-    const userCredentialBucket = new Bucket("file", "server/data/db/user.UserCredential", dbMgr);
+    const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
+    const userCredentialBucket = new Bucket("file", CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
 
     let uid = loginReq.uid;
     let passwdHash = loginReq.passwdHash;
     let expectedPasswdHash = userCredentialBucket.get(uid);
 
-    let loginReply = new LoginReply();
+    let userInfo = new UserInfo();
 
+    // user doesn't exist
     if (expectedPasswdHash[0] === undefined) {
-        loginReply.status = 0;
-        return loginReply;
+        userInfo.uid = -1;
+        userInfo.sex = 0;
+        logger.debug("user does not exist: ", loginReq.uid);
+        return userInfo;
     }
 
     // FIXME: constant time equality check
     if (passwdHash === expectedPasswdHash[0].passwdHash) {
-        loginReply.status = 1;
+        userInfo = userInfoBucket.get(loginReq.uid)[0];
         let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
-        let uid = loginReq.uid;
-        setMqttTopic(mqttServer, uid.toString(), true, true);
+        setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
+
+        // save session
+        let session = getEnv().getSession();
+        write(dbMgr, (tr: Tr) => {
+            session.set(tr, "uid", loginReq.uid.toString());
+            logger.info("set session value of uid: ", loginReq.uid.toString());
+        });
+
+        // TODO: debug purpose
+        read(dbMgr, (tr: Tr) => {
+            let v = session.get(tr, "uid");
+            logger.debug("read session value of uid: ", v);
+            logger.debug("user login session id: ", session.getId());
+        });
     } else {
-        loginReply.status = 0;
+        logger.debug("wrong password or uid");
+        userInfo.uid = -1;
     }
 
-    return loginReply;
+    userInfo.sex = 0;
+
+    return userInfo;
 }
 
 
@@ -96,10 +117,11 @@ export const login = (loginReq: LoginReq): LoginReply => {
 //#[rpc=rpcServer]
 export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
     const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket("file", "server/data/db/user.UserInfo", dbMgr);
+    const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
 
     let uids = getUserInfoReq.uids;
     let values: any = userInfoBucket.get(uids);
+    logger.debug("Read userinfo: ", uids, values);
 
     //FIXME: check if `values` have undefined element, or will crash
     let res = new UserArray();
@@ -115,7 +137,7 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
 //#[rpc=rpcServer]
 export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq): GroupArray => {
     const dbMgr = getEnv().getDbMgr();
-    const groupInfoBucket = new Bucket("file", "server/data/db/user.GroupInfo", dbMgr);
+    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
 
     let gids = getGroupInfoReq.gids;
     let values: any = groupInfoBucket.get(gids);
@@ -132,8 +154,40 @@ export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq): GroupArray => {
  */
 //#[rpc=rpcServer]
 export const setUserInfo = (param: UserInfoSet): Result => {
+    logger.info("setUserInfo: ", param);
+    const dbMgr = getEnv().getDbMgr();
+    const userInfoBucket = new Bucket("file", CONSTANT.USER_INFO_TABLE, dbMgr);
 
-    return
+    let res = new Result();
+
+    let uid;
+    let session = getEnv().getSession();
+    logger.debug('sessionId: ', session.getId());
+    read(dbMgr, (tr: Tr) => {
+        uid = session.get(tr, "uid");
+    });
+    logger.info("read uid from seesion: ", uid);
+
+    if (uid === undefined) {
+        logger.info()
+        res.r = 0;
+        return res;
+    }
+
+    let userInfo = userInfoBucket.get<number, UserInfo>(parseInt(uid));
+    userInfo.name = param.name;
+    userInfo.note = param.note;
+    userInfo.sex = param.sex;
+    userInfo.tel = param.tel;
+    userInfo.avator = param.avator;
+
+    logger.debug("userInfo: ", userInfo);
+    userInfoBucket.put(uid, userInfo);
+    logger.info("Set user info success for uid: ", uid);
+    logger.debug("set user info: ", uid, userInfo);
+    res.r = 1;
+
+    return res;
 }
 
 
@@ -144,7 +198,7 @@ export const setUserInfo = (param: UserInfoSet): Result => {
 //#[rpc=rpcServer]
 export const getContact = (getContactReq: GetContactReq): Contact => {
     const dbMgr = getEnv().getDbMgr();
-    const contactBucket = new Bucket("file", "server/data/db/user.Contact", dbMgr);
+    const contactBucket = new Bucket("file", CONSTANT.CONTACT_TABLE, dbMgr);
 
     let uid = getContactReq.uid;
     let value = contactBucket.get<number, Contact>(uid);
@@ -156,15 +210,16 @@ export const getContact = (getContactReq: GetContactReq): Contact => {
  * 获取好友别名和历史记录
  * @param uuidArr
  */
-//#[rpc=rpcServer]
+//#[rpc=rpcServer]   
 export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLinkArray => {
     const dbMgr = getEnv().getDbMgr();
-    const friendLinkBucket = new Bucket("file", "server/data/db/user.FriendLink", dbMgr);
+    const friendLinkBucket = new Bucket("file", CONSTANT.FRIEND_LINK_TABLE, dbMgr);
 
-    let uuids = getFriendLinksReq.uuid;
-    let values: FriendLinkArray = friendLinkBucket.get(uuids);
+    let friendLinkArray = new FriendLinkArray();
+    let uuids = getFriendLinksReq.uuid.map(v => v.toString());
+    friendLinkArray.arr = friendLinkBucket.get(uuids);
 
-    return values;
+    return friendLinkArray;
 }
 
 /**
@@ -172,11 +227,11 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
  * @param uuidArr
  */
 //#[rpc=rpcServer]
-export const getGroupUserLinks = (uuidArr: Guid): GroupUserLinkArray => {
+export const getGroupUserLinks = (uuidArr: string): GroupUserLinkArray => {
     const dbMgr = getEnv().getDbMgr();
-    const groupInfoBucket = new Bucket("file", "server/data/db/group.GroupInfo", dbMgr);
+    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
 
-    let groupInfo = groupInfoBucket.get<Guid, GroupInfo>(uuidArr);
+    let groupInfo = groupInfoBucket.get<string, GroupInfo>(uuidArr);
     let groupUserLink = new GroupUserLink();
     // TODO: fill more fields
 
@@ -190,17 +245,27 @@ export const getGroupUserLinks = (uuidArr: Guid): GroupUserLinkArray => {
 //#[rpc=rpcServer]
 export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
-    const groupHistoryBucket = new Bucket("file", "server/data/db/message.GroupHistory", dbMgr);
+    const groupHistoryBucket = new Bucket("file", CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
 
-    let hincId = new HIncId();
     let groupHistoryArray = new GroupHistoryArray();
 
-    for (let i = 0; i < param.size; i++) {
-        hincId.hid = param.hid;
-        hincId.index = param.from + i;
-        // FIXME: i don't know if the master key works
-        let msg = groupHistoryBucket.get(hincId)[0].msg;
-        groupHistoryArray.arr.push(msg);
+    // we don't use param.order there, because `iter` is not bidirectional
+    let hid = param.hid
+    let from = param.from;
+    let size = param.size;
+
+    let keyPrefix = hid + ":";
+    let value = groupHistoryBucket.get(keyPrefix + from);
+
+    if (value[0] !== undefined) {
+        for (let i = from; i < from + size; i++) {
+            let v = groupHistoryBucket.get(keyPrefix + i);
+            if (v[0] !== undefined) {
+                groupHistoryArray.arr.push(v[0]);
+            } else {
+                break;
+            }
+        }
     }
 
     return groupHistoryArray;
@@ -214,20 +279,30 @@ export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
 //#[rpc=rpcServer]
 export const getUserHistory = (param: MessageFragment): UserHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
-    const userHistoryBucket = new Bucket("file", "server/data/db/message.UserHistory", dbMgr);
+    const userHistoryBucket = new Bucket("file", CONSTANT.USER_HISTORY_TABLE, dbMgr);
 
-    let hincId = new HIncId();
     let userHistory = new UserHistoryArray();
 
-    for (let i = 0; i < param.size; i++) {
-        hincId.hid = param.hid;
-        hincId.index = param.from + i;
-        // FIXME: i don't know if the master key works
-        let msg = userHistoryBucket.get(hincId)[0].msg;
-        userHistory.arr.push(msg);
+    // we don't use param.order there, because `iter` is not bidirectional
+    let hid = param.hid
+    let from = param.from;
+    let size = param.size;
+
+    let keyPrefix = hid + ":";
+    let value = userHistoryBucket.get(keyPrefix + from);
+
+    if (value[0] !== undefined) {
+        for (let i = from; i < from + size; i++) {
+            let v = userHistoryBucket.get(keyPrefix + i);
+            if (v[0] !== undefined) {
+                userHistory.arr.push(v[0]);
+            } else {
+                break;
+            }
+        }
     }
 
-    return
+    return userHistory;
 }
 
 /**
@@ -237,26 +312,31 @@ export const getUserHistory = (param: MessageFragment): UserHistoryArray => {
 //#[rpc=rpcServer]
 export const getAnnoucement = (param: AnnouceFragment): AnnounceHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
-    const announceHistoryBucket = new Bucket("file", "server/data/db/message.AnnounceHistory", dbMgr);
+    const announceHistoryBucket = new Bucket("file", CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
 
-    let aincId = new AIncId();
     let announceHistory = new AnnounceHistoryArray();
 
-    for (let i = 0; i < param.size; i++) {
-        aincId.aid = param.aid;
-        aincId.index = param.from + i;
-        let announce = announceHistoryBucket.get(aincId)[0].announce;
-        announceHistory.arr.push(announce);
+    // we don't use param.order there, because `iter` is not bidirectional
+    let aid = param.aid
+    let from = param.from;
+    let size = param.size;
+
+    let keyPrefix = aid + ":";
+    let value = announceHistoryBucket.get(keyPrefix + from);
+
+    if (value[0] !== undefined) {
+        for (let i = from; i < from + size; i++) {
+            let v = announceHistoryBucket.get(keyPrefix + i);
+            if (v[0] !== undefined) {
+                announceHistory.arr.push(v[0]);
+            } else {
+                break;
+            }
+        }
     }
 
     return announceHistory;
 }
 
 // ================================================================= 本地
-
-const setDBMonitorAccordingUid = (uid:number)=>{
-    const mqttServer: ServerNode = getEnv().getNativeObject('mqttServer');
-    const key = ab2hex(new BonBuffer().write(uid).getBuffer());
-    setMqttTopic(mqttServer, `${WARE_NAME}.${RoleBase._$info.name}.${key}`, true, true);
-}
 
