@@ -73,6 +73,12 @@ winit.initNext = function () {
 				tab.release();
 				console.log("res time:", Date.now() - startTime);
 
+				var root = pi_modules.commonjs.exports.relativeGet("pi/ui/root").exports;
+				root.cfg.width = 750;
+				root.cfg.height = 1334;
+				root.cfg.hscale = 0.25;
+				root.cfg.wscale = 0;
+
 				var index = pi_modules.commonjs.exports.relativeGet("client/app/view/index/index").exports;
 				index.run();
 

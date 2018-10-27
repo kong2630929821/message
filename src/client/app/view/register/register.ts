@@ -5,7 +5,7 @@
  // ================================================ 导入
  import {Widget} from "../../../../pi/widget/widget";
  import {Forelet} from "../../../../pi/widget/forelet";
- import {open} from "../../../../pi/ui/root";
+ import {open, popNew} from "../../../../pi/ui/root";
 
  // ================================================ 导出
  export class Login extends Widget {

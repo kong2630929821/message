@@ -1,0 +1,41 @@
+.group-set-ul{
+    padding:0;
+    position:absolute;
+    left: 20px;
+    top: 549px;
+    width: 710px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+
+}
+.groupSet-item-wrap{
+    height:140px;
+    display:flex;
+    align-items:center;
+}
+.itemText-wrap{
+    display:flex;
+    flex-direction:column;
+    margin-left:30px;
+}
+.title{
+    color: rgba(34, 34, 34, 1);
+    font-size: 32px;
+    font-weight:bold;
+    font-family: PingFangSC-Regular;
+    margin-bottom:8px;
+}
+.content{
+    color: rgba(136, 136, 136, 1);
+    font-size: 24px;
+    font-family: PingFangSC-Regular;
+
+}
+.switch{
+    width:98px;
+    height:58px;
+    border:solid blue 1px;
+    margin-left:auto;
+    margin-right:31px;
+}

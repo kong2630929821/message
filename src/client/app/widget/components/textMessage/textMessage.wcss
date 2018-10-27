@@ -1,0 +1,65 @@
+.text-message-wrap{
+    position:absolute;
+    top:100px;
+    left:100px;
+}
+.text-wrap{
+    min-width:410px;
+    max-width:512px;
+    padding:16px;
+    font-size: 32px;
+    font-family: PingFangSC-Regular;
+    border-radius:16px;
+}
+.yourText{
+    color: rgba(255, 255, 255, 1);
+    background:#3FA2F7;
+}
+.heText{
+    color:#222222;
+    background:#FFFFFF;
+}
+.corner{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+}
+.sendTime{   
+    color: rgba(41, 127, 202, 1);
+    font-size: 24px;
+    font-family: PingFangSC-Regular;
+}
+.isRead{
+    height:14px;
+    margin-left:10px;
+}
+.rightDownTail{
+    position:absolute;
+    left:100%;
+    bottom:-16px;
+    width:20px;
+    height:20px;
+    border-width:0;
+    border-style:solid;
+    border-color:transparent;
+    margin-left:-5px;
+    border-top-width:10px;
+    border-top-color:currentColor;
+    border-radius:0 32px 0 0;
+    color:#3FA2F7;
+}
+.leftDownTail{
+    position:absolute;
+    right:100%;
+    bottom:-16px;
+    width:20px;
+    height:20px;
+    border-width:0;
+    border-style:solid;
+    border-color:transparent;
+    margin-right:-5px;
+    border-top-width:10px;
+    border-top-color:currentColor;
+    border-radius:32px 0 0 0;
+    color:#fff;
+}

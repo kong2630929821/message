@@ -1,0 +1,311 @@
+/** √ */
+
+input:disabled{
+    background-color: #fff;
+}
+/** - */
+.checkbox1_indeterminate::before{
+    content: "";
+    position: absolute;
+    display: block;
+    background-color: #fff;
+    height: 2px;
+    transform: scale(.5);
+    left: 0;
+    right: 0;
+    top: 5px;
+}
+
+/** 开关图形 */
+.switch_icon::after{
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 1px;
+    border-radius: 100%;
+    transition: all .3s;
+    width: 42px;
+    height: 42px;
+    background-color: #fff;
+}
+
+.switch_icon_select::after{
+    content: "";
+    position: absolute;
+    top: 8px;
+    left: 1px;
+    border-radius: 100%;
+    transition: all .3s;
+    width: 42px;
+    height: 42px;
+    background-color: #fff;
+    left: 100%;
+    margin-left: -43px;
+}
+
+
+.icon_close::before,.icon_close::after{
+    position:absolute;
+    content:'';
+    background-color:#fff;
+}
+.icon_close::before{
+    width: 2px;
+    height: 12px;
+    left: 3px;
+    top: -2px;  
+}
+.icon_close::after{
+    width: 12px;
+    height: 2px;
+    top: 3px;
+    left: -2px;
+}
+
+
+.pi-radio__inner::after{
+    display: inline-block;
+    content: " ";
+    width: 4px;
+    height: 4px;
+    border-radius: 100%;
+    background-color: #fff;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%,-50%) scale(0);
+    transform: translate(-50%,-50%) scale(0);
+    -webkit-transition: -webkit-transform .15s cubic-bezier(.71,-.46,.88,.6);
+    transition: -webkit-transform .15s cubic-bezier(.71,-.46,.88,.6);
+    transition: transform .15s cubic-bezier(.71,-.46,.88,.6);
+    transition: transform .15s cubic-bezier(.71,-.46,.88,.6), -webkit-transform .15s cubic-bezier(.71,-.46,.88,.6);
+    transition: transform .15s cubic-bezier(.71,-.46,.88,.6),-webkit-transform .15s cubic-bezier(.71,-.46,.88,.6);
+}
+.is-checked .pi-radio__inner::after{
+    -webkit-transform: translate(-50%,-50%) scale(1);
+    transform: translate(-50%,-50%) scale(1);
+}
+
+.is-checked.is-disabled .pi-radio__inner::after{
+    background-color: #c0c4cc;
+}
+.pi-radio__inner:hover{
+    border: 1px solid #409EFF !important;
+}
+
+
+.pi-input-search__inner1:focus{
+    border: 1px solid #409EFF !important;
+}
+
+.pi-input ::-webkit-input-placeholder { /* WebKit browsers */
+    color:    #cccccc;
+}
+.pi-input :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color:    #cccccc;
+}
+.pi-input ::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color:    #cccccc;
+}
+.pi-input :-ms-input-placeholder { /* Internet Explorer 10+ */
+    color:    #cccccc;
+}
+
+.pi-input textarea::-webkit-input-placeholder { /* WebKit browsers */
+    color: #8E96AB;
+}
+.pi-input textarea:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: #8E96AB;
+}
+.pi-input textarea::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: #8E96AB;
+}
+.pi-input textarea:-ms-input-placeholder { /* Internet Explorer 10+ */
+    color:#8E96AB;
+}
+
+
+
+svg:not(:root), symbol, image, marker, pattern, foreignObject {
+    overflow: hidden;
+}
+
+
+
+.pi-collapse-item:last-child .pi-collapse-item-panel{
+    border-bottom: 1px solid transparent !important;
+}
+.pi-collapse-item-active .pi-collapse-item-panel .pi-collapse-text-item:last-child .pi-collapse-text{
+    border-bottom: 1px solid transparent !important;
+}
+
+
+.message_open{
+    transform: translateX(-50%);
+    transition: opacity 0.3s, transform .4s;
+}
+
+.message-fade-enter {
+  opacity: 0;
+  transform: translate(-50%, 100%);
+}
+
+
+.pi-loading-mask{
+    position: absolute;
+    margin: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    -webkit-transition: opacity .3s;
+    transition: opacity .3s;
+    color: #fff;
+    font-size: 24px;
+}
+.pi-loading-spinner{
+    width: 180px;
+    height: 180px;
+    background-color: rgba(0,0,0,.6);
+    top: 50%;
+    left: 50%;
+    text-align: center;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    padding-top: 10px;
+}
+
+.pi-loading-text{
+    color: #fff;
+    margin: 10px 0 20px;
+}
+.pi-svg-box{
+    display: inline-block;
+}
+
+.pi-circular{
+    height:100px;
+    width: 100px;
+    animation: loadingRotating 2s linear infinite;
+}
+.pi-circular1{
+    height:46px;
+    width: 46px;
+    animation: loadingRotating 2s linear infinite;
+}
+
+@keyframes loadingRotating{
+    100% {transform: rotate(360deg);}
+}
+
+.pi-path{
+    -webkit-animation: loading-dash 1.5s ease-in-out infinite;
+    animation: loading-dash 1.5s ease-in-out infinite;
+    stroke-dasharray: 90,150;
+    stroke-dashoffset: 0;
+    stroke-width: 2;
+    stroke: #fff;
+    stroke-linecap: round;
+}
+.pi-path1{
+    -webkit-animation: loading-dash 1.5s ease-in-out infinite;
+    animation: loading-dash 1.5s ease-in-out infinite;
+    stroke-dasharray: 90,150;
+    stroke-dashoffset: 0;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke: #318DE5;
+}
+@keyframes loading-dash{
+    0% {
+        stroke-dasharray: 1,200;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dasharray: 90,150;
+        stroke-dashoffset: -40px;
+    }
+    100% {
+        stroke-dasharray: 90,150;
+        stroke-dashoffset: -120px;
+    }
+}
+
+/* 按钮点击效果 */
+@keyframes btnClick{
+    0% {
+        text-shadow: -1px -1px 1px #000, 1px 1px 1px #fff;
+        box-shadow: none;
+    }
+    100% {
+        text-shadow: none;
+    }
+}
+
+/* 领分红数字上移放大效果 */
+@keyframes dividendMove{
+    0%   {transform: scale(0.1);margin-top: -245px;}
+    100% {transform: scale(1);color: rgba(255,0,0,0.1);margin-top: -300px;}
+}
+.dividendNum{
+    font-size: 70px;
+    transform: scale(0);
+    position: relative;
+    margin-top: -245px;
+    text-align: center;
+    width: 100%;
+    color:red;
+}
+/* 领分红按钮点击效果 */
+@keyframes dividendChange{
+    0%   {
+        width: 180px;
+        height: 180px;
+        font-size: 48px;
+        line-height: 180px;
+        margin-top: 10px;
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        font-size: 48px;
+        line-height: 200px;
+    }
+}
+/* 挖矿数字放大效果 */
+@keyframes miningEnlarge{
+    0%   {font-size: 20px;}
+    100% {font-size: 72px;color: rgba(255,0,0,0.1)}
+}
+.miningNum{
+    font-size: 0px;
+    color:red;
+    position: relative;
+    margin-left: 20px;
+}
+/* 我的帮助问题列表样式 */
+ul{
+    list-style: none;
+    padding: 0;
+}
+li{
+    margin: 10px 0;
+}
+.ansLI{
+    font-weight: 600;
+    margin: 10px 0;
+    color: #222222;
+}
+/* 创建钱包点击骰子旋转效果 */
+@keyframes rotating{
+    0%{transform: rotate(0);}
+    100%{transform: rotate(360deg);}
+}
+.random{
+    animation: rotating 1s;
+}

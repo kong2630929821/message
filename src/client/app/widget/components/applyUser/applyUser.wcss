@@ -1,0 +1,60 @@
+.user-apply-wrap{
+    width: 710px;
+    height: 180px;
+    
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+    display:flex;
+    align-items:center;
+}
+.avator-wrap{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    border:solid black 1px;
+    margin-left:20px;
+    margin-right:20px;
+}
+.avator{
+    width:80px;
+}
+.user-info-wrap{
+    display:flex;
+    flex-direction:column;
+}
+.userName{
+    font-size: 32px;
+    font-weight:bold;
+    font-family: PingFangSC-Medium;
+    margin-bottom:5px;
+}
+.applyInfo{ 
+    color: rgba(102, 102, 102, 1);
+    font-size: 28px;
+    font-family: PingFangSC-Regular;
+}
+.agreeText{
+    position:relative;
+    bottom:18px;
+    color: rgba(136, 136, 136, 1);
+    font-size: 24px;
+    font-family: PingFangSC-Regular;
+    margin-right:18px;
+    margin-left:auto;
+}
+.disagreeText{
+    position:relative;
+    top:22px; 
+    color: rgba(49, 141, 230, 1);
+    font-size: 24px;
+    font-family: PingFangSC-Medium;
+    display:inline-block;
+    width:80px;
+    height:40px;
+    line-height:40px;
+    border:solid rgba(49, 141, 230, 1) 1px;
+    border-radius:6px;
+    text-align:center;
+    margin-right:18px;
+    margin-left:auto;
+}
