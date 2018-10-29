@@ -33,3 +33,15 @@ export const depCopy = (v: any): any => {
 export const toBonBuffer = (key: any) => {
     return ab2hex(new BonBuffer().write(key).getBuffer());
 }
+
+
+/**
+ * tpl不支持map所以需要将map转换为array
+ */
+export const map2Arr = (m:Map<any,any>) => {
+    const arr = [];
+    for (const [, v] of m) {
+        arr.push(v);
+    }
+    return depCopy(arr);
+}

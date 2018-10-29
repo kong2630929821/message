@@ -14,6 +14,8 @@ import { clientRpcFunc, subscribe } from "./init";
 import { toBonBuffer } from "../../../utils/util";
 import { WARE_NAME } from "../../../server/data/constant";
 import { getBorn, updateStore, MapName} from "../data/store";
+import { ab2hex } from '../../../pi/util/util';
+import { BonBuffer } from '../../../pi/util/bon';
 
 // ================================================================= 导出
 
@@ -129,8 +131,8 @@ export const subscribeAddressInfo = (uid: number, cb) => {
 const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyValue:any, struct:any, mapName:MapName, cb:(r)=>void) => {
     clientRpcFunc(method, keyValue, (r: any) => {
         updateMap(r);
-        let key = toBonBuffer(keyValue);
-        subscribe(`${WARE_NAME}.${struct._$info.name}.${key}`, struct, (r: any) => {
+        const bonKeyValue = ab2hex(new BonBuffer().write(keyValue).getBuffer());
+        subscribe(`${WARE_NAME}.${struct._$info.name}.${bonKeyValue}`, struct, (r: any) => {
             updateMap(r);
         })
     })    

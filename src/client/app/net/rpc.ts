@@ -7,7 +7,8 @@ import {notEmptyString} from "../../../utils/util";
 import {registerUser, login as loginUser, setUserInfo as setUserProfile} from "../../../server/data/rpc/basic.p";
 import {UserRegister, LoginReq, UserInfoSet, Result} from "../../../server/data/rpc/basic.s";
 import {UserInfo} from "../../../server/data/db/user.s";
-import {applyFriend as applyUserFriend} from "../../../server/data/rpc/user.p";
+import {applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFriend as delUserFriend} from "../../../server/data/rpc/user.p";
+import {UserAgree} from "../../../server/data/rpc/user.s";
 import {updateStore, getBorn} from "../data/store";
 import {sendUserMessage} from "../../../server/data/rpc/message.p";
 import {UserSend} from "../../../server/data/rpc/message.s";
@@ -15,6 +16,7 @@ import {UserHistory, MSG_TYPE} from "../../../server/data/db/message.s";
 
 import { GroupCreate } from "../../../server/data/rpc/group.s";
 import { createGroup as createGroupp } from "../../../server/data/rpc/group.p";
+import { userAgent } from "../../../pi/util/html";
 
 // ================================================ 导出
 /**
@@ -31,7 +33,6 @@ export const register = (name:string,passwdHash:string,cb:(r:UserInfo)=>void) =>
         let userInfoMap = getBorn("userInfoMap")
         userInfoMap.set(r.uid, r);
         updateStore("userInfoMap", userInfoMap);
-        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
     })
 }
@@ -50,7 +51,6 @@ export const login = (uid:number, passwdHash:string,cb:(r:UserInfo)=>void) => {
         let userInfoMap = getBorn("userInfoMap")
         userInfoMap.set(r.uid, r);
         updateStore("userInfoMap", userInfoMap);
-        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);
@@ -75,7 +75,6 @@ export const sendMessage = (rid:number, msg:string, cb:(r:UserHistory)=>void) =>
         let userHistoryMap = getBorn("userHistoryMap")
         userHistoryMap.set(r.hIncid, r);
         updateStore("userHistoryMap", userHistoryMap);
-        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);
@@ -90,6 +89,31 @@ export const sendMessage = (rid:number, msg:string, cb:(r:UserHistory)=>void) =>
  */
 export const applyFriend = (rid:number, cb:(r)=>void) => {
     clientRpcFunc(applyUserFriend, rid,(r:Result)=>{
+        cb(r)
+    })
+}
+
+/**
+ * 接受对方为好友
+ * @param rid 
+ * @param cb 
+ */
+export const acceptFriend = (rid:number, agree:boolean, cb:(r)=>void) => {
+    let userAgree = new UserAgree;
+    userAgree.uid = rid;
+    userAgree.agree = agree;
+    clientRpcFunc(acceptUserFriend, userAgree,(r:Result)=>{
+        cb(r)
+    })
+}
+
+/**
+ * 删除好友
+ * @param rid 
+ * @param cb 
+ */
+export const delFriend = (rid:number, cb:(r)=>void) => {
+    clientRpcFunc(delUserFriend, rid,(r:Result)=>{
         cb(r)
     })
 }
@@ -120,7 +144,6 @@ export const createGroup = () => {
 }
 
 (<any>self).setUserInfo = () => {
-    alert("xxx")
     setUserInfo();
 }
 

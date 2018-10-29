@@ -10,6 +10,8 @@ import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { toBonBuffer} from "../../../utils/util";
+import { ab2hex } from '../../../pi/util/util';
+import { BonBuffer } from '../../../pi/util/bon';
 import { Bucket } from "../../../utils/db";
 import * as CONSTANT from '../constant';
 
@@ -144,12 +146,14 @@ const getMqttServer = () => {
 export const watchInfo = (keyName:string, keyValue:any, tableStruct:any, keyDefaultValue:any):any => {    
     //监听数据库
     const mqttServer = getMqttServer();
-    keyValue = toBonBuffer(keyValue);
-    setMqttTopic(mqttServer, `${CONSTANT.WARE_NAME}.${tableStruct._$info.name}.${keyValue}`, true, true); 
+    const bonKeyValue = ab2hex(new BonBuffer().write(keyValue).getBuffer());
+    setMqttTopic(mqttServer, `${CONSTANT.WARE_NAME}.${tableStruct._$info.name}.${bonKeyValue}`, true, true); 
     //返回当前值
     const dbMgr = getEnv().getDbMgr();
-    const infoBucket = new Bucket(CONSTANT.WARE_NAME, tableStruct._$info.name, dbMgr);   
+    const infoBucket = new Bucket(CONSTANT.WARE_NAME, tableStruct._$info.name, dbMgr); 
+    console.log(`keyValue is : ${keyValue}, info is : ${infoBucket.get(keyValue)[0]}`)  
     let info = infoBucket.get(keyValue)[0] || new tableStruct;
+    console.log(tableStruct._$info.name);
     info[keyName] = info[keyName] || keyDefaultValue;
     return info;
 }

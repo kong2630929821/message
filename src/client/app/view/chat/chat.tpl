@@ -3,4 +3,5 @@
     <div><span>我的id是:{{it.sid}}</span><br></br><span on-tap="subscribe">点我订阅自己的消息</span></div>
     <div><span>请输入对方uid</span><pi-ui-input ev-input-text="inputUid"></pi-ui-input></div>
     <div><span>请输入聊天</span><pi-ui-input ev-input-text="inputMessage"></pi-ui-input><span on-tap="send">点我发送</span></div>
+    <div><span on-tap="openAddUser">点我打开好友页面</span></div>
 </div>

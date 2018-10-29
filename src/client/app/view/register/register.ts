@@ -26,9 +26,9 @@ export class Login extends Widget {
         this.props.passwd = e.text;
     }
     register(e) {
-        // registerUser(this.props.name, this.props.passwd, (r: UserInfo) => {
-        // })
-        open("client-app-widget-components-inputMessage-inputMessage");
+        registerUser(this.props.name, this.props.passwd, (r: UserInfo) => {
+        })
+        // open("client-app-widget-components-inputMessage-inputMessage");
     }
 }
 
