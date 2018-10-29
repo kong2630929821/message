@@ -7,12 +7,12 @@ import { notEmptyString } from "../../../utils/util";
 import { registerUser, login as loginUser, setUserInfo as setUserProfile } from "../../../server/data/rpc/basic.p";
 import { UserRegister, LoginReq, UserInfoSet, Result } from "../../../server/data/rpc/basic.s";
 import { UserInfo } from "../../../server/data/db/user.s";
-import {applyFriend as applyUserFriend} from "../../../server/data/rpc/user.p";
+import { applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFriend as delUserFriend } from "../../../server/data/rpc/user.p";
 import { updateStore, getBorn } from "../data/store";
 import { sendUserMessage, sendGroupMessage } from "../../../server/data/rpc/message.p";
 import { UserSend, GroupSend } from "../../../server/data/rpc/message.s";
 import { UserHistory, MSG_TYPE } from "../../../server/data/db/message.s";
-
+import { UserAgree } from "../../../server/data/rpc/user.s";
 import { GroupCreate } from "../../../server/data/rpc/group.s";
 import { createGroup as createGroupp, delMember, dissolveGroup } from "../../../server/data/rpc/group.p";
 
@@ -91,6 +91,31 @@ export const applyFriend = (rid: number, cb: (r) => void) => {
     })
 }
 
+
+/**
+ * 接受对方为好友
+ * @param rid 
+ * @param cb 
+ */
+export const acceptFriend = (rid: number, agree: boolean, cb: (r) => void) => {
+    let userAgree = new UserAgree;
+    userAgree.uid = rid;
+    userAgree.agree = agree;
+    clientRpcFunc(acceptUserFriend, userAgree, (r: Result) => {
+        cb(r)
+    })
+}
+
+/**
+ * 删除好友
+ * @param rid 
+ * @param cb 
+ */
+export const delFriend = (rid: number, cb: (r) => void) => {
+    clientRpcFunc(delUserFriend, rid, (r: Result) => {
+        cb(r)
+    })
+}
 // ================  debug purpose ==========================
 
 export const setUserInfo = () => {

@@ -9,7 +9,11 @@ import { popNew } from "../../../../pi/ui/root";
 import { login as userLogin } from '../../net/rpc';
 import { UserInfo } from "../../../../server/data/db/user.s";
 import * as subscribedb from "../../net/subscribedb";
+import { Logger } from '../../../../utils/logger';
 
+declare var module;
+const WIDGET_NAME = module.id.replace(/\//g, '-');
+const logger = new Logger(WIDGET_NAME);
 // ================================================ 导出
 export class Login extends Widget {
     props = {
@@ -32,6 +36,7 @@ export class Login extends Widget {
     login(e) {
         userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
             if (r.uid > 0) {
+                logger.debug(JSON.stringify(r));
                 popNew("client-app-view-chat-chat", { "sid": this.props.uid })
                 subscribeDB(r.uid);
             }

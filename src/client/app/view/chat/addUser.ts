@@ -13,7 +13,7 @@ import { Result } from "../../../../server/data/rpc/basic.s";
 // ================================================ 导出
 declare var module;
 export const forelet = new Forelet;
-export const WIDGET_NAME = module.id.replace(/\//g, '-');
+const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 export class AddUser extends Widget {
     props = {

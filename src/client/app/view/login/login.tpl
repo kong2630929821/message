@@ -8,6 +8,6 @@
         <span>输入密码</span>
         <pi-ui-input></pi-ui-input>
     </div>
-    <div on-tap="login">点我登录</div>
-    <div on-tap="openRegister">点我注册</div>
+    <div on-tap="login" >!点我登录</div>
+    <div on-tap="openRegister">!点我注册</div>
 </div>
