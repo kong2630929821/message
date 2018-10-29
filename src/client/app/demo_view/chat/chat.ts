@@ -35,7 +35,7 @@ export class Chat extends Widget {
         })
     }
     openAddUser(e) {
-        popNew("client-app-view-chat-addUser", { "sid": this.props.sid,"rid":null })
+        popNew("client-app-demo_view-chat-addUser", { "sid": this.props.sid,"rid":null })
     }
 }
 

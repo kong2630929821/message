@@ -30,14 +30,14 @@ export class Login extends Widget {
     }
 
     openRegister() {
-        popNew("client-app-view-register-register")
+        popNew("client-app-demo_view-register-register")
     }
 
     login(e) {
         userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
             if (r.uid > 0) {
                 logger.debug(JSON.stringify(r));
-                popNew("client-app-view-chat-chat", { "sid": this.props.uid })
+                popNew("client-app-demo_view-chat-chat", { "sid": this.props.uid })
                 subscribeDB(r.uid);
             }
         })

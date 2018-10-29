@@ -9,5 +9,5 @@ export const run = () => {
         //或者return false;
         e.preventDefault();
     };
-    popNew("client-app-view-login-login");
+    popNew("client-app-demo_view-login-login");
 }
