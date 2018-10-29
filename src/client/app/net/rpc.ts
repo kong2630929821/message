@@ -2,21 +2,19 @@
  * 调用rpc接口
  */
 // ================================================ 导入
-import {clientRpcFunc} from "./init";
-import {notEmptyString} from "../../../utils/util";
-import {registerUser, login as loginUser, setUserInfo as setUserProfile} from "../../../server/data/rpc/basic.p";
-import {UserRegister, LoginReq, UserInfoSet, Result} from "../../../server/data/rpc/basic.s";
-import {UserInfo} from "../../../server/data/db/user.s";
-import {applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFriend as delUserFriend} from "../../../server/data/rpc/user.p";
-import {UserAgree} from "../../../server/data/rpc/user.s";
-import {updateStore, getBorn} from "../data/store";
-import {sendUserMessage} from "../../../server/data/rpc/message.p";
-import {UserSend} from "../../../server/data/rpc/message.s";
-import {UserHistory, MSG_TYPE} from "../../../server/data/db/message.s";
+import { clientRpcFunc } from "./init";
+import { notEmptyString } from "../../../utils/util";
+import { registerUser, login as loginUser, setUserInfo as setUserProfile } from "../../../server/data/rpc/basic.p";
+import { UserRegister, LoginReq, UserInfoSet, Result } from "../../../server/data/rpc/basic.s";
+import { UserInfo } from "../../../server/data/db/user.s";
+import {applyFriend as applyUserFriend} from "../../../server/data/rpc/user.p";
+import { updateStore, getBorn } from "../data/store";
+import { sendUserMessage, sendGroupMessage } from "../../../server/data/rpc/message.p";
+import { UserSend, GroupSend } from "../../../server/data/rpc/message.s";
+import { UserHistory, MSG_TYPE } from "../../../server/data/db/message.s";
 
 import { GroupCreate } from "../../../server/data/rpc/group.s";
-import { createGroup as createGroupp } from "../../../server/data/rpc/group.p";
-import { userAgent } from "../../../pi/util/html";
+import { createGroup as createGroupp, delMember, dissolveGroup } from "../../../server/data/rpc/group.p";
 
 // ================================================ 导出
 /**
@@ -25,14 +23,15 @@ import { userAgent } from "../../../pi/util/html";
  * @param passwd
  * @param cb
  */
-export const register = (name:string,passwdHash:string,cb:(r:UserInfo)=>void) => {
+export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => void) => {
     let info = new UserRegister;
     info.name = name;
     info.passwdHash = passwdHash;
-    clientRpcFunc(registerUser,info,(r:UserInfo)=>{
+    clientRpcFunc(registerUser, info, (r: UserInfo) => {
         let userInfoMap = getBorn("userInfoMap")
         userInfoMap.set(r.uid, r);
         updateStore("userInfoMap", userInfoMap);
+        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
     })
 }
@@ -43,14 +42,15 @@ export const register = (name:string,passwdHash:string,cb:(r:UserInfo)=>void) =>
  * @param passwdHash
  * @param cb
  */
-export const login = (uid:number, passwdHash:string,cb:(r:UserInfo)=>void) => {
+export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void) => {
     let info = new LoginReq;
     info.uid = uid;
     info.passwdHash = passwdHash;
-    clientRpcFunc(loginUser,info,(r:UserInfo)=>{
+    clientRpcFunc(loginUser, info, (r: UserInfo) => {
         let userInfoMap = getBorn("userInfoMap")
         userInfoMap.set(r.uid, r);
         updateStore("userInfoMap", userInfoMap);
+        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);
@@ -64,17 +64,18 @@ export const login = (uid:number, passwdHash:string,cb:(r:UserInfo)=>void) => {
  * @param msg
  * @param cb
  */
-export const sendMessage = (rid:number, msg:string, cb:(r:UserHistory)=>void) => {
+export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => void) => {
     let info = new UserSend;
     info.msg = msg;
     info.mtype = MSG_TYPE.TXT
     info.rid = rid;
     info.time = (new Date).getTime();
 
-    clientRpcFunc(sendUserMessage,info,(r:UserHistory)=>{
+    clientRpcFunc(sendUserMessage, info, (r: UserHistory) => {
         let userHistoryMap = getBorn("userHistoryMap")
         userHistoryMap.set(r.hIncid, r);
         updateStore("userHistoryMap", userHistoryMap);
+        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);
@@ -87,33 +88,8 @@ export const sendMessage = (rid:number, msg:string, cb:(r:UserHistory)=>void) =>
  * @param rid
  * @param cb
  */
-export const applyFriend = (rid:number, cb:(r)=>void) => {
-    clientRpcFunc(applyUserFriend, rid,(r:Result)=>{
-        cb(r)
-    })
-}
-
-/**
- * 接受对方为好友
- * @param rid 
- * @param cb 
- */
-export const acceptFriend = (rid:number, agree:boolean, cb:(r)=>void) => {
-    let userAgree = new UserAgree;
-    userAgree.uid = rid;
-    userAgree.agree = agree;
-    clientRpcFunc(acceptUserFriend, userAgree,(r:Result)=>{
-        cb(r)
-    })
-}
-
-/**
- * 删除好友
- * @param rid 
- * @param cb 
- */
-export const delFriend = (rid:number, cb:(r)=>void) => {
-    clientRpcFunc(delUserFriend, rid,(r:Result)=>{
+export const applyFriend = (rid: number, cb: (r) => void) => {
+    clientRpcFunc(applyUserFriend, rid, (r: Result) => {
         cb(r)
     })
 }
@@ -143,17 +119,45 @@ export const createGroup = () => {
     })
 }
 
+export const deleteGroupMember = () => {
+    let req = "11111:4";
+
+    clientRpcFunc(delMember, req, (r) => {
+        console.log(r);
+    })
+}
+
+export const deleteGroup = () => {
+    let gid = 11111;
+    clientRpcFunc(dissolveGroup, gid, (r) => {
+        console.log(r);
+    });
+}
+
+export const sendGroupMsg = () => {
+    let msg = new GroupSend();
+    msg.gid = 11111;
+    msg.msg = "hi group";
+    msg.mtype = 0;
+    msg.time = Date.now();
+
+    clientRpcFunc(sendGroupMessage, msg, (r) => {
+        console.log(r);
+    })
+}
+
 (<any>self).setUserInfo = () => {
+    alert("xxx")
     setUserInfo();
 }
 
-(<any>self).login = (uid:number, passwdHash:string) => {
+(<any>self).login = (uid: number, passwdHash: string) => {
     login(uid, passwdHash, (r) => {
         console.log(r);
     });
 }
 
-(<any>self).register = (name:string,passwdHash:string) => {
+(<any>self).register = (name: string, passwdHash: string) => {
     register(name, passwdHash, (r) => {
         console.log(r);
     });
@@ -161,4 +165,16 @@ export const createGroup = () => {
 
 (<any>self).createGroup = () => {
     createGroup();
+}
+
+(<any>self).deleteGroupMember = () => {
+    deleteGroupMember();
+}
+
+(<any>self).deleteGroup = () => {
+    deleteGroup();
+}
+
+(<any>self).sendGroupMsg = () => {
+    sendGroupMsg();
 }

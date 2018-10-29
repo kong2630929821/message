@@ -66,8 +66,22 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
  */
 //#[rpc=rpcServer]
 export const setOwner = (guid: string): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
 
-    return
+    let groupId = guid.split(":")[0];
+    let newOwnerId = guid.split(":")[1];
+    let res = new Result();
+
+    logger.debug("user logged in with uid: ", uid, "and you want to chang new owner: ", newOwnerId);
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId))[0];
+    logger.debug("read group info: ", gInfo);
+
+    gInfo.ownerid = parseInt(newOwnerId);
+    groupInfoBucket.put(gInfo[0].gid, gInfo);
+    res.r = 1;
+
+    return res;
 }
 
 /**
@@ -76,8 +90,22 @@ export const setOwner = (guid: string): Result => {
  */
 //#[rpc=rpcServer]
 export const addAdmin = (guid: string): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
 
-    return
+    let groupId = guid.split(":")[0];
+    let addAdminId = guid.split(":")[1];
+    let res = new Result();
+
+    logger.debug("user logged in with uid: ", uid, "and you want to add an admin: ", addAdminId);
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId))[0];
+    logger.debug("read group info: ", gInfo);
+
+    gInfo[0].adminids.push(parseInt(addAdminId));
+    groupInfoBucket.put(gInfo.gid, gInfo);
+    res.r = 1;
+
+    return res;
 }
 
 /**
@@ -86,8 +114,31 @@ export const addAdmin = (guid: string): Result => {
  */
 //#[rpc=rpcServer]
 export const delAdmin = (guid: string): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
 
-    return
+    let groupId = guid.split(":")[0];
+    let delAdminId = guid.split(":")[1];
+    let res = new Result();
+
+    logger.debug("user logged in with uid: ", uid, "and you want to delete an admin: ", delAdminId);
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId))[0];
+    logger.debug("read group info: ", gInfo);
+    let members = gInfo[0].adminids;
+
+    logger.debug("before delete admin memebers: ", gInfo[0].adminids);
+    let index = members.indexOf(parseInt(delAdminId));
+    if (index > -1) {
+        members.splice(index, 1);
+    }
+
+    gInfo[0].adminids = members;
+    groupInfoBucket.put(gInfo.gid, gInfo);
+    logger.debug("after delete admin memmber: ", groupInfoBucket.get(gInfo.gid));
+
+    res.r = 1;
+
+    return res;
 }
 
 /**
@@ -96,37 +147,31 @@ export const delAdmin = (guid: string): Result => {
  */
 //#[rpc=rpcServer]
 export const delMember = (guid: string): Result => {
-    const dbMgr = getEnv().getDbMgr();
-    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
 
+    let groupId = guid.split(":")[0];
     let delId = guid.split(":")[1];
     let res = new Result();
-    let uid;
-    let session = getEnv().getSession();
-    read(dbMgr, (tr: Tr) => {
-        uid = session.get(tr, "uid");
-    });
-    let gInfo = groupInfoBucket.get<number, GroupInfo>(parseInt(uid));
-    let members = gInfo.memberids;
-    let admins = gInfo.adminids;
 
-    let isAddmin = false;
-    for (let i = 0; i < admins.length; i++) {
-        if (admins[i] === uid)
-            isAddmin = true;
+    logger.debug("user logged in with uid: ", uid, "and you want to delete a member: ", delId);
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId));
+    logger.debug("read group info: ", gInfo[0]);
+    let members = gInfo[0].memberids;
+
+    logger.debug("before delete memeber: ", gInfo[0].memberids);
+    let index = members.indexOf(parseInt(delId));
+    if (index > -1) {
+        members.splice(index, 1);
     }
 
-    // WIP
+    gInfo[0].memberids = members;
+    groupInfoBucket.put(gInfo[0].gid, gInfo[0]);
+    logger.debug("after delete memmber: ", groupInfoBucket.get(gInfo[0].gid)[0]);
 
-    let isOwner = gInfo.ownerid === uid;
+    res.r = 1;
 
-    if (!isAddmin && !isOwner) {
-        logger.error("Don't have right to del user");
-        res.r = 0;
-        return res;
-    }
-
-    return
+    return res;
 }
 
 /**
@@ -135,22 +180,34 @@ export const delMember = (guid: string): Result => {
  */
 //#[rpc=rpcServer]
 export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
-    const dbMgr = getEnv().getDbMgr();
-    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
 
-    let gInfo = new GroupInfo();
-    gInfo.note = groupInfo.note;
-    gInfo.adminids = [1, 2, 3];
-    gInfo.annoceid = 1;
-    gInfo.create_time = Date.now();
-    gInfo.dissolve_time = 0;
-    gInfo.gid = 11000;
-    gInfo.join_method = 0;
-    gInfo.memberids = [4, 5, 6];
+    if (uid !== undefined) {
+        let gInfo = new GroupInfo();
+        gInfo.note = groupInfo.note;
+        gInfo.adminids = [];
+        gInfo.annoceid = 1;
+        gInfo.create_time = Date.now();
+        gInfo.dissolve_time = 0;
+        gInfo.gid = 11111; // TODO: ways to generate group id
+        gInfo.join_method = 0;
+        gInfo.ownerid = parseInt(uid);
+        gInfo.memberids = [10001, 10002, 10003];
+        gInfo.state = 0;
 
-    groupInfoBucket.put(gInfo.gid, gInfo);
+        logger.debug("create group: ", gInfo);
 
-    return gInfo;
+        groupInfoBucket.put(gInfo.gid, gInfo);
+        logger.debug("read group info: ", groupInfoBucket.get(gInfo.gid));
+
+        let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+        setMqttTopic(mqttServer, gInfo.gid.toString(), true, true);
+
+        return gInfo;
+    }
+
+    // TODO: what if user doesn't login
 }
 
 /**
@@ -159,7 +216,42 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
  */
 //#[rpc=rpcServer]
 export const dissolveGroup = (gid: number): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
 
-    return
+    let res = new Result();
+
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid);
+
+    if (parseInt(uid) === gInfo[0].ownerid) {
+        gInfo[0].state = 1;
+        groupInfoBucket.put(gid, gInfo[0]);
+        logger.debug("After group dissovled: ", groupInfoBucket.get(gid)[0]);
+
+        res.r = 1;
+
+        return res;
+    }
+
+    // TODO: delete group topic
 }
 
+// ============ helpers =================
+
+const getGroupInfoBucket = () => {
+    const dbMgr = getEnv().getDbMgr();
+    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
+
+    return groupInfoBucket
+}
+
+const getUid = () => {
+    const dbMgr = getEnv().getDbMgr();
+    let session = getEnv().getSession();
+    let uid;
+    read(dbMgr, (tr: Tr) => {
+        uid = session.get(tr, "uid");
+    });
+
+    return uid;
+}
