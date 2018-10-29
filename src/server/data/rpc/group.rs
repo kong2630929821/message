@@ -21,3 +21,7 @@ struct Invite{
 struct InviteArray{
     arr:&[Invite]//被邀请的用户数组
 }
+
+struct NotifyAdmin {
+    uid: u32
+}
