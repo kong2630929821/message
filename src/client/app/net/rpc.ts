@@ -31,7 +31,6 @@ export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => 
         let userInfoMap = getBorn("userInfoMap")
         userInfoMap.set(r.uid, r);
         updateStore("userInfoMap", userInfoMap);
-        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
     })
 }
@@ -50,7 +49,6 @@ export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void
         let userInfoMap = getBorn("userInfoMap")
         userInfoMap.set(r.uid, r);
         updateStore("userInfoMap", userInfoMap);
-        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);
@@ -75,7 +73,6 @@ export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => vo
         let userHistoryMap = getBorn("userHistoryMap")
         userHistoryMap.set(r.hIncid, r);
         updateStore("userHistoryMap", userHistoryMap);
-        alert(`rpc${JSON.stringify(r)}`);
         cb(r);
         // userInfoMap.set(r.uid, r)
         // updateStore("userInfoMap", userInfoMap);
@@ -147,7 +144,6 @@ export const sendGroupMsg = () => {
 }
 
 (<any>self).setUserInfo = () => {
-    alert("xxx")
     setUserInfo();
 }
 
