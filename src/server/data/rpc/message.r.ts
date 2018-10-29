@@ -112,7 +112,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     // TODO: how to handle members that doesn't online ?
     let members = groupInfoBucket.get<number, [GroupInfo]>(message.gid)[0].memberids;
     for (let i = 0; i < members.length; i++) {
-        logger.debug("Send message to member: ", members[i].toString());
+        logger.debug("Group message sent from:", uid.toString(), "to:", members[i].toString());
         mqttPublish(mqttServer, true, QoS.AtMostOnce, members[i].toString(), buf.getBuffer());
     }
 
@@ -200,6 +200,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
 
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
     mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
+    logger.debug("User message sent from: ", sid.toString(), "to: ", message.rid.toString());
 
     return userHistory;
 }

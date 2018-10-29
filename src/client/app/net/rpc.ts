@@ -14,7 +14,7 @@ import { UserSend, GroupSend } from "../../../server/data/rpc/message.s";
 import { UserHistory, MSG_TYPE } from "../../../server/data/db/message.s";
 import { UserAgree } from "../../../server/data/rpc/user.s";
 import { GroupCreate } from "../../../server/data/rpc/group.s";
-import { createGroup as createGroupp, delMember, dissolveGroup } from "../../../server/data/rpc/group.p";
+import { createGroup as createGroupp, delMember, dissolveGroup, addAdmin, applyJoinGroup } from "../../../server/data/rpc/group.p";
 
 // ================================================ 导出
 /**
@@ -168,6 +168,19 @@ export const sendGroupMsg = () => {
     })
 }
 
+export const addAdministror = (uid: number) => {
+    let guid = "11111:" + uid.toString();
+    clientRpcFunc(addAdmin, guid, (r) => {
+        console.log(r);
+    })
+}
+
+export const applyGroup = (gid: number) => {
+    clientRpcFunc(applyJoinGroup, gid, (r) => {
+        console.log(r);
+    })
+}
+
 (<any>self).setUserInfo = () => {
     setUserInfo();
 }
@@ -198,4 +211,18 @@ export const sendGroupMsg = () => {
 
 (<any>self).sendGroupMsg = () => {
     sendGroupMsg();
+}
+
+(<any>self).sendMessage = (uid: number, msg: string) => {
+    sendMessage(uid, msg, (r) => {
+        console.log(r);
+    })
+}
+
+(<any>self).addAdministror = (uid: number) => {
+    addAdministror(uid);
+}
+
+(<any>self).applyGroup = (gid: number) => {
+    applyGroup(gid);
 }

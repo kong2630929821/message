@@ -4,7 +4,7 @@
 // ================================================================= 导入
 import { GroupInfo } from "../db/group.s";
 import { Result } from "./basic.s";
-import { GroupCreate, GroupAgree, InviteArray } from "./group.s";
+import { GroupCreate, GroupAgree, InviteArray, NotifyAdmin } from "./group.s";
 
 import { GroupHistory, GroupMsg } from "../db/message.s";
 import { Bucket } from "../../../utils/db";
@@ -15,6 +15,7 @@ import * as CONSTANT from '../constant';
 import { Tr } from "../../../pi_pt/rust/pi_db/mgr";
 import { write, read } from "../../../pi_pt/db";
 import { Logger } from '../../../utils/logger';
+import { BonBuffer } from "../../../pi/util/bon";
 
 const logger = new Logger('GROUP');
 
@@ -26,8 +27,29 @@ const logger = new Logger('GROUP');
  */
 //#[rpc=rpcServer]
 export const applyJoinGroup = (gid: number): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
+    const res = new Result();
 
-    return
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    let admins = gInfo.adminids;
+
+    let notify = new NotifyAdmin();
+    notify.uid = parseInt(uid);
+
+    let buf = new BonBuffer();
+    notify.bonEncode(buf);
+
+    let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+    // notify all admins
+    for (let i = 0; i < admins.length; i++) {
+        //TODO: persist this message
+        mqttPublish(mqttServer, true, QoS.AtMostOnce, admins[i].toString(), buf.getBuffer());
+        logger.debug("Notify admin: ", admins[i], "for user: ", uid, "want to join the group");
+    }
+    res.r = 1;
+
+    return res;
 }
 
 /**
@@ -36,8 +58,36 @@ export const applyJoinGroup = (gid: number): Result => {
  */
 //#[rpc=rpcServer]
 export const acceptUser = (agree: GroupAgree): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
+    const res = new Result();
 
-    return
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(agree.gid)[0];
+    let admins = gInfo.adminids;
+    let owner = gInfo.ownerid;
+
+    if (!(admins.indexOf(parseInt(uid)) > -1 || owner === parseInt(uid))) {
+        res.r = 3; // user is not admin or owner
+        logger.debug("User: ", uid, "is not amdin or owner");
+        return res;
+    }
+
+    if(!agree.agree) {
+        res.r = 4; // admin refuse user to join
+        logger.debug('Admin refuse user: ', agree.uid, "to join in group: ", agree.gid);
+        return res;
+    }
+    if (gInfo.memberids.indexOf(agree.uid) > -1 || gInfo.adminids.indexOf(agree.uid) > -1) {
+        res.r = 2; // user has been exist
+        logger.debug("User: ", agree.uid, "has been exist");
+    } else {
+        gInfo.memberids.push(agree.uid);
+        groupInfoBucket.put(gInfo.gid, gInfo);
+        logger.debug("Accept user: ", agree.uid, "to group: ", agree.gid);
+        res.r = 1; //successfully add user
+    }
+
+    return res;
 }
 
 /**
@@ -51,13 +101,31 @@ export const inviteUsers = (invites: InviteArray): Result => {
 }
 
 /**
- * 用户同意加入群组
+ * 用户同意加入群组(被动加入)
  * @param agree
  */
 //#[rpc=rpcServer]
 export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
 
-    return
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(agree.gid)[0];
+    if (!agree.agree) {
+        logger.debug("User: ", uid, "don't want to join group: ", agree.gid);
+        gInfo.gid = -1; // gid = -1 indicate that user don't want to join this group
+
+        return gInfo;
+    }
+
+    if (gInfo.memberids.indexOf(agree.uid) > -1) {
+        logger.debug("User: ", agree.uid, "has been exist");
+    } else {
+        gInfo.memberids.push(agree.uid);
+        groupInfoBucket.put(gInfo.gid, gInfo);
+        logger.debug("User: ", agree.uid, "agree to join group: ", agree.gid);
+    }
+
+    return gInfo;
 }
 
 /**
@@ -75,10 +143,14 @@ export const setOwner = (guid: string): Result => {
 
     logger.debug("user logged in with uid: ", uid, "and you want to chang new owner: ", newOwnerId);
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId))[0];
-    logger.debug("read group info: ", gInfo);
+    if (parseInt(uid) !== gInfo.ownerid) {
+        logger.debug("User: ", uid, "is not the owner of group: ", gInfo.gid);
+        res.r = 0; // not the group owner
+        return res;
+    }
 
     gInfo.ownerid = parseInt(newOwnerId);
-    groupInfoBucket.put(gInfo[0].gid, gInfo);
+    groupInfoBucket.put(gInfo.gid, gInfo);
     res.r = 1;
 
     return res;
@@ -97,12 +169,17 @@ export const addAdmin = (guid: string): Result => {
     let addAdminId = guid.split(":")[1];
     let res = new Result();
 
-    logger.debug("user logged in with uid: ", uid, "and you want to add an admin: ", addAdminId);
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId))[0];
-    logger.debug("read group info: ", gInfo);
+    if (gInfo.adminids.indexOf(parseInt(addAdminId)) > -1) {
+        res.r = 0;
+        logger.debug("User: ", addAdminId, "is already an admin");
 
-    gInfo[0].adminids.push(parseInt(addAdminId));
+        return res;
+    }
+    logger.debug("user logged in with uid: ", uid, "and you want to add an admin: ", addAdminId);
+    gInfo.adminids.push(parseInt(addAdminId));
     groupInfoBucket.put(gInfo.gid, gInfo);
+    logger.debug("After add admin: ", gInfo);
     res.r = 1;
 
     return res;
@@ -124,15 +201,15 @@ export const delAdmin = (guid: string): Result => {
     logger.debug("user logged in with uid: ", uid, "and you want to delete an admin: ", delAdminId);
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId))[0];
     logger.debug("read group info: ", gInfo);
-    let members = gInfo[0].adminids;
+    let members = gInfo.adminids;
 
-    logger.debug("before delete admin memebers: ", gInfo[0].adminids);
+    logger.debug("before delete admin memebers: ", gInfo.adminids);
     let index = members.indexOf(parseInt(delAdminId));
     if (index > -1) {
         members.splice(index, 1);
     }
 
-    gInfo[0].adminids = members;
+    gInfo.adminids = members;
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug("after delete admin memmber: ", groupInfoBucket.get(gInfo.gid));
 
@@ -193,6 +270,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.gid = 11111; // TODO: ways to generate group id
         gInfo.join_method = 0;
         gInfo.ownerid = parseInt(uid);
+        // TODO: add self to memberids
         gInfo.memberids = [10001, 10002, 10003];
         gInfo.state = 0;
 
