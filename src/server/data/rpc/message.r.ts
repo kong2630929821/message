@@ -15,6 +15,10 @@ import * as CONSTANT from '../constant';
 
 import {Tr} from "../../../pi_pt/rust/pi_db/mgr";
 import { write, read } from "../../../pi_pt/db";
+import { GroupInfo } from "../db/group.s";
+import { Logger } from "../../../utils/logger";
+
+const logger = new Logger("MESSAGE");
 
 
 // ================================================================= 导出
@@ -76,22 +80,41 @@ export const cancelAnnouncement = (aIncId: string): Result => {
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket("file", CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
+    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
+
+    let session = getEnv().getSession();
+    let uid;
+    read(dbMgr, (tr: Tr) => {
+        uid = session.get(tr, "uid");
+    });
+
+    //TODO: what if uid is undefined
 
     let gh = new GroupHistory();
     let gmsg = new GroupMsg();
     gmsg.msg = message.msg;
-    gmsg.mtype = 0;
+    gmsg.mtype = message.mtype;
     gmsg.send = true;
-    gmsg.sid = 0; // ??????
-    gmsg.time = Date.now();
+    gmsg.sid = parseInt(uid);
+    gmsg.time = message.time;
     gmsg.cancel = false;
 
-    gh.hIncid = message.gid + ":" + "1"; // ?????
+    gh.hIncid = message.gid + ":" + "1"; // TODO: generate msg id
     gh.msg = gmsg;
 
     bkt.put(gh.hIncid, gh);
 
-    // TODO: publish message
+    let buf = new BonBuffer();
+    gmsg.bonEncode(buf);
+
+    let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+
+    // TODO: how to handle members that doesn't online ?
+    let members = groupInfoBucket.get<number, [GroupInfo]>(message.gid)[0].memberids;
+    for (let i = 0; i < members.length; i++) {
+        logger.debug("Send message to member: ", members[i].toString());
+        mqttPublish(mqttServer, true, QoS.AtMostOnce, members[i].toString(), buf.getBuffer());
+    }
 
     return gh;
 }

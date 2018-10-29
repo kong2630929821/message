@@ -104,6 +104,7 @@ export const login = (loginReq: LoginReq): UserInfo => {
         userInfo = userInfoBucket.get(loginReq.uid)[0];
         let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
         setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
+        logger.debug("Set user topic: ", loginReq.uid.toString());
 
         // save session
         let session = getEnv().getSession();
@@ -204,14 +205,13 @@ export const setUserInfo = (param: UserInfoSet): Result => {
     userInfo.avator = param.avator;
 
     logger.debug("UserInfo to be written: ", uid, userInfo);
-    let v = userInfoBucket.put(uid, userInfo);
+    let v = userInfoBucket.put(parseInt(uid), userInfo);
     if (!v) {
         logger.error("Can't write userInfo to db: ", uid, userInfo);
     } else {
         logger.debug("Write userInfo to db success: ", uid, userInfo);
     }
 
-    // FIXME: fatal bug, can't update db
     logger.debug("Read userInfo after write: ", uid, userInfoBucket.get(parseInt(uid))[0]);
 
     res.r = 1;
