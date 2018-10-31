@@ -18,6 +18,8 @@ import { write, read } from "../../../pi_pt/db";
 import { GroupInfo } from "../db/group.s";
 import { Logger } from "../../../utils/logger";
 
+import { GroupMsgId, P2PMsgId, AnounceMsgId } from "../db/msgid";
+
 const logger = new Logger("MESSAGE");
 
 
@@ -41,8 +43,9 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
     anmt.time = Date.now();
     anmt.sid = parseInt(uid);
 
+    let announId = new AnounceMsgId(announce.gid, dbMgr);
     let ah = new AnnounceHistory();
-    ah.aIncId = announce.gid + ":" + "1"; // TODO: ways to generate aIncId
+    ah.aIncId = announce.gid + ":" + announId.nextId();
     ah.announce = anmt;
 
     bkt.put(ah.aIncId, ah);
@@ -84,7 +87,6 @@ export const cancelAnnouncement = (aIncId: string): Result => {
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket("file", CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
-    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
 
     let session = getEnv().getSession();
     let uid;
@@ -103,7 +105,9 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     gmsg.time = message.time;
     gmsg.cancel = false;
 
-    gh.hIncid = message.gid + ":" + "1"; // TODO: generate msg id
+    let groupMsgId = new GroupMsgId(message.gid, dbMgr);
+
+    gh.hIncid = message.gid + ":" + groupMsgId.nextId();
     gh.msg = gmsg;
 
     bkt.put(gh.hIncid, gh);
@@ -112,13 +116,11 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     gmsg.bonEncode(buf);
 
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+    let groupTopic = "ims/group/msg/" + message.gid;
 
-    // TODO: how to handle members that doesn't online ?
-    let members = groupInfoBucket.get<number, [GroupInfo]>(message.gid)[0].memberids;
-    for (let i = 0; i < members.length; i++) {
-        logger.debug("Group message sent from:", uid.toString(), "to:", members[i].toString());
-        mqttPublish(mqttServer, true, QoS.AtMostOnce, members[i].toString(), buf.getBuffer());
-    }
+    // directly send message to group topic
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
+    logger.debug("Send group message: ", message.msg, "to group topic: ", groupTopic);
 
     return gh;
 }

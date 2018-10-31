@@ -251,6 +251,7 @@ export const addAdmin = (guid: string): Result => {
     }
     logger.debug("user logged in with uid: ", uid, "and you want to add an admin: ", addAdminId);
     gInfo.adminids.push(parseInt(addAdminId));
+    gInfo.memberids.push(parseInt(addAdminId));
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug("After add admin: ", gInfo);
     res.r = 1;
@@ -336,7 +337,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
     if (uid !== undefined) {
         let gInfo = new GroupInfo();
         gInfo.note = groupInfo.note;
-        gInfo.adminids = [];
+        gInfo.adminids = [parseInt(uid)];
         gInfo.annoceid = "0:0";
         gInfo.create_time = Date.now();
         gInfo.dissolve_time = 0;
@@ -358,8 +359,10 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         contactBucket.put(parseInt(uid), contact);
         logger.debug("Add self: ", uid, "to conatact group");
 
+        let groupTopic = "ims/group/msg/" + gInfo.gid;
         let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
-        setMqttTopic(mqttServer, gInfo.gid.toString(), true, true);
+        setMqttTopic(mqttServer, groupTopic, true, true);
+        logger.debug("Set mqtt topic for group: ", gInfo.gid, "with topic name: ", groupTopic);
 
         return gInfo;
     }

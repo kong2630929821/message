@@ -2,7 +2,7 @@
  * 调用rpc接口
  */
 // ================================================ 导入
-import { clientRpcFunc } from "./init";
+import { clientRpcFunc, subscribe } from "./init";
 import { notEmptyString } from "../../../utils/util";
 import { registerUser, login as loginUser, setUserInfo as setUserProfile, getGroupsInfo } from "../../../server/data/rpc/basic.p";
 import { UserRegister, LoginReq, UserInfoSet, Result, GetGroupInfoReq } from "../../../server/data/rpc/basic.s";
@@ -11,7 +11,7 @@ import { applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFr
 import { updateStore, getBorn } from "../data/store";
 import { sendUserMessage, sendGroupMessage, sendAnnouncement } from "../../../server/data/rpc/message.p";
 import { UserSend, GroupSend, AnnounceSend } from "../../../server/data/rpc/message.s";
-import { UserHistory, MSG_TYPE } from "../../../server/data/db/message.s";
+import { UserHistory, MSG_TYPE, GroupMsg } from "../../../server/data/db/message.s";
 import { UserAgree } from "../../../server/data/rpc/user.s";
 import { GroupCreate, GroupAgree, InviteArray, Invite } from "../../../server/data/rpc/group.s";
 import { createGroup as createGroupp, delMember, dissolveGroup, addAdmin, applyJoinGroup, acceptUser, inviteUsers } from "../../../server/data/rpc/group.p";
@@ -232,6 +232,12 @@ export const getGroupInfo = () => {
     clientRpcFunc(getGroupsInfo, groups, (r) => {
         console.log(r);
     })
+}
+
+(<any>self).subscribeGroupMsg = (topicName: string) => {
+    subscribe(topicName, GroupMsg, (r) => {
+
+    });
 }
 
 (<any>self).getGroupInfo = () => {
