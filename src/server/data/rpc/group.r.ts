@@ -174,6 +174,7 @@ export const inviteUsers = (invites: InviteArray): Result => {
 //#[rpc=rpcServer]
 export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     const groupInfoBucket = getGroupInfoBucket();
+    const contactBucket = getContactBucket();
     const uid = getUid();
 
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(agree.gid)[0];
@@ -184,12 +185,17 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         return gInfo;
     }
 
+    let cInfo = contactBucket.get<number, [Contact]>(agree.uid)[0];
+
     if (gInfo.memberids.indexOf(agree.uid) > -1) {
         logger.debug("User: ", agree.uid, "has been exist");
     } else {
         gInfo.memberids.push(agree.uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug("User: ", agree.uid, "agree to join group: ", agree.gid);
+        cInfo.group.push(agree.gid);
+        logger.debug("Add group: ", agree.gid, "to user's contact: ", cInfo.group);
+        logger.debug("")
     }
 
     return gInfo;
