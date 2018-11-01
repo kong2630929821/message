@@ -2,19 +2,19 @@
  * 调用rpc接口
  */
 // ================================================ 导入
-import { clientRpcFunc } from "./init";
+import { clientRpcFunc, subscribe } from "./init";
 import { notEmptyString } from "../../../utils/util";
-import { registerUser, login as loginUser, setUserInfo as setUserProfile } from "../../../server/data/rpc/basic.p";
-import { UserRegister, LoginReq, UserInfoSet, Result } from "../../../server/data/rpc/basic.s";
+import { registerUser, login as loginUser, setUserInfo as setUserProfile, getGroupsInfo } from "../../../server/data/rpc/basic.p";
+import { UserRegister, LoginReq, UserInfoSet, Result, GetGroupInfoReq } from "../../../server/data/rpc/basic.s";
 import { UserInfo } from "../../../server/data/db/user.s";
 import { applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFriend as delUserFriend } from "../../../server/data/rpc/user.p";
 import { updateStore, getBorn } from "../data/store";
-import { sendUserMessage, sendGroupMessage } from "../../../server/data/rpc/message.p";
-import { UserSend, GroupSend } from "../../../server/data/rpc/message.s";
-import { UserHistory, MSG_TYPE } from "../../../server/data/db/message.s";
+import { sendUserMessage, sendGroupMessage, sendAnnouncement } from "../../../server/data/rpc/message.p";
+import { UserSend, GroupSend, AnnounceSend } from "../../../server/data/rpc/message.s";
+import { UserHistory, MSG_TYPE, GroupMsg } from "../../../server/data/db/message.s";
 import { UserAgree } from "../../../server/data/rpc/user.s";
-import { GroupCreate } from "../../../server/data/rpc/group.s";
-import { createGroup as createGroupp, delMember, dissolveGroup, addAdmin, applyJoinGroup } from "../../../server/data/rpc/group.p";
+import { GroupCreate, GroupAgree, InviteArray, Invite } from "../../../server/data/rpc/group.s";
+import { createGroup as createGroupp, delMember, dissolveGroup, addAdmin, applyJoinGroup, acceptUser, inviteUsers } from "../../../server/data/rpc/group.p";
 
 // ================================================ 导出
 /**
@@ -94,8 +94,8 @@ export const applyFriend = (rid: number, cb: (r) => void) => {
 
 /**
  * 接受对方为好友
- * @param rid 
- * @param cb 
+ * @param rid
+ * @param cb
  */
 export const acceptFriend = (rid: number, agree: boolean, cb: (r) => void) => {
     let userAgree = new UserAgree;
@@ -108,8 +108,8 @@ export const acceptFriend = (rid: number, agree: boolean, cb: (r) => void) => {
 
 /**
  * 删除好友
- * @param rid 
- * @param cb 
+ * @param rid
+ * @param cb
  */
 export const delFriend = (rid: number, cb: (r) => void) => {
     clientRpcFunc(delUserFriend, rid, (r: Result) => {
@@ -181,6 +181,69 @@ export const applyGroup = (gid: number) => {
     })
 }
 
+export const acceptUserJoin = (uid: number, accept: boolean) => {
+    let ga = new GroupAgree();
+    ga.agree = accept;
+    ga.gid = 11111;
+    ga.uid = uid;
+
+    clientRpcFunc(acceptUser, ga, (r) => {
+        console.log(r);
+    })
+}
+
+export const sendAnnounce = (gid: number) => {
+    let a = new AnnounceSend();
+    a.gid = 11111;
+    a.msg = "new announcement";
+    a.mtype = 1;
+    a.time = Date.now();
+
+    clientRpcFunc(sendAnnouncement, a, (r) => {
+        console.log(r);
+    })
+}
+
+export const inviteUsersToGroup = () => {
+    let ia = new InviteArray();
+    let invite1 = new Invite();
+    invite1.gid = 11111;
+    invite1.rid = 10001;
+
+    let invite2 = new Invite();
+    invite2.gid = 11111;
+    invite2.rid = 10002;
+
+    let invite3 = new Invite();
+    invite3.gid = 11111;
+    invite3.rid = 10003;
+
+    ia.arr = [invite1, invite2, invite3];
+
+    clientRpcFunc(inviteUsers, ia, (r) => {
+        console.log(r);
+    })
+}
+
+export const getGroupInfo = () => {
+    let groups = new GetGroupInfoReq();
+    groups.gids = [11111];
+
+    clientRpcFunc(getGroupsInfo, groups, (r) => {
+        console.log(r);
+    })
+}
+
+(<any>self).subscribeGroupMsg = (topicName: string) => {
+    subscribe(topicName, GroupMsg, (r) => {
+
+    });
+}
+
+(<any>self).getGroupInfo = () => {
+    getGroupInfo();
+}
+
 (<any>self).setUserInfo = () => {
     setUserInfo();
 }
@@ -225,4 +288,16 @@ export const applyGroup = (gid: number) => {
 
 (<any>self).applyGroup = (gid: number) => {
     applyGroup(gid);
+}
+
+(<any>self).acceptUserJoin = (uid: number, accept: boolean) => {
+    acceptUserJoin(uid, accept);
+}
+
+(<any>self).sendAnnouncement = (gid: number) => {
+    sendAnnounce(gid);
+}
+
+(<any>self).inviteUsersToGroup = (gid: number) => {
+    inviteUsersToGroup();
 }

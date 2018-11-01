@@ -18,6 +18,8 @@ import { write, read } from "../../../pi_pt/db";
 import { GroupInfo } from "../db/group.s";
 import { Logger } from "../../../utils/logger";
 
+import { GroupMsgId, P2PMsgId, AnounceMsgId } from "../db/msgid";
+
 const logger = new Logger("MESSAGE");
 
 
@@ -30,22 +32,27 @@ const logger = new Logger("MESSAGE");
 export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket("file", CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
+    let uid = getUid();
+    let groupInfoBucket = getGroupInfoBucket();
 
     let anmt = new Announcement();
     anmt.cancel = false;
     anmt.msg = announce.msg;
-    anmt.mtype = 1;
+    anmt.mtype = announce.mtype;
     anmt.send = true;
     anmt.time = Date.now();
-    anmt.sid = 0; // announce里面哪里知道发送者id是哪个？？？
+    anmt.sid = parseInt(uid);
 
+    let announId = new AnounceMsgId(announce.gid, dbMgr);
     let ah = new AnnounceHistory();
-    ah.aIncId = announce.gid + ":" + "1";
+    ah.aIncId = announce.gid + ":" + announId.nextId();
     ah.announce = anmt;
 
     bkt.put(ah.aIncId, ah);
+    logger.debug("Send annoucement: ", anmt, "to group: ", announce.gid);
 
-    // TODO: publish message
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(announce.gid)[0];
+    gInfo.annoceid = ah.aIncId;
 
     return ah;
 }
@@ -60,7 +67,7 @@ export const cancelAnnouncement = (aIncId: string): Result => {
     const bkt = new Bucket("file", CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
 
     let v = bkt.get<string, AnnounceHistory>(aIncId);
-    if (v !== undefined) {
+    if (v[0] !== undefined) {
         v.announce.cancel = true;
     }
 
@@ -80,7 +87,6 @@ export const cancelAnnouncement = (aIncId: string): Result => {
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket("file", CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
-    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
 
     let session = getEnv().getSession();
     let uid;
@@ -99,7 +105,9 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     gmsg.time = message.time;
     gmsg.cancel = false;
 
-    gh.hIncid = message.gid + ":" + "1"; // TODO: generate msg id
+    let groupMsgId = new GroupMsgId(message.gid, dbMgr);
+
+    gh.hIncid = message.gid + ":" + groupMsgId.nextId();
     gh.msg = gmsg;
 
     bkt.put(gh.hIncid, gh);
@@ -108,13 +116,11 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     gmsg.bonEncode(buf);
 
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+    let groupTopic = "ims/group/msg/" + message.gid;
 
-    // TODO: how to handle members that doesn't online ?
-    let members = groupInfoBucket.get<number, [GroupInfo]>(message.gid)[0].memberids;
-    for (let i = 0; i < members.length; i++) {
-        logger.debug("Group message sent from:", uid.toString(), "to:", members[i].toString());
-        mqttPublish(mqttServer, true, QoS.AtMostOnce, members[i].toString(), buf.getBuffer());
-    }
+    // directly send message to group topic
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
+    logger.debug("Send group message: ", message.msg, "to group topic: ", groupTopic);
 
     return gh;
 }
@@ -167,7 +173,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     let hid = 10001;
     let curId = 0;
     let mLock = msgLockBucket.get(hid);
-    console.log('msgLock:', mLock);
+    logger.debug("msgLock:", mLock);
     if (mLock[0] === undefined) {
         let msgLock = new MsgLock();
         msgLock.hid = hid
@@ -215,7 +221,7 @@ export const cancelUserMessage = (hIncId: string): Result => {
     const bkt = new Bucket("file", CONSTANT.USER_HISTORY_TABLE, dbMgr);
 
     let v = bkt.get<string, UserHistory>(hIncId);
-    if (v !== undefined) {
+    if (v[0] !== undefined) {
         v.msg.cancel = true;
     }
 
@@ -225,4 +231,23 @@ export const cancelUserMessage = (hIncId: string): Result => {
     res.r = 1;
 
     return res;
+}
+
+// ----------------- helpers ------------------
+const getUid = () => {
+    const dbMgr = getEnv().getDbMgr();
+    let session = getEnv().getSession();
+    let uid;
+    read(dbMgr, (tr: Tr) => {
+        uid = session.get(tr, "uid");
+    });
+
+    return uid;
+}
+
+const getGroupInfoBucket = () => {
+    const dbMgr = getEnv().getDbMgr();
+    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
+
+    return groupInfoBucket;
 }

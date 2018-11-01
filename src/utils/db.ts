@@ -7,6 +7,10 @@ import { Tr } from "../pi_pt/rust/pi_db/mgr";
 import { TabMeta } from "../pi/struct/sinfo";
 import { Mgr } from "../pi_pt/rust/pi_db/mgr";
 
+import { Logger } from "./logger";
+
+const logger = new Logger("DB");
+
 type DbType = "memory" | "file";
 
 const createBucket = (dbType: DbType, bucketName: string, bucketMetaInfo: TabMeta, dbMgr: Mgr): Bucket => {
@@ -61,7 +65,7 @@ export class Bucket {
             });
 
         } catch(e) {
-            console.log("read key from bucket failed with error: ", e);
+            logger.error("read key from bucket failed with error: ", e);
         }
 
         if (Array.isArray(value)) {
@@ -88,7 +92,7 @@ export class Bucket {
 
             return true;
         } catch(e) {
-            console.log("failed to write key with error: ", e);
+            logger.error("failed to write key with error: ", e);
         }
 
         return false;
@@ -113,7 +117,7 @@ export class Bucket {
 
             return true;
         } catch(e) {
-            console.log("failed to delete key with error: ", e);
+            logger.error("failed to delete key with error: ", e);
         }
 
         return false;
@@ -126,7 +130,7 @@ export class Bucket {
                 iter = iterDb(tr, this.dbType, this.bucketName, key, desc, filter);
             })
         } catch (e) {
-            console.log("failed to iter db with error: ", e);
+            logger.error("failed to iter db with error: ", e);
         }
 
         return iter;

@@ -3,6 +3,7 @@
  */
 // ================================================================= 导入
 import { GroupInfo } from "../db/group.s";
+import { Contact } from "../db/user.s"
 import { Result } from "./basic.s";
 import { GroupCreate, GroupAgree, InviteArray, NotifyAdmin } from "./group.s";
 
@@ -53,6 +54,41 @@ export const applyJoinGroup = (gid: number): Result => {
 }
 
 /**
+ * 用户主动退出群组
+ * @param gid group number
+ */
+
+//#[rpc=rpcServer]
+export const userExitGroup = (gid: number): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const contactBucket = getContactBucket();
+
+    const uid = getUid();
+    const res = new Result();
+
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    let index1 = gInfo.memberids.indexOf(parseInt(uid));
+    let contact = contactBucket.get<number, [Contact]>(parseInt(uid))[0];
+    let index2 = contact.group.indexOf(gid);
+
+    if (index1 > -1) {
+        gInfo.memberids.splice(index1, 1);
+        groupInfoBucket.put(gid, gInfo);
+        logger.debug("user: ", uid, "exit group: ", gid);
+
+        contact.group.splice(index2, 1);
+        contactBucket.put(parseInt(uid), contact);
+        logger.debug("Remove group: ", gid, "from user's contact");
+
+        res.r = 1;
+    } else {
+        res.r = 0;
+    }
+
+    return res;
+}
+
+/**
  * 管理员接受/拒绝用户的加群申请
  * @param agree
  */
@@ -65,6 +101,9 @@ export const acceptUser = (agree: GroupAgree): Result => {
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(agree.gid)[0];
     let admins = gInfo.adminids;
     let owner = gInfo.ownerid;
+
+    const contactBucket = getContactBucket();
+    let contact = contactBucket.get<number, [Contact]>(agree.uid)[0];
 
     if (!(admins.indexOf(parseInt(uid)) > -1 || owner === parseInt(uid))) {
         res.r = 3; // user is not admin or owner
@@ -80,10 +119,17 @@ export const acceptUser = (agree: GroupAgree): Result => {
     if (gInfo.memberids.indexOf(agree.uid) > -1 || gInfo.adminids.indexOf(agree.uid) > -1) {
         res.r = 2; // user has been exist
         logger.debug("User: ", agree.uid, "has been exist");
+    } else if (contact === undefined) {
+        res.r = -1; // agree.uid is not a registered user
+        logger.error("user: ", agree.uid, "is not a registered user");
+        return res;
     } else {
         gInfo.memberids.push(agree.uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug("Accept user: ", agree.uid, "to group: ", agree.gid);
+        contact.group.push(agree.gid);
+        contactBucket.put(agree.uid, contact);
+        logger.debug("Add group: ", agree.gid, "to user's contact: ", contact.group);
         res.r = 1; //successfully add user
     }
 
@@ -96,8 +142,29 @@ export const acceptUser = (agree: GroupAgree): Result => {
  */
 //#[rpc=rpcServer]
 export const inviteUsers = (invites: InviteArray): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const contactBucket = getContactBucket();
+    const uid = getUid();
+    let res = new Result();
+    let gid = invites.arr[0].gid;
 
-    return
+    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    if (gInfo.memberids.indexOf(parseInt(uid)) <= -1) {
+        logger.debug("user: ", uid, "is not a member of this group");
+        res.r = 2; // User is not a member of this group
+        return res;
+    }
+
+    for (let i = 0; i < invites.arr.length; i++) {
+        let rid = invites.arr[i].rid;
+        let cInfo = contactBucket.get<number, [Contact]>(rid)[0];
+        cInfo.applyGroup.push(gid);
+        contactBucket.put(rid, cInfo);
+        logger.debug("Invite user: ", rid, "to group: ", gid);
+    }
+
+    res.r = 1;
+    return res;
 }
 
 /**
@@ -107,6 +174,7 @@ export const inviteUsers = (invites: InviteArray): Result => {
 //#[rpc=rpcServer]
 export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     const groupInfoBucket = getGroupInfoBucket();
+    const contactBucket = getContactBucket();
     const uid = getUid();
 
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(agree.gid)[0];
@@ -117,12 +185,17 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         return gInfo;
     }
 
+    let cInfo = contactBucket.get<number, [Contact]>(agree.uid)[0];
+
     if (gInfo.memberids.indexOf(agree.uid) > -1) {
         logger.debug("User: ", agree.uid, "has been exist");
     } else {
         gInfo.memberids.push(agree.uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug("User: ", agree.uid, "agree to join group: ", agree.gid);
+        cInfo.group.push(agree.gid);
+        logger.debug("Add group: ", agree.gid, "to user's contact: ", cInfo.group);
+        logger.debug("")
     }
 
     return gInfo;
@@ -178,6 +251,7 @@ export const addAdmin = (guid: string): Result => {
     }
     logger.debug("user logged in with uid: ", uid, "and you want to add an admin: ", addAdminId);
     gInfo.adminids.push(parseInt(addAdminId));
+    gInfo.memberids.push(parseInt(addAdminId));
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug("After add admin: ", gInfo);
     res.r = 1;
@@ -263,15 +337,15 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
     if (uid !== undefined) {
         let gInfo = new GroupInfo();
         gInfo.note = groupInfo.note;
-        gInfo.adminids = [];
-        gInfo.annoceid = 1;
+        gInfo.adminids = [parseInt(uid)];
+        gInfo.annoceid = "0:0";
         gInfo.create_time = Date.now();
         gInfo.dissolve_time = 0;
         gInfo.gid = 11111; // TODO: ways to generate group id
         gInfo.join_method = 0;
         gInfo.ownerid = parseInt(uid);
         // TODO: add self to memberids
-        gInfo.memberids = [10001, 10002, 10003];
+        gInfo.memberids = [parseInt(uid)]; // add self to member
         gInfo.state = 0;
 
         logger.debug("create group: ", gInfo);
@@ -279,8 +353,16 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug("read group info: ", groupInfoBucket.get(gInfo.gid));
 
+        let contactBucket = getContactBucket();
+        let contact = contactBucket.get<number, [Contact]>(parseInt(uid))[0];
+        contact.group.push(gInfo.gid);
+        contactBucket.put(parseInt(uid), contact);
+        logger.debug("Add self: ", uid, "to conatact group");
+
+        let groupTopic = "ims/group/msg/" + gInfo.gid;
         let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
-        setMqttTopic(mqttServer, gInfo.gid.toString(), true, true);
+        setMqttTopic(mqttServer, groupTopic, true, true);
+        logger.debug("Set mqtt topic for group: ", gInfo.gid, "with topic name: ", groupTopic);
 
         return gInfo;
     }
@@ -321,6 +403,13 @@ const getGroupInfoBucket = () => {
     const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
 
     return groupInfoBucket
+}
+
+const getContactBucket = () => {
+    const dbMgr = getEnv().getDbMgr();
+    const contactBucket = new Bucket("file", CONSTANT.CONTACT_TABLE, dbMgr);
+
+    return contactBucket;
 }
 
 const getUid = () => {
