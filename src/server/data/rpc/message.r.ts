@@ -54,6 +54,14 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(announce.gid)[0];
     gInfo.annoceid = ah.aIncId;
 
+    let buf = new BonBuffer();
+    announce.bonEncode(buf);
+    let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+    let groupAnnounceTopic = "img/group/anounnce/" + announce.gid;
+
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, groupAnnounceTopic, buf.getBuffer());
+    logger.debug("Send group announcement: ", announce.msg, "to group topic: ", groupAnnounceTopic);
+
     return ah;
 }
 
@@ -168,9 +176,8 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     });
 
     let userHistory = new UserHistory();
-
-    // TODO: ways to generate hid?
-    let hid = 10001;
+    sid = parseInt(sid);
+    let hid = sid;
     let curId = 0;
     let mLock = msgLockBucket.get(hid);
     logger.debug("msgLock:", mLock);
@@ -200,6 +207,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userHistory.msg = userMsg;
 
     userHistoryBucket.put(userHistory.hIncid, userHistory);
+    logger.debug("Persist user history message to DB: ", userHistory);
 
     let buf = new BonBuffer();
     userMsg.bonEncode(buf);

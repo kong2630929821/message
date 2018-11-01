@@ -1,7 +1,7 @@
 import { Bucket } from '../../../utils/db';
 import { Mgr } from "../../../pi_pt/rust/pi_db/mgr";
 
-import { GroupMsgIdBucket, P2PMsgIdBucket, AnounceMsgIdBucket } from '../db/mid.s';
+import { GroupMsgIdBucket, P2PMsgIdBucket, AnounceMsgIdBucket, AccountBucket } from '../db/mid.s';
 
 export class P2PMsgId {
     private uid: number;
@@ -87,6 +87,66 @@ export class AnounceMsgId {
             m.gid = this.gid;
             m.aid = nextId;
             gbkt.put(this.gid, m);
+
+            return nextId;
+        }
+    }
+}
+
+export class AccountId {
+    private dbManager: Mgr;
+
+    constructor(dbMgr: Mgr) {
+        this.dbManager = dbMgr;
+    }
+
+    nextPersonalId() {
+        let m = new AccountBucket();
+        let gbkt = new Bucket("file","server/data/db/mid.AccountBucket", this.dbManager);
+        if (gbkt.get(0)[0] === undefined) {
+            m.atype = 0;
+            m.accid = 1;
+            gbkt.put(m.atype, m);
+
+            return 1;
+        } else if (gbkt.get(1)[0] === undefined) {
+            m.atype = 1;
+            m.accid = 1;
+            gbkt.put(m.atype, m);
+
+            return 1;
+        } else {
+            let cur = gbkt.get<number, [AccountBucket]>(0)[0];
+            let nextId = cur.accid + 1;
+            m.accid = nextId;
+            m.atype = 0;
+            gbkt.put(m.atype, m);
+
+            return nextId;
+        }
+    }
+
+    nextGroupId() {
+        let m = new AccountBucket();
+        let gbkt = new Bucket("file","server/data/db/mid.AccountBucket", this.dbManager);
+        if (gbkt.get(0)[0] === undefined) {
+            m.atype = 0;
+            m.accid = 1;
+            gbkt.put(m.atype, m);
+
+            return 1;
+        } else if(gbkt.get(1)[0] === undefined) {
+            m.atype = 1;
+            m.accid = 1;
+            gbkt.put(m.atype, m);
+
+            return 1;
+        } else {
+            let cur = gbkt.get<number, [AccountBucket]>(1)[0];
+            let nextId = cur.accid + 1;
+            m.accid = nextId;
+            m.atype = 1;
+            gbkt.put(m.atype, m);
 
             return nextId;
         }

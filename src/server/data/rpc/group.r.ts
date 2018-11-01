@@ -5,7 +5,7 @@
 import { GroupInfo } from "../db/group.s";
 import { Contact } from "../db/user.s"
 import { Result } from "./basic.s";
-import { GroupCreate, GroupAgree, InviteArray, NotifyAdmin } from "./group.s";
+import { GroupCreate, GroupAgree, InviteArray, NotifyAdmin, GroupMembers } from "./group.s";
 
 import { GroupHistory, GroupMsg } from "../db/message.s";
 import { Bucket } from "../../../utils/db";
@@ -17,6 +17,7 @@ import { Tr } from "../../../pi_pt/rust/pi_db/mgr";
 import { write, read } from "../../../pi_pt/db";
 import { Logger } from '../../../utils/logger';
 import { BonBuffer } from "../../../pi/util/bon";
+import { AccountId } from "../db/msgid";
 
 const logger = new Logger('GROUP');
 
@@ -326,13 +327,30 @@ export const delMember = (guid: string): Result => {
 }
 
 /**
+ * 获取群组内的用户id
+ * @param gid group id
+ */
+export const getGroupMembers = (gid: number): GroupMembers => {
+    const dbMgr = getEnv().getDbMgr();
+    const groupInfoBucket = getGroupInfoBucket();
+
+    let gm = new GroupMembers();
+    let m = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    gm.members = m.memberids;
+
+    return gm;
+}
+
+/**
  * 创建群
  * @param uid
  */
 //#[rpc=rpcServer]
 export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
+    const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
+    let idGen = new AccountId(dbMgr);
 
     if (uid !== undefined) {
         let gInfo = new GroupInfo();
@@ -341,7 +359,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.annoceid = "0:0";
         gInfo.create_time = Date.now();
         gInfo.dissolve_time = 0;
-        gInfo.gid = 11111; // TODO: ways to generate group id
+        gInfo.gid = idGen.nextGroupId();
         gInfo.join_method = 0;
         gInfo.ownerid = parseInt(uid);
         // TODO: add self to memberids

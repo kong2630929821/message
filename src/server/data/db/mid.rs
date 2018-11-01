@@ -15,3 +15,9 @@ struct AnounceMsgIdBucket {
     gid: usize,
     aid: usize
 }
+
+#[primary=atype,db=file,dbMonitor=true,hasmgr=false]
+struct AccountBucket {
+    atype: usize, // account type: 0 -> personal account, 1 -> group account
+    accid: usize
+}

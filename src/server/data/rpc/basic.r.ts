@@ -251,21 +251,6 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
     return friendLinkArray;
 }
 
-/**
- * 获取好友别名和历史记录id
- * @param uuidArr
- */
-//#[rpc=rpcServer]
-export const getGroupUserLinks = (uuidArr: string): GroupUserLinkArray => {
-    const dbMgr = getEnv().getDbMgr();
-    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
-
-    let groupInfo = groupInfoBucket.get<string, GroupInfo>(uuidArr);
-    let groupUserLink = new GroupUserLink();
-    // TODO: fill more fields
-
-    return;
-}
 
 /**
  * 获取群组聊天的历史记录
