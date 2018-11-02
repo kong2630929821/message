@@ -62,7 +62,8 @@ struct Contact {
     temp_chat: &[u32],//临时用户id
     group: &[u32],//群组id
     applyUser:&[u32],//其他用户申请添加当前用户为好友
-    applyGroup:&[u32]//其他群组申请添加当前用户为好友
+    applyGroup:&[u32],//其他群组申请添加当前用户为好友
+    blackList: &[u32]
 }
 
 
