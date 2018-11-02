@@ -16,11 +16,73 @@ import * as CONSTANT from '../constant';
 import {Tr} from "../../../pi_pt/rust/pi_db/mgr";
 import { write, read } from "../../../pi_pt/db";
 import { GroupInfo } from "../db/group.s";
+import { LastReadMessageId } from "../db/user.s"
 import { Logger } from "../../../utils/logger";
 
 import { GroupMsgId, P2PMsgId, AnounceMsgId } from "../db/msgid";
 
 const logger = new Logger("MESSAGE");
+
+/**
+ * 用户确认读取了的最新消息id
+ * @param uid
+ */
+//#[rpc=rpcServer]
+export const messageReadAck = (cursor: LastReadMessageId): Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const lastReadMessageidBucket = new Bucket("file", CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
+    let sessionUid = getUid();
+    let uid = cursor.mtype.split(":")[1];
+    let res = new Result();
+    if (sessionUid === undefined) {
+        logger.debug("User didn't login, can't send message read ack");
+        res.r = 0;
+        return res;
+    }
+
+    if (sessionUid !== uid) {
+        logger.debug("inappropriate uid");
+        res.r = 0;
+        return res;
+    }
+
+    let lrmi = new LastReadMessageId();
+    lrmi.mtype = cursor.mtype;
+    lrmi.msgId = cursor.msgId;
+
+    lastReadMessageidBucket.put(uid, lrmi);
+    logger.debug("User: ", uid, "confirm receive message id: ", lrmi.msgId);
+    res.r = 1;
+
+    return res;
+}
+
+/**
+ * 用户获取消息游标
+ * @param cursor "10001:0" -> 用户 10001个人对个人消息， "10001:1" -> 用户10001群消息
+ */
+//#[rpc=rpcServer]
+export const getLastReadMessageId = (cursor: string): LastReadMessageId => {
+    const dbMgr = getEnv().getDbMgr();
+    let uid = getUid();
+    const lastReadMessageidBucket = new Bucket("file", CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
+    let msgId = lastReadMessageidBucket.get(cursor)[0];
+    let res = new LastReadMessageId();
+
+    if (msgId === undefined) {
+        logger.error("User: ", uid, "Can't get msgId for message type: ", cursor);
+        res.mtype = "";
+        res.msgId = "";
+
+        return res;
+    }
+
+    res.mtype = cursor;
+    res.msgId = msgId;
+    logger.debug("User: ", uid, "get message id: ", msgId);
+
+    return res;
+}
 
 
 // ================================================================= 导出
@@ -177,7 +239,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
 
     let userHistory = new UserHistory();
     sid = parseInt(sid);
-    let hid = sid;
+    let hid = message.rid;
     let curId = 0;
     let mLock = msgLockBucket.get(hid);
     logger.debug("msgLock:", mLock);

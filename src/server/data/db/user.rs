@@ -66,4 +66,10 @@ struct Contact {
     blackList: &[u32]
 }
 
+#[primary=mtype,db=file,dbMonitor=true]
+struct LastReadMessageId {
+    mtype: String, // "10001:0" -> 用户 10001个人对个人消息， "10001:1" -> 用户10001群消息
+    msgId: String // hIncid
+}
+
 

@@ -25,6 +25,8 @@ export const USER_CREDENTIAL_TABLE = "server/data/db/user.UserCredential";
 export const ACCOUNT_GENERATOR_TABLE = "server/data/db/user.AccountGenerator";
 export const FRIEND_LINK_TABLE = "server/data/db/user.FriendLink";
 export const CONTACT_TABLE = "server/data/db/user.Contact";
+export const LAST_READ_MESSAGE_ID_TABLE = "server/data/db/user.LastReadMessageId";
+
 
 //其他
 export const ADDRESS_INFO_TABLE = "server/data/db/extra.AddressInfo";
