@@ -63,6 +63,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     contact.friends = [];
     contact.group = [];
     contact.temp_chat = [];
+    contact.blackList = [];
 
     const contactBucket = new Bucket("file", CONSTANT.CONTACT_TABLE, dbMgr);
     let c = contactBucket.get(userInfo.uid)[0];

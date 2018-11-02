@@ -196,7 +196,6 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         logger.debug("User: ", agree.uid, "agree to join group: ", agree.gid);
         cInfo.group.push(agree.gid);
         logger.debug("Add group: ", agree.gid, "to user's contact: ", cInfo.group);
-        logger.debug("")
     }
 
     return gInfo;
@@ -225,6 +224,7 @@ export const setOwner = (guid: string): Result => {
 
     gInfo.ownerid = parseInt(newOwnerId);
     groupInfoBucket.put(gInfo.gid, gInfo);
+    logger.debug("change group: ", groupId, "owner from: ", gInfo.ownerid, "to: ", newOwnerId);
     res.r = 1;
 
     return res;
@@ -282,15 +282,18 @@ export const delAdmin = (guid: string): Result => {
     let index = members.indexOf(parseInt(delAdminId));
     if (index > -1) {
         members.splice(index, 1);
+        gInfo.adminids = members;
+        groupInfoBucket.put(gInfo.gid, gInfo);
+        logger.debug("after delete admin memmber: ", groupInfoBucket.get(gInfo.gid));
+
+        res.r = 1;
+        return res;
+    } else {
+        res.r = 0; // not an admin
+        logger.debug("User: ", delAdminId, "is not an admin");
+
+        return res;
     }
-
-    gInfo.adminids = members;
-    groupInfoBucket.put(gInfo.gid, gInfo);
-    logger.debug("after delete admin memmber: ", groupInfoBucket.get(gInfo.gid));
-
-    res.r = 1;
-
-    return res;
 }
 
 /**
