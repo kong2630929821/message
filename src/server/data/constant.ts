@@ -26,6 +26,8 @@ export const ACCOUNT_GENERATOR_TABLE = "server/data/db/user.AccountGenerator";
 export const FRIEND_LINK_TABLE = "server/data/db/user.FriendLink";
 export const CONTACT_TABLE = "server/data/db/user.Contact";
 export const LAST_READ_MESSAGE_ID_TABLE = "server/data/db/user.LastReadMessageId";
+export const ONLINE_USERS_TABLE = "server/data/db/user.OnlineUsers";
+export const ONLINE_USERS_REVERSE_INDEX_TABLE = "server/data/db/user.OnlineUsersReverseIndex";
 
 
 //其他

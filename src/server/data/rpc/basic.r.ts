@@ -3,7 +3,7 @@
  * 后端不应该相信前端发送的uid信息，应该自己从会话中获取
  */
 // ================================================================= 导入
-import { Contact, FriendLink, UserInfo, UserCredential, AccountGenerator } from "../db/user.s";
+import { Contact, FriendLink, UserInfo, UserCredential, AccountGenerator, OnlineUsers, OnlineUsersReverseIndex } from "../db/user.s";
 import { LoginReq, LoginReply, GetFriendLinksReq, GetContactReq, Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister, GetUserInfoReq, GetGroupInfoReq } from "./basic.s";
 import { GroupHistory, GroupMsg} from "../db/message.s";
 import { GroupInfo, GroupUserLink } from "../db/group.s";
@@ -120,6 +120,24 @@ export const login = (loginReq: LoginReq): UserInfo => {
             logger.debug("read session value of uid: ", v);
             logger.debug("user login session id: ", session.getId());
         });
+
+        let onlineUsersBucket = new Bucket("memory", CONSTANT.ONLINE_USERS_TABLE, dbMgr);
+        let onlineUsersReverseIndexBucket = new Bucket("memory", CONSTANT.ONLINE_USERS_REVERSE_INDEX_TABLE, dbMgr);
+
+        let online = new OnlineUsers();
+        online.uid = loginReq.uid;
+        online.sessionId = session.getId();
+        onlineUsersBucket.put(online.uid, online);
+
+        logger.debug("Add user: ", uid, "to online users bucket with sessionId: ", online.sessionId);
+
+        let onlineReverse = new OnlineUsersReverseIndex();
+        onlineReverse.sessionId = session.getId();
+        onlineReverse.uid = loginReq.uid;
+        onlineUsersReverseIndexBucket.put(onlineReverse.sessionId, onlineReverse);
+
+        logger.debug("Add user: ", uid, "to online users reverse index bucket with sessionId: ", online.sessionId);
+
     } else {
         logger.debug("wrong password or uid");
         userInfo.uid = -1;
@@ -130,6 +148,21 @@ export const login = (loginReq: LoginReq): UserInfo => {
     return userInfo;
 }
 
+
+//#[rpc=rpcServer]
+export const isUserOnline = (uid: number): Result => {
+    let dbMgr = getEnv().getDbMgr();
+
+    let res = new Result();
+    let bucket = new Bucket("memory", CONSTANT.ONLINE_USERS_TABLE, dbMgr);
+    if (bucket.get<number, [OnlineUsers]>(uid)[0].sessionId === -1) {
+        res.r = 0; // off line;
+        return res;
+    } else {
+        res.r = 1; // user online
+        return res;
+    }
+}
 
 /**
  * 获取用户基本信息

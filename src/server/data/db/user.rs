@@ -72,4 +72,15 @@ struct LastReadMessageId {
     msgId: String // hIncid
 }
 
+#[primary=uid,db=memory]
+struct OnlineUsers {
+    uid: u32,
+    sessionId: u32 // 若用户在线，seessionId > -1
+}
+
+#[primary=sessionId,db=memory]
+struct OnlineUsersReverseIndex {
+    sessionId: u32,
+    uid: u32
+}
 
