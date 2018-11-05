@@ -4,7 +4,7 @@
 // ================================================ 导入
 import { clientRpcFunc, subscribe } from "./init";
 import { notEmptyString } from "../../../utils/util";
-import { registerUser, login as loginUser, setUserInfo as setUserProfile, getGroupsInfo } from "../../../server/data/rpc/basic.p";
+import { registerUser, login as loginUser, setUserInfo as setUserProfile, getGroupsInfo, isUserOnline } from "../../../server/data/rpc/basic.p";
 import { UserRegister, LoginReq, UserInfoSet, Result, GetGroupInfoReq } from "../../../server/data/rpc/basic.s";
 import { UserInfo } from "../../../server/data/db/user.s";
 import { applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFriend as delUserFriend } from "../../../server/data/rpc/user.p";
@@ -232,6 +232,16 @@ export const getGroupInfo = () => {
     clientRpcFunc(getGroupsInfo, groups, (r) => {
         console.log(r);
     })
+}
+
+export const userOnline = (uid: number) => {
+    clientRpcFunc(isUserOnline, uid, (r) => {
+        console.log(r);
+    })
+}
+
+(<any>self).userOnline = (uid: number) => {
+    userOnline(uid);
 }
 
 (<any>self).subscribeGroupMsg = (topicName: string) => {

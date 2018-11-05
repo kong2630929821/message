@@ -155,11 +155,14 @@ export const isUserOnline = (uid: number): Result => {
 
     let res = new Result();
     let bucket = new Bucket("memory", CONSTANT.ONLINE_USERS_TABLE, dbMgr);
-    if (bucket.get<number, [OnlineUsers]>(uid)[0].sessionId === -1) {
-        res.r = 0; // off line;
+    let onlineUser = bucket.get<number, [OnlineUsers]>(uid)[0];
+    if (onlineUser !== undefined && onlineUser.sessionId !== -1) {
+        logger.debug("User: ", uid, "on line");
+        res.r = 1; // on line;
         return res;
     } else {
-        res.r = 1; // user online
+        logger.debug("User: ", uid, "off line");
+        res.r = 0; // off online
         return res;
     }
 }
