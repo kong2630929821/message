@@ -13,6 +13,7 @@
   * 订阅主题
 ims/group/msg/_hid //特定群组的聊天主题
 img/group/anounnce/_aid //特定群组的公告
+
 news/暂无
   */
 

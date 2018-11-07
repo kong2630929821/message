@@ -38,7 +38,7 @@ export class Login extends Widget {
             if (r.uid > 0) {
                 logger.debug(JSON.stringify(r));
                 popNew("client-app-demo_view-chat-chat", { "sid": this.props.uid })
-                subscribeDB(r.uid);
+                subscribeDB(r.uid); 
             }
         })
     }
@@ -50,6 +50,7 @@ export class Login extends Widget {
  */
 const subscribeDB = (uid:number)=>{
     subscribedb.subscribeContact(uid,null);
+    //TODO:
 }
 // ================================================ 本地
 interface Props {

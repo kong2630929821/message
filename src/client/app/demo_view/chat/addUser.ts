@@ -28,19 +28,23 @@ export class AddUser extends Widget {
     returnFunc() {
         this.ok();
     }
+
     setProps(props:any){
-        this.props = props;
+        super.setProps(props);
         this.props.friends = this.state.get(this.props.sid).friends;
         this.props.applyUser = this.state.get(this.props.sid).applyUser;
     }
+
     inputUid(e) {
         this.props.rid = parseInt(e.text);
     }
+
     applyFriend() {
         applyUserFriend(this.props.rid,(r:Result)=>{
             //TODO:
         })
     }
+
     agree(uid:number){
         acceptFriend(uid,true,(r:Result)=>{
             //TODO:

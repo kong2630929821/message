@@ -41,7 +41,7 @@ struct GroupInfo {
 #[primary=guid,db=file,dbMonitor=true]
 struct GroupUserLink {
     guid:String,//用户在当前群组的唯一id"-1"代表不存在,"10001:10002",前面代表gid后面代表uid
-    groupAlias:String,//群在该用户账号上的别名
+    groupAlias:String,//群在该用户账号上的别名//delete
     userAlias:String,//该用户在群里的别名
     hid:usize,//群历史记录id
     join_time: u32,//加入时间
