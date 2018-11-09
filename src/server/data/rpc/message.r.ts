@@ -16,9 +16,73 @@ import * as CONSTANT from '../constant';
 import {Tr} from "../../../pi_pt/rust/pi_db/mgr";
 import { write, read } from "../../../pi_pt/db";
 import { GroupInfo } from "../db/group.s";
+import { LastReadMessageId } from "../db/user.s"
 import { Logger } from "../../../utils/logger";
 
+import { GroupMsgId, P2PMsgId, AnounceMsgId } from "../db/msgid";
+
 const logger = new Logger("MESSAGE");
+
+/**
+ * 用户确认读取了的最新消息id
+ * @param uid
+ */
+//#[rpc=rpcServer]
+export const messageReadAck = (cursor: LastReadMessageId): Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const lastReadMessageidBucket = new Bucket("file", CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
+    let sessionUid = getUid();
+    let uid = cursor.mtype.split(":")[1];
+    let res = new Result();
+    if (sessionUid === undefined) {
+        logger.debug("User didn't login, can't send message read ack");
+        res.r = 0;
+        return res;
+    }
+
+    if (sessionUid !== uid) {
+        logger.debug("inappropriate uid");
+        res.r = 0;
+        return res;
+    }
+
+    let lrmi = new LastReadMessageId();
+    lrmi.mtype = cursor.mtype;
+    lrmi.msgId = cursor.msgId;
+
+    lastReadMessageidBucket.put(uid, lrmi);
+    logger.debug("User: ", uid, "confirm receive message id: ", lrmi.msgId);
+    res.r = 1;
+
+    return res;
+}
+
+/**
+ * 用户获取消息游标
+ * @param cursor "10001:0" -> 用户 10001个人对个人消息， "10001:1" -> 用户10001群消息
+ */
+//#[rpc=rpcServer]
+export const getLastReadMessageId = (cursor: string): LastReadMessageId => {
+    const dbMgr = getEnv().getDbMgr();
+    let uid = getUid();
+    const lastReadMessageidBucket = new Bucket("file", CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
+    let msgId = lastReadMessageidBucket.get(cursor)[0];
+    let res = new LastReadMessageId();
+
+    if (msgId === undefined) {
+        logger.error("User: ", uid, "Can't get msgId for message type: ", cursor);
+        res.mtype = "";
+        res.msgId = "";
+
+        return res;
+    }
+
+    res.mtype = cursor;
+    res.msgId = msgId;
+    logger.debug("User: ", uid, "get message id: ", msgId);
+
+    return res;
+}
 
 
 // ================================================================= 导出
@@ -41,8 +105,9 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
     anmt.time = Date.now();
     anmt.sid = parseInt(uid);
 
+    let announId = new AnounceMsgId(announce.gid, dbMgr);
     let ah = new AnnounceHistory();
-    ah.aIncId = announce.gid + ":" + "1"; // TODO: ways to generate aIncId
+    ah.aIncId = announce.gid + ":" + announId.nextId();
     ah.announce = anmt;
 
     bkt.put(ah.aIncId, ah);
@@ -50,6 +115,14 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
 
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(announce.gid)[0];
     gInfo.annoceid = ah.aIncId;
+
+    let buf = new BonBuffer();
+    announce.bonEncode(buf);
+    let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+    let groupAnnounceTopic = "img/group/anounnce/" + announce.gid;
+
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, groupAnnounceTopic, buf.getBuffer());
+    logger.debug("Send group announcement: ", announce.msg, "to group topic: ", groupAnnounceTopic);
 
     return ah;
 }
@@ -84,7 +157,6 @@ export const cancelAnnouncement = (aIncId: string): Result => {
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket("file", CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
-    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
 
     let session = getEnv().getSession();
     let uid;
@@ -103,7 +175,9 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     gmsg.time = message.time;
     gmsg.cancel = false;
 
-    gh.hIncid = message.gid + ":" + "1"; // TODO: generate msg id
+    let groupMsgId = new GroupMsgId(message.gid, dbMgr);
+
+    gh.hIncid = message.gid + ":" + groupMsgId.nextId();
     gh.msg = gmsg;
 
     bkt.put(gh.hIncid, gh);
@@ -112,13 +186,11 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     gmsg.bonEncode(buf);
 
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+    let groupTopic = "ims/group/msg/" + message.gid;
 
-    // TODO: how to handle members that doesn't online ?
-    let members = groupInfoBucket.get<number, [GroupInfo]>(message.gid)[0].memberids;
-    for (let i = 0; i < members.length; i++) {
-        logger.debug("Group message sent from:", uid.toString(), "to:", members[i].toString());
-        mqttPublish(mqttServer, true, QoS.AtMostOnce, members[i].toString(), buf.getBuffer());
-    }
+    // directly send message to group topic
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
+    logger.debug("Send group message: ", message.msg, "to group topic: ", groupTopic);
 
     return gh;
 }
@@ -166,9 +238,8 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     });
 
     let userHistory = new UserHistory();
-
-    // TODO: ways to generate hid?
-    let hid = 10001;
+    sid = parseInt(sid);
+    let hid = message.rid;
     let curId = 0;
     let mLock = msgLockBucket.get(hid);
     logger.debug("msgLock:", mLock);
@@ -198,6 +269,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userHistory.msg = userMsg;
 
     userHistoryBucket.put(userHistory.hIncid, userHistory);
+    logger.debug("Persist user history message to DB: ", userHistory);
 
     let buf = new BonBuffer();
     userMsg.bonEncode(buf);

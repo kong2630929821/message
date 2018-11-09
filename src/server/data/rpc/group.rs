@@ -25,3 +25,7 @@ struct InviteArray{
 struct NotifyAdmin {
     uid: u32
 }
+
+struct GroupMembers {
+    members: &[u32]
+}

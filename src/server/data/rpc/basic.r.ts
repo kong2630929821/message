@@ -3,7 +3,7 @@
  * 后端不应该相信前端发送的uid信息，应该自己从会话中获取
  */
 // ================================================================= 导入
-import { Contact, FriendLink, UserInfo, UserCredential, AccountGenerator } from "../db/user.s";
+import { Contact, FriendLink, UserInfo, UserCredential, AccountGenerator, OnlineUsers, OnlineUsersReverseIndex } from "../db/user.s";
 import { LoginReq, LoginReply, GetFriendLinksReq, GetContactReq, Result, UserInfoSet, MessageFragment, AnnouceFragment, UserArray, GroupArray, FriendLinkArray, GroupHistoryArray, UserHistoryArray, AnnounceHistoryArray, GroupUserLinkArray, UserRegister, GetUserInfoReq, GetGroupInfoReq } from "./basic.s";
 import { GroupHistory, GroupMsg} from "../db/message.s";
 import { GroupInfo, GroupUserLink } from "../db/group.s";
@@ -63,6 +63,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     contact.friends = [];
     contact.group = [];
     contact.temp_chat = [];
+    contact.blackList = [];
 
     const contactBucket = new Bucket("file", CONSTANT.CONTACT_TABLE, dbMgr);
     let c = contactBucket.get(userInfo.uid)[0];
@@ -119,6 +120,24 @@ export const login = (loginReq: LoginReq): UserInfo => {
             logger.debug("read session value of uid: ", v);
             logger.debug("user login session id: ", session.getId());
         });
+
+        let onlineUsersBucket = new Bucket("memory", CONSTANT.ONLINE_USERS_TABLE, dbMgr);
+        let onlineUsersReverseIndexBucket = new Bucket("memory", CONSTANT.ONLINE_USERS_REVERSE_INDEX_TABLE, dbMgr);
+
+        let online = new OnlineUsers();
+        online.uid = loginReq.uid;
+        online.sessionId = session.getId();
+        onlineUsersBucket.put(online.uid, online);
+
+        logger.debug("Add user: ", uid, "to online users bucket with sessionId: ", online.sessionId);
+
+        let onlineReverse = new OnlineUsersReverseIndex();
+        onlineReverse.sessionId = session.getId();
+        onlineReverse.uid = loginReq.uid;
+        onlineUsersReverseIndexBucket.put(onlineReverse.sessionId, onlineReverse);
+
+        logger.debug("Add user: ", uid, "to online users reverse index bucket with sessionId: ", online.sessionId);
+
     } else {
         logger.debug("wrong password or uid");
         userInfo.uid = -1;
@@ -129,6 +148,24 @@ export const login = (loginReq: LoginReq): UserInfo => {
     return userInfo;
 }
 
+
+//#[rpc=rpcServer]
+export const isUserOnline = (uid: number): Result => {
+    let dbMgr = getEnv().getDbMgr();
+
+    let res = new Result();
+    let bucket = new Bucket("memory", CONSTANT.ONLINE_USERS_TABLE, dbMgr);
+    let onlineUser = bucket.get<number, [OnlineUsers]>(uid)[0];
+    if (onlineUser !== undefined && onlineUser.sessionId !== -1) {
+        logger.debug("User: ", uid, "on line");
+        res.r = 1; // on line;
+        return res;
+    } else {
+        logger.debug("User: ", uid, "off line");
+        res.r = 0; // off online
+        return res;
+    }
+}
 
 /**
  * 获取用户基本信息
@@ -251,21 +288,6 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
     return friendLinkArray;
 }
 
-/**
- * 获取好友别名和历史记录id
- * @param uuidArr
- */
-//#[rpc=rpcServer]
-export const getGroupUserLinks = (uuidArr: string): GroupUserLinkArray => {
-    const dbMgr = getEnv().getDbMgr();
-    const groupInfoBucket = new Bucket("file", CONSTANT.GROUP_INFO_TABLE, dbMgr);
-
-    let groupInfo = groupInfoBucket.get<string, GroupInfo>(uuidArr);
-    let groupUserLink = new GroupUserLink();
-    // TODO: fill more fields
-
-    return;
-}
 
 /**
  * 获取群组聊天的历史记录

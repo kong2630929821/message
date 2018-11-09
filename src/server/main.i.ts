@@ -25,7 +25,9 @@ const initAccountGenerator = () => {
     accountGenerator.nextIndex = ACCOUNT_START;
 
     const bkt = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
-    bkt.put("index", accountGenerator);
+    if (bkt.get("index")[0] === undefined) {
+        bkt.put("index", accountGenerator);
+    }
 }
 
 // 数据库监听器， 需要初始化配置， 启动mqtt服务， rpc服务

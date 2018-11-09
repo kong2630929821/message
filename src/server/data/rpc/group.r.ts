@@ -2,10 +2,10 @@
  * 群组相关的rpc操作
  */
 // ================================================================= 导入
-import { GroupInfo } from "../db/group.s";
+import { GroupInfo, GroupUserLink } from "../db/group.s";
 import { Contact } from "../db/user.s"
-import { Result } from "./basic.s";
-import { GroupCreate, GroupAgree, InviteArray, NotifyAdmin } from "./group.s";
+import { Result, GroupUserLinkArray } from "./basic.s";
+import { GroupCreate, GroupAgree, InviteArray, NotifyAdmin, GroupMembers } from "./group.s";
 
 import { GroupHistory, GroupMsg } from "../db/message.s";
 import { Bucket } from "../../../utils/db";
@@ -17,6 +17,7 @@ import { Tr } from "../../../pi_pt/rust/pi_db/mgr";
 import { write, read } from "../../../pi_pt/db";
 import { Logger } from '../../../utils/logger';
 import { BonBuffer } from "../../../pi/util/bon";
+import { AccountId } from "../db/msgid";
 
 const logger = new Logger('GROUP');
 
@@ -80,6 +81,10 @@ export const userExitGroup = (gid: number): Result => {
         contactBucket.put(parseInt(uid), contact);
         logger.debug("Remove group: ", gid, "from user's contact");
 
+        let groupUserLinkBucket = getGroupUserLinkBucket();
+        groupUserLinkBucket.delete("" + gid + uid);
+        logger.debug("delete user: ", uid, "from groupUserLinkBucket");
+
         res.r = 1;
     } else {
         res.r = 0;
@@ -130,6 +135,18 @@ export const acceptUser = (agree: GroupAgree): Result => {
         contact.group.push(agree.gid);
         contactBucket.put(agree.uid, contact);
         logger.debug("Add group: ", agree.gid, "to user's contact: ", contact.group);
+
+        let groupUserLinkBucket = getGroupUserLinkBucket();
+        let gul = new GroupUserLink();
+        gul.guid = "" + agree.gid + agree.uid;
+        gul.hid = 0;
+        gul.join_time = Date.now();
+        gul.userAlias = "";
+        gul.groupAlias = "";
+
+        groupUserLinkBucket.put(gul.guid, gul);
+        logger.debug("Add user: ", agree.uid, "to groupUserLinkBucket");
+
         res.r = 1; //successfully add user
     }
 
@@ -174,6 +191,7 @@ export const inviteUsers = (invites: InviteArray): Result => {
 //#[rpc=rpcServer]
 export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     const groupInfoBucket = getGroupInfoBucket();
+    const contactBucket = getContactBucket();
     const uid = getUid();
 
     let gInfo = groupInfoBucket.get<number, [GroupInfo]>(agree.gid)[0];
@@ -184,12 +202,27 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         return gInfo;
     }
 
+    let cInfo = contactBucket.get<number, [Contact]>(agree.uid)[0];
+
     if (gInfo.memberids.indexOf(agree.uid) > -1) {
         logger.debug("User: ", agree.uid, "has been exist");
     } else {
         gInfo.memberids.push(agree.uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug("User: ", agree.uid, "agree to join group: ", agree.gid);
+        cInfo.group.push(agree.gid);
+        logger.debug("Add group: ", agree.gid, "to user's contact: ", cInfo.group);
+
+        let groupUserLinkBucket = getGroupUserLinkBucket();
+        let gul = new GroupUserLink();
+        gul.guid = "" + agree.gid + agree.uid;
+        gul.hid = 0;
+        gul.join_time = Date.now();
+        gul.userAlias = "";
+        gul.groupAlias = "";
+
+        groupUserLinkBucket.put(gul.guid, gul);
+        logger.debug("Add user: ", agree.uid, "to groupUserLinkBucket");
     }
 
     return gInfo;
@@ -218,6 +251,7 @@ export const setOwner = (guid: string): Result => {
 
     gInfo.ownerid = parseInt(newOwnerId);
     groupInfoBucket.put(gInfo.gid, gInfo);
+    logger.debug("change group: ", groupId, "owner from: ", gInfo.ownerid, "to: ", newOwnerId);
     res.r = 1;
 
     return res;
@@ -245,6 +279,7 @@ export const addAdmin = (guid: string): Result => {
     }
     logger.debug("user logged in with uid: ", uid, "and you want to add an admin: ", addAdminId);
     gInfo.adminids.push(parseInt(addAdminId));
+    gInfo.memberids.push(parseInt(addAdminId));
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug("After add admin: ", gInfo);
     res.r = 1;
@@ -274,15 +309,22 @@ export const delAdmin = (guid: string): Result => {
     let index = members.indexOf(parseInt(delAdminId));
     if (index > -1) {
         members.splice(index, 1);
+        gInfo.adminids = members;
+        groupInfoBucket.put(gInfo.gid, gInfo);
+        logger.debug("after delete admin memmber: ", groupInfoBucket.get(gInfo.gid));
+
+        let groupUserLinkBucket = getGroupUserLinkBucket();
+        groupUserLinkBucket.delete(guid);
+        logger.debug("delete user: ", delAdminId, "from groupUserLinkBucket");
+
+        res.r = 1;
+        return res;
+    } else {
+        res.r = 0; // not an admin
+        logger.debug("User: ", delAdminId, "is not an admin");
+
+        return res;
     }
-
-    gInfo.adminids = members;
-    groupInfoBucket.put(gInfo.gid, gInfo);
-    logger.debug("after delete admin memmber: ", groupInfoBucket.get(gInfo.gid));
-
-    res.r = 1;
-
-    return res;
 }
 
 /**
@@ -307,6 +349,9 @@ export const delMember = (guid: string): Result => {
     let index = members.indexOf(parseInt(delId));
     if (index > -1) {
         members.splice(index, 1);
+        let groupUserLinkBucket = getGroupUserLinkBucket();
+        groupUserLinkBucket.delete(guid);
+        logger.debug("delete user: ", delId, "from groupUserLinkBucket");
     }
 
     gInfo[0].memberids = members;
@@ -319,22 +364,61 @@ export const delMember = (guid: string): Result => {
 }
 
 /**
+ * 获取群组内的用户id
+ * @param gid group id
+ */
+export const getGroupMembers = (gid: number): GroupMembers => {
+    const dbMgr = getEnv().getDbMgr();
+    const groupInfoBucket = getGroupInfoBucket();
+
+    let gm = new GroupMembers();
+    let m = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    gm.members = m.memberids;
+
+    return gm;
+}
+
+/**
+ * 获取用户在群组内的信息
+ * @param gid
+ */
+export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
+    const dbMgr = getEnv().getDbMgr();
+    const groupInfoBucket = getGroupInfoBucket();
+    let groupUserLinkBucket = new Bucket("file", CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
+    let gla = new GroupUserLinkArray();
+
+    let m = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+
+    for (let i = 0; i < m.memberids.length; i++) {
+        let guid = "" + gid + m.memberids[i];
+        gla.arr.push(groupUserLinkBucket.get(guid)[0]);
+    }
+
+    logger.debug("Get group user link: ", gla);
+
+    return gla;
+}
+
+/**
  * 创建群
  * @param uid
  */
 //#[rpc=rpcServer]
 export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
+    const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
+    let idGen = new AccountId(dbMgr);
 
     if (uid !== undefined) {
         let gInfo = new GroupInfo();
         gInfo.note = groupInfo.note;
-        gInfo.adminids = [];
+        gInfo.adminids = [parseInt(uid)];
         gInfo.annoceid = "0:0";
         gInfo.create_time = Date.now();
         gInfo.dissolve_time = 0;
-        gInfo.gid = 11111; // TODO: ways to generate group id
+        gInfo.gid = idGen.nextGroupId();
         gInfo.join_method = 0;
         gInfo.ownerid = parseInt(uid);
         // TODO: add self to memberids
@@ -352,13 +436,23 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         contactBucket.put(parseInt(uid), contact);
         logger.debug("Add self: ", uid, "to conatact group");
 
+        let groupTopic = "ims/group/msg/" + gInfo.gid;
         let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
-        setMqttTopic(mqttServer, gInfo.gid.toString(), true, true);
+        setMqttTopic(mqttServer, groupTopic, true, true);
+        logger.debug("Set mqtt topic for group: ", gInfo.gid, "with topic name: ", groupTopic);
+
+        let groupUserLinkBucket = new Bucket("file", CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
+        let gulink = new GroupUserLink();
+        gulink.groupAlias = "";
+        gulink.guid = "" + gInfo.gid + uid;
+        gulink.hid = 0;
+        gulink.join_time = Date.now();
+        gulink.userAlias = "";
+
+        groupUserLinkBucket.put(gulink.guid, gulink);
 
         return gInfo;
     }
-
-    // TODO: what if user doesn't login
 }
 
 /**
@@ -388,6 +482,13 @@ export const dissolveGroup = (gid: number): Result => {
 }
 
 // ============ helpers =================
+
+const getGroupUserLinkBucket = () => {
+    const dbMgr = getEnv().getDbMgr();
+    let groupUserLinkBucket = new Bucket("file", CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
+
+    return groupUserLinkBucket;
+}
 
 const getGroupInfoBucket = () => {
     const dbMgr = getEnv().getDbMgr();

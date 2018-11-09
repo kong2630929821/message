@@ -62,7 +62,25 @@ struct Contact {
     temp_chat: &[u32],//临时用户id
     group: &[u32],//群组id
     applyUser:&[u32],//其他用户申请添加当前用户为好友
-    applyGroup:&[u32]//其他群组申请添加当前用户为好友
+    applyGroup:&[u32],//其他群组申请添加当前用户为好友
+    blackList: &[u32]
 }
 
+#[primary=mtype,db=file,dbMonitor=true]
+struct LastReadMessageId {
+    mtype: String, // "10001:0" -> 用户 10001个人对个人消息， "10001:1" -> 用户10001群消息
+    msgId: String // hIncid
+}
+
+#[primary=uid,db=memory]
+struct OnlineUsers {
+    uid: u32,
+    sessionId: u32 // 若用户在线，seessionId > -1
+}
+
+#[primary=sessionId,db=memory]
+struct OnlineUsersReverseIndex {
+    sessionId: u32,
+    uid: u32
+}
 
