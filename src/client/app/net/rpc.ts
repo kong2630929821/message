@@ -4,8 +4,8 @@
 // ================================================ 导入
 import { clientRpcFunc, subscribe } from "./init";
 import { notEmptyString } from "../../../utils/util";
-import { registerUser, login as loginUser, setUserInfo as setUserProfile, getGroupsInfo, isUserOnline } from "../../../server/data/rpc/basic.p";
-import { UserRegister, LoginReq, UserInfoSet, Result, GetGroupInfoReq } from "../../../server/data/rpc/basic.s";
+import { registerUser, login as loginUser, setUserInfo as setUserProfile, getUsersInfo, getGroupsInfo, isUserOnline } from "../../../server/data/rpc/basic.p";
+import { UserRegister, LoginReq, UserInfoSet, Result, GetUserInfoReq, UserArray, GetGroupInfoReq } from "../../../server/data/rpc/basic.s";
 import { UserInfo } from "../../../server/data/db/user.s";
 import { applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFriend as delUserFriend } from "../../../server/data/rpc/user.p";
 import { updateStore, getBorn } from "../data/store";
@@ -55,7 +55,18 @@ export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void
         //todo
     })
 }
-
+/**
+ * 获取用户基本信息
+ * 
+ * @param uid
+ */
+export const getUsersBasicInfo = (uids:Array<number>,cb: (r:UserArray) => void) => {
+    let info = new GetUserInfoReq;
+    info.uids = uids;
+    clientRpcFunc(getUsersInfo,info,(r:UserArray) => {
+        cb(r);
+    })
+}
 /**
  * 单聊
  * @param rid

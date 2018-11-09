@@ -5,11 +5,12 @@
 // ================================================ 导入
 import { Widget } from "../../../../pi/widget/widget";
 import { Forelet } from "../../../../pi/widget/forelet";
-import { open } from "../../../../pi/ui/root";
+import { popNew } from "../../../../pi/ui/root";
 import { login as userLogin } from '../../net/rpc';
 import { UserInfo } from "../../../../server/data/db/user.s";
 import { Logger } from '../../../../utils/logger';
 import { factorial } from "../../../../pi/util/math";
+import { create } from "../../../../pi/net/rpc";
 
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
@@ -20,41 +21,49 @@ export class RecentHistory extends Widget {
     /**
      * setProps
      */
-    // props:Props={
-    //     messageList:[
-    //         { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 0 },
-    //         { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 27 },
-    //         { avatorPath: "user.png", isGroupMessage: false, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 27 },
-    //         { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: false, unReadCount: 27 },
-    //         { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 27 },
-    //         { avatorPath: "user.png", isGroupMessage: false, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: false, unReadCount: 27 },
-    //         { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 27 }],
-    //     isUtilVisible: false
-    // };
+    public setProps(props,oldProps){
+        super.setProps(props,oldProps);
+        this.props.messageList = [
+                { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 0 },
+                { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 27 },
+                { avatorPath: "user.png", isGroupMessage: false, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 27 },
+                { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: false, unReadCount: 27 },
+                { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 27 },
+                { avatorPath: "user.png", isGroupMessage: false, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: false, unReadCount: 27 },
+                { avatorPath: "user.png", isGroupMessage: true, name: "小天", recordInfo: "给我发个红包看看", recordTime: "18:38", isNotDisturb: true, unReadCount: 27 }];
+        this.props.isUtilVisible = false;
+        this.props.utilList = [
+                {iconPath:"search.png",utilText:"搜索"},
+                {iconPath:"adress-book.png",utilText:"通讯录"},
+                {iconPath:"add-friend.png",utilText:"添加好友"},
+                {iconPath:"group-chat.png",utilText:"创建群聊"},
+                {iconPath:"scan.png",utilText:"扫一扫"},
+        ];
+    }
+    
 
-    // getMore() {
-    //     console.log("getMore")
-    //     let temp = !this.props.isUtilVisible;
-    //     this.props.isUtilVisible = temp;
-    //     this.paint();
-    // }
+    getMore() {
+        console.log("getMore")
+        let temp = !this.props.isUtilVisible;
+        this.props.isUtilVisible = temp;
+        this.paint();
+    }
     // 父组件接收子组件的传值
     handleFatherTap(e){
+        // 如果点击的是通讯录
         if(e.index === 1){
             console.log("hhhh")
-            open("client-app-view-contactList-contactList");
+            popNew("client-app-view-contactList-contactList",{"sid" : this.props.uid});
         }
-        // switch(e.index){
-        //     case 1 :
-        //     {
-        //         open("client-app-view-contactList-contactList");
-        //         break;
-        //     }
-        //     case 2 :{
-        //         open("client-app-view-contactList-contactList");
-        //         break;
-        //     }
-        // }
+        // 如果点击的是添加好友
+        if(e.index === 2){
+            console.log("hhhh")
+            popNew("client-app-view-addUser-addUser",{"sid" : this.props.uid});
+        }
+    }
+    // 打开添加好友界面
+    openAddUser(){
+        popNew("client-app-view-addUser-addUser",{"sid" : this.props.uid});
     }
 }
 
@@ -73,15 +82,9 @@ interface UtilList {
     utilText: string;//文本
 }
 interface Props {
+    uid: number,
     messageList: MessageList[],
     utilList:UtilList[],
     isUtilVisible: boolean// 操作列表是否可见
 }
 
-register("userChatMap",()=>{
-
-})
-
-register("lastChat",()=>{
-
-})
