@@ -27,3 +27,12 @@
     font-size: 28px;
     font-family: PingFangSC-Regular;
 }
+.contactorID{
+    font-size: 24px;
+    font-family: PingFangSC-Regular;
+    margin-top:20px;
+}
+.contactorNick{
+    font-size: 24px;
+    font-family: PingFangSC-Regular;
+}

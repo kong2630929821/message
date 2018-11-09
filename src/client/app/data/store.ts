@@ -97,18 +97,21 @@ export const initStore = () => {
  */
 export interface Store {
     uid:number,
-    groupInfoMap: Map<number, GroupInfo>,
-    groupUserLinkMap: Map<string, GroupUserLink>,
-    userHistoryMap: Map<string, UserHistory>,
-    groupHistoryMap: Map<string, GroupHistory>,
-    announceHistoryMap: Map<string, AnnounceHistory>,
-    msgLockMap: Map<number, MsgLock>,
-    userInfoMap: Map<number, UserInfo>,
-    userCredentialMap: Map<number, UserCredential>, 
-    accountGeneratorMap: Map<string, AccountGenerator>,
-    friendLinkMap: Map<string, FriendLink>,
-    contactMap: Map<number, Contact>,
-    addressInfoMap: Map<number, AddressInfo>
+    groupInfoMap: Map<number, GroupInfo>,//gid
+    groupUserLinkMap: Map<string, GroupUserLink>,//guid
+    userHistoryMap: Map<string, UserHistory>,//hidinc
+    groupHistoryMap: Map<string, GroupHistory>,//hidinc
+    announceHistoryMap: Map<string, AnnounceHistory>,//aidinc
+    msgLockMap: Map<number, MsgLock>,//LOCK
+    userInfoMap: Map<number, UserInfo>,//uid
+    userCredentialMap: Map<number, UserCredential>, //todo
+    accountGeneratorMap: Map<string, AccountGenerator>,//todo
+    friendLinkMap: Map<string, FriendLink>,//uuid
+    contactMap: Map<number, Contact>,//uid
+    addressInfoMap: Map<number, AddressInfo>//uid
+    userChatMap:Map<number, Array<string>>//hid,hidinc,递增存储
+    groupChatMap:Map<number, Array<string>>//hid,hidinc
+    lastChat:Array<[number,number]>//gid|uid,time,最大50个元素的数组，前端自己生产的数组，每条信息都需要更新该表
 }
 
 // ============================================ 本地

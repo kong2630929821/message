@@ -15,15 +15,11 @@ interface Props{
 
 // ===========================导出
 export class TextMessage extends Widget{
-    public props : Props;
-    constructor(){
-        super();
-        this.props = {
-                message : "大家好在我是新手请多多指教大家啊好，我是新手请多多指教大家好，我是新手请多多指教",
-                sendTime : "17:56",
-                isYourSelf : true,
-                isRead:true
-        };
-    }
+    props = {
+        message : "大家好在我是新手请多多指教大家啊好，我是新手请多多指教大家好，我是新手请多多指教",
+        sendTime : "17:56",
+        isYourSelf : true,
+        isRead:true
+    } as Props;
 }
 

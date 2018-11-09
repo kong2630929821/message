@@ -5,9 +5,7 @@
         </div>
         <div w-class="corner">
             <span w-class="sendTime">{{it.sendTime}}</span>
-            {{if it.isRead}}
-            <img w-class="isRead" src="../../res/images/error.png" />
-            {{end}}
+            <img w-class="isRead" src="../../res/images/{{it.isRead ? 'readed' : 'unread'}}.png" />
         </div>
         <span w-class="{{it.isYourSelf ? 'rightDownTail' : 'leftDownTail'}}"></span>
     </div>

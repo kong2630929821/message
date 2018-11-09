@@ -12,7 +12,7 @@
         </div>
     </div>
     <div w-class="eye" on-tap="changeEye">
-        <img src="../../res/images/{{it.visible ? 'open' : 'close'}}-eye.png" />
+        <img src="../../res/images/{{it.visible ? 'open' : 'close'}}Eyes.png" />
     </div>
     
     <span w-class="login-btn" on-tap="login">登录</span>

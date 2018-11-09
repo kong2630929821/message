@@ -27,12 +27,10 @@ const logger = new Logger(WIDGET_NAME);
      } as Props
 
     inputName(e){
-        console.log("inputName",e.value)
         this.props.uid = parseInt(e.value);
     }
 
     inputPasswd(e){
-        console.log("inputPasswd",e.value)
         this.props.passwd = e.value;
         if(e.value){
             this.props.isClear = true;
@@ -68,14 +66,16 @@ const logger = new Logger(WIDGET_NAME);
         //                 lastChat
         //         }
         userLogin(this.props.uid,this.props.passwd, (r:UserInfo)=>{
+            console.log("=====fff=====",r)
+            // popNew("client-app-view-recentHistory-recentHistory",{"uid":10001})
             if(r.uid > 0){
                 logger.debug(JSON.stringify(r));
-                popNew("client-app-view-recentHistory-recentHistory")
+                popNew("client-app-view-recentHistory-recentHistory", { "uid": this.props.uid })
                 // 订阅消息主题 别人发消息可以收到
                 subscribeMsg(r.uid.toString(),UserMsg,(r:UserMsg) => {
 
                 });
-                // 订阅数据库表
+                //订阅数据库表
                 subscribeDB(r.uid);
             }
         })

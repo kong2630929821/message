@@ -1,5 +1,5 @@
 /**
- * 登录
+ * 注册成功
  */
 
 // ================================================ 导入
@@ -20,10 +20,7 @@ export class RegisterSuccess extends Widget {
     props = {
         uid:null
     } as Props
-    ok:()=>void;
-    back(e) {
-        this.ok()
-    }
+    
     goChat() {
         console.log("goChat")    
     }
@@ -31,5 +28,5 @@ export class RegisterSuccess extends Widget {
 
 // ================================================ 本地
 interface Props {
-    uid : string
+    uid : number
 }

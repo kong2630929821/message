@@ -18,15 +18,13 @@ interface Props{
 
 // ===========================导出
 export class UtilList extends Widget{
-    public props: Props;
-    public setProps(props:Props,oldProps:Props){
-        super.setProps(props,oldProps);
-        // this.props = {
-        //     utilList : [{iconPath : "emoji.png",utilText : "搜索"},
-        //                 {iconPath : "emoji.png",utilText : "通讯录"},
-        //                 {iconPath : "",utilText : "添加好友"}]
-        // }   
-    }
+    
+    public props: Props = {
+        utilList : [{iconPath : "emoji.png",utilText : "搜索"},
+                    {iconPath : "emoji.png",utilText : "通讯录"},
+                    {iconPath : "",utilText : "添加好友"}]
+    }   
+        
     // 处理点击每一项功能列表
     handleUtilItemTap(event,index){
         notify(event.node,"ev-handleFatherTap",{index:index});

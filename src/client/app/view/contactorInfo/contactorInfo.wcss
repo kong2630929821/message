@@ -1,0 +1,99 @@
+.top-main-wrap{
+    width:100%;
+    height:550px;
+}
+.detail-info-wrap{
+    position:absolute;
+    left: 20px;
+    top: 474px;
+    width: 710px;
+    height: 840px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+}
+.detail-info{
+    width:690px;
+    height:400px;
+    padding-left:20px;
+    padding-right:20px;
+    border-bottom:solid gray 1px;
+    margin:0 10px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-around;
+}
+.adress-wrap{
+    display:flex;
+    align-items:center;
+    margin-top: 40px;
+}
+.phone-wrap{
+    display:flex;
+    align-items:center;
+    margin-bottom: 40px;
+}
+.adressIcon{
+    width:48px;
+    height: 48px;
+    margin-right:40px;
+}
+.phoneIcon{
+    width:48px;
+    height: 48px;
+    margin-right:40px;
+}
+.adress-text-wrap{
+    display:flex;
+    flex-direction:column;
+}
+.phone-text-wrap{
+    display:flex;
+    flex-direction:column;
+}
+.mainText{   
+    color: rgba(34, 34, 34, 1);
+    font-size: 32px;
+    font-family: PingFangSC-Regular;
+}
+.flag{
+    color: rgba(136, 136, 136, 1);
+    font-size: 24px;
+    font-family: PingFangSC-Regular;
+}
+.other-wrap{
+    width:650px;
+    margin:30px;
+    display:flex;
+}
+.moreChooseIcon{
+    width:48px;
+    height: 48px;
+    margin-right:40px;
+}
+.ul-wrap{
+    margin:0;
+    width:562px;
+}
+.liItem{
+    margin:20px 0;
+    color: rgba(34, 34, 34, 1);
+    font-size: 32px;
+    font-family: PingFangSC-Regular;
+}
+.firstLi{
+    margin-top:0;
+}
+.lastLi{
+    color:#318DE6;
+}
+.contactorOpList{
+    position:absolute;
+    left: 427px;
+    top: 128px;
+    width: 273px;
+    height: 324px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.2);
+}

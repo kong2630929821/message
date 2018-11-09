@@ -5,16 +5,24 @@
 
 // ===========================导入
 import { Widget } from "../../../../pi/widget/widget"
+import {notify} from "../../../../pi/widget/event"
 
+interface Props{
+    rid : number,
+    isOnInput:boolean
+}
 
 // ===========================导出
 export class InputMessage extends Widget{
 
-    public create(){
-        super.create();
-        this.state = {
-            isOnInput : false
-        }
+    public setProps(props,oldProps){
+        console.log("新旧",props,oldProps)
+        super.setProps(props,oldProps);
+        this.props.isOnInput = false;
+    }
+    props:Props={
+        rid : 10001,
+        isOnInput:false
     }
     
     // 麦克风输入处理
@@ -32,13 +40,21 @@ export class InputMessage extends Widget{
         console.log("openTool");
     }
 
+    // 点击发送
+    public send(e){
+        if(this.props.isOnInput){ // 有输入才触发发送事件处理
+            notify(e.node,"ev-send",{})    
+        }
+    }
+
     public HandleOnInput(e){
-        if(e.text){
-            this.state.isOnInput = true;
+        if(e.value){
+            this.props.isOnInput = true;
         }
         else{
-            this.state.isOnInput = false;
+            this.props.isOnInput = false;
         }
+        notify(e.node,"ev-input-text",{"message":e.value})
         this.paint();
     }
 
