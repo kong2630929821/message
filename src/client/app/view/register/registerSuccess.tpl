@@ -1,7 +1,7 @@
 <div w-class="register-success-wrap" style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
     <client-app-widget-topBar-topBar w-class="title">{title:"注册",background:"#fff"}</client-app-widget-topBar-topBar>
     <div w-class="success-status-wrap">
-        <img src="../../res/images/icon_right2.png" w-class="successIcon">
+        <img src="../../res/images/icon_right2.png" w-class="successIcon"/>
         <span w-class="successText">注册成功</span>
     </div>
     <div w-class="id-wrap">
