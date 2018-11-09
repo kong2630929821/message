@@ -65,7 +65,8 @@ winit.initNext = function () {
 
 		//加载APP部分代码，实际项目中会分的更细致
 		var loadApp = function () {
-			util.loadDir(["client/app/"], flags, fm, undefined, function (fileMap) {
+			util.loadDir(["client/app/widget/"], flags, fm, undefined, function (fileMap) {
+				alert("3");
 				console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
 				var tab = util.loadCssRes(fileMap);
 				// 将预加载的资源缓冲90秒，释放
@@ -92,6 +93,7 @@ winit.initNext = function () {
 		//初始化rpc服务
 		var structRegister = function () {
 			util.loadDir(["client/app/net/", "pi/struct/"], flags, fm, undefined, function (fileMap, mods) {
+				alert("4");
 				pi_modules.commonjs.exports.relativeGet("client/app/net/init").exports.registerRpcStruct(fm);
 				pi_modules.commonjs.exports.relativeGet("client/app/net/init").exports.initClient();
 			}, function (r) {
