@@ -13,7 +13,7 @@ import { AddressInfo } from "../../../server/data/db/extra.s";
 import { clientRpcFunc, subscribe } from "./init";
 import { toBonBuffer } from "../../../utils/util";
 import { WARE_NAME } from "../../../server/data/constant";
-import { getBorn, updateStore, MapName} from "../data/store";
+import * as store from "../data/store";
 import { ab2hex } from '../../../pi/util/util';
 import { BonBuffer } from '../../../pi/util/bon';
 
@@ -128,7 +128,7 @@ export const subscribeAddressInfo = (uid: number, cb) => {
  * @param mapName 
  * @param cb 
  */
-const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyValue:any, struct:any, mapName:MapName, cb:(r)=>void) => {
+const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyValue:any, struct:any, mapName:store.MapName, cb:(r)=>void) => {
     clientRpcFunc(method, keyValue, (r: any) => {
         updateMap(r);
         const bonKeyValue = ab2hex(new BonBuffer().write(keyValue).getBuffer());
@@ -136,12 +136,9 @@ const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyV
             updateMap(r);
         })
     })    
+
     const updateMap = (r:any) => {
-        let oldMap = getBorn(mapName)
-        if(r[keyName] != defaultKeyValue){
-            oldMap.set(r[keyName],r);
-            updateStore(mapName,oldMap)
-        }
+        store.setStore(`${mapName}/${keyValue}`,r)
         cb&&cb(r);
     }
 }

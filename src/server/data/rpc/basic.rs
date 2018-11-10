@@ -82,7 +82,7 @@ struct GetContactReq {
 }
 
 struct GetFriendLinksReq {
-    uuid: &[u32]
+    uuid: &[String]
 }
 
 struct LoginReq {

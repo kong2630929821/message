@@ -9,6 +9,7 @@ import { applyFriend as applyUserFriend, acceptFriend, delFriend as delUserFrien
 import * as store from "../../data/store";
 import { Contact } from "../../../../server/data/db/user.s";
 import { Result } from "../../../../server/data/rpc/basic.s";
+import { popNew } from "../../../../pi/ui/root";
 
 // ================================================ 导出
 declare var module;
@@ -18,21 +19,13 @@ const WIDGET_NAME = module.id.replace(/\//g, '-');
 export class AddUser extends Widget {
     props = {
         sid: null,
-        rid: null,
-        friends:[],
-        applyUser:[]
+        rid: null
     } as Props
     state = new Map;
     ok:()=>void
 
     returnFunc() {
         this.ok();
-    }
-
-    setProps(props:any){
-        super.setProps(props);
-        this.props.friends = this.state.get(this.props.sid).friends;
-        this.props.applyUser = this.state.get(this.props.sid).applyUser;
     }
 
     inputUid(e) {
@@ -44,7 +37,9 @@ export class AddUser extends Widget {
             //TODO:
         })
     }
-
+    chat(uid:number){
+        popNew("client-app-demo_view-chat-chat", {"sid":this.props.sid,"rid":uid})
+    }
     agree(uid:number){
         acceptFriend(uid,true,(r:Result)=>{
             //TODO:
@@ -66,16 +61,12 @@ export class AddUser extends Widget {
 interface Props {
     sid: number,
     rid: number,
-    friends:Array<number>,
-    applyUser:Array<number>
 }
-type State = Map<number, Contact>
+type State = Contact
 
 store.register("contactMap", (r: Map<number, Contact>) => {
-    forelet.paint(r);
-    let w = forelet.getWidget(WIDGET_NAME)    
-    if(w){
-        w.setProps(w.props);
-        w.paint()
-    }
+    //这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
+    for (let value of r.values()) {
+        forelet.paint(value)
+      }    
 })

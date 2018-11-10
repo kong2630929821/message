@@ -8,7 +8,7 @@ import { registerUser, login as loginUser, setUserInfo as setUserProfile, getUse
 import { UserRegister, LoginReq, UserInfoSet, Result, GetUserInfoReq, UserArray, GetGroupInfoReq } from "../../../server/data/rpc/basic.s";
 import { UserInfo } from "../../../server/data/db/user.s";
 import { applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFriend as delUserFriend } from "../../../server/data/rpc/user.p";
-import { updateStore, getBorn } from "../data/store";
+import { setStore } from "../data/store";
 import { sendUserMessage, sendGroupMessage, sendAnnouncement } from "../../../server/data/rpc/message.p";
 import { UserSend, GroupSend, AnnounceSend } from "../../../server/data/rpc/message.s";
 import { UserHistory, MSG_TYPE, GroupMsg } from "../../../server/data/db/message.s";
@@ -28,9 +28,7 @@ export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => 
     info.name = name;
     info.passwdHash = passwdHash;
     clientRpcFunc(registerUser, info, (r: UserInfo) => {
-        let userInfoMap = getBorn("userInfoMap")
-        userInfoMap.set(r.uid, r);
-        updateStore("userInfoMap", userInfoMap);
+        setStore(`userInfoMap/${r.uid}`,r)        
         cb(r);
     })
 }
@@ -46,13 +44,7 @@ export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void
     info.uid = uid;
     info.passwdHash = passwdHash;
     clientRpcFunc(loginUser, info, (r: UserInfo) => {
-        let userInfoMap = getBorn("userInfoMap")
-        userInfoMap.set(r.uid, r);
-        updateStore("userInfoMap", userInfoMap);
         cb(r);
-        // userInfoMap.set(r.uid, r)
-        // updateStore("userInfoMap", userInfoMap);
-        //todo
     })
 }
 /**
@@ -81,13 +73,7 @@ export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => vo
     info.time = (new Date).getTime();
 
     clientRpcFunc(sendUserMessage, info, (r: UserHistory) => {
-        let userHistoryMap = getBorn("userHistoryMap")
-        userHistoryMap.set(r.hIncid, r);
-        updateStore("userHistoryMap", userHistoryMap);
         cb(r);
-        // userInfoMap.set(r.uid, r)
-        // updateStore("userInfoMap", userInfoMap);
-        //todo
     })
 }
 

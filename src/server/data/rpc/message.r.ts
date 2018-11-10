@@ -272,7 +272,8 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     logger.debug("Persist user history message to DB: ", userHistory);
 
     let buf = new BonBuffer();
-    userMsg.bonEncode(buf);
+    // userMsg.bonEncode(buf);
+    userHistory.bonEncode(buf);    
 
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
     mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());

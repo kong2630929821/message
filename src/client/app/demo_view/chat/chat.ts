@@ -6,36 +6,60 @@
 import { Widget } from "../../../../pi/widget/widget";
 import { Forelet } from "../../../../pi/widget/forelet";
 import { sendMessage } from "../../net/rpc";
-import { subscribe as subscribeMsg } from "../../net/init";
-import { UserHistory, UserMsg } from "../../../../server/data/db/message.s";
 import { popNew } from "../../../../pi/ui/root";
+import { UserHistory, UserMsg } from "../../../../server/data/db/message.s";
+import { updateUserMessage } from "../../data/parse";
+import * as store from "../../data/store";
 // ================================================ 导出
 export class Chat extends Widget {
     props = {
         sid: null,
         rid: null,
-        message: null
+        inputMessage:"",
+        hidIncArray: []
     } as Props
 
-    inputUid(e) {
-        this.props.rid = parseInt(e.text);
+    create(){
+        super.create();
+        
+    }
+    setProps(props){
+        super.setProps(props);
+        this.props.hidIncArray = store.getStore(`userChatMap/${this.getHid()}`);
+    }
+
+    firstPaint(){
+        super.firstPaint();
+        store.register(`userChatMap/${this.getHid()}`,(r:Array<string>)=>{
+            this.setProps(this.props);
+            this.paint();
+        })
     }
 
     inputMessage(e) {
-        this.props.message = e.text;
+        this.props.inputMessage = e.text;
     }
-    subscribe() {
-        subscribeMsg(this.props.sid.toString(), UserMsg, (r: UserMsg) => {
 
-        })
-    }
     send(e) {
-        sendMessage(this.props.rid, this.props.message, (r: UserHistory) => {
-            //TODO:
-        })
+        sendMessage(this.props.rid, this.props.inputMessage, (() => {
+            let nextside = this.props.rid;
+            return (r: UserHistory) => {
+                updateUserMessage(nextside, r);
+            }
+        })())
     }
+
     openAddUser(e) {
-        popNew("client-app-demo_view-chat-addUser", { "sid": this.props.sid,"rid":null })
+        popNew("client-app-demo_view-chat-addUser", { "sid": this.props.sid, "rid": null })
+    }
+
+    destroy(){
+        store.unregister(`userChatMap/${this.getHid()}`,undefined)
+        return super.destroy();
+    }
+    private getHid(){
+        let friendLink = store.getStore(`friendLinkMap/${this.props.sid}:${this.props.rid}`)
+        return friendLink && friendLink.hid
     }
 }
 
@@ -43,5 +67,7 @@ export class Chat extends Widget {
 interface Props {
     sid: number,
     rid: number,
-    message: string
+    inputMessage:string,
+    hidIncArray: Array<string>
+    
 }
