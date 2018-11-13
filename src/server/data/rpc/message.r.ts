@@ -95,7 +95,6 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket("file", CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
     let uid = getUid();
-    let groupInfoBucket = getGroupInfoBucket();
 
     let anmt = new Announcement();
     anmt.cancel = false;
@@ -112,9 +111,6 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
 
     bkt.put(ah.aIncId, ah);
     logger.debug("Send annoucement: ", anmt, "to group: ", announce.gid);
-
-    let gInfo = groupInfoBucket.get<number, [GroupInfo]>(announce.gid)[0];
-    gInfo.annoceid = ah.aIncId;
 
     let buf = new BonBuffer();
     announce.bonEncode(buf);
@@ -273,7 +269,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
 
     let buf = new BonBuffer();
     // userMsg.bonEncode(buf);
-    userHistory.bonEncode(buf);    
+    userHistory.bonEncode(buf);
 
     let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
     mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());

@@ -28,7 +28,7 @@ export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => 
     info.name = name;
     info.passwdHash = passwdHash;
     clientRpcFunc(registerUser, info, (r: UserInfo) => {
-        setStore(`userInfoMap/${r.uid}`,r)        
+        setStore(`userInfoMap/${r.uid}`,r)
         cb(r);
     })
 }
@@ -49,7 +49,7 @@ export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void
 }
 /**
  * 获取用户基本信息
- * 
+ *
  * @param uid
  */
 export const getUsersBasicInfo = (uids:Array<number>,cb: (r:UserArray) => void) => {
@@ -191,7 +191,7 @@ export const acceptUserJoin = (uid: number, accept: boolean) => {
 
 export const sendAnnounce = (gid: number) => {
     let a = new AnnounceSend();
-    a.gid = 11111;
+    a.gid = gid;
     a.msg = "new announcement";
     a.mtype = 1;
     a.time = Date.now();

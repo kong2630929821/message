@@ -74,7 +74,7 @@ export class AnounceMsgId {
 
     nextId() {
         let m = new AnounceMsgIdBucket();
-        let gbkt = new Bucket("file","server/data/db/mid.GroupMsgIdBucket", this.dbManager);
+        let gbkt = new Bucket("file","server/data/db/mid.AnounceMsgIdBucket", this.dbManager);
         if (gbkt.get(this.gid)[0] === undefined) {
             m.gid = this.gid;
             m.aid = 1;
