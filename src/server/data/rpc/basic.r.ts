@@ -43,7 +43,6 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     accountGenerator.nextIndex = nextAccount;
     accountGeneratorBucket.put("index", accountGenerator);
 
-    // FBI warning: if the struct has a field with integer type, you must explicit specify it, wtf
     userInfo.uid = nextAccount;
     userInfo.sex = 1;
 
@@ -52,7 +51,6 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
 
     userInfoBucket.put(userInfo.uid, userInfo);
     logger.debug("sucessfully registered user", userInfo);
-    // TODO: check potential error
     userCredentialBucket.put(userInfo.uid, userCredential);
 
     // write contact info
@@ -283,7 +281,16 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
 
     let friendLinkArray = new FriendLinkArray();
     let uuids = getFriendLinksReq.uuid.map(v => v.toString());
-    friendLinkArray.arr = friendLinkBucket.get(uuids);
+
+    let friend = new FriendLink();
+    let friends = friendLinkBucket.get(uuids)[0];
+    // no friends found
+    if (friends === undefined) {
+        friend.alias = "";
+        friend.hid = 0;
+        friend.uuid = "";
+    }
+    friendLinkArray.arr = [friend];
 
     return friendLinkArray;
 }

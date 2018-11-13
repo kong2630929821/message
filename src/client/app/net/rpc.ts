@@ -4,8 +4,8 @@
 // ================================================ 导入
 import { clientRpcFunc, subscribe } from "./init";
 import { notEmptyString } from "../../../utils/util";
-import { registerUser, login as loginUser, setUserInfo as setUserProfile, getUsersInfo, getGroupsInfo, isUserOnline } from "../../../server/data/rpc/basic.p";
-import { UserRegister, LoginReq, UserInfoSet, Result, GetUserInfoReq, UserArray, GetGroupInfoReq } from "../../../server/data/rpc/basic.s";
+import { registerUser, login as loginUser, setUserInfo as setUserProfile, getUsersInfo, getGroupsInfo, isUserOnline, getFriendLinks } from "../../../server/data/rpc/basic.p";
+import { UserRegister, LoginReq, UserInfoSet, Result, GetUserInfoReq, UserArray, GetGroupInfoReq, GetFriendLinksReq } from "../../../server/data/rpc/basic.s";
 import { UserInfo } from "../../../server/data/db/user.s";
 import { applyFriend as applyUserFriend, acceptFriend as acceptUserFriend, delFriend as delUserFriend } from "../../../server/data/rpc/user.p";
 import { setStore } from "../data/store";
@@ -235,6 +235,19 @@ export const userOnline = (uid: number) => {
     clientRpcFunc(isUserOnline, uid, (r) => {
         console.log(r);
     })
+}
+
+export const friendLinks = (uuid: string) => {
+    let x = new GetFriendLinksReq();
+    x.uuid = [uuid];
+
+    clientRpcFunc(getFriendLinks, x, (r) => {
+        console.log(r);
+    })
+}
+
+(<any>self).friendLinks = (uuid: string) => {
+    friendLinks(uuid);
 }
 
 (<any>self).userOnline = (uid: number) => {
