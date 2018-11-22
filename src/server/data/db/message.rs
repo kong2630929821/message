@@ -54,18 +54,18 @@ struct Announcement {
 /**
 *用户历史记录
 */
-#[primary=hIncid,db=file,dbMonitor=true]
+#[primary=hIncId,db=file,dbMonitor=true]
 struct UserHistory {
-    hIncid: String,//"-1"代表不存在,历史记录的唯一id,"10001:111",前面代表hid后面代表index
+    hIncId: String,//"-1"代表不存在,历史记录的唯一id,"10001:111",前面代表hid后面代表index
     msg: UserMsg,
 }
 
 /**
 *群组历史记录
 */
-#[primary=hIncid,db=file,dbMonitor=true]
+#[primary=hIncId,db=file,dbMonitor=true]
 struct GroupHistory {
-    hIncid: String,//历史记录的唯一id,"10001:111",前面代表hid后面代表index
+    hIncId: String,//历史记录的唯一id,"10001:111",前面代表hid后面代表index
     msg: GroupMsg,
 }
 
@@ -83,6 +83,6 @@ struct AnnounceHistory {
 */
 #[primary=hid,db=file,dbMonitor=true]
 struct MsgLock {
-    hid: usize,//历史记录id,-1代表不存在
+    hid: String,//历史记录id,-1代表不存在
     current: u32,//当前消息锁编号
 }

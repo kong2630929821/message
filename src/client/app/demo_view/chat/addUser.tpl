@@ -11,7 +11,12 @@
     已有好友
     <br></br>
     {{for key,value of it1.friends}}
-        <div><span>id:{{value}}</span><span on-tap="chat({{value}})">!点我聊天</span><span on-tap="delFriend({{value}})">!点我删除</span></div>
+        <div>
+            <span>id:{{value}}</span>
+            <span on-tap="chat({{value}})">!点我聊天</span>
+            <span on-tap="delFriend({{value}})">!点我删除</span>
+            <span on-tap="showInfo({{value}})">!点我查看详情</span>
+        </div>
     {{end}}  
     <br></br>  
     </div>

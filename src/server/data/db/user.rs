@@ -48,8 +48,8 @@ struct AccountGenerator {
 #[primary=uuid,db=file,dbMonitor=true]
 struct FriendLink {
     uuid: String,//两个用户的id"-1"代表不存在,"10001:10002",前面代表uid1后面代表uid2
-    alias: String,//别名
-    hid: usize//历史记录id 53位，直接使用底层接口
+    alias: String,//别名,如果没有别名则为空字符串
+    hid: String//历史记录id 53位，直接使用底层接口
 }
 
 /**
@@ -69,7 +69,7 @@ struct Contact {
 #[primary=mtype,db=file,dbMonitor=true]
 struct LastReadMessageId {
     mtype: String, // "10001:0" -> 用户 10001个人对个人消息， "10001:1" -> 用户10001群消息
-    msgId: String // hIncid
+    msgId: String // hIncId
 }
 
 #[primary=uid,db=memory]

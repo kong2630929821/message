@@ -1,6 +1,12 @@
 {
     "compilerOptions": {
-        "target": "es6",
-        "module": "amd"
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "target": "es2015",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "noUnusedLocals": true,
+        "noUnusedParameters": true, 
+        "experimentalDecorators": true
     }
 }

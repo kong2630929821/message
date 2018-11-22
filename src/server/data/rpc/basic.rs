@@ -28,7 +28,7 @@ enum ORDER {
 }
 
 struct MessageFragment{
-    hid:usize,//历史记录id
+    hid:String,//历史记录id
     from:u32,//开始条数,-1代表最近一条
     order:ORDER,//顺序还是逆序,一般是逆序
     size:u32,//总共取多少条

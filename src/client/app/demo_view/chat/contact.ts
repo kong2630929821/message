@@ -3,37 +3,35 @@
  */
 
 // ================================================ 导入
-import { Widget } from "../../../../pi/widget/widget";
-import { Forelet } from "../../../../pi/widget/forelet";
-import * as store from "../../data/store";
-import { popNew } from "../../../../pi/ui/root";
-import { UserHistory, UserMsg } from "../../../../server/data/db/message.s";
-import { updateUserMessage } from "../../data/parse";
+import { popNew } from '../../../../pi/ui/root';
+import { Forelet } from '../../../../pi/widget/forelet';
+import { Widget } from '../../../../pi/widget/widget';
+import * as store from '../../data/store';
 // ================================================ 导出
-export const forelet = new Forelet;
+export const forelet = new Forelet();
 export class Contact extends Widget {
-    
-    props = {
-        sid: null,
-    } as Props;
+    public props:Props;
+    constructor() {
+        super();
+        this.props = {
+            sid: null
+        }; 
+    }    
 
-    chat(uid:number){
-        popNew("client-app-demo_view-chat-chat", {"sid":this.props.sid,"rid":uid})
+    public chat(uid:number) {
+        popNew('client-app-demo_view-chat-chat', { sid:this.props.sid,rid:uid });
     }
 
-    openAddUser(e) {
-        popNew("client-app-demo_view-chat-addUser", { "sid": this.props.sid})
+    public openAddUser(e:Event) {
+        popNew('client-app-demo_view-chat-addUser', { sid: this.props.sid });
     }
 }
 
-store.register(`lastChat`,(r:Array<[number,number]>)=>{
-    alert("xxx")
+store.register(`lastChat`,(r:[number,number][]) => {    
     forelet.paint(r);
-})
-
+});
 
 // ================================================ 本地
 interface Props {
-    sid: number,
+    sid: number;
 }
-

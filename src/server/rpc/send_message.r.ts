@@ -1,48 +1,55 @@
-import { sendMessage as Message, messageReceivedAck, messageDeliveredAck as deliveredAck } from './send_message.s';
-import { createMemoryBucket } from '../../utils/db';
-import { Type, EnumType, TabMeta } from '../../pi/struct/sinfo';
+/**
+ * 发送聊天消息
+ */
+import { EnumType, TabMeta, Type } from '../../pi/struct/sinfo';
+import { BonBuffer } from '../../pi/util/bon';
 import { getEnv } from '../../pi_pt/net/rpc_server';
-import { mqttPublish, QoS } from "../../pi_pt/rust/pi_serv/js_net";
-import { ServerNode } from "../../pi_pt/rust/mqtt/server";
-import {BonBuffer} from "../../pi/util/bon";
+import { ServerNode } from '../../pi_pt/rust/mqtt/server';
+import { mqttPublish, QoS } from '../../pi_pt/rust/pi_serv/js_net';
+import { createMemoryBucket } from '../../utils/db';
+import { Logger } from '../../utils/logger';
+import { messageDeliveredAck as deliveredAck, messageReceivedAck, sendMessage as Message } from './send_message.s';
 
+// tslint:disable-next-line:no-reserved-keywords
+declare var module;
+const WIDGET_NAME = module.id.replace(/\//g, '-');
+const logger = new Logger(WIDGET_NAME);
 
-
-//#[rpc]
+// #[rpc]
 export const sendMessage = (message: Message): messageReceivedAck => {
-    let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
 
-    let dst = message.dst;
-    let msgAck = new messageReceivedAck();
+    const dst = message.dst;
+    const msgAck = new messageReceivedAck();
     msgAck.ack = true;
 
     messgeHandler(message);
 
-    let buf = new BonBuffer();
+    const buf = new BonBuffer();
     message.bonEncode(buf);
-
+    logger.debug(`the topic is : ${dst}`);
     mqttPublish(mqttServer, true, QoS.AtMostOnce, dst, buf.getBuffer());
 
     return msgAck;
-}
+};
 
-//#[rpc]
+// #[rpc]
 export const messageDeliveredAck = (): deliveredAck => {
-    let deliverAck = new deliveredAck();
+    const deliverAck = new deliveredAck();
     deliverAck.ack = true;
 
     return deliverAck;
-}
+};
 
 const messgeHandler = (message: Message) => {
-    let dbMgr = getEnv().getDbMgr();
-    let meta = new TabMeta(new EnumType(Type.Usize), new EnumType(Type.Struct, Message._$info));
-    let bkt = createMemoryBucket("wtf", meta, dbMgr);
+    const dbMgr = getEnv().getDbMgr();
+    const meta = new TabMeta(new EnumType(Type.Usize), new EnumType(Type.Struct, Message._$info));
+    const bkt = createMemoryBucket('wtf', meta, dbMgr);
 
-    let key = message.msgId;
-    let val = message;
+    const key = message.msgId;
+    const val = message;
 
     bkt.put(key, val);
 
     console.log('read memory bucket', bkt.get(key));
-}
+};
