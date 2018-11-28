@@ -30,12 +30,12 @@ export class AddUser extends Widget {
         this.state = new Map();
     }
 
-    public returnFunc() {
+    public back() {
         this.ok();
     }
 
     public inputUid(e:any) {
-        this.props.rid = parseInt(e.text,10);
+        this.props.rid = parseInt(e.value,10);
     }
 
     public applyFriend() {
@@ -71,7 +71,6 @@ interface Props {
     sid: number;
     rid: number;
 }
-type State = Contact;
 
 store.register('contactMap', (r: Map<number, Contact>) => {
     // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map

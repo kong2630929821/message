@@ -1,10 +1,14 @@
 <div w-class="user-apply-wrap">
     <div w-class="avator-wrap">
-        <img w-class="avator" src="../../res/images/{{it.avatorPath}}" />
+        <img w-class="avator" src="../../res/images/user.png" />
     </div>
      <div w-class="user-info-wrap">
-        <span w-class="userName">{{it.userName}}</span>
-         <span w-class="applyInfo">{{it.applyInfo}}</span>
+        <span w-class="userName">{{it.info.name}}</span>
+        <span w-class="applyInfo">{{it.applyInfo}}</span>
     </div>
-    <span w-class="seeText" on-tap="viewApplyDetail({{it.uid}})">查看</span>
+    {{if !it.isagree}}
+    <span w-class="seeText" on-tap="agreenBtn">同意</span>
+    {{else}}
+    <span w-class="seeText" style="border:none;color: #888888;">已添加</span>
+    {{end}}
 </div>

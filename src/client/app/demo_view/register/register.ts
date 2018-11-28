@@ -3,39 +3,41 @@
  */
 
 // ================================================ 导入
-import { open } from '../../../../pi/ui/root';
-import { Forelet } from '../../../../pi/widget/forelet';
+import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
 import { register as registerUser } from '../../net/rpc';
 
+// tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
 // ================================================ 导出
 export class Login extends Widget {
-    public props = {
+    public props:Props = {
         name: '',
-        passwd: ''
-    } as Props;
+        passwd: '',
+        success:false
+    };
     public ok:() => void;
-    public back(e) {
+    public back(e:any) {
         this.ok();
     }
-    public inputName(e) {
-        this.props.name = e.text;
+    public inputName(e:any) {
+        this.props.name = e.value;
     }
-    public inputPasswd(e) {
-        this.props.passwd = e.text;
+    public inputPasswd(e:any) {
+        this.props.passwd = e.password;
+        this.props.success = e.success;
     }
-    public register(e) {
+    public register(e:any) {
         registerUser(this.props.name, this.props.passwd, (r: UserInfo) => {
             logger.debug(JSON.stringify(r));
+            this.ok();
+            popNew('client-app-demo_view-register-registerSuccess',{ uid:r.uid });
         });
-
-        // open("client-app-widget-components-inputMessage-inputMessage");
     }
 }
 
@@ -43,4 +45,5 @@ export class Login extends Widget {
 interface Props {
     name: string;
     passwd: string;
+    success:boolean;
 }

@@ -25,7 +25,6 @@ interface Props {
     style?:string;
     autofocus?:boolean;
     maxLength?:number;
-    isSuccess?:boolean;// 验证是否成功
 }
 interface State {
     currentValue:string;
@@ -40,6 +39,7 @@ export class Input extends Widget {
     
     public setProps(props: Props, oldProps: Props) {
         super.setProps(props,oldProps);
+        
         let currentValue = '';
         if (props.input) {
             currentValue = props.input;
@@ -63,6 +63,7 @@ export class Input extends Widget {
             this.props = {};
         }
         paintCmd3(this.getInput(), 'readOnly', this.props.disabled || false);
+        (<any>this.getInput()).value = this.state.currentValue;
         paintWidget(this, reset);
     }
     /**
@@ -108,7 +109,7 @@ export class Input extends Widget {
         }
         // 密码输入时检验非法字符
         if (this.props.itype === 'password' && !this.availableJudge(currentValue) && currentValue.length > 0) {
-            popNew('app-components1-message-message',{ content:'不支持的字符' });
+            popNew('app-components1-message-message',{ content:'非法字符' });
             currentValue = currentValue.slice(0,currentValue.length - 1); 
         }
         // 数字输入时检验输入格式
@@ -122,13 +123,13 @@ export class Input extends Widget {
         if (this.props.itype === 'integer' && currentValue.length > 0) {
             currentValue = currentValue.replace(/[\D]/g,''); 
         }
-
         this.state.currentValue = currentValue;
         this.state.showClear = this.props.clearable && !this.props.disabled && this.state.currentValue !== '' && this.state.focused;
         
-        notify(event.node,'ev-input-change',{ value:this.state.currentValue });
         (<any>this.getInput()).value = currentValue;
-        this.paint();
+        notify(event.node,'ev-input-change',{ value:this.state.currentValue }); 
+        this.state.focused = true;
+        this.paint();  
     }
 
     /**
@@ -154,8 +155,10 @@ export class Input extends Widget {
     // 清空文本框
     public clearClickListener(event:any) {
         this.state.currentValue = '';
-        notify(event.node,'ev-input-clear',{});
-        this.paint(true);
+        this.state.showClear = false;
+        (<any>this.getInput()).value = '';
+        notify(event.node,'ev-input-clear',{});  
+        this.paint();      
     }
 
     /**

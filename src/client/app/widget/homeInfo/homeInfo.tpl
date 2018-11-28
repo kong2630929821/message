@@ -1,7 +1,5 @@
 <div w-class="home-info-wrap">
-    <div w-class="avator-wrap">
-        <img w-class="avator" src="../../res/images/{{it.avatorPath}}" />
-    </div>
+    <img w-class="avator" src="../../res/images/img_avatar1.png" />
     <span w-class="nameText">{{it.isUser && it.note ? it.note : it.name}}</span>
     {{if !it.isUser && it.note}}
         <span w-class="otherText">群号：{{it.note}}</span>
