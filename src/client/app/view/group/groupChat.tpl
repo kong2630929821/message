@@ -1,5 +1,5 @@
 <div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
-    <client-app-widget-topBar-topBar>{title:{{it.groupName}},background:"#fff",moreImg:"more-dot-white.png"}</client-app-widget-topBar-topBar>
+    <client-app-widget-topBar-topBar>{title:{{it.groupName}},background:"#fff",nextImg:"more-dot-white.png"}</client-app-widget-topBar-topBar>
     {{if !it.isLogin}}
     <div w-class="unlogin-chat-wrap">
         <img w-class="no-message" src="../../res/images/no-message.png" />

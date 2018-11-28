@@ -1,6 +1,6 @@
 <div w-class="recent-history-wrap" style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
     <div w-class="top-main-wrap">
-        <client-app-widget-topBar-topBar>{title:"",moreImg:"more-dot-white.png",background:"none"}</client-app-widget-topBar-topBar>
+        <client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"none"}</client-app-widget-topBar-topBar>
         <client-app-widget-homeInfo-homeInfo>{avatorPath:"github.png",name:"用户名",isUser:true,isContactor:false,userId:{{it.rid}} }</client-app-widget-homeInfo-homeInfo>
     </div>
     <div w-class="detail-info-wrap">

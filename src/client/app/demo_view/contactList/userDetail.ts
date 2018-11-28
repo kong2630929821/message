@@ -17,6 +17,7 @@ const logger = new Logger(WIDGET_NAME);
 
 // ================================================ 导出
 export class UserDetail extends Widget {
+    public ok:() => void;
     public props:Props = {
         uid:null,
         isContactorOpVisible:false,
@@ -80,6 +81,10 @@ export class UserDetail extends Widget {
             popNew('client-app-widget-modalBox-modalBox',this.props.modalArr[2]);
         }
         this.paint();
+    }
+
+    public goBack() {
+        this.ok();
     }
 }
 
