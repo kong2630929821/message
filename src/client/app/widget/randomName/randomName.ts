@@ -5,6 +5,7 @@
 import { getRealNode } from '../../../../pi/widget/painter';
 import { Widget } from '../../../../pi/widget/widget';
 import { nameWare } from './nameWareHouse';
+import { notify } from '../../../../pi/widget/event';
 
 // ================================ 导出
 
@@ -27,6 +28,7 @@ export class RandomName extends Widget {
      */
     public nameChange(e: any) {
         this.state.name = e.value;
+        notify(e.node,'ev-rName-change',{value:e.value});
         this.paint();
     }
 

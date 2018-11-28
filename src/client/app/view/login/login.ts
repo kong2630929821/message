@@ -26,7 +26,6 @@ export class Login extends Widget {
             uid:null,
             passwd:'',
             visible: false,// 密码可见性
-            isClear: false// 密码是否可清除
         };
     }
 
@@ -36,12 +35,6 @@ export class Login extends Widget {
 
     public inputPasswd(e:any) {
         this.props.passwd = e.value;
-        if (e.value) {
-            this.props.isClear = true;
-        } else {
-            this.props.isClear = false;
-        }
-        this.paint();
     }
     // 改变眼睛状态
     public changeEye() {
@@ -97,5 +90,4 @@ interface Props  {
     uid:number;
     passwd:string;
     visible:boolean;
-    isClear:boolean;
 }

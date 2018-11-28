@@ -1,13 +1,14 @@
-<div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
-    <div on-tap="back">!点我返回</div>
-    <div>我是注册界面</div>
-    <div ev-input-text="inputName">
-        <span>输入用户名</span>
-        <pi-ui-input></pi-ui-input>
+<div w-class="register-wrap" class="new-page" ev-back-click="back">
+    <client-app-widget-topBar-topBar w-class="title">{title:"注册",background:"none"}</client-app-widget-topBar-topBar>
+    <div w-class="avator-wrap">
+        <img w-class="avator" src="../../res/images/user.png" />
+        <span w-class="upload" on-tap="upload">上传头像</span>
     </div>
-    <div ev-input-text="inputPasswd">
-        <span>输入密码</span>
-        <pi-ui-input></pi-ui-input>
+    <div w-class="input-wrap" ev-psw-change="inputPasswd">
+        <div style="border-bottom: 1px solid #DBDBE5;" ev-rName-change="inputName" >
+            <client-app-widget-randomName-randomName></client-app-widget-randomName-randomName>
+        </div>
+        <client-app-widget-newPassword-newPassword>{}</client-app-widget-newPassword-newPassword> 
     </div>
-    <div on-tap="register">!点我注册</div>
+    <span w-class="register-btn" on-tap="register">注册</span>
 </div>

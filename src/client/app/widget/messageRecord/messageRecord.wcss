@@ -11,7 +11,6 @@
     width:80px;
     height:80px;
     border-radius:50%;
-    border:solid black 1px;
     margin-left:20px;
     margin-right:20px;
 }
@@ -39,7 +38,7 @@
 .notDisturbIcon{
     width:32px;
     height:32px;
-     margin-left:16px;
+    margin-left:16px;
 }
 .recordInfo{ 
     color: rgba(102, 102, 102, 1);
@@ -67,5 +66,5 @@
     color: rgba(255, 255, 255, 1);
     font-size: 28px;
     font-family: PingFangSC-Medium;
-    padding:6px 12px;
+    padding: 0 10px;
 }

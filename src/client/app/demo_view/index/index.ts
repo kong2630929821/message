@@ -1,13 +1,16 @@
+/**
+ * 
+ */
 // ============================== 导入
-import { addWidget } from "../../../../pi/widget/util";
-import { destory, popNew } from "../../../../pi/ui/root";
+import { destory, popNew } from '../../../../pi/ui/root';
+import { addWidget } from '../../../../pi/widget/util';
 // ============================== 导出
 export const run = () => {
-    let currentTime = (new Date).getTime();
-    addWidget(document.body, "pi-ui-root");
-    document.oncontextmenu = function (e) {
-        //或者return false;
+    const currentTime = (new Date()).getTime();
+    addWidget(document.body, 'pi-ui-root');
+    document.oncontextmenu = (e) => {
+        // 或者return false;
         e.preventDefault();
     };
-    popNew("client-app-demo_view-login-login");
-}
+    popNew('client-app-demo_view-login-login');
+};

@@ -27,16 +27,24 @@ export class Login extends Widget {
         super();
         this.props = {
             uid: null,
-            passwd: ''
+            passwd: '',
+            visible: false,// 密码可见性
+            isClear: false// 密码是否可清除
         };
     }
 
     public inputName(e:any) {
-        this.props.uid = parseInt(e.text,10);
+        this.props.uid = parseInt(e.value,10);
     }
 
     public inputPasswd(e:any) {
-        this.props.passwd = e.text;
+        this.props.passwd = e.value;
+        if (e.value) {
+            this.props.isClear = true;
+        } else {
+            this.props.isClear = false;
+        }
+        this.paint();
     }
 
     public openRegister() {
@@ -90,7 +98,3 @@ const init = (uid:number) => {
     // TODO:
 };
 // ================================================ 本地
-interface Props {
-    uid: number;
-    passwd: string;
-}
