@@ -27,6 +27,7 @@ export class Chat extends Widget {
     }
     public setProps(props:any) {
         super.setProps(props);
+        this.props.sid = store.getStore('uid');
         this.props.hidIncArray = store.getStore(`userChatMap/${this.getHid()}`) || [];
     }
 
@@ -38,12 +39,10 @@ export class Chat extends Widget {
         this.setProps(this.props);
         this.paint();
     }
-    public inputMessage(e:any) {
-        this.props.inputMessage = e.text;
-    }
-
+    
     public send(e:any) {
-        sendMessage(this.props.rid, this.props.inputMessage, (() => {
+        this.props.inputMessage = e.value;
+        sendMessage(this.props.rid, e.value, (() => {
             const nextside = this.props.rid;
 
             return (r: UserHistory) => {
@@ -57,16 +56,12 @@ export class Chat extends Widget {
         })());
     }
 
-    public openAddUser(e:any) {
-        popNew('client-app-demo_view-chat-addUser', { sid: this.props.sid, rid: null });
-    }
-
     public destroy() {
         store.unregister(`userChatMap/${this.getHid()}`,this.bindCB);
 
         return super.destroy();
     }
-    public back() {
+    public goBack() {
         this.ok();
     }
     private getHid() {

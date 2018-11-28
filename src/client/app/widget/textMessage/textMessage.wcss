@@ -1,10 +1,8 @@
 .text-message-wrap{
     position:absolute;
-    top:100px;
-    left:100px;
+    right: 50px;
 }
 .text-wrap{
-    min-width:410px;
     max-width:512px;
     padding:16px;
     font-size: 32px;
@@ -23,6 +21,8 @@
     position:absolute;
     right:10px;
     bottom:10px;
+    display: flex;
+    align-items: center;
 }
 .sendTime{   
     color: rgba(41, 127, 202, 1);
@@ -30,7 +30,8 @@
     font-family: PingFangSC-Regular;
 }
 .isRead{
-    height:14px;
+    height:32px;
+    width: 32px;
     margin-left:10px;
 }
 .rightDownTail{

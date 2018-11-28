@@ -1,11 +1,8 @@
 .user-apply-wrap{
-    width: 690px;
     height: 180px;
-    margin: 0 10px;
     padding: 0 20px;
-    border-bottom: solid gray 1px;
+    border-bottom: solid #DBDBE5 1px;
     background-color: rgba(255, 255, 255, 1);
-    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
     display:flex;
     align-items:center;
 }
@@ -13,7 +10,6 @@
     width:80px;
     height:80px;
     border-radius:50%;
-    border:solid black 1px;
     margin-left:0px;
     margin-right:20px;
 }

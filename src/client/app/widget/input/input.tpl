@@ -16,7 +16,5 @@
     />
     {{if it1.showClear}}
     <img w-class="clearBtn" src="../../res/images/clear.png" on-tap="clearClickListener"/>
-    {{elseif it.isSuccess}}
-    <img w-class="clearBtn" src="../../res/images/icon_right2.png" />
     {{end}}
 </div>

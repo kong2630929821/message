@@ -1,31 +1,14 @@
-{{: it1 = it1 || {"friends":[], "applyUser":[]} }}
-<div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
-    <div on-tap="returnFunc">!点我返回</div>
-    <div><span>我的id是:{{it.sid}}</span></div>
-    <div ev-input-text="inputUid">
-        <span>请输入对方id</span>
-        <pi-ui-input></pi-ui-input>
+<div class="new-page" ev-back-click="back">
+    <client-app-widget-topBar-topBar w-class="title">{title:"添加好友"}</client-app-widget-topBar-topBar>
+    <div w-class="search-input" ev-input-change="inputUid">
+        <client-app-widget-input-input w-class="pi-input idInput">{placeHolder : "搜索地址或手机号",style : "font-size:32px;color:#ccc;padding-left:82px;border-radius: 12px;"}</client-app-widget-input-input>
+        <img w-class="searchIcon" src="../../res/images/search-gray.png" />
     </div>
-    <div on-tap="applyFriend">!点我申请添加对方为好友</div>
-    <div>
-    已有好友
-    <br></br>
-    {{for key,value of it1.friends}}
-        <div>
-            <span>id:{{value}}</span>
-            <span on-tap="chat({{value}})">!点我聊天</span>
-            <span on-tap="delFriend({{value}})">!点我删除</span>
-            <span on-tap="showInfo({{value}})">!点我查看详情</span>
-        </div>
-    {{end}}  
-    <br></br>  
+    <div w-class="featureBar-scan-wrap">
+        <client-app-widget-featureBar-featureBar>{iconPath:"scan-circle.png",text:"扫一扫"}</client-app-widget-featureBar-featureBar>
     </div>
-    <div>
-    别人申请加我为好友
-    <br></br>
-    {{for key,value of it1.applyUser}}
-        <div><span>id:{{value}}</span><span on-tap="agree({{value}})">!点我同意</span><span on-tap="reject({{value}})">!点我拒绝</span></div>
-    {{end}}
-    <br></br>
+    <div w-class="featureBar-code-wrap">
+        <client-app-widget-featureBar-featureBar>{iconPath:"two-code.png",text:"我的二维码"}</client-app-widget-featureBar-featureBar>
     </div>
+    <div on-tap="applyFriend" w-class="applyBtn">添加好友</div>
 </div>

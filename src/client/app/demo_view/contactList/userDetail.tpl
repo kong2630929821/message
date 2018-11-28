@@ -1,5 +1,5 @@
-<div w-class="recent-history-wrap" class="new-page" on-tap="closeMore">
-    <div w-class="top-main-wrap" ev-next-click="handleMoreContactor">
+<div w-class="recent-history-wrap" class="new-page">
+    <div w-class="top-main-wrap" ev-handleMoreContactor="handleMoreContactor">
         <client-app-widget-topBar-topBar>{title:"",moreImg:"more-dot-white.png",background:"#318DE6"}</client-app-widget-topBar-topBar>
         <client-app-widget-homeInfo-homeInfo>{avatorPath:"",name:{{it.userInfo.name}},userId:{{it.uid}},isUser:true,isContactor:true}</client-app-widget-homeInfo-homeInfo>
     </div>  

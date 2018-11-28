@@ -1,33 +1,41 @@
-/*
-** applyUser 组件相关处理
-**
-*/ 
-
+/**
+ * applyUser 组件相关处理
+ *
+ */ 
 // ===========================导入
-import { Widget } from "../../../../pi/widget/widget"
-import { popNew } from "../../../../pi/ui/root";
+import { Json } from '../../../../pi/lang/type';
+import { popNew } from '../../../../pi/ui/root';
+import { notify } from '../../../../pi/widget/event';
+import { Widget } from '../../../../pi/widget/widget';
+import { UserInfo } from '../../../../server/data/db/user.s';
+import * as store from '../../data/store';
 
-interface Props{
-    uid:number;//id
-    avatorPath : string;// 头像
-    userName : string;//用户名
-    applyInfo : string; // 其他
+interface Props {
+    uid?:number;// id
+    info?:Json;
+    applyInfo? : string; // 其他
+    isagree:boolean;
 }
 
 // ===========================导出
-export class applyUser extends Widget{
-        props:Props = {
-            uid:null,
-            avatorPath : "emoji.png",
-            userName : "好友用户名",
-            applyInfo : "填写验证信息",
-        }
-        setProps(props:any){
-            this.props = props;
-        }
-        // 查看申请详细信息 
-        viewApplyDetail(uid:number){
-            popNew("client-app-view-addUser-newFriendApply",{'uid':uid});
-        }
-}
+export class ApplyUser extends Widget {
+    public props:Props;
 
+    public setProps(props:any) {
+        super.setProps(props);
+        console.log(props);
+        this.props.applyInfo = '填写验证信息';
+        this.props.info = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
+        this.props.isagree = false;
+    }
+        // 查看申请详细信息 
+    public viewApplyDetail() {
+        popNew('client-app-view-addUser-newFriendApply',{ uid:this.props.uid });
+    }
+
+    public agreenBtn(e:any) {
+        notify(e.node,'ev-agree-friend',{ value:this.props.uid });
+        this.props.isagree = true;
+        this.paint();
+    }
+}

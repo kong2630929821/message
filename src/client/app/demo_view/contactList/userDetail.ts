@@ -3,16 +3,12 @@
  */
 
 // ================================================ 导入
-import { create } from '../../../../pi/net/rpc';
+import { Json } from '../../../../pi/lang/type';
 import { popNew } from '../../../../pi/ui/root';
-import { factorial } from '../../../../pi/util/math';
-import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
-import { UserInfo } from '../../../../server/data/db/user.s';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
 import { getUsersBasicInfo } from '../../../app/net/rpc';
-import { login as userLogin } from '../../net/rpc';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -20,7 +16,7 @@ const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
 // ================================================ 导出
-export class ContactorInfo extends Widget {
+export class UserDetail extends Widget {
     public props:Props = {
         uid:null,
         isContactorOpVisible:false,
@@ -30,8 +26,8 @@ export class ContactorInfo extends Widget {
         userInfo:{}
     };
 
-    public setProps(props,oldProps) {
-        super.setProps(props,oldProps);
+    public setProps(props:Json) {
+        super.setProps(props);
         this.props.userInfo = {};
         this.props.utilList = [
             { utilText:'发送名片' },
@@ -60,15 +56,19 @@ export class ContactorInfo extends Widget {
 
     // 点击...展开联系人操作列表
     public handleMoreContactor() {
-        this.props.isContactorOpVisible = !this.props.isContactorOpVisible;
+        console.log('handleMoreContactor');
+        const temp = !this.props.isContactorOpVisible;
+        this.props.isContactorOpVisible = temp;
         this.paint();
     }
     // 开始对话
     public startDialog() {
-        popNew('client-app-view-chat-chat',{ rid:this.props.uid });
+        console.log('startDialog');
+        popNew('client-app-demo_view-chat-chat',{ rid:this.props.uid });
     }  
     // 点击联系人操作列表项
     public handleFatherTap(e:any) {
+        console.log('handleFatherTap');
         this.props.isContactorOpVisible = false;
         if (e.index === 1) { // 清空聊天记录
             popNew('client-app-widget-modalBox-modalBox',this.props.modalArr[0]);       
@@ -79,12 +79,6 @@ export class ContactorInfo extends Widget {
         if (e.index === 3) { // 删除联系人
             popNew('client-app-widget-modalBox-modalBox',this.props.modalArr[2]);
         }
-        this.paint();
-    }
-
-    // 关闭更多操作列表
-    public closeMore() {
-        this.props.isContactorOpVisible = false;
         this.paint();
     }
 }
