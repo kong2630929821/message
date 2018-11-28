@@ -18,8 +18,7 @@ import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { Logger } from '../../../utils/logger';
 import { LastReadMessageId } from '../db/user.s';
 
-import { genHIncId, genUserHid } from '../../../utils/util';
-import { AnounceMsgId, GroupMsgId } from '../db/msgid';
+import { genHidFromGid, genHIncId, genNextMessageIndex, genUserHid } from '../../../utils/util';
 
 const logger = new Logger('MESSAGE');
 
@@ -154,6 +153,7 @@ export const cancelAnnouncement = (aIncId: string): Result => {
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
 
     const session = getEnv().getSession();
     let uid;
@@ -172,9 +172,16 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     gmsg.time = message.time;
     gmsg.cancel = false;
 
-    const groupMsgId = new GroupMsgId(message.gid, dbMgr);
+    const msgLock = new MsgLock();
+    msgLock.hid = genHidFromGid(message.gid);
+    // 这是一个事务
+    msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
+        mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
 
-    gh.hIncId = `${message.gid}:${groupMsgId.nextId()}`;
+        return msgLock;
+    });    
+
+    gh.hIncId = genHIncId(msgLock.hid, msgLock.current);
     gh.msg = gmsg;
 
     bkt.put(gh.hIncId, gh);
@@ -255,25 +262,15 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
         return userHistory;
     }
     
-    sid = parseInt(sid,10);
-    const hid = genUserHid(sid, message.rid);
-    let curId = 0;
-    const mLock = msgLockBucket.get(hid);
-    logger.debug('msgLock:', mLock);
-    if (mLock[0] === undefined) {
-        const msgLock = new MsgLock();
-        // FIXME:
-        msgLock.hid = hid;
-        msgLock.current = 0;
-        msgLockBucket.put(hid, msgLock);
-    } else {
-        const msgLock = new MsgLock();
-        // FIXME:
-        msgLock.hid = hid;
-        msgLock.current = mLock[0].current + 1;
-        curId =  msgLock.current;
-        msgLockBucket.put(hid, msgLock);
-    }
+    sid = parseInt(sid,10);    
+    const msgLock = new MsgLock();
+    msgLock.hid = genUserHid(sid, message.rid);
+    // 这是一个事务
+    msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
+        mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
+
+        return msgLock;
+    });
 
     const userMsg = new UserMsg();
     userMsg.cancel = false;
@@ -284,7 +281,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userMsg.sid = sid;
     userMsg.time = Date.now();
 
-    userHistory.hIncId =  genHIncId(hid, curId);
+    userHistory.hIncId =  genHIncId(msgLock.hid, msgLock.current);
     userHistory.msg = userMsg;
 
     userHistoryBucket.put(userHistory.hIncId, userHistory);

@@ -7,13 +7,12 @@ import { read, write } from '../../../pi_pt/db';
 import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
-import { mqttPublish, QoS, setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
+import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
+import { genNewIdFromOld } from '../../../utils/util';
 import * as CONSTANT from '../constant';
-import { GroupInfo, GroupUserLink } from '../db/group.s';
-import { GroupHistory, GroupMsg } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, OnlineUsers, OnlineUsersReverseIndex, UserCredential, UserInfo } from '../db/user.s';
+import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserCredential, UserInfo } from '../db/user.s';
 import { AnnouceFragment, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupUserLinkArray, LoginReply, LoginReq, MessageFragment, Result, UserArray, UserHistoryArray, UserInfoSet, UserRegister } from './basic.s';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -40,13 +39,16 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     userInfo.name = registerInfo.name;
     userInfo.note = '';
     userInfo.tel = '';
+    // 这是一个事务
+    accountGeneratorBucket.readAndWrite(GENERATOR_TYPE.USER,(items:any[]) => {
+        const accountGenerator = new AccountGenerator();
+        accountGenerator.index = GENERATOR_TYPE.USER;
+        accountGenerator.currentIndex = genNewIdFromOld(items[0].currentIndex);
+        userInfo.uid = accountGenerator.currentIndex;
 
-    const accountGenerator = new AccountGenerator();
-    const nextAccount = accountGeneratorBucket.get('index')[0].nextIndex + 1;
-    accountGenerator.nextIndex = nextAccount;
-    accountGeneratorBucket.put('index', accountGenerator);
+        return accountGenerator;
+    });
 
-    userInfo.uid = nextAccount;
     userInfo.sex = 1;
 
     userCredential.uid = userInfo.uid;

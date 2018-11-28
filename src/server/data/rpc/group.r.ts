@@ -3,24 +3,23 @@
  */
 // ================================================================= 导入
 import { GroupInfo, GroupUserLink } from '../db/group.s';
-import { Contact } from '../db/user.s';
+import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
 import { GroupAgree, GroupCreate, GroupMembers, InviteArray, NotifyAdmin } from './group.s';
 
 import { BonBuffer } from '../../../pi/util/bon';
-import { read, write } from '../../../pi_pt/db';
+import { read } from '../../../pi_pt/db';
 import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { mqttPublish, QoS, setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
+import { delValueFromArray, genAnnounceIncId, genGuid, genHidFromGid, genNewIdFromOld } from '../../../utils/util';
 import * as CONSTANT from '../constant';
-import { GroupHistory, GroupMsg } from '../db/message.s';
-import { AccountId } from '../db/msgid';
 
 const logger = new Logger('GROUP');
-
+const START_INDEX = 0;
 // ================================================================= 导出
 
 /**
@@ -172,6 +171,7 @@ export const inviteUsers = (invites: InviteArray): Result => {
     if (gInfo.memberids.indexOf(parseInt(uid,10)) <= -1) {
         logger.debug('user: ', uid, 'is not a member of this group');
         res.r = 2; // User is not a member of this group
+
         return res;
     }
 
@@ -199,34 +199,42 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     const uid = getUid();
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(agree.gid)[0];
-    if (!agree.agree) {
+    const cInfo = contactBucket.get<number, [Contact]>(uid)[0];
+    // 判断群组是否邀请了该用户,如果没有邀请，则直接返回
+    if (cInfo.applyGroup.findIndex(item => item === agree.gid) === -1) {
+        gInfo.gid = -1; // gid = -1 indicate that user don't want to join this group
+        
+        return gInfo; 
+    }
+    // 删除applyGroup并放回db中
+    cInfo.applyGroup = delValueFromArray(agree.gid, cInfo.applyGroup);     
+    if (agree.agree) {
+        cInfo.group.push(agree.gid);
+    } else {
+        contactBucket.put(uid, cInfo);
         logger.debug('User: ', uid, 'don\'t want to join group: ', agree.gid);
         gInfo.gid = -1; // gid = -1 indicate that user don't want to join this group
 
         return gInfo;
-    }
+    }    
 
-    const cInfo = contactBucket.get<number, [Contact]>(agree.uid)[0];
-
-    if (gInfo.memberids.indexOf(agree.uid) > -1) {
-        logger.debug('User: ', agree.uid, 'has been exist');
+    if (gInfo.memberids.indexOf(uid) > -1) {
+        logger.debug('User: ', uid, 'has been exist');
     } else {
-        gInfo.memberids.push(agree.uid);
+        gInfo.memberids.push(uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
-        logger.debug('User: ', agree.uid, 'agree to join group: ', agree.gid);
-        cInfo.group.push(agree.gid);
-        logger.debug('Add group: ', agree.gid, 'to user\'s contact: ', cInfo.group);
+        logger.debug('User: ', uid, 'agree to join group: ', agree.gid);        
 
         const groupUserLinkBucket = getGroupUserLinkBucket();
         const gul = new GroupUserLink();
-        gul.guid = `${agree.gid}:${agree.uid}`;
-        gul.hid = '';        
-        gul.join_time = Date.now();
-        gul.userAlias = '';
-        gul.groupAlias = '';
+        gul.guid = genGuid(agree.gid, uid);
+        gul.hid = gInfo.hid;
+        gul.join_time = Date.now();        
+        gul.userAlias = getCurrentUserInfo().name;
+        gul.groupAlias = gInfo.name;
 
         groupUserLinkBucket.put(gul.guid, gul);
-        logger.debug('Add user: ', agree.uid, 'to groupUserLinkBucket');
+        logger.debug('Add user: ', uid, 'to groupUserLinkBucket');
     }
 
     return gInfo;
@@ -264,7 +272,7 @@ export const setOwner = (guid: string): Result => {
 
 /**
  * 添加管理员
- * @param guid
+ * @param guid group user id
  */
 // #[rpc=rpcServer]
 export const addAdmin = (guid: string): Result => {
@@ -323,6 +331,7 @@ export const delAdmin = (guid: string): Result => {
         logger.debug('delete user: ', delAdminId, 'from groupUserLinkBucket');
 
         res.r = 1;
+
         return res;
     } else {
         res.r = 0; // not an admin
@@ -334,7 +343,7 @@ export const delAdmin = (guid: string): Result => {
 
 /**
  * 剔除用户
- * @param guid
+ * @param guid group user id
  */
 // #[rpc=rpcServer]
 export const delMember = (guid: string): Result => {
@@ -385,7 +394,7 @@ export const getGroupMembers = (gid: number): GroupMembers => {
 
 /**
  * 获取用户在群组内的信息
- * @param gid
+ * @param gid group id
  */
 export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
     const dbMgr = getEnv().getDbMgr();
@@ -408,22 +417,35 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
 /**
  * 创建群
  * @param uid user id
+ * 
+ * 
  */
 // #[rpc=rpcServer]
 export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
     const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
-    const idGen = new AccountId(dbMgr);
+    const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE, dbMgr);
 
     if (uid !== undefined) {
         const gInfo = new GroupInfo();
+        // 这是一个事务
+        accountGeneratorBucket.readAndWrite(GENERATOR_TYPE.GROUP,(items:any[]) => {
+            const accountGenerator = new AccountGenerator();
+            accountGenerator.index = GENERATOR_TYPE.GROUP;
+            accountGenerator.currentIndex = genNewIdFromOld(items[0].currentIndex);
+            gInfo.gid = accountGenerator.currentIndex;
+
+            return accountGenerator;
+        });
+        gInfo.name = groupInfo.name;
+        gInfo.hid = genHidFromGid(gInfo.gid);
         gInfo.note = groupInfo.note;
         gInfo.adminids = [parseInt(uid,10)];
-        gInfo.annoceid = '0:0';
+        gInfo.annoceid = genAnnounceIncId(gInfo.gid, START_INDEX);
         gInfo.create_time = Date.now();
         gInfo.dissolve_time = 0;
-        gInfo.gid = idGen.nextGroupId();
+        
         gInfo.join_method = 0;
         gInfo.ownerid = parseInt(uid,10);
         // TODO: add self to memberids
@@ -449,7 +471,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
         const gulink = new GroupUserLink();
         gulink.groupAlias = '';
-        gulink.guid = `${gInfo.gid}:${uid}`;
+        gulink.guid = genGuid(gInfo.gid,uid);
         gulink.hid = '';
         gulink.join_time = Date.now();
         gulink.userAlias = '';
@@ -462,7 +484,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
 
 /**
  * 解散群
- * @param guid
+ * @param guid group user id
  */
 // #[rpc=rpcServer]
 export const dissolveGroup = (gid: number): Result => {
@@ -504,6 +526,14 @@ const getContactBucket = () => {
     const dbMgr = getEnv().getDbMgr();
 
     return new Bucket('file', CONSTANT.CONTACT_TABLE, dbMgr);
+};
+
+const getCurrentUserInfo = (uid?:number):UserInfo => {
+    const currentUid = uid || getUid();
+    const dbMgr = getEnv().getDbMgr();
+    const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE, dbMgr);
+
+    return userInfoBucket.get(currentUid)[0];
 };
 
 const getUid = () => {

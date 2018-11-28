@@ -10,7 +10,10 @@ enum SEXY {
     MALE = 1,//男性
 }
 
-
+enum GENERATOR_TYPE {
+    USER = "user",//个人
+    GROUP = "group",//群组
+}
 /**
 *用户本人的基本信息
 */
@@ -38,8 +41,8 @@ struct UserCredential {
  */
 #[primary=index,db=file,dbMonitor=true,hasmgr=false]
 struct AccountGenerator {
-    index: String,
-    nextIndex: u32
+    index: GENERATOR_TYPE,      
+    currentIndex: u32
 }
 
 /**
