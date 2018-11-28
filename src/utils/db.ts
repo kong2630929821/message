@@ -115,8 +115,9 @@ export class Bucket {
             } else {
                 itemsRead.push({ ware: this.dbType, tab: this.bucketName, key: key });
             }
+            logger.debug(`before write`);
             write(this.dbManager, (tr: Tr) => {
-
+                logger.debug(`before query`);
                 let value = query(tr, itemsRead, timeout, false);
                 if (Array.isArray(value)) {
                     value = value.map(v => v.value);
@@ -129,7 +130,9 @@ export class Bucket {
                 } else {
                     itemsWrite.push({ ware: this.dbType, tab: this.bucketName, key: key, value: value });
                 }
+                logger.debug(`before modify`);
                 modify(tr, itemsWrite, timeout, false);
+                logger.debug(`after modify`);
             });
 
             return true;

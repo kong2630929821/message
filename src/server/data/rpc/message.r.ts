@@ -246,18 +246,18 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const sContactInfo = contactBucket.get(message.rid)[0];
     // 判断当前用户是否在对方的好友列表中
     
+    const userMsg = new UserMsg();
+    userMsg.cancel = false;
+    userMsg.msg = message.msg;
+    userMsg.mtype = 0;
+    userMsg.read = false;
+    userMsg.send = false;
+    userMsg.sid = sid;
+    userMsg.time = Date.now();
+    // logger.debug(`friends is : ${JSON.stringify(sContactInfo.friends)}, sid is : ${sid}`);
     if (sContactInfo.friends.findIndex(item => item === parseInt(sid,10)) === -1) {
-        const userMsg = new UserMsg();
-        userMsg.cancel = false;
-        userMsg.msg = message.msg;
-        userMsg.mtype = 0;
-        userMsg.read = false;
-        userMsg.send = false;
-        userMsg.sid = sid;
-        userMsg.time = Date.now();
-    
         userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
-        userHistory.msg = userMsg;
+        userHistory.msg = userMsg;    
 
         return userHistory;
     }
@@ -266,21 +266,14 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const msgLock = new MsgLock();
     msgLock.hid = genUserHid(sid, message.rid);
     // 这是一个事务
+    logger.debug('before readAndWrite');
     msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
         mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
+        logger.debug('readAndWrite...');
 
         return msgLock;
     });
-
-    const userMsg = new UserMsg();
-    userMsg.cancel = false;
-    userMsg.msg = message.msg;
-    userMsg.mtype = 0;
-    userMsg.read = true;
-    userMsg.send = true;
-    userMsg.sid = sid;
-    userMsg.time = Date.now();
-
+    logger.debug('after readAndWrite');
     userHistory.hIncId =  genHIncId(msgLock.hid, msgLock.current);
     userHistory.msg = userMsg;
 

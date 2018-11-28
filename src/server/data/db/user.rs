@@ -41,7 +41,7 @@ struct UserCredential {
  */
 #[primary=index,db=file,dbMonitor=true,hasmgr=false]
 struct AccountGenerator {
-    index: GENERATOR_TYPE,      
+    index: String,//本质上是GENERATOR_TYPE
     currentIndex: u32
 }
 
