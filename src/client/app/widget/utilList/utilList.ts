@@ -1,7 +1,8 @@
 /**
  * utilList 组件相关处理
  */
-// ===========================导入
+
+// ================================================ 导入
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 
@@ -23,7 +24,7 @@ export class UtilList extends Widget {
     };   
         
     // 处理点击每一项功能列表
-    public handleUtilItemTap(event:any,index:any) {
+    public handleUtilItemTap(event:any,index:number) {
         notify(event.node,'ev-handleFatherTap',{ index:index });
     }
 }

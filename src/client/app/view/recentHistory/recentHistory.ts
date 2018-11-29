@@ -12,6 +12,7 @@ import { UserInfo } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
 import { login as userLogin } from '../../net/rpc';
 
+// tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
@@ -21,7 +22,7 @@ export class RecentHistory extends Widget {
     /**
      * setProps
      */
-    public setProps(props,oldProps) {
+    public setProps(props:JSON,oldProps:JSON) {
         super.setProps(props,oldProps);
         this.props.messageList = [
                 { avatorPath: 'user.png', isGroupMessage: true, name: '小天', recordInfo: '给我发个红包看看', recordTime: '18:38', isNotDisturb: true, unReadCount: 0 },
@@ -48,7 +49,7 @@ export class RecentHistory extends Widget {
         this.paint();
     }
     // 父组件接收子组件的传值
-    public handleFatherTap(e) {
+    public handleFatherTap(e:any) {
         // 如果点击的是通讯录
         if (e.index === 1) {
             console.log('hhhh');

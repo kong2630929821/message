@@ -7,7 +7,7 @@ import { HandlerMap } from '../../../pi/util/event';
 import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../server/data/db/message.s';
-import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../../../server/data/db/user.s';
+import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy } from '../../../utils/util';
 
 // ============================================ 导出
@@ -140,7 +140,7 @@ export interface Store {
     addressInfoMap: Map<number, AddressInfo>;// uid
     userChatMap:Map<string, string[]>;// hid,hidinc,递增存储
     groupChatMap:Map<string, string[]>;// hid,hidinc
-    lastChat:[number,number][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
+    lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
     // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
 }
 

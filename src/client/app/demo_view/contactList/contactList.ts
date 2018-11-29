@@ -36,6 +36,10 @@ export class ContactList extends Widget {
         popNew('client-app-demo_view-contactList-newFriend',{ applyUser:this.state.applyUser });
     }
 
+    public toGroup() {
+        popNew(`client-app-demo_view-group-group`);
+    }
+
     // 查看好友详细信息
     public friendInfo(i:number) {
         popNew('client-app-demo_view-contactList-userDetail',{ uid:i });

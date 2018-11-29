@@ -3,11 +3,12 @@
  */
 
 import { TabMeta } from '../pi/struct/sinfo';
-import { alter, iterDb, modify, query, read, write } from '../pi_pt/db';
+import { alter, Handler, iterDb, modify, query, read, write } from '../pi_pt/db';
 import { Mgr, Tr } from '../pi_pt/rust/pi_db/mgr';
 
 import { Logger } from './logger';
-
+export type Handler = (tr: Tr) => any;
+type RWHandler<V> = (value: V) => V;
 const logger = new Logger('DB');
 
 type DbType = 'memory' | 'file';
@@ -86,13 +87,57 @@ export class Bucket {
             } else {
                 items.push({ ware: this.dbType, tab: this.bucketName, key: key, value: value });
             }
-            write(this.dbManager, (tr: Tr) => {
+            write(this.dbManager, (tr: Tr) => {                
                 modify(tr, items, timeout, false);
             });
 
             return true;
         } catch (e) {
             logger.error('failed to write key with error: ', e);
+        }
+
+        return false;
+    }
+    /**
+     * 这是一个完整的事务不会被打断
+     * @param key key
+     * @param rwHandler RWHandler
+     * @param timeout RWHandler
+     */
+    public readAndWrite<K>(key: K, rwHandler:RWHandler<any>, timeout: number = 1000):boolean {
+        const itemsRead = [];
+        const itemsWrite = [];
+        try {
+            if (Array.isArray(key)) {
+                for (let i = 0; i < key.length; i++) {
+                    itemsRead.push({ ware: this.dbType, tab: this.bucketName, key: key[i] });
+                }
+            } else {
+                itemsRead.push({ ware: this.dbType, tab: this.bucketName, key: key });
+            }
+            logger.debug(`before write`);
+            write(this.dbManager, (tr: Tr) => {
+                logger.debug(`before query`);
+                let value = query(tr, itemsRead, timeout, false);
+                if (Array.isArray(value)) {
+                    value = value.map(v => v.value);
+                }
+                value = rwHandler(value);
+                if (Array.isArray(key) && Array.isArray(value) && key.length === value.length) {
+                    for (let i = 0; i < key.length; i++) {
+                        itemsWrite.push({ ware: this.dbType, tab: this.bucketName, key: key[i], value: value[i] });
+                    }
+                } else {
+                    itemsWrite.push({ ware: this.dbType, tab: this.bucketName, key: key, value: value });
+                }
+                logger.debug(`before modify`);
+                modify(tr, itemsWrite, timeout, false);
+                logger.debug(`after modify`);
+            });
+
+            return true;
+        } catch (e) {
+            logger.error('failed to readAndWrite key with error: ', e);
         }
 
         return false;

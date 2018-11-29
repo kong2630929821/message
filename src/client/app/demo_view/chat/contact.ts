@@ -7,6 +7,7 @@ import { Json } from '../../../../pi/lang/type';
 import { popNew } from '../../../../pi/ui/root';
 import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 // ================================================ 导出
 export const forelet = new Forelet();
@@ -26,8 +27,13 @@ export class Contact extends Widget {
         ];
     }
 
-    public chat(uid:number) {
-        popNew('client-app-demo_view-chat-chat', { rid:uid });
+    public chat(e:any, id:number, chatType:GENERATOR_TYPE) {
+        if (chatType === GENERATOR_TYPE.USER) {
+            popNew('client-app-demo_view-chat-chat', { rid:id });
+        } else if (chatType === GENERATOR_TYPE.GROUP) {
+            popNew('client-app-demo_view-chat-group', { gid:id });
+        }
+        
     }
 
     public openAddUser() {
@@ -46,13 +52,23 @@ export class Contact extends Widget {
     }
 
     public handleFatherTap(e:any) {
-        // 如果点击的是通讯录
-        if (e.index === 1) {
-            popNew('client-app-demo_view-contactList-contactList',{ sid : this.props.sid });
-        }
-        // 如果点击的是添加好友
-        if (e.index === 2) {
-            this.openAddUser();
+        switch (e.index) {
+            case 0:// 搜索
+            
+                break;
+            case 1:// 点击通讯录
+                popNew('client-app-demo_view-contactList-contactList',{ sid : this.props.sid });
+                break;
+            case 2:// 点击添加好友
+                this.openAddUser();
+                break;
+            case 3:// 创建群聊
+                popNew('client-app-demo_view-group-create');
+                break;
+            case 4:// 扫一扫            
+                break;
+
+            default:
         }
     }
 }

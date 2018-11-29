@@ -85,3 +85,62 @@ export const genHIncId = (hid:string, index:number) :string => {
 
     return `${hid}:${index}`;
 };
+
+/**
+ * generate new id from the old one
+ * @param oldId old id
+ */
+
+export const genNewIdFromOld = (oldId: number):number => {
+    
+    return oldId + 1;
+};
+
+/**
+ * generat group user id
+ * @param group id 
+ * @param user id
+ */
+export const genGuid = (gid:number, uid:number) : string => {
+    
+    return `${gid}:${uid}`;
+};
+
+/**
+ * generate announcement increament id
+ * @param gid group id 
+ * @param index  index
+ */
+export const genAnnounceIncId = (gid:number, index:number):string => {
+
+    return `${gid}:${index}`;
+};
+
+/**
+ * 删除value
+ * @param value value
+ * @param arr array
+ */
+export const delValueFromArray = (value: any, arr: any[]) => {
+    return arr.filter((ele) => {
+        return ele !== value;
+    });
+};
+
+/**
+ * generate next index
+ * @param index index
+ */
+export const genNextMessageIndex = (index:number):number => {
+    
+    return index + 1;
+};
+
+/**
+ * 
+ * @param inc a:b
+ */
+export const getHidFromInc = (inc:string):string => {
+    
+    return inc.split(':')[0];
+};

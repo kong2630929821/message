@@ -18,8 +18,8 @@ import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { Logger } from '../../../utils/logger';
 import { LastReadMessageId } from '../db/user.s';
 
-import { genHIncId, genUserHid } from '../../../utils/util';
-import { AnounceMsgId, GroupMsgId } from '../db/msgid';
+import { genGroupHid, genHIncId, genNextMessageIndex, genUserHid } from '../../../utils/util';
+import { getUid } from './group.r';
 
 const logger = new Logger('MESSAGE');
 
@@ -41,7 +41,7 @@ export const messageReadAck = (cursor: LastReadMessageId): Result => {
         return res;
     }
 
-    if (sessionUid !== uid) {
+    if (sessionUid !== parseInt(uid,10)) {
         logger.debug('inappropriate uid');
         res.r = 0;
 
@@ -64,27 +64,27 @@ export const messageReadAck = (cursor: LastReadMessageId): Result => {
  * @param cursor "10001:0" -> 用户 10001个人对个人消息， "10001:1" -> 用户10001群消息
  */
 // #[rpc=rpcServer]
-export const getLastReadMessageId = (cursor: string): LastReadMessageId => {
-    const dbMgr = getEnv().getDbMgr();
-    const uid = getUid();
-    const lastReadMessageidBucket = new Bucket('file', CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
-    const msgId = lastReadMessageidBucket.get(cursor)[0];
-    const res = new LastReadMessageId();
+// export const getLastReadMessageId = (cursor: string): LastReadMessageId => {
+//     const dbMgr = getEnv().getDbMgr();
+//     const uid = getUid();
+//     const lastReadMessageidBucket = new Bucket('file', CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
+//     const msgId = lastReadMessageidBucket.get(cursor)[0];
+//     const res = new LastReadMessageId();
 
-    if (msgId === undefined) {
-        logger.error('User: ', uid, 'Can\'t get msgId for message type: ', cursor);
-        res.mtype = '';
-        res.msgId = '';
+//     if (msgId === undefined) {
+//         logger.error('User: ', uid, 'Can\'t get msgId for message type: ', cursor);
+//         res.mtype = '';
+//         res.msgId = '';
 
-        return res;
-    }
+//         return res;
+//     }
 
-    res.mtype = cursor;
-    res.msgId = msgId;
-    logger.debug('User: ', uid, 'get message id: ', msgId);
+//     res.mtype = cursor;
+//     res.msgId = msgId;
+//     logger.debug('User: ', uid, 'get message id: ', msgId);
 
-    return res;
-};
+//     return res;
+// };
 
 // ================================================================= 导出
 /**
@@ -95,7 +95,6 @@ export const getLastReadMessageId = (cursor: string): LastReadMessageId => {
 export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
-    const uid = getUid();
 
     const anmt = new Announcement();
     anmt.cancel = false;
@@ -103,7 +102,7 @@ export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
     anmt.mtype = announce.mtype;
     anmt.send = true;
     anmt.time = Date.now();
-    anmt.sid = parseInt(uid,10);
+    anmt.sid = getUid();
 
     const announId = new AnounceMsgId(announce.gid, dbMgr);
     const ah = new AnnounceHistory();
@@ -154,37 +153,47 @@ export const cancelAnnouncement = (aIncId: string): Result => {
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
-
-    const session = getEnv().getSession();
-    let uid;
-    read(dbMgr, (tr: Tr) => {
-        uid = session.get(tr, 'uid');
-    });
-
-    // TODO: what if uid is undefined
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+    const gInfoBucket = new Bucket('file', CONSTANT.GROUP_INFO_TABLE, dbMgr);
+    const gInfo = gInfoBucket.get(message.gid)[0];        
 
     const gh = new GroupHistory();
     const gmsg = new GroupMsg();
     gmsg.msg = message.msg;
     gmsg.mtype = message.mtype;
     gmsg.send = true;
-    gmsg.sid = parseInt(uid,10);
+    gmsg.sid = getUid();
     gmsg.time = message.time;
-    gmsg.cancel = false;
-
-    const groupMsgId = new GroupMsgId(message.gid, dbMgr);
-
-    gh.hIncId = `${message.gid}:${groupMsgId.nextId()}`;
+    gmsg.cancel = false;    
     gh.msg = gmsg;
+    // 判断是否是群组成员
+    logger.debug(`sid is : ${gmsg.sid}`);
+    if (gInfo.memberids.findIndex(id => id === gmsg.sid) === -1) {
+        gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+
+        return gh;
+    }
+
+    const msgLock = new MsgLock();
+    msgLock.hid = genGroupHid(message.gid);
+    logger.debug(`before read and write`);
+    // 这是一个事务
+    msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
+        mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
+
+        return msgLock;
+    });    
+    logger.debug(`after read and write`);
+    gh.hIncId = genHIncId(msgLock.hid, msgLock.current);    
 
     bkt.put(gh.hIncId, gh);
 
     const buf = new BonBuffer();
-    gmsg.bonEncode(buf);
+    gh.bonEncode(buf);
 
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
     const groupTopic = `ims/group/msg/${ message.gid}`;
-
+    logger.debug(`before publish ,the topic is : ${groupTopic}`);
     // directly send message to group topic
     mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
     logger.debug('Send group message: ', message.msg, 'to group topic: ', groupTopic);
@@ -239,54 +248,36 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const sContactInfo = contactBucket.get(message.rid)[0];
     // 判断当前用户是否在对方的好友列表中
     
-    if (sContactInfo.friends.findIndex(item => item === parseInt(sid,10)) === -1) {
-        const userMsg = new UserMsg();
-        userMsg.cancel = false;
-        userMsg.msg = message.msg;
-        userMsg.mtype = 0;
-        userMsg.read = false;
-        userMsg.send = false;
-        userMsg.sid = sid;
-        userMsg.time = Date.now();
-    
-        userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
-        userHistory.msg = userMsg;
-
-        return userHistory;
-    }
-    
-    sid = parseInt(sid,10);
-    const hid = genUserHid(sid, message.rid);
-    let curId = 0;
-    const mLock = msgLockBucket.get(hid);
-    logger.debug('msgLock:', mLock);
-    if (mLock[0] === undefined) {
-        const msgLock = new MsgLock();
-        // FIXME:
-        msgLock.hid = hid;
-        msgLock.current = 0;
-        msgLockBucket.put(hid, msgLock);
-    } else {
-        const msgLock = new MsgLock();
-        // FIXME:
-        msgLock.hid = hid;
-        msgLock.current = mLock[0].current + 1;
-        curId =  msgLock.current;
-        msgLockBucket.put(hid, msgLock);
-    }
-
     const userMsg = new UserMsg();
     userMsg.cancel = false;
     userMsg.msg = message.msg;
     userMsg.mtype = 0;
-    userMsg.read = true;
-    userMsg.send = true;
+    userMsg.read = false;
+    userMsg.send = false;
     userMsg.sid = sid;
     userMsg.time = Date.now();
-
-    userHistory.hIncId =  genHIncId(hid, curId);
     userHistory.msg = userMsg;
+    // logger.debug(`friends is : ${JSON.stringify(sContactInfo.friends)}, sid is : ${sid}`);
+    if (sContactInfo.friends.findIndex(item => item === parseInt(sid,10)) === -1) {
+        userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
 
+        return userHistory;
+    }
+    
+    sid = parseInt(sid,10);    
+    const msgLock = new MsgLock();
+    msgLock.hid = genUserHid(sid, message.rid);
+    // 这是一个事务
+    logger.debug('before readAndWrite');
+    msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
+        mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
+        logger.debug('readAndWrite...');
+
+        return msgLock;
+    });
+    logger.debug('after readAndWrite');
+    userHistory.hIncId =  genHIncId(msgLock.hid, msgLock.current);
+    
     userHistoryBucket.put(userHistory.hIncId, userHistory);
     logger.debug('Persist user history message to DB: ', userHistory);
 
@@ -325,19 +316,3 @@ export const cancelUserMessage = (hIncId: string): Result => {
 };
 
 // ----------------- helpers ------------------
-const getUid = () => {
-    const dbMgr = getEnv().getDbMgr();
-    const session = getEnv().getSession();
-    let uid;
-    read(dbMgr, (tr: Tr) => {
-        uid = session.get(tr, 'uid');
-    });
-
-    return uid;
-};
-
-const getGroupInfoBucket = () => {
-    const dbMgr = getEnv().getDbMgr();
-
-    return new Bucket('file', CONSTANT.GROUP_INFO_TABLE, dbMgr);
-};

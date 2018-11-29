@@ -23,11 +23,13 @@ enum JOIN_METHOD {
 */
 #[primary=gid,db=file,dbMonitor=true,hasmgr=false]
 struct GroupInfo {
-    gid:u32,//群组id,全局唯一,-1代表不存在
+    gid:u32,//群组id,全局唯一,-1代表不存在,gid同hid
+    name:String,//群名
     ownerid:u32,//群主id
     adminids:&[u32],//管理员id
     memberids:&[u32],//成员id
     annoceid:String,//公告id
+    hid:String,//历史消息
     create_time:u32,//创建时间
     dissolve_time:u32,//解散时间
     join_method:JOIN_METHOD,//加入方式

@@ -7,7 +7,7 @@ import { getEnv } from '../../../pi_pt/net/rpc_server';
 import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { genUserHid, genUuid } from '../../../utils/util';
+import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 import { Contact, FriendLink } from '../db/user.s';
 import { Result } from './basic.s';
@@ -62,6 +62,15 @@ export const acceptFriend = (agree: UserAgree): Result => {
         const sContactInfo = contactBucket.get(sid)[0];
         // 从申请列表中删除当前同意/拒绝的用户
         console.log(`sContactInfo.applyFriend is ${sContactInfo.applyUser}`);
+
+        // 判断对方是否邀请了该用户,如果没有邀请，则直接返回
+        if (sContactInfo.applyUser.findIndex(item => item === rid) === -1) {
+            const rlt = new Result();
+            rlt.r = -1;
+            
+            return rlt; 
+        }
+
         sContactInfo.applyUser = delValueFromArray(rid, sContactInfo.applyUser);
         if (agree) {
             // 在对方的列表中添加好友
@@ -72,7 +81,7 @@ export const acceptFriend = (agree: UserAgree): Result => {
             sContactInfo.friends.findIndex(item => item === rid) === -1 && sContactInfo.friends.push(rid);
         }
         contactBucket.put(sid, sContactInfo);
-        // 分别插入到friendLink中去friendLInk
+        // 分别插入到friendLink中去
         const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
         const friendLink = new FriendLink();
         friendLink.uuid = genUuid(sid,rid);
@@ -195,16 +204,5 @@ const getCurrentUidFromSession = (cb: (uid: number) => void) => {
     read(dbMgr, (tr: Tr) => {
         const uid = session.get(tr, 'uid');
         cb(parseInt(<string>uid,10));
-    });
-};
-
-/**
- * 删除value
- * @param value value
- * @param arr array
- */
-const delValueFromArray = (value: any, arr: any[]) => {
-    return arr.filter((ele) => {
-        return ele !== value;
     });
 };

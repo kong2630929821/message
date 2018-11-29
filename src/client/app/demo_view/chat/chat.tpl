@@ -8,7 +8,6 @@
     </div>
     <div ev-send="send" style="height:120px;">
         <client-app-widget-inputMessage-inputMessage></client-app-widget-inputMessage-inputMessage>
-    </div>
-    
+    </div>    
 </div>
 

@@ -1,13 +1,15 @@
-import { AccountGenerator } from './data/db/user.s';
+/**
+ * 入口文件
+ */
 import { Struct } from '../pi/struct/struct_mgr';
-import { Bucket } from '../utils/db';
-import { getEnv, getNativeObj } from '../pi_pt/init/init';
-import { DBToMqttMonitor, registerDbToMqttMonitor } from '../pi_pt/rust/pi_serv/js_db';
-import { ServerNode } from '../pi_pt/rust/mqtt/server';
 import { BonBuffer } from '../pi/util/bon';
-import { cloneServerNode } from '../pi_pt/rust/pi_serv/js_net';
-import { WARE_NAME } from "./data/constant";
-
+import { getEnv, getNativeObj } from '../pi_pt/init/init';
+import { ServerNode } from '../pi_pt/rust/mqtt/server';
+import { DBToMqttMonitor, registerDbToMqttMonitor } from '../pi_pt/rust/pi_serv/js_db';
+import { cloneServerNode, setMqttTopic } from '../pi_pt/rust/pi_serv/js_net';
+import { Bucket } from '../utils/db';
+import { ACCOUNT_GENERATOR_TABLE, GROUP_INFO_TABLE, USER_INFO_TABLE, WARE_NAME } from './data/constant';
+import { AccountGenerator, GENERATOR_TYPE } from './data/db/user.s';
 
 declare var pi_modules;
 
@@ -17,18 +19,24 @@ const dbMgr = getEnv().getDbMgr();
 const init = () => {
     initAccountGenerator();
     addDbMonitor();
-}
+    initMqttTopic();
+};
 
 const initAccountGenerator = () => {
-    let accountGenerator = new AccountGenerator();
-    accountGenerator.index = "index";
-    accountGenerator.nextIndex = ACCOUNT_START;
-
-    const bkt = new Bucket("file", "server/data/db/user.AccountGenerator", dbMgr);
-    if (bkt.get("index")[0] === undefined) {
-        bkt.put("index", accountGenerator);
+    const bkt = new Bucket('file', ACCOUNT_GENERATOR_TABLE, dbMgr);    
+    if (bkt.get(GENERATOR_TYPE.USER)[0] === undefined) {
+        const userAccountGenerator = new AccountGenerator();
+        userAccountGenerator.index = GENERATOR_TYPE.USER;
+        userAccountGenerator.currentIndex = ACCOUNT_START;
+        bkt.put(GENERATOR_TYPE.USER, userAccountGenerator);
     }
-}
+    if (bkt.get(GENERATOR_TYPE.GROUP)[0] === undefined) {
+        const groupAccountGenerator = new AccountGenerator();        
+        groupAccountGenerator.index = GENERATOR_TYPE.GROUP;
+        groupAccountGenerator.currentIndex = ACCOUNT_START;
+        bkt.put(GENERATOR_TYPE.GROUP, groupAccountGenerator);
+    }
+};
 
 // 数据库监听器， 需要初始化配置， 启动mqtt服务， rpc服务
 const addDbMonitor = () => {
@@ -67,8 +75,21 @@ const createRoster = (): Map<string, Map<string, boolean>> => {
             }
         }
     }
+
     return map;
 };
 
-init()
+const initMqttTopic = () => {    
+    // 注册群组主题
+    const gInfoBucket = new Bucket('file', GROUP_INFO_TABLE, dbMgr);
+    const gItr = gInfoBucket.iter(undefined);
+    let gInfo = gItr.nextElem();
+    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    if (gInfo) {
+        const groupTopic = `ims/group/msg/${gInfo[1].gid}`;        
+        setMqttTopic(mqttServer, groupTopic, true, true);
+        gInfo = gItr.nextElem();
+    }
+};
 
+init();
