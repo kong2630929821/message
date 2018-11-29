@@ -6,9 +6,9 @@ import { BonBuffer } from '../pi/util/bon';
 import { getEnv, getNativeObj } from '../pi_pt/init/init';
 import { ServerNode } from '../pi_pt/rust/mqtt/server';
 import { DBToMqttMonitor, registerDbToMqttMonitor } from '../pi_pt/rust/pi_serv/js_db';
-import { cloneServerNode } from '../pi_pt/rust/pi_serv/js_net';
+import { cloneServerNode, setMqttTopic } from '../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../utils/db';
-import { WARE_NAME } from './data/constant';
+import { ACCOUNT_GENERATOR_TABLE, GROUP_INFO_TABLE, USER_INFO_TABLE, WARE_NAME } from './data/constant';
 import { AccountGenerator, GENERATOR_TYPE } from './data/db/user.s';
 
 declare var pi_modules;
@@ -19,10 +19,11 @@ const dbMgr = getEnv().getDbMgr();
 const init = () => {
     initAccountGenerator();
     addDbMonitor();
+    initMqttTopic();
 };
 
 const initAccountGenerator = () => {
-    const bkt = new Bucket('file', 'server/data/db/user.AccountGenerator', dbMgr);    
+    const bkt = new Bucket('file', ACCOUNT_GENERATOR_TABLE, dbMgr);    
     if (bkt.get(GENERATOR_TYPE.USER)[0] === undefined) {
         const userAccountGenerator = new AccountGenerator();
         userAccountGenerator.index = GENERATOR_TYPE.USER;
@@ -74,7 +75,21 @@ const createRoster = (): Map<string, Map<string, boolean>> => {
             }
         }
     }
+
     return map;
+};
+
+const initMqttTopic = () => {    
+    // 注册群组主题
+    const gInfoBucket = new Bucket('file', GROUP_INFO_TABLE, dbMgr);
+    const gItr = gInfoBucket.iter(undefined);
+    let gInfo = gItr.nextElem();
+    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    if (gInfo) {
+        const groupTopic = `ims/group/msg/${gInfo[1].gid}`;        
+        setMqttTopic(mqttServer, groupTopic, true, true);
+        gInfo = gItr.nextElem();
+    }
 };
 
 init();

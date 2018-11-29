@@ -128,19 +128,19 @@ export const delValueFromArray = (value: any, arr: any[]) => {
 };
 
 /**
- * history message id
- * @param gid group id
- */
-export const genHidFromGid = (gid:number):string => {
-    
-    return `${gid}`;
-};
-
-/**
  * generate next index
  * @param index index
  */
 export const genNextMessageIndex = (index:number):number => {
     
     return index + 1;
+};
+
+/**
+ * 
+ * @param inc a:b
+ */
+export const getHidFromInc = (inc:string):string => {
+    
+    return inc.split(':')[0];
 };

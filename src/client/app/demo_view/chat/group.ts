@@ -5,13 +5,14 @@
 // ================================================ 导入
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
-import { UserHistory } from '../../../../server/data/db/message.s';
-import { genUuid } from '../../../../utils/util';
-import { updateUserMessage } from '../../data/parse';
+import { GroupHistory, MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
+import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
+import { GroupSend } from '../../../../server/data/rpc/message.s';
+import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { sendMessage } from '../../net/rpc';
+import { clientRpcFunc } from '../../net/init';
 // ================================================ 导出
-export class Chat extends Widget {
+export class Group extends Widget {
     public props:Props;
     public bindCB: any;
     public ok: () => void;
@@ -19,7 +20,7 @@ export class Chat extends Widget {
         super();
         this.props = {
             sid: null,
-            rid: null,
+            gid: null,
             inputMessage:'',
             hidIncArray: []
         }; 
@@ -28,12 +29,12 @@ export class Chat extends Widget {
     public setProps(props:any) {
         super.setProps(props);
         this.props.sid = store.getStore('uid');
-        this.props.hidIncArray = store.getStore(`userChatMap/${this.getHid()}`) || [];
+        this.props.hidIncArray = store.getStore(`groupChatMap/${this.getHid()}`) || [];
     }
 
     public firstPaint() {
         super.firstPaint();
-        store.register(`userChatMap/${this.getHid()}`,this.bindCB);
+        store.register(`groupChatMap/${this.getHid()}`,this.bindCB);
     }
     public updateChat() {
         this.setProps(this.props);
@@ -42,22 +43,27 @@ export class Chat extends Widget {
     
     public send(e:any) {
         this.props.inputMessage = e.value;
-        sendMessage(this.props.rid, e.value, (() => {
-            const nextside = this.props.rid;
+        const message = new GroupSend();
+        message.gid = this.props.gid;
+        message.msg = this.props.inputMessage;
+        message.mtype = MSG_TYPE.TXT;
+        message.time = (new Date()).getTime();
+        clientRpcFunc(sendGroupMessage, message, (() => {
+            const gid = this.props.gid;
 
-            return (r: UserHistory) => {
+            return (r: GroupHistory) => {
                 if (r.hIncId === DEFAULT_ERROR_STR) {
                     alert('对方不是你的好友！');
                     
                     return;
                 }
-                updateUserMessage(nextside, r);
+                // updateGroupMessage(gid, r);
             };
         })());
     }
 
     public destroy() {
-        store.unregister(`userChatMap/${this.getHid()}`,this.bindCB);
+        store.unregister(`groupChatMap/${this.getHid()}`,this.bindCB);
 
         return super.destroy();
     }
@@ -65,16 +71,15 @@ export class Chat extends Widget {
         this.ok();
     }
     private getHid() {
-        const friendLink = store.getStore(`friendLinkMap/${genUuid(this.props.sid, this.props.rid)}`);
-        
-        return friendLink && friendLink.hid;
+
+        return store.getStore(`groupInfoMap/${this.props.gid}`).hid;
     }
 }
 
 // ================================================ 本地
 interface Props {
     sid: number;
-    rid: number;
+    gid: number;
     inputMessage:string;
     hidIncArray: string[];
     

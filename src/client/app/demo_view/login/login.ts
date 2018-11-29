@@ -5,13 +5,14 @@
 // ================================================ 导入
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
-import { UserHistory, UserMsg } from '../../../../server/data/db/message.s';
+import { GroupInfo } from '../../../../server/data/db/group.s';
+import { GroupHistory, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
 import { Contact, FriendLink, UserInfo } from '../../../../server/data/db/user.s';
-import { getFriendLinks, getUsersInfo } from '../../../../server/data/rpc/basic.p';
-import { FriendLinkArray, GetFriendLinksReq, GetUserInfoReq, UserArray } from '../../../../server/data/rpc/basic.s';
+import { getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/data/rpc/basic.p';
+import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
 import { genUuid } from '../../../../utils/util';
-import { updateUserMessage } from '../../data/parse';
+import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { clientRpcFunc, subscribe as subscribeMsg } from '../../net/init';
 import { login as userLogin } from '../../net/rpc';
@@ -66,35 +67,91 @@ export class Login extends Widget {
     }
 }
 
+// ================================================ 本地
 /**
  * 登录成功获取各种数据表的变化
  * @param uid user id
  */
 const init = (uid:number) => {
     subscribedb.subscribeContact(uid,(r:Contact) => {
-        const info = new GetFriendLinksReq();
-        info.uuid = [];
-        r.friends.forEach((rid:number) => {
-            info.uuid.push(genUuid(uid,rid));
-        });
-        if (info.uuid.length > 0) {
-            clientRpcFunc(getFriendLinks,info,(r:FriendLinkArray) => {            
-                r.arr.forEach((e:FriendLink) => {
-                    store.setStore(`friendLinkMap/${e.uuid}`,e);
-                });            
-            });
-            const usersInfo = new GetUserInfoReq();
-            usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList);
-            clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
-                r.arr.forEach((e:UserInfo) => {
-                    store.setStore(`userInfoMap/${e.uid}`,e);
-                });
-            });
-        }
-        
-        // userInfoMap
+        updateUsers(r,uid);        
+    },(r:Contact) => {
+        updateGroup(r,uid);
     });
 
     // TODO:
 };
-// ================================================ 本地
+
+/**
+ * 更新群组相关信息
+ * @param r 联系人列表
+ * @param uid 当前用户id
+ */
+const updateGroup = (r:Contact,uid:number) => {
+    // 判断群组是否发生了变化,需要重新订阅群组消息
+        
+    const oldGroup = (store.getStore(`contactMap/${uid}`) || { group:[] }).group;
+    const addGroup = r.group.filter((gid) => {
+        return oldGroup.findIndex(item => item === gid) === -1;
+    });
+    const delGroup = oldGroup.filter((gid) => {
+        return r.group.findIndex(item => item === gid) === -1;
+    });
+    
+    // 获取群组信息
+    const groupReq = new GetGroupInfoReq();
+    groupReq.gids = addGroup;
+    clientRpcFunc(getGroupsInfo, groupReq, (r:GroupArray) => {
+        r.arr.forEach((gInfo:GroupInfo) => {
+            store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
+        });
+    });
+    // 删除群组信息
+    const gInfoMap = store.getStore(`groupInfoMap`);    
+    delGroup.forEach((gid:number) => {
+        gInfoMap.delete(gid);
+    });
+    store.setStore(`groupInfoMap`, gInfoMap);
+    // 订阅群组消息
+    addGroup.forEach((gid) => {
+        subscribeMsg(`ims/group/msg/${gid}`, GroupHistory, (r: GroupHistory) => {
+            updateGroupMessage(gid,r);
+        });
+    });
+    
+    // 取消订阅
+};
+
+/**
+ * 更新好友信息
+ * @param r 联系人列表
+ * @param uid 当前用户id
+ */
+const updateUsers = (r:Contact,uid:number) => {
+    const info = new GetFriendLinksReq();
+    info.uuid = [];
+    r.friends.forEach((rid:number) => {
+        info.uuid.push(genUuid(uid,rid));
+    });
+    if (info.uuid.length > 0) {
+            // 获取friendlink
+        clientRpcFunc(getFriendLinks,info,(r:FriendLinkArray) => {            
+            if (r && r.arr && r.arr.length > 0) {
+                r.arr.forEach((e:FriendLink) => {
+                    store.setStore(`friendLinkMap/${e.uuid}`,e);
+                }); 
+            }
+                       
+        });
+        const usersInfo = new GetUserInfoReq();
+        usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList);
+            // 获取好友信息
+        clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
+            if (r && r.arr && r.arr.length > 0) {
+                r.arr.forEach((e:UserInfo) => {
+                    store.setStore(`userInfoMap/${e.uid}`,e);
+                });
+            }
+        });
+    }
+};

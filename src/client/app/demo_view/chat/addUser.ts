@@ -19,7 +19,7 @@ const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 export class AddUser extends Widget {
     public props:Props;
-    public state:Map<any,any>;
+    public state:Contact;
     public ok:() => void;
     constructor() {
         super();
@@ -27,7 +27,6 @@ export class AddUser extends Widget {
             sid: null,
             rid: null
         };
-        this.state = new Map();
     }
 
     public back() {

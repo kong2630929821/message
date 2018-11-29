@@ -101,8 +101,8 @@ export const subscribeFriendLink = (uuid: string, cb) => {
  * 联系人信息
  * @param uid uid
  */
-export const subscribeContact = (uid: number, cb) => {
-    subscribeTable(watchContact,'uid',uid,DEFAULT_ERROR_NUMBER,Contact,'contactMap',cb);            
+export const subscribeContact = (uid: number, cb, diffcb) => {
+    subscribeTable(watchContact,'uid',uid,DEFAULT_ERROR_NUMBER,Contact,'contactMap',cb, diffcb);            
 };
 
 /**
@@ -124,8 +124,9 @@ export const subscribeAddressInfo = (uid: number, cb) => {
  * @param struct struct 
  * @param mapName map Name
  * @param cb callback
+ * @param beforeStoreCb 在修改数据库之前先调用这个函数，专门用户新旧数据的比较
  */
-const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyValue:any, struct:any, mapName:store.MapName, cb:(r) => void) => {
+const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyValue:any, struct:any, mapName:store.MapName, cb:(r:any) => void, beforeStoreCb?:(r:any) => void) => {
     clientRpcFunc(method, keyValue, (r: any) => {
         updateMap(r);
         const bonKeyValue = ab2hex(new BonBuffer().write(keyValue).getBuffer());
@@ -135,6 +136,7 @@ const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyV
     });    
 
     const updateMap = (r:any) => {
+        beforeStoreCb && beforeStoreCb(r);
         store.setStore(`${mapName}/${keyValue}`,r);
         cb && cb(r);
     };

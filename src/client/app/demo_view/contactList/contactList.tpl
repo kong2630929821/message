@@ -7,7 +7,9 @@
         <div on-tap="toNewFriend" style="border-bottom: 1px solid #DBDBE5;">
             <client-app-widget-contactItem-contactItem>{text:"新的朋友",totalNew:{{it1.applyUser.length}} }</client-app-widget-contactItem-contactItem>
         </div>
-        <client-app-widget-contactItem-contactItem>{text:"群聊"}</client-app-widget-contactItem-contactItem>
+        <div on-tap="toGroup" style="border-bottom: 1px solid #DBDBE5;">
+            <client-app-widget-contactItem-contactItem>{text:"群聊"}</client-app-widget-contactItem-contactItem>
+        </div>
     </div>
     <div w-class="a-part">
         {{for i,v of it1.friends}}

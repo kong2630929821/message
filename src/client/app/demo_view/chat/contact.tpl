@@ -25,6 +25,6 @@
     {{end}}
 
     {{for key,value of it1}}
-        <div><client-app-demo_view-chat-lastMessageItem>{"rid":{{value[0]}} }</client-app-demo_view-chat-lastMessageItem> <span on-tap="chat({{value[0]}})">!点我聊天</span></div>
+        <div><client-app-demo_view-chat-lastMessageItem>{"id":{{value[0]}}, "chatType":{{value[2]}} }</client-app-demo_view-chat-lastMessageItem> <span on-tap="chat(e,{{ value[0] }},'{{ value[2] }}')">!点我聊天</span></div>
     {{end}} 
 </div>
