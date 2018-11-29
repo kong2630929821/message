@@ -4,9 +4,9 @@
 // ================================================ 导入
 import { Json } from '../../../../pi/lang/type';
 import { Widget } from '../../../../pi/widget/widget';
-import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
+import { Result } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
-import { acceptFriend, getUsersBasicInfo } from '../../../app/net/rpc';
+import { acceptFriend } from '../../../app/net/rpc';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -23,7 +23,6 @@ export class NewFriend extends Widget {
     };
     public setProps(props:Json) {
         super.setProps(props);
-        console.log('hhhhhhhhhh',props);
         this.props.applyUser = props.applyUser;
         
     }

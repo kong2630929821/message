@@ -11,8 +11,8 @@
     </div>
     <div w-class="history-wrap">
         <div w-class="inner-wrap">
-            {{for index,item of it.messageList}}
-            <client-app-widget-messageRecord-messageRecord style="margin-bottom:10px;">{{item}}</client-app-widget-messageRecord-messageRecord>
+            {{for i,v of it1}}
+            <widget w-tag="client-app-widget-messageRecord-messageRecord" on-tap="chat({{v[0]}})">{"rid":{{v[0]}} }</widget>
             {{end}} 
              
         </div> 
@@ -24,7 +24,4 @@
     </div>
     {{end}}
 
-    {{for key,value of it1}}
-        <div><client-app-demo_view-chat-lastMessageItem>{"rid":{{value[0]}} }</client-app-demo_view-chat-lastMessageItem> <span on-tap="chat({{value[0]}})">!点我聊天</span></div>
-    {{end}} 
 </div>

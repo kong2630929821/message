@@ -6,9 +6,9 @@
 import { Json } from '../../../../pi/lang/type';
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
-import { UserArray } from '../../../../server/data/rpc/basic.s';
+import { UserInfo } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
-import { getUsersBasicInfo } from '../../../app/net/rpc';
+import * as store from '../../data/store';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -42,19 +42,9 @@ export class UserDetail extends Widget {
             { title:'删除联系人',content:'将联系人\'赵铁柱\'删除，同时删除聊天记录',sureText:'删除',cancelText:'取消' }];
         this.props.isContactorOpVisible = false;
         this.props.isModalBoxVisible = false;
-        this.getContactorInfo();
+        this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
     }
     
-    // 获取联系人信息
-    public getContactorInfo() {
-        const uids:number[] = [this.props.uid];
-        getUsersBasicInfo(uids,(r:UserArray) => {
-            console.log('===联系人信息===',r);
-            this.props.userInfo = r.arr[0];
-            this.paint();                    
-        });
-    }
-
     // 点击...展开联系人操作列表
     public handleMoreContactor() {
         console.log('handleMoreContactor');

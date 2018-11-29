@@ -8,10 +8,8 @@ import { popNew } from '../../../../pi/ui/root';
 import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
-import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { getUsersBasicInfo, login as userLogin } from '../../net/rpc';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -31,21 +29,7 @@ export class ContactList extends Widget {
     public goBack() {
         this.ok();
     }
-     // 获取friends信息
-    public getFriends() {
-        getUsersBasicInfo(this.state.friends,(r:UserArray) => {
-            console.log('===通讯录好友信息===',r);
-            r.arr.map(item => {
-                const obj = {
-                    uid :item.uid,
-                    avatorPath : 'user.png',
-                    text:item.uid.toString()
-                };
-                this.props.userList.push(obj);
-            });
-            this.paint();                    
-        });
-    }
+     
      // 跳转至新的朋友验证状态界面
     public toNewFriend() {
         console.log('===========toNewFriend');

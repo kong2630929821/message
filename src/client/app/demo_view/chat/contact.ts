@@ -27,7 +27,7 @@ export class Contact extends Widget {
     }
 
     public chat(uid:number) {
-        popNew('client-app-demo_view-chat-chat', { sid:this.props.sid,rid:uid });
+        popNew('client-app-demo_view-chat-chat', { rid:uid });
     }
 
     public openAddUser() {

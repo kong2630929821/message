@@ -17,7 +17,7 @@ const logger = new Logger(WIDGET_NAME);
 // ================================================ 导出
 export class Login extends Widget {
     public props:Props = {
-        name: '',
+        name: '赵铁柱',
         passwd: '',
         success:false
     };

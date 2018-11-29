@@ -84,7 +84,7 @@ const init = (uid:number) => {
                 });            
             });
             const usersInfo = new GetUserInfoReq();
-            usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList);
+            usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
             clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
                 r.arr.forEach((e:UserInfo) => {
                     store.setStore(`userInfoMap/${e.uid}`,e);
