@@ -33,7 +33,7 @@ export class ContactList extends Widget {
      // 跳转至新的朋友验证状态界面
     public toNewFriend() {
         console.log('===========toNewFriend');
-        popNew('client-app-demo_view-contactList-newFriend',{ applyUser:this.state.applyUser });
+        popNew('client-app-demo_view-contactList-newFriend');
     }
 
     public toGroup() {

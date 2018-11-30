@@ -26,7 +26,6 @@ export class TextMessage extends Widget {
         let time = this.props.msg.time;
         time = timestampFormat(time).split(' ')[1];
         this.props.time = time.substr(0,5);
-        console.log('聊天信息》》》》》》》》',props);
     }
 }
 

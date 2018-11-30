@@ -32,6 +32,7 @@ export class Chat extends Widget {
         this.props.sid = store.getStore('uid');
         this.props.name = store.getStore(`userInfoMap/${this.props.rid}`,new UserInfo()).name;
         this.props.hidIncArray = store.getStore(`userChatMap/${this.getHid()}`) || [];
+        console.log('chat》》》》》》',store.getStore('userChatMap'));
     }
 
     public firstPaint() {

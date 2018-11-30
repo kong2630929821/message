@@ -3,7 +3,6 @@
  */
 import { Widget } from '../../../../pi/widget/widget';
 
-
 interface Props {
     title: string;
     content: string;
@@ -16,9 +15,6 @@ export class ModalBox extends Widget {
     public ok: () => void;
     public cancel: () => void;
 
-    public create() {
-        super.create();
-    }
     public cancelBtnClick(e: any) {
         this.cancel && this.cancel();
     }

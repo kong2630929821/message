@@ -23,7 +23,7 @@
     margin-left: 20px;
 }
 .sendTime{   
-    color: rgba(41, 127, 202, 1);
+    color: #BBE5FE;
     font-size: 24px;
     font-family: PingFangSC-Regular;
 }

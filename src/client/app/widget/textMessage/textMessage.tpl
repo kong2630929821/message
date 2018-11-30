@@ -19,7 +19,7 @@
             <div w-class="text-wrap" style="color:#222222;background:#fff;">
                 {{it.msg.msg}}
                 <div w-class="corner">
-                    <span w-class="sendTime">{{it.time}}</span>
+                    <span w-class="sendTime" style="color:#297FCA">{{it.time}}</span>
                 </div>
             </div>
             
