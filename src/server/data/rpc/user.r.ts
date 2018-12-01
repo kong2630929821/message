@@ -9,10 +9,10 @@ import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
-import { Contact, FriendLink } from '../db/user.s';
+import { Contact, FriendLink, UserInfo } from '../db/user.s';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
-import { UserAgree } from './user.s';
+import { FriendAlias, UserAgree } from './user.s';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -189,6 +189,56 @@ export const removeFromBlackList = (peerUid: number): Result => {
 
         return result;
     }
+};
+
+/**
+ * 修改好友别名
+ * @param rid user id
+ * @param alias user alias
+ */
+// #[rpc=rpcServer]
+export const changeFriendAlias = (friendAlias:FriendAlias):Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME,CONSTANT.FRIEND_LINK_TABLE,dbMgr);
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+    const sid = getUid();
+    const uuid = genUuid(sid,friendAlias.rid);
+    const result = new Result();
+    const contactInfo = contactBucket.get(sid)[0];
+    const index = contactInfo.friends.indexOf(friendAlias.rid);
+    // 判断rid是否是当前用户的好友
+    if (index > -1) {
+        const friend = friendLinkBucket.get(uuid)[0];
+        friend.alias = friendAlias.alias;
+        friendLinkBucket.put(uuid,friend);
+        result.r = 1;
+    } else {
+        logger.debug('user: ',friendAlias.rid,' is not your friend');
+        result.r = 0;
+    }
+    
+    return result;
+};
+
+/**
+ * 修改当前用户的基础信息
+ * @param userinfo user info
+ */
+// #[rpc=rpcServer]
+export const changeUserInfo = (userinfo:UserInfo):Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,CONSTANT.USER_INFO_TABLE,dbMgr);
+    const sid = getUid();
+    const result = new Result();
+    if (userinfo.uid === sid) {
+        userInfoBucket.put(sid,userinfo);
+        result.r = 1;
+    } else {
+        logger.debug('curUser: ',sid,' changeUser: ',userinfo.uid);
+        result.r = 0;
+    }
+    
+    return result;
 };
 
 // ================================================================= 本地

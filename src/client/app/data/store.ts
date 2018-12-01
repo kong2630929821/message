@@ -160,6 +160,10 @@ const registerDataChange = () => {
     register('userInfoMap',() => {
         friendChange();  // 好友数据更新
     });
+
+    register('friendLinkMap',() => {
+        friendChange();  // 好友数据更新
+    });
 };
 
 /**

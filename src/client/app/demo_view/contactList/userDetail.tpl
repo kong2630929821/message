@@ -1,11 +1,15 @@
-<div w-class="recent-history-wrap" class="new-page">
+<div w-class="recent-history-wrap" class="new-page" on-tap="pageClick">
     <div w-class="top-main-wrap" ev-next-click="handleMoreContactor" ev-back-click="goBack">
         <client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap">
             <img w-class="avator" src="../../res/images/img_avatar1.png" />
             <div w-class="nameText">
-                {{it.userInfo.name}}
-                <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="changeRemark"/>
+                {{if it.editable}}
+                    <input type="text" value="{{it.alias}}" w-class="aliasInput" maxlength="10" on-blur="changeFriendAlias" on-tap="editAlias" on-change="aliasChange"/>
+                {{else}}
+                    {{it.alias}}
+                {{end}}
+                <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="editAlias"/>
             </div>
             <div>ID：{{it.uid}}</div>
             <div>昵称：{{it.userInfo.name}}</div>
