@@ -30,7 +30,7 @@ export class ApplyUser extends Widget {
     }
         // 查看申请详细信息 
     public viewApplyDetail() {
-        popNew('client-app-view-addUser-newFriendApply',{ uid:this.props.uid });
+        popNew('client-app-demo_view-contactList-newFriendApply',this.props);
     }
 
     public agreenBtn(e:any) {

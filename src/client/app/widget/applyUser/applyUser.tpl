@@ -1,4 +1,4 @@
-<div w-class="user-apply-wrap">
+<div w-class="user-apply-wrap" on-tap="viewApplyDetail">
     <div w-class="avator-wrap">
         <img w-class="avator" src="../../res/images/user.png" />
     </div>

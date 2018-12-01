@@ -10,7 +10,7 @@ import * as store from './store';
  * @param msg UserHistory
  */
 export const updateUserMessage = (nextside:number,msg:UserHistory) => {
-    store.setStore(`userHistoryMap/${msg.hIncId}`,msg.msg,false);
+    store.setStore(`userHistoryMap/${msg.hIncId}`,msg.msg);
     const chat = store.getStore(`userChatMap/${getHidFromInc(msg.hIncId)}`, []);
     chat.push(msg.hIncId);
     store.setStore(`userChatMap/${getHidFromInc(msg.hIncId)}`,chat);    
@@ -18,7 +18,7 @@ export const updateUserMessage = (nextside:number,msg:UserHistory) => {
 };
 
 export const updateGroupMessage = (gid:number,msg:GroupHistory) => {
-    store.setStore(`groupHistoryMap/${msg.hIncId}`,msg.msg,false);
+    store.setStore(`groupHistoryMap/${msg.hIncId}`,msg.msg);
     const chat = store.getStore(`groupChatMap/${getHidFromInc(msg.hIncId)}`, []);
     chat.push(msg.hIncId);
     store.setStore(`groupChatMap/${getHidFromInc(msg.hIncId)}`,chat);    
@@ -32,6 +32,6 @@ const pushLastChat = (value:[number,number,GENERATOR_TYPE]) => {
     const lastChat = store.getStore(`lastChat`, []);
     const index = lastChat.findIndex(item => item[0] === value[0] && item[2] === value[2]);
     index > -1 && lastChat.splice(index, 1);    
-    lastChat.push(value);
+    lastChat.unshift(value); // 向前压入数组中
     store.setStore(`lastChat`,lastChat);
 };

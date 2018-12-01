@@ -1,12 +1,13 @@
-.unlogin-chat-wrap{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    background:rgb(242, 242, 242);
+.new-page{
+    display: flex;
+    flex-direction: column;
 }
-.login-chat-wrap{
-    height:1106px;
-    background:rgb(242, 242, 242);
+.messageBox{
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex: 1 0 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 .no-message{
     width:192px;
@@ -17,5 +18,4 @@
 .text{
     color: #888;
     font-size: 32px;
-    font-family: PingFangSC-Regular;
 }
