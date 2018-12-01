@@ -144,7 +144,7 @@ const updateUsers = (r:Contact,uid:number) => {
                        
         });
         const usersInfo = new GetUserInfoReq();
-        usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList);
+        usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
             // 获取好友信息
         clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
             if (r && r.arr && r.arr.length > 0) {

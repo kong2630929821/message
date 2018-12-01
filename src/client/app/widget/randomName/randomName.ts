@@ -2,20 +2,20 @@
  * 随机获取名字组件
  */
 // ================================ 导入
+import { notify } from '../../../../pi/widget/event';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { Widget } from '../../../../pi/widget/widget';
 import { nameWare } from './nameWareHouse';
-import { notify } from '../../../../pi/widget/event';
 
 // ================================ 导出
 
 export class RandomName extends Widget {
     public ok: () => void;
 
-    public create() {
-        super.create();
+    public setProps(props:any) {
+        super.setProps(props);
         this.state = {
-            name:this.playerName() 
+            name:props.name
         };
     }
 
@@ -28,15 +28,16 @@ export class RandomName extends Widget {
      */
     public nameChange(e: any) {
         this.state.name = e.value;
-        notify(e.node,'ev-rName-change',{value:e.value});
+        notify(e.node,'ev-rName-change',{ value:e.value });
         this.paint();
     }
 
     /**
      * 随机获取新名字
      */
-    public randomPlayName() {
+    public randomPlayName(e:any) {
         this.state.name = this.playerName();
+        notify(e.node,'ev-rName-change',{ value:this.state.name });
         const img = getRealNode(this.tree).getElementsByTagName('img')[0];
         img.classList.add('random');
         setTimeout(() => {

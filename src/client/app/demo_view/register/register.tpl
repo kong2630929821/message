@@ -6,7 +6,7 @@
     </div>
     <div w-class="input-wrap" ev-psw-change="inputPasswd">
         <div style="border-bottom: 1px solid #DBDBE5;" ev-rName-change="inputName" >
-            <client-app-widget-randomName-randomName></client-app-widget-randomName-randomName>
+            <client-app-widget-randomName-randomName>{"name":{{it.name}} }</client-app-widget-randomName-randomName>
         </div>
         <client-app-widget-newPassword-newPassword>{}</client-app-widget-newPassword-newPassword> 
     </div>

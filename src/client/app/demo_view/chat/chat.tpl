@@ -1,15 +1,12 @@
-<div class="new-page" ev-back-click="goBack">
-    <client-app-widget-topBar-topBar>{title:{{it.rid}}}</client-app-widget-topBar-topBar>
-    
-    {{for key,value of it.hidIncArray}}
-        <client-app-demo_view-chat-chatItem>{"hIncId": {{value}} }</client-app-demo_view-chat-chatItem>
-    {{end}} 
-    <client-app-widget-textMessage-textMessage></client-app-widget-textMessage-textMessage>
-    <client-app-widget-textMessage-textMessage></client-app-widget-textMessage-textMessage>
-    <div w-class="login-chat-wrap">
-        单人聊天
+<div class="new-page" ev-back-click="goBack" w-class="new-page">
+    <client-app-widget-topBar-topBar>{title:{{it.name}}}</client-app-widget-topBar-topBar>
+    <div w-class="messageBox" on-scroll="">
+        {{for i,v of it.hidIncArray}}
+            <client-app-widget-textMessage-textMessage>{hIncId: {{v}},name:{{it.name}} }</client-app-widget-textMessage-textMessage>
+        {{end}} 
+        <div id="messEnd"></div>
     </div>
-    <div ev-send="send">
+    <div ev-send="send" style="height:120px;">
         <client-app-widget-inputMessage-inputMessage></client-app-widget-inputMessage-inputMessage>
     </div>    
 </div>
