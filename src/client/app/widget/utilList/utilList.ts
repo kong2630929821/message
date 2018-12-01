@@ -27,5 +27,4 @@ export class UtilList extends Widget {
     public handleUtilItemTap(event:any,index:number) {
         notify(event.node,'ev-handleFatherTap',{ index:index });
     }
-    
 }

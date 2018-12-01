@@ -3,20 +3,30 @@
  */
 // ===========================导入
 import { Widget } from '../../../../pi/widget/widget';
-
-interface Props {
-    message : string; // 消息内容
-    sendTime:string;// 发送时间
-    isYourSelf: boolean;// 是否本人的消息
-    isRead:boolean;// 是否已读
-}
+import * as store from '../../data/store';
+import { timestampFormat } from '../../logic/logic';
 
 // ===========================导出
 export class TextMessage extends Widget {
-    public props:Props = {
-        message : '大家好在我是新手请多多指教大家啊好，我是新手请多多指教大家好，我是新手请多多指教',
-        sendTime : '17:56',
-        isYourSelf : true,
-        isRead:true
-    };
+    constructor() {
+        super();
+        this.props = {
+            hIncId:'',
+            name:'',
+            msg:null,
+            me:true,
+            time:''
+        };
+    }     
+
+    public setProps(props:any) {
+        super.setProps(props);
+        this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`);
+        this.props.me = this.props.msg.sid === store.getStore('uid');
+        let time = this.props.msg.time;
+        time = timestampFormat(time).split(' ')[1];
+        this.props.time = time.substr(0,5);
+    }
 }
+
+// ================================================ 本地

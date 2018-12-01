@@ -5,7 +5,7 @@
 .liItem{
     display:flex;
     align-items:center;
-    border-bottom: solid gray 1px;
+    border-bottom: solid #CCCCCC 1px;
     margin:0;
 }
 .utilImg{

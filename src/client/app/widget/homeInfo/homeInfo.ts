@@ -25,7 +25,7 @@ export class HomeInfo extends Widget {
         isUser : false,
         isContactor:true
     };
-    public setProps(props) {
+    public setProps(props:any) {
         super.setProps(props);
         console.log('hhhhhhhhhhhhhhhhhhhh',props);
     }

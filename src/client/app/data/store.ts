@@ -8,7 +8,7 @@ import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { depCopy } from '../../../utils/util';
+import { getFile, initFileStore, writeFile } from './lcstore';
 
 // ============================================ 导出
 
@@ -101,11 +101,12 @@ export const unregister = (keyName: string, cb: Function): void => {
  * store初始化
  */
 export const initStore = () => {
+    registerDataChange();
     store = {
         uid:null,
         groupInfoMap: new Map(),
         groupUserLinkMap: new Map(),
-        userHistoryMap: new Map(),
+        userHistoryMap:new Map(),
         groupHistoryMap: new Map(),
         announceHistoryMap: new Map(),
         msgLockMap: new Map(),
@@ -119,6 +120,56 @@ export const initStore = () => {
         groupChatMap:new Map(),
         lastChat:[]
     };
+};
+
+/**
+ * 更新当前用户的数据
+ */
+const initAccount = () => {
+    initFileStore().then(() => {
+        const uid = getStore('uid');
+        if (!uid) return;
+        getFile(uid, (value, key) => {
+            // console.timeEnd('initFile');
+            if (!value) return;
+            
+            const curAccount = value[uid];
+            if (curAccount) {
+                store.userHistoryMap = curAccount.userHistoryMap;
+                store.userChatMap = curAccount.userChatMap;
+                store.lastChat = curAccount.lastChat;
+            }
+            // console.log('store init success',store);
+        }, () => {
+            console.log('read error');
+        });
+    });
+    
+};
+
+/**
+ * 注册监听事件
+ */
+const registerDataChange = () => {
+    register('uid',() => {
+        initAccount(); // 登陆成功后更新当前用户的历史数据
+    });
+
+    register('lastChat',() => {
+        accountsChange();  // 新的聊天数据
+    });
+    
+};
+
+/**
+ * 数据变化
+ */
+const accountsChange = () => {
+    const newAccount:any = {};
+    newAccount.userHistoryMap = getStore('userHistoryMap'); // 单人聊天历史记录变化
+    newAccount.userChatMap = getStore('userChatMap');  // 单人聊天历史记录索引变化
+    newAccount.lastChat = getStore('lastChat');  // 最近聊天记录
+    writeFile(getStore('uid'),newAccount);
 };
 
 /**

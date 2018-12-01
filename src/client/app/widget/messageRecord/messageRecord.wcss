@@ -43,7 +43,11 @@
 .recordInfo{ 
     color: rgba(102, 102, 102, 1);
     font-size: 28px;
-    font-family: PingFangSC-Regular;
+    word-break: break-all;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 450px;
+    overflow: hidden;
 }
 .right-wrap{
     display:flex;
