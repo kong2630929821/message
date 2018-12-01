@@ -11,6 +11,7 @@ import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 import { Contact, FriendLink } from '../db/user.s';
 import { Result } from './basic.s';
+import { getUid } from './group.r';
 import { UserAgree } from './user.s';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -32,16 +33,16 @@ export const applyFriend = (uid: number): Result => {
      */
     const _applyFriend = (sid: number, rid: number) => {
         const dbMgr = getEnv().getDbMgr();
+        // 取出联系人表
         const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+        // TODO:判断rid是否已经添加了sid为好友
+        // 取出对应的那一个联系人
         const contactInfo = contactBucket.get(rid)[0];
-        contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);        
+        contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);      
         contactBucket.put(rid, contactInfo);
     };
 
-    getCurrentUidFromSession((sid: number) => {
-        console.log(`sid is ${sid}, uid is : ${uid}`);
-        _applyFriend(sid, uid);
-    });
+    _applyFriend(getUid(), uid);
 
     const result = new Result();
     result.r = 1;
@@ -92,9 +93,8 @@ export const acceptFriend = (agree: UserAgree): Result => {
         friendLinkBucket.put(friendLink.uuid,friendLink);
 
     };
-    getCurrentUidFromSession((sid: number) => {
-        _acceptFriend(sid, agree.uid, agree.agree);
-    });
+
+    _acceptFriend(getUid(), agree.uid, agree.agree);
 
     const result = new Result();
     result.r = 1;
@@ -120,9 +120,8 @@ export const delFriend = (uid: number): Result => {
         const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
         friendLinkBucket.delete(genUuid(sid,rid));        
     };
-    getCurrentUidFromSession((sid: number) => {
-        _delFriend(sid, uid);
-    });
+
+    _delFriend(getUid(), uid);
 
     const result = new Result();
     result.r = 1;
@@ -193,16 +192,3 @@ export const removeFromBlackList = (peerUid: number): Result => {
 };
 
 // ================================================================= 本地
-
-/**
- * 从session中取uid
- * @param cb callback
- */
-const getCurrentUidFromSession = (cb: (uid: number) => void) => {
-    const session = getEnv().getSession();
-    const dbMgr = getEnv().getDbMgr();
-    read(dbMgr, (tr: Tr) => {
-        const uid = session.get(tr, 'uid');
-        cb(parseInt(<string>uid,10));
-    });
-};
