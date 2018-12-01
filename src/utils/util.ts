@@ -97,7 +97,7 @@ export const genNewIdFromOld = (oldId: number):number => {
 };
 
 /**
- * generat group user id
+ * generate group user id
  * @param group id 
  * @param user id
  */
@@ -143,4 +143,22 @@ export const genNextMessageIndex = (index:number):number => {
 export const getHidFromInc = (inc:string):string => {
     
     return inc.split(':')[0];
+};
+
+/**
+ * get gid
+ * @param guid group user id 
+ */
+export const getGidFromGuid = (guid:string) => {
+
+    return parseInt(guid.split(':')[0], 10);
+};
+
+/**
+ * get uid
+ * @param guid group user id 
+ */
+export const getUidFromGuid = (guid:string) => {
+
+    return parseInt(guid.split(':')[1],10);
 };
