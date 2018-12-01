@@ -19,11 +19,11 @@ export class Contact extends Widget {
         this.props.messageList = [];
         this.props.isUtilVisible = false;
         this.props.utilList = [
-                { iconPath:'search.png',utilText:'搜索' },
-                { iconPath:'adress-book.png',utilText:'通讯录' },
-                { iconPath:'add-friend.png',utilText:'添加好友' },
-                { iconPath:'group-chat.png',utilText:'创建群聊' },
-                { iconPath:'scan.png',utilText:'扫一扫' }
+            { iconPath:'search.png',utilText:'搜索' },
+            { iconPath:'adress-book.png',utilText:'通讯录' },
+            { iconPath:'add-friend.png',utilText:'添加好友' },
+            { iconPath:'group-chat.png',utilText:'创建群聊' },
+            { iconPath:'scan.png',utilText:'扫一扫' }
         ];
     }
 
@@ -54,7 +54,6 @@ export class Contact extends Widget {
     public handleFatherTap(e:any) {
         switch (e.index) {
             case 0:// 搜索
-            
                 break;
             case 1:// 点击通讯录
                 popNew('client-app-demo_view-contactList-contactList',{ sid : this.props.sid });

@@ -8,8 +8,7 @@ import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { json2Map, map2Json } from '../logic/logic';
-import { getLocalStorage, setLocalStorage } from './lcstore';
+import { getFile, initFileStore, writeFile } from './lcstore';
 
 // ============================================ 导出
 
@@ -127,15 +126,25 @@ export const initStore = () => {
  * 更新当前用户的数据
  */
 const initAccount = () => {
-    const localAccounts = getLocalStorage('accounts', {
-        account:{}
+    initFileStore().then(() => {
+        const uid = getStore('uid');
+        if (!uid) return;
+        getFile(uid, (value, key) => {
+            // console.timeEnd('initFile');
+            if (!value) return;
+            
+            const curAccount = value[uid];
+            if (curAccount) {
+                store.userHistoryMap = curAccount.userHistoryMap;
+                store.userChatMap = curAccount.userChatMap;
+                store.lastChat = curAccount.lastChat;
+            }
+            // console.log('store init success',store);
+        }, () => {
+            console.log('read error');
+        });
     });
-    const curAccount = localAccounts.account[getStore('uid')];
-    if (curAccount) {
-        store.userHistoryMap = json2Map(curAccount.userHistoryMap);
-        store.userChatMap = json2Map(curAccount.userChatMap);
-        store.lastChat = curAccount.lastChat;
-    }
+    
 };
 
 /**
@@ -156,15 +165,11 @@ const registerDataChange = () => {
  * 数据变化
  */
 const accountsChange = () => {
-    const localAccounts = getLocalStorage('accounts', {
-        account:{}
-    });
     const newAccount:any = {};
-    newAccount.userHistoryMap = map2Json(getStore('userHistoryMap')); // 单人聊天历史记录变化
-    newAccount.userChatMap = map2Json(getStore('userChatMap'));  // 单人聊天历史记录索引变化
+    newAccount.userHistoryMap = getStore('userHistoryMap'); // 单人聊天历史记录变化
+    newAccount.userChatMap = getStore('userChatMap');  // 单人聊天历史记录索引变化
     newAccount.lastChat = getStore('lastChat');  // 最近聊天记录
-    localAccounts.account[getStore('uid')] = newAccount;
-    setLocalStorage('accounts',localAccounts);
+    writeFile(getStore('uid'),newAccount);
 };
 
 /**
