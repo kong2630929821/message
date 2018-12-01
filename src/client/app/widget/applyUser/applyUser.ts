@@ -9,10 +9,13 @@ import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
+import { GroupInfo } from '../../../../server/data/db/group.s';
 
 interface Props {
     uid?:number;// id
+    gid?:number;
     info?:Json;
+    ginfo?:Json;
     applyInfo? : string; // 其他
     isagree:boolean;
 }
@@ -26,6 +29,7 @@ export class ApplyUser extends Widget {
         console.log(props);
         this.props.applyInfo = '填写验证信息';
         this.props.info = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
+        this.props.ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
         this.props.isagree = false;
     }
         // 查看申请详细信息 
@@ -35,6 +39,7 @@ export class ApplyUser extends Widget {
 
     public agreenBtn(e:any) {
         notify(e.node,'ev-agree-friend',{ value:this.props.uid });
+        notify(e.node,'ev-agree-group',{ value:this.props.gid });
         this.props.isagree = true;
         this.paint();
     }

@@ -1,0 +1,35 @@
+.search-input{
+    position:relative;
+    margin-left: 20px;
+    margin-top: 30px;
+    width: 710px;
+    height: 110px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+}
+.searchIcon{
+    position:absolute;
+    left:30px;
+    top:40px;
+    width:32px;
+    height:32px;
+}
+.a-part{
+    width:710px;
+    border-radius: 12px;
+    margin-left: 20px;
+    margin-top: 30px;
+    background-color: rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+}
+.a{
+    height:80px;
+    line-height: 50px;
+    padding: 15px 20px;
+    margin: 0 10px;
+    border-bottom: solid gray 1px;
+    font-size:28px;
+    color:gray;
+    text-transform:uppercase;   
+}

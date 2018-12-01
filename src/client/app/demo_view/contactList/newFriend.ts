@@ -7,6 +7,11 @@ import { Widget } from '../../../../pi/widget/widget';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
 import { acceptFriend, getUsersBasicInfo } from '../../../app/net/rpc';
+import { GroupAgree } from '../../../../server/data/rpc/group.s';
+import * as  store from '../../data/store';
+import { clientRpcFunc } from '../../net/init';
+import { agreeJoinGroup } from '../../../../server/data/rpc/group.p';
+import { GroupInfo } from '../../../../server/data/db/group.s';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -19,13 +24,14 @@ export class NewFriend extends Widget {
     public props:Props = {
         sid:null,
         applyUser:[],
+        applyGroup:[],
         applyUserList:[]
     };
     public setProps(props:Json) {
         super.setProps(props);
         console.log('hhhhhhhhhh',props);
         this.props.applyUser = props.applyUser;
-        
+        this.props.applyGroup = props.applyGroup;
     }
 
     public goBack() {
@@ -37,6 +43,24 @@ export class NewFriend extends Widget {
         console.log(v);
         acceptFriend(v,true,(r:Result) => {
             // TODO:
+        });
+    }
+
+    //同意入群申请
+    public agreeGroupApply(e:any){
+        const gid = parseInt(e.value,10);
+        console.log(gid);
+
+        const agree = new GroupAgree();
+        agree.agree = true;
+        agree.gid = gid;
+        agree.uid = store.getStore(`uid`);
+        clientRpcFunc(agreeJoinGroup, agree,(gInfo:GroupInfo) => {
+            if (gInfo.gid === -1) {
+
+                return;
+            }
+            store.setStore(`groupInfoMap/${gInfo.gid}`,gInfo);
         });
     }
 }
@@ -51,5 +75,6 @@ interface ApplyUserList {
 interface Props {
     sid: number;
     applyUser:number[];
+    applyGroup:number[];
     applyUserList : ApplyUserList[];
 }

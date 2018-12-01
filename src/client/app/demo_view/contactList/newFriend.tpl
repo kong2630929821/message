@@ -6,6 +6,11 @@
             {{for i,v of it.applyUser}}
             <client-app-widget-applyUser-applyUser>{"uid":{{v}} }</client-app-widget-applyUser-applyUser>
             {{end}}
+            {{for i,v of it.applyGroup}}
+            <div ev-agree-group="agreeGroupApply">
+                <client-app-widget-applyUser-applyUser>{"gid":{{v}} }</client-app-widget-applyUser-applyUser>
+            </div>
+            {{end}}
         </div>
     </div>
  </div> 
