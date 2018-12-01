@@ -6,7 +6,7 @@
 import { HandlerMap } from '../../../pi/util/event';
 import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
-import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../server/data/db/message.s';
+import { AnnounceHistory, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy } from '../../../utils/util';
 
@@ -128,16 +128,16 @@ export interface Store {
     uid:number;
     groupInfoMap: Map<number, GroupInfo>;// gid
     groupUserLinkMap: Map<string, GroupUserLink>;// guid
-    userHistoryMap: Map<string, UserHistory>;// hidinc
-    groupHistoryMap: Map<string, GroupHistory>;// hidinc
+    userHistoryMap: Map<string, UserMsg>;// hidinc
+    groupHistoryMap: Map<string, GroupMsg>;// hidinc
     announceHistoryMap: Map<string, AnnounceHistory>;// aidinc
-    msgLockMap: Map<number, MsgLock>;// LOCK
+    msgLockMap: Map<number, MsgLock>;// LOCK,前端暂时没用到
     userInfoMap: Map<number, UserInfo>;// uid
-    userCredentialMap: Map<number, UserCredential>; // todo
-    accountGeneratorMap: Map<string, AccountGenerator>;// todo
+    userCredentialMap: Map<number, UserCredential>; // todo,前端暂时没用到
+    accountGeneratorMap: Map<string, AccountGenerator>;// todo,前端暂时没用到
     friendLinkMap: Map<string, FriendLink>;// uuid
     contactMap: Map<number, Contact>;// uid
-    addressInfoMap: Map<number, AddressInfo>;// uid
+    addressInfoMap: Map<number, AddressInfo>;// uid,暂时没用到
     userChatMap:Map<string, string[]>;// hid,hidinc,递增存储
     groupChatMap:Map<string, string[]>;// hid,hidinc
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
