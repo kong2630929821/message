@@ -78,10 +78,21 @@ export class UserDetail extends Widget {
         this.ok();
     }
 
+    /**
+     * 删除好友
+     * @param uid 用户ID
+     */
     public delFriend(uid:number) {
         delUserFriend(uid,(r:Result) => {
             // TODO:
         });
+    }
+
+    /**
+     * 修改好友备注
+     */
+    public changeRemark() {
+        // todo
     }
 }
 

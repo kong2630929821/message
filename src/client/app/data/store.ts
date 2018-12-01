@@ -129,17 +129,15 @@ const initAccount = () => {
     initFileStore().then(() => {
         const uid = getStore('uid');
         if (!uid) return;
-        getFile(uid, (value, key) => {
-            // console.timeEnd('initFile');
+        getFile(uid, (value) => {
             if (!value) return;
-            
-            const curAccount = value[uid];
-            if (curAccount) {
-                store.userHistoryMap = curAccount.userHistoryMap;
-                store.userChatMap = curAccount.userChatMap;
-                store.lastChat = curAccount.lastChat;
-            }
-            // console.log('store init success',store);
+            store.userHistoryMap = value.userHistoryMap;
+            store.userChatMap = value.userChatMap;
+            store.lastChat = value.lastChat;
+            store.friendLinkMap = value.friendLinkMap;
+            store.userInfoMap = value.userInfoMap;
+            setStore('lastChat',value.lastChat);
+            console.log('store init success',store);
         }, () => {
             console.log('read error');
         });
@@ -159,17 +157,45 @@ const registerDataChange = () => {
         accountsChange();  // 新的聊天数据
     });
     
+    register('userInfoMap',() => {
+        friendChange();  // 好友数据更新
+    });
 };
 
 /**
- * 数据变化
+ * 聊天数据变化
  */
 const accountsChange = () => {
-    const newAccount:any = {};
-    newAccount.userHistoryMap = getStore('userHistoryMap'); // 单人聊天历史记录变化
-    newAccount.userChatMap = getStore('userChatMap');  // 单人聊天历史记录索引变化
-    newAccount.lastChat = getStore('lastChat');  // 最近聊天记录
-    writeFile(getStore('uid'),newAccount);
+    const id = getStore('uid');
+    getFile(id,(value) => {
+        if (!value) {
+            value = {};
+        }
+        value.userHistoryMap = getStore('userHistoryMap'); // 单人聊天历史记录变化
+        value.userChatMap = getStore('userChatMap');  // 单人聊天历史记录索引变化
+        value.lastChat = getStore('lastChat');  // 最近聊天记录
+        writeFile(id,value);
+    },() => {
+        console.log('read error');
+    });
+    
+};
+
+/**
+ * 好友数据变化
+ */
+const friendChange = () => {
+    const id = getStore('uid');
+    getFile(id,(value) => {
+        if (!value) {
+            value = {};
+        }
+        value.friendLinkMap = getStore('friendLinkMap'); // 好友链接
+        value.userInfoMap = getStore('userInfoMap');  // 用户信息
+        writeFile(id,value);
+    },() => {
+        console.log('read error');
+    });
 };
 
 /**

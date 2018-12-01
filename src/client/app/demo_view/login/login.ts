@@ -56,9 +56,9 @@ export class Login extends Widget {
         userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
             if (r.uid > 0) {
                 store.setStore(`uid`,r.uid);
-                store.setStore(`userInfoMap/${r.uid}`,r);                
-                popNew('client-app-demo_view-chat-contact', { sid: this.props.uid });
+                store.setStore(`userInfoMap/${r.uid}`,r);        
                 init(r.uid); 
+                popNew('client-app-demo_view-chat-contact', { sid: this.props.uid });
                 subscribeMsg(this.props.uid.toString(), UserHistory, (r: UserHistory) => {
                     updateUserMessage(r.msg.sid,r);
                 });
