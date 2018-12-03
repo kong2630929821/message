@@ -3,9 +3,9 @@
         <client-app-widget-topBar-topBar>{title:"",background:"#318DE6"}</client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap">
             <img w-class="avator" src="../../res/images/img_avatar1.png" />
-            <div w-class="nameText">
+            <div w-class="nameText" ev-input-blur="changeUserInfo" ev-input-change="nameChange">
                 {{if it.nameEdit}}
-                    <input type="text" value="{{it.name}}" w-class="aliasInput" maxlength="10" on-blur="changeUserInfo" on-tap="editName" on-input="nameChange"/>
+                    <widget w-class="aliasInput" w-tag="client-app-widget-input-input" on-tap="editName">{input:{{it.name}},style:"padding:0px;background:none;color:#fff;",itype:"text",maxLength:10 }</widget>
                 {{else}}
                     {{it.name}}
                 {{end}}

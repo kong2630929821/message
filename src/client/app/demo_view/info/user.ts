@@ -4,7 +4,6 @@
 // ================================================ 导入
 import { Widget } from '../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
-import { Result } from '../../../../server/data/rpc/basic.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
@@ -53,7 +52,7 @@ export class User extends Widget {
      * 昵称更改
      */
     public nameChange(e:any) {
-        this.props.name = e.target.value;
+        this.props.name = e.value;
         this.paint();
     }
 
@@ -78,8 +77,11 @@ export class User extends Widget {
      */
     public changeUserInfo() {
         const sid = store.getStore('uid');
-        const test = new UserInfo();
         const userinfo = store.getStore(`userInfoMap/${sid}`,new UserInfo());
+        this.props.name = this.props.name || userinfo.name;
+        this.props.tel = this.props.tel || '未知';
+        
+        const test = new UserInfo();
         test.uid = sid;
         test.name = this.props.name;
         test.tel = this.props.tel;
@@ -95,5 +97,6 @@ export class User extends Widget {
                 console.log('修改个人信息成功',r);
             }
         });
+        this.paint();
     }
 }   
