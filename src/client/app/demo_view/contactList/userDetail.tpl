@@ -1,21 +1,34 @@
-<div w-class="recent-history-wrap" class="new-page">
+<div w-class="new-page" class="new-page" on-tap="pageClick">
     <div w-class="top-main-wrap" ev-next-click="handleMoreContactor" ev-back-click="goBack">
         <client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</client-app-widget-topBar-topBar>
-        <client-app-widget-homeInfo-homeInfo>{avatorPath:"",name:{{it.userInfo.name}},userId:{{it.uid}},isUser:true,isContactor:true}</client-app-widget-homeInfo-homeInfo>
+        <div w-class="home-info-wrap">
+            <img w-class="avator" src="../../res/images/img_avatar1.png" />
+            <div w-class="nameText">
+                {{if it.editable}}
+                    <input type="text" value="{{it.alias}}" w-class="aliasInput" maxlength="10" on-blur="changeFriendAlias" on-tap="editAlias" on-input="aliasChange"/>
+                {{else}}
+                    {{it.alias}}
+                {{end}}
+                <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="editAlias"/>
+            </div>
+            <div>ID：{{it.uid}}</div>
+            <div>昵称：{{it.userInfo.name}}</div>
+        </div>
     </div>  
+
     <div w-class="detail-info-wrap">
         <div w-class="detail-info">
             <div w-class="adress-wrap">
                 <img w-class="adressIcon" src="../../res/images/adress-book.png" />
                 <div w-class="adress-text-wrap">
-                    <span w-class="mainText">xxxxxxxxxxxxxxxxxxxx</span>
+                    <span w-class="mainText">0x58b0b586b0b50x58b0b586vcbvcbvc0b586b586</span>
                     <span w-class="flag">地址</span>
                 </div>
             </div>
             <div w-class="phone-wrap">
                 <img w-class="phoneIcon" src="../../res/images/phone.png" />
                 <div w-class="phone-text-wrap">
-                    <span w-class="mainText">xxxxxxxxxxxxxxxxxxxx</span>
+                    <span w-class="mainText">未知</span>
                     <span w-class="flag">电话</span>
                 </div>
             </div>

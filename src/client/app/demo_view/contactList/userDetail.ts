@@ -8,8 +8,13 @@ import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
+import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
+import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { Logger } from '../../../../utils/logger';
+import { genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { getFriendAlias } from '../../logic/logic';
+import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend } from '../../net/rpc';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -22,10 +27,11 @@ export class UserDetail extends Widget {
     public ok:() => void;
     public props:Props = {
         uid:null,
+        editable:false,
         isContactorOpVisible:false,
-        isModalBoxVisible:false,
         utilList:[],
-        userInfo:{}
+        userInfo:{},
+        alias:''
     };
 
     public setProps(props:Json) {
@@ -39,8 +45,9 @@ export class UserDetail extends Widget {
         ];
         
         this.props.isContactorOpVisible = false;
-        this.props.isModalBoxVisible = false;
+        this.props.editable = false;
         this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
+        this.props.alias = getFriendAlias(this.props.uid);
     }
     
     // 点击...展开联系人操作列表
@@ -78,10 +85,58 @@ export class UserDetail extends Widget {
         this.ok();
     }
 
+    /**
+     * 删除好友
+     * @param uid 用户ID
+     */
     public delFriend(uid:number) {
         delUserFriend(uid,(r:Result) => {
             // TODO:
         });
+    }
+
+    /**
+     * 编辑好友别名
+     */
+    public editAlias() {
+        this.props.editable = true;
+        this.paint();
+    }
+
+    /**
+     * 页面点击
+     */
+    public pageClick() {
+        this.props.editable = false;
+        this.paint();
+    }
+
+    /**
+     * 好友别名更改
+     */
+    public aliasChange(e:any) {
+        this.props.alias = e.target.value;
+        this.paint();
+    }
+
+    /**
+     * 修改好友备注
+     */
+    public changeFriendAlias() {
+        const friend = new FriendAlias();
+        friend.rid = this.props.uid;
+        friend.alias = this.props.alias;
+        clientRpcFunc(changeFriendAlias, friend, (r: Result) => {
+            // todo
+            if (r.r === 1) {
+                const sid = store.getStore('uid');
+                const friendlink = store.getStore(`friendLinkMap/${genUuid(sid,this.props.uid)}`,{}); 
+                friendlink.alias = this.props.alias;
+                store.setStore(`friendLinkMap/${genUuid(sid,this.props.uid)}`,friendlink);
+                console.log('修改好友备注成功',this.props.alias);
+            }
+        });
+        
     }
 }
 
@@ -89,8 +144,9 @@ export class UserDetail extends Widget {
 
 interface Props {
     uid: number;
+    editable:boolean;
     isContactorOpVisible:boolean;
-    isModalBoxVisible:boolean;
     utilList:any;
     userInfo:any;
+    alias:string;
 }
