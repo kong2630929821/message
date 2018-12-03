@@ -4,10 +4,9 @@
 // ================================================ 导入
 import { Widget } from '../../../../pi/widget/widget';
 import { UserMsg } from '../../../../server/data/db/message.s';
-import { UserInfo } from '../../../../server/data/db/user.s';
 import { genUserHid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { timestampFormat } from '../../logic/logic';
+import { getFriendAlias, timestampFormat } from '../../logic/logic';
 // ================================================ 导出
 
 export class MessageRecord extends Widget {
@@ -21,7 +20,7 @@ export class MessageRecord extends Widget {
     public setProps(props: any) {
         super.setProps(props);
         const sid = store.getStore(`uid`);
-        this.props.name = store.getStore(`userInfoMap/${this.props.rid}`,new UserInfo()).name;
+        this.props.name = getFriendAlias(this.props.rid);
         const friendLink = store.getStore(`friendLinkMap/${sid}:${this.props.rid}`);
         const hid = friendLink.hid;
         const hIncIdArr = store.getStore(`userChatMap/${hid}`);

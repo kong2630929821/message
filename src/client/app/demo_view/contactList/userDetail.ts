@@ -13,6 +13,7 @@ import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { Logger } from '../../../../utils/logger';
 import { genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { getFriendAlias } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend } from '../../net/rpc';
 
@@ -43,12 +44,10 @@ export class UserDetail extends Widget {
             { utilText:'删除' }
         ];
         
-        const sid = store.getStore('uid');
         this.props.isContactorOpVisible = false;
         this.props.editable = false;
         this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
-        const friend = store.getStore(`friendLinkMap/${genUuid(sid,this.props.uid)}`,{});
-        this.props.alias = friend.alias || this.props.userInfo.name;
+        this.props.alias = getFriendAlias(this.props.uid);
     }
     
     // 点击...展开联系人操作列表
@@ -116,8 +115,8 @@ export class UserDetail extends Widget {
      * 好友别名更改
      */
     public aliasChange(e:any) {
-        // this.props.alias = e.target.value;
-        // this.paint();
+        this.props.alias = e.target.value;
+        this.paint();
     }
 
     /**
@@ -129,6 +128,13 @@ export class UserDetail extends Widget {
         friend.alias = this.props.alias;
         clientRpcFunc(changeFriendAlias, friend, (r: Result) => {
             // todo
+            if (r.r === 1) {
+                const sid = store.getStore('uid');
+                const friendlink = store.getStore(`friendLinkMap/${genUuid(sid,this.props.uid)}`,{}); 
+                friendlink.alias = this.props.alias;
+                store.setStore(`friendLinkMap/${genUuid(sid,this.props.uid)}`,friendlink);
+                console.log('修改好友备注成功',this.props.alias);
+            }
         });
         
     }

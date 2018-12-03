@@ -10,7 +10,11 @@ import { Widget } from '../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 // ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
+declare var module;
 export const forelet = new Forelet();
+const WIDGET_NAME = module.id.replace(/\//g, '-');
+
 export class Contact extends Widget {
     public props:Props;
 
@@ -21,9 +25,10 @@ export class Contact extends Widget {
         this.props.utilList = [
             { iconPath:'search.png',utilText:'搜索' },
             { iconPath:'adress-book.png',utilText:'通讯录' },
-            { iconPath:'add-friend.png',utilText:'添加好友' },
+            { iconPath:'add-blue.png',utilText:'添加好友' },
             { iconPath:'group-chat.png',utilText:'创建群聊' },
-            { iconPath:'scan.png',utilText:'扫一扫' }
+            { iconPath:'scan.png',utilText:'扫一扫' },
+            { iconPath:'add-friend.png',utilText:'我的信息' }
         ];
     }
 
@@ -66,6 +71,9 @@ export class Contact extends Widget {
                 break;
             case 4:// 扫一扫            
                 break;
+            case 5:
+                popNew('client-app-demo_view-info-user');
+                break;
 
             default:
         }
@@ -83,3 +91,9 @@ interface Props {
     isUtilVisible:boolean;
     utilList:any[];
 }
+store.register('friendLinkMap',() => {
+    const w = forelet.getWidget(WIDGET_NAME);
+    if (w) {
+        w.paint(true);
+    }
+});

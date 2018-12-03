@@ -1,36 +1,99 @@
 /**
- * 用户详细信息
+ * 我的个人信息
  */
 // ================================================ 导入
 import { Widget } from '../../../../pi/widget/widget';
-import { FriendLink, UserInfo } from '../../../../server/data/db/user.s';
-import { genUuid } from '../../../../utils/util';
+import { UserInfo } from '../../../../server/data/db/user.s';
+import { Result } from '../../../../server/data/rpc/basic.s';
+import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
+import { clientRpcFunc } from '../../net/init';
 export class User extends Widget {
-    public props:Props;
     public ok:() => void;
     constructor() {
         super();
         this.props = {
-            sid:-1,
-            rid:-1,
-            info : new UserInfo(),
-            alias:''
+            info:new UserInfo(),
+            tel:'',
+            name:'',
+            nameEdit:false,
+            phoneEdit:false
         };
     }
-    public setProps(props:any) {
-        super.setProps(props);
-        this.props.info = store.getStore(`userInfoMap/${this.props.rid}`,new UserInfo());
-        this.props.alias = store.getStore(`friendLinkMap/${genUuid(this.props.sid,this.props.rid)}`,new FriendLink()).alias;
+
+    public create() {
+        super.create();
+        const sid = store.getStore('uid');
+        this.props.info = store.getStore(`userInfoMap/${sid}`,new UserInfo());
+        this.props.tel = this.props.info.tel || '未知';
+        this.props.name = this.props.info.name;
     }
-    public back() {
+    public goBack() {
         this.ok();
     } 
-}   
 
-interface Props {
-    sid:number;
-    rid:number;
-    info:UserInfo;
-    alias:string;
-}
+    /**
+     * 页面点击
+     */
+    public pageClick() {
+        this.props.nameEdit = false;
+        this.props.phoneEdit = false;
+        this.paint();
+    }
+
+    /**
+     * 点击后可编辑昵称
+     */
+    public editName() {
+        this.props.nameEdit = true;
+        this.paint();
+    }
+
+    /**
+     * 昵称更改
+     */
+    public nameChange(e:any) {
+        this.props.name = e.target.value;
+        this.paint();
+    }
+
+    /**
+     * 点击后可编辑电话号码
+     */
+    public editPhone() {
+        this.props.phoneEdit = true;
+        this.paint();
+    }
+
+    /**
+     * 电话更改
+     */
+    public phoneChange(e:any) {
+        this.props.tel = e.value;
+        this.paint();
+    }
+
+    /**
+     * 修改个人信息
+     */
+    public changeUserInfo() {
+        const sid = store.getStore('uid');
+        const test = new UserInfo();
+        const userinfo = store.getStore(`userInfoMap/${sid}`,new UserInfo());
+        test.uid = sid;
+        test.name = this.props.name;
+        test.tel = this.props.tel;
+        test.avator = userinfo.avator;
+        test.sex = userinfo.sex;
+        test.note = userinfo.note;
+        
+        clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
+            // todo
+            if (r.uid !== -1) {
+                const sid = store.getStore('uid');
+                store.setStore(`userInfoMap/${sid}`,test);
+                console.log('修改个人信息成功',r);
+            }
+        });
+    }
+}   

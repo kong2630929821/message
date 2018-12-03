@@ -225,20 +225,20 @@ export const changeFriendAlias = (friendAlias:FriendAlias):Result => {
  * @param userinfo user info
  */
 // #[rpc=rpcServer]
-export const changeUserInfo = (userinfo:UserInfo):Result => {
+export const changeUserInfo = (userinfo:UserInfo):UserInfo => {
     const dbMgr = getEnv().getDbMgr();
     const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,CONSTANT.USER_INFO_TABLE,dbMgr);
     const sid = getUid();
-    const result = new Result();
+    let newUser = new UserInfo();
     if (userinfo.uid === sid) {
         userInfoBucket.put(sid,userinfo);
-        result.r = 1;
+        newUser = userinfo;
     } else {
         logger.debug('curUser: ',sid,' changeUser: ',userinfo.uid);
-        result.r = 0;
+        newUser.uid = -1;
     }
     
-    return result;
+    return newUser;
 };
 
 // ================================================================= 本地
