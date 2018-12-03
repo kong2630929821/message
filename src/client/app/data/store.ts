@@ -131,12 +131,12 @@ const initAccount = () => {
         if (!uid) return;
         getFile(uid, (value) => {
             if (!value) return;
-            store.userHistoryMap = value.userHistoryMap;
-            store.userChatMap = value.userChatMap;
-            store.lastChat = value.lastChat;
-            store.friendLinkMap = value.friendLinkMap;
-            store.userInfoMap = value.userInfoMap;
-            setStore('lastChat',value.lastChat);
+            store.userHistoryMap = value.userHistoryMap || new Map();
+            store.userChatMap = value.userChatMap || new Map();
+            store.lastChat = value.lastChat || [];
+            store.friendLinkMap = value.friendLinkMap || new Map();
+            store.userInfoMap = value.userInfoMap || new Map();
+            setStore('lastChat',store.lastChat);
             console.log('store init success',store);
         }, () => {
             console.log('read error');
