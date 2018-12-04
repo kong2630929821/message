@@ -9,9 +9,10 @@ import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
-import { Contact, FriendLink } from '../db/user.s';
+import { Contact, FriendLink, UserInfo } from '../db/user.s';
 import { Result } from './basic.s';
-import { UserAgree } from './user.s';
+import { getUid } from './group.r';
+import { FriendAlias, UserAgree } from './user.s';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -32,16 +33,16 @@ export const applyFriend = (uid: number): Result => {
      */
     const _applyFriend = (sid: number, rid: number) => {
         const dbMgr = getEnv().getDbMgr();
+        // 取出联系人表
         const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+        // TODO:判断rid是否已经添加了sid为好友
+        // 取出对应的那一个联系人
         const contactInfo = contactBucket.get(rid)[0];
-        contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);        
+        contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);      
         contactBucket.put(rid, contactInfo);
     };
 
-    getCurrentUidFromSession((sid: number) => {
-        console.log(`sid is ${sid}, uid is : ${uid}`);
-        _applyFriend(sid, uid);
-    });
+    _applyFriend(getUid(), uid);
 
     const result = new Result();
     result.r = 1;
@@ -92,9 +93,8 @@ export const acceptFriend = (agree: UserAgree): Result => {
         friendLinkBucket.put(friendLink.uuid,friendLink);
 
     };
-    getCurrentUidFromSession((sid: number) => {
-        _acceptFriend(sid, agree.uid, agree.agree);
-    });
+
+    _acceptFriend(getUid(), agree.uid, agree.agree);
 
     const result = new Result();
     result.r = 1;
@@ -120,9 +120,8 @@ export const delFriend = (uid: number): Result => {
         const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
         friendLinkBucket.delete(genUuid(sid,rid));        
     };
-    getCurrentUidFromSession((sid: number) => {
-        _delFriend(sid, uid);
-    });
+
+    _delFriend(getUid(), uid);
 
     const result = new Result();
     result.r = 1;
@@ -192,17 +191,54 @@ export const removeFromBlackList = (peerUid: number): Result => {
     }
 };
 
-// ================================================================= 本地
+/**
+ * 修改好友别名
+ * @param rid user id
+ * @param alias user alias
+ */
+// #[rpc=rpcServer]
+export const changeFriendAlias = (friendAlias:FriendAlias):Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME,CONSTANT.FRIEND_LINK_TABLE,dbMgr);
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+    const sid = getUid();
+    const uuid = genUuid(sid,friendAlias.rid);
+    const result = new Result();
+    const contactInfo = contactBucket.get(sid)[0];
+    const index = contactInfo.friends.indexOf(friendAlias.rid);
+    // 判断rid是否是当前用户的好友
+    if (index > -1) {
+        const friend = friendLinkBucket.get(uuid)[0];
+        friend.alias = friendAlias.alias;
+        friendLinkBucket.put(uuid,friend);
+        result.r = 1;
+    } else {
+        logger.debug('user: ',friendAlias.rid,' is not your friend');
+        result.r = 0;
+    }
+    
+    return result;
+};
 
 /**
- * 从session中取uid
- * @param cb callback
+ * 修改当前用户的基础信息
+ * @param userinfo user info
  */
-const getCurrentUidFromSession = (cb: (uid: number) => void) => {
-    const session = getEnv().getSession();
+// #[rpc=rpcServer]
+export const changeUserInfo = (userinfo:UserInfo):UserInfo => {
     const dbMgr = getEnv().getDbMgr();
-    read(dbMgr, (tr: Tr) => {
-        const uid = session.get(tr, 'uid');
-        cb(parseInt(<string>uid,10));
-    });
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,CONSTANT.USER_INFO_TABLE,dbMgr);
+    const sid = getUid();
+    let newUser = new UserInfo();
+    if (userinfo.uid === sid) {
+        userInfoBucket.put(sid,userinfo);
+        newUser = userinfo;
+    } else {
+        logger.debug('curUser: ',sid,' changeUser: ',userinfo.uid);
+        newUser.uid = -1;
+    }
+    
+    return newUser;
 };
+
+// ================================================================= 本地

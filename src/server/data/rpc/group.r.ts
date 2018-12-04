@@ -15,7 +15,7 @@ import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { mqttPublish, QoS, setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { delValueFromArray, genAnnounceIncId, genGroupHid, genGuid, genHidFromGid, genNewIdFromOld } from '../../../utils/util';
+import { delValueFromArray, genAnnounceIncId, genGroupHid, genGuid, genHidFromGid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 
 const logger = new Logger('GROUP');
@@ -202,6 +202,7 @@ export const inviteUsers = (invites: InviteArray): Result => {
     for (let i = 0; i < invites.arr.length; i++) {
         const rid = invites.arr[i].rid;
         const cInfo = contactBucket.get<number, [Contact]>(rid)[0];
+        // TODO: 判断对方是否已经在当前群中
         cInfo.applyGroup.push(gid);
         contactBucket.put(rid, cInfo);
         logger.debug('Invite user: ', rid, 'to group: ', gid);
@@ -304,15 +305,20 @@ export const setOwner = (guid: string): Result => {
  * @param guid group user id
  */
 // #[rpc=rpcServer]
-export const addAdmin = (guidsAdmin: GuidsAdminArray): Result => {
+export const addAdmin = (guid: string): Result => {
     const groupInfoBucket = getGroupInfoBucket();
+    // TODO:判断群是否已经销毁
+    // TODO:判断群是否存在
+    // TODO:先判断当前用户是否是管理员
+    // TODO:判断被添加的用户是否是群成员
+    // 判断被添加的用户是否已经是管理员
     const uid = getUid();
+
     const guids = guidsAdmin.guids;
 
     const res = new Result();
     const groupId = guids[0].split(':')[0];
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId,10))[0];
-
     if(gInfo.ownerid !== uid){
         logger.debug('User: ', uid, 'is not an owner');
         res.r = -1;
@@ -344,7 +350,11 @@ export const addAdmin = (guidsAdmin: GuidsAdminArray): Result => {
 export const delAdmin = (guid: string): Result => {
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
-
+    // TODO:判断群是否已经销毁
+    // TODO:判断群是否存在
+    // TODO:先判断当前用户是否是管理员
+    // TODO:判断是否是群主，群主必须是管理员,不能被删除
+    // 判断被添加的用户是否是管理员成员
     const groupId = guid.split(':')[0];
     const delAdminId = guid.split(':')[1];
     const res = new Result();
@@ -352,19 +362,17 @@ export const delAdmin = (guid: string): Result => {
     logger.debug('user logged in with uid: ', uid, 'and you want to delete an admin: ', delAdminId);
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId,10))[0];
     logger.debug('read group info: ', gInfo);
-    const members = gInfo.adminids;
+    const adminids = gInfo.adminids;
 
     logger.debug('before delete admin memebers: ', gInfo.adminids);
-    const index = members.indexOf(parseInt(delAdminId,10));
+    const index = adminids.indexOf(parseInt(delAdminId,10));
     if (index > -1) {
-        members.splice(index, 1);
-        gInfo.adminids = members;
+        adminids.splice(index, 1);
+        gInfo.adminids = adminids;
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('after delete admin memmber: ', groupInfoBucket.get(gInfo.gid));
 
-        const groupUserLinkBucket = getGroupUserLinkBucket();
-        groupUserLinkBucket.delete(guid);
-        logger.debug('delete user: ', delAdminId, 'from groupUserLinkBucket');
+        
 
         res.r = 1;
 
@@ -481,7 +489,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.annoceid = genAnnounceIncId(gInfo.gid, START_INDEX);
         gInfo.create_time = Date.now();
         gInfo.dissolve_time = 0;
-
+        
         gInfo.join_method = 0;
         gInfo.ownerid = uid;
         // TODO: add self to memberids

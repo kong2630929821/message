@@ -12,7 +12,6 @@ import { sendAnnouncement, sendGroupMessage, sendUserMessage } from '../../../se
 import { AnnounceSend, GroupSend, UserSend } from '../../../server/data/rpc/message.s';
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
-import { notEmptyString } from '../../../utils/util';
 import { setStore } from '../data/store';
 import { clientRpcFunc, subscribe } from './init';
 

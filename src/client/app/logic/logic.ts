@@ -1,6 +1,10 @@
 /**
  * 一些全局方法
  */
+// =====================================导入
+import { UserInfo } from '../../../server/data/db/user.s';
+import { genUuid } from '../../../utils/util';
+import * as store from '../data/store';
 
 // =====================================导出
 
@@ -20,7 +24,7 @@ export const timestampFormat = (timestamp: number) => {
 };
 
 /**
- * Map转json
+ * Map转json，仅接受一层map
  */
 export const map2Json = (data:Map<any,any>)  => {
     const res = {};
@@ -32,7 +36,7 @@ export const map2Json = (data:Map<any,any>)  => {
 };
 
 /**
- * json转Map
+ * json转Map，仅可转一层map
  */
 export const json2Map = (data:JSON) => {
     const res = new Map();
@@ -41,4 +45,15 @@ export const json2Map = (data:JSON) => {
     }
 
     return res;
+};
+
+/**
+ * 获取好友的别名
+ */
+export const getFriendAlias = (rid:number) => {
+    const sid = store.getStore('uid');
+    const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
+    const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,{});
+
+    return friend.alias || user.name;
 };

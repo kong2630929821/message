@@ -4,9 +4,9 @@
 // ===========================导入
 import { Json } from '../../../../pi/lang/type';
 import { Widget } from '../../../../pi/widget/widget';
-import { UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { GroupInfo } from '../../../../server/data/db/group.s';
+import { getFriendAlias } from '../../logic/logic';
 
 interface Props {
     uid?:number;
@@ -31,10 +31,11 @@ export class ContactItem extends Widget {
         super.setProps(props, oldProps);
         console.log(props);
         if (!this.props.text) {
-            this.props.info = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
+            this.props.info = getFriendAlias(this.props.uid);
         }
+	this.props.gid = props.gid;
         this.props.ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
-        this.props.gid = props.gid;
+        
     }
    
 }

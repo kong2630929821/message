@@ -6,7 +6,7 @@
 import { HandlerMap } from '../../../pi/util/event';
 import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
-import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../server/data/db/message.s';
+import { AnnounceHistory, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 import { getFile, initFileStore, writeFile } from './lcstore';
 
@@ -129,17 +129,15 @@ const initAccount = () => {
     initFileStore().then(() => {
         const uid = getStore('uid');
         if (!uid) return;
-        getFile(uid, (value, key) => {
-            // console.timeEnd('initFile');
+        getFile(uid, (value) => {
             if (!value) return;
-            
-            const curAccount = value[uid];
-            if (curAccount) {
-                store.userHistoryMap = curAccount.userHistoryMap;
-                store.userChatMap = curAccount.userChatMap;
-                store.lastChat = curAccount.lastChat;
-            }
-            // console.log('store init success',store);
+            store.userHistoryMap = value.userHistoryMap || new Map();
+            store.userChatMap = value.userChatMap || new Map();
+            store.lastChat = value.lastChat || [];
+            store.friendLinkMap = value.friendLinkMap || new Map();
+            store.userInfoMap = value.userInfoMap || new Map();
+            setStore('lastChat',store.lastChat);
+            console.log('store init success',store);
         }, () => {
             console.log('read error');
         });
@@ -159,17 +157,49 @@ const registerDataChange = () => {
         accountsChange();  // 新的聊天数据
     });
     
+    register('userInfoMap',() => {
+        friendChange();  // 好友数据更新
+    });
+
+    register('friendLinkMap',() => {
+        friendChange();  // 好友数据更新
+    });
 };
 
 /**
- * 数据变化
+ * 聊天数据变化
  */
 const accountsChange = () => {
-    const newAccount:any = {};
-    newAccount.userHistoryMap = getStore('userHistoryMap'); // 单人聊天历史记录变化
-    newAccount.userChatMap = getStore('userChatMap');  // 单人聊天历史记录索引变化
-    newAccount.lastChat = getStore('lastChat');  // 最近聊天记录
-    writeFile(getStore('uid'),newAccount);
+    const id = getStore('uid');
+    getFile(id,(value) => {
+        if (!value) {
+            value = {};
+        }
+        value.userHistoryMap = getStore('userHistoryMap'); // 单人聊天历史记录变化
+        value.userChatMap = getStore('userChatMap');  // 单人聊天历史记录索引变化
+        value.lastChat = getStore('lastChat');  // 最近聊天记录
+        writeFile(id,value);
+    },() => {
+        console.log('read error');
+    });
+    
+};
+
+/**
+ * 好友数据变化
+ */
+const friendChange = () => {
+    const id = getStore('uid');
+    getFile(id,(value) => {
+        if (!value) {
+            value = {};
+        }
+        value.friendLinkMap = getStore('friendLinkMap'); // 好友链接
+        value.userInfoMap = getStore('userInfoMap');  // 用户信息
+        writeFile(id,value);
+    },() => {
+        console.log('read error');
+    });
 };
 
 /**
@@ -179,16 +209,16 @@ export interface Store {
     uid:number;
     groupInfoMap: Map<number, GroupInfo>;// gid
     groupUserLinkMap: Map<string, GroupUserLink>;// guid
-    userHistoryMap: Map<string, UserHistory>;// hidinc
-    groupHistoryMap: Map<string, GroupHistory>;// hidinc
+    userHistoryMap: Map<string, UserMsg>;// hidinc
+    groupHistoryMap: Map<string, GroupMsg>;// hidinc
     announceHistoryMap: Map<string, AnnounceHistory>;// aidinc
-    msgLockMap: Map<number, MsgLock>;// LOCK
+    msgLockMap: Map<number, MsgLock>;// LOCK,前端暂时没用到
     userInfoMap: Map<number, UserInfo>;// uid
-    userCredentialMap: Map<number, UserCredential>; // todo
-    accountGeneratorMap: Map<string, AccountGenerator>;// todo
+    userCredentialMap: Map<number, UserCredential>; // todo,前端暂时没用到
+    accountGeneratorMap: Map<string, AccountGenerator>;// todo,前端暂时没用到
     friendLinkMap: Map<string, FriendLink>;// uuid
     contactMap: Map<number, Contact>;// uid
-    addressInfoMap: Map<number, AddressInfo>;// uid
+    addressInfoMap: Map<number, AddressInfo>;// uid,暂时没用到
     userChatMap:Map<string, string[]>;// hid,hidinc,递增存储
     groupChatMap:Map<string, string[]>;// hid,hidinc
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表

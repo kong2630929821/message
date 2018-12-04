@@ -70,3 +70,9 @@ store.register('contactMap', (r: Map<number, Contact>) => {
         forelet.paint(value);
     }    
 });
+store.register('friendLinkMap',() => {
+    const w = forelet.getWidget(WIDGET_NAME);
+    if (w) {
+        w.paint(true);
+    }
+});

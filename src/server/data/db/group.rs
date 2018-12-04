@@ -29,7 +29,7 @@ struct GroupInfo {
     adminids:&[u32],//管理员id
     memberids:&[u32],//成员id
     annoceid:String,//公告id
-    hid:String,//历史消息
+    hid:String,//历史消息id
     create_time:u32,//创建时间
     dissolve_time:u32,//解散时间
     join_method:JOIN_METHOD,//加入方式
