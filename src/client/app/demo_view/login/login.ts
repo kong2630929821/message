@@ -64,7 +64,17 @@ export class Login extends Widget {
                 });
             }
         });
+        
     }
+
+    /**
+     * 切换密码是否可见
+     */
+    public changeEye() {
+        this.props.visible = !this.props.visible;
+        this.paint();
+    }
+
 }
 
 // ================================================ 本地
@@ -143,15 +153,16 @@ const updateUsers = (r:Contact,uid:number) => {
             }
                        
         });
-        const usersInfo = new GetUserInfoReq();
-        usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
-            // 获取好友信息
-        clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
-            if (r && r.arr && r.arr.length > 0) {
-                r.arr.forEach((e:UserInfo) => {
-                    store.setStore(`userInfoMap/${e.uid}`,e);
-                });
-            }
-        });
+        
     }
+    const usersInfo = new GetUserInfoReq();
+    usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
+    // 获取好友信息
+    clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
+        if (r && r.arr && r.arr.length > 0) {
+            r.arr.forEach((e:UserInfo) => {
+                store.setStore(`userInfoMap/${e.uid}`,e);
+            });
+        }
+    });
 };

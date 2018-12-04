@@ -74,6 +74,8 @@ export class Contact extends Widget {
 
             default:
         }
+        this.closeMore();
+        this.paint();
     }
 }
 

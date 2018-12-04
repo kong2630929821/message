@@ -4,6 +4,7 @@
 
 // ================================================ 导入
 import { Forelet } from '../../../../pi/widget/forelet';
+import { getRealNode } from '../../../../pi/widget/painter';
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { UserHistory } from '../../../../server/data/db/message.s';
@@ -85,6 +86,7 @@ export class Chat extends Widget {
     public goBack() {
         this.ok();
     }
+
     private getHid() {
         const friendLink = store.getStore(`friendLinkMap/${genUuid(this.props.sid, this.props.rid)}`);
         
