@@ -14,7 +14,7 @@
     {{else}}
     <div w-class="username">{{it.name}}</div>
     <div w-class="textMessage">
-        <img src="../../res/images/user.png" w-class="avatar"/>
+        <img src="../../res/images/user.png" w-class="avatar" on-tap="goDetail"/>
         <div>
             <div w-class="text-wrap" style="color:#222222;background:#fff;">
                 {{it.msg.msg}}

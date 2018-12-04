@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { UserHistory } from '../../../../server/data/db/message.s';
@@ -12,6 +13,11 @@ import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
 import { sendMessage } from '../../net/rpc';
 // ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
+declare var module;
+export const forelet = new Forelet();
+const WIDGET_NAME = module.id.replace(/\//g, '-');
+
 export class Chat extends Widget {
     public props:Props;
     public bindCB: any;
@@ -94,3 +100,9 @@ interface Props {
     inputMessage:string;
     hidIncArray: string[];
 }
+store.register('friendLinkMap',() => {
+    const w = forelet.getWidget(WIDGET_NAME);
+    if (w) {
+        w.paint(true);
+    }
+});

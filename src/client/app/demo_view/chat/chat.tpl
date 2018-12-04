@@ -7,7 +7,7 @@
         <div id="messEnd"></div>
     </div>
     <div ev-send="send" style="height:120px;">
-        <client-app-widget-inputMessage-inputMessage></client-app-widget-inputMessage-inputMessage>
+        <widget w-tag="client-app-widget-inputMessage-inputMessage"></widget>
     </div>    
 </div>
 

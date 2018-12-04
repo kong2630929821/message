@@ -42,7 +42,7 @@ export class ContactList extends Widget {
 
     // 查看好友详细信息
     public friendInfo(i:number) {
-        popNew('client-app-demo_view-contactList-userDetail',{ uid:i });
+        popNew('client-app-demo_view-info-userDetail',{ uid:i });
     }
 }
 

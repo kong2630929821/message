@@ -3,9 +3,9 @@
         <client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap">
             <img w-class="avator" src="../../res/images/img_avatar1.png" />
-            <div w-class="nameText">
+            <div w-class="nameText" ev-input-blur="changeFriendAlias" ev-input-change="aliasChange">
                 {{if it.editable}}
-                    <input type="text" value="{{it.alias}}" w-class="aliasInput" maxlength="10" on-blur="changeFriendAlias" on-tap="editAlias" on-input="aliasChange"/>
+                    <widget w-class="aliasInput" w-tag="client-app-widget-input-input" on-tap="editAlias">{input:{{it.alias}},style:"padding:0px;background:none;color:#fff;",itype:"text",maxLength:10 }</widget>
                 {{else}}
                     {{it.alias}}
                 {{end}}

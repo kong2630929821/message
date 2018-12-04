@@ -14,7 +14,6 @@
             {{for i,v of it1}}
             <widget w-tag="client-app-widget-messageRecord-messageRecord" on-tap="chat(e,{{v[0]}},'user')" style="margin-bottom: 10px;">{"rid":{{v[0]}} }</widget>
             {{end}} 
-             
         </div> 
     </div>
     
