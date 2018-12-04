@@ -6,7 +6,7 @@
         <div w-class="title-wrap">新的朋友</div>
         <div w-class="detail-wrap" ev-agree-friend="agreeClick">
             {{for i,v of it1.applyUser}}
-            <client-app-widget-applyUser-applyUser>{"uid":{{v}} }</client-app-widget-applyUser-applyUser>
+            <client-app-demo_view-contactList-applyUser>{"uid":{{v}} }</client-app-demo_view-contactList-applyUser>
             {{end}}
         </div>
     </div>

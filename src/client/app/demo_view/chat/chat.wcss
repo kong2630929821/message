@@ -8,6 +8,8 @@
     flex: 1 0 0;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
 }
 .no-message{
     width:192px;

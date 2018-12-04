@@ -1,4 +1,4 @@
-<div style="overflow: auto;">
+<div>
     {{if it.me}}
     <div style="margin: 10px 50px 0;float: right;">
         <div w-class="text-wrap">
