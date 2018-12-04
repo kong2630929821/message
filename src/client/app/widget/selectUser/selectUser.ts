@@ -40,7 +40,7 @@ export class SelectUser extends Widget{
     // public changeSelect(event:any){
     //     let temp = this.props.isSelect;
     //     this.props.isSelect = !temp;
-    //     notify(event.node,"ev-changeSelect",{key : this.props.isSelect});
+    //     notify(event.node,"ev-addMember",{});
     //     this.paint();
     // }
     

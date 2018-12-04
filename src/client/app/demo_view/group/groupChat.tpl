@@ -9,9 +9,11 @@
     </div>
     {{end}}
     <div w-class="login-chat-wrap">
-        群组聊天
+        {{for key,value of it.hidIncArray}}
+        <client-app-widget-textMessage-textMessage>{"hIncId": {{value}}, "chatType":"group" }</client-app-widget-textMessage-textMessage>
+        {{end}} 
     </div>
     <div ev-send="send">
-        <client-app-widget-inputMessage-inputMessage>{"rid":10001}</client-app-widget-inputMessage-inputMessage>
+        <client-app-widget-inputMessage-inputMessage></client-app-widget-inputMessage-inputMessage>
     </div>
 </div>

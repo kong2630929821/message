@@ -66,5 +66,11 @@ export class TopBar extends Widget {
     public complete(event:any){
         notify(event.node,'ev-complete',{});
     }
+    /**
+     * 获取更多
+     */
+    public more(event:any){
+        notify(event.node,'ev-handleMoreContactor',{});
+    }
     
 }

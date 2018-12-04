@@ -14,13 +14,16 @@ import { create } from "../../../../pi/net/rpc";
 import { UserArray, GetGroupInfoReq, GroupArray } from "../../../../server/data/rpc/basic.s"
 import { getGroupsInfo } from "../../../../server/data/rpc/basic.p";
 import { clientRpcFunc } from "../../net/init";
+import { getStore } from "../../data/store";
+import { GroupInfo } from "../../../../server/data/db/group.s";
+import { Json } from "../../../../pi/lang/type";
 
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
 // ================================================ 导出
-export class GroupInfo extends Widget {
+export class GroupInfos extends Widget {
     public ok:() => void;
     public props : Props = {
         gid:null,
@@ -74,13 +77,26 @@ export class GroupInfo extends Widget {
             popNew("client-app-widget-modalBox-modalBox",this.props.modalArr[0])
         }
         if(e.index === 2){ // 删除
-            popNew("client-app-widget-modalBox-modalBox",this.props.modalArr[1])
+            popNew("client-app-widget-modalBox-modalBox",{...this.props.modalArr[1],gid:this.props.gid, record :e.index})
         }
         this.paint();
     }
+    deleteGroup(){
+        console.log("=========deleteGroup")
+    }
+    // 打开群管理
+    openGroupManage(){
+        const ownerid = this.props.groupInfo.ownerid;
+        const adminids = this.props.groupInfo.adminids;
+        const uid = getStore('uid');
+        console.log("============openGroupManage",ownerid,adminids,uid)
+        if(ownerid === uid || adminids.indexOf(uid) > -1){
+            popNew("client-app-demo_view-groupManage-groupManage",{"groupInfo" : this.props.groupInfo});
+        }
+    }
     // 打开群聊天
     openGroupChat(){
-        popNew("client-app-demo_view-group-groupChat",this.props.gid)
+        popNew("client-app-demo_view-group-groupChat",{"gid" : this.props.gid});
     }
     
 }
@@ -92,7 +108,7 @@ interface Util{
 }
 interface Props {
     gid: number,
-    groupInfo:{},//群信息
+    groupInfo:Json,//群信息
     utilList:Util[], // 操作列表
     isGroupOpVisible:boolean,
     modalArr:Object

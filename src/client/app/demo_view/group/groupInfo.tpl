@@ -1,10 +1,10 @@
 <div w-class="group-info-wrap" style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
     <div w-class="top-main-wrap" ev-handleMoreContactor="handleMoreGroup" ev-back-click="goBack">
-        <client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"none"}</client-app-widget-topBar-topBar>
+        <client-app-widget-topBar-topBar>{title:"",moreImg:"more-dot-white.png",background:"none"}</client-app-widget-topBar-topBar>
         <client-app-widget-homeInfo-homeInfo>{avatorPath:"github.png",name:{{it.groupInfo.name}},note:{{it.groupInfo.gid}},isUser:false}</client-app-widget-homeInfo-homeInfo>
     </div>
     {{if it.isGroupOpVisible}}
-    <div w-class="group-op-wrap" ev-handleFatherTap="handleFatherTap">
+    <div w-class="group-op-wrap" ev-handleFatherTap="handleFatherTap" ev-deleteGroup="deleteGroup">
         <client-app-widget-utilList-utilList>{utilList:{{it.utilList}}}</client-app-widget-utilList-utilList>
     </div>
     {{end}}
@@ -39,7 +39,7 @@
                             <span>消息免打扰</span>
                             <client-app-widget-switch-switch>{types:true,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</client-app-widget-switch-switch>
                         </li>
-                        <li w-class="liItem">群管理</li>
+                        <li w-class="liItem" on-tap="openGroupManage">群管理</li>
                         <li w-class="liItem lastLi" on-tap="openGroupChat">开始聊天</li>
                     </ul>
                 </div>

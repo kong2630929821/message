@@ -25,14 +25,12 @@ const logger = new Logger(WIDGET_NAME);
 export class NewFriend extends Widget {
     public ok:() => void;
     public props:Props = {
-    	applyGroup:[]
+    	
     };
     
     
     public setProps(props:Json) {
         super.setProps(props);
-        console.log('hhhhhhhhhh',props);
-	this.props.applyGroup = props.applyGroup;
     }
 
     public goBack() {
@@ -68,7 +66,7 @@ export class NewFriend extends Widget {
 
 // ================================================ 本地
 interface Props {
-    applyGroup:number[];
+    
 }
 store.register('contactMap', (r: Map<number, Contact>) => {
     // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map

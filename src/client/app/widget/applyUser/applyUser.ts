@@ -40,6 +40,7 @@ export class ApplyUser extends Widget {
     public agreenBtn(e:any) {
         notify(e.node,'ev-agree-friend',{ value:this.props.uid });
         notify(e.node,'ev-agree-group',{ value:this.props.gid });
+        notify(e.node,'ev-agree-joinGroup',{ value:this.props.uid });
         this.props.isagree = true;
         this.paint();
     }

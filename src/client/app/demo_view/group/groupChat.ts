@@ -49,7 +49,7 @@ export class GroupChat extends Widget {
         this.props.hidIncArray = store.getStore(`groupChatMap/${this.getHid()}`) || [];
         this.props.groupName = "KuPay官方群(24)";
         this.props.isLogin = true;
-            
+        console.log("============groupChat",this.props)
     }
     public firstPaint() {
         super.firstPaint();
