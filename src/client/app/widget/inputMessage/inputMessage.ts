@@ -3,14 +3,9 @@
  */
 // ===========================导入
 import { Json } from '../../../../pi/lang/type';
+import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
-
-interface Props {
-    rid : number;
-    isOnInput:boolean;
-    message:string;
-}
 
 // ===========================导出
 export class InputMessage extends Widget {
@@ -32,6 +27,10 @@ export class InputMessage extends Widget {
 
     // 打开表情
     public playRemoji() {
+        popNew('client-app-demo_view-chat-emoji',undefined,undefined,undefined,(emoji:string) => {
+            this.props.message += `[${emoji}]`;
+            this.paint();
+        });
         console.log('playRemoji');
     }
 
@@ -59,4 +58,10 @@ export class InputMessage extends Widget {
         this.paint();
     }
 
+}
+// ===========================本地
+interface Props {
+    rid : number;
+    isOnInput:boolean;
+    message:string;
 }

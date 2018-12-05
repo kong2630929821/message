@@ -2,7 +2,7 @@
     {{if it.me}}
     <div style="margin: 10px 50px 0;float: right;">
         <div w-class="text-wrap">
-            {{it.msg.msg}}
+            <pi-ui-html>{{it.msg.msg}}</pi-ui-html>
             <div w-class="corner">
                 <span w-class="sendTime">{{it.time}}</span>
                 <img w-class="isRead" src="../../res/images/{{it.msg.read ? 'readed' : 'unread'}}.png" />

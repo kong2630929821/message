@@ -24,7 +24,7 @@ export class SingleChat extends Widget {
     };
     public setProps(props,oldProps) {
         super.setProps(props,oldProps);
-        this.props = props;            
+        this.props = props;
     }
     public HandleOnInput(e) {
         console.log('HandleOnInput',e.message);

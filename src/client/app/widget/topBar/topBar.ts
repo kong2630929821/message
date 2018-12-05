@@ -20,7 +20,7 @@ interface Props {
     unfoldImg?:string;
     moreImg?:string;
     completeImg?:string;
-    searchImg?:string
+    searchImg?:string;
 }
 
 // ================================ 导出
@@ -63,13 +63,13 @@ export class TopBar extends Widget {
      /**
      * 提交
      */
-    public complete(event:any){
+    public complete(event:any) {
         notify(event.node,'ev-complete',{});
     }
     /**
      * 获取更多
      */
-    public more(event:any){
+    public more(event:any) {
         notify(event.node,'ev-handleMoreContactor',{});
     }
     
