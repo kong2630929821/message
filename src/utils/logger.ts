@@ -9,7 +9,6 @@ enum LogLevel {
     FATAL
 }
 
-
 // TODO: make DEFAULT_LOGGER_LEVEL configurable
 const DEFAULT_LOGGER_LEVEL = LogLevel.DEBUG;
 
@@ -23,34 +22,34 @@ export class Logger {
         this.moduleName = moduleName;
     }
 
-    info(...message: any[]): void {
+    public info(...message: any[]): void {
         if (this.level <= LogLevel.INFO) {
-            console.log('[', new Date().toLocaleString(), ']', '[ INF ]', this.moduleName + ':', ...message);
+            console.log('[', new Date().toLocaleString(), ']', '[ INF ]', `${this.moduleName}:`, ...message);
         }
     }
 
-    debug(...message: any[]): void {
+    public debug(...message: any[]): void {
         if (this.level <= LogLevel.DEBUG) {
-            console.log('[', new Date().toLocaleString(), ']', '[ DBG ]', this.moduleName + ':', ...message);
+            console.log('[', new Date().toLocaleString(), ']', '[ DBG ]',`${this.moduleName}:`, ...message);
         }
     }
 
-    warn(...message: any[]): void {
+    public warn(...message: any[]): void {
         if (this.level <= LogLevel.WARN) {
-            console.log('[', new Date().toLocaleString(), ']', '[ WRN ]', this.moduleName + ':', ...message);
+            console.log('[', new Date().toLocaleString(), ']', '[ WRN ]',`${this.moduleName}:`, ...message);
         }
     }
 
-    error(...message: any[]): void {
+    public error(...message: any[]): void {
         if (this.level <= LogLevel.ERROR) {
-            console.log('[', new Date().toLocaleString(), ']', '[ ERR ]', this.moduleName + ':', ...message);
+            console.log('[', new Date().toLocaleString(), ']', '[ ERR ]',`${this.moduleName}:`, ...message);
         }
     }
 
-    fatal(...message: any[]): void {
+    public fatal(...message: any[]): void {
         if (this.level <= LogLevel.FATAL) {
-            console.log('[', new Date().toLocaleString(), ']', '[ FAT ]', this.moduleName + ':', ...message);
-            throw new Error("FATAL error deteced");
+            console.log('[', new Date().toLocaleString(), ']', '[ FAT ]',`${this.moduleName}:`, ...message);
+            throw new Error('FATAL error deteced');
         }
     }
 }

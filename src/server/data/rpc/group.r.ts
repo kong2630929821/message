@@ -2,11 +2,6 @@
  * 群组相关的rpc操作
  */
 // ================================================================= 导入
-import { GroupInfo, GroupUserLink } from '../db/group.s';
-import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
-import { GroupUserLinkArray, Result } from './basic.s';
-import { GroupAgree, GroupCreate, GroupMembers, Invite, InviteArray, NotifyAdmin } from './group.s';
-
 import { BonBuffer } from '../../../pi/util/bon';
 import { read } from '../../../pi_pt/db';
 import { getEnv } from '../../../pi_pt/net/rpc_server';
@@ -17,6 +12,10 @@ import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delValueFromArray, genAnnounceIncId, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
+import { GroupInfo, GroupUserLink } from '../db/group.s';
+import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
+import { GroupUserLinkArray, Result } from './basic.s';
+import { GroupAgree, GroupCreate, GroupMembers, Invite, InviteArray, NotifyAdmin } from './group.s';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -346,7 +345,6 @@ export const delAdmin = (guid: string): Result => {
         gInfo.adminids = adminids;
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('after delete admin memmber: ', groupInfoBucket.get(gInfo.gid));
-
         res.r = 1;
 
         return res;
