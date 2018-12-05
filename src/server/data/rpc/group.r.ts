@@ -5,7 +5,7 @@
 import { GroupInfo, GroupUserLink } from '../db/group.s';
 import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
-import { GroupAgree, GroupCreate, GroupMembers, Invite, InviteArray, NotifyAdmin } from './group.s';
+import { GroupAgree, GroupCreate, GroupMembers, Invite, InviteArray, NotifyAdmin, GuidsAdminArray } from './group.s';
 
 import { BonBuffer } from '../../../pi/util/bon';
 import { read } from '../../../pi_pt/db';
@@ -15,7 +15,7 @@ import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { mqttPublish, QoS, setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { delValueFromArray, genAnnounceIncId, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
+import { delValueFromArray, genAnnounceIncId, genGroupHid, genGuid, genHidFromGid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 
 const logger = new Logger('GROUP');
@@ -33,6 +33,8 @@ export const applyJoinGroup = (gid: number): Result => {
     const res = new Result();
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    gInfo.applyUser.push(uid);
+    groupInfoBucket.put(gid,gInfo);
     const admins = gInfo.adminids;
 
     const notify = new NotifyAdmin();
@@ -70,7 +72,12 @@ export const userExitGroup = (gid: number): Result => {
     const index1 = gInfo.memberids.indexOf(uid);
     const contact = contactBucket.get<number, [Contact]>(uid)[0];
     const index2 = contact.group.indexOf(gid);
-
+    // 群主不能主动退出群组 只能调用解散群接口
+    if(gInfo.ownerid === uid){
+        logger.debug('user: ', uid, 'is owner, cant exit group: ', gid);
+        res.r = -1;
+        return res;
+    }
     if (index1 > -1) {
         gInfo.memberids.splice(index1, 1);
         groupInfoBucket.put(gid, gInfo);
@@ -132,6 +139,14 @@ export const acceptUser = (agree: GroupAgree): Result => {
         return res;
     } else {
         gInfo.memberids.push(agree.uid);
+        //删除接受/拒绝用户的加群申请
+        if(gInfo.applyUser.findIndex(item => item === agree.uid) === -1){
+            const rlt = new Result();
+            rlt.r = -1;
+            
+            return rlt; 
+        }
+        gInfo.applyUser = delValueFromArray(agree.uid,gInfo.applyUser);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('Accept user: ', agree.uid, 'to group: ', agree.gid);
         contact.group.push(agree.gid);
@@ -274,6 +289,9 @@ export const setOwner = (guid: string): Result => {
         return res;
     }
 
+    // 将原管理员列表对应项替换成新的群主
+    const ownerIdindex = gInfo.adminids.indexOf(gInfo.ownerid);
+    gInfo.adminids.splice(ownerIdindex,1,parseInt(newOwnerId),10);
     gInfo.ownerid = parseInt(newOwnerId,10);
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('change group: ', groupId, 'owner from: ', gInfo.ownerid, 'to: ', newOwnerId);
@@ -296,20 +314,27 @@ export const addAdmin = (guid: string): Result => {
     // 判断被添加的用户是否已经是管理员
     const uid = getUid();
 
-    const groupId = getGidFromGuid(guid);
-    const addAdminId = getUidFromGuid(guid);
+    const guids = guidsAdmin.guids;
+
     const res = new Result();
-
-    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(groupId)[0];
-    if (gInfo.adminids.indexOf(addAdminId) > -1) {
-        res.r = 0;
-        logger.debug('User: ', addAdminId, 'is already an admin');
-
+    const groupId = guids[0].split(':')[0];
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId,10))[0];
+    if(gInfo.ownerid !== uid){
+        logger.debug('User: ', uid, 'is not an owner');
+        res.r = -1;
         return res;
     }
-    logger.debug('user logged in with uid: ', uid, 'and you want to add an admin: ', addAdminId);
-    gInfo.adminids.push(addAdminId);
-    gInfo.memberids.push(addAdminId);
+    guids.forEach(item => {
+        let addAdminId = item.split(':')[1];
+        if (gInfo.adminids.indexOf(parseInt(addAdminId,10)) > -1) {
+            res.r = 0;
+            logger.debug('User: ', addAdminId, 'is already an admin');
+    
+            return res;
+        }
+        logger.debug('user logged in with uid: ', uid, 'and you want to add an admin: ', addAdminId);
+        gInfo.adminids.push(parseInt(addAdminId,10));
+    })
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('After add admin: ', gInfo);
     res.r = 1;
@@ -346,6 +371,8 @@ export const delAdmin = (guid: string): Result => {
         gInfo.adminids = adminids;
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('after delete admin memmber: ', groupInfoBucket.get(gInfo.gid));
+
+        
 
         res.r = 1;
 
@@ -468,6 +495,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         // TODO: add self to memberids
         gInfo.memberids = [uid]; // add self to member
         gInfo.state = 0;
+        gInfo.applyUser = [];
 
         logger.debug('create group: ', gInfo);
 
