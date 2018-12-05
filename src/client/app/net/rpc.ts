@@ -64,10 +64,10 @@ export const getUsersBasicInfo = (uids:number[],cb: (r:UserArray) => void) => {
  * @param msg message
  * @param cb callback
  */
-export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => void) => {
+export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => void, msgType= MSG_TYPE.TXT) => {
     const info = new UserSend();
     info.msg = msg;
-    info.mtype = MSG_TYPE.TXT;
+    info.mtype = msgType;
     info.rid = rid;
     info.time = (new Date()).getTime();
 

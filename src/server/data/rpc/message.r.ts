@@ -251,7 +251,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const userMsg = new UserMsg();
     userMsg.cancel = false;
     userMsg.msg = message.msg;
-    userMsg.mtype = 0;
+    userMsg.mtype = message.mtype;
     userMsg.read = false;
     userMsg.send = false;
     userMsg.sid = sid;

@@ -10,7 +10,7 @@ enum MSG_TYPE {
     TXT = 1,//文本
     IMG = 2,//图片
     VOICE = 3,//声音
-    TXT_IMG = 4,//文本和图片
+    VIDEO = 4,//视频
 }
 
 /**

@@ -3,14 +3,14 @@
  */
 // ===========================导入
 import { Widget } from '../../../../pi/widget/widget';
-import { UserMsg } from '../../../../server/data/db/message.s';
+import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { EMOJIS_MAP } from '../../demo_view/chat/emoji';
 import { timestampFormat } from '../../logic/logic';
-declare var module;
+import { downloadFileUrlPrefix } from '../../net/upload';
 // ===========================导出
-export class TextMessage extends Widget {
+export class MessageItem extends Widget {
     constructor() {
         super();
         this.props = {
@@ -34,7 +34,7 @@ export class TextMessage extends Widget {
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`);
         }
-        this.props.msg = parseEmoji(this.props.msg);
+        this.props.msg = parseMessage(this.props.msg);
         this.props.me = this.props.msg.sid === store.getStore('uid');
         let time = this.props.msg.time;
         time = timestampFormat(time).split(' ')[1];
@@ -44,8 +44,7 @@ export class TextMessage extends Widget {
 
 // ================================================ 本地
 
-const parseEmoji = (msg:UserMsg):UserMsg => {
-    module.id;
+const parseEmoji = (msg:UserMsg):UserMsg => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
         let url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
@@ -59,4 +58,29 @@ const parseEmoji = (msg:UserMsg):UserMsg => {
     });
 
     return msg;
+};
+
+const parseImg = (msg:UserMsg):UserMsg => {    
+    msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, url) => {
+        return `<img src="${downloadFileUrlPrefix}${url}" alt="img"></img>`;
+    });
+
+    return msg;
+};
+const parseMessage = (msg:UserMsg):UserMsg => {
+    switch (msg.mtype) {
+        case MSG_TYPE.TXT:
+            return parseEmoji(msg);
+        case MSG_TYPE.IMG:
+            return parseImg(msg);
+        case MSG_TYPE.VOICE:
+        // TODO:
+            return msg;
+        case MSG_TYPE.VIDEO:
+        // TODO:
+            return msg;
+        default:
+
+            return msg;
+    }
 };

@@ -17,7 +17,7 @@
         <img src="../../res/images/user.png" w-class="avatar"/>
         <div>
             <div w-class="text-wrap" style="color:#222222;background:#fff;">
-                {{it.msg.msg}}
+                <pi-ui-html>{{it.msg.msg}}</pi-ui-html>
                 <div w-class="corner">
                     <span w-class="sendTime" style="color:#297FCA">{{it.time}}</span>
                 </div>

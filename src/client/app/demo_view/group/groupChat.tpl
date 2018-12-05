@@ -10,7 +10,7 @@
     {{end}}
     <div w-class="login-chat-wrap">
         {{for key,value of it.hidIncArray}}
-        <client-app-widget-textMessage-textMessage>{"hIncId": {{value}}, "chatType":"group" }</client-app-widget-textMessage-textMessage>
+        <client-app-widget-messageItem-messageItem>{"hIncId": {{value}}, "chatType":"group" }</client-app-widget-messageItem-messageItem>
         {{end}} 
     </div>
     <div ev-send="send">
