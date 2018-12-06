@@ -63,8 +63,8 @@ export class Contact extends Widget {
             case 2:// 点击添加好友
                 popNew('client-app-demo_view-chat-addUser', { sid: this.props.sid });
                 break;
-            case 3:// 创建群聊
-                popNew('client-app-demo_view-group-create');
+            case 3:// 创建群聊 setGroupChat
+                popNew('client-app-demo_view-group-setGroupChat');
                 break;
             case 4:// 扫一扫            
                 break;

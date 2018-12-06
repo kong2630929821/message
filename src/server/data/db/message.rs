@@ -10,7 +10,10 @@ enum MSG_TYPE {
     TXT = 1,//文本
     IMG = 2,//图片
     VOICE = 3,//声音
-    TXT_IMG = 4,//文本和图片
+    VIDEO = 4,//视频
+    RECALL = 5,//撤回消息
+    NOTICE = 6,//公告消息
+    RENOTICE = 7,//撤回公告消息
 }
 
 /**

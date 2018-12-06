@@ -82,7 +82,7 @@ export class Chat extends Widget {
                 }
                 updateUserMessage(nextside, r);
             };
-        })());
+        })(), e.msgType);
     }
 
     public destroy() {

@@ -4,8 +4,8 @@
     {{for key,value of it.hidIncArray}}
         <client-app-demo_view-chat-chatItem>{"hIncId": {{value}}, "chatType":"group" }</client-app-demo_view-chat-chatItem>
     {{end}} 
-    <client-app-widget-textMessage-textMessage></client-app-widget-textMessage-textMessage>
-    <client-app-widget-textMessage-textMessage></client-app-widget-textMessage-textMessage>
+    <client-app-widget-messageItem-messageItem></client-app-widget-messageItem-messageItem>
+    <client-app-widget-messageItem-messageItem></client-app-widget-messageItem-messageItem>
     <div w-class="login-chat-wrap">
         群组聊天
     </div>

@@ -17,6 +17,10 @@ interface Props {
     centerTitle?:boolean;
     background?:string;
     refreshImg?:string;
+    unfoldImg?:string;
+    moreImg?:string;
+    completeImg?:string;
+    searchImg?:string;
 }
 
 // ================================ 导出
@@ -55,6 +59,18 @@ export class TopBar extends Widget {
             this.state.refresh = false;
             this.paint();
         }, 1000);
+    }
+     /**
+     * 提交
+     */
+    public complete(event:any) {
+        notify(event.node,'ev-complete',{});
+    }
+    /**
+     * 获取更多
+     */
+    public more(event:any) {
+        notify(event.node,'ev-handleMoreContactor',{});
     }
     
 }

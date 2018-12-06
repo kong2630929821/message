@@ -29,3 +29,7 @@ struct NotifyAdmin {
 struct GroupMembers {
     members: &[u32]
 }
+
+struct GuidsAdminArray{
+    guids:&[String]//被添加的管理员数组
+}

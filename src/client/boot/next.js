@@ -65,7 +65,7 @@ winit.initNext = function () {
 
 		//加载APP部分代码，实际项目中会分的更细致
 		var loadApp = function () {
-			util.loadDir(["client/app/"], flags, fm, undefined, function (fileMap) {
+			util.loadDir(["client/app/demo_view/","client/app/widget/","client/app/res/css/","client/app/res/images/"], flags, fm, undefined, function (fileMap) {
 				console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
 				var tab = util.loadCssRes(fileMap);
 				// 将预加载的资源缓冲90秒，释放
@@ -83,21 +83,40 @@ winit.initNext = function () {
 				index.run();
 
 				document.body.removeChild(div);
-				structRegister();
+				registerStruct();
 			}, function (r) {
 				alert("加载目录失败, " + r.error + ":" + r.reason);
 			}, dirProcess.handler);
 		}
 
 		//初始化rpc服务
-		var structRegister = function () {
+		var registerStruct = function () {
 			util.loadDir(["client/app/net/", "pi/struct/"], flags, fm, undefined, function (fileMap, mods) {
 				pi_modules.commonjs.exports.relativeGet("client/app/net/init").exports.registerRpcStruct(fm);
 				pi_modules.commonjs.exports.relativeGet("client/app/net/init").exports.initClient();
+				loadEmoji();
 			}, function (r) {
 				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
 			}, dirProcess.handler);
 		};
+
+		var loadEmoji = function() {
+			util.loadDir(["client/app/res/emoji/"],flags,fm,undefined,function(fileMap,mods){
+				//TODO: 可以长期放在缓存中达到更快的显示效果
+				loadChatImg();
+			},function (r) {
+				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
+			}, dirProcess.handler)
+		}
+
+		var loadChatImg = function () {
+			util.loadDir(["client/app/res/chatImg/"],flags,fm,undefined,function(fileMap,mods){
+				//TODO: 可以长期放在缓存中达到更快的显示效果
+
+			},function (r) {
+				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
+			}, dirProcess.handler)
+		}
 
 		html.checkWebpFeature(function (r) {
 			flags.webp = flags.webp || r;

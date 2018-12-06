@@ -5,6 +5,7 @@
 
 // ===========================导入
 import { Widget } from "../../../../pi/widget/widget"
+import { notify } from "../../../../pi/widget/event";
 
 interface Manage{
     title:string;// 标题
@@ -39,6 +40,10 @@ export class ManageItem extends Widget{
             ]
            
         };
+    }
+
+    public openManageItem(e,index){
+        notify(e.node,"ev-openManageItem",{value : index});
     }
     
 }
