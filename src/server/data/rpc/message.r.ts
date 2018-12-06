@@ -2,7 +2,7 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import { AnnounceHistory, Announcement, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg } from '../db/message.s';
+import { AnnounceHistory, Announcement, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg, MSG_TYPE } from '../db/message.s';
 import { Result } from './basic.s';
 import { AnnounceSend, GroupSend, UserSend } from './message.s';
 
@@ -174,6 +174,19 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         return gh;
     }
 
+    //消息撤回
+    if (message.mtype === MSG_TYPE.RECALL) {
+        //需要撤回的消息key
+        let recallKey = message.msg;
+        //获取撤回消息的基础信息
+        const v = bkt.get<string, GroupHistory>(recallKey);
+        // TODO 判断撤回时间
+        if (v !== undefined) {
+            v.msg.cancel = true;
+            bkt.put(recallKey, v[0]);
+        }
+    }
+
     const msgLock = new MsgLock();
     msgLock.hid = genGroupHid(message.gid);
     logger.debug(`before read and write`);
@@ -202,33 +215,12 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 };
 
 /**
- * 撤销群组消息
- * @param hIncId history increament id
- */
-// #[rpc=rpcServer]
-export const cancelGroupMessage = (hIncId: string): Result => {
-    const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
-
-    const v = bkt.get<string, GroupHistory>(hIncId);
-    if (v !== undefined) {
-        v.msg.cancel = true;
-    }
-
-    bkt.put(hIncId, v[0]);
-
-    const res = new Result();
-    res.r = 1;
-
-    return res;
-};
-
-/**
  * 发送单聊消息
  * @param message user send
  */
 // #[rpc=rpcServer]
 export const sendUserMessage = (message: UserSend): UserHistory => {
+    console.log("sendMsg!!!!!!!!!!!", message);
     const dbMgr = getEnv().getDbMgr();
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
@@ -248,6 +240,18 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const sContactInfo = contactBucket.get(message.rid)[0];
     // 判断当前用户是否在对方的好友列表中
     
+    //消息撤回
+    if (message.mtype === MSG_TYPE.RECALL) {
+        //需要撤回的消息key
+        let recallKey = message.msg;
+        //获取撤回消息的基础信息
+        const v = userHistoryBucket.get<string, UserHistory>(recallKey);
+        // TODO 判断撤回时间
+        if (v[0] !== undefined) {
+            v.msg.cancel = true;
+            userHistoryBucket.put(recallKey, v[0]);
+        }
+    }
     const userMsg = new UserMsg();
     userMsg.cancel = false;
     userMsg.msg = message.msg;
@@ -291,28 +295,6 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     logger.debug('User message sent from: ', sid.toString(), 'to: ', message.rid.toString());
 
     return userHistory;
-};
-
-/**
- * 撤销群组消息
- * @param hIncId history Increament Id
- */
-// #[rpc=rpcServer]
-export const cancelUserMessage = (hIncId: string): Result => {
-    const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
-
-    const v = bkt.get<string, UserHistory>(hIncId);
-    if (v[0] !== undefined) {
-        v.msg.cancel = true;
-    }
-
-    bkt.put(hIncId, v[0]);
-
-    const res = new Result();
-    res.r = 1;
-
-    return res;
 };
 
 // ----------------- helpers ------------------
