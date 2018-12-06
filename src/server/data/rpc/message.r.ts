@@ -2,7 +2,7 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import { AnnounceHistory, Announcement, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg } from '../db/message.s';
+import { AnnounceHistory, Announcement, GroupHistory, GroupMsg, MsgLock, UserHistory, UserHistoryCursor, UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
 import { AnnounceSend, GroupSend, UserSend } from './message.s';
 
@@ -16,9 +16,9 @@ import * as CONSTANT from '../constant';
 import { read } from '../../../pi_pt/db';
 import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { Logger } from '../../../utils/logger';
-import { LastReadMessageId } from '../db/user.s';
+import { LastReadMessageId, OnlineUsers } from '../db/user.s';
 
-import { genGroupHid, genHIncId, genNextMessageIndex, genUserHid } from '../../../utils/util';
+import { genGroupHid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { getUid } from './group.r';
 
 const logger = new Logger('MESSAGE');
@@ -282,13 +282,42 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     logger.debug('Persist user history message to DB: ', userHistory);
 
     const buf = new BonBuffer();
-    // userMsg.bonEncode(buf);
     userHistory.bonEncode(buf);
 
-    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-    mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
-    logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(userHistory)}`);
-    logger.debug('User message sent from: ', sid.toString(), 'to: ', message.rid.toString());
+    const userHistoryCursorBucket = new Bucket('file',CONSTANT.USER_HISTORY_CURSOR_TABLE,dbMgr);
+    let sidHistoryCursor = userHistoryCursorBucket.get(genUuid(sid,message.rid))[0];
+    let ridHistoryCursor = userHistoryCursorBucket.get(genUuid(message.rid,sid))[0];
+    
+    // 游标表中是否有该用户的记录
+    if (sidHistoryCursor) { 
+        sidHistoryCursor.cursor = msgLock.current; // 发送者的游标一定在变化
+    } else {
+        sidHistoryCursor = new UserHistoryCursor();
+        sidHistoryCursor.uuid = genUuid(sid,message.rid);
+        sidHistoryCursor.cursor = msgLock.current;
+    }
+    
+    logger.debug('sendUserMessage sidHistoryCursor: ', sidHistoryCursor);
+    userHistoryCursorBucket.put(genUuid(sid,message.rid),sidHistoryCursor);
+
+    // 游标表中是否有该用户的记录
+    if (!ridHistoryCursor) {
+        ridHistoryCursor = new UserHistoryCursor();
+        ridHistoryCursor.uuid = genUuid(message.rid,sid);
+        ridHistoryCursor.cursor = 0;
+    }
+    // 对方是否在线，不在线则不推送消息
+    const res = isUserOnline(message.rid);
+    if (res.r === 1) {
+        const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+        mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
+        logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(userHistory)}`);
+        
+        ridHistoryCursor.cursor = msgLock.current;
+    } 
+
+    userHistoryCursorBucket.put(genUuid(message.rid,sid),ridHistoryCursor); // 接收者在线则游标会变化，否则不变化
+    logger.debug('sendUserMessage ridHistoryCursor: ', ridHistoryCursor);
 
     return userHistory;
 };
@@ -313,6 +342,30 @@ export const cancelUserMessage = (hIncId: string): Result => {
     res.r = 1;
 
     return res;
+};
+
+/**
+ * 判断用户是否在线
+ * @param uid 用户ID
+ */
+// #[rpc=rpcServer]
+export const isUserOnline = (uid: number): Result => {
+    const dbMgr = getEnv().getDbMgr();
+
+    const res = new Result();
+    const bucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
+    const onlineUser = bucket.get<number, [OnlineUsers]>(uid)[0];
+    if (onlineUser !== undefined && onlineUser.sessionId !== -1) {
+        logger.debug('User: ', uid, 'on line');
+        res.r = 1; // on line;
+
+        return res;
+    } else {
+        logger.debug('User: ', uid, 'off line');
+        res.r = 0; // off online
+
+        return res;
+    }
 };
 
 // ----------------- helpers ------------------

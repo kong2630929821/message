@@ -6,7 +6,7 @@
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { GroupHistory, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
+import { GroupHistory, UserHistory } from '../../../../server/data/db/message.s';
 import { Contact, FriendLink, UserInfo } from '../../../../server/data/db/user.s';
 import { getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/data/rpc/basic.p';
 import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
@@ -144,12 +144,12 @@ const updateUsers = (r:Contact,uid:number) => {
         info.uuid.push(genUuid(uid,rid));
     });
     if (info.uuid.length > 0) {
-            // 获取friendlink
+        // 获取friendlink
         clientRpcFunc(getFriendLinks,info,(r:FriendLinkArray) => {            
             if (r && r.arr && r.arr.length > 0) {
                 r.arr.forEach((e:FriendLink) => {
                     store.setStore(`friendLinkMap/${e.uuid}`,e);
-                }); 
+                });
             }
                        
         });
@@ -157,12 +157,14 @@ const updateUsers = (r:Contact,uid:number) => {
     }
     const usersInfo = new GetUserInfoReq();
     usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
-    // 获取好友信息
-    clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
-        if (r && r.arr && r.arr.length > 0) {
-            r.arr.forEach((e:UserInfo) => {
-                store.setStore(`userInfoMap/${e.uid}`,e);
-            });
-        }
-    });
+    if (usersInfo.uids.length > 0) {
+        // 获取好友信息
+        clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
+            if (r && r.arr && r.arr.length > 0) {
+                r.arr.forEach((e:UserInfo) => {
+                    store.setStore(`userInfoMap/${e.uid}`,e);
+                });
+            }
+        });
+    }
 };

@@ -10,10 +10,12 @@ import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { genNewIdFromOld } from '../../../utils/util';
+import { genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
 import * as CONSTANT from '../constant';
+import { UserHistory, UserHistoryCursor } from '../db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserCredential, UserInfo } from '../db/user.s';
-import { AnnouceFragment, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupUserLinkArray, LoginReply, LoginReq, MessageFragment, Result, UserArray, UserHistoryArray, UserInfoSet, UserRegister } from './basic.s';
+import { AnnouceFragment, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister } from './basic.s';
+import { getUid } from './group.r';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -152,26 +154,6 @@ export const login = (loginReq: LoginReq): UserInfo => {
     return userInfo;
 };
 
-// #[rpc=rpcServer]
-export const isUserOnline = (uid: number): Result => {
-    const dbMgr = getEnv().getDbMgr();
-
-    const res = new Result();
-    const bucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
-    const onlineUser = bucket.get<number, [OnlineUsers]>(uid)[0];
-    if (onlineUser !== undefined && onlineUser.sessionId !== -1) {
-        logger.debug('User: ', uid, 'on line');
-        res.r = 1; // on line;
-
-        return res;
-    } else {
-        logger.debug('User: ', uid, 'off line');
-        res.r = 0; // off online
-
-        return res;
-    }
-};
-
 /**
  * 获取用户基本信息
  *
@@ -207,57 +189,6 @@ export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq): GroupArray => {
 
     const res = new GroupArray();
     res.arr = values;
-
-    return res;
-};
-
-/**
- * 设置用户基本信息
- * @param param user info set
- */
-// #[rpc=rpcServer]
-export const setUserInfo = (param: UserInfoSet): Result => {
-    logger.info('setUserInfo: ', param);
-    const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE, dbMgr);
-
-    const res = new Result();
-
-    let uid;
-    const session = getEnv().getSession();
-    logger.debug('setUserInfo for sessionId: ', session.getId());
-    read(dbMgr, (tr: Tr) => {
-        uid = session.get(tr, 'uid');
-    });
-    logger.info('Read uid from seesion: ', uid);
-
-    if (uid === undefined) {
-        logger.info('User doesn\'t login');
-        res.r = 0;
-
-        return res;
-    }
-
-    let userInfo = new UserInfo();
-    userInfo = userInfoBucket.get<number, UserInfo>(parseInt(uid,10))[0];
-    logger.debug('userInfo before update: ',uid,  userInfo);
-    userInfo.name = param.name;
-    userInfo.note = param.note;
-    userInfo.sex = param.sex;
-    userInfo.tel = param.tel;
-    userInfo.avator = param.avator;
-
-    logger.debug('UserInfo to be written: ', uid, userInfo);
-    const v = userInfoBucket.put(parseInt(uid,10), userInfo);
-    if (!v) {
-        logger.error('Can\'t write userInfo to db: ', uid, userInfo);
-    } else {
-        logger.debug('Write userInfo to db success: ', uid, userInfo);
-    }
-
-    logger.debug('Read userInfo after write: ', uid, userInfoBucket.get(parseInt(uid,10))[0]);
-
-    res.r = 1;
 
     return res;
 };
@@ -337,37 +268,54 @@ export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
 };
 
 /**
- * 获取单聊的历史记录
- * @param hid history id
+ * 获取单聊的消息记录
  */
 // #[rpc=rpcServer]
-export const getUserHistory = (param: MessageFragment): UserHistoryArray => {
+export const getUserHistory = (param:UserHistoryFlag): UserHistoryArray => {
+    logger.debug('getUserHistory param',param);
     const dbMgr = getEnv().getDbMgr();
+    const sid = getUid();
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
+    const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
+    const hid = genUserHid(sid,param.rid); // 删除好友也应该可以看到以前发送的历史记录，所以不从friendLink中获取
+    const userHistoryArray = new UserHistoryArray();
+    userHistoryArray.arr = [];
 
-    const userHistory = new UserHistoryArray();
+    let fg = 1; 
+    let index = 0;
+    let userCursor = userHistoryCursorBucket.get<String,UserHistoryCursor>(genUuid(sid,param.rid))[0];
 
-    // we don't use param.order there, because `iter` is not bidirectional
-    const hid = param.hid;
-    // tslint:disable-next-line:no-reserved-keywords
-    const from = param.from;
-    const size = param.size;
-
-    const keyPrefix = `${hid}:`;
-    const value = userHistoryBucket.get(keyPrefix + from);
-
-    if (value[0] !== undefined) {
-        for (let i = from; i < from + size; i++) {
-            const v = userHistoryBucket.get(keyPrefix + i);
-            if (v[0] !== undefined) {
-                userHistory.arr.push(v[0]);
-            } else {
-                break;
-            }
+    if (param.hIncId === '0' && userCursor) {  // 如果本地没有记录则从cursor中获取
+        index = userCursor.cursor;
+        
+    } else if (param.hIncId !== '0') {
+        index = getIndexFromHIncId(param.hIncId);
+    }
+    
+    logger.debug('getUserHistory index',index,'userHistoryCursor: ',userCursor);
+    while (fg === 1) {
+        index++;
+        const oneMess = userHistoryBucket.get<String,UserHistory>(genHIncId(hid,index))[0];
+        if (oneMess) {
+            userHistoryArray.arr.push(oneMess);
+            
+        } else {
+            fg = 0;
         }
     }
 
-    return userHistory;
+    // 游标表中是否有该用户的记录
+    if (!userCursor) { 
+
+        userCursor = new UserHistoryCursor();
+        userCursor.uuid = genUuid(sid,param.rid);
+    }
+    userCursor.cursor = index - 1; 
+
+    userHistoryArray.newMess = userHistoryArray.arr.length;
+    logger.debug('rid: ',param.rid,'history: ',userHistoryArray);
+    
+    return userHistoryArray;
 };
 
 /**
