@@ -88,64 +88,6 @@ export const messageReadAck = (cursor: LastReadMessageId): Result => {
 
 // ================================================================= 导出
 /**
- * 发布公告
- * @param announce AnnounceSend
- */
-// #[rpc=rpcServer]
-export const sendAnnouncement = (announce: AnnounceSend): AnnounceHistory => {
-    const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
-
-    const anmt = new Announcement();
-    anmt.cancel = false;
-    anmt.msg = announce.msg;
-    anmt.mtype = announce.mtype;
-    anmt.send = true;
-    anmt.time = Date.now();
-    anmt.sid = getUid();
-
-    const announId = new AnounceMsgId(announce.gid, dbMgr);
-    const ah = new AnnounceHistory();
-    ah.aIncId = `${announce.gid}:${announId.nextId()}`;
-    ah.announce = anmt;
-
-    bkt.put(ah.aIncId, ah);
-    logger.debug('Send annoucement: ', anmt, 'to group: ', announce.gid);
-
-    const buf = new BonBuffer();
-    announce.bonEncode(buf);
-    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-    const groupAnnounceTopic = `img/group/anounnce/${announce.gid}`;
-
-    mqttPublish(mqttServer, true, QoS.AtMostOnce, groupAnnounceTopic, buf.getBuffer());
-    logger.debug('Send group announcement: ', announce.msg, 'to group topic: ', groupAnnounceTopic);
-
-    return ah;
-};
-
-/**
- * 撤销公告
- * @param aIncId announce increament id
- */
-// #[rpc=rpcServer]
-export const cancelAnnouncement = (aIncId: string): Result => {
-    const dbMgr = getEnv().getDbMgr();
-    const bkt = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
-
-    const v = bkt.get<string, AnnounceHistory>(aIncId);
-    if (v[0] !== undefined) {
-        v.announce.cancel = true;
-    }
-
-    bkt.put(aIncId, v[0]);
-
-    const res = new Result();
-    res.r = 1;
-
-    return res;
-};
-
-/**
  * 发送群组消息
  * @param message group send
  */
@@ -173,7 +115,9 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 
         return gh;
     }
-
+    //生成消息ID
+    const msgLock = new MsgLock();
+    msgLock.hid = genGroupHid(message.gid);
     //消息撤回
     if (message.mtype === MSG_TYPE.RECALL) {
         //需要撤回的消息key
@@ -187,8 +131,40 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         }
     }
 
-    const msgLock = new MsgLock();
-    msgLock.hid = genGroupHid(message.gid);
+    //公告消息撤回
+    if (message.mtype === MSG_TYPE.RENOTICE) {
+        //需要撤回的消息key
+        let recallKey = message.msg;
+        const noticeBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
+        //获取撤回消息的基础信息
+        const v = noticeBucket.get<string, AnnounceHistory>(recallKey);
+        // TODO 判断撤回时间
+        if (v !== undefined) {
+            v.announce.cancel = true;
+            noticeBucket.put(recallKey, v[0]);
+        }
+    }
+
+    //公告消息
+    if (message.mtype === MSG_TYPE.NOTICE) {
+        //公告数据存储
+        const noticeBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
+        const anmt = new Announcement();
+        anmt.cancel = false;
+        anmt.msg = message.msg;
+        anmt.mtype = message.mtype;
+        anmt.send = true;
+        anmt.time = Date.now();
+        anmt.sid = getUid();
+
+        const ah = new AnnounceHistory();
+        //公告key使用群聊消息key
+        ah.aIncId = msgLock.hid;
+        ah.announce = anmt;
+        noticeBucket.put(ah.aIncId, ah);
+        logger.debug('Send annoucement: ', anmt, 'to group: ', message.gid);
+    }
+
     logger.debug(`before read and write`);
     // 这是一个事务
     msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {

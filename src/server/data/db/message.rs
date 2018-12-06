@@ -12,6 +12,8 @@ enum MSG_TYPE {
     VOICE = 3,//声音
     VIDEO = 4,//视频
     RECALL = 5,//撤回消息
+    NOTICE = 6,//公告消息
+    RENOTICE = 7,//撤回公告消息
 }
 
 /**
