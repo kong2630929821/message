@@ -67,7 +67,7 @@ export class InputMessage extends Widget {
         // FIXME: 此方法不应该写在这里，只是为了测试，请把我挪走
         selectImage((width, height, base64) => {
             uploadFile(base64, (imgUrlSuf:string) => {
-                notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, type:MSG_TYPE.IMG });
+                notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
             });            
         });
     }

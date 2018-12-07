@@ -6,6 +6,7 @@ import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { EMOJIS_MAP } from '../../demo_view/chat/emoji';
 import { timestampFormat } from '../../logic/logic';
@@ -35,11 +36,10 @@ export class MessageItem extends Widget {
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`);
         }
-        this.props.msg = parseMessage(this.props.msg);
+        this.props.msg = parseMessage(depCopy(this.props.msg));
         this.props.me = this.props.msg.sid === store.getStore('uid');
-        let time = this.props.msg.time;
-        time = timestampFormat(time).split(' ')[1];
-        this.props.time = time.substr(0,5);
+        const time = depCopy(this.props.msg.time);
+        this.props.time = timestampFormat(time,1);
     }
 
     public userDetail() {
