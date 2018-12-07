@@ -36,7 +36,7 @@ export class RandomName extends Widget {
      * 随机获取新名字
      */
     public randomPlayName(e:any) {
-        this.state.name = this.playerName();
+        this.state.name = playerName();
         notify(e.node,'ev-rName-change',{ value:this.state.name });
         const img = getRealNode(this.tree).getElementsByTagName('img')[0];
         img.classList.add('random');
@@ -46,32 +46,33 @@ export class RandomName extends Widget {
         }, 1000);
     }
     
-    /**
-     * 获取随机名字
-     */
-    public playerName() {
-        const num1 = nameWare[0].length;
-        const num2 = nameWare[1].length;
-        let name = '';
-        // tslint:disable-next-line:max-line-length
-        name = this.unicodeArray2Str(nameWare[0][Math.floor(Math.random() * num1)]) + this.unicodeArray2Str(nameWare[1][Math.floor(Math.random() * num2)]);
-        
-        return name;
-    }
+}
 
-    /**
-     * unicode数组转字符串
-     */
-    public unicodeArray2Str(arr:any) {
-        let str = '';
-        if (!arr || typeof arr === 'string') {  // 如果本身不存在或是字符串则直接返回
-            return str;
-        }
-        
-        for (let i = 0; i < arr.length; i++) {
-            str += String.fromCharCode(arr[i]);
-        }
+/**
+ * 获取随机名字
+ */
+export const playerName = () => {
+    const num1 = nameWare[0].length;
+    const num2 = nameWare[1].length;
+    let name = '';
+    // tslint:disable-next-line:max-line-length
+    name = unicodeArray2Str(nameWare[0][Math.floor(Math.random() * num1)]) + unicodeArray2Str(nameWare[1][Math.floor(Math.random() * num2)]);
+    
+    return name;
+};
 
+/**
+ * unicode数组转字符串
+ */
+export const unicodeArray2Str = (arr:any) => {
+    let str = '';
+    if (!arr || typeof arr === 'string') {  // 如果本身不存在或是字符串则直接返回
         return str;
     }
-}
+    
+    for (let i = 0; i < arr.length; i++) {
+        str += String.fromCharCode(arr[i]);
+    }
+
+    return str;
+};
