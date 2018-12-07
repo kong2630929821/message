@@ -3,90 +3,67 @@
  */
 
 // ================================================ 导入
-import { Widget } from "../../../../pi/widget/widget";
-import { Forelet } from "../../../../pi/widget/forelet";
-import { popNew } from "../../../../pi/ui/root";
-import { login as userLogin } from '../../net/rpc';
-import { UserInfo } from "../../../../server/data/db/user.s";
+import { Json } from '../../../../pi/lang/type';
+import { Forelet } from '../../../../pi/widget/forelet';
+import { Widget } from '../../../../pi/widget/widget';
+import { GroupInfo } from '../../../../server/data/db/group.s';
+import { acceptUser } from '../../../../server/data/rpc/group.p';
+import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
-import { factorial } from "../../../../pi/util/math";
-import { create } from "../../../../pi/net/rpc";
-import { UserArray } from "../../../../server/data/rpc/basic.s"
-import { Json } from "../../../../pi/lang/type";
-import { GroupAgree } from "../../../../server/data/rpc/group.s";
-import { clientRpcFunc } from "../../net/init";
-import { acceptUser } from "../../../../server/data/rpc/group.p";
-import * as store from "../../data/store";
-import { GroupInfo } from "../../../../server/data/db/group.s";
+import * as store from '../../data/store';
+import { clientRpcFunc } from '../../net/init';
 
+// ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
 declare var module;
 export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
-// ================================================ 导出
 export class GroupApplyStatus extends Widget {
     public ok:() => void;
     public props : Props = {
         gid:null,
-        applyUser:[],
+        groupInfo:{}
+    };
+    public setProps(props:any) {
+        super.setProps(props);
+        this.props.groupInfo = this.getGroupInfo(this.props.gid);
     }
-    public setProps(props,oldProps){
-        super.setProps(props,oldProps);
-        this.props.applyUser = props.applyUser;
-        // this.props.applyUserList = [{
-        //     avatorPath : "emoji.png",
-        //     userName : "好友用户名",
-        //     applyInfo : "填写验证信息",
-        //     isAgree : true
-        // },
-        // {
-        //     avatorPath : "emoji.png",
-        //     userName : "好友用户名",
-        //     applyInfo : "填写验证信息",
-        //     isAgree : true
-        // },
-        // {
-        //     avatorPath : "emoji.png",
-        //     userName : "好友用户名",
-        //     applyInfo : "填写验证信息",
-        //     isAgree : false
-        // }];
-    }
-    public goBack(){
+    public goBack() {
         this.ok();
     }
-    // 同意入群申请
-    public agreeJoinGroup(e){
+    // 获取群组信息
+    public getGroupInfo(gid:number) {
+        const ginfo = store.getStore(`groupInfoMap/${gid}`);
+        logger.debug('============ginfo',ginfo);
+
+        return ginfo;
+    }
+    public firstPaint() {
+        super.firstPaint();
+        store.register(`groupInfoMap/${this.props.gid}`,(r:GroupInfo) => {
+            this.props.groupInfo = r;
+            this.paint();
+        });
+    }
+    // 同意入群申请（主动）
+    public agreeJoinGroup(e:any) {
         const uid = parseInt(e.value,10);
         const gid = this.props.gid;
         const agree = new GroupAgree();
         agree.gid = gid;
         agree.uid = uid;
         agree.agree = true;
-        console.log("==========agreeJoinGroup agree",agree)
-        clientRpcFunc(acceptUser,agree,(r)=>{
-            console.log("==========agreeJoinGroup result",r)
-        })
+        logger.debug('==========agreeJoinGroup agree',agree);
+        clientRpcFunc(acceptUser,agree,(r) => {
+            logger.debug('==========agreeJoinGroup result',r);
+        });
     }
 }
 
 // ================================================ 本地
-interface ApplyUserList{
-    avatorPath : string;// 头像
-    userName : string;//用户名
-    applyInfo : string; // 其他
-    isAgree: boolean;//是否已同意
-}
 interface Props {
     gid:number;
-    applyUser:Json;
-    // applyUserList : ApplyUserList[];
+    groupInfo:Json;
 }
-store.register('groupInfoMap', (r: Map<number, GroupInfo>) => {
-    console.log("==========agreeJoinGroup value ggggggg",r)
-    for (const value of r.values()) {
-        console.log("==========agreeJoinGroup value",value)
-        forelet.paint(value);
-    }    
-});

@@ -14,7 +14,7 @@
     <div w-class="a-part">
         {{for i,v of it1.friends}}
         <div on-tap="friendInfo({{v}})" style="border-bottom: 1px solid #DBDBE5;">
-            <client-app-widget-contactItem-contactItem>{"uid":{{v}} }</client-app-widget-contactItem-contactItem>
+            <client-app-widget-contactItem-contactItem>{id: {{v}}, chatType: "user"}</client-app-widget-contactItem-contactItem>
         </div>
         {{end}}
     </div>

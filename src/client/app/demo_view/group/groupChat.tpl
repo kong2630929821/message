@@ -1,6 +1,6 @@
 <div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
     <div ev-back-click="goBack">
-        <client-app-widget-topBar-topBar>{title:{{it.gid}},background:"#fff",nextImg:"more-dot-white.png"}</client-app-widget-topBar-topBar>
+        <client-app-widget-topBar-topBar>{title:{{it.groupName}},background:"#fff",nextImg:"more-dot-white.png"}</client-app-widget-topBar-topBar>
     </div>
     {{if !it.isLogin}}
     <div w-class="unlogin-chat-wrap">

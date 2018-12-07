@@ -1,41 +1,44 @@
 /**
  * contactItem 组件相关处理
  */
-// ===========================导入
-import { Json } from '../../../../pi/lang/type';
+
+// ================================================ 导入
 import { Widget } from '../../../../pi/widget/widget';
-import * as store from '../../data/store';
 import { GroupInfo } from '../../../../server/data/db/group.s';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
 
-interface Props {
-    uid?:number;
-    gid?:number;
-    ginfo?:Json;
-    info?:Json; // 用户信息
-    text?:string; // 显示文本
-    totalNew?: number;// 多少条消息
-}
-
-// ===========================导出
+// ================================================ 导出
 export class ContactItem extends Widget {
-    public props : Props = {
-        uid:null,
-        gid:null,
-        info:null,
-        ginfo:null,  
-        text:null,
+    public props: Props = {
+        id:null,
+        name:'',
+        chatType:GENERATOR_TYPE.USER,  
+        text:'',
         totalNew: null  
     };
-    public setProps(props: Props, oldProps: Props) {
-        super.setProps(props, oldProps);
-        console.log(props);
+    public setProps(props: Props) {
+        super.setProps(props);
+        this.props.chatType = props.chatType;
+        this.props.id = props.id;
         if (!this.props.text) {
-            this.props.info = getFriendAlias(this.props.uid);
+            if (this.props.chatType === GENERATOR_TYPE.USER) {
+                this.props.name = getFriendAlias(this.props.id);
+            }
+            if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+                this.props.name = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo()).name; 
+            }
         }
-	this.props.gid = props.gid;
-        this.props.ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
-        
     }
    
+}
+
+// ================================================ 本地
+interface Props {
+    id?:number; // 用户id或者群组id
+    name?:string; // 用户名或者群名
+    chatType:GENERATOR_TYPE; // 用户或者群组
+    text?:string; // 显示文本
+    totalNew?: number; // 多少条消息
 }

@@ -10,7 +10,7 @@
         <div w-class="a">群聊</div>
         {{for index,item of it.groups}}
         <div on-tap="showInfo({{item}})">
-            <client-app-widget-contactItem-contactItem>{"gid":{{item}}}</client-app-widget-contactItem-contactItem>
+            <client-app-widget-contactItem-contactItem>{id: {{item}}, chatType: "group"}</client-app-widget-contactItem-contactItem>
         </div>
         {{end}}
     </div>

@@ -1,13 +1,13 @@
 /**
  * textMessage 组件相关处理
  */
-// ===========================导入
+// ================================================ 导入
 import { Widget } from '../../../../pi/widget/widget';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { timestampFormat } from '../../logic/logic';
-import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 
-// ===========================导出
+// ================================================ 导出
 export class TextMessage extends Widget {
     constructor() {
         super();
@@ -31,6 +31,8 @@ export class TextMessage extends Widget {
             this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`);
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`);
+            // 此处应该操作GroupUseLink
+            this.props.name = store.getStore(`userInfoMap/${this.props.msg.sid}`).name;
         }
         this.props.me = this.props.msg.sid === store.getStore('uid');
         let time = this.props.msg.time;

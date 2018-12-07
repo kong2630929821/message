@@ -12,7 +12,7 @@
         <span w-class="rightDownTail"></span>
     </div>
     {{else}}
-    <div w-class="username">{{it.name || it.msg.sid}}</div>
+    <div w-class="username">{{it.name}}</div>
     <div w-class="textMessage">
         <img src="../../res/images/user.png" w-class="avatar"/>
         <div>

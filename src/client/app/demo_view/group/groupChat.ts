@@ -3,53 +3,47 @@
  */
 
 // ================================================ 导入
-import { Widget } from "../../../../pi/widget/widget";
-import { Forelet } from "../../../../pi/widget/forelet";
-import { popNew } from "../../../../pi/ui/root";
-import { login as userLogin } from '../../net/rpc';
-import { UserInfo } from "../../../../server/data/db/user.s";
+import { Widget } from '../../../../pi/widget/widget';
+import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
+import { GroupInfo } from '../../../../server/data/db/group.s';
+import { GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
+import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
+import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
-import { factorial } from "../../../../pi/util/math";
-import { create } from "../../../../pi/net/rpc";
-import { UserArray } from "../../../../server/data/rpc/basic.s"
 import * as store from '../../data/store';
-import { GroupSend } from "../../../../server/data/rpc/message.s";
-import { MSG_TYPE, GroupHistory } from "../../../../server/data/db/message.s";
-import { clientRpcFunc } from "../../net/init";
-import { sendGroupMessage } from "../../../../server/data/rpc/message.p";
-import { DEFAULT_ERROR_STR } from "../../../../server/data/constant";
+import { clientRpcFunc } from '../../net/init';
 
+// ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
-// ================================================ 导出
 export class GroupChat extends Widget {
     public ok:() => void;
     public props:Props;
     public bindCB: any;
-    constructor(){
+    constructor() {
         super();
         this.props = {
-            sid:null,
             gid:null,
+            groupName:'',
             inputMessage:'',
             hidIncArray: [],
-            groupName:"KuPay官方群(24)",
             isLogin:true
-        }
+        };
         this.bindCB = this.updateChat.bind(this);
     }
-    goBack(){
+    public goBack() {
         this.ok();
     }
-    public setProps(props){
+    public setProps(props:any) {
         super.setProps(props);
-        this.props.sid = store.getStore('uid');
+        this.props.gid = props.gid;
         this.props.hidIncArray = store.getStore(`groupChatMap/${this.getHid()}`) || [];
-        this.props.groupName = "KuPay官方群(24)";
+        this.props.groupName = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo()).name;
         this.props.isLogin = true;
-        console.log("============groupChat",this.props)
+        logger.debug('============groupChat',this.props);
     }
     public firstPaint() {
         super.firstPaint();
@@ -71,7 +65,7 @@ export class GroupChat extends Widget {
 
             return (r: GroupHistory) => {
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    alert('对方不是你的好友！');
+                    logger.debug('对方不是你的好友！');
                     
                     return;
                 }
@@ -92,10 +86,9 @@ export class GroupChat extends Widget {
 
 // ================================================ 本地
 interface Props {
-    sid:number,
-    gid:number,
-    inputMessage:string;
-    hidIncArray: string[];
-    groupName: string,
-    isLogin:boolean
+    gid:number;
+    groupName: string; // 群名
+    inputMessage:string; // 输入的群消息
+    hidIncArray: string[]; // 群消息记录
+    isLogin:boolean;
 }

@@ -59,6 +59,7 @@ export class Login extends Widget {
                 store.setStore(`userInfoMap/${r.uid}`,r);        
                 init(r.uid); 
                 popNew('client-app-demo_view-chat-contact', { sid: this.props.uid });
+                // popNew('client-app-demo_view-group-groupMember', { gid: 10001 });
                 subscribeMsg(this.props.uid.toString(), UserHistory, (r: UserHistory) => {
                     updateUserMessage(r.msg.sid,r);
                 });
@@ -91,7 +92,7 @@ const updateGroup = (r:Contact,uid:number) => {
     // 判断群组是否发生了变化,需要重新订阅群组消息
         
     const oldGroup = (store.getStore(`contactMap/${uid}`) || { group:[] }).group;
-    const addGroup = r.group.filter((gid) => {
+    const addGroup = r.group.concat(r.applyGroup).filter((gid) => {
         return oldGroup.findIndex(item => item === gid) === -1;
     });
     const delGroup = oldGroup.filter((gid) => {
@@ -106,6 +107,10 @@ const updateGroup = (r:Contact,uid:number) => {
             store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
         });
     });
+    addGroup.forEach(gid => {
+        subscribedb.subscribeGroupInfo(gid,undefined);
+    });
+    
     // 删除群组信息
     const gInfoMap = store.getStore(`groupInfoMap`);    
     delGroup.forEach((gid:number) => {
@@ -143,15 +148,15 @@ const updateUsers = (r:Contact,uid:number) => {
             }
                        
         });
-        const usersInfo = new GetUserInfoReq();
-        usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
-            // 获取好友信息
-        clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
-            if (r && r.arr && r.arr.length > 0) {
-                r.arr.forEach((e:UserInfo) => {
-                    store.setStore(`userInfoMap/${e.uid}`,e);
-                });
-            }
-        });
     }
+    const usersInfo = new GetUserInfoReq();
+    usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
+            // 获取好友信息
+    clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
+        if (r && r.arr && r.arr.length > 0) {
+            r.arr.forEach((e:UserInfo) => {
+                store.setStore(`userInfoMap/${e.uid}`,e);
+            });
+        }
+    });
 };

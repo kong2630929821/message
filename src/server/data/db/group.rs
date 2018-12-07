@@ -17,7 +17,6 @@ enum JOIN_METHOD {
     USER_APPLY = 0,//用户主动申请
     MEMBER_INVITE = 1,//群成员邀请
 }
-
 /**
 *群组信息
 */

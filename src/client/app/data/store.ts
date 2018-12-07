@@ -5,7 +5,7 @@
 // ============================================ 导入
 import { HandlerMap } from '../../../pi/util/event';
 import { AddressInfo } from '../../../server/data/db/extra.s';
-import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
+import { GroupInfo, GroupUserLink, ReadGroupTime } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 import { getFile, initFileStore, writeFile } from './lcstore';
@@ -104,6 +104,7 @@ export const initStore = () => {
     registerDataChange();
     store = {
         uid:null,
+        readGroupTimeMap: new Map(),
         groupInfoMap: new Map(),
         groupUserLinkMap: new Map(),
         userHistoryMap:new Map(),
@@ -136,6 +137,7 @@ const initAccount = () => {
             store.lastChat = value.lastChat || [];
             store.friendLinkMap = value.friendLinkMap || new Map();
             store.userInfoMap = value.userInfoMap || new Map();
+            store.groupUserLinkMap = value.groupUserLinkMap || new Map();
             setStore('lastChat',store.lastChat);
             console.log('store init success',store);
         }, () => {
@@ -163,6 +165,10 @@ const registerDataChange = () => {
 
     register('friendLinkMap',() => {
         friendChange();  // 好友数据更新
+    });
+
+    register('groupUserLinkMap',() => {
+        groupUserLinkChange();  // 群组用户数据更新
     });
 };
 
@@ -203,10 +209,27 @@ const friendChange = () => {
 };
 
 /**
+ * 群组用户数据变化
+ */
+const groupUserLinkChange = () => {
+    const id = getStore('uid');
+    getFile(id,(value) => {
+        if (!value) {
+            value = {};
+        }
+        value.groupUserLinkMap = getStore('groupUserLinkMap'); // 群组用户
+        writeFile(id,value);
+    },() => {
+        console.log('read error');
+    });
+};
+
+/**
  * Store的声明
  */
 export interface Store {
     uid:number;
+    readGroupTimeMap: Map<number, number>;// gid,time
     groupInfoMap: Map<number, GroupInfo>;// gid
     groupUserLinkMap: Map<string, GroupUserLink>;// guid
     userHistoryMap: Map<string, UserMsg>;// hidinc

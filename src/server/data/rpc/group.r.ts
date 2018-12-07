@@ -5,7 +5,7 @@
 import { GroupInfo, GroupUserLink } from '../db/group.s';
 import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
-import { GroupAgree, GroupCreate, GroupMembers, Invite, InviteArray, NotifyAdmin, GuidsAdminArray } from './group.s';
+import { GroupAgree, GroupAlias, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray, NotifyAdmin } from './group.s';
 
 import { BonBuffer } from '../../../pi/util/bon';
 import { read } from '../../../pi_pt/db';
@@ -33,23 +33,14 @@ export const applyJoinGroup = (gid: number): Result => {
     const res = new Result();
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    if (gInfo.memberids.indexOf(uid) > -1) {
+        res.r = -1;
+        logger.debug(`user: ${uid}, is exist in group: ${gInfo.name}`);
+
+        return res;
+    }
     gInfo.applyUser.push(uid);
     groupInfoBucket.put(gid,gInfo);
-    const admins = gInfo.adminids;
-
-    const notify = new NotifyAdmin();
-    notify.uid = uid;
-
-    const buf = new BonBuffer();
-    notify.bonEncode(buf);
-
-    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-    // notify all admins
-    for (let i = 0; i < admins.length; i++) {
-        // TODO: persist this message
-        mqttPublish(mqttServer, true, QoS.AtMostOnce, admins[i].toString(), buf.getBuffer());
-        logger.debug('Notify admin: ', admins[i], 'for user: ', uid, 'want to join the group');
-    }
     res.r = 1;
 
     return res;
@@ -69,21 +60,22 @@ export const userExitGroup = (gid: number): Result => {
     const res = new Result();
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
-    const index1 = gInfo.memberids.indexOf(uid);
+    const uidIndex = gInfo.memberids.indexOf(uid);
     const contact = contactBucket.get<number, [Contact]>(uid)[0];
-    const index2 = contact.group.indexOf(gid);
+    const gidIndex = contact.group.indexOf(gid);
     // 群主不能主动退出群组 只能调用解散群接口
-    if(gInfo.ownerid === uid){
+    if (gInfo.ownerid === uid) {
         logger.debug('user: ', uid, 'is owner, cant exit group: ', gid);
         res.r = -1;
+
         return res;
     }
-    if (index1 > -1) {
-        gInfo.memberids.splice(index1, 1);
+    if (uidIndex > -1) {
+        gInfo.memberids.splice(uidIndex, 1);
         groupInfoBucket.put(gid, gInfo);
         logger.debug('user: ', uid, 'exit group: ', gid);
 
-        contact.group.splice(index2, 1);
+        contact.group.splice(gidIndex, 1);
         contactBucket.put(uid, contact);
         logger.debug('Remove group: ', gid, 'from user\'s contact');
 
@@ -115,6 +107,17 @@ export const acceptUser = (agree: GroupAgree): Result => {
 
     const contactBucket = getContactBucket();
     const contact = contactBucket.get<number, [Contact]>(agree.uid)[0];
+    
+    // 如果加群申请中没有该用户 
+    if (gInfo.applyUser.findIndex(item => item === agree.uid) === -1) {
+        res.r = 0;
+        logger.debug('user:',agree.uid,'not to be invited');
+        
+        return res; 
+    }
+     // 删除接受/拒绝用户的加群申请
+    gInfo.applyUser = delValueFromArray(agree.uid,gInfo.applyUser);
+    groupInfoBucket.put(gInfo.gid, gInfo);
 
     if (!(admins.indexOf(uid) > -1 || owner === uid)) {
         res.r = 3; // user is not admin or owner
@@ -139,14 +142,6 @@ export const acceptUser = (agree: GroupAgree): Result => {
         return res;
     } else {
         gInfo.memberids.push(agree.uid);
-        //删除接受/拒绝用户的加群申请
-        if(gInfo.applyUser.findIndex(item => item === agree.uid) === -1){
-            const rlt = new Result();
-            rlt.r = -1;
-            
-            return rlt; 
-        }
-        gInfo.applyUser = delValueFromArray(agree.uid,gInfo.applyUser);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('Accept user: ', agree.uid, 'to group: ', agree.gid);
         contact.group.push(agree.gid);
@@ -158,7 +153,7 @@ export const acceptUser = (agree: GroupAgree): Result => {
         gul.guid = `${agree.gid}:${agree.uid}`;
         gul.hid = '';
         gul.join_time = Date.now();
-        gul.userAlias = '';
+        gul.userAlias = getCurrentUserInfo(agree.uid).name;
         gul.groupAlias = '';
 
         groupUserLinkBucket.put(gul.guid, gul);
@@ -203,6 +198,10 @@ export const inviteUsers = (invites: InviteArray): Result => {
         const rid = invites.arr[i].rid;
         const cInfo = contactBucket.get<number, [Contact]>(rid)[0];
         // TODO: 判断对方是否已经在当前群中
+        if (gInfo.memberids.indexOf(rid) > -1) {
+            logger.debug('be invited user: ', rid, 'is exist in this group:',gid);
+            continue;
+        }
         cInfo.applyGroup.push(gid);
         contactBucket.put(rid, cInfo);
         logger.debug('Invite user: ', rid, 'to group: ', gid);
@@ -240,7 +239,7 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     contactBucket.put(uid, cInfo);
     if (!agree.agree) {        
         logger.debug('User: ', uid, 'don\'t want to join group: ', agree.gid);
-        gInfo.gid = -1; // gid = -1 indicate that user don't want to join this group
+        gInfo.gid = -2; // gid = -1 indicate that user don't want to join this group
 
         return gInfo;
     }    
@@ -276,12 +275,12 @@ export const setOwner = (guid: string): Result => {
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
 
-    const groupId = guid.split(':')[0];
-    const newOwnerId = guid.split(':')[1];
+    const groupId = getGidFromGuid(guid);
+    const newOwnerId = getUidFromGuid(guid);
     const res = new Result();
 
     logger.debug('user logged in with uid: ', uid, 'and you want to chang new owner: ', newOwnerId);
-    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId,10))[0];
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(groupId)[0];
     if (uid !== gInfo.ownerid) {
         logger.debug('User: ', uid, 'is not the owner of group: ', gInfo.gid);
         res.r = 0; // not the group owner
@@ -291,8 +290,13 @@ export const setOwner = (guid: string): Result => {
 
     // 将原管理员列表对应项替换成新的群主
     const ownerIdindex = gInfo.adminids.indexOf(gInfo.ownerid);
-    gInfo.adminids.splice(ownerIdindex,1,parseInt(newOwnerId),10);
-    gInfo.ownerid = parseInt(newOwnerId,10);
+    // 如果群主临时者是管理员
+    if (gInfo.adminids.indexOf(newOwnerId) > -1) {
+        gInfo.adminids.splice(ownerIdindex,1);
+    } else {
+        gInfo.adminids.splice(ownerIdindex,1,newOwnerId);
+    }
+    gInfo.ownerid = newOwnerId;
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('change group: ', groupId, 'owner from: ', gInfo.ownerid, 'to: ', newOwnerId);
     res.r = 1;
@@ -302,10 +306,10 @@ export const setOwner = (guid: string): Result => {
 
 /**
  * 添加管理员
- * @param guid group user id
+ * @param guidsAdmin group users id
  */
 // #[rpc=rpcServer]
-export const addAdmin = (guid: string): Result => {
+export const addAdmin = (guidsAdmin: GuidsAdminArray): Result => {
     const groupInfoBucket = getGroupInfoBucket();
     // TODO:判断群是否已经销毁
     // TODO:判断群是否存在
@@ -319,13 +323,14 @@ export const addAdmin = (guid: string): Result => {
     const res = new Result();
     const groupId = guids[0].split(':')[0];
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId,10))[0];
-    if(gInfo.ownerid !== uid){
+    if (gInfo.ownerid !== uid) {
         logger.debug('User: ', uid, 'is not an owner');
         res.r = -1;
+        
         return res;
     }
     guids.forEach(item => {
-        let addAdminId = item.split(':')[1];
+        const addAdminId = item.split(':')[1];
         if (gInfo.adminids.indexOf(parseInt(addAdminId,10)) > -1) {
             res.r = 0;
             logger.debug('User: ', addAdminId, 'is already an admin');
@@ -334,7 +339,7 @@ export const addAdmin = (guid: string): Result => {
         }
         logger.debug('user logged in with uid: ', uid, 'and you want to add an admin: ', addAdminId);
         gInfo.adminids.push(parseInt(addAdminId,10));
-    })
+    });
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('After add admin: ', gInfo);
     res.r = 1;
@@ -355,24 +360,46 @@ export const delAdmin = (guid: string): Result => {
     // TODO:先判断当前用户是否是管理员
     // TODO:判断是否是群主，群主必须是管理员,不能被删除
     // 判断被添加的用户是否是管理员成员
-    const groupId = guid.split(':')[0];
-    const delAdminId = guid.split(':')[1];
+    const groupId = getGidFromGuid(guid);
+    const delAdminId = getUidFromGuid(guid);
     const res = new Result();
 
     logger.debug('user logged in with uid: ', uid, 'and you want to delete an admin: ', delAdminId);
-    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId,10))[0];
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(groupId)[0];
     logger.debug('read group info: ', gInfo);
+    if (gInfo.state === 1) {
+        logger.debug('group: ', gInfo.gid, ',', gInfo.name,'is dissolve');
+        res.r = -1;
+
+        return res;
+    }
+    if (gInfo.gid === -1) {
+        logger.debug('group: ', gInfo.gid, ',', gInfo.name,'is not exist');
+        res.r = -2;
+
+        return res;
+    }
+    if (uid !== gInfo.ownerid) {
+        logger.debug('user: ', uid, 'is not group owner, not have the permission of delete admins');
+        res.r = -3;
+
+        return res;
+    }
     const adminids = gInfo.adminids;
 
     logger.debug('before delete admin memebers: ', gInfo.adminids);
-    const index = adminids.indexOf(parseInt(delAdminId,10));
+    const index = adminids.indexOf(delAdminId);
     if (index > -1) {
+        if (adminids[index] === gInfo.ownerid) {
+            logger.debug('group owner: ', gInfo.ownerid, ',','is not allow to be delete');
+            res.r = -4;
+
+            return res;
+        }
         adminids.splice(index, 1);
         gInfo.adminids = adminids;
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('after delete admin memmber: ', groupInfoBucket.get(gInfo.gid));
-
-        
 
         res.r = 1;
 
@@ -394,17 +421,27 @@ export const delMember = (guid: string): Result => {
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
 
-    const groupId = guid.split(':')[0];
-    const delId = guid.split(':')[1];
+    const groupId = getGidFromGuid(guid);
+    const delId = getUidFromGuid(guid);
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(groupId)[0];
+    logger.debug('read group info: ', gInfo);
     const res = new Result();
+    if (uid !== gInfo.ownerid && gInfo.adminids.indexOf(uid) === -1) {
+        logger.debug('user : ', uid, 'is not a owner and admins');
+        res.r = 0;
 
+        return res;
+    }
+    if (delId === gInfo.ownerid || gInfo.adminids.indexOf(delId) > -1) {
+        logger.debug('user : ', delId, 'is a owner or admins, cant remove');
+        res.r = -1;
+
+        return res;
+    }
     logger.debug('user logged in with uid: ', uid, 'and you want to delete a member: ', delId);
-    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId,10));
-    logger.debug('read group info: ', gInfo[0]);
-    const members = gInfo[0].memberids;
-
-    logger.debug('before delete memeber: ', gInfo[0].memberids);
-    const index = members.indexOf(parseInt(delId,10));
+    const members = gInfo.memberids;
+    logger.debug('before delete memeber: ', gInfo.memberids);
+    const index = members.indexOf(delId);
     if (index > -1) {
         members.splice(index, 1);
         const groupUserLinkBucket = getGroupUserLinkBucket();
@@ -412,9 +449,16 @@ export const delMember = (guid: string): Result => {
         logger.debug('delete user: ', delId, 'from groupUserLinkBucket');
     }
 
-    gInfo[0].memberids = members;
-    groupInfoBucket.put(gInfo[0].gid, gInfo[0]);
-    logger.debug('after delete memmber: ', groupInfoBucket.get(gInfo[0].gid)[0]);
+    gInfo.memberids = members;
+    groupInfoBucket.put(gInfo.gid, gInfo);
+    // 被踢出用户的群列表中将该群去掉
+    const contactBucket = getContactBucket();
+    const contact = contactBucket.get<number, [Contact]>(delId)[0];
+    const delGroupIndex = contact.group.indexOf(groupId); 
+    contact.group.splice(delGroupIndex,1);
+    contactBucket.put(delId, contact);
+    logger.debug('user:',delId,'has exit group',groupId);
+    logger.debug('after delete memmber: ', groupInfoBucket.get(gInfo.gid)[0]);
 
     res.r = 1;
 
@@ -440,18 +484,17 @@ export const getGroupMembers = (gid: number): GroupMembers => {
  * 获取用户在群组内的信息
  * @param gid group id
  */
+// #[rpc=rpcServer]
 export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
     const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = getGroupInfoBucket();
     const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
+    
     const gla = new GroupUserLinkArray();
-
     const m = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
-
-    for (let i = 0; i < m.memberids.length; i++) {
-        const guid = `${gid}:${m.memberids[i]}`;
-        gla.arr.push(groupUserLinkBucket.get(guid)[0]);
-    }
+       
+    const guids = m.memberids.map(item => genGuid(gid,item));  
+    gla.arr = groupUserLinkBucket.get(guids);
 
     logger.debug('Get group user link: ', gla);
 
@@ -519,7 +562,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gulink.guid = genGuid(gInfo.gid,uid);
         gulink.hid = '';
         gulink.join_time = Date.now();
-        gulink.userAlias = '';
+        gulink.userAlias = getCurrentUserInfo(uid).name;
 
         groupUserLinkBucket.put(gulink.guid, gulink);
 
@@ -551,6 +594,33 @@ export const dissolveGroup = (gid: number): Result => {
     }
 
     // TODO: delete group topic
+};
+
+/**
+ * 修改群名
+ * @param gid group id
+ * @param groupAlias group alias / new group name
+ */
+// #[rpc=rpcServer]
+export const updateGroupAlias = (gAlias: GroupAlias): Result => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const gid = gAlias.gid;
+    const newGroupName = gAlias.groupAlias;
+    const uid = getUid();
+
+    const res = new Result();
+
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+
+    if (uid === gInfo.ownerid) {
+        gInfo.name = newGroupName;
+        groupInfoBucket.put(gid, gInfo);
+        logger.debug('After update group name: ', groupInfoBucket.get(gid)[0]);
+
+        res.r = 1;
+
+        return res;
+    }
 };
 
 export const getUid = () => {

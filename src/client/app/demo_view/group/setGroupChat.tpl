@@ -1,6 +1,6 @@
 <div w-class="set-groupChat-wrap" style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
     <div w-class="top-main-wrap" ev-complete="createGroup" ev-back-click="back">
-        <client-app-widget-topBar-topBar>{title:"创建群聊(0/500)",searchImg:"search.png",completeImg:"complete.png",background:"#fff"}</client-app-widget-topBar-topBar>
+        <client-app-widget-topBar-topBar>{title:"创建群聊({{it.applyMembers.length}}/500)",searchImg:"search.png",completeImg:"complete.png",background:"#fff"}</client-app-widget-topBar-topBar>
     </div>
     <div w-class="group-info-wrap">
         <div w-class="group-avator-wrap">
@@ -17,7 +17,7 @@
         <div w-class="a">a</div>
         {{for index,item of it1.friends}}
         <div on-tap="addMember({{item}})">
-            <client-app-widget-selectUser-selectUser>{"uid":{{item}},isSelect : {{it.isSlect}}}</client-app-widget-selectUser-selectUser>
+            <client-app-widget-selectUser-selectUser>{id:{{item}}, chatType: "user"}</client-app-widget-selectUser-selectUser>
         </div>
         {{end}}
     </div>

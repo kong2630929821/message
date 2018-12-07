@@ -3,7 +3,7 @@
         <div w-class="avator-wrap">
             <img w-class="avator" src="../../res/images/user.png" />
         </div>
-        <span w-class="userName">{{it.uid}}</span>
+        <span w-class="userName">{{it.name}}</span>
         {{if it.isSelect}}
          <img w-class="selectIcon" src="../../res/images/selected.png" />
         {{end}}

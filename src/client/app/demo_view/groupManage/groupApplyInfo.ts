@@ -1,44 +1,78 @@
 /**
- * 入群验证信息
+ * 主动入群验证信息
  */
 
 // ================================================ 导入
-import { Widget } from "../../../../pi/widget/widget";
-import { Forelet } from "../../../../pi/widget/forelet";
-import { popNew } from "../../../../pi/ui/root";
-import { login as userLogin } from '../../net/rpc';
-import { UserInfo } from "../../../../server/data/db/user.s";
+import { Widget } from '../../../../pi/widget/widget';
+import { acceptUser } from '../../../../server/data/rpc/group.p';
+import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
-import { factorial } from "../../../../pi/util/math";
-import { create } from "../../../../pi/net/rpc";
-import { getUserInfo } from "../../../app/net/rpc"
-import { UserArray } from "../../../../server/data/rpc/basic.s"
+import { clientRpcFunc } from '../../net/init';
 
+// ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
-// ================================================ 导出
 export class GroupApplyInfo extends Widget {
-    props = {
-        applyInfo: "该用户填写的入群申请该用户填写的入群申请该用户填写"
-    } as Props
-    
+    public ok:() => void;
+    public props: Props = {
+        gid:null,
+        uid:null,
+        name:'',
+        applyInfo: '',
+        isSolve:''
+    };
+    public setProps(props:any) {
+        super.setProps(props);
+        logger.debug('==================主动申请入群验证详细',props);
+        this.props.gid = props.activeToGGid;
+        this.props.uid = props.id;
+        this.props.isSolve = props.isagree ? '已同意' :'';
+    }
+    public goBack() {
+        this.ok();
+    }
     // 点击拒绝添加好友
-    reject(){
-        console.log("reject")
+    public reject() {
+        const uid = this.props.uid;
+        const gid = this.props.gid;
+        const agree = new GroupAgree();
+        agree.gid = gid;
+        agree.uid = uid;
+        agree.agree = false;
+        logger.debug('==========active GroupApplyInfo reject',agree);
+        clientRpcFunc(acceptUser,agree,(r) => {
+            logger.debug('==========active GroupApplyInfo reject result',r);
+            this.props.isSolve = '已拒绝';
+            this.paint();
+        });
     }
 
     // 点击同意添加好友
-    agree(){
-        console.log("agree")
-        popNew("client-app-view-addUser-newFriend",{"sid" : 10001});
+    public agree() {
+        const uid = this.props.uid;
+        const gid = this.props.gid;
+        const agree = new GroupAgree();
+        agree.gid = gid;
+        agree.uid = uid;
+        agree.agree = true;
+        logger.debug('==========active GroupApplyInfo agree',agree);
+        clientRpcFunc(acceptUser,agree,(r) => {
+            logger.debug('==========active GroupApplyInfo agree result',r);
+            this.props.isSolve = '已同意';
+            this.paint();
+        });
     }
     
 }
 
 // ================================================ 本地
-
 interface Props {
-    applyInfo: string
+    gid:number; // 主动加群的群id
+    uid:number; // 申请加群的用户id
+    name: string; // 用户名
+    applyInfo: string; // 申请信息 
+    isSolve:string;
 }
