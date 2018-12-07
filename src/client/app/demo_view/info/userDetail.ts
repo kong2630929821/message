@@ -107,6 +107,8 @@ export class UserDetail extends Widget {
      * 页面点击
      */
     public pageClick() {
+        const userinfo = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
+        this.props.alias = this.props.alias || userinfo.name;
         this.props.editable = false;
         this.paint();
     }
@@ -115,7 +117,7 @@ export class UserDetail extends Widget {
      * 好友别名更改
      */
     public aliasChange(e:any) {
-        this.props.alias = e.target.value;
+        this.props.alias = e.value;
         this.paint();
     }
 
@@ -136,7 +138,6 @@ export class UserDetail extends Widget {
                 console.log('修改好友备注成功',this.props.alias);
             }
         });
-        
     }
 }
 

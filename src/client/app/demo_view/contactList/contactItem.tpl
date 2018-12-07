@@ -3,7 +3,7 @@
         <div w-class="avator-wrap">
             <img w-class="avator" src="../../res/images/user.png" />
         </div>
-        <span w-class="text">{{(it.text ? it.text : it.uid || it.info) || it.ginfo.name}}</span>
+        <span w-class="text">{{it.text ? it.text : it.info}}</span>
         {{if it.totalNew>0}}
         <div w-class="other">
             {{it.totalNew}}

@@ -89,3 +89,12 @@ struct MsgLock {
     hid: String,//历史记录id,-1代表不存在
     current: u32,//当前消息锁编号
 }
+
+/**
+*用户历史记录游标
+*/
+#[primary=uuid,db=file]
+struct UserHistoryCursor {
+    uuid: String,//两个用户的id"-1"代表不存在,"10001:10002",前面代表uid1后面代表uid2
+    cursor: i32,//当前已推送给用户uid1的最大消息ID
+}

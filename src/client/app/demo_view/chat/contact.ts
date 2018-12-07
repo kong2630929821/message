@@ -33,16 +33,13 @@ export class Contact extends Widget {
     }
 
     public chat(e:any, id:number, chatType:GENERATOR_TYPE) {
+        this.closeMore();
         if (chatType === GENERATOR_TYPE.USER) {
             popNew('client-app-demo_view-chat-chat', { rid:id });
         } else if (chatType === GENERATOR_TYPE.GROUP) {
             popNew('client-app-demo_view-chat-group', { gid:id });
         }
         
-    }
-
-    public openAddUser() {
-        popNew('client-app-demo_view-chat-addUser', { sid: this.props.sid });
     }
 
     // 打开更多功能
@@ -64,7 +61,7 @@ export class Contact extends Widget {
                 popNew('client-app-demo_view-contactList-contactList',{ sid : this.props.sid });
                 break;
             case 2:// 点击添加好友
-                this.openAddUser();
+                popNew('client-app-demo_view-chat-addUser', { sid: this.props.sid });
                 break;
             case 3:// 创建群聊 setGroupChat
                 popNew('client-app-demo_view-group-setGroupChat');
@@ -77,6 +74,8 @@ export class Contact extends Widget {
 
             default:
         }
+        this.closeMore();
+        this.paint();
     }
 }
 

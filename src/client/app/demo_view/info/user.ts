@@ -4,7 +4,6 @@
 // ================================================ 导入
 import { Widget } from '../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
-import { Result } from '../../../../server/data/rpc/basic.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
@@ -13,6 +12,7 @@ export class User extends Widget {
     constructor() {
         super();
         this.props = {
+            sid:0,
             info:new UserInfo(),
             tel:'',
             name:'',
@@ -23,8 +23,8 @@ export class User extends Widget {
 
     public create() {
         super.create();
-        const sid = store.getStore('uid');
-        this.props.info = store.getStore(`userInfoMap/${sid}`,new UserInfo());
+        this.props.sid = store.getStore('uid');
+        this.props.info = store.getStore(`userInfoMap/${this.props.sid}`,new UserInfo());
         this.props.tel = this.props.info.tel || '未知';
         this.props.name = this.props.info.name;
     }
@@ -36,6 +36,9 @@ export class User extends Widget {
      * 页面点击
      */
     public pageClick() {
+        const userinfo = store.getStore(`userInfoMap/${this.props.sid}`,new UserInfo());
+        this.props.name = this.props.name || userinfo.name;
+        this.props.tel = this.props.tel || '未知';
         this.props.nameEdit = false;
         this.props.phoneEdit = false;
         this.paint();
@@ -53,7 +56,7 @@ export class User extends Widget {
      * 昵称更改
      */
     public nameChange(e:any) {
-        this.props.name = e.target.value;
+        this.props.name = e.value;
         this.paint();
     }
 
@@ -77,10 +80,9 @@ export class User extends Widget {
      * 修改个人信息
      */
     public changeUserInfo() {
-        const sid = store.getStore('uid');
+        const userinfo = store.getStore(`userInfoMap/${this.props.sid}`,new UserInfo());
         const test = new UserInfo();
-        const userinfo = store.getStore(`userInfoMap/${sid}`,new UserInfo());
-        test.uid = sid;
+        test.uid = this.props.sid;
         test.name = this.props.name;
         test.tel = this.props.tel;
         test.avator = userinfo.avator;

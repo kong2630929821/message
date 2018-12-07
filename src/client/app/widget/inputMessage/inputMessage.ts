@@ -48,6 +48,7 @@ export class InputMessage extends Widget {
     public send(e:any) {
         if (this.props.isOnInput) { // 有输入才触发发送事件处理
             notify(e.node,'ev-send',{ value:this.props.message, msgType:MSG_TYPE.TXT });
+            this.props.isOnInput = false;
         }
         this.props.message = '';
         this.paint();

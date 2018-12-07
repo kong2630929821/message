@@ -3,7 +3,7 @@
  */
 import { GroupHistory, UserHistory } from '../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
-import { getHidFromInc } from '../../../utils/util';
+import { getHidFromhIncId } from '../../../utils/util';
 import * as store from './store';
 /**
  * 更新userHistoryMap/userChatMap,lastChat
@@ -11,17 +11,17 @@ import * as store from './store';
  */
 export const updateUserMessage = (nextside:number,msg:UserHistory) => {
     store.setStore(`userHistoryMap/${msg.hIncId}`,msg.msg);
-    const chat = store.getStore(`userChatMap/${getHidFromInc(msg.hIncId)}`, []);
+    const chat = store.getStore(`userChatMap/${getHidFromhIncId(msg.hIncId)}`, []);
     chat.push(msg.hIncId);
-    store.setStore(`userChatMap/${getHidFromInc(msg.hIncId)}`,chat);    
+    store.setStore(`userChatMap/${getHidFromhIncId(msg.hIncId)}`,chat);    
     pushLastChat([nextside, msg.msg.time, GENERATOR_TYPE.USER]);    
 };
 
 export const updateGroupMessage = (gid:number,msg:GroupHistory) => {
     store.setStore(`groupHistoryMap/${msg.hIncId}`,msg.msg);
-    const chat = store.getStore(`groupChatMap/${getHidFromInc(msg.hIncId)}`, []);
+    const chat = store.getStore(`groupChatMap/${getHidFromhIncId(msg.hIncId)}`, []);
     chat.push(msg.hIncId);
-    store.setStore(`groupChatMap/${getHidFromInc(msg.hIncId)}`,chat);    
+    store.setStore(`groupChatMap/${getHidFromhIncId(msg.hIncId)}`,chat);    
     pushLastChat([gid, msg.msg.time, GENERATOR_TYPE.GROUP]);    
 };
 /**

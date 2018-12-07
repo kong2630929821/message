@@ -17,6 +17,7 @@ export const USER_HISTORY_TABLE = 'server/data/db/message.UserHistory';
 export const GROUP_HISTORY_TABLE = 'server/data/db/message.GroupHistory';
 export const ANNOUNCE_HISTORY_TABLE = 'server/data/db/message.AnnounceHistory';
 export const MSG_LOCK_TABLE = 'server/data/db/message.MsgLock';
+export const USER_HISTORY_CURSOR_TABLE = 'server/data/db/message.UserHistoryCursor';
 
 // 个人
 export const USER_INFO_TABLE = 'server/data/db/user.UserInfo';

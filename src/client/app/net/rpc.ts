@@ -4,11 +4,11 @@
 // ================================================ 导入
 import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { UserInfo } from '../../../server/data/db/user.s';
-import { getFriendLinks, getGroupsInfo, getUsersInfo, isUserOnline, login as loginUser, registerUser, setUserInfo as setUserProfile } from '../../../server/data/rpc/basic.p';
-import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserInfoSet, UserRegister } from '../../../server/data/rpc/basic.s';
+import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, registerUser } from '../../../server/data/rpc/basic.p';
+import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister } from '../../../server/data/rpc/basic.s';
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createGroupp, delMember, dissolveGroup, inviteUsers } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, Invite, InviteArray } from '../../../server/data/rpc/group.s';
-import { sendAnnouncement, sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
+import { isUserOnline, sendAnnouncement, sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { AnnounceSend, GroupSend, UserSend } from '../../../server/data/rpc/message.s';
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
@@ -112,19 +112,6 @@ export const delFriend = (rid: number, cb: (r:Result) => void) => {
     });
 };
 // ================  debug purpose ==========================
-
-export const setUserInfo = () => {
-    const userInfoSet = new UserInfoSet();
-    userInfoSet.avator = 'avatar';
-    userInfoSet.name = 'wtf';
-    userInfoSet.note = 'xxx';
-    userInfoSet.sex = 0;
-    userInfoSet.tel = '13800000000';
-
-    clientRpcFunc(setUserProfile, userInfoSet, (r) => {
-        console.log(r);
-    });
-};
 
 export const createGroup = () => {
     const x = new GroupCreate();

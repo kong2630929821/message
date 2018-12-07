@@ -10,8 +10,9 @@ import * as store from '../data/store';
 
 /**
  * 时间戳格式化 毫秒为单位
+ * timeType 1 返回时分
  */ 
-export const timestampFormat = (timestamp: number) => {
+export const timestampFormat = (timestamp: number,timeType?: number) => {
     const date = new Date(timestamp);
     const year = date.getFullYear();
     const month = (date.getMonth() + 1) >= 10 ? (date.getMonth() + 1) : `0${date.getMonth() + 1}`;
@@ -19,6 +20,10 @@ export const timestampFormat = (timestamp: number) => {
     const hour = date.getHours() >= 10 ? date.getHours() : `0${date.getHours()}`;
     const minutes = date.getMinutes() >= 10 ? date.getMinutes() : `0${date.getMinutes()}`;
     const seconds = date.getSeconds() >= 10 ? date.getSeconds() : `0${date.getSeconds()}`;
+
+    if (timeType === 1) {
+        return `${hour}:${minutes}`;
+    }
 
     return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`;
 };

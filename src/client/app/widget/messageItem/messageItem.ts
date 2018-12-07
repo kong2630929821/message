@@ -2,6 +2,7 @@
  * textMessage 组件相关处理
  */
 // ===========================导入
+import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
@@ -40,6 +41,10 @@ export class MessageItem extends Widget {
         time = timestampFormat(time).split(' ')[1];
         this.props.time = time.substr(0,5);
     }
+
+    public userDetail() {
+        popNew('client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid });
+    }
 }
 
 // ================================================ 本地
@@ -51,7 +56,7 @@ const parseEmoji = (msg:UserMsg):UserMsg => {
             // FIXME: 不应该写死,应该动态获取
             url = url.replace('../../','/client/app/');
 
-            return `<img src="${url}" alt="${capture}"></img>`;
+            return `<img src="${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;
         }
@@ -62,7 +67,7 @@ const parseEmoji = (msg:UserMsg):UserMsg => {
 
 const parseImg = (msg:UserMsg):UserMsg => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, url) => {
-        return `<img src="${downloadFileUrlPrefix}${url}" alt="img"></img>`;
+        return `<img src="${downloadFileUrlPrefix}${url}" alt="img" class='imgMsg'></img>`;
     });
 
     return msg;

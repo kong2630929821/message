@@ -6,9 +6,9 @@
 import { HandlerMap } from '../../../pi/util/event';
 import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
-import { AnnounceHistory, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg } from '../../../server/data/db/message.s';
+import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { getFile, initFileStore, writeFile } from './lcstore';
+import { accountsChange, friendChange, initAccount } from './initStore';
 
 // ============================================ 导出
 
@@ -118,31 +118,9 @@ export const initStore = () => {
         addressInfoMap: new Map(),
         userChatMap:new Map(),
         groupChatMap:new Map(),
-        lastChat:[]
+        lastChat:[],
+        lastRead:new Map()
     };
-};
-
-/**
- * 更新当前用户的数据
- */
-const initAccount = () => {
-    initFileStore().then(() => {
-        const uid = getStore('uid');
-        if (!uid) return;
-        getFile(uid, (value) => {
-            if (!value) return;
-            store.userHistoryMap = value.userHistoryMap || new Map();
-            store.userChatMap = value.userChatMap || new Map();
-            store.lastChat = value.lastChat || [];
-            store.friendLinkMap = value.friendLinkMap || new Map();
-            store.userInfoMap = value.userInfoMap || new Map();
-            setStore('lastChat',store.lastChat);
-            console.log('store init success',store);
-        }, () => {
-            console.log('read error');
-        });
-    });
-    
 };
 
 /**
@@ -167,42 +145,6 @@ const registerDataChange = () => {
 };
 
 /**
- * 聊天数据变化
- */
-const accountsChange = () => {
-    const id = getStore('uid');
-    getFile(id,(value) => {
-        if (!value) {
-            value = {};
-        }
-        value.userHistoryMap = getStore('userHistoryMap'); // 单人聊天历史记录变化
-        value.userChatMap = getStore('userChatMap');  // 单人聊天历史记录索引变化
-        value.lastChat = getStore('lastChat');  // 最近聊天记录
-        writeFile(id,value);
-    },() => {
-        console.log('read error');
-    });
-    
-};
-
-/**
- * 好友数据变化
- */
-const friendChange = () => {
-    const id = getStore('uid');
-    getFile(id,(value) => {
-        if (!value) {
-            value = {};
-        }
-        value.friendLinkMap = getStore('friendLinkMap'); // 好友链接
-        value.userInfoMap = getStore('userInfoMap');  // 用户信息
-        writeFile(id,value);
-    },() => {
-        console.log('read error');
-    });
-};
-
-/**
  * Store的声明
  */
 export interface Store {
@@ -223,12 +165,20 @@ export interface Store {
     groupChatMap:Map<string, string[]>;// hid,hidinc
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
     // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
+    lastRead:Map<number,LastReadMsgId>;// gid|uid 
+
 }
 
+/**
+ * 上次阅读到哪一条消息
+ */
+export interface LastReadMsgId {
+    msgType: string; // 单聊或群聊
+    msgId: string; // hIncId
+}
 // ============================================ 本地
 
 // 本质上是主键
-type KeyName = MapName;
 export type MapName = 'groupInfoMap' | 'groupUserLinkMap' | 'userHistoryMap' | 'groupHistoryMap' | 'announceHistoryMap' | 'msgLockMap' | 'userInfoMap' | 'userCredentialMap' | 'accountGeneratorMap' | 'friendLinkMap' | 'contactMap' | 'addressInfoMap';
 
 export let store:Store;

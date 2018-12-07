@@ -124,10 +124,10 @@ export class Input extends Widget {
             currentValue = currentValue.replace(/[\D]/g,''); 
         }
         this.state.currentValue = currentValue;
-        this.state.showClear = this.props.clearable && !this.props.disabled && this.state.currentValue !== '' && this.state.focused;
-        
         (<any>this.getInput()).value = currentValue;
         notify(event.node,'ev-input-change',{ value:this.state.currentValue }); 
+        
+        this.state.showClear = this.props.clearable && !this.props.disabled && this.state.currentValue !== '';
         this.state.focused = true;
         this.paint();  
     }
@@ -137,7 +137,6 @@ export class Input extends Widget {
      */
     public onBlur(event:any) {
         this.state.focused = false;
-        this.state.showClear = false;
         notify(event.node,'ev-input-blur',{ value:this.state.currentValue });
         this.paint();
     }
@@ -147,7 +146,7 @@ export class Input extends Widget {
      */
     public onFocus(event:any) {
         this.state.focused = true;
-        this.state.showClear = this.props.clearable && !this.props.disabled && this.state.currentValue !== '' && this.state.focused;
+        this.state.showClear = this.props.clearable && !this.props.disabled && this.state.currentValue !== '';
         notify(event.node,'ev-input-focus',{});
         this.paint();
     }

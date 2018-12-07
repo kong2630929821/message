@@ -2,9 +2,9 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import { AnnounceHistory, Announcement, GroupHistory, GroupMsg, MsgLock, UserHistory, UserMsg, MSG_TYPE } from '../db/message.s';
+import { AnnounceHistory, Announcement, GroupHistory, GroupMsg, MSG_TYPE, MsgLock, UserHistory, UserHistoryCursor ,UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
-import { AnnounceSend, GroupSend, UserSend } from './message.s';
+import { GroupSend, UserSend } from './message.s';
 
 import { BonBuffer } from '../../../pi/util/bon';
 import { getEnv } from '../../../pi_pt/net/rpc_server';
@@ -13,12 +13,10 @@ import { mqttPublish, QoS } from '../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
 
-import { read } from '../../../pi_pt/db';
-import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { Logger } from '../../../utils/logger';
-import { LastReadMessageId } from '../db/user.s';
+import { OnlineUsers } from '../db/user.s';
 
-import { genGroupHid, genHIncId, genNextMessageIndex, genUserHid } from '../../../utils/util';
+import { genGroupHid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { getUid } from './group.r';
 
 const logger = new Logger('MESSAGE');
@@ -28,63 +26,48 @@ const logger = new Logger('MESSAGE');
  * @param uid user id
  */
 // #[rpc=rpcServer]
-export const messageReadAck = (cursor: LastReadMessageId): Result => {
-    const dbMgr = getEnv().getDbMgr();
-    const lastReadMessageidBucket = new Bucket('file', CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
-    const sessionUid = getUid();
-    const uid = cursor.mtype.split(':')[1];
-    const res = new Result();
-    if (sessionUid === undefined) {
-        logger.debug('User didn\'t login, can\'t send message read ack');
-        res.r = 0;
-
-        return res;
-    }
-
-    if (sessionUid !== parseInt(uid,10)) {
-        logger.debug('inappropriate uid');
-        res.r = 0;
-
-        return res;
-    }
-
-    const lrmi = new LastReadMessageId();
-    lrmi.mtype = cursor.mtype;
-    lrmi.msgId = cursor.msgId;
-
-    lastReadMessageidBucket.put(uid, lrmi);
-    logger.debug('User: ', uid, 'confirm receive message id: ', lrmi.msgId);
-    res.r = 1;
-
-    return res;
-};
-
-/**
- * 用户获取消息游标
- * @param cursor "10001:0" -> 用户 10001个人对个人消息， "10001:1" -> 用户10001群消息
- */
-// #[rpc=rpcServer]
-// export const getLastReadMessageId = (cursor: string): LastReadMessageId => {
+// export const messageReadAck = (cursor: LastReadMessageId): Result => {
 //     const dbMgr = getEnv().getDbMgr();
-//     const uid = getUid();
 //     const lastReadMessageidBucket = new Bucket('file', CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
-//     const msgId = lastReadMessageidBucket.get(cursor)[0];
-//     const res = new LastReadMessageId();
-
-//     if (msgId === undefined) {
-//         logger.error('User: ', uid, 'Can\'t get msgId for message type: ', cursor);
-//         res.mtype = '';
-//         res.msgId = '';
+//     const sessionUid = getUid();
+//     const uid = cursor.mtype.split(':')[1];
+//     const res = new Result();
+//     if (sessionUid === undefined) {
+//         logger.debug('User didn\'t login, can\'t send message read ack');
+//         res.r = 0;
 
 //         return res;
 //     }
 
-//     res.mtype = cursor;
-//     res.msgId = msgId;
-//     logger.debug('User: ', uid, 'get message id: ', msgId);
+//     if (sessionUid !== parseInt(uid,10)) {
+//         logger.debug('inappropriate uid');
+//         res.r = 0;
+
+//         return res;
+//     }
+
+//     const lrmi = new LastReadMessageId();
+//     lrmi.mtype = cursor.mtype;
+//     lrmi.msgId = cursor.msgId;
+
+//     lastReadMessageidBucket.put(uid, lrmi);
+//     logger.debug('User: ', uid, 'confirm receive message id: ', lrmi.msgId);
+//     res.r = 1;
 
 //     return res;
 // };
+
+/**
+ * 获取单聊消息游标
+ */
+// #[rpc=rpcServer]
+export const getUserHistoryCursor = (uid: number): UserHistoryCursor => {
+    const dbMgr = getEnv().getDbMgr();
+    const sid = getUid();
+    const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
+  
+    return userHistoryCursorBucket.get(genUuid(sid,uid))[0];
+};
 
 // ================================================================= 导出
 /**
@@ -115,14 +98,14 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 
         return gh;
     }
-    //生成消息ID
+    // 生成消息ID
     const msgLock = new MsgLock();
     msgLock.hid = genGroupHid(message.gid);
-    //消息撤回
+    // 消息撤回
     if (message.mtype === MSG_TYPE.RECALL) {
-        //需要撤回的消息key
-        let recallKey = message.msg;
-        //获取撤回消息的基础信息
+        // 需要撤回的消息key
+        const recallKey = message.msg;
+        // 获取撤回消息的基础信息
         const v = bkt.get<string, GroupHistory>(recallKey);
         // TODO 判断撤回时间
         if (v !== undefined) {
@@ -131,12 +114,12 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         }
     }
 
-    //公告消息撤回
+    // 公告消息撤回
     if (message.mtype === MSG_TYPE.RENOTICE) {
-        //需要撤回的消息key
-        let recallKey = message.msg;
+        // 需要撤回的消息key
+        const recallKey = message.msg;
         const noticeBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
-        //获取撤回消息的基础信息
+        // 获取撤回消息的基础信息
         const v = noticeBucket.get<string, AnnounceHistory>(recallKey);
         // TODO 判断撤回时间
         if (v !== undefined) {
@@ -145,9 +128,9 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         }
     }
 
-    //公告消息
+    // 公告消息
     if (message.mtype === MSG_TYPE.NOTICE) {
-        //公告数据存储
+        // 公告数据存储
         const noticeBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
         const anmt = new Announcement();
         anmt.cancel = false;
@@ -158,7 +141,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         anmt.sid = getUid();
 
         const ah = new AnnounceHistory();
-        //公告key使用群聊消息key
+        // 公告key使用群聊消息key
         ah.aIncId = msgLock.hid;
         ah.announce = anmt;
         noticeBucket.put(ah.aIncId, ah);
@@ -196,31 +179,23 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
  */
 // #[rpc=rpcServer]
 export const sendUserMessage = (message: UserSend): UserHistory => {
-    console.log("sendMsg!!!!!!!!!!!", message);
+    console.log('sendMsg!!!!!!!!!!!', message);
     const dbMgr = getEnv().getDbMgr();
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
 
-    let sid;
-    const session = getEnv().getSession();
-    read(dbMgr, (tr: Tr) => {
-        sid = session.get(tr, 'uid');
-        if (sid === undefined) {
-            sid = -1;
-        }
-        console.log('read uid for this session: ', sid);
-    });
+    const sid = getUid();
     const userHistory = new UserHistory();
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
     // 获取对方联系人列表
     const sContactInfo = contactBucket.get(message.rid)[0];
     // 判断当前用户是否在对方的好友列表中
     
-    //消息撤回
+    // 消息撤回
     if (message.mtype === MSG_TYPE.RECALL) {
-        //需要撤回的消息key
-        let recallKey = message.msg;
-        //获取撤回消息的基础信息
+        // 需要撤回的消息key
+        const recallKey = message.msg;
+        // 获取撤回消息的基础信息
         const v = userHistoryBucket.get<string, UserHistory>(recallKey);
         // TODO 判断撤回时间
         if (v[0] !== undefined) {
@@ -238,13 +213,12 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userMsg.time = Date.now();
     userHistory.msg = userMsg;
     // logger.debug(`friends is : ${JSON.stringify(sContactInfo.friends)}, sid is : ${sid}`);
-    if (sContactInfo.friends.findIndex(item => item === parseInt(sid,10)) === -1) {
+    if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
         userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
 
         return userHistory;
     }
     
-    sid = parseInt(sid,10);    
     const msgLock = new MsgLock();
     msgLock.hid = genUserHid(sid, message.rid);
     // 这是一个事务
@@ -262,15 +236,70 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     logger.debug('Persist user history message to DB: ', userHistory);
 
     const buf = new BonBuffer();
-    // userMsg.bonEncode(buf);
     userHistory.bonEncode(buf);
 
-    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-    mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
-    logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(userHistory)}`);
-    logger.debug('User message sent from: ', sid.toString(), 'to: ', message.rid.toString());
+    const userHistoryCursorBucket = new Bucket('file',CONSTANT.USER_HISTORY_CURSOR_TABLE,dbMgr);
+    let sidHistoryCursor = userHistoryCursorBucket.get(genUuid(sid,message.rid))[0];
+    let ridHistoryCursor = userHistoryCursorBucket.get(genUuid(message.rid,sid))[0];
+    logger.debug('sendUserMessage begin sidHistoryCursor: ', sidHistoryCursor);
+    logger.debug('sendUserMessage begin ridHistoryCursor: ', ridHistoryCursor);
+    
+    // 游标表中是否有该用户的记录
+    if (sidHistoryCursor) { 
+        sidHistoryCursor.cursor = msgLock.current; // 发送者的游标一定在变化
+    } else {
+        sidHistoryCursor = new UserHistoryCursor();
+        sidHistoryCursor.uuid = genUuid(sid,message.rid);
+        sidHistoryCursor.cursor = msgLock.current;
+    }
+    
+    logger.debug('sendUserMessage sidHistoryCursor: ', sidHistoryCursor);
+    userHistoryCursorBucket.put(genUuid(sid,message.rid),sidHistoryCursor);
+
+    // 游标表中是否有该用户的记录
+    if (!ridHistoryCursor) {
+        ridHistoryCursor = new UserHistoryCursor();
+        ridHistoryCursor.uuid = genUuid(message.rid,sid);
+        ridHistoryCursor.cursor = -1;
+    }
+    // 对方是否在线，不在线则不推送消息
+    const res = isUserOnline(message.rid);
+    if (res.r === 1) {
+        const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+        mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
+        logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(userHistory)}`);
+        
+        ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
+    } 
+
+    userHistoryCursorBucket.put(genUuid(message.rid,sid),ridHistoryCursor); 
+    logger.debug(`sendUserMessage ridHistoryCursor: ${JSON.stringify(ridHistoryCursor)}`);
 
     return userHistory;
+};
+
+/**
+ * 判断用户是否在线
+ * @param uid 用户ID
+ */
+// #[rpc=rpcServer]
+export const isUserOnline = (uid: number): Result => {
+    const dbMgr = getEnv().getDbMgr();
+
+    const res = new Result();
+    const bucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
+    const onlineUser = bucket.get<number, [OnlineUsers]>(uid)[0];
+    if (onlineUser !== undefined && onlineUser.sessionId !== -1) {
+        logger.debug('User: ', uid, 'on line');
+        res.r = 1; // on line;
+
+        return res;
+    } else {
+        logger.debug('User: ', uid, 'off line');
+        res.r = 0; // off online
+
+        return res;
+    }
 };
 
 // ----------------- helpers ------------------

@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { UserHistory } from '../../../../server/data/db/message.s';
@@ -12,6 +13,8 @@ import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
 import { sendMessage } from '../../net/rpc';
 // ================================================ 导出
+export const forelet = new Forelet();
+
 export class Chat extends Widget {
     public props:Props;
     public bindCB: any;
@@ -31,7 +34,14 @@ export class Chat extends Widget {
         super.setProps(props);
         this.props.sid = store.getStore('uid');
         this.props.name = getFriendAlias(this.props.rid);
-        this.props.hidIncArray = store.getStore(`userChatMap/${this.getHid()}`) || [];
+        const hIncIdArr = store.getStore(`userChatMap/${this.getHid()}`) || [];
+        this.props.hidIncArray = hIncIdArr;
+
+        // 更新上次阅读到哪一条记录
+        const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
+        const lastRead = store.getStore(`lastRead/${this.props.rid}`,{ msgId:undefined,msgType:'user' });
+        lastRead.msgId = hincId;
+        store.setStore(`lastRead/${this.props.rid}`,lastRead);
     }
 
     public firstPaint() {
@@ -45,6 +55,9 @@ export class Chat extends Widget {
         document.querySelector('#messEnd').scrollIntoView();
     }
 
+    /**
+     * 更新聊天记录
+     */
     public updateChat() {
         this.setProps(this.props);
         this.paint();
@@ -54,7 +67,7 @@ export class Chat extends Widget {
             this.paint();
         }, 100);
     }
-    
+
     public send(e:any) {
         this.props.inputMessage = e.value;
         sendMessage(this.props.rid, e.value, (() => {
@@ -79,6 +92,7 @@ export class Chat extends Widget {
     public goBack() {
         this.ok();
     }
+
     private getHid() {
         const friendLink = store.getStore(`friendLinkMap/${genUuid(this.props.sid, this.props.rid)}`);
         
