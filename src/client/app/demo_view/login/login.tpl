@@ -8,7 +8,7 @@
             <client-app-widget-input-input w-class="pi-input idInput">{placeHolder : "ID",style : "font-size:32px;color:#318DE6"}</client-app-widget-input-input>
         </div>
         <div ev-input-change="inputPasswd">
-            <client-app-widget-input-input w-class="pi-input">{placeHolder : "密码",itype :{{it.visible ? "text" : "password"}},clearable : true,style : "font-size:32px;color:#318DE6" }</client-app-widget-input-input>
+            <client-app-widget-input-input w-class="pi-input">{input:{{it.passwd}},placeHolder : "密码",itype :{{it.visible ? "text" : "password"}},clearable : true,style : "font-size:32px;color:#318DE6" }</client-app-widget-input-input>
         </div>
     </div>
     <div w-class="eye" on-tap="changeEye">

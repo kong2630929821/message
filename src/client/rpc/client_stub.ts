@@ -8,8 +8,8 @@ import { BonBuffer } from '../../pi/util/bon';
 import { Error } from '../../pi_pt/net/rpc_r.s';
 import { UserSend } from '../../server/data/rpc/message.s';
 
-// const SERVER_IP = '192.168.9.29';
-const SERVER_IP = '127.0.0.1';
+const SERVER_IP = '192.168.9.29';
+// const SERVER_IP = '127.0.0.1';
 const SERVER_PORT = 1234;
 
 const createMqttClient = (onSuccess: Function, onFailure: Function): Client => {

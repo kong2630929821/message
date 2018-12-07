@@ -10,13 +10,13 @@ import { Widget } from '../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-
+// ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
 export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
+const logger = new Logger(WIDGET_NAME);
 
- // ================================================ 导出
 export class ContactList extends Widget {
     public ok:() => void;
 
@@ -34,12 +34,12 @@ export class ContactList extends Widget {
     }
 
     public toGroup() {
-        popNew(`client-app-demo_view-group-groupList`,{ groups:this.state.group });
+        popNew(`client-app-demo_view-group-groupList`,{groups:this.state.group});
     }
 
     // 查看好友详细信息
     public friendInfo(i:number) {
-        popNew('client-app-demo_view-contactList-userDetail',{ uid:i });
+        popNew('client-app-demo_view-info-userDetail',{ uid:i });
     }
 }
 

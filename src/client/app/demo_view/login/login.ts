@@ -12,6 +12,7 @@ import { getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/
 import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
 import { genUuid } from '../../../../utils/util';
+import { getFriendHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { clientRpcFunc, subscribe as subscribeMsg } from '../../net/init';
@@ -59,13 +60,22 @@ export class Login extends Widget {
                 store.setStore(`userInfoMap/${r.uid}`,r);        
                 init(r.uid); 
                 popNew('client-app-demo_view-chat-contact', { sid: this.props.uid });
-                // popNew('client-app-demo_view-group-groupMember', { gid: 10001 });
                 subscribeMsg(this.props.uid.toString(), UserHistory, (r: UserHistory) => {
                     updateUserMessage(r.msg.sid,r);
                 });
             }
         });
+        
     }
+
+    /**
+     * 切换密码是否可见
+     */
+    public changeEye() {
+        this.props.visible = !this.props.visible;
+        this.paint();
+    }
+
 }
 
 // ================================================ 本地
@@ -139,24 +149,27 @@ const updateUsers = (r:Contact,uid:number) => {
         info.uuid.push(genUuid(uid,rid));
     });
     if (info.uuid.length > 0) {
-            // 获取friendlink
+        // 获取friendlink
         clientRpcFunc(getFriendLinks,info,(r:FriendLinkArray) => {            
             if (r && r.arr && r.arr.length > 0) {
                 r.arr.forEach((e:FriendLink) => {
                     store.setStore(`friendLinkMap/${e.uuid}`,e);
-                }); 
+                });
             }
                        
         });
-    }
+    }  
     const usersInfo = new GetUserInfoReq();
     usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
-            // 获取好友信息
-    clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
-        if (r && r.arr && r.arr.length > 0) {
-            r.arr.forEach((e:UserInfo) => {
-                store.setStore(`userInfoMap/${e.uid}`,e);
-            });
-        }
-    });
+    if (usersInfo.uids.length > 0) {
+        // 获取好友信息
+        clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
+            if (r && r.arr && r.arr.length > 0) {
+                r.arr.forEach((e:UserInfo) => {
+                    store.setStore(`userInfoMap/${e.uid}`,e);
+                    getFriendHistory(e);  // 获取该好友发送的离线消息
+                });
+            }
+        });
+    }
 };

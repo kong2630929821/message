@@ -14,14 +14,6 @@ struct UserRegister{
     passwdHash:String,
 }
 
-struct UserInfoSet {
-    name: String,//用户自己设置的用户名
-    avator: String,//头像
-    sex: SEXY,//性别
-    tel: String,//电话
-    note: String,//用户自己的备注信息
-}
-
 enum ORDER {
     INC = 0,//顺序
     DEC = 1,//逆序
@@ -62,6 +54,7 @@ struct GroupHistoryArray{
 }
 
 struct UserHistoryArray{
+    newMess:u32, // 新消息条数
     arr:&[UserHistory]//用户历史记录表
 }
 
@@ -92,4 +85,9 @@ struct LoginReq {
 
 struct LoginReply {
     status: u8
+}
+
+struct UserHistoryFlag {
+    rid:u32, // 好友ID
+    hIncId:String // 历史记录ID
 }

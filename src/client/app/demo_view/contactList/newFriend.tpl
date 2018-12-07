@@ -6,11 +6,11 @@
         <div w-class="title-wrap">新的朋友</div>
         <div w-class="detail-wrap" ev-agree-friend="agreeClick">
             {{for i,v of it1.applyUser}}
-            <client-app-widget-applyUser-applyUser>{id: {{v}}, chatType: "user"}</client-app-widget-applyUser-applyUser>
+            <client-app-demo_view-contactList-applyUser>{id: {{v}}, chatType: "user"}</client-app-demo_view-contactList-applyUser>
             {{end}}
             {{for i,v of it1.applyGroup}}
             <div ev-agree-group="agreeGroupApply">
-                <client-app-widget-applyUser-applyUser>{id: {{v}}, chatType: "group", isActiveToGroup: false}</client-app-widget-applyUser-applyUser>
+                <client-app-demo_view-contactList-applyUser>{id: {{v}}, chatType: "group", isActiveToGroup: false}</client-app-demo_view-contactList-applyUser>
             </div>
             {{end}}
         </div>

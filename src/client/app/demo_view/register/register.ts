@@ -8,6 +8,7 @@ import { Widget } from '../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
 import { register as registerUser } from '../../net/rpc';
+import { playerName } from '../../widget/randomName/randomName';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -17,7 +18,7 @@ const logger = new Logger(WIDGET_NAME);
 // ================================================ 导出
 export class Login extends Widget {
     public props:Props = {
-        name: '赵铁柱',
+        name: playerName(),
         passwd: '',
         success:false
     };

@@ -137,12 +137,21 @@ export const genNextMessageIndex = (index:number):number => {
 };
 
 /**
- * 
- * @param inc a:b
+ * getHid
+ * @param hIncId a:b
  */
-export const getHidFromInc = (inc:string):string => {
+export const getHidFromhIncId = (hIncId:string):string => {
     
-    return inc.split(':')[0];
+    return hIncId.split(':')[0];
+};
+
+/**
+ * get index
+ * @param hIncId a:b
+ */
+export const getIndexFromHIncId = (hIncId:string) => {
+    
+    return parseInt(hIncId.split(':')[1],10);
 };
 
 /**
@@ -161,4 +170,12 @@ export const getGidFromGuid = (guid:string) => {
 export const getUidFromGuid = (guid:string) => {
 
     return parseInt(guid.split(':')[1],10);
+};
+
+/**
+ * get rid
+ */
+export const getUidFromUuid = (uuid:string) => {
+    
+    return parseInt(uuid.split(':')[1],10);
 };
