@@ -7,7 +7,6 @@ import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { UserHistory } from '../../../../server/data/db/message.s';
-import { LastReadMsgId } from '../../../../server/data/db/user.s';
 import { genUuid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
@@ -40,7 +39,7 @@ export class Chat extends Widget {
 
         // 更新上次阅读到哪一条记录
         const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-        const lastRead = store.getStore(`lastRead/${this.props.rid}`,new LastReadMsgId());
+        const lastRead = store.getStore(`lastRead/${this.props.rid}`,{ msgId:undefined,msgType:'user' });
         lastRead.msgId = hincId;
         store.setStore(`lastRead/${this.props.rid}`,lastRead);
     }

@@ -96,5 +96,5 @@ struct MsgLock {
 #[primary=uuid,db=file]
 struct UserHistoryCursor {
     uuid: String,//两个用户的id"-1"代表不存在,"10001:10002",前面代表uid1后面代表uid2
-    cursor: u32,//当前已推送给用户uid1的最大消息ID
+    cursor: i32,//当前已推送给用户uid1的最大消息ID
 }

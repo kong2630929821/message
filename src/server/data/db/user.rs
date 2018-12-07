@@ -69,11 +69,6 @@ struct Contact {
     blackList: &[u32]
 }
 
-struct LastReadMsgId {
-    msgType: String, // 单聊或群聊
-    msgId: String // hIncId
-}
-
 #[primary=uid,db=memory]
 struct OnlineUsers {
     uid: u32,

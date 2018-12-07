@@ -3,7 +3,6 @@
  */
 
 // ================================================ 导入
-import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { Logger } from '../../../../utils/logger';
 
@@ -23,7 +22,7 @@ export class Emoji extends Widget {
             emojis:EMOJIS
         };
     }
-    public back() {
+    public goBack() {
         this.ok();
     }
     public click(index:number) {

@@ -8,10 +8,10 @@ import { popNew } from '../../../../pi/ui/root';
 import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
-import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
+import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { getUsersBasicInfo, login as userLogin } from '../../net/rpc';
+import { getUsersBasicInfo } from '../../net/rpc';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -53,7 +53,7 @@ export class ContactList extends Widget {
     }
 
     public toGroup() {
-        popNew(`client-app-demo_view-group-groupList`,{groups:this.state.group});
+        popNew(`client-app-demo_view-group-groupList`,{ groups:this.state.group });
     }
 
     // 查看好友详细信息

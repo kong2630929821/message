@@ -7,7 +7,7 @@ import { HandlerMap } from '../../../pi/util/event';
 import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
-import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, LastReadMsgId, UserCredential, UserInfo } from '../../../server/data/db/user.s';
+import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 import { accountsChange, friendChange, initAccount } from './initStore';
 
 // ============================================ 导出
@@ -165,10 +165,17 @@ export interface Store {
     groupChatMap:Map<string, string[]>;// hid,hidinc
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
     // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
-    lastRead:Map<number,LastReadMsgId>;// gid|uid 上次阅读到哪一条新消息
+    lastRead:Map<number,LastReadMsgId>;// gid|uid 
 
 }
 
+/**
+ * 上次阅读到哪一条消息
+ */
+export interface LastReadMsgId {
+    msgType: string; // 单聊或群聊
+    msgId: string; // hIncId
+}
 // ============================================ 本地
 
 // 本质上是主键

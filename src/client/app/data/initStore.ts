@@ -1,10 +1,12 @@
 /**
  * 初始化store
  */
-import { FriendLink, GENERATOR_TYPE, LastReadMsgId } from '../../../server/data/db/user.s';
+import { UserHistory, UserHistoryCursor } from '../../../server/data/db/message.s';
+import { GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { getUserHistory } from '../../../server/data/rpc/basic.p';
 import { UserHistoryArray, UserHistoryFlag } from '../../../server/data/rpc/basic.s';
-import { getUidFromUuid } from '../../../utils/util';
+import { getUserHistoryCursor } from '../../../server/data/rpc/message.p';
+import { genHIncId, genUserHid } from '../../../utils/util';
 import { clientRpcFunc } from '../net/init';
 import { getFile, initFileStore, writeFile } from './lcstore';
 import { updateUserMessage } from './parse';
@@ -15,9 +17,9 @@ import * as store from './store';
  */
 export const initAccount = () => {
     initFileStore().then(() => {
-        const uid = store.getStore('uid');
-        if (!uid) return;
-        getFile(uid, (value) => {
+        const sid = store.getStore('uid');
+        if (!sid) return;
+        getFile(sid, (value) => {
             if (!value) return;
             store.setStore('userHistoryMap',value.userHistoryMap || new Map(), false);
             store.setStore('userChatMap',value.userChatMap || new Map(), false);
@@ -25,9 +27,6 @@ export const initAccount = () => {
             store.setStore('userInfoMap',value.userInfoMap || new Map(), false);
             store.setStore('lastChat',value.lastChat || []);
 
-            store.getStore('friendLinkMap',new Map()).forEach((elem:FriendLink) => {
-                getFriendHistory(elem);
-            });
             console.log('store init success',store);
         }, () => {
             console.log('read error');
@@ -39,22 +38,39 @@ export const initAccount = () => {
 /**
  * 请求所有好友发的消息历史记录
  */
-export const getFriendHistory = (elem:FriendLink) => {
-    
+export const getFriendHistory = (elem:UserInfo) => {
+    const sid = store.getStore('uid');
+    const hid = genUserHid(sid,elem.uid);
+    if (sid === elem.uid) return;
+
     const userflag = new UserHistoryFlag();
-    userflag.rid = getUidFromUuid(elem.uuid);
-    const hIncIdArr = store.getStore('userChatMap',new Map()).get(elem.hid);
-    userflag.hIncId = hIncIdArr && hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : '0';
+    userflag.rid = elem.uid;
+    const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
+    userflag.hIncId = hIncIdArr && hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
     
-    const lastRead = new LastReadMsgId();
-    lastRead.msgId = userflag.hIncId;
-    lastRead.msgType = GENERATOR_TYPE.USER;
-    store.setStore(`lastRead/${userflag.rid}`,lastRead);
-    clientRpcFunc(getUserHistory,userflag,(r:UserHistoryArray) => {
-        console.error('initStore getFriendHistory》》》》》',r);
-        r.arr.forEach(element => {
-            updateUserMessage(userflag.rid,element);
+    const lastRead = {
+        msgId:userflag.hIncId,
+        msgType:GENERATOR_TYPE.USER
+    };
+    if (!userflag.hIncId) {  // 如果本地没有记录，则请求后端存的游标
+        clientRpcFunc(getUserHistoryCursor,elem.uid,(r:UserHistoryCursor) => {
+            if (r) {
+                lastRead.msgId = genHIncId(hid,r.cursor);
+                store.setStore(`lastRead/${elem.uid}`,lastRead); // 异步请求，必须在回调函数中赋值
+                console.error('uid: ',elem.uid,'lastread ',lastRead);
+            }
         });
+    } else {
+        store.setStore(`lastRead/${elem.uid}`,lastRead);
+    } 
+    
+    clientRpcFunc(getUserHistory,userflag,(r:UserHistoryArray) => {
+        console.error('uuid: ',elem.uid,'initStore getFriendHistory',r);
+        if (r.newMess > 0) {
+            r.arr.forEach(element => {
+                updateUserMessage(userflag.rid,element);
+            });
+        }
     });
         
 };

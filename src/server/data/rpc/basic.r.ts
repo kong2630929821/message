@@ -220,15 +220,15 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
     const friendLinkArray = new FriendLinkArray();    
     // const friend = new FriendLink();
     logger.debug(`uuid is : ${JSON.stringify(getFriendLinksReq.uuid)}`);
-    const friends = friendLinkBucket.get(getFriendLinksReq.uuid);
+    const friends = friendLinkBucket.get<string[],FriendLink[]>(getFriendLinksReq.uuid);
     // no friends found
     // if (friends === undefined) {
     //     friend.alias = '';
     //     friend.hid = 0;
     //     friend.uuid = '';
     // }
-    friendLinkArray.arr = <FriendLink[]>friends || [];
-    logger.debug(`friendLinkArray is : ${JSON.stringify(friendLinkArray)}`);
+    logger.debug(`friendLinkArray is : ${JSON.stringify(friends)}`);
+    friendLinkArray.arr = friends || [];
     
     return friendLinkArray;
 };
@@ -282,23 +282,23 @@ export const getUserHistory = (param:UserHistoryFlag): UserHistoryArray => {
     userHistoryArray.arr = [];
 
     let fg = 1; 
-    let index = 0;
+    let index = -1;
     let userCursor = userHistoryCursorBucket.get<String,UserHistoryCursor>(genUuid(sid,param.rid))[0];
+    logger.debug(`getUserHistory begin index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
-    if (param.hIncId === '0' && userCursor) {  // 如果本地没有记录则从cursor中获取
-        index = userCursor.cursor;
-        
-    } else if (param.hIncId !== '0') {
+    if (param.hIncId) {  // 如果本地有记录则取本地记录
         index = getIndexFromHIncId(param.hIncId);
+        
+    } else if (userCursor) { // 如果本地没有记录且cursor存在则从cursor中获取，否则从0开始
+        index = userCursor.cursor;
     }
     
-    logger.debug('getUserHistory index',index,'userHistoryCursor: ',userCursor);
     while (fg === 1) {
         index++;
         const oneMess = userHistoryBucket.get<String,UserHistory>(genHIncId(hid,index))[0];
+        logger.debug('getUserHistory oneMess: ',oneMess);
         if (oneMess) {
             userHistoryArray.arr.push(oneMess);
-            
         } else {
             fg = 0;
         }
@@ -311,9 +311,11 @@ export const getUserHistory = (param:UserHistoryFlag): UserHistoryArray => {
         userCursor.uuid = genUuid(sid,param.rid);
     }
     userCursor.cursor = index - 1; 
+    userHistoryCursorBucket.put(userCursor.uuid,userCursor);
+    logger.debug(`getUserHistory index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
     userHistoryArray.newMess = userHistoryArray.arr.length;
-    logger.debug('rid: ',param.rid,'history: ',userHistoryArray);
+    logger.debug('getUserHistory rid: ',param.rid,'history: ',userHistoryArray);
     
     return userHistoryArray;
 };

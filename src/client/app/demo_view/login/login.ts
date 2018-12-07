@@ -12,6 +12,7 @@ import { getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/
 import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
 import { genUuid } from '../../../../utils/util';
+import { getFriendHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { clientRpcFunc, subscribe as subscribeMsg } from '../../net/init';
@@ -163,6 +164,7 @@ const updateUsers = (r:Contact,uid:number) => {
             if (r && r.arr && r.arr.length > 0) {
                 r.arr.forEach((e:UserInfo) => {
                     store.setStore(`userInfoMap/${e.uid}`,e);
+                    getFriendHistory(e);  // 获取该好友发送的离线消息
                 });
             }
         });

@@ -4,8 +4,8 @@
 // ===========================导入
 import { Json } from '../../../../pi/lang/type';
 import { Widget } from '../../../../pi/widget/widget';
-import * as store from '../../data/store';
 import { GroupInfo } from '../../../../server/data/db/group.s';
+import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
 
 interface Props {
@@ -33,7 +33,7 @@ export class ContactItem extends Widget {
         if (!this.props.text) {
             this.props.info = getFriendAlias(this.props.uid);
         }
-	this.props.gid = props.gid;
+        this.props.gid = props.gid;
         this.props.ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
         
     }

@@ -2,7 +2,7 @@
     <client-app-widget-topBar-topBar>{title:{{it.name}}}</client-app-widget-topBar-topBar>
     <div w-class="messageBox">
         {{for i,v of it.hidIncArray}}
-            <client-app-demo_view-chat-textMessage>{hIncId: {{v}},name:{{it.name}} }</client-app-demo_view-chat-textMessage>
+            <client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:"user"  }</client-app-widget-messageItem-messageItem>
         {{end}} 
         <div id="messEnd"></div>
     </div>

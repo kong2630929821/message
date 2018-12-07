@@ -5,7 +5,7 @@
     </div>
     <div w-class="topic-wrap">
         <div on-tap="toNewFriend" style="border-bottom: 1px solid #DBDBE5;">
-            <client-app-widget-contactItem-contactItem>{text:"新的朋友",totalNew:{{it1.applyUser.length + it1.applyGroup.length}} }</client-app-widget-contactItem-contactItem>
+            <client-app-demo_view-contactList-contactItem>{text:"新的朋友",totalNew:{{it1.applyUser.length + it1.applyGroup.length}} }</client-app-demo_view-contactList-contactItem>
         </div>
         <div on-tap="toGroup" style="border-bottom: 1px solid #DBDBE5;">
             <client-app-demo_view-contactList-contactItem>{text:"群聊"}</client-app-demo_view-contactList-contactItem>
