@@ -51,12 +51,12 @@ export class MessageItem extends Widget {
 
 const parseEmoji = (msg:UserMsg):UserMsg => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
-        let url = EMOJIS_MAP.get(capture) || undefined;
+        const url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
             // FIXME: 不应该写死,应该动态获取
-            url = url.replace('../../','/client/app/');
+            // url = url.replace('../../','/client/app/');
 
-            return `<img src="${url}" alt="${capture}" class='emojiMsg'></img>`;
+            return `<img src="/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;
         }

@@ -16,6 +16,7 @@ import * as CONSTANT from '../constant';
 import { Logger } from '../../../utils/logger';
 import { OnlineUsers } from '../db/user.s';
 
+import * as bigInt from '../../../pi/bigint/biginteger';
 import { genGroupHid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { getUid } from './group.r';
 

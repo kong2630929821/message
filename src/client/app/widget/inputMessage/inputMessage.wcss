@@ -1,8 +1,11 @@
-.input-message-wrap{
+.outer{
     height: 100%;
     background-color: rgba(255, 255, 255, 1);
+}
+.input-message-wrap{
     display: flex;
     align-items:center;
+    border-bottom: 1px solid #cccccc;
 }
 .audio{
     width: 30px;
@@ -26,4 +29,9 @@
     width: 44px;
     height: 44px;
     margin: 0px 33px 0 41px; 
+}
+.emojiMap{
+    height:400px;
+    overflow-x:hidden;
+    overflow-y:auto;
 }

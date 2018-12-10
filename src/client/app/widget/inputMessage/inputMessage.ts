@@ -3,7 +3,6 @@
  */
 // ===========================导入
 import { Json } from '../../../../pi/lang/type';
-import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
@@ -15,12 +14,14 @@ export class InputMessage extends Widget {
     public props:Props = {
         rid : 10001,
         isOnInput:false,
-        message:''
+        message:'',
+        isOnEmoji:false
     };
 
     public setProps(props:Json) {
         super.setProps(props);
         this.props.isOnInput = false;
+        this.props.isOnEmoji = false;
     }
     
     // 麦克风输入处理
@@ -30,18 +31,20 @@ export class InputMessage extends Widget {
 
     // 打开表情
     public playRemoji() {
-        popNew('client-app-demo_view-chat-emoji',undefined,undefined,undefined,(emoji:string) => {
-            this.props.message += `[${emoji}]`;
-            this.paint();
-        });
-        console.log('playRemoji');
+        // popNew('client-app-demo_view-chat-emoji',undefined,undefined,undefined,(emoji:string) => {
+        //     this.props.message += `[${emoji}]`;
+        //     this.props.isOnInput = true;
+        //     this.paint();
+        // });
+
+        this.props.isOnEmoji = !this.props.isOnEmoji;
+        this.paint();
     }
 
     // 打开更多功能
     public openTool(e:any) {
         // FIXEME: 直接写的选择照片
         this.sendImg(e);
-        console.log('openTool');
     }
 
     // 点击发送
@@ -54,7 +57,19 @@ export class InputMessage extends Widget {
         this.paint();
     }
 
-    public handleOnInput(e:any) {
+    /**
+     * 选择表情
+     */
+    public pickEmoji(emoji:any) {
+        this.props.message += `[${emoji}]`;
+        this.props.isOnInput = true;
+        this.paint();
+    }
+
+    /**
+     * 输入内容 
+     */
+    public messageChange(e:any) {
         if (e.value) {
             this.props.isOnInput = true;
         } else {
@@ -63,6 +78,15 @@ export class InputMessage extends Widget {
         this.props.message = e.value;
         this.paint();
     }
+
+    /**
+     * 输入框聚焦
+     */
+    public inputFocus() {
+        this.props.isOnEmoji = false;
+        this.paint();
+    }
+
     public sendImg(e:any) {
         // FIXME: 此方法不应该写在这里，只是为了测试，请把我挪走
         selectImage((width, height, base64) => {
@@ -77,5 +101,6 @@ export class InputMessage extends Widget {
 interface Props {
     rid : number;
     isOnInput:boolean;
+    isOnEmoji:boolean;
     message:string;
 }
