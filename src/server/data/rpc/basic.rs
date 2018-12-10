@@ -83,6 +83,16 @@ struct LoginReq {
     passwdHash: String
 }
 
+struct WalletLoginReq {
+    openid: String,
+    sign: String
+}
+
+enum UserType {
+    DEF(LoginReq),
+    WALLET(WalletLoginReq),
+}
+
 struct LoginReply {
     status: u8
 }
