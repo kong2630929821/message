@@ -13,8 +13,8 @@ import { Logger } from '../../../utils/logger';
 import { genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 import { UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserCredential, UserInfo } from '../db/user.s';
-import { AnnouceFragment, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister } from './basic.s';
+import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserCredential, UserInfo, UserAccount } from '../db/user.s';
+import { AnnouceFragment, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -42,7 +42,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     userInfo.note = '';
     userInfo.tel = '';
     // 这是一个事务
-    accountGeneratorBucket.readAndWrite(GENERATOR_TYPE.USER,(items:any[]) => {
+    accountGeneratorBucket.readAndWrite(GENERATOR_TYPE.USER, (items: any[]) => {
         const accountGenerator = new AccountGenerator();
         accountGenerator.index = GENERATOR_TYPE.USER;
         accountGenerator.currentIndex = genNewIdFromOld(items[0].currentIndex);
@@ -85,69 +85,84 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
 };
 
 // #[rpc=rpcServer]
-export const login = (loginReq: LoginReq): UserInfo => {
-    logger.debug('user try to login with uid: ', loginReq.uid);
+export const login = (user: UserType): UserInfo => {
+    // logger.debug('user try to login with uid: ', loginReq.uid);
     const dbMgr = getEnv().getDbMgr();
     const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE, dbMgr);
     const userCredentialBucket = new Bucket('file', CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
 
-    const uid = loginReq.uid;
-    const passwdHash = loginReq.passwdHash;
-    const expectedPasswdHash = userCredentialBucket.get(uid);
-
+    let loginReq = new LoginReq();
     let userInfo = new UserInfo();
-
-    // user doesn't exist
-    if (expectedPasswdHash[0] === undefined) {
-        userInfo.uid = -1;
-        userInfo.sex = 0;
-        logger.debug('user does not exist: ', loginReq.uid);
-
-        return userInfo;
+    if (user.enum_type === UserType_Enum.WALLET) {
+        let walletLoginReq = <WalletLoginReq>user.value;
+        let openid = walletLoginReq.openid;
+        let sign = walletLoginReq.sign;
+        //TODO 验证签名
+        const userAccountBucket = new Bucket('file', CONSTANT.USER_ACCOUNT_TABLE, dbMgr);
+        let v = userAccountBucket.get(openid)[0];
+        if (!v) {
+            //注册用户
+            let reguser = new UserRegister();
+            reguser.passwdHash = openid;
+            reguser.name = "";
+            let userinfo = registerUser(reguser);
+            let userAcc = new UserAccount();
+            userAcc.user = openid;
+            userAcc.uid = userinfo.uid;
+            let v = userAccountBucket.put(openid,userAcc);
+            loginReq.uid = userinfo.uid;
+        } else {
+            loginReq.uid = v.uid;
+        }
+    } else if (user.enum_type === UserType_Enum.DEF) {
+        loginReq = <LoginReq>user.value;
+        const passwdHash = loginReq.passwdHash;
+        const expectedPasswdHash = userCredentialBucket.get(loginReq.uid);
+        //判断密码是否正确
+        // user doesn't exist
+        if ((expectedPasswdHash[0] === undefined) || (passwdHash !== expectedPasswdHash[0].passwdHash)) {
+            userInfo.uid = -1;
+            userInfo.sex = 0;
+            logger.debug('user does not exist: ', loginReq.uid);
+            return userInfo;
+        }
     }
-
     // FIXME: constant time equality check
-    if (passwdHash === expectedPasswdHash[0].passwdHash) {
-        userInfo = userInfoBucket.get(loginReq.uid)[0];
-        const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-        setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
-        logger.debug('Set user topic: ', loginReq.uid.toString());
+    userInfo = userInfoBucket.get(loginReq.uid)[0];
+    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
+    logger.debug('Set user topic: ', loginReq.uid.toString());
 
-        // save session
-        const session = getEnv().getSession();
-        write(dbMgr, (tr: Tr) => {
-            session.set(tr, 'uid', loginReq.uid.toString());
-            logger.info('set session value of uid: ', loginReq.uid.toString());
-        });
+    // save session
+    const session = getEnv().getSession();
+    write(dbMgr, (tr: Tr) => {
+        session.set(tr, 'uid', loginReq.uid.toString());
+        logger.info('set session value of uid: ', loginReq.uid.toString());
+    });
 
-        // TODO: debug purpose
-        read(dbMgr, (tr: Tr) => {
-            const v = session.get(tr, 'uid');
-            logger.debug('read session value of uid: ', v);
-            logger.debug('user login session id: ', session.getId());
-        });
+    // TODO: debug purpose
+    read(dbMgr, (tr: Tr) => {
+        const v = session.get(tr, 'uid');
+        logger.debug('read session value of uid: ', v);
+        logger.debug('user login session id: ', session.getId());
+    });
 
-        const onlineUsersBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
-        const onlineUsersReverseIndexBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_REVERSE_INDEX_TABLE, dbMgr);
+    const onlineUsersBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
+    const onlineUsersReverseIndexBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_REVERSE_INDEX_TABLE, dbMgr);
 
-        const online = new OnlineUsers();
-        online.uid = loginReq.uid;
-        online.sessionId = session.getId();
-        onlineUsersBucket.put(online.uid, online);
+    const online = new OnlineUsers();
+    online.uid = loginReq.uid;
+    online.sessionId = session.getId();
+    onlineUsersBucket.put(online.uid, online);
 
-        logger.debug('Add user: ', uid, 'to online users bucket with sessionId: ', online.sessionId);
+    logger.debug('Add user: ', loginReq.uid, 'to online users bucket with sessionId: ', online.sessionId);
 
-        const onlineReverse = new OnlineUsersReverseIndex();
-        onlineReverse.sessionId = session.getId();
-        onlineReverse.uid = loginReq.uid;
-        onlineUsersReverseIndexBucket.put(onlineReverse.sessionId, onlineReverse);
+    const onlineReverse = new OnlineUsersReverseIndex();
+    onlineReverse.sessionId = session.getId();
+    onlineReverse.uid = loginReq.uid;
+    onlineUsersReverseIndexBucket.put(onlineReverse.sessionId, onlineReverse);
 
-        logger.debug('Add user: ', uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
-
-    } else {
-        logger.debug('wrong password or uid');
-        userInfo.uid = -1;
-    }
+    logger.debug('Add user: ', loginReq.uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
 
     userInfo.sex = 0;
 
@@ -217,10 +232,10 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
     const dbMgr = getEnv().getDbMgr();
     const friendLinkBucket = new Bucket('file', CONSTANT.FRIEND_LINK_TABLE, dbMgr);
 
-    const friendLinkArray = new FriendLinkArray();    
+    const friendLinkArray = new FriendLinkArray();
     // const friend = new FriendLink();
     logger.debug(`uuid is : ${JSON.stringify(getFriendLinksReq.uuid)}`);
-    const friends = friendLinkBucket.get<string[],FriendLink[]>(getFriendLinksReq.uuid);
+    const friends = friendLinkBucket.get<string[], FriendLink[]>(getFriendLinksReq.uuid);
     // no friends found
     // if (friends === undefined) {
     //     friend.alias = '';
@@ -229,7 +244,7 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
     // }
     logger.debug(`friendLinkArray is : ${JSON.stringify(friends)}`);
     friendLinkArray.arr = friends || [];
-    
+
     return friendLinkArray;
 };
 
@@ -247,7 +262,7 @@ export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
     // we don't use param.order there, because `iter` is not bidirectional
     const hid = param.hid;
     // tslint:disable-next-line:no-reserved-keywords
-    const from = param.from ;
+    const from = param.from;
     const size = param.size;
 
     const keyPrefix = `${hid}:`;
@@ -271,32 +286,32 @@ export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
  * 获取单聊的消息记录
  */
 // #[rpc=rpcServer]
-export const getUserHistory = (param:UserHistoryFlag): UserHistoryArray => {
-    logger.debug('getUserHistory param',param);
+export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
+    logger.debug('getUserHistory param', param);
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
     const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
-    const hid = genUserHid(sid,param.rid); // 删除好友也应该可以看到以前发送的历史记录，所以不从friendLink中获取
+    const hid = genUserHid(sid, param.rid); // 删除好友也应该可以看到以前发送的历史记录，所以不从friendLink中获取
     const userHistoryArray = new UserHistoryArray();
     userHistoryArray.arr = [];
 
-    let fg = 1; 
+    let fg = 1;
     let index = -1;
-    let userCursor = userHistoryCursorBucket.get<String,UserHistoryCursor>(genUuid(sid,param.rid))[0];
+    let userCursor = userHistoryCursorBucket.get<String, UserHistoryCursor>(genUuid(sid, param.rid))[0];
     logger.debug(`getUserHistory begin index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
     if (param.hIncId) {  // 如果本地有记录则取本地记录
         index = getIndexFromHIncId(param.hIncId);
-        
+
     } else if (userCursor) { // 如果本地没有记录且cursor存在则从cursor中获取，否则从0开始
         index = userCursor.cursor;
     }
-    
+
     while (fg === 1) {
         index++;
-        const oneMess = userHistoryBucket.get<String,UserHistory>(genHIncId(hid,index))[0];
-        logger.debug('getUserHistory oneMess: ',oneMess);
+        const oneMess = userHistoryBucket.get<String, UserHistory>(genHIncId(hid, index))[0];
+        logger.debug('getUserHistory oneMess: ', oneMess);
         if (oneMess) {
             userHistoryArray.arr.push(oneMess);
         } else {
@@ -305,18 +320,18 @@ export const getUserHistory = (param:UserHistoryFlag): UserHistoryArray => {
     }
 
     // 游标表中是否有该用户的记录
-    if (!userCursor) { 
+    if (!userCursor) {
 
         userCursor = new UserHistoryCursor();
-        userCursor.uuid = genUuid(sid,param.rid);
+        userCursor.uuid = genUuid(sid, param.rid);
     }
-    userCursor.cursor = index - 1; 
-    userHistoryCursorBucket.put(userCursor.uuid,userCursor);
+    userCursor.cursor = index - 1;
+    userHistoryCursorBucket.put(userCursor.uuid, userCursor);
     logger.debug(`getUserHistory index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
     userHistoryArray.newMess = userHistoryArray.arr.length;
-    logger.debug('getUserHistory rid: ',param.rid,'history: ',userHistoryArray);
-    
+    logger.debug('getUserHistory rid: ', param.rid, 'history: ', userHistoryArray);
+
     return userHistoryArray;
 };
 

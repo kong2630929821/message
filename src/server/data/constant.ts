@@ -21,6 +21,7 @@ export const USER_HISTORY_CURSOR_TABLE = 'server/data/db/message.UserHistoryCurs
 
 // 个人
 export const USER_INFO_TABLE = 'server/data/db/user.UserInfo';
+export const USER_ACCOUNT_TABLE = 'server/data/db/user.UserAccount';
 export const USER_CREDENTIAL_TABLE = 'server/data/db/user.UserCredential';
 export const ACCOUNT_GENERATOR_TABLE = 'server/data/db/user.AccountGenerator';
 export const FRIEND_LINK_TABLE = 'server/data/db/user.FriendLink';
