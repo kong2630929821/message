@@ -1,8 +1,9 @@
 /**
- * 登录
+ * 单聊
  */
 
 // ================================================ 导入
+import { popNew } from '../../../../pi/ui/root';
 import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
@@ -47,12 +48,11 @@ export class Chat extends Widget {
     public firstPaint() {
         super.firstPaint();
         store.register(`userChatMap/${this.getHid()}`,this.bindCB);
-    }
-
-    public attach() {
-        super.attach();
         // 第一次进入定位到最新的一条消息
-        document.querySelector('#messEnd').scrollIntoView();
+        setTimeout(() => {
+            document.querySelector('#messEnd').scrollIntoView();
+            this.paint();
+        }, 100);
     }
 
     /**
@@ -66,6 +66,13 @@ export class Chat extends Widget {
             document.querySelector('#messEnd').scrollIntoView();
             this.paint();
         }, 100);
+    }
+
+    /**
+     * 查看用户详情
+     */
+    public goUserDetail(e:any) {
+        popNew('client-app-demo_view-info-userDetail',{ uid: e.rid, inFlag: 1 });
     }
 
     public send(e:any) {

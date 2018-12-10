@@ -2,7 +2,7 @@
  * textMessage 组件相关处理
  */
 // ===========================导入
-import { popNew } from '../../../../pi/ui/root';
+import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
@@ -42,8 +42,8 @@ export class MessageItem extends Widget {
         this.props.time = timestampFormat(time,1);
     }
 
-    public userDetail() {
-        popNew('client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid });
+    public userDetail(e:any) {
+        notify(e.node,'ev-avatar-click',{ rid:this.props.msg.sid });
     }
 }
 
