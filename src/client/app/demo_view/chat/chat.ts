@@ -52,7 +52,7 @@ export class Chat extends Widget {
         setTimeout(() => {
             document.querySelector('#messEnd').scrollIntoView();
             this.paint();
-        }, 100);
+        }, 200);
     }
 
     /**

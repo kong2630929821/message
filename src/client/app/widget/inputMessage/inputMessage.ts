@@ -4,6 +4,7 @@
 // ===========================导入
 import { Json } from '../../../../pi/lang/type';
 import { notify } from '../../../../pi/widget/event';
+import { getRealNode } from '../../../../pi/widget/painter';
 import { Widget } from '../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { selectImage } from '../../logic/native';
@@ -37,8 +38,11 @@ export class InputMessage extends Widget {
         //     this.paint();
         // });
 
-        this.props.isOnEmoji = !this.props.isOnEmoji;
-        this.paint();
+        getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
+        setTimeout(() => {
+            this.props.isOnEmoji = !this.props.isOnEmoji;
+            this.paint();
+        }, 100);
     }
 
     // 打开更多功能
@@ -49,7 +53,7 @@ export class InputMessage extends Widget {
 
     // 点击发送
     public send(e:any) {
-        if (this.props.isOnInput) { // 有输入才触发发送事件处理
+        if (this.props.message !== '') { // 有输入才触发发送事件处理
             notify(e.node,'ev-send',{ value:this.props.message, msgType:MSG_TYPE.TXT });
             this.props.isOnInput = false;
         }

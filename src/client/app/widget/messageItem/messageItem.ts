@@ -23,14 +23,11 @@ export class MessageItem extends Widget {
             time:'',
             chatType:GENERATOR_TYPE.USER
         };
-        this.props.hIncId = '';
-        this.props.msg = null; 
-        this.props.chatType = GENERATOR_TYPE.USER;
+        
     }     
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.chatType = props.chatType;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`);
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
