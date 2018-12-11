@@ -23,7 +23,7 @@ struct UserMsg {
     sid: u32,//发信人id
     mtype: MSG_TYPE,
     msg: String,//内容
-    time: u32,//时间
+    time: usize,//时间
     send: bool,//是否发送
     read: bool,//是否已读
     cancel: bool,//是否撤回
@@ -36,7 +36,7 @@ struct GroupMsg {
     sid: u32,//发信人id
     mtype: MSG_TYPE,
     msg: String,//内容
-    time: u32,//时间
+    time: usize,//时间
     send: bool,//是否发送
     cancel: bool,//是否撤回
 }
@@ -48,7 +48,7 @@ struct Announcement {
     sid: u32,//发布者id
     mtype: MSG_TYPE,
     msg: String,//内容
-    time: u32,//时间
+    time: usize,//时间
     send: bool,//是否发送
     cancel: bool,//是否撤销
 }

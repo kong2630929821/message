@@ -3,9 +3,9 @@
  */
 // ================================================ 导入
 import { Widget } from '../../../../pi/widget/widget';
-import { UserMsg } from '../../../../server/data/db/message.s';
+import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { FriendLink } from '../../../../server/data/db/user.s';
-import { genUserHid, genUuid, getIndexFromHIncId } from '../../../../utils/util';
+import { depCopy, genUserHid, genUuid, getIndexFromHIncId } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias, timestampFormat } from '../../logic/logic';
 // ================================================ 导出
@@ -28,8 +28,13 @@ export class MessageRecord extends Widget {
         const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
         const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
         this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : '没有最新消息';
-        const time:any = this.props.lastMessage.time;
+        
+        const time:any = depCopy(this.props.lastMessage.time);
         this.props.time = timestampFormat(time,1);
+        this.props.msg = depCopy(this.props.lastMessage.msg);
+        if (this.props.lastMessage.mtype === MSG_TYPE.IMG) {
+            this.props.msg = '图片';
+        }
         const lastHincId = store.getStore(`lastRead/${this.props.rid}`,{ msgId:undefined }).msgId;
 
         // 计算有多少条新消息记录
@@ -58,11 +63,12 @@ export class MessageRecord extends Widget {
 // ================================================ 本地
 
 interface Props {
-    rid: number;
-    name:string;
-    time:string;
-    lastMessage: UserMsg;
+    rid: number;  // 好友的ID
+    name:string;  // 好友名字
+    time:string;  // 最新一条消息时间
+    msg:string;   // 最新一条消息内容
+    lastMessage: UserMsg;  // 最新一条消息记录
     isGroupMessage:boolean;
-    isNotDisturb:boolean;
-    unReadCount:number;
+    isNotDisturb:boolean;  
+    unReadCount:number;  // 未读消息数
 }

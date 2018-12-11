@@ -45,7 +45,7 @@
                     <span>消息免打扰</span>
                     <client-app-widget-switch-switch>{types:false,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</client-app-widget-switch-switch>
                 </li>
-                <li w-class="liItem" on-tap="startDialog" style="color: #318DE6;margin-bottom: 110px;">开始对话</li>
+                <li w-class="liItem" on-tap="startChat" style="color: #318DE6;margin-bottom: 110px;">开始对话</li>
             </ul>
         </div>
     </div>

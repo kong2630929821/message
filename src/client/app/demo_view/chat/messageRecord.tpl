@@ -12,7 +12,7 @@
             <img w-class="notDisturbIcon" src="../../res/images/not-disturb.png" />
             {{end}}
         </div>
-        <div w-class="recordInfo">{{it.lastMessage.msg}}</div>
+        <div w-class="recordInfo">{{it.msg}}</div>
     </div>
     <div w-class="right-wrap">
         <span w-class="recordTime">{{it.time}}</span>

@@ -57,7 +57,7 @@ export const getFriendHistory = (elem:UserInfo) => {
             if (r) {
                 lastRead.msgId = genHIncId(hid,r.cursor);
                 store.setStore(`lastRead/${elem.uid}`,lastRead); // 异步请求，必须在回调函数中赋值
-                console.error('uid: ',elem.uid,'lastread ',lastRead);
+                // console.error('uid: ',elem.uid,'lastread ',lastRead);
             }
         });
     } else {
@@ -65,7 +65,7 @@ export const getFriendHistory = (elem:UserInfo) => {
     } 
     
     clientRpcFunc(getUserHistory,userflag,(r:UserHistoryArray) => {
-        console.error('uuid: ',elem.uid,'initStore getFriendHistory',r);
+        // console.error('uuid: ',elem.uid,'initStore getFriendHistory',r);
         if (r.newMess > 0) {
             r.arr.forEach(element => {
                 updateUserMessage(userflag.rid,element);

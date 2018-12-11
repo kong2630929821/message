@@ -2,10 +2,11 @@
  * textMessage 组件相关处理
  */
 // ===========================导入
-import { popNew } from '../../../../pi/ui/root';
+import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { EMOJIS_MAP } from '../../demo_view/chat/emoji';
 import { timestampFormat } from '../../logic/logic';
@@ -22,28 +23,24 @@ export class MessageItem extends Widget {
             time:'',
             chatType:GENERATOR_TYPE.USER
         };
-        this.props.hIncId = '';
-        this.props.msg = null; 
-        this.props.chatType = GENERATOR_TYPE.USER;
+        
     }     
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.chatType = props.chatType;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`);
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`);
         }
-        this.props.msg = parseMessage(this.props.msg);
+        this.props.msg = parseMessage(depCopy(this.props.msg));
         this.props.me = this.props.msg.sid === store.getStore('uid');
-        let time = this.props.msg.time;
-        time = timestampFormat(time).split(' ')[1];
-        this.props.time = time.substr(0,5);
+        const time = depCopy(this.props.msg.time);
+        this.props.time = timestampFormat(time,1);
     }
 
-    public userDetail() {
-        popNew('client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid });
+    public userDetail(e:any) {
+        notify(e.node,'ev-avatar-click',{ rid:this.props.msg.sid });
     }
 }
 
@@ -51,12 +48,12 @@ export class MessageItem extends Widget {
 
 const parseEmoji = (msg:UserMsg):UserMsg => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
-        let url = EMOJIS_MAP.get(capture) || undefined;
+        const url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
             // FIXME: 不应该写死,应该动态获取
-            url = url.replace('../../','/client/app/');
+            // url = url.replace('../../','/client/app/');
 
-            return `<img src="${url}" alt="${capture}" class='emojiMsg'></img>`;
+            return `<img src="/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;
         }
