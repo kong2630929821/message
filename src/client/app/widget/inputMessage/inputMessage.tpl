@@ -9,7 +9,6 @@
 		<img w-class="unfold" on-tap="openTool" src="../../res/images/unfold.png"/>
 		{{end}}
 	</div>
-	{{if it.isOnEmoji}}
-	<widget w-tag="client-app-demo_view-chat-emoji" w-class="emojiMap"></widget>
-	{{end}}
+
+	<widget w-tag="client-app-widget-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}"></widget>
 </div>

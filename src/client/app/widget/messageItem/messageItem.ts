@@ -8,9 +8,9 @@ import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { EMOJIS_MAP } from '../../demo_view/chat/emoji';
 import { timestampFormat } from '../../logic/logic';
 import { downloadFileUrlPrefix } from '../../net/upload';
+import { EMOJIS_MAP } from '../emoji/emoji';
 // ===========================导出
 export class MessageItem extends Widget {
     constructor() {

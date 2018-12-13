@@ -24,21 +24,18 @@ interface Props {
 interface State {
     currentValue:string;
     inputLock:boolean; // 中文输入结束标记，未结束时不执行change方法
-    rows:number; // 文本框的行数，默认 1，最大 5
 }
 
 export class Input extends Widget {
     public props: Props;
     public state: State = {
         currentValue:'',
-        inputLock:false,
-        rows:1
+        inputLock:false
     };
     
     public setProps(props: Props, oldProps: Props) {
         super.setProps(props,oldProps);
         this.state.currentValue = props.input ? props.input :'';
-        this.state.rows = this.getRows(props.input);
     }
     /**
      * 绘制方法
@@ -51,16 +48,16 @@ export class Input extends Widget {
         if (!this.props) {
             this.props = {};
         }
-        (<any>this.getInput()).value = this.state.currentValue;
-        (<any>this.getInput()).setAttribute('rows',this.state.rows);
+        const textarea = (<any>this.getInput());
+        textarea.value = this.state.currentValue;
+        textarea.scrollTop = textarea.scrollHeight - textarea.style.height;
         paintWidget(this, reset);
     }
- 
     /**
      * 获取真实输入框dom
      */
     public getInput() {
-        return getRealNode((<any>this.tree).children[0]);
+        return getRealNode((<any>this.tree).children[1]);
     }
 
     /**
@@ -91,11 +88,7 @@ export class Input extends Widget {
             currentValue = String(currentValue).slice(0,this.props.maxLength);
         }
 
-        this.state.rows = this.getRows(currentValue);
-
         this.state.currentValue = currentValue;
-        (<any>this.getInput()).value = currentValue;
-        (<any>this.getInput()).setAttribute('rows',this.state.rows);
         notify(event.node,'ev-input-change',{ value:this.state.currentValue }); 
         
         this.paint();  

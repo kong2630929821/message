@@ -5,6 +5,7 @@
 .input-message-wrap{
     display: flex;
     align-items:center;
+    border-top: 1px solid #cccccc;
     border-bottom: 1px solid #cccccc;
 }
 .audio{
@@ -34,4 +35,5 @@
     height:400px;
     overflow-x:hidden;
     overflow-y:auto;
+    min-height: 400px;
 }

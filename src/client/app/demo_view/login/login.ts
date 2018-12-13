@@ -66,8 +66,8 @@ export class Login extends Widget {
                 store.setStore(`userInfoMap/${r.uid}`,r);        
                 init(r.uid); 
                 popNew('client-app-demo_view-chat-contact', { sid: this.props.uid });
-                subscribeMsg(this.props.uid.toString(), UserHistory, (r: UserHistory) => {
-                    updateUserMessage(r.msg.sid,r);
+                subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
+                    updateUserMessage(v.msg.sid,v);
                 });
             }
         });
