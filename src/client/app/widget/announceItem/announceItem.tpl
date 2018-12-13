@@ -1,4 +1,8 @@
-<div w-class="item-wrap">
-    <div w-class="title">群公告标题</div>
-    <div w-class="time">8月8日 14：00</div>
+<div>
+    {{if it.announce && !it.announce.cancel}}
+    <div w-class="item-wrap">
+        <div w-class="title">{{it.announce?it.announce.msg:""}}</div>
+        <div w-class="time">{{it.time}}</div>
+    </div>
+    {{end}}
 </div>

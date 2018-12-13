@@ -1,16 +1,25 @@
 /**
  * textMessage 组件相关处理
  */
-// ===========================导入
+// ================================================ 导入
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
-import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
+import { GroupUserLink } from '../../../../server/data/db/group.s';
+import { GroupHistory, MSG_TYPE, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { Logger } from '../../../../utils/logger';
+import { genGuid, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { EMOJIS_MAP } from '../../demo_view/chat/emoji';
 import { timestampFormat } from '../../logic/logic';
 import { downloadFileUrlPrefix } from '../../net/upload';
-// ===========================导出
+
+// ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
+declare var module;
+const WIDGET_NAME = module.id.replace(/\//g, '-');
+const logger = new Logger(WIDGET_NAME);
+
 export class MessageItem extends Widget {
     constructor() {
         super();
@@ -20,7 +29,8 @@ export class MessageItem extends Widget {
             msg:null,
             me:true,
             time:'',
-            chatType:GENERATOR_TYPE.USER
+            chatType:GENERATOR_TYPE.USER,
+            isMessageRecallVisible:false
         };
         this.props.hIncId = '';
         this.props.msg = null; 
@@ -31,19 +41,50 @@ export class MessageItem extends Widget {
         super.setProps(props);
         this.props.chatType = props.chatType;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`);
+            this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserHistory());
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`);
+            this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupHistory());
+            logger.debug('oooooooooooooo', this.props.msg);
+            const gid = getGidFromHincid(this.props.hIncId);
+            logger.debug('mmmmmmmmmmmmmmmmm',gid);
+            this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.msg.sid)}`, new GroupUserLink()).userAlias;
         }
         this.props.msg = parseMessage(this.props.msg);
+        logger.debug('==================vvvvvvvvvvvvvvvvv',this.props.msg);
         this.props.me = this.props.msg.sid === store.getStore('uid');
+        logger.debug('==================hhhhhhhhhhhhhhhhh',this.props.me);
         let time = this.props.msg.time;
         time = timestampFormat(time).split(' ')[1];
         this.props.time = time.substr(0,5);
     }
 
+    public firstPaint() {
+        super.firstPaint();
+        // 当消息撤回 更新map
+        store.register(`userHistoryMap/${this.props.hIncId}`,() => {
+            this.setProps(this.props);
+            this.paint();
+        });  
+        store.register(`groupHistoryMap/${this.props.hIncId}`,() => {
+            this.setProps(this.props);
+            this.paint();
+        });  
+    }
+
     public userDetail() {
         popNew('client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid });
+    }
+
+    // 长按打开消息撤回条组件
+    public openMessageRecall() {
+        this.props.isMessageRecallVisible = true;
+        this.paint();
+    }
+
+    // 点击关闭消息撤回组件
+    public closeMessageRecall() {
+        this.props.isMessageRecallVisible = false;
+        this.paint();
     }
 }
 

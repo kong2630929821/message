@@ -45,7 +45,9 @@ export class InviteMember extends Widget {
         return ginfo;
     }
      // 添加群成员
-    public addGroupMember(uid:number) {
+    public addGroupMember(e:any) {
+        const uid = e.value;
+        logger.debug('====邀请成员',uid);
         if (this.props.applyGroupMembers.findIndex(item => item === uid) === -1) {
             this.props.applyGroupMembers.push(uid);
         } else {

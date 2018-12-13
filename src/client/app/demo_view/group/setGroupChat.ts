@@ -78,8 +78,9 @@ export class SetGroupChat extends Widget {
         this.props.name = e.value;
     }
 
-    public addMember(uid:number) {
-        this.props.isSelect = !this.props.isSelect;
+    public addMember(e:any) {
+        const uid = e.value;
+        logger.debug('=========创建群聊',uid);
         if (this.props.applyMembers.findIndex(item => item === uid) === -1) {
             this.props.applyMembers.push(uid);
         } else {

@@ -1,6 +1,8 @@
-<div>
+<div on-tap="closeMessageRecall">
+    {{if !it.msg.cancel && it.msg.mtype === 1}}
+    <div style="overflow: hidden;">
     {{if it.me}}
-    <div style="margin: 10px 40px 0;float: right;">
+    <div style="position:relative;margin: 10px 40px 0;float: right;" on-longtap="openMessageRecall">
         <div w-class="text-wrap">
             <widget w-tag="pi-ui-html" style="display: inline;">{{it.msg.msg}}</widget>
             <div w-class="corner">
@@ -10,9 +12,14 @@
         </div>
         
         <span w-class="rightDownTail"></span>
+        {{if it.isMessageRecallVisible}}
+        <div style="position:absolute;top:0px;left:-240px;">
+            <client-app-widget-messageRecall-messageRecall>{chatType:{{it.chatType}}, hidInc:{{it.hIncId}} }</client-app-widget-messageRecall-messageRecall>
+        </div>
+        {{end}}
     </div>
     {{else}}
-    <div w-class="username">{{it.name || it.msg.sid}}</div>
+    <div w-class="username">{{it.name}}</div>
     <div w-class="textMessage">
         <img src="../../res/images/user.png" w-class="avatar" on-tap="userDetail"/>
         <div>
@@ -25,6 +32,8 @@
             
             <span w-class="leftDownTail"></span>
         </div>
+    </div>
+    {{end}}
     </div>
     {{end}}
 </div>

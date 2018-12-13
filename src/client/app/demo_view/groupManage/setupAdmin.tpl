@@ -1,5 +1,5 @@
 {{let admins = it.ginfo.adminids}}
-<div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
+<div class="new-page">
     <div ev-back-click="goBack">
         <client-app-widget-topBar-topBar>{title:"设置管理员",background:"#fff"}</client-app-widget-topBar-topBar>
     </div>
@@ -7,7 +7,7 @@
         <div w-class="a">管理员{{admins.length}}/5</div>
         {{for index,item of admins}}
         <div style="position:relative;">
-            <client-app-widget-contactItem-contactItem>{id:{{item}},chatType:"user"}</client-app-widget-contactItem-contactItem>
+            <client-app-demo_view-contactList-contactItem>{id:{{item}},chatType:"user"}</client-app-demo_view-contactList-contactItem>
             {{if item !== it.ginfo.ownerid}}
             <img on-tap="removeAdmin({{item}})" src="../../res/images/icon_remove.png" style="position:absolute;right:36px;top:36px;"/>
             {{else}}

@@ -35,12 +35,11 @@ export class SelectUser extends Widget {
     }
 
     // 点击改变选中状态
-    // public changeSelect(event:any){
-    //     let temp = this.props.isSelect;
-    //     this.props.isSelect = !temp;
-    //     notify(event.node,"ev-addMember",{});
-    //     this.paint();
-    // }
+    public changeSelect(event:any) {
+        this.props.isSelect = !this.props.isSelect;
+        notify(event.node,'ev-addMember',{ value :  this.props.id });
+        this.paint();
+    }
     
 }
 

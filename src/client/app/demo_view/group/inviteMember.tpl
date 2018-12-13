@@ -1,4 +1,4 @@
-<div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
+<div class="new-page">
     <div ev-back-click="goBack" ev-complete="completeAddGroupMember">
         <client-app-widget-topBar-topBar>{title:"邀请成员",completeImg:"complete.png",background:"#fff"}</client-app-widget-topBar-topBar>
     </div>
@@ -9,7 +9,7 @@
     <div w-class="a-part" ev-changeSelect="changeSelect">
         <div w-class="a">a</div>
         {{for index,item of it1.friends}}
-        <div on-tap="addGroupMember({{item}})">
+        <div ev-addMember="addGroupMember">
             <client-app-widget-selectUser-selectUser>{id:{{item}}, chatType: "user"}</client-app-widget-selectUser-selectUser>
         </div>
         {{end}}

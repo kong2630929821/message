@@ -6,14 +6,12 @@
 import { Json } from '../../../../pi/lang/type';
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
-import { GroupInfo, GroupUserLink, ReadGroupTime } from '../../../../server/data/db/group.s';
-import { getGroupsInfo } from '../../../../server/data/rpc/basic.p';
-import { GetGroupInfoReq, GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
+import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
+import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
 import { getGroupUserLink, updateGroupAlias, userExitGroup } from '../../../../server/data/rpc/group.p';
 import { GroupAlias } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { setStore } from '../../data/store';
 import { getGroupAlias } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
@@ -159,7 +157,10 @@ export class GroupInfos extends Widget {
         });
         
     }
-
+    // 打开群公告
+    public openGroupAnnounce() {
+        popNew('client-app-demo_view-group-groupAnnounce',{ gid : this.props.gid });
+    }
     // 打开群管理
     public openGroupManage() {
         const ownerid = this.props.groupInfo.ownerid;

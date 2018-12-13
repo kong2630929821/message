@@ -27,7 +27,7 @@ struct GroupInfo {
     ownerid:u32,//群主id
     adminids:&[u32],//管理员id
     memberids:&[u32],//成员id
-    annoceid:String,//公告id
+    annoceids:&[String],//公告id
     hid:String,//历史消息id
     create_time:u32,//创建时间
     dissolve_time:u32,//解散时间

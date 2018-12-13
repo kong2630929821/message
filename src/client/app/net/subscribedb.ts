@@ -21,8 +21,8 @@ import { clientRpcFunc, subscribe } from './init';
  * 群组信息
  * @param gid group id
  */
-export const subscribeGroupInfo = (gid: number,cb) => {
-    subscribeTable(watchGroupInfo,'gid',gid,DEFAULT_ERROR_NUMBER,GroupInfo,'groupInfoMap',cb);
+export const subscribeGroupInfo = (gid: number,cb,diffcb) => {
+    subscribeTable(watchGroupInfo,'gid',gid,DEFAULT_ERROR_NUMBER,GroupInfo,'groupInfoMap',cb,diffcb);
 };
 
 /**

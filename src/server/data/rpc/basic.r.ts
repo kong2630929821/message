@@ -14,7 +14,7 @@ import { genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } f
 import * as CONSTANT from '../constant';
 import { UserHistory, UserHistoryCursor } from '../db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserCredential, UserInfo } from '../db/user.s';
-import { AnnouceFragment, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister } from './basic.s';
+import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister } from './basic.s';
 import { getUid } from './group.r';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -350,6 +350,25 @@ export const getAnnoucement = (param: AnnouceFragment): AnnounceHistoryArray => 
             }
         }
     }
+
+    return announceHistory;
+};
+
+/**
+ * 获取公告信息
+ * @param param AnnouceIds
+ */
+// #[rpc=rpcServer]
+export const getAnnoucements = (param: AnnouceIds): AnnounceHistoryArray => {
+    const dbMgr = getEnv().getDbMgr();
+    const announceHistoryBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
+
+    const announceHistory = new AnnounceHistoryArray();
+
+    const aids = param.arr;
+    
+    announceHistory.arr = announceHistoryBucket.get(aids);
+    logger.debug('getAnnoucements announceHistory',announceHistory);
 
     return announceHistory;
 };

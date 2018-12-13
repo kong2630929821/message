@@ -1,4 +1,4 @@
-<div w-class="select-user-wrap">
+<div w-class="select-user-wrap" on-tap="changeSelect">
     <div w-class="slect-wrap">
         <div w-class="avator-wrap">
             <img w-class="avator" src="../../res/images/user.png" />

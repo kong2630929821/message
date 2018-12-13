@@ -9,7 +9,13 @@
 .login-chat-wrap{
     width:750px;
     height:1106px;
+    overflow:hidden;
     background:rgb(242, 242, 242);
+}
+.inner{
+    width:100%;
+    height:100%;
+    overflow:scroll;
 }
 .no-message{
     width:192px;

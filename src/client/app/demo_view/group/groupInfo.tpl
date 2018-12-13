@@ -1,4 +1,4 @@
-<div w-class="group-info-wrap" on-tap="pageClick" style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
+<div w-class="group-info-wrap" on-tap="pageClick" class="new-page">
     <div w-class="top-main-wrap" ev-handleMoreContactor="handleMoreGroup" ev-back-click="goBack">
         <client-app-widget-topBar-topBar>{title:"",moreImg:"more-dot-white.png",background:"none"}</client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap">
@@ -25,7 +25,7 @@
         <div w-class="inner">
             <div w-class="detail-info-wrap">
                 <div w-class="detail-info">
-                    <div w-class="adress-wrap">
+                    <div w-class="adress-wrap" on-tap="openGroupAnnounce">
                         <img w-class="adressIcon" src="../../res/images/sound.png" />
                         <div w-class="adress-text-wrap">
                             <span w-class="mainText">无</span>

@@ -6,12 +6,12 @@
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { GroupHistory, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
+import { AnnounceHistory, GroupHistory, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
 import { Contact, FriendLink, UserInfo } from '../../../../server/data/db/user.s';
-import { getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/data/rpc/basic.p';
-import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
+import { getAnnoucement, getAnnoucements, getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/data/rpc/basic.p';
+import { AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
-import { genUuid } from '../../../../utils/util';
+import { genGroupHid, genUuid } from '../../../../utils/util';
 import { getFriendHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
@@ -89,7 +89,6 @@ const init = (uid:number) => {
     },(r:Contact) => {
         updateGroup(r,uid);
     });
-
     // TODO:
 };
 
@@ -113,12 +112,11 @@ const updateGroup = (r:Contact,uid:number) => {
     const groupReq = new GetGroupInfoReq();
     groupReq.gids = addGroup;
     clientRpcFunc(getGroupsInfo, groupReq, (r:GroupArray) => {
-        r.arr.forEach((gInfo:GroupInfo) => {
-            store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
-        });
-    });
-    addGroup.forEach(gid => {
-        subscribedb.subscribeGroupInfo(gid,undefined);
+        if (r && r.arr) {
+            r.arr.forEach((gInfo:GroupInfo) => {
+                store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
+            });
+        }
     });
     
     // 删除群组信息
@@ -133,7 +131,7 @@ const updateGroup = (r:Contact,uid:number) => {
             updateGroupMessage(gid,r);
         });
     });
-    
+
     // 取消订阅
 };
 

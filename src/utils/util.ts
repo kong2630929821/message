@@ -179,3 +179,12 @@ export const getUidFromUuid = (uuid:string) => {
     
     return parseInt(uuid.split(':')[1],10);
 };
+
+/**
+ * get gid
+ * @param hIncid group history id 
+ */
+export const getGidFromHincid = (hIncId:string) => {
+
+    return parseInt(hIncId.split(':')[0].substr(1), 10);
+};

@@ -58,6 +58,10 @@ struct UserHistoryArray{
     arr:&[UserHistory]//用户历史记录表
 }
 
+struct AnnouceIds{
+    arr:&[String] //公告id
+}
+
 struct AnnounceHistoryArray{
     arr:&[AnnounceHistory]//公告表
 }

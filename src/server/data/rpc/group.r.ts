@@ -529,7 +529,8 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.hid = genGroupHid(gInfo.gid);
         gInfo.note = groupInfo.note;
         gInfo.adminids = [uid];
-        gInfo.annoceid = genAnnounceIncId(gInfo.gid, START_INDEX);
+        // genAnnounceIncId(gInfo.gid, START_INDEX)
+        gInfo.annoceids = [];
         gInfo.create_time = Date.now();
         gInfo.dissolve_time = 0;
         

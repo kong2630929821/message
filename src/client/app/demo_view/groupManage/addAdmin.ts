@@ -41,7 +41,9 @@ export class AddAdmin extends Widget {
         return ginfo;
     }
     // 添加管理员
-    public addAdminMember(uid:number) {
+    public addAdminMember(e:any) {
+        const uid = e.value;
+        logger.debug('添加管理员',uid);
         if (this.props.applyAdminMembers.findIndex(item => item === uid) === -1) {
             this.props.applyAdminMembers.push(uid);
         } else {

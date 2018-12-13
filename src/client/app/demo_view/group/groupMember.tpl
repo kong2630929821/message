@@ -1,4 +1,4 @@
-<div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
+<div class="new-page">
     <div ev-back-click="goBack">
         <client-app-widget-topBar-topBar>{title:"群成员",background:"#fff"}</client-app-widget-topBar-topBar>
     </div>
