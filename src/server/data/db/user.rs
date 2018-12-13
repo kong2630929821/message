@@ -37,6 +37,16 @@ struct UserCredential {
 }
 
 /**
+ * 用户账户信息
+ */
+#[primary=user,db=file,dbMonitor=true]
+struct UserAccount {
+    user: String,
+    uid: u32
+}
+
+
+/**
  * User account generator
  */
 #[primary=index,db=file,dbMonitor=true,hasmgr=false]

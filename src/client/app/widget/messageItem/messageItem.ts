@@ -1,7 +1,7 @@
 /**
- * textMessage ç»„ä»¶ç›¸å…³å¤„ç†
+ * textMessage ×é¼şÏà¹Ø´¦Àí
  */
-// ================================================ å¯¼å…¥
+// ================================================ µ¼Èë
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
@@ -14,7 +14,7 @@ import { EMOJIS_MAP } from '../../demo_view/chat/emoji';
 import { timestampFormat } from '../../logic/logic';
 import { downloadFileUrlPrefix } from '../../net/upload';
 
-// ================================================ å¯¼å‡º
+// ================================================ µ¼³ö
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
@@ -60,7 +60,7 @@ export class MessageItem extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        // å½“æ¶ˆæ¯æ’¤å› æ›´æ–°map
+        // µ±ÏûÏ¢³·»Ø ¸üĞÂmap
         store.register(`userHistoryMap/${this.props.hIncId}`,() => {
             this.setProps(this.props);
             this.paint();
@@ -75,26 +75,26 @@ export class MessageItem extends Widget {
         popNew('client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid });
     }
 
-    // é•¿æŒ‰æ‰“å¼€æ¶ˆæ¯æ’¤å›æ¡ç»„ä»¶
+    // ³¤°´´ò¿ªÏûÏ¢³·»ØÌõ×é¼ş
     public openMessageRecall() {
         this.props.isMessageRecallVisible = true;
         this.paint();
     }
 
-    // ç‚¹å‡»å…³é—­æ¶ˆæ¯æ’¤å›ç»„ä»¶
+    // µã»÷¹Ø±ÕÏûÏ¢³·»Ø×é¼ş
     public closeMessageRecall() {
         this.props.isMessageRecallVisible = false;
         this.paint();
     }
 }
 
-// ================================================ æœ¬åœ°
+// ================================================ ±¾µØ
 
 const parseEmoji = (msg:UserMsg):UserMsg => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
         let url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
-            // FIXME: ä¸åº”è¯¥å†™æ­»,åº”è¯¥åŠ¨æ€è·å–
+            // FIXME: ²»Ó¦¸ÃĞ´ËÀ,Ó¦¸Ã¶¯Ì¬»ñÈ¡
             url = url.replace('../../','/client/app/');
 
             return `<img src="${url}" alt="${capture}" class='emojiMsg'></img>`;

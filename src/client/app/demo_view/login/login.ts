@@ -4,6 +4,7 @@
 
 // ================================================ 导入
 import { popNew } from '../../../../pi/ui/root';
+import { getRealNode } from '../../../../pi/widget/painter';
 import { Widget } from '../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { AnnounceHistory, GroupHistory, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
@@ -54,6 +55,11 @@ export class Login extends Widget {
     }
 
     public login(e:any) {
+        // 让所有输入框的失去焦点
+        const inputs = getRealNode(this.tree).getElementsByTagName('input');
+        for (let i = 0;i < inputs.length;i++) {
+            inputs[i].blur();
+        }
         userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
             if (r.uid > 0) {
                 store.setStore(`uid`,r.uid);

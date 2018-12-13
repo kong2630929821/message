@@ -27,6 +27,7 @@ export class UserDetail extends Widget {
     public ok:() => void;
     public props:Props = {
         uid:null,
+        inFlag:0,
         editable:false,
         isContactorOpVisible:false,
         utilList:[],
@@ -52,16 +53,19 @@ export class UserDetail extends Widget {
     
     // 点击...展开联系人操作列表
     public handleMoreContactor() {
-        console.log('handleMoreContactor');
-        const temp = !this.props.isContactorOpVisible;
-        this.props.isContactorOpVisible = temp;
+        this.props.isContactorOpVisible = !this.props.isContactorOpVisible;
         this.paint();
     }
+
     // 开始对话
-    public startDialog() {
-        console.log('startDialog');
-        popNew('client-app-demo_view-chat-chat',{ rid:this.props.uid });
+    public startChat() {
+        if (this.props.inFlag) { // 如果是从chat页面进入则返回chat页面
+            this.ok();
+        } else {
+            popNew('client-app-demo_view-chat-chat',{ rid:this.props.uid });
+        }
     }  
+
     // 点击联系人操作列表项
     public handleFatherTap(e:any) {
         console.log('handleFatherTap');
@@ -110,6 +114,7 @@ export class UserDetail extends Widget {
         const userinfo = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
         this.props.alias = this.props.alias || userinfo.name;
         this.props.editable = false;
+        this.props.isContactorOpVisible = false;
         this.paint();
     }
 
@@ -145,6 +150,7 @@ export class UserDetail extends Widget {
 
 interface Props {
     uid: number;
+    inFlag:number; // 从某个页面进入，0 contactList进入, 1 chat进入
     editable:boolean;
     isContactorOpVisible:boolean;
     utilList:any;

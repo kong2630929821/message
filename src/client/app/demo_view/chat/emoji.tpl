@@ -1,6 +1,5 @@
-<div class="new-page" ev-back-click="goBack">
-    <client-app-widget-topBar-topBar>{title:"表情"}</client-app-widget-topBar-topBar>
+<div ev-back-click="goBack">
     {{for key,value of it.emojis}}
-        <img style="width:100px;height:100px;" src="{{value[1]}}" alt="{{value[0]}}" on-tap="click({{key}})" />
+        <img style="width:48px;height:48px;margin: 10px;" src="../../res/emoji/{{value[2]}}" alt="{{value[0]}}" on-down="click(e,{{key}})" />
     {{end}}
 </div> 
