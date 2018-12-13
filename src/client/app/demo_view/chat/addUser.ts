@@ -12,10 +12,7 @@ import * as store from '../../data/store';
 import { acceptFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../net/rpc';
 
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
 export const forelet = new Forelet();
-const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 export class AddUser extends Widget {
     public props:Props;
@@ -38,8 +35,19 @@ export class AddUser extends Widget {
     }
 
     public applyFriend() {
+        const sid = store.getStore('uid');
+        if (this.props.rid === sid) {
+            alert('不能添加自己为好友');
+
+            return;
+        }
+        
         applyUserFriend(this.props.rid,(r:Result) => {
-            // TODO:
+            if (r.r === 0) {
+                alert(`${this.props.rid}已经是你的好友`);
+    
+                return;
+            }
         });
     }
     public chat(uid:number) {
