@@ -8,7 +8,7 @@ import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { UserHistory } from '../../../../server/data/db/message.s';
-import { genUuid } from '../../../../utils/util';
+import { genUserHid, genUuid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
@@ -40,9 +40,9 @@ export class Chat extends Widget {
 
         // 更新上次阅读到哪一条记录
         const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-        const lastRead = store.getStore(`lastRead/${this.props.rid}`,{ msgId:undefined,msgType:'user' });
+        const lastRead = store.getStore(`lastRead/${genUserHid(this.props.sid,this.props.rid)}`,{ msgId:undefined,msgType:'user' });
         lastRead.msgId = hincId;
-        store.setStore(`lastRead/${this.props.rid}`,lastRead);
+        store.setStore(`lastRead/${genUserHid(this.props.sid,this.props.rid)}`,lastRead);
     }
 
     public firstPaint() {

@@ -3,6 +3,7 @@
  */
 // ===========================导入
 import { Json } from '../../../../pi/lang/type';
+import { getKeyBoardHeight } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { Widget } from '../../../../pi/widget/widget';
@@ -30,7 +31,7 @@ export class InputMessage extends Widget {
         console.log('playRadio');
     }
 
-    // 打开表情
+    // 打开表情包图库
     public playRemoji() {
         // popNew('client-app-demo_view-chat-emoji',undefined,undefined,undefined,(emoji:string) => {
         //     this.props.message += `[${emoji}]`;
@@ -39,9 +40,12 @@ export class InputMessage extends Widget {
         // });
 
         getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
+        document.getElementById('emojiMap').style.height = `${getKeyBoardHeight()}px`;
+
         setTimeout(() => {
             this.props.isOnEmoji = !this.props.isOnEmoji;
             this.paint();
+
         }, 100);
     }
 

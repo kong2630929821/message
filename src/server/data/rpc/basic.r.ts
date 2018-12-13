@@ -13,7 +13,7 @@ import { Logger } from '../../../utils/logger';
 import { genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 import { UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserCredential, UserInfo, UserAccount } from '../db/user.s';
+import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
 import { AnnouceFragment, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
 
@@ -94,22 +94,22 @@ export const login = (user: UserType): UserInfo => {
     let loginReq = new LoginReq();
     let userInfo = new UserInfo();
     if (user.enum_type === UserType_Enum.WALLET) {
-        let walletLoginReq = <WalletLoginReq>user.value;
-        let openid = walletLoginReq.openid;
-        let sign = walletLoginReq.sign;
-        //TODO 验证签名
+        const walletLoginReq = <WalletLoginReq>user.value;
+        const openid = walletLoginReq.openid;
+        const sign = walletLoginReq.sign;
+        // TODO 验证签名
         const userAccountBucket = new Bucket('file', CONSTANT.USER_ACCOUNT_TABLE, dbMgr);
-        let v = userAccountBucket.get(openid)[0];
+        const v = userAccountBucket.get(openid)[0];
         if (!v) {
-            //注册用户
-            let reguser = new UserRegister();
+            // 注册用户
+            const reguser = new UserRegister();
             reguser.passwdHash = openid;
-            reguser.name = "";
-            let userinfo = registerUser(reguser);
-            let userAcc = new UserAccount();
+            reguser.name = '';
+            const userinfo = registerUser(reguser);
+            const userAcc = new UserAccount();
             userAcc.user = openid;
             userAcc.uid = userinfo.uid;
-            let v = userAccountBucket.put(openid,userAcc);
+            const v = userAccountBucket.put(openid,userAcc);
             loginReq.uid = userinfo.uid;
         } else {
             loginReq.uid = v.uid;
@@ -118,7 +118,7 @@ export const login = (user: UserType): UserInfo => {
         loginReq = <LoginReq>user.value;
         const passwdHash = loginReq.passwdHash;
         const expectedPasswdHash = userCredentialBucket.get(loginReq.uid);
-        //判断密码是否正确
+        // 判断密码是否正确
         // user doesn't exist
         if ((expectedPasswdHash[0] === undefined) || (passwdHash !== expectedPasswdHash[0].passwdHash)) {
             userInfo.uid = -1;

@@ -32,7 +32,7 @@ export class Contact extends Widget {
         ];
     }
 
-    public chat(e:any, id:number, chatType:GENERATOR_TYPE) {
+    public chat(id:number, chatType:GENERATOR_TYPE) {
         this.closeMore();
         if (chatType === GENERATOR_TYPE.USER) {
             popNew('client-app-demo_view-chat-chat', { rid:id });

@@ -4,7 +4,7 @@
     </div>
     <div w-class="user-info-wrap">
         <div w-class="info-wrap">
-            {{if it.isGroupMessage}}
+            {{if it.chatType == "group"}}
             <img w-class="resIcon" src="../../res/images/group-icon.png" />
             {{end}}
             <span w-class="userName">{{it.name}}</span>

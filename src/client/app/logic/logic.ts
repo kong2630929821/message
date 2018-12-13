@@ -2,7 +2,7 @@
  * 一些全局方法
  */
 // =====================================导入
-import { UserInfo } from '../../../server/data/db/user.s';
+import { FriendLink, UserInfo } from '../../../server/data/db/user.s';
 import { genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 
@@ -58,7 +58,7 @@ export const json2Map = (data:JSON) => {
 export const getFriendAlias = (rid:number) => {
     const sid = store.getStore('uid');
     const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
-    const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,{});
+    const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,new FriendLink());
 
     return friend.alias || user.name;
 };

@@ -197,11 +197,11 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
         // 需要撤回的消息key
         const recallKey = message.msg;
         // 获取撤回消息的基础信息
-        const v = userHistoryBucket.get<string, UserHistory>(recallKey);
+        const v = userHistoryBucket.get<string, UserHistory>(recallKey)[0];
         // TODO 判断撤回时间
-        if (v[0] !== undefined) {
+        if (v !== undefined) {
             v.msg.cancel = true;
-            userHistoryBucket.put(recallKey, v[0]);
+            userHistoryBucket.put(recallKey, v);
         }
     }
     const userMsg = new UserMsg();

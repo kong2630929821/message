@@ -7,9 +7,9 @@ import { Json } from '../../../../pi/lang/type';
 import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
+import { GroupInfo } from '../../../../server/data/db/group.s';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
-import { GroupInfo } from '../../../../server/data/db/group.s';
 
 interface Props {
     uid?:number;// id

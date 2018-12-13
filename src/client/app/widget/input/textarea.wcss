@@ -3,7 +3,7 @@
     height: 100%;
     color: #222;
     font-size: 32px;
-    padding-top: 10px;
+    max-height: 240px;
 }
 .pi-input__inner{
     appearance:none;
@@ -17,23 +17,26 @@
     box-sizing: border-box;
     display: inline-block;
     font-size: inherit;
-    padding:20px 0;
+    padding-bottom: 20px;
     outline: 0;
     -webkit-transition: border-color .2s cubic-bezier(.645,.045,.355,1);
     transition: border-color .2s cubic-bezier(.645,.045,.355,1);
     width: 100%;
     color: #222;
     font-size: 32px;
-}
-.clearBtn{
-    display: inline-block;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 20px solid transparent;
     position: absolute;
-    right: 100px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
+    top: 20px;
+    bottom: 0;
+    word-break: break-all;
+    font-family: monospace;
+    line-height: 40px;
+}
+.hideMsg{
+    display:block;
+    visibility:hidden;
+    white-space: pre-wrap;
+    word-break: break-all;
+    padding: 20px 0;
+    font-family: monospace;
+    line-height: 40px;
 }

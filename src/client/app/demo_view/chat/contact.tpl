@@ -12,7 +12,7 @@
     <div w-class="history-wrap">
         <div w-class="inner-wrap">
             {{for i,v of it1}}
-            <widget w-tag="client-app-demo_view-chat-messageRecord" on-tap="chat(e,{{v[0]}},'user')" style="margin-bottom: 10px;">{"rid":{{v[0]}} }</widget>
+            <widget w-tag="client-app-demo_view-chat-messageRecord" on-tap="chat({{v[0]}},'{{v[2]}}')" style="margin-bottom: 10px;">{"rid":{{v[0]}},"chatType":{{v[2]}} }</widget>
             {{end}} 
         </div> 
     </div>

@@ -66,8 +66,8 @@ export class Login extends Widget {
                 store.setStore(`userInfoMap/${r.uid}`,r);        
                 init(r.uid); 
                 popNew('client-app-demo_view-chat-contact', { sid: this.props.uid });
-                subscribeMsg(this.props.uid.toString(), UserHistory, (r: UserHistory) => {
-                    updateUserMessage(r.msg.sid,r);
+                subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
+                    updateUserMessage(v.msg.sid,v);
                 });
             }
         });
@@ -165,14 +165,11 @@ const updateUsers = (r:Contact,uid:number) => {
     const usersInfo = new GetUserInfoReq();
     usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
     if (usersInfo.uids.length > 0) {
-        // 获取好友信息
-        clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
-            if (r && r.arr && r.arr.length > 0) {
-                r.arr.forEach((e:UserInfo) => {
-                    store.setStore(`userInfoMap/${e.uid}`,e);
-                    getFriendHistory(e);  // 获取该好友发送的离线消息
-                });
-            }
+        usersInfo.uids.forEach(elem => {
+            subscribedb.subscribeUserInfo(elem,(r:UserInfo) => {
+                getFriendHistory(r);  // 获取该好友发送的离线消息
+            });
         });
+
     }
 };

@@ -3,7 +3,6 @@
  */
 
 // ================================================ 导入
-import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { Logger } from '../../../../utils/logger';
 
@@ -14,12 +13,13 @@ const logger = new Logger(WIDGET_NAME);
 
 // ================================================ 导出
 export class RegisterSuccess extends Widget {
+    public ok:() => void;
     public props:Props = {
         uid:null
     };
     
     public goChat() {
-        popNew('client-app-demo_view-login-login');  
+        this.ok();
     }
 }
 
