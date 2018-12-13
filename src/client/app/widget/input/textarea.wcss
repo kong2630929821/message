@@ -17,7 +17,7 @@
     box-sizing: border-box;
     display: inline-block;
     font-size: inherit;
-    padding:30px 0;
+    padding-bottom: 20px;
     outline: 0;
     -webkit-transition: border-color .2s cubic-bezier(.645,.045,.355,1);
     transition: border-color .2s cubic-bezier(.645,.045,.355,1);
@@ -25,18 +25,18 @@
     color: #222;
     font-size: 32px;
     position: absolute;
-    top: 0;
+    top: 20px;
     bottom: 0;
     word-break: break-all;
     font-family: monospace;
-    letter-spacing: 1px;
+    line-height: 40px;
 }
 .hideMsg{
     display:block;
     visibility:hidden;
     white-space: pre-wrap;
     word-break: break-all;
-    padding:30px 0;
+    padding: 20px 0;
     font-family: monospace;
-    letter-spacing: 1px;
+    line-height: 40px;
 }
