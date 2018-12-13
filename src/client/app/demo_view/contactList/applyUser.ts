@@ -7,10 +7,9 @@ import { Json } from '../../../../pi/lang/type';
 import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
-import { GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
-import { Logger } from '../../../../utils/logger';
-import * as store from '../../data/store';
+import { Logger } from '../../../../utils/logger';import * as store from '../../data/store';
+import { UserInfo } from '../../../../server/data/db/user.s';
 
 // ================================================ 导出
  // tslint:disable-next-line:no-reserved-keywords
@@ -31,9 +30,7 @@ export class ApplyUser extends Widget {
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.id = props.id;
-        this.props.chatType = props.chatType;
-        this.props.isActiveToGroup = props.isActiveToGroup;
+        this.props.ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
         this.props.isagree = false;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             logger.debug('------------',store.getStore(`userInfoMap/${this.props.id}`));

@@ -22,29 +22,34 @@ const logger = new Logger(WIDGET_NAME);
 // ================================================================= 导出
 /**
  * 申请添加对方为好友
- * @param uuid uid:uid
+ * @param uid uid
  */
 // #[rpc=rpcServer]
 export const applyFriend = (uid: number): Result => {
-    /**
-     * 添加到联系人表中
-     * @param sid sender id
-     * @param rid reader id
-     */
-    const _applyFriend = (sid: number, rid: number) => {
-        const dbMgr = getEnv().getDbMgr();
-        // 取出联系人表
-        const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
-        // TODO:判断rid是否已经添加了sid为好友
-        // 取出对应的那一个联系人
-        const contactInfo = contactBucket.get(rid)[0];
-        contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);      
-        contactBucket.put(rid, contactInfo);
-    };
-
-    _applyFriend(getUid(), uid);
-
+    const sid = getUid();
     const result = new Result();
+    if (sid === uid) {
+        result.r = -1;  // 不能添加自己为好友
+        
+        return result;
+    }
+    const dbMgr = getEnv().getDbMgr();
+    // 取出联系人表
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
+    const friend1 = friendLinkBucket.get(genUuid(sid,uid))[0];
+    const friend2 = friendLinkBucket.get(genUuid(sid,uid))[0];
+    logger.debug('applyFriend friend1: ',friend1,'friend2: ',friend2);
+    if (friend1 && friend2) {
+        result.r = 0;   // 已经是好友，不需要重复添加
+
+        return result;
+    }
+    // 取出对应的那一个联系人
+    const contactInfo = contactBucket.get(uid)[0];
+    contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);      
+    contactBucket.put(uid, contactInfo);
+
     result.r = 1;
 
     return result;

@@ -37,12 +37,7 @@ export class GroupListt extends Widget {
     public showInfo(gid:number) {
         popNew('client-app-demo_view-group-groupInfo', { gid:gid });
         // 监听群组表的变化
-        subscribedb.subscribeGroupInfo(gid,(r:GroupInfo) => {
-            logger.debug('after ===================',r);
-        },(r:GroupInfo) => {
-            logger.debug('before ===================',r);
-            updateAnnounce(r,gid);
-        });
+        // getGroupInfo();
     }
     // 输入要添加群聊的Gid
     public inputGid(e:any) {

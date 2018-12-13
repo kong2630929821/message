@@ -59,12 +59,12 @@ export const getFriendHistory = (elem: UserInfo) => {
         clientRpcFunc(getUserHistoryCursor, elem.uid, (r: UserHistoryCursor) => {
             if (r) {
                 lastRead.msgId = genHIncId(hid,r.cursor);
-                store.setStore(`lastRead/${elem.uid}`,lastRead); // 异步请求，必须在回调函数中赋值
+                store.setStore(`lastRead/${hid}`,lastRead); // 异步请求，必须在回调函数中赋值
                 // console.error('uid: ',elem.uid,'lastread ',lastRead);
             }
         });
     } else {
-        store.setStore(`lastRead/${elem.uid}`,lastRead);
+        store.setStore(`lastRead/${hid}`,lastRead);
     } 
     
     clientRpcFunc(getUserHistory,userflag,(r:UserHistoryArray) => {

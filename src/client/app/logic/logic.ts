@@ -3,8 +3,7 @@
  */
 // =====================================导入
 import { GroupInfo } from '../../../server/data/db/group.s';
-import { UserInfo } from '../../../server/data/db/user.s';
-import { genUuid } from '../../../utils/util';
+import { FriendLink, UserInfo } from '../../../server/data/db/user.s';import { genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 
 // =====================================导出
@@ -59,7 +58,7 @@ export const json2Map = (data:JSON) => {
 export const getFriendAlias = (rid:number) => {
     const sid = store.getStore('uid');
     const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
-    const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,{});
+    const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,new FriendLink());
 
     return friend.alias || user.name;
 };

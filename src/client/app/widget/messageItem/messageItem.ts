@@ -1,26 +1,23 @@
 /**
- * textMessage ×é¼şÏà¹Ø´¦Àí
+ * textMessage ç»„ä»¶ç›¸å…³å¤„ç†
  */
-// ================================================ µ¼Èë
+// ================================================ å¯¼å…¥
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GroupHistory, MSG_TYPE, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
-import { genGuid, getGidFromHincid } from '../../../../utils/util';
+import { depCopy, genGuid, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { EMOJIS_MAP } from '../../demo_view/chat/emoji';
 import { timestampFormat } from '../../logic/logic';
 import { downloadFileUrlPrefix } from '../../net/upload';
-
-// ================================================ µ¼³ö
+import { EMOJIS_MAP } from '../emoji/emoji';
+// ================================================ å¯¼å‡º
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
-
-export class MessageItem extends Widget {
+const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
     constructor() {
         super();
         this.props = {
@@ -39,7 +36,6 @@ export class MessageItem extends Widget {
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.chatType = props.chatType;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserHistory());
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
@@ -49,18 +45,17 @@ export class MessageItem extends Widget {
             logger.debug('mmmmmmmmmmmmmmmmm',gid);
             this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.msg.sid)}`, new GroupUserLink()).userAlias;
         }
-        this.props.msg = parseMessage(this.props.msg);
+        this.props.msg = parseMessage(depCopy(this.props.msg));
         logger.debug('==================vvvvvvvvvvvvvvvvv',this.props.msg);
         this.props.me = this.props.msg.sid === store.getStore('uid');
         logger.debug('==================hhhhhhhhhhhhhhhhh',this.props.me);
-        let time = this.props.msg.time;
-        time = timestampFormat(time).split(' ')[1];
-        this.props.time = time.substr(0,5);
+        const time = depCopy(this.props.msg.time);
+        this.props.time = timestampFormat(time,1);
     }
 
     public firstPaint() {
         super.firstPaint();
-        // µ±ÏûÏ¢³·»Ø ¸üĞÂmap
+        // å½“æ¶ˆæ¯æ’¤å› æ›´æ–°map
         store.register(`userHistoryMap/${this.props.hIncId}`,() => {
             this.setProps(this.props);
             this.paint();
@@ -75,29 +70,29 @@ export class MessageItem extends Widget {
         popNew('client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid });
     }
 
-    // ³¤°´´ò¿ªÏûÏ¢³·»ØÌõ×é¼ş
+    // é•¿æŒ‰æ‰“å¼€æ¶ˆæ¯æ’¤å›æ¡ç»„ä»¶
     public openMessageRecall() {
         this.props.isMessageRecallVisible = true;
         this.paint();
     }
 
-    // µã»÷¹Ø±ÕÏûÏ¢³·»Ø×é¼ş
+    // ç‚¹å‡»å…³é—­æ¶ˆæ¯æ’¤å›ç»„ä»¶
     public closeMessageRecall() {
         this.props.isMessageRecallVisible = false;
         this.paint();
     }
 }
 
-// ================================================ ±¾µØ
+// ================================================ æœ¬åœ°
 
 const parseEmoji = (msg:UserMsg):UserMsg => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
-        let url = EMOJIS_MAP.get(capture) || undefined;
+        const url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
-            // FIXME: ²»Ó¦¸ÃĞ´ËÀ,Ó¦¸Ã¶¯Ì¬»ñÈ¡
-            url = url.replace('../../','/client/app/');
+            // FIXME: ä¸åº”è¯¥å†™æ­»,åº”è¯¥åŠ¨æ€è·å–
+            // url = url.replace('../../','/client/app/');
 
-            return `<img src="${url}" alt="${capture}" class='emojiMsg'></img>`;
+            return `<img src="/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;
         }

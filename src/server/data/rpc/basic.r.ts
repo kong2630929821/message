@@ -13,9 +13,7 @@ import { Logger } from '../../../utils/logger';
 import { genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 import { UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
-import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
-import { getUid } from './group.r';
+import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';import { getUid } from './group.r';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;

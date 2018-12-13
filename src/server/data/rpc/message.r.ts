@@ -271,7 +271,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
             mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
             logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(v)}`);
 
-            return v;
+            return v;        
         }
         userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
 

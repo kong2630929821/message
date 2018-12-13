@@ -137,8 +137,9 @@ const updateGroup = (r:Contact,uid:number) => {
             updateGroupMessage(gid,r);
         });
     });
+    // 订阅群组基本信息变化groupInfo
 
-    // 取消订阅
+    // 取消订阅    
 };
 
 /**
