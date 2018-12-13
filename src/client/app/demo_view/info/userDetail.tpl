@@ -7,7 +7,7 @@
                 {{if it.editable}}
                     <widget w-class="aliasInput" w-tag="client-app-widget-input-input" on-tap="editAlias">{input:{{it.alias}},style:"padding:0px;background:none;color:#fff;",itype:"text",maxLength:10 }</widget>
                 {{else}}
-                    {{it.alias}}
+                    {{it.alias||it.userInfo.name}}
                 {{end}}
                 <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="editAlias"/>
             </div>
