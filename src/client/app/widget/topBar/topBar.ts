@@ -60,7 +60,7 @@ export class TopBar extends Widget {
             this.paint();
         }, 1000);
     }
-     /**
+    /**
      * 提交
      */
     public complete(event:any) {
@@ -72,5 +72,10 @@ export class TopBar extends Widget {
     public more(event:any) {
         notify(event.node,'ev-handleMoreContactor',{});
     }
-    
+    /**
+     * 编辑
+     */
+    public edit(event:any) {
+        notify(event.node,'ev-handleEdit',{});
+    }
 }

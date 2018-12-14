@@ -7,12 +7,12 @@ import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { Widget } from '../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { GroupHistory, UserHistory } from '../../../../server/data/db/message.s';
+import { AnnounceHistory, GroupHistory, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
 import { Contact, FriendLink, UserInfo } from '../../../../server/data/db/user.s';
-import { getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/data/rpc/basic.p';
-import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
+import { getAnnoucement, getAnnoucements, getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/data/rpc/basic.p';
+import { AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
-import { genUuid } from '../../../../utils/util';
+import { genGroupHid, genUuid } from '../../../../utils/util';
 import { getFriendHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
@@ -66,8 +66,8 @@ export class Login extends Widget {
                 store.setStore(`userInfoMap/${r.uid}`,r);        
                 init(r.uid); 
                 popNew('client-app-demo_view-chat-contact', { sid: this.props.uid });
-                subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
-                    updateUserMessage(v.msg.sid,v);
+                subscribeMsg(this.props.uid.toString(), UserHistory, (r: UserHistory) => {
+                    updateUserMessage(r.msg.sid,r);
                 });
             }
         });
@@ -95,7 +95,6 @@ const init = (uid:number) => {
     },(r:Contact) => {
         updateGroup(r,uid);
     });
-
     // TODO:
 };
 
@@ -108,7 +107,7 @@ const updateGroup = (r:Contact,uid:number) => {
     // 判断群组是否发生了变化,需要重新订阅群组消息
         
     const oldGroup = (store.getStore(`contactMap/${uid}`) || { group:[] }).group;
-    const addGroup = r.group.filter((gid) => {
+    const addGroup = r.group.concat(r.applyGroup).filter((gid) => {
         return oldGroup.findIndex(item => item === gid) === -1;
     });
     const delGroup = oldGroup.filter((gid) => {
@@ -119,10 +118,13 @@ const updateGroup = (r:Contact,uid:number) => {
     const groupReq = new GetGroupInfoReq();
     groupReq.gids = addGroup;
     clientRpcFunc(getGroupsInfo, groupReq, (r:GroupArray) => {
-        r.arr.forEach((gInfo:GroupInfo) => {
-            store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
-        });
+        if (r && r.arr) {
+            r.arr.forEach((gInfo:GroupInfo) => {
+                store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
+            });
+        }
     });
+    
     // 删除群组信息
     const gInfoMap = store.getStore(`groupInfoMap`);    
     delGroup.forEach((gid:number) => {
@@ -135,8 +137,9 @@ const updateGroup = (r:Contact,uid:number) => {
             updateGroupMessage(gid,r);
         });
     });
-    
-    // 取消订阅
+    // 订阅群组基本信息变化groupInfo
+
+    // 取消订阅    
 };
 
 /**
@@ -160,16 +163,18 @@ const updateUsers = (r:Contact,uid:number) => {
             }
                        
         });
-        
-    }
+    }  
     const usersInfo = new GetUserInfoReq();
     usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
     if (usersInfo.uids.length > 0) {
-        usersInfo.uids.forEach(elem => {
-            subscribedb.subscribeUserInfo(elem,(r:UserInfo) => {
-                getFriendHistory(r);  // 获取该好友发送的离线消息
-            });
+        // 获取好友信息
+        clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
+            if (r && r.arr && r.arr.length > 0) {
+                r.arr.forEach((e:UserInfo) => {
+                    store.setStore(`userInfoMap/${e.uid}`,e);
+                    getFriendHistory(e);  // 获取该好友发送的离线消息
+                });
+            }
         });
-
     }
 };

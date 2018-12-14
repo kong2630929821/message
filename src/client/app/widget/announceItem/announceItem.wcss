@@ -1,5 +1,4 @@
 .item-wrap{
-    margin-left: 19px;
     margin-top: 10px;
     width: 710px;
     padding:20px;

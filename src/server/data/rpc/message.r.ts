@@ -76,6 +76,7 @@ export const getUserHistoryCursor = (uid: number): UserHistoryCursor => {
  * @param message group send
  */
 // #[rpc=rpcServer]
+// tslint:disable-next-line:max-func-body-length
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const dbMgr = getEnv().getDbMgr();
     const bkt = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
@@ -99,38 +100,98 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 
         return gh;
     }
-    // 生成消息ID
-    const msgLock = new MsgLock();
-    msgLock.hid = genGroupHid(message.gid);
+    logger.debug(`before read and write`);
+    
     // 消息撤回
     if (message.mtype === MSG_TYPE.RECALL) {
         // 需要撤回的消息key
         const recallKey = message.msg;
         // 获取撤回消息的基础信息
-        const v = bkt.get<string, GroupHistory>(recallKey);
+        const v = bkt.get<string, GroupHistory>(recallKey)[0];
+        logger.debug('sendGroupMessage grouphistory begin v:',v);
         // TODO 判断撤回时间
         if (v !== undefined) {
             v.msg.cancel = true;
-            bkt.put(recallKey, v[0]);
+            v.msg.mtype = MSG_TYPE.RECALL;
+            bkt.put(recallKey, v);
+            logger.debug('sendGroupMessage grouphistory v:',v);
+
+            // 发布消息通知
+            const buf = new BonBuffer();
+            v.bonEncode(buf);
+
+            const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+            const groupTopic = `ims/group/msg/${ message.gid}`;
+            logger.debug(`before publish ,the topic is : ${groupTopic}`);
+            // directly send message to group topic
+            mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
+
+            return v;
         }
+        gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+        logger.debug('sendGroupMessage grouphistory gh:',gh);
+
+        return gh;
     }
 
     // 公告消息撤回
     if (message.mtype === MSG_TYPE.RENOTICE) {
+        // 群主才能发送公告和撤销公告
+        if (getUid() !== gInfo.ownerid) {
+            gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+
+            return gh;
+        }
         // 需要撤回的消息key
         const recallKey = message.msg;
         const noticeBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
         // 获取撤回消息的基础信息
-        const v = noticeBucket.get<string, AnnounceHistory>(recallKey);
+        const v = noticeBucket.get<string, AnnounceHistory>(recallKey)[0];
+        logger.debug('sendGroupMessage AnnounceHistory',v);
         // TODO 判断撤回时间
         if (v !== undefined) {
+            const ghA = new GroupHistory();
             v.announce.cancel = true;
-            noticeBucket.put(recallKey, v[0]);
+            v.announce.mtype = MSG_TYPE.RENOTICE;
+            noticeBucket.put(recallKey, v);
+
+            // const index = gInfo.annoceids.indexOf(message.msg);
+            // gInfo.annoceids.splice(index,1);
+            // gInfoBucket.put(message.gid,gInfo);
+
+            ghA.hIncId = recallKey;
+            ghA.msg = v.announce;
+
+            logger.debug('============',ghA);
+
+            return ghA;
         }
+        gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+        logger.debug('sendGroupMessage grouphistory gh:',gh);
+
+        return gh;
     }
+
+    // 生成消息ID
+    const msgLock = new MsgLock();
+    msgLock.hid = genGroupHid(message.gid);
+    // 这是一个事务
+    msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
+        mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
+
+        return msgLock;
+    });    
+    logger.debug(`after read and write`);
+    gh.hIncId = genHIncId(msgLock.hid, msgLock.current);
 
     // 公告消息
     if (message.mtype === MSG_TYPE.NOTICE) {
+        // 群主才能发送公告和撤销公告
+        if (getUid() !== gInfo.ownerid) {
+            gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+
+            return gh;
+        }
         // 公告数据存储
         const noticeBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
         const anmt = new Announcement();
@@ -143,21 +204,19 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 
         const ah = new AnnounceHistory();
         // 公告key使用群聊消息key
-        ah.aIncId = msgLock.hid;
+        ah.aIncId = genHIncId(msgLock.hid, msgLock.current);
         ah.announce = anmt;
         noticeBucket.put(ah.aIncId, ah);
-        logger.debug('Send annoucement: ', anmt, 'to group: ', message.gid);
+        logger.debug('sendGroupMessage annoucement: ', ah, 'to group: ', message.gid);
+        gInfo.annoceids.push(gh.hIncId);
+        gInfoBucket.put(message.gid,gInfo);
+
+        // const buf = new BonBuffer();
+        // ah.bonEncode(buf);
+        // const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+        // mqttPublish(mqttServer, true, QoS.AtMostOnce, genGroupHid(message.gid), buf.getBuffer());
+        // logger.debug('sendGroupMessage annoucement: ',ah);
     }
-
-    logger.debug(`before read and write`);
-    // 这是一个事务
-    msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
-        mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
-
-        return msgLock;
-    });    
-    logger.debug(`after read and write`);
-    gh.hIncId = genHIncId(msgLock.hid, msgLock.current);    
 
     bkt.put(gh.hIncId, gh);
 
@@ -179,6 +238,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
  * @param message user send
  */
 // #[rpc=rpcServer]
+// tslint:disable-next-line:max-func-body-length
 export const sendUserMessage = (message: UserSend): UserHistory => {
     console.log('sendMsg!!!!!!!!!!!', message);
     const dbMgr = getEnv().getDbMgr();
@@ -201,8 +261,21 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
         // TODO 判断撤回时间
         if (v !== undefined) {
             v.msg.cancel = true;
-            userHistoryBucket.put(recallKey, v);
+            v.msg.mtype = MSG_TYPE.RECALL;
+            userHistoryBucket.put(recallKey, v);  
+
+            const buf = new BonBuffer();
+            v.bonEncode(buf);
+
+            const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+            mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
+            logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(v)}`);
+
+            return v;        
         }
+        userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
+
+        return userHistory;
     }
     const userMsg = new UserMsg();
     userMsg.cancel = false;

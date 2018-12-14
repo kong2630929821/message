@@ -1,0 +1,12 @@
+.latest-announce-wrap{
+    width:100%;
+    height:100%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-around;
+}
+.content-wrap{
+    width: 564px;
+    font-size: 28px;
+}

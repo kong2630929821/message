@@ -7,13 +7,22 @@ import { popNew } from '../../../../pi/ui/root';
 import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
-import { UserHistory } from '../../../../server/data/db/message.s';
+import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
+import { sendUserMessage } from '../../../../server/data/rpc/message.p';
+import { UserSend } from '../../../../server/data/rpc/message.s';
+import { Logger } from '../../../../utils/logger';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
+import { clientRpcFunc } from '../../net/init';
 import { sendMessage } from '../../net/rpc';
+
 // ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
+declare var module;
+const WIDGET_NAME = module.id.replace(/\//g, '-');
+const logger = new Logger(WIDGET_NAME);
 export const forelet = new Forelet();
 
 export class Chat extends Widget {
@@ -35,7 +44,7 @@ export class Chat extends Widget {
         super.setProps(props);
         this.props.sid = store.getStore('uid');
         this.props.name = getFriendAlias(this.props.rid);
-        const hIncIdArr = store.getStore(`userChatMap/${this.getHid()}`) || [];
+        const hIncIdArr = store.getStore(`userChatMap/${this.getHid()}`, []);
         this.props.hidIncArray = hIncIdArr;
 
         // 更新上次阅读到哪一条记录
@@ -47,7 +56,7 @@ export class Chat extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        store.register(`userChatMap/${this.getHid()}`,this.bindCB);
+		store.register(`userChatMap/${this.getHid()}`,this.bindCB);
         // 第一次进入定位到最新的一条消息
         setTimeout(() => {
             document.querySelector('#messEnd').scrollIntoView();
@@ -76,6 +85,7 @@ export class Chat extends Widget {
     }
 
     public send(e:any) {
+        logger.debug('=========send chat',e);
         this.props.inputMessage = e.value;
         sendMessage(this.props.rid, e.value, (() => {
             const nextside = this.props.rid;
@@ -90,7 +100,6 @@ export class Chat extends Widget {
             };
         })(), e.msgType);
     }
-
     public destroy() {
         store.unregister(`userChatMap/${this.getHid()}`,this.bindCB);
 

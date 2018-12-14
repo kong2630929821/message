@@ -3,77 +3,98 @@
  */
 
 // ================================================ 导入
-import { Widget } from "../../../../pi/widget/widget";
-import { Forelet } from "../../../../pi/widget/forelet";
-import { popNew } from "../../../../pi/ui/root";
-import { login as userLogin } from '../../net/rpc';
-import { UserInfo } from "../../../../server/data/db/user.s";
+import { Widget } from '../../../../pi/widget/widget';
+import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
+import { GroupInfo } from '../../../../server/data/db/group.s';
+import { AnnounceHistory, GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
+import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
+import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
-import { factorial } from "../../../../pi/util/math";
-import { create } from "../../../../pi/net/rpc";
-import { UserArray } from "../../../../server/data/rpc/basic.s"
+import { updateGroupMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { GroupSend } from "../../../../server/data/rpc/message.s";
-import { MSG_TYPE, GroupHistory } from "../../../../server/data/db/message.s";
-import { clientRpcFunc } from "../../net/init";
-import { sendGroupMessage } from "../../../../server/data/rpc/message.p";
-import { DEFAULT_ERROR_STR } from "../../../../server/data/constant";
+import { clientRpcFunc } from '../../net/init';
 
+// ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
-// ================================================ 导出
 export class GroupChat extends Widget {
     public ok:() => void;
     public props:Props;
     public bindCB: any;
-    constructor(){
+    constructor() {
         super();
         this.props = {
-            sid:null,
             gid:null,
+            groupName:'',
             inputMessage:'',
             hidIncArray: [],
-            groupName:"KuPay官方群(24)",
+            aIncIdArray:[],
             isLogin:true
-        }
+        };
         this.bindCB = this.updateChat.bind(this);
     }
-    goBack(){
+    public goBack() {
         this.ok();
     }
-    public setProps(props){
+    public setProps(props:any) {
         super.setProps(props);
-        this.props.sid = store.getStore('uid');
-        this.props.hidIncArray = store.getStore(`groupChatMap/${this.getHid()}`) || [];
-        this.props.groupName = "KuPay官方群(24)";
+        this.props.hidIncArray = store.getStore(`groupChatMap/${this.getHid()}`,[]);
+        this.props.groupName = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo()).name;
+        this.props.aIncIdArray = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo()).annoceids;
+        // this.props.aIncIdArray = [];
         this.props.isLogin = true;
-        console.log("============groupChat",this.props)
+        logger.debug('============groupChat',this.props);
     }
     public firstPaint() {
         super.firstPaint();
         store.register(`groupChatMap/${this.getHid()}`,this.bindCB);
+        // store.register(`groupHistoryMap`,this.bindCB);
+        store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
     }
+
+    public attach() {
+        super.attach();
+        // 第一次进入定位到最新的一条消息
+        document.querySelector('#messEnd').scrollIntoView();
+    }
+
     public updateChat() {
         this.setProps(this.props);
         this.paint();
+        // 有新消息来时定位到最新消息
+        setTimeout(() => {
+            document.querySelector('#messEnd').scrollIntoView();
+            this.paint();
+        }, 100);
     }
     public send(e:any) {
+        logger.debug('====群组聊天信息发送',e);
         this.props.inputMessage = e.value;
         const message = new GroupSend();
         message.gid = this.props.gid;
         message.msg = this.props.inputMessage;
-        message.mtype = MSG_TYPE.TXT;
+        message.mtype = e.msgType || MSG_TYPE.TXT;
         message.time = (new Date()).getTime();
         clientRpcFunc(sendGroupMessage, message, (() => {
             const gid = this.props.gid;
 
             return (r: GroupHistory) => {
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    alert('对方不是你的好友！');
+                    logger.debug('发送失败！');
                     
                     return;
+                }
+                // 如果是撤回公告
+                if (r.msg.mtype === MSG_TYPE.RENOTICE) {
+                    logger.debug('撤回公告');
+                    const ah = new AnnounceHistory();
+                    // 公告key使用群聊消息key
+                    ah.aIncId = r.hIncId;
+                    ah.announce = r.msg;
+                    store.setStore(`announceHistoryMap/${ah.aIncId}`,ah);
                 }
                 // updateGroupMessage(gid, r);
             };
@@ -92,10 +113,10 @@ export class GroupChat extends Widget {
 
 // ================================================ 本地
 interface Props {
-    sid:number,
-    gid:number,
-    inputMessage:string;
-    hidIncArray: string[];
-    groupName: string,
-    isLogin:boolean
+    gid:number;
+    groupName: string; // 群名
+    inputMessage:string; // 输入的群消息
+    hidIncArray: string[]; // 群消息记录
+    aIncIdArray: string[]; // 群公告记录
+    isLogin:boolean;
 }
