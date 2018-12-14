@@ -13,9 +13,7 @@ import { Logger } from '../../../utils/logger';
 import { genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 import { UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
-import { AnnouceFragment, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
-import { getUid } from './group.r';
+import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';import { getUid } from './group.r';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -124,6 +122,7 @@ export const login = (user: UserType): UserInfo => {
             userInfo.uid = -1;
             userInfo.sex = 0;
             logger.debug('user does not exist: ', loginReq.uid);
+            
             return userInfo;
         }
     }
@@ -365,6 +364,25 @@ export const getAnnoucement = (param: AnnouceFragment): AnnounceHistoryArray => 
             }
         }
     }
+
+    return announceHistory;
+};
+
+/**
+ * 获取公告信息
+ * @param param AnnouceIds
+ */
+// #[rpc=rpcServer]
+export const getAnnoucements = (param: AnnouceIds): AnnounceHistoryArray => {
+    const dbMgr = getEnv().getDbMgr();
+    const announceHistoryBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
+
+    const announceHistory = new AnnounceHistoryArray();
+
+    const aids = param.arr;
+    
+    announceHistory.arr = announceHistoryBucket.get(aids);
+    logger.debug('getAnnoucements announceHistory',announceHistory);
 
     return announceHistory;
 };

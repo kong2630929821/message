@@ -3,37 +3,47 @@
  */
 
 // ================================================ 导入
-import { Widget } from "../../../../pi/widget/widget";
-import { Forelet } from "../../../../pi/widget/forelet";
-import { popNew } from "../../../../pi/ui/root";
+import { Json } from '../../../../pi/lang/type';
+import { Widget } from '../../../../pi/widget/widget';
+import { AnnounceHistory } from '../../../../server/data/db/message.s';
 import { Logger } from '../../../../utils/logger';
-import { factorial } from "../../../../pi/util/math";
+import * as store from '../../data/store';
+import { timestampFormat } from '../../logic/logic';
 
-
+// ================================================ 导出
+// tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
-// ================================================ 导出
 export class AnnounceItem extends Widget {
-    public setProps(props,oldProps){
-        super.setProps(props,oldProps); 
-        // this.props.announceList = [
-        //     {title:"公告标题",timeStamp:"8月3号 14：00"},
-        //     {title:"公告标题",timeStamp:"8月3号 14：00"},
-        //     {title:"公告标题",timeStamp:"8月3号 14：00"},
-        //     {title:"公告标题",timeStamp:"8月3号 14：00"},
-        // ]    
+    public props:Props = {
+        aIncId : '',
+        announce: null,
+        time:''
+    };
+    public setProps(props:any) {
+        super.setProps(props); 
+        logger.debug(props.aIncId,'=============',this.props.aIncId);
+        this.props.announce = store.getStore(`announceHistoryMap/${this.props.aIncId}`,new AnnounceHistory()).announce;
+        logger.debug('====this.props.announce',this.props.announce);
+        const time = this.props.announce ? this.props.announce.time : null;
+        this.props.time = timestampFormat(time).substr(5,16);
     }
-    // props:Props = {
-    //     avatorPath:"user.png",
-    //     text:"成员名",
-    //     isOrdinary:true
-    // }
+
+    public firstPaint() {
+        super.firstPaint();
+        store.register(`announceHistoryMap/${this.props.aIncId}`,() => {
+            this.setProps(this.props);
+            this.paint();
+        });
+    }
+    
 }
 
 // ================================================ 本地
 interface Props {
-    title:string,
-    timeStamp:string
+    aIncId:string;
+    announce:any; // 公告详细
+    time:string;
 }

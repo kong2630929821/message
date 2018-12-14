@@ -12,7 +12,7 @@
         <div w-class="user-wrap" ev-transferAdmin="openConfirmTranBox">
             {{for index,item of membersButnoOwner}}
             <div on-tap="openConfirmTranBox({{item}})">
-                <client-app-widget-contactItem-contactItem>{"uid":{{item}}}</client-app-widget-contactItem-contactItem>
+                <client-app-demo_view-contactList-contactItem>{"id":{{item}},chatType:"user"}</client-app-demo_view-contactList-contactItem>
             </div>
             {{end}}
         </div>

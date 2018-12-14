@@ -3,7 +3,7 @@
         <img w-class="avator" src="../../res/images/user.png" />
     </div>
      <div w-class="user-info-wrap">
-        <span w-class="userName">{{it.info.name || it.gid}}</span>
+        <span w-class="userName">{{it.name}}</span>
         <span w-class="applyInfo">{{it.applyInfo}}</span>
     </div>
     {{if !it.isagree}}

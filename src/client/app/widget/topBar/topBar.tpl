@@ -27,5 +27,8 @@
         {{if it.shareImg}}
         <img on-tap="share" src="../../res/images/{{it.shareImg}}" w-class="shareImg" />
         {{end}}
+        {{if it.editImg}}
+        <img on-tap="edit" src="../../res/images/{{it.editImg}}" w-class="editImg" />
+        {{end}}
     </div>
 </div>

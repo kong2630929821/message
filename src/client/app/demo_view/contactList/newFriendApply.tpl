@@ -1,7 +1,9 @@
-<div class="new-page" ev-back-click="goBack">
-    <client-app-widget-topBar-topBar>{title:"新的朋友",background:"#fff"}</client-app-widget-topBar-topBar>
+<div class="new-page">
+    <div ev-back-click="goBack">
+        <client-app-widget-topBar-topBar>{title:"新的朋友",background:"#fff"}</client-app-widget-topBar-topBar>
+    </div>
     <div w-class="newfriend-wrap">
-        <client-app-widget-featureBar-featureBar>{iconPath:"user.png",text:{{it.info.name}} }</client-app-widget-featureBar-featureBar>
+        <client-app-widget-featureBar-featureBar>{iconPath:"user.png",text:{{it.name}} }</client-app-widget-featureBar-featureBar>
     </div>
     <div w-class="attach-info-wrap">
         <div w-class="title-wrap">附加信息</div>
