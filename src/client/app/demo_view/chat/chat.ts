@@ -8,14 +8,11 @@ import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
-import { sendUserMessage } from '../../../../server/data/rpc/message.p';
-import { UserSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
-import { clientRpcFunc } from '../../net/init';
 import { sendMessage } from '../../net/rpc';
 
 // ================================================ 导出
@@ -56,7 +53,7 @@ export class Chat extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-		store.register(`userChatMap/${this.getHid()}`,this.bindCB);
+        store.register(`userChatMap/${this.getHid()}`,this.bindCB);
         // 第一次进入定位到最新的一条消息
         setTimeout(() => {
             document.querySelector('#messEnd').scrollIntoView();
@@ -95,6 +92,10 @@ export class Chat extends Widget {
                     alert('对方不是你的好友！');
                     
                     return;
+                } else if (r.msg.mtype === MSG_TYPE.RECALL) {
+                    const mess = store.getStore(`userHistoryMap/${r.msg.msg}`);
+                    mess.cancel = true;
+                    store.setStore(`userHistoryMap/${r.msg.msg}`,mess);
                 }
                 updateUserMessage(nextside, r);
             };

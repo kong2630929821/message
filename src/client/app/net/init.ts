@@ -31,8 +31,8 @@ export const initClient =  () => {
                 console.log('connect fail', r);
             }
         };
-        rootClient = new Client('127.0.0.1', 1234, 'clientId-wcd14PDgoZ', null, options);
-        // rootClient = new Client('192.168.9.29', 1234, 'clientId-wcd14PDgoZ', null, options);
+        // rootClient = new Client('127.0.0.1', 1234, 'clientId-wcd14PDgoZ', null, options);
+        rootClient = new Client('192.168.9.29', 1234, 'clientId-wcd14PDgoZ', null, options);
     }
 };
 
