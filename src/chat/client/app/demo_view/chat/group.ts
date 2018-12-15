@@ -5,10 +5,9 @@
 // ================================================ 导入
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
-import { GroupHistory, MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
+import { GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
-import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
 // ================================================ 导出

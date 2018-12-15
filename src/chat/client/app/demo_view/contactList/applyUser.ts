@@ -3,9 +3,9 @@
  */ 
 
 // ================================================ 导入
-import { popNew } from '../../../../pi/ui/root';
-import { notify } from '../../../../pi/widget/event';
-import { Widget } from '../../../../pi/widget/widget';
+import { popNew } from '../../../../../pi/ui/root';
+import { notify } from '../../../../../pi/widget/event';
+import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';import * as store from '../../data/store';
 

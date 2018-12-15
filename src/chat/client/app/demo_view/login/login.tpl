@@ -1,6 +1,6 @@
-<div w-class="login-wrap" style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
+<div class="new-page" style="background-image: url('../../chat/client/app/res/images/home_bg.png');">
     <chat-client-app-widget-topBar-topBar w-class="title">{title:"登录聊天",background:"none"}</chat-client-app-widget-topBar-topBar>
-    <div w-class="logo-wrap">
+    <div w-class="logo-wrap" >
         <img w-class="logo" src="../../res/images/logo.png" />
     </div>
     <div w-class="input-wrap">

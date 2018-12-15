@@ -1,6 +1,3 @@
-.register-wrap{
-    background: url("../app/res/images/home_bg.png");
-}
 .title{ 
     color: rgba(255, 255, 255, 1);
     font-size: 32px;
