@@ -37,7 +37,7 @@ export class Contact extends Widget {
         if (chatType === GENERATOR_TYPE.USER) {
             popNew('chat-client-app-demo_view-chat-chat', { rid:id });
         } else if (chatType === GENERATOR_TYPE.GROUP) {
-            popNew('chat-client-app-demo_view-chat-group', { gid:id });
+            popNew('client-app-demo_view-group-groupChat', { gid:id });
         }
         
     }

@@ -10,7 +10,6 @@ import { AnnounceHistory, GroupHistory, MSG_TYPE } from '../../../../server/data
 import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
-import { updateGroupMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
 
@@ -47,6 +46,12 @@ export class GroupChat extends Widget {
         // this.props.aIncIdArray = [];
         this.props.isLogin = true;
         logger.debug('============groupChat',this.props);
+
+        // 更新上次阅读到哪一条记录
+        const lastRead = store.getStore(`lastRead/${this.getHid()}`,{ msgId:undefined,msgType:'group' });
+        const hincId = this.props.hidIncArray.length > 0 ? this.props.hidIncArray[this.props.hidIncArray.length - 1] : undefined;
+        lastRead.msgId = hincId;
+        store.setStore(`lastRead/${this.getHid()}`,lastRead);
     }
     public firstPaint() {
         super.firstPaint();

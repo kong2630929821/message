@@ -1,7 +1,7 @@
 /**
  * 对后端推送的数据做一些处理，然后放入数据库
  */
-import { GroupHistory, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
+import { GroupHistory, UserHistory } from '../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
 import { getHidFromhIncId } from '../../../utils/util';
 import * as store from './store';

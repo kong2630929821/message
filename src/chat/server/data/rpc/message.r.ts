@@ -16,7 +16,6 @@ import * as CONSTANT from '../constant';
 import { Logger } from '../../../utils/logger';
 import { OnlineUsers } from '../db/user.s';
 
-import * as bigInt from '../../../../pi/bigint/biginteger';
 import { genGroupHid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { getUid } from './group.r';
 
@@ -66,8 +65,10 @@ export const getUserHistoryCursor = (uid: number): UserHistoryCursor => {
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
     const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
-  
-    return userHistoryCursorBucket.get(genUuid(sid,uid))[0];
+    const userCursor = userHistoryCursorBucket.get(genUuid(sid,uid))[0];
+    logger.debug('getUserHistoryCursor userCursor',userCursor);
+
+    return userCursor;
 };
 
 // ================================================================= 导出
@@ -260,8 +261,8 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
         const v = userHistoryBucket.get<string, UserHistory>(recallKey)[0];
         // TODO 判断撤回时间
         if (v !== undefined) {
-            v.msg.cancel = true;
-            v.msg.mtype = MSG_TYPE.RECALL;
+            v.msg.cancel = true;   // 撤回该条消息，但是该消息本身不是一条撤回标记
+            // v.msg.mtype = MSG_TYPE.RECALL;
             userHistoryBucket.put(recallKey, v);  
 
             const buf = new BonBuffer();
@@ -271,11 +272,12 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
             mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
             logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(v)}`);
 
-            return v;        
-        }
-        userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
+            // return v;        
+        } else {  // 错误的撤回请求
+            userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
 
-        return userHistory;
+            return userHistory;
+        }
     }
     const userMsg = new UserMsg();
     userMsg.cancel = false;

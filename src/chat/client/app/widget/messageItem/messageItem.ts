@@ -5,7 +5,7 @@
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
-import { GroupHistory, MSG_TYPE, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
+import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGuid, getGidFromHincid } from '../../../../utils/util';
@@ -37,9 +37,9 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
     public setProps(props:any) {
         super.setProps(props);
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserHistory());
+            this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupHistory());
+            this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
             logger.debug('oooooooooooooo', this.props.msg);
             const gid = getGidFromHincid(this.props.hIncId);
             logger.debug('mmmmmmmmmmmmmmmmm',gid);
