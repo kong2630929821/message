@@ -10,7 +10,7 @@ import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GroupHistory, UserHistory } from '../../../../server/data/db/message.s';
 import { Contact, FriendLink, UserInfo } from '../../../../server/data/db/user.s';
 import { getFriendLinks } from '../../../../server/data/rpc/basic.p';
-import { FriendLinkArray, GetFriendLinksReq, GetUserInfoReq, GroupUserLinkArray } from '../../../../server/data/rpc/basic.s';
+import { FriendLinkArray, GetFriendLinksReq, GroupUserLinkArray } from '../../../../server/data/rpc/basic.s';
 import { getGroupUserLink } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import { genUuid } from '../../../../utils/util';
@@ -18,7 +18,7 @@ import { getFriendHistory, getMyGroupHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { clientRpcFunc, subscribe as subscribeMsg } from '../../net/init';
-import { login as userLogin } from '../../net/rpc';
+import { login as userLogin, walletLogin } from '../../net/rpc';
 import * as subscribedb from '../../net/subscribedb';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -61,17 +61,31 @@ export class Login extends Widget {
         for (let i = 0;i < inputs.length;i++) {
             inputs[i].blur();
         }
-        userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
-            if (r.uid > 0) {
-                store.setStore(`uid`,r.uid);
-                store.setStore(`userInfoMap/${r.uid}`,r);        
-                init(r.uid); 
-                popNew('chat-client-app-demo_view-chat-contact', { sid: this.props.uid });
-                subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
-                    updateUserMessage(v.msg.sid,v);
-                });
-            }
-        });
+        if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {
+            walletLogin(getOpenId('101'),'',(r:UserInfo) => {
+                if (r.uid > 0) {
+                    store.setStore(`uid`,r.uid);
+                    store.setStore(`userInfoMap/${r.uid}`,r);        
+                    init(r.uid); 
+                    popNew('chat-client-app-demo_view-chat-contact', { sid: this.props.uid });
+                    subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
+                        updateUserMessage(v.msg.sid,v);
+                    });
+                }
+            });
+        } else {
+            userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
+                if (r.uid > 0) {
+                    store.setStore(`uid`,r.uid);
+                    store.setStore(`userInfoMap/${r.uid}`,r);        
+                    init(r.uid); 
+                    popNew('chat-client-app-demo_view-chat-contact', { sid: this.props.uid });
+                    subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
+                        updateUserMessage(v.msg.sid,v);
+                    });
+                }
+            });
+        }
         
     }
 

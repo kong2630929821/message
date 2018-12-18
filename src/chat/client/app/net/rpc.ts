@@ -39,14 +39,7 @@ export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => 
  * @param cb callback
  */
 export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void) => {
-    // 钱包登录
-    // let userType = new UserType();
-    // userType.enum_type = UserType_Enum.WALLET;
-    // let walletLoginReq = new WalletLoginReq();
-    // walletLoginReq.openid = "test";
-    // walletLoginReq.sign = "";
-    // userType.value = walletLoginReq;
-    
+   
     // 本地账户登录
     const userType = new UserType();
     userType.enum_type = UserType_Enum.DEF;
@@ -54,6 +47,23 @@ export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void
     info.uid = uid;
     info.passwdHash = passwdHash;
     userType.value = info;
+    clientRpcFunc(loginUser, userType, (r: UserInfo) => {
+        cb(r);
+    });
+};
+/**
+ * 钱包登录
+ * @param uid user id 
+ * @param passwdHash passwd hash
+ * @param cb callback
+ */
+export const walletLogin = (openid: string, sign: string, cb: (r: UserInfo) => void) => {
+    const userType = new UserType();
+    userType.enum_type = UserType_Enum.WALLET;
+    const walletLoginReq = new WalletLoginReq();
+    walletLoginReq.openid = openid;
+    walletLoginReq.sign = sign;
+    userType.value = walletLoginReq;
     clientRpcFunc(loginUser, userType, (r: UserInfo) => {
         cb(r);
     });

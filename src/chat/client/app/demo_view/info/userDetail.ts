@@ -7,7 +7,8 @@ import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
-import { Result } from '../../../../server/data/rpc/basic.s';
+import { getUsersInfo } from '../../../../server/data/rpc/basic.p';
+import { GetUserInfoReq, Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { Logger } from '../../../../utils/logger';
@@ -15,7 +16,7 @@ import { genUserHid, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
 import { clientRpcFunc, unSubscribe } from '../../net/init';
-import { delFriend as delUserFriend } from '../../net/rpc';
+import { applyFriend, delFriend as delUserFriend } from '../../net/rpc';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -32,7 +33,8 @@ export class UserDetail extends Widget {
         isContactorOpVisible:false,
         utilList:[],
         userInfo:{},
-        alias:''
+        alias:'',
+        isFriend:true
     };
 
     public setProps(props:Json) {
@@ -47,8 +49,27 @@ export class UserDetail extends Widget {
         
         this.props.isContactorOpVisible = false;
         this.props.editable = false;
+        this.props.isFriend = true;
         this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
         this.props.alias = getFriendAlias(this.props.uid);
+        if (!this.props.alias) {
+            this.getUserData(this.props.uid);
+        }
+    }
+
+    // 非好友展示信息
+    public getUserData(uid:number) {
+        const info = new GetUserInfoReq();
+        info.uids = [uid];
+        this.props.isFriend = false;
+        clientRpcFunc(getUsersInfo,info,(r:UserArray) => {
+            if (r && r.arr.length > 0) {
+                this.props.userInfo = r.arr[0];
+                this.paint();
+            } else {
+                console.error('获取用户信息失败',r);
+            }
+        });
     }
     
     // 点击...展开联系人操作列表
@@ -66,12 +87,21 @@ export class UserDetail extends Widget {
         }
     }  
 
+    // 添加好友
+    public addUser() {
+        applyFriend(this.props.uid,(r:Result) => {
+            if (r.r === 0) {
+                alert(`${this.props.uid}已经是你的好友`);
+            }
+        });
+    }
+
     // 点击联系人操作列表项
     public handleFatherTap(e:any) {
         console.log('handleFatherTap');
         this.props.isContactorOpVisible = false;
         if (e.index === 1) { // 清空聊天记录
-            popNew('chat-client-app-widget-modalBox-modalBox',{ title:'清空聊天记录',content:'确定清空和' + `${this.props.userInfo.name}` + '的聊天记录吗' });       
+            popNew('chat-client-app-widget-modalBox-modalBox',{ title:'清空聊天记录',content:'确定清空和' + `${this.props.userInfo.name}` + '的聊天记录吗' });
         }
         if (e.index === 2) { // 加入黑名单
             popNew('chat-client-app-widget-modalBox-modalBox',{ title:'加入黑名单',content:'加入黑名单，您不再收到对方的消息。' });
@@ -169,9 +199,10 @@ export class UserDetail extends Widget {
 interface Props {
     uid: number;
     inFlag:number; // 从某个页面进入，0 contactList进入, 1 chat进入
-    editable:boolean;
+    editable:boolean; // 是否可编辑别名
     isContactorOpVisible:boolean;
     utilList:any;
     userInfo:any;
-    alias:string;
+    alias:string; // 好友别名
+    isFriend:boolean; // 是否是好友
 }

@@ -9,7 +9,10 @@
                 {{else}}
                     {{it.alias||it.userInfo.name}}
                 {{end}}
+
+                {{if it.isFriend}}
                 <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="editAlias"/>
+                {{end}}
             </div>
             <div>ID：{{it.uid}}</div>
             <div>昵称：{{it.userInfo.name}}</div>
@@ -45,11 +48,15 @@
                     <span>消息免打扰</span>
                     <chat-client-app-widget-switch-switch>{types:false,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                 </li>
+                {{if it.isFriend}}
                 <li w-class="liItem" on-tap="startChat" style="color: #318DE6;margin-bottom: 110px;">开始对话</li>
+                {{else}}
+                <li w-class="liItem" on-tap="addUser" style="color: #318DE6;margin-bottom: 110px;">添加好友</li>
+                {{end}}
             </ul>
         </div>
     </div>
-    {{if it.isContactorOpVisible}}
+    {{if it.isContactorOpVisible && it.isFriend}}
     <div w-class="contactorOpList" ev-handleFatherTap="handleFatherTap">
         <chat-client-app-widget-utilList-utilList>{utilList:{{it.utilList}} }</chat-client-app-widget-utilList-utilList>
     </div>
