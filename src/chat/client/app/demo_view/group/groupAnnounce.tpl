@@ -11,7 +11,7 @@
             </div>
             {{if it.aIncIdArray.length > 0}}
                 {{for index,item of it.aIncIdArray}}
-                <chat-client-app-widget-announceItem-announceItem>{aIncId:{{item}} }</chat-client-app-widget-announceItem-announceItem>
+                <widget w-tag="chat-client-app-widget-announceItem-announceItem" on-tap="goDetail('{{item}}')">{aIncId:{{item}} }</widget>
                 {{end}}
             {{end}}
         </div>

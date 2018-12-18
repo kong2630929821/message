@@ -3,35 +3,44 @@
  */
 
 // ================================================ 导入
-import { Widget } from "../../../../../pi/widget/widget";
-import { Forelet } from "../../../../../pi/widget/forelet";
-import { popNew } from "../../../../../pi/ui/root";
-import { Logger } from '../../../../utils/logger';
-import { factorial } from "../../../../../pi/util/math";
-
-
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
+import { popNew } from '../../../../../pi/ui/root';
+import { Widget } from '../../../../../pi/widget/widget';
+import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
+import { GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
+import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
+import { GroupSend } from '../../../../server/data/rpc/message.s';
+import { getGidFromHincid } from '../../../../utils/util';
+import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
 export class AnnounceDetail extends Widget {
-    public setProps(props,oldProps){
-        super.setProps(props,oldProps); 
-        this.props.content = "欢迎大家入群";    
-    }
-    // props:Props = {
-    //     avatorPath:"user.png",
-    //     text:"成员名",
-    //     isOrdinary:true
-    // }
-    // 点击删除公告
-    deleteAnnounce(){
-        popNew("chat-client-app-widget-modalDelete-modalDelete");
-    }
-}
+    public ok:() => void;
 
-// ================================================ 本地
-interface Props {
-    content:string,
+    public setProps(props:any) {
+        super.setProps(props); 
+        this.props.content = '欢迎大家入群';    
+    }
+    
+    // 点击删除公告
+    public deleteAnnounce(e:any) {
+        popNew('chat-client-app-widget-openLink-openLink',{ text:'确认删除' },() => {
+            const message = new GroupSend();
+            message.gid = getGidFromHincid(this.props.aIncId);
+            message.msg = this.props.aIncId;
+            message.mtype = MSG_TYPE.RENOTICE;
+            message.time = (new Date()).getTime();
+            clientRpcFunc(sendGroupMessage, message, (r:GroupHistory) => {
+                // TODO
+                if (r.hIncId === DEFAULT_ERROR_STR) {
+                    console.log('删除公告失败');
+                        
+                    return;
+                }
+            });
+        });
+    }
+
+    public goBack() {
+        this.ok();
+    }
 }

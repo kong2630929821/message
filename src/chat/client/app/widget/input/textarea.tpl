@@ -1,4 +1,4 @@
-<div w-class="pi-input-box" class="pi-input">
+<div w-class="pi-input-box" class="pi-input" style="{{it && it.style ? it.style : ''}}">
     <div w-class="hideMsg">{{it1.currentValue?it1.currentValue:'1'}}</div>
     <textarea 
         w-class="pi-input__inner" 

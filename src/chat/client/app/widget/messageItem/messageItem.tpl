@@ -14,7 +14,7 @@
             <span w-class="rightDownTail"></span>
             {{if it.isMessageRecallVisible}}
             <div style="position:absolute;top:0px;left:-240px;">
-                <client-app-widget-messageRecall-messageRecall>{chatType:{{it.chatType}}, hidInc:{{it.hIncId}} }</client-app-widget-messageRecall-messageRecall>
+                <widget w-tag="chat-client-app-widget-messageRecall-messageRecall">{chatType:{{it.chatType}}, hidInc:{{it.hIncId}} }</widget>
             </div>
             {{end}}
         </div>

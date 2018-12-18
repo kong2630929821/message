@@ -1,15 +1,15 @@
 /**
  * 初始化store
  */
-import { UserHistoryCursor } from '../../../server/data/db/message.s';
-import { GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
-import { getUserHistory } from '../../../server/data/rpc/basic.p';
-import { UserHistoryArray, UserHistoryFlag } from '../../../server/data/rpc/basic.s';
-import { getUserHistoryCursor } from '../../../server/data/rpc/message.p';
-import { genHIncId, genUserHid, genUuid } from '../../../utils/util';
+import { GroupHistoryCursor, UserHistoryCursor } from '../../../server/data/db/message.s';
+import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
+import { getGroupHistory, getUserHistory } from '../../../server/data/rpc/basic.p';
+import { GroupHistoryArray, GroupHistoryFlag, UserHistoryArray, UserHistoryFlag } from '../../../server/data/rpc/basic.s';
+import { getGroupHistoryCursor, getUserHistoryCursor } from '../../../server/data/rpc/message.p';
+import { genGroupHid, genGuid, genHIncId, genUserHid, genUuid } from '../../../utils/util';
 import { clientRpcFunc } from '../net/init';
 import { getFile, initFileStore, writeFile } from './lcstore';
-import { updateUserMessage } from './parse';
+import { updateGroupMessage, updateUserMessage } from './parse';
 import * as store from './store';
 
 /**
@@ -41,13 +41,13 @@ export const initAccount = () => {
 /**
  * 请求好友发的消息历史记录
  */
-export const getFriendHistory = (elem: UserInfo) => {
+export const getFriendHistory = (rid: number) => {
     const sid = store.getStore('uid');
-    const hid = genUserHid(sid, elem.uid);
-    if (sid === elem.uid) return;
+    const hid = genUserHid(sid, rid);
+    if (sid === rid) return;
 
     const userflag = new UserHistoryFlag();
-    userflag.rid = elem.uid;
+    userflag.rid = rid;
     const hIncIdArr = store.getStore(`userChatMap/${hid}`, []);
     userflag.hIncId = hIncIdArr && hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
 
@@ -56,10 +56,10 @@ export const getFriendHistory = (elem: UserInfo) => {
         msgType: GENERATOR_TYPE.USER
     };
     if (!userflag.hIncId) {  // 如果本地没有记录，则请求后端存的游标
-        clientRpcFunc(getUserHistoryCursor, elem.uid, (r: UserHistoryCursor) => {
-            if (r && r.uuid === genUuid(sid,elem.uid)) { // 有返回值且是正确的返回值
+        clientRpcFunc(getUserHistoryCursor, rid, (r: UserHistoryCursor) => {
+            if (r && r.uuid === genUuid(sid,rid)) { // 有返回值且是正确的返回值
                 lastRead.msgId = genHIncId(hid,r.cursor);
-                // console.error('uid: ',elem.uid,'lastread ',lastRead);
+                // console.error('rid: ',rid,'lastread ',lastRead);
             } 
             store.setStore(`lastRead/${hid}`,lastRead); 
         });
@@ -69,7 +69,7 @@ export const getFriendHistory = (elem: UserInfo) => {
     } 
     
     clientRpcFunc(getUserHistory,userflag,(r:UserHistoryArray) => {
-        // console.error('uuid: ',elem.uid,'initStore getFriendHistory',r);
+        // console.error('uuid: ',hid,'initStore getFriendHistory',r);
         if (r.newMess > 0) {
             r.arr.forEach(element => {
                 updateUserMessage(userflag.rid, element);
@@ -80,9 +80,49 @@ export const getFriendHistory = (elem: UserInfo) => {
 };
 
 /**
- * 聊天数据变化
+ * 请求群聊消息历史记录
  */
-export const accountsChange = () => {
+export const getMyGroupHistory = (gid: number) => {
+    const sid = store.getStore('uid');
+    const hid = genGroupHid(gid);
+
+    const groupflag = new GroupHistoryFlag();
+    groupflag.gid = gid;
+    const hIncIdArr = store.getStore(`groupChatMap/${hid}`, []);
+    groupflag.hIncId = hIncIdArr && hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
+
+    const lastRead = {
+        msgId: groupflag.hIncId,
+        msgType: GENERATOR_TYPE.GROUP
+    };
+    if (!groupflag.hIncId) {  // 如果本地没有记录，则请求后端存的游标
+        clientRpcFunc(getGroupHistoryCursor, gid, (r: GroupHistoryCursor) => {
+            if (r && r.guid === genGuid(gid,sid)) { // 有返回值且是正确的返回值
+                lastRead.msgId = genHIncId(hid,r.cursor);
+                console.error('gid: ',gid,'lastread ',lastRead);
+            } 
+            store.setStore(`lastRead/${hid}`,lastRead); 
+        });
+
+    } else {
+        store.setStore(`lastRead/${hid}`,lastRead);
+    } 
+    
+    clientRpcFunc(getGroupHistory,groupflag,(r:GroupHistoryArray) => {
+        console.error('guid: ',hid,'initStore getMyGroupHistory',r);
+        if (r.newMess > 0) {
+            r.arr.forEach(element => {
+                updateGroupMessage(gid, element);
+            });
+        }
+    });
+
+};
+
+/**
+ * 单聊数据变化
+ */
+export const userChatChange = () => {
     const id = store.getStore('uid');
     getFile(id, (value) => {
         if (!value) {
@@ -91,7 +131,15 @@ export const accountsChange = () => {
         value.userHistoryMap = store.getStore('userHistoryMap'); // 单人聊天历史记录变化
         value.userChatMap = store.getStore('userChatMap');  // 单人聊天历史记录索引变化
         value.lastChat = store.getStore('lastChat');  // 最近聊天记录
-        writeFile(id, value);
+
+        setTimeout(() => {
+            writeFile(id, value,() => {
+                console.log('write success');
+            }, () => {
+                console.log('fail!!!!!!!!!!');
+            });
+        }, 0);
+
     }, () => {
         console.log('read error');
     });
@@ -118,7 +166,7 @@ export const friendChange = () => {
 /**
  * 群组相关数据变化
  */
-export const groupChange = () => {
+export const groupChatChange = () => {
     const id = store.getStore('uid');
     getFile(id, (value) => {
         if (!value) {
@@ -130,20 +178,12 @@ export const groupChange = () => {
 
         setTimeout(() => {
             writeFile(id, value, () => {
-                // setTimeout(() => {
-                //     getFile(id, (val) => {
-                //         console.log(`待写数据 is : ${JSON.stringify(value)}`);
-                //         console.log(`文件数据 is : ${JSON.stringify(val)}`);
-                //     }, () => {
-                //         console.log('read error');
-                //     });
-                // }, 0);
                 console.log('write success');
-
             }, () => {
                 console.log('fail!!!!!!!!!!');
             });
         }, 0);
+        
     }, () => {
         console.log('read error');
     });

@@ -11,20 +11,17 @@
     background: white;
     display: flex;
     align-items: center;
-    border-bottom: solid gray 1px;
+    border-bottom: solid #DBDBE5 1px;
 }
 .title{
     font-size: 28px;
     font-weight:bold;
-    font-family: PingFangSC-Medium;
     margin-left:0px;
     margin-right:auto;
 }
 .quantity{
     color: rgba(136, 136, 136, 0.87);
     font-size: 28px;
-    font-family: PingFangSC-Regular;
-
 }
 .goToImg{
     width:32px;

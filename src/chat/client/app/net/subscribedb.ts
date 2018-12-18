@@ -11,7 +11,6 @@ import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 import { watchAccountGenerator, watchAddressInfo, watchAnnounceHistory, watchContact,watchFriendLink, watchGroupHistory, watchGroupInfo, watchGroupUserLink,watchMsgLock, watchUserCredential, watchUserHistory, watchUserInfo } from '../../../server/data/rpc/dbWatcher.p';
-import { toBonBuffer } from '../../../utils/util';
 import * as store from '../data/store';
 import { clientRpcFunc, subscribe } from './init';
 
@@ -21,8 +20,8 @@ import { clientRpcFunc, subscribe } from './init';
  * 群组信息
  * @param gid group id
  */
-export const subscribeGroupInfo = (gid: number,cb,diffcb) => {
-    subscribeTable(watchGroupInfo,'gid',gid,DEFAULT_ERROR_NUMBER,GroupInfo,'groupInfoMap',cb,diffcb);
+export const subscribeGroupInfo = (gid: number,cb) => {
+    subscribeTable(watchGroupInfo,'gid',gid,DEFAULT_ERROR_NUMBER,GroupInfo,'groupInfoMap',cb);
 };
 
 /**

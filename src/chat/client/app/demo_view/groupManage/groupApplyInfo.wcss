@@ -18,10 +18,9 @@
     height: 71px;
     padding:10px 20px;
     margin:0 10px;
-    border-bottom:solid gray 1px;
+    border-bottom:solid #DBDBE5 1px;
     color: rgba(136, 136, 136, 1);
     font-size: 28px;
-    font-family: PingFangSC-Regular;
     
 }
 .detail-wrap{
@@ -29,7 +28,6 @@
     margin:30px;  
     color: rgba(34, 34, 34, 1);
     font-size: 28px;
-    font-family: PingFangSC-Regular;
 }
 .agree-wrap{
     width:710px;
@@ -48,7 +46,6 @@
     background-color: rgba(255, 255, 255, 1);
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
-    font-family: PingFangSC-Regular;
 }
 .agree{
     display:inline-block;
@@ -61,7 +58,6 @@
     background-color: rgba(49, 141, 230, 1);
     color: rgba(255, 255, 255, 1);
     font-size: 32px;
-    font-family: PingFangSC-Regular;
 }
 .solved{
     margin: 40px 20px;

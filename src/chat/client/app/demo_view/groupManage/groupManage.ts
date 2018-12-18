@@ -8,8 +8,6 @@ import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { getGroupsInfo } from '../../../../server/data/rpc/basic.p';
-import { GetGroupInfoReq } from '../../../../server/data/rpc/basic.s';
 import { dissolveGroup } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
@@ -75,15 +73,18 @@ export class ManageItem extends Widget {
         const ownerid = this.props.groupInfo.ownerid;
         const uid = store.getStore('uid');
         logger.debug('==============openManageItem',e.value);
-        if (ownerid === uid && e.value === 0) { // 设置管理员
-            popNew('chat-client-app-demo_view-groupManage-setupAdmin',{ gid:this.props.gid });
-        }
-        if (ownerid === uid && e.value === 1) { // 转让群主
-            popNew('chat-client-app-demo_view-groupManage-transferAdmin',{ gid:this.props.gid });
-        }
         if (e.value === 2) { // 入群申请
             popNew('chat-client-app-demo_view-groupManage-groupApplyStatus',{ gid:this.props.gid });
+        } else if (ownerid !== uid) {  // 是否是群主
+            alert('你没有权限执行此操作');
+
+            return;
         }
+        if (e.value === 0) { // 设置管理员
+            popNew('chat-client-app-demo_view-groupManage-setupAdmin',{ gid:this.props.gid });
+        } else if (e.value === 1) { // 转让群主
+            popNew('chat-client-app-demo_view-groupManage-transferAdmin',{ gid:this.props.gid });
+        } 
     }
     // 解散群
     public destroyGroup() {

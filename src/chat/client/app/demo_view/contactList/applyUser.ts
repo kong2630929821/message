@@ -8,6 +8,9 @@ import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';import * as store from '../../data/store';
+import { getUsersInfo } from '../../../../server/data/rpc/basic.p';
+import { GetUserInfoReq, UserArray } from '../../../../server/data/rpc/basic.s';
+import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
  // tslint:disable-next-line:no-reserved-keywords
@@ -37,14 +40,21 @@ export class ApplyUser extends Widget {
         }
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             if (this.props.isActiveToGroup) { // 主动申请加群
-                const userInfo = store.getStore(`userInfoMap/${this.props.id}`);
-                this.props.name = userInfo ? userInfo.name : ''; 
-                this.props.applyInfo = `用户${this.props.name}申请进群`;
-                this.props.activeToGGid = props.activeToGGid;
+                const info = new GetUserInfoReq();
+                info.uids = [this.props.id];
+                clientRpcFunc(getUsersInfo,info,(r:UserArray) => {
+                    if (r.arr.length > 0) {
+                        this.props.name = r.arr[0].name; 
+                        this.props.applyInfo = `用户${this.props.name}申请进群`;
+                        this.props.activeToGGid = props.activeToGGid;
+                        this.paint();
+                    }
+                });
+                
             } else { // 被动进群
                 const ginfo = store.getStore(`groupInfoMap/${this.props.id}`);
                 this.props.name = ginfo ? ginfo.name : ''; 
-                this.props.applyInfo = `邀请你进群：${this.props.name}`;
+                this.props.applyInfo = `邀请你加入群组：${this.props.name}`;
             }
             
         }

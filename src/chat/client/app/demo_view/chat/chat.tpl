@@ -9,6 +9,8 @@
         <div id="messEnd"></div>
     </div>
 
-    <widget w-tag="chat-client-app-widget-inputMessage-inputMessage"></widget>  
+    <div>
+        <widget w-tag="chat-client-app-widget-inputMessage-inputMessage"></widget>  
+    </div>
 </div>
 

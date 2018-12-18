@@ -2,7 +2,6 @@
  * 一些全局方法
  */
 // =====================================导入
-import { GroupInfo } from '../../../server/data/db/group.s';
 import { FriendLink, UserInfo } from '../../../server/data/db/user.s';import { genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 
@@ -61,13 +60,4 @@ export const getFriendAlias = (rid:number) => {
     const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,new FriendLink());
 
     return friend.alias || user.name;
-};
-
-/**
- * 获取群别名
- */
-export const getGroupAlias = (gid:number) => {
-    const groupInfo = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
-    
-    return groupInfo.name;
 };

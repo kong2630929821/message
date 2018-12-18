@@ -14,11 +14,11 @@
 .text{
     color: #888;
     font-size: 32px;
-    font-family: PingFangSC-Regular;
 }
 .notice{
     height:128px;
     position:absolute;
     top:129px;
-    left:0px;
+    left:0;
+    right: 0;
 }

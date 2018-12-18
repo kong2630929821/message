@@ -1,4 +1,5 @@
-<div class="new-page" style="background-image: url('../../chat/client/app/res/images/home_bg.png');">
+<div class="new-page">
+    <img src="../../res/images/home_bg.png" w-class="home_bg"/>
     <chat-client-app-widget-topBar-topBar w-class="title">{title:"登录聊天",background:"none"}</chat-client-app-widget-topBar-topBar>
     <div w-class="logo-wrap" >
         <img w-class="logo" src="../../res/images/logo.png" />

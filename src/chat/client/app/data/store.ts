@@ -8,7 +8,7 @@ import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { accountsChange, friendChange, groupChange, groupUserLinkChange, initAccount } from './initStore';
+import { friendChange, groupChatChange, groupUserLinkChange, initAccount, userChatChange } from './initStore';
 
 // ============================================ 导出
 
@@ -132,8 +132,8 @@ const registerDataChange = () => {
         initAccount(); // 登陆成功后更新当前用户的历史数据
     });
 
-    register('lastChat',() => {
-        accountsChange();  // 新的聊天数据
+    register('userHistoryMap',() => {
+        userChatChange();  // 新的聊天数据
     });
     
     register('userInfoMap',() => {
@@ -145,11 +145,7 @@ const registerDataChange = () => {
     });
 
     register('groupHistoryMap',() => {
-        groupChange();  // 群组聊天数据更新
-    });
-
-    register('announceHistoryMap',() => {
-        groupChange();  // 群组公告数据更新
+        groupChatChange();  // 群组聊天数据更新
     });
 
     register('groupUserLinkMap',() => {
@@ -187,7 +183,7 @@ export interface Store {
  * 上次阅读到哪一条消息
  */
 export interface LastReadMsgId {
-    msgType: string; // 单聊或群聊
+    msgType: string; // 单聊、群聊、群公告
     msgId: string; // hIncId
 }
 // ============================================ 本地

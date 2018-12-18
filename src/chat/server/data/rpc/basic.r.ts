@@ -10,12 +10,12 @@ import { Tr } from '../../../../pi_pt/rust/pi_db/mgr';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
+import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
 import * as CONSTANT from '../constant';
-import { UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, LoginReq, MessageFragment, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
+import { GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
+import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
+import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
-import { UserInfo, UserCredential, GENERATOR_TYPE, AccountGenerator, Contact, UserAccount, OnlineUsers, OnlineUsersReverseIndex, FriendLink } from '../db/user.s';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -251,34 +251,53 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
 
 /**
  * 获取群组聊天的历史记录
- * @param hid history id
  */
 // #[rpc=rpcServer]
-export const getGroupHistory = (param: MessageFragment): GroupHistoryArray => {
+export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
+    const sid = getUid();
     const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
+    const groupHistorycursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
 
+    const hid = genGroupHid(param.gid); // 删除好友也应该可以看到以前发送的历史记录，所以不从friendLink中获取
     const groupHistoryArray = new GroupHistoryArray();
+    groupHistoryArray.arr = [];
 
-    // we don't use param.order there, because `iter` is not bidirectional
-    const hid = param.hid;
-    // tslint:disable-next-line:no-reserved-keywords
-    const from = param.from;
-    const size = param.size;
+    let fg = 1;
+    let index = -1;
+    let groupCursor = groupHistorycursorBucket.get<String, GroupHistoryCursor>(genGuid(param.gid,sid))[0];
+    logger.debug(`getGroupHistory begin index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
 
-    const keyPrefix = `${hid}:`;
-    const value = groupHistoryBucket.get(keyPrefix + from);
+    if (param.hIncId) {  // 如果本地有记录则取本地记录
+        index = getIndexFromHIncId(param.hIncId);
 
-    if (value[0] !== undefined) {
-        for (let i = from; i < from + size; i++) {
-            const v = groupHistoryBucket.get(keyPrefix + i);
-            if (v[0] !== undefined) {
-                groupHistoryArray.arr.push(v[0]);
-            } else {
-                break;
-            }
+    } else if (groupCursor) { // 如果本地没有记录且cursor存在则从cursor中获取，否则从0开始
+        index = groupCursor.cursor;
+    }
+
+    while (fg === 1) {
+        index++;
+        const oneMess = groupHistoryBucket.get<String, UserHistory>(genHIncId(hid, index))[0];
+        logger.debug('getGroupHistory oneMess: ', oneMess);
+        if (oneMess) {
+            groupHistoryArray.arr.push(oneMess);
+        } else {
+            fg = 0;
         }
     }
+
+    // 游标表中是否有该用户的记录
+    if (!groupCursor) {
+
+        groupCursor = new UserHistoryCursor();
+        groupCursor.guid = genGuid(param.gid,sid);
+    }
+    groupCursor.cursor = index - 1;
+    groupHistorycursorBucket.put(groupCursor.guid, groupCursor);
+    logger.debug(`getGroupHistory index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
+
+    groupHistoryArray.newMess = groupHistoryArray.arr.length;
+    logger.debug('getGroupHistory rid: ', param.gid, 'history: ', groupHistoryArray);
 
     return groupHistoryArray;
 };

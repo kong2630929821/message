@@ -17,7 +17,7 @@ enum GENERATOR_TYPE {
 /**
 *用户本人的基本信息
 */
-#[primary=uid,db=file,dbMonitor=true,hasmgr=false]
+#[primary=uid,db=file,dbMonitor=true]
 struct UserInfo {
     uid: u32,//用户id,自增,-1代表不存在
     name: String,//用户自己设置的用户名
@@ -30,7 +30,7 @@ struct UserInfo {
 /**
  * User credential table
  */
-#[primary=uid,db=file,dbMonitor=true,hasmgr=false]
+#[primary=uid,db=file,dbMonitor=true]
 struct UserCredential {
     uid: u32,//-1代表不存在
     passwdHash: String

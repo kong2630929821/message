@@ -80,6 +80,7 @@ export class Contact extends Widget {
 }
 
 store.register(`lastChat`,(r:[number,number][]) => {    
+    console.log('最近聊天数据',r);
     forelet.paint(r);
 });
 

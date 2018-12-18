@@ -40,15 +40,11 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
             this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
-            logger.debug('oooooooooooooo', this.props.msg);
             const gid = getGidFromHincid(this.props.hIncId);
-            logger.debug('mmmmmmmmmmmmmmmmm',gid);
             this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.msg.sid)}`, new GroupUserLink()).userAlias;
         }
         this.props.msg = parseMessage(depCopy(this.props.msg));
-        logger.debug('==================vvvvvvvvvvvvvvvvv',this.props.msg);
         this.props.me = this.props.msg.sid === store.getStore('uid');
-        logger.debug('==================hhhhhhhhhhhhhhhhh',this.props.me);
         const time = depCopy(this.props.msg.time);
         this.props.time = timestampFormat(time,1);
     }
@@ -92,7 +88,7 @@ const parseEmoji = (msg:UserMsg):UserMsg => {
             // FIXME: 不应该写死,应该动态获取
             // url = url.replace('../../','/client/app/');
 
-            return `<img src="../../chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
+            return `<img src="/chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;
         }

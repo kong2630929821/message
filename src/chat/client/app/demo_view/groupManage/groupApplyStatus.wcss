@@ -13,10 +13,9 @@
     height: 71px;
     padding:10px 20px;
     margin:0 10px;
-    border-bottom:solid gray 1px;
+    border-bottom:solid #DBDBE5 1px;
     color: rgba(136, 136, 136, 1);
     font-size: 28px;
-    font-family: PingFangSC-Regular;
     
 }
 .detail-wrap{

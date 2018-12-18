@@ -15,7 +15,7 @@ export class UserInfo extends Struct {
     sex: number;
     tel: string;
     note: string;
-	static _$info =  new StructInfo("chat/server/data/db/user.UserInfo",1769539731,  new Map( [["primary","uid"],["db","file"],["dbMonitor","true"],["hasmgr","false"]]), [new FieldInfo("uid", 
+	static _$info =  new StructInfo("chat/server/data/db/user.UserInfo",1769539731,  new Map( [["primary","uid"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("uid", 
 new EnumType( Type.U32 ), null), new FieldInfo("name", 
 new EnumType( Type.Str ), null), new FieldInfo("avator", 
 new EnumType( Type.Str ), null), new FieldInfo("sex", 
@@ -24,6 +24,15 @@ new EnumType( Type.Str ), null), new FieldInfo("note",
 new EnumType( Type.Str ), null) ]);
 
 
+	addMeta(mgr: StructMgr){
+		if(this._$meta)
+			return;
+		addToMeta(mgr, this);
+	}
+
+	removeMeta(){
+		removeFromMeta(this);
+	}
 
 
 
@@ -57,11 +66,20 @@ export class UserCredential extends Struct {
 
     uid: number;
     passwdHash: string;
-	static _$info =  new StructInfo("chat/server/data/db/user.UserCredential",2717825780,  new Map( [["primary","uid"],["db","file"],["dbMonitor","true"],["hasmgr","false"]]), [new FieldInfo("uid", 
+	static _$info =  new StructInfo("chat/server/data/db/user.UserCredential",2717825780,  new Map( [["primary","uid"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("uid", 
 new EnumType( Type.U32 ), null), new FieldInfo("passwdHash", 
 new EnumType( Type.Str ), null) ]);
 
 
+	addMeta(mgr: StructMgr){
+		if(this._$meta)
+			return;
+		addToMeta(mgr, this);
+	}
+
+	removeMeta(){
+		removeFromMeta(this);
+	}
 
 
 

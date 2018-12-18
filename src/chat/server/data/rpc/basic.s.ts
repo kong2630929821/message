@@ -55,41 +55,6 @@ new EnumType( Type.Str ), null) ]);
 
 export enum ORDER{INC=0,DEC=1 }
 
-export class MessageFragment extends Struct {
-
-    hid: string;
-    from: number;
-    order: ORDER;
-    size: number;
-	static _$info =  new StructInfo("chat/server/data/rpc/basic.MessageFragment",2895841624, null, [new FieldInfo("hid", 
-new EnumType( Type.Str ), null), new FieldInfo("from", 
-new EnumType( Type.U32 ), null), new FieldInfo("order", 
-new EnumType( Type.U8 ), null), new FieldInfo("size", 
-new EnumType( Type.U32 ), null) ]);
-
-
-
-
-
-	bonDecode(bb:BonBuffer) {
-		this.hid = bb.readUtf8();
-		this.from = bb.readInt();
-		this.order = bb.readInt() as ORDER;
-		this.size = bb.readInt();
-	}
-
-	bonEncode(bb:BonBuffer) {        
-        bb.writeUtf8(this.hid);
-                
-        bb.writeInt(this.from);
-                
-        bb.writeInt(this.order);        
-        bb.writeInt(this.size);
-        
-	}
-}
-
-
 export class AnnouceFragment extends Struct {
 
     aid: number;
@@ -239,8 +204,10 @@ new EnumType(Type.Struct, GroupUserLink._$info ) ), null) ]);
 
 export class GroupHistoryArray extends Struct {
 
+    newMess: number;
     arr: Array<GroupHistory>;
-	static _$info =  new StructInfo("chat/server/data/rpc/basic.GroupHistoryArray",2914149564, null, [new FieldInfo("arr", 
+	static _$info =  new StructInfo("chat/server/data/rpc/basic.GroupHistoryArray",2914149564, null, [new FieldInfo("newMess", 
+new EnumType( Type.U32 ), null), new FieldInfo("arr", 
 new EnumType( Type.Arr, 
 new EnumType(Type.Struct, GroupHistory._$info ) ), null) ]);
 
@@ -249,6 +216,7 @@ new EnumType(Type.Struct, GroupHistory._$info ) ), null) ]);
 
 
 	bonDecode(bb:BonBuffer) {
+		this.newMess = bb.readInt();
 		this.arr = bb.readArray(() => {
 	return      bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.arr):GroupHistory);
 })
@@ -256,6 +224,8 @@ new EnumType(Type.Struct, GroupHistory._$info ) ), null) ]);
 	}
 
 	bonEncode(bb:BonBuffer) {        
+        bb.writeInt(this.newMess);
+                
         bb.writeArray(this.arr, (el) => {    
             bb.writeBonCode(el);
             
@@ -600,6 +570,32 @@ new EnumType( Type.Str ), null) ]);
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.rid);
+                
+        bb.writeUtf8(this.hIncId);
+        
+	}
+}
+
+
+export class GroupHistoryFlag extends Struct {
+
+    gid: number;
+    hIncId: string;
+	static _$info =  new StructInfo("chat/server/data/rpc/basic.GroupHistoryFlag",229723152, null, [new FieldInfo("gid", 
+new EnumType( Type.U32 ), null), new FieldInfo("hIncId", 
+new EnumType( Type.Str ), null) ]);
+
+
+
+
+
+	bonDecode(bb:BonBuffer) {
+		this.gid = bb.readInt();
+		this.hIncId = bb.readUtf8();
+	}
+
+	bonEncode(bb:BonBuffer) {        
+        bb.writeInt(this.gid);
                 
         bb.writeUtf8(this.hIncId);
         

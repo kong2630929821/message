@@ -58,6 +58,8 @@ export class MessageRecord extends Widget {
             this.props.msg = '图片';
         } else if (this.props.lastMessage.mtype === MSG_TYPE.RECALL) {
             this.props.msg = '消息撤回';
+        } else if (this.props.lastMessage.mtype === MSG_TYPE.RENOTICE) {
+            this.props.msg = '公告撤回';
         }
         
     }

@@ -18,6 +18,7 @@ export const GROUP_HISTORY_TABLE = 'chat/server/data/db/message.GroupHistory';
 export const ANNOUNCE_HISTORY_TABLE = 'chat/server/data/db/message.AnnounceHistory';
 export const MSG_LOCK_TABLE = 'chat/server/data/db/message.MsgLock';
 export const USER_HISTORY_CURSOR_TABLE = 'chat/server/data/db/message.UserHistoryCursor';
+export const GROUP_HISTORY_CURSOR_TABLE = 'chat/server/data/db/message.GroupHistoryCursor';
 
 // 个人
 export const USER_INFO_TABLE = 'chat/server/data/db/user.UserInfo';

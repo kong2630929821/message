@@ -100,7 +100,7 @@ winit.init = function (){};
 winit.flags = {};
 winit.start = function() {
 	//if(winit.debug) winit.loadJS([winit.domains[1]], "/dst/client/boot/hotfix.js", "utf8", winit.initFail, "load hotupdate error");
-	winit.loadJS([winit.domains[1]], "/client/boot/index.js?" + Math.random(), "utf8", winit.initFail, "load index error");
+	winit.loadJS([winit.domains[1]], "/chat/client/boot/index.js?" + Math.random(), "utf8", winit.initFail, "load index error");
 };
 if(document.hidden === true)
 setTimeout(function(){

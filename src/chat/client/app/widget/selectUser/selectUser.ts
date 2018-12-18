@@ -3,7 +3,6 @@
  */
 
  // ================================================ 导入
-import { Json } from '../../../../../pi/lang/type';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
