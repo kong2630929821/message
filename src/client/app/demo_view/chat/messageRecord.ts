@@ -56,6 +56,8 @@ export class MessageRecord extends Widget {
         this.props.msg = depCopy(this.props.lastMessage.msg);
         if (this.props.lastMessage.mtype === MSG_TYPE.IMG) {
             this.props.msg = '图片';
+        } else if (this.props.lastMessage.mtype === MSG_TYPE.RECALL) {
+            this.props.msg = '消息撤回';
         }
         
     }

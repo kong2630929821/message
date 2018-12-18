@@ -1,12 +1,12 @@
 /**
  * 初始化store
  */
-import { UserHistory, UserHistoryCursor } from '../../../server/data/db/message.s';
+import { UserHistoryCursor } from '../../../server/data/db/message.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { getUserHistory } from '../../../server/data/rpc/basic.p';
 import { UserHistoryArray, UserHistoryFlag } from '../../../server/data/rpc/basic.s';
 import { getUserHistoryCursor } from '../../../server/data/rpc/message.p';
-import { genHIncId, genUserHid } from '../../../utils/util';
+import { genHIncId, genUserHid, genUuid } from '../../../utils/util';
 import { clientRpcFunc } from '../net/init';
 import { getFile, initFileStore, writeFile } from './lcstore';
 import { updateUserMessage } from './parse';
@@ -39,7 +39,7 @@ export const initAccount = () => {
 };
 
 /**
- * 请求所有好友发的消息历史记录
+ * 请求好友发的消息历史记录
  */
 export const getFriendHistory = (elem: UserInfo) => {
     const sid = store.getStore('uid');
@@ -57,12 +57,13 @@ export const getFriendHistory = (elem: UserInfo) => {
     };
     if (!userflag.hIncId) {  // 如果本地没有记录，则请求后端存的游标
         clientRpcFunc(getUserHistoryCursor, elem.uid, (r: UserHistoryCursor) => {
-            if (r) {
+            if (r && r.uuid === genUuid(sid,elem.uid)) { // 有返回值且是正确的返回值
                 lastRead.msgId = genHIncId(hid,r.cursor);
-                store.setStore(`lastRead/${hid}`,lastRead); // 异步请求，必须在回调函数中赋值
                 // console.error('uid: ',elem.uid,'lastread ',lastRead);
-            }
+            } 
+            store.setStore(`lastRead/${hid}`,lastRead); 
         });
+
     } else {
         store.setStore(`lastRead/${hid}`,lastRead);
     } 

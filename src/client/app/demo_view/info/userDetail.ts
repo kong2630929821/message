@@ -111,8 +111,7 @@ export class UserDetail extends Widget {
      * 页面点击
      */
     public pageClick() {
-        const userinfo = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
-        this.props.alias = this.props.alias || userinfo.name;
+        this.props.alias = this.props.alias;
         this.props.editable = false;
         this.props.isContactorOpVisible = false;
         this.paint();
