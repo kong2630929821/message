@@ -11,14 +11,14 @@
             {{if item !== it.ginfo.ownerid}}
             <img on-tap="removeAdmin({{item}})" src="../../res/images/icon_remove.png" style="position:absolute;right:36px;top:36px;"/>
             {{else}}
-            <span style="position:absolute;right:36px;top:45px;color:orange;font-size: 24px;">群主</span>
+            <span w-class="mainPerson">群主</span>
             {{end}}
         </div>
         {{end}}
-        <div w-class="add-admin-wrap" on-tap="openAddAdmin">
+        <div style="height:120px;" on-tap="openAddAdmin">
             <div w-class="contact-wrap">
                 <div w-class="avator-wrap">
-                    <img w-class="avator" src="../../res/images/unfold.png" />
+                    <img w-class="avator" src="../../res/images/add_group_user.png" />
                 </div>
                 <span w-class="text">添加管理员</span>
             </div>

@@ -6,15 +6,15 @@
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { UserInfo } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { Logger } from '../../../../utils/logger';
-import { genUuid } from '../../../../utils/util';
+import { genUserHid, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
-import { clientRpcFunc } from '../../net/init';
+import { clientRpcFunc, unSubscribe } from '../../net/init';
 import { delFriend as delUserFriend } from '../../net/rpc';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -95,7 +95,26 @@ export class UserDetail extends Widget {
      */
     public delFriend(uid:number) {
         delUserFriend(uid,(r:Result) => {
-            // TODO:
+            if (r.r === 1) { // 删除成功取消订阅好友消息
+                unSubscribe(uid.toString());
+
+                const sid = store.getStore('uid');
+                const userChatMap = store.getStore('userChatMap',[]);
+                const index1 = userChatMap.indexOf(genUserHid(sid,uid));
+                if (index1 > -1) { // 删除聊天记录
+                    userChatMap.splice(index1,1);
+                    store.setStore('userChatMap',userChatMap);
+                }
+
+                const lastChat = store.getStore(`lastChat`, []);
+                const index2 = lastChat.findIndex(item => item[0] === uid && item[2] === GENERATOR_TYPE.USER);
+                if (index2 > -1) { // 删除最近对话记录
+                    lastChat.splice(index1,1);
+                    store.setStore('lastChat',lastChat);
+                }
+            } else {
+                alert('删除好友失败');
+            }
         });
     }
 
@@ -111,8 +130,7 @@ export class UserDetail extends Widget {
      * 页面点击
      */
     public pageClick() {
-        const userinfo = store.getStore(`userInfoMap/${this.props.uid}`,new UserInfo());
-        this.props.alias = this.props.alias || userinfo.name;
+        this.props.alias = this.props.alias;
         this.props.editable = false;
         this.props.isContactorOpVisible = false;
         this.paint();

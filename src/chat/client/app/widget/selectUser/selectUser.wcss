@@ -7,7 +7,7 @@
     height:100%;
     margin: 0 10px;
     padding: 0 20px;
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid #DBDBE5;
     display:flex;
     align-items:center;
 }
@@ -23,7 +23,6 @@
 .userName{ 
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
-    font-family: PingFangSC-Medium;
     font-weight:bold;
 }
 .selectIcon{

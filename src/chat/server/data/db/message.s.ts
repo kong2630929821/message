@@ -325,3 +325,38 @@ new EnumType( Type.I32 ), null) ]);
 	}
 }
 
+
+export class GroupHistoryCursor extends Struct {
+
+    guid: string;
+    cursor: number;
+	static _$info =  new StructInfo("chat/server/data/db/message.GroupHistoryCursor",2372808082,  new Map( [["primary","guid"],["db","file"]]), [new FieldInfo("guid", 
+new EnumType( Type.Str ), null), new FieldInfo("cursor", 
+new EnumType( Type.I32 ), null) ]);
+
+
+	addMeta(mgr: StructMgr){
+		if(this._$meta)
+			return;
+		addToMeta(mgr, this);
+	}
+
+	removeMeta(){
+		removeFromMeta(this);
+	}
+
+
+
+	bonDecode(bb:BonBuffer) {
+		this.guid = bb.readUtf8();
+		this.cursor = bb.readInt();
+	}
+
+	bonEncode(bb:BonBuffer) {        
+        bb.writeUtf8(this.guid);
+                
+        bb.writeInt(this.cursor);
+        
+	}
+}
+

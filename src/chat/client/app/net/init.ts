@@ -31,8 +31,8 @@ export const initClient =  () => {
                 console.log('connect fail', r);
             }
         };
-        rootClient = new Client('127.0.0.1', 1234, 'clientId-wcd14PDgoZ', null, options);
-        // rootClient = new Client('192.168.9.29', 1234, 'clientId-wcd14PDgoZ', null, options);
+        // rootClient = new Client('127.0.0.1', 1234, 'clientId-wcd14PDgoZ', null, options);
+        rootClient = new Client('192.168.9.29', 1234, 'clientId-wcd14PDgoZ', null, options);
     }
 };
 
@@ -97,6 +97,17 @@ export const subscribe = (platerTopic: string, returnStruct: any, cb: Function) 
     });
 
     rootClient.subscribe(platerTopic, option); // 订阅主题
+};
+
+/**
+ * 取消订阅主题
+ * @param platerTopic topic
+ * @param cb callback
+ */
+export const unSubscribe = (platerTopic: string) => {
+    if (!rootClient) return;
+    
+    rootClient.unsubscribe(platerTopic); // 订阅主题
 };
 
 // ================================================ 本地

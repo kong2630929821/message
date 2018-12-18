@@ -6,14 +6,15 @@
 import { popNew } from '../../../../../pi/ui/root';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupInfo } from '../../../../server/data/db/group.s';
-import { AnnounceHistory, GroupHistory, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
+import { GroupUserLink } from '../../../../server/data/db/group.s';
+import { GroupHistory, UserHistory } from '../../../../server/data/db/message.s';
 import { Contact, FriendLink, UserInfo } from '../../../../server/data/db/user.s';
-import { getAnnoucement, getAnnoucements, getFriendLinks, getGroupsInfo, getUsersInfo } from '../../../../server/data/rpc/basic.p';
-import { AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, UserArray } from '../../../../server/data/rpc/basic.s';
+import { getFriendLinks } from '../../../../server/data/rpc/basic.p';
+import { FriendLinkArray, GetFriendLinksReq, GetUserInfoReq, GroupUserLinkArray } from '../../../../server/data/rpc/basic.s';
+import { getGroupUserLink } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
-import { genGroupHid, genUuid } from '../../../../utils/util';
-import { getFriendHistory } from '../../data/initStore';
+import { genUuid } from '../../../../utils/util';
+import { getFriendHistory, getMyGroupHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { clientRpcFunc, subscribe as subscribeMsg } from '../../net/init';
@@ -66,8 +67,8 @@ export class Login extends Widget {
                 store.setStore(`userInfoMap/${r.uid}`,r);        
                 init(r.uid); 
                 popNew('chat-client-app-demo_view-chat-contact', { sid: this.props.uid });
-                subscribeMsg(this.props.uid.toString(), UserHistory, (r: UserHistory) => {
-                    updateUserMessage(r.msg.sid,r);
+                subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
+                    updateUserMessage(v.msg.sid,v);
                 });
             }
         });
@@ -95,6 +96,7 @@ const init = (uid:number) => {
     },(r:Contact) => {
         updateGroup(r,uid);
     });
+
     // TODO:
 };
 
@@ -107,39 +109,42 @@ const updateGroup = (r:Contact,uid:number) => {
     // 判断群组是否发生了变化,需要重新订阅群组消息
         
     const oldGroup = (store.getStore(`contactMap/${uid}`) || { group:[] }).group;
-    const addGroup = r.group.concat(r.applyGroup).filter((gid) => {
+    const addGroup = r.group.filter((gid) => {
         return oldGroup.findIndex(item => item === gid) === -1;
     });
     const delGroup = oldGroup.filter((gid) => {
         return r.group.findIndex(item => item === gid) === -1;
     });
     
-    // 获取群组信息
-    const groupReq = new GetGroupInfoReq();
-    groupReq.gids = addGroup;
-    clientRpcFunc(getGroupsInfo, groupReq, (r:GroupArray) => {
-        if (r && r.arr) {
-            r.arr.forEach((gInfo:GroupInfo) => {
-                store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
-            });
-        }
-    });
-    
-    // 删除群组信息
+    // 删除群组信息 // 取消订阅已退出的群组消息
     const gInfoMap = store.getStore(`groupInfoMap`);    
     delGroup.forEach((gid:number) => {
         gInfoMap.delete(gid);
     });
     store.setStore(`groupInfoMap`, gInfoMap);
-    // 订阅群组消息
+    // 订阅群组聊天消息
     addGroup.forEach((gid) => {
+        getMyGroupHistory(gid); // 获取群组离线消息
         subscribeMsg(`ims/group/msg/${gid}`, GroupHistory, (r: GroupHistory) => {
             updateGroupMessage(gid,r);
         });
     });
-    // 订阅群组基本信息变化groupInfo
-
-    // 取消订阅    
+    // 订阅群组基础信息，包括邀请我进群的群组信息
+    addGroup.concat(r.applyGroup).forEach((gid) => {
+        subscribedb.subscribeGroupInfo(gid,() => {
+            // TODO
+            clientRpcFunc(getGroupUserLink,gid,(r:GroupUserLinkArray) => {
+                logger.debug('===============',r);
+                // 判断是否返回成功
+                if (r.arr.length > 0) {
+                    r.arr.forEach((item:GroupUserLink) => {
+                        store.setStore(`groupUserLinkMap/${item.guid}`,item);
+                    });
+                }
+            });
+        });
+    });
+    
 };
 
 /**
@@ -152,6 +157,7 @@ const updateUsers = (r:Contact,uid:number) => {
     info.uuid = [];
     r.friends.forEach((rid:number) => {
         info.uuid.push(genUuid(uid,rid));
+        getFriendHistory(rid);  // 获取好友发送的离线消息
     });
     if (info.uuid.length > 0) {
         // 获取friendlink
@@ -163,18 +169,15 @@ const updateUsers = (r:Contact,uid:number) => {
             }
                        
         });
-    }  
-    const usersInfo = new GetUserInfoReq();
-    usersInfo.uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
-    if (usersInfo.uids.length > 0) {
-        // 获取好友信息
-        clientRpcFunc(getUsersInfo,usersInfo,(r:UserArray) => {            
-            if (r && r.arr && r.arr.length > 0) {
-                r.arr.forEach((e:UserInfo) => {
-                    store.setStore(`userInfoMap/${e.uid}`,e);
-                    getFriendHistory(e);  // 获取该好友发送的离线消息
-                });
-            }
+        
+    }
+    const uids = r.friends.concat(r.temp_chat,r.blackList,r.applyUser);
+    if (uids.length > 0) {
+        uids.forEach(elem => {
+            subscribedb.subscribeUserInfo(elem,(r:UserInfo) => {
+                // TODO
+            });
         });
+
     }
 };

@@ -7,13 +7,14 @@ import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
 import { getGroupUserLink, updateGroupAlias, userExitGroup } from '../../../../server/data/rpc/group.p';
 import { GroupAlias } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
+import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getGroupAlias } from '../../logic/logic';
-import { clientRpcFunc } from '../../net/init';
+import { clientRpcFunc, unSubscribe } from '../../net/init';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -26,11 +27,9 @@ export class GroupInfos extends Widget {
     public props : Props = {
         gid:null,
         groupInfo:{},
-        memberCount:null,
         members:[],
         isGroupOpVisible:false,
         utilList:[],
-        modalArr:[],
         editable:false,
         groupAlias:'',
         isOwner: false
@@ -43,18 +42,14 @@ export class GroupInfos extends Widget {
             { utilText : '清空聊天记录' },
             { utilText : '删除' }];
         this.props.isGroupOpVisible = false;
-        this.props.modalArr = [
-            { title:'清空聊天记录',content:'确定清空聊天记录吗',sureText:'确定',cancelText:'取消' },
-            { content:'删除后，将不再接受此群消息',sureText:'确定',cancelText:'取消',style:'color:#F7931A' }];
-        // this.getGroupInfo();
         this.props.editable = false;
-        this.props.groupAlias = getGroupAlias(this.props.gid);
+        const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`);
+        this.props.groupInfo = ginfo;
+        this.props.groupAlias = depCopy(ginfo.name);
         
-        this.props.groupInfo = this.getGroupInfo(this.props.gid);
         const uid = store.getStore('uid');
         const members = this.props.groupInfo.memberids;
-        this.props.members = members.length > 0 ? members : [];
-        this.props.memberCount = members ? members.length : 0;
+        this.props.members = members ? members : [];
         if (uid === this.props.groupInfo.ownerid) {
             this.props.isOwner = true;
         }
@@ -62,10 +57,8 @@ export class GroupInfos extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        // 获取群成员的groupUserLink
         this.getGroupUserLinkInfo(this.props.gid);
         store.register(`groupInfoMap/${this.props.gid}`,(r:GroupInfo) => {
-            this.props.memberCount = r.memberids.length;
             this.props.members = r.memberids.length <= 4 ? r.memberids : r.memberids.filter(index => index < 4);
             this.paint();
         });
@@ -74,14 +67,7 @@ export class GroupInfos extends Widget {
         this.ok();
     }
 
-    // 获取群组信息
-    public getGroupInfo(gid:number) {
-        const ginfo = store.getStore(`groupInfoMap/${gid}`);
-        logger.debug('============ginfo',ginfo);
-
-        return ginfo;
-    }
-    // 获取用户在群组内的信息
+    // 获取群内成员信息
     public getGroupUserLinkInfo(gid:number) {
         if (Date.now() - store.getStore(`readGroupTimeMap/${gid}`, -1) > MAX_DURING) {
             clientRpcFunc(getGroupUserLink,this.props.gid,(r:GroupUserLinkArray) => {
@@ -106,26 +92,56 @@ export class GroupInfos extends Widget {
     // 点击群信息更多操作列表项
     public handleFatherTap(e:any) {
         this.props.isGroupOpVisible = false;
-        if (e.index === 0) { // 发送名片
-           
+        switch (e.index) {
+            case 0: // 发送名片
+                break;
+            case 1:  // 清空聊天记录
+                popNew('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' });
+                break;
+            case 2: // 删除，退出群
+                this.deleteGroup();
+                break;
+            default:
         }
-        if (e.index === 1) { // 清空聊天记录
-            popNew('chat-client-app-widget-modalBox-modalBox',this.props.modalArr[0]);
-        }
-        if (e.index === 2) { // 删除
-            popNew('chat-client-app-widget-modalBox-modalBox',this.props.modalArr[1],
-            () => {
-                logger.debug('===============deleteGroup');
-                clientRpcFunc(userExitGroup,this.props.gid,(r) => {
-                    logger.debug('========deleteGroup',r);
-                });
-            },
-            () => {
-                logger.debug('=============== cancel deleteGroup');
-            });
-        }
+        
         this.paint();
     }
+
+    /**
+     * 退出群
+     */
+    public deleteGroup() {
+        popNew('chat-client-app-widget-modalBox-modalBox', { content:'删除后，将不再接受此群消息',style:'color:#F7931A' },
+        () => {
+            logger.debug('===============deleteGroup');
+            clientRpcFunc(userExitGroup,this.props.gid,(r) => {
+                logger.debug('========deleteGroup',r);
+                if (r.r === 1) { // 退出成功取消订阅群消息
+                    unSubscribe(`ims/group/msg/${this.props.gid}`);
+
+                    const groupChatMap = store.getStore('groupChatMap',[]);
+                    const index1 = groupChatMap.indexOf(genGroupHid(this.props.gid));
+                    if (index1 > -1) { // 删除聊天记录
+                        groupChatMap.splice(index1,1);
+                        store.setStore('groupChatMap',groupChatMap);
+                    }
+
+                    const lastChat = store.getStore(`lastChat`, []);
+                    const index2 = lastChat.findIndex(item => item[0] === this.props.gid && item[2] === GENERATOR_TYPE.GROUP);
+                    if (index2 > -1) { // 删除最近对话记录
+                        lastChat.splice(index1,1);
+                        store.setStore('lastChat',lastChat);
+                    }
+                } else {
+                    alert('退出群组失败');
+                }
+            });
+        },
+        () => {
+            logger.debug('=============== cancel deleteGroup');
+        });
+    }
+
     // 页面点击
     public pageClick() {
         this.props.editable = false;
@@ -143,12 +159,10 @@ export class GroupInfos extends Widget {
     public changeGroupAlias() {
         const gAlias = new GroupAlias();
         gAlias.gid = this.props.gid;
-        gAlias.groupAlias = this.props.groupAlias;
+        gAlias.groupAlias = this.props.groupAlias || this.props.groupInfo.name;
         clientRpcFunc(updateGroupAlias, gAlias, (r: Result) => {
             logger.debug('====================changeGroupAlias',r);
             if (r.r === 1) {
-                // const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
-                // ginfo.name = this.props.groupAlias;
                 this.props.groupInfo.name = this.props.groupAlias; 
                 
                 store.setStore(`groupInfoMap/${this.props.gid}`,this.props.groupInfo);
@@ -169,6 +183,8 @@ export class GroupInfos extends Widget {
         logger.debug('============openGroupManage',ownerid,adminids,uid);
         if (ownerid === uid || adminids.indexOf(uid) > -1) {
             popNew('chat-client-app-demo_view-groupManage-groupManage',{ gid : this.props.gid });
+        } else {
+            alert('您没有权限进行群管理');
         }
     }
     // 打开群聊天
@@ -189,11 +205,9 @@ interface Util {
 interface Props {
     gid: number;
     groupInfo:Json;// 群信息
-    memberCount:number; // 群成员个数
     members:Json; // 群成员数组
     utilList:Util[]; // 操作列表
     isGroupOpVisible:boolean;
-    modalArr:Object;
     editable:boolean; // 是否可编辑
     groupAlias:string; // 群别名
     isOwner:boolean; // 是否是群主

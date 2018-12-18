@@ -5,7 +5,7 @@
 // ================================================ 导入
 import { Json } from '../../../../../pi/lang/type';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupInfo } from '../../../../server/data/db/group.s';
+import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
@@ -30,13 +30,16 @@ export class ContactItem extends Widget {
     };
     public setProps(props: any) {
         super.setProps(props);
+        this.props.show = true;
         
         if (!this.props.text) {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
                 this.props.name = getFriendAlias(this.props.id);
             }
             if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-                this.props.name = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo()).name; 
+                const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
+                this.props.name = group.name; 
+                this.props.show = group.state === GROUP_STATE.CREATED;
             }
         }
     }
@@ -50,4 +53,5 @@ interface Props {
     chatType:GENERATOR_TYPE; // 用户或者群组
     text?:string; // 显示文本
     totalNew?: number; // 多少条消息
+    show?:boolean; // 是否显示
 }

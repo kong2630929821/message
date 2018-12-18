@@ -2,20 +2,19 @@
  * 群组相关的rpc操作
  */
 // ================================================================= 导入
-import { GroupInfo, GroupUserLink } from '../db/group.s';
+import { GROUP_STATE, GroupInfo, GroupUserLink } from '../db/group.s';
 import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
-import { GroupAgree, GroupAlias, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray, NotifyAdmin } from './group.s';
+import { GroupAgree, GroupAlias, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray } from './group.s';
 
-import { BonBuffer } from '../../../../pi/util/bon';
 import { read } from '../../../../pi_pt/db';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
 import { Tr } from '../../../../pi_pt/rust/pi_db/mgr';
-import { mqttPublish, QoS, setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
+import { setMqttTopic, unsetMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { delValueFromArray, genAnnounceIncId, genGroupHid, genGuid, genHidFromGid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
+import { delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 
 const logger = new Logger('GROUP');
@@ -33,6 +32,20 @@ export const applyJoinGroup = (gid: number): Result => {
     const res = new Result();
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    // 群是否存在
+    if (!gInfo) {
+        logger.debug('group: ', gid, 'is not exist');
+        res.r = -2;
+        
+        return res;
+    }
+    // 群是否被解散
+    if (gInfo.state === GROUP_STATE.DISSOLVE) {
+        logger.debug('group: ', gid, 'was Disbanded');
+        res.r = -2;
+        
+        return res;
+    }
     if (gInfo.memberids.indexOf(uid) > -1) {
         res.r = -1;
         logger.debug(`user: ${uid}, is exist in group: ${gInfo.name}`);
@@ -321,8 +334,20 @@ export const addAdmin = (guidsAdmin: GuidsAdminArray): Result => {
     const guids = guidsAdmin.guids;
 
     const res = new Result();
-    const groupId = guids[0].split(':')[0];
-    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(parseInt(groupId,10))[0];
+    const groupId = getGidFromGuid(guids[0]);
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(groupId)[0];
+    if (!gInfo) {
+        logger.debug('group: ', groupId, 'is not exist');
+        res.r = -1;
+        
+        return res;
+    }
+    if (gInfo.state === GROUP_STATE.DISSOLVE) {
+        logger.debug('group: ', groupId, 'was Disbanded');
+        res.r = -1;
+        
+        return res;
+    }
     if (gInfo.ownerid !== uid) {
         logger.debug('User: ', uid, 'is not an owner');
         res.r = -1;
@@ -551,7 +576,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         contact.group.push(gInfo.gid);
         contactBucket.put(uid, contact);
         logger.debug('Add self: ', uid, 'to conatact group');
-        // // 发送一条当前群组创建成功的消息，其实不是必须的
+        // 发送一条当前群组创建成功的消息，其实不是必须的
         const groupTopic = `ims/group/msg/${gInfo.gid}`;
         const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
         setMqttTopic(mqttServer, groupTopic, true, true);

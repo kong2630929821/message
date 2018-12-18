@@ -28,7 +28,7 @@
     line-height: 50px;
     padding: 15px 20px;
     margin: 0 10px;
-    border-bottom: solid gray 1px;
+    border-bottom: solid #DBDBE5 1px;
     font-size:28px;
     color:gray;
     text-transform:uppercase;  

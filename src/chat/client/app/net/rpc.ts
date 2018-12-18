@@ -5,10 +5,10 @@
 import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, registerUser } from '../../../server/data/rpc/basic.p';
-import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, WalletLoginReq, UserType_Enum } from '../../../server/data/rpc/basic.s';
+import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createGroupp, delMember, dissolveGroup, inviteUsers } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, Invite, InviteArray } from '../../../server/data/rpc/group.s';
-import { isUserOnline, sendAnnouncement, sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
+import { isUserOnline, sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { AnnounceSend, GroupSend, UserSend } from '../../../server/data/rpc/message.s';
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
@@ -39,7 +39,7 @@ export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => 
  * @param cb callback
  */
 export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void) => {
-    //钱包登录
+    // 钱包登录
     // let userType = new UserType();
     // userType.enum_type = UserType_Enum.WALLET;
     // let walletLoginReq = new WalletLoginReq();
@@ -47,8 +47,8 @@ export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void
     // walletLoginReq.sign = "";
     // userType.value = walletLoginReq;
     
-    //本地账户登录
-    let userType = new UserType();
+    // 本地账户登录
+    const userType = new UserType();
     userType.enum_type = UserType_Enum.DEF;
     const info = new LoginReq();
     info.uid = uid;

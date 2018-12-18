@@ -1,4 +1,5 @@
-<div w-class="contact-item-wrap">
+<div>
+    {{if it.show}}
     <div w-class="contact-wrap">
         <div w-class="avator-wrap">
             <img w-class="avator" src="../../res/images/user.png" />
@@ -10,5 +11,6 @@
         </div>
         {{end}}
     </div>
+    {{end}}
 </div>
         

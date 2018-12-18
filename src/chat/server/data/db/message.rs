@@ -96,5 +96,14 @@ struct MsgLock {
 #[primary=uuid,db=file]
 struct UserHistoryCursor {
     uuid: String,//两个用户的id"-1"代表不存在,"10001:10002",前面代表uid1后面代表uid2
-    cursor: i32,//当前已推送给用户uid1的最大消息ID
+    cursor: i32,//当前已推送给用户uid1的最新消息
+}
+
+/**
+*用户历史记录游标
+*/
+#[primary=guid,db=file]
+struct GroupHistoryCursor {
+    guid: String,//群成员的id"-1"代表不存在,"10001:10002",前面代表gid后面代表uid
+    cursor: i32,//当前已推送给用户uid的最新消息
 }

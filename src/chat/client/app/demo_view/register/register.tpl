@@ -1,4 +1,5 @@
-<div w-class="register-wrap" class="new-page" ev-back-click="back">
+<div class="new-page" ev-back-click="back">
+    <img src="../../res/images/home_bg.png" w-class="home_bg"/>
     <chat-client-app-widget-topBar-topBar w-class="title">{title:"注册",background:"none"}</chat-client-app-widget-topBar-topBar>
     <div w-class="avator-wrap">
         <img w-class="avator" src="../../res/images/user.png" />

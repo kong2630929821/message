@@ -34,7 +34,7 @@ export class ContactList extends Widget {
     }
 
     public toGroup() {
-        popNew(`chat-client-app-demo_view-group-groupList`,{groups:this.state.group});
+        popNew(`chat-client-app-demo_view-group-groupList`,{ groups:this.state.group });
     }
 
     // 查看好友详细信息

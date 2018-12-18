@@ -6,11 +6,11 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { AnnounceHistory, GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
+import { GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
-import { updateGroupMessage } from '../../data/parse';
+import { getIndexFromHIncId } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
 
@@ -31,7 +31,7 @@ export class GroupChat extends Widget {
             groupName:'',
             inputMessage:'',
             hidIncArray: [],
-            aIncIdArray:[],
+            lastAnnounce:'',
             isLogin:true
         };
         this.bindCB = this.updateChat.bind(this);
@@ -43,22 +43,32 @@ export class GroupChat extends Widget {
         super.setProps(props);
         this.props.hidIncArray = store.getStore(`groupChatMap/${this.getHid()}`,[]);
         this.props.groupName = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo()).name;
-        this.props.aIncIdArray = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo()).annoceids;
-        // this.props.aIncIdArray = [];
         this.props.isLogin = true;
         logger.debug('============groupChat',this.props);
+
+        const lastRead = store.getStore(`lastRead/${this.getHid()}`,{ msgId:undefined,msgType:'group' });
+        const annouces = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo()).annoceids;
+        const lastAnnounce = annouces && annouces.length > 0 ? annouces[annouces.length - 1] :undefined ;
+        // 最新一条公告是否已读
+        const count1 = lastAnnounce ? getIndexFromHIncId(lastAnnounce) :-1 ;
+        const count2 = lastRead.msgId ? getIndexFromHIncId(lastRead.msgId)  :-1;
+        this.props.lastAnnounce = count1 > count2 ? lastAnnounce :undefined;
+        
+        // 更新上次阅读到哪一条记录        
+        const hincId = this.props.hidIncArray.length > 0 ? this.props.hidIncArray[this.props.hidIncArray.length - 1] : undefined;
+        lastRead.msgId = hincId;
+        store.setStore(`lastRead/${this.getHid()}`,lastRead);
+        
     }
     public firstPaint() {
         super.firstPaint();
         store.register(`groupChatMap/${this.getHid()}`,this.bindCB);
-        // store.register(`groupHistoryMap`,this.bindCB);
         store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
-    }
-
-    public attach() {
-        super.attach();
         // 第一次进入定位到最新的一条消息
-        document.querySelector('#messEnd').scrollIntoView();
+        setTimeout(() => {
+            document.querySelector('#messEnd').scrollIntoView();
+            this.paint();
+        }, 200);
     }
 
     public updateChat() {
@@ -79,7 +89,6 @@ export class GroupChat extends Widget {
         message.mtype = e.msgType || MSG_TYPE.TXT;
         message.time = (new Date()).getTime();
         clientRpcFunc(sendGroupMessage, message, (() => {
-            const gid = this.props.gid;
 
             return (r: GroupHistory) => {
                 if (r.hIncId === DEFAULT_ERROR_STR) {
@@ -87,19 +96,16 @@ export class GroupChat extends Widget {
                     
                     return;
                 }
-                // 如果是撤回公告
-                if (r.msg.mtype === MSG_TYPE.RENOTICE) {
-                    logger.debug('撤回公告');
-                    const ah = new AnnounceHistory();
-                    // 公告key使用群聊消息key
-                    ah.aIncId = r.hIncId;
-                    ah.announce = r.msg;
-                    store.setStore(`announceHistoryMap/${ah.aIncId}`,ah);
-                }
-                // updateGroupMessage(gid, r);
             };
         })());
     }
+
+    // 关闭公告
+    public closeAnnounce() {
+        this.props.lastAnnounce = undefined;
+        this.paint();
+    }
+
     public destroy() {
         store.unregister(`groupChatMap/${this.getHid()}`,this.bindCB);
 
@@ -117,6 +123,6 @@ interface Props {
     groupName: string; // 群名
     inputMessage:string; // 输入的群消息
     hidIncArray: string[]; // 群消息记录
-    aIncIdArray: string[]; // 群公告记录
+    lastAnnounce: string; // 最新一条群公告
     isLogin:boolean;
 }

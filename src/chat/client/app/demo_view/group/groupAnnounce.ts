@@ -4,8 +4,6 @@
 
 // ================================================ 导入
 import { popNew } from '../../../../../pi/ui/root';
-import { factorial } from '../../../../../pi/util/math';
-import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { Logger } from '../../../../utils/logger';
@@ -32,15 +30,12 @@ export class GroupAnnounce extends Widget {
     }
     public firstPaint() {
         super.firstPaint();
-        // store.register(`groupInfoMap/${this.props.gid}`,() => {
-        //     this.setProps(this.props);
-        //     this.paint();
-        // });
         store.register(`announceHistoryMap`,() => {
             this.setProps(this.props);
             this.paint();
         });
     }
+
     // 编辑群公告
     public editGroupAnnounce() {
         const uid = store.getStore('uid');
@@ -51,6 +46,10 @@ export class GroupAnnounce extends Widget {
         }
     }
     
+    // 查看公告详情
+    public goDetail(aIncId:string) {
+        popNew('chat-client-app-demo_view-group-announceDetail',{ aIncId:aIncId });
+    }
 }
 
 // ================================================ 本地

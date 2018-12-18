@@ -5,7 +5,7 @@
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
-import { GroupHistory, MSG_TYPE, UserHistory, UserMsg } from '../../../../server/data/db/message.s';
+import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGuid, getGidFromHincid } from '../../../../utils/util';
@@ -37,18 +37,14 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
     public setProps(props:any) {
         super.setProps(props);
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserHistory());
+            this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupHistory());
-            logger.debug('oooooooooooooo', this.props.msg);
+            this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
             const gid = getGidFromHincid(this.props.hIncId);
-            logger.debug('mmmmmmmmmmmmmmmmm',gid);
             this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.msg.sid)}`, new GroupUserLink()).userAlias;
         }
         this.props.msg = parseMessage(depCopy(this.props.msg));
-        logger.debug('==================vvvvvvvvvvvvvvvvv',this.props.msg);
         this.props.me = this.props.msg.sid === store.getStore('uid');
-        logger.debug('==================hhhhhhhhhhhhhhhhh',this.props.me);
         const time = depCopy(this.props.msg.time);
         this.props.time = timestampFormat(time,1);
     }
@@ -92,7 +88,7 @@ const parseEmoji = (msg:UserMsg):UserMsg => {
             // FIXME: 不应该写死,应该动态获取
             // url = url.replace('../../','/client/app/');
 
-            return `<img src="/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
+            return `<img src="/chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;
         }

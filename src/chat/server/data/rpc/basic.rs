@@ -19,13 +19,6 @@ enum ORDER {
     DEC = 1,//逆序
 }
 
-struct MessageFragment{
-    hid:String,//历史记录id
-    from:u32,//开始条数,-1代表最近一条
-    order:ORDER,//顺序还是逆序,一般是逆序
-    size:u32,//总共取多少条
-}
-
 struct AnnouceFragment{
     aid:usize,//公告id
     from:u32,//开始条数,-1代表最近一条
@@ -50,6 +43,7 @@ struct GroupUserLinkArray{
 }
 
 struct GroupHistoryArray{
+    newMess:u32, // 新消息条数
     arr:&[GroupHistory]//群组历史记录表
 }
 
@@ -103,5 +97,10 @@ struct LoginReply {
 
 struct UserHistoryFlag {
     rid:u32, // 好友ID
+    hIncId:String // 历史记录ID
+}
+
+struct GroupHistoryFlag {
+    gid:u32, // 群组ID
     hIncId:String // 历史记录ID
 }

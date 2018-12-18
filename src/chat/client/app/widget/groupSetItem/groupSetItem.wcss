@@ -21,15 +21,11 @@
 .title{
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
-    font-weight:bold;
-    font-family: PingFangSC-Regular;
     margin-bottom:8px;
 }
 .content{
     color: rgba(136, 136, 136, 1);
     font-size: 24px;
-    font-family: PingFangSC-Regular;
-
 }
 .switch{
     margin-left:auto;
