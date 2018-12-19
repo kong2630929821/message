@@ -10,8 +10,8 @@ import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';import * as store from '../../data/store';
 import { getUsersInfo } from '../../../../server/data/rpc/basic.p';
 import { GetUserInfoReq, UserArray } from '../../../../server/data/rpc/basic.s';
-import { clientRpcFunc } from '../../net/init';
 import { getGidFromGuid, getUidFromGuid } from '../../../../utils/util';
+import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
  // tslint:disable-next-line:no-reserved-keywords

@@ -59,30 +59,3 @@ interface Props {
     inputGid:number; // 用户输入的要添加的群组id
     groups:number[]; // 群组列表
 }
-
-/**
- * 更新群组公告相关信息
- * @param r 群组信息
- * @param gid 当前群组id
- */
-// const updateAnnounce = (r:GroupInfo,gid:number) => {
-//     const oldAnnounce = store.getStore(`groupInfoMap/${gid}`, new GroupInfo()).annoceids;
-//     logger.debug('oldAnnounce===========',oldAnnounce);
-//     const addAnnounce = r.annoceids.filter(aid => {
-//         return oldAnnounce.findIndex(item => item === aid) === -1;
-//     });
-//     logger.debug('addAnnounce===========',addAnnounce);
-//     if (addAnnounce.length === 0) {
-//         addAnnounce.push(oldAnnounce[oldAnnounce.length - 1]);
-//     }
-//     const aids = new AnnouceIds();
-//     aids.arr = addAnnounce;
-//     clientRpcFunc(getAnnoucements,aids,(r:AnnounceHistoryArray) => {
-//         logger.debug('===============success',r);
-//         if (r && r.arr) {
-//             r.arr.forEach(item => {
-//                 store.setStore(`announceHistoryMap/${item.aIncId}`,item);  
-//             });
-//         }
-//     });
-// };

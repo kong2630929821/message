@@ -93,11 +93,11 @@ export class Login extends Widget {
  */
 export const init = (uid:number) => {
     subscribedb.subscribeContact(uid,(r:Contact) => {
-        if(r && r.uid == uid){
+        if (r && r.uid === uid) {
             updateUsers(r,uid);        
         }
     },(r:Contact) => {
-        if(r && r.uid == uid){
+        if (r && r.uid === uid) {
             updateGroup(r,uid);
         }
     });
@@ -150,12 +150,12 @@ const updateGroup = (r:Contact,uid:number) => {
         });
     });
     // 订阅邀请我进群的群组信息
-    r.applyGroup.forEach(guid=>{
+    r.applyGroup.forEach(guid => {
         const gid = getGidFromGuid(guid);
-        subscribedb.subscribeGroupInfo(gid,()=>{
+        subscribedb.subscribeGroupInfo(gid,() => {
             // TODO
-        })
-    })
+        });
+    });
     
 };
 

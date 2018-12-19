@@ -7,15 +7,14 @@ import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
-import { getGroupUserLink, updateGroupAlias } from '../../../../server/data/rpc/group.p';
+import { getGroupUserLink, updateGroupAlias, userExitGroup } from '../../../../server/data/rpc/group.p';
 import { GroupAlias } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { userExitGroup } from '../../../../server/data/rpc/group.p';
 import { clientRpcFunc, unSubscribe } from '../../net/init';
-import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -209,4 +208,4 @@ export const exitGroup = (gid:number) => {
             alert('退出群组失败');
         }
     });
-}
+};
