@@ -17,10 +17,9 @@ import { genUuid, getGidFromGuid } from '../../../../utils/util';
 import { getFriendHistory, getMyGroupHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { clientRpcFunc, subscribe as subscribeMsg } from '../../net/init';
+import { clientRpcFunc, subscribe as subscribeMsg, unSubscribe } from '../../net/init';
 import { login as userLogin } from '../../net/rpc';
 import * as subscribedb from '../../net/subscribedb';
-import { exitGroup } from '../../logic/logic';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -126,7 +125,7 @@ const updateGroup = (r:Contact,uid:number) => {
     const gInfoMap = store.getStore(`groupInfoMap`);    
     delGroup.forEach((gid:number) => {
         gInfoMap.delete(gid);
-        exitGroup(gid);
+        unSubscribe(`ims/group/msg/${gid}`);
     });
     store.setStore(`groupInfoMap`, gInfoMap);
     // 订阅群组聊天消息

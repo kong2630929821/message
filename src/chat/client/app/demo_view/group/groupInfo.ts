@@ -11,10 +11,11 @@ import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s
 import { getGroupUserLink, updateGroupAlias } from '../../../../server/data/rpc/group.p';
 import { GroupAlias } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
-import { depCopy } from '../../../../utils/util';
+import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { clientRpcFunc } from '../../net/init';
-import { exitGroup } from '../../logic/logic';
+import { userExitGroup } from '../../../../server/data/rpc/group.p';
+import { clientRpcFunc, unSubscribe } from '../../net/init';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -181,3 +182,31 @@ interface Props {
 }
 
 const MAX_DURING = 600;
+
+/**
+ * 主动退出群组，取消订阅
+ */
+export const exitGroup = (gid:number) => {
+    clientRpcFunc(userExitGroup,gid,(r) => {
+        console.log('========deleteGroup',r);
+        if (r.r === 1) { // 退出成功取消订阅群消息
+            unSubscribe(`ims/group/msg/${gid}`);
+
+            const groupChatMap = store.getStore('groupChatMap',[]);
+            const index1 = groupChatMap.indexOf(genGroupHid(gid));
+            if (index1 > -1) { // 删除聊天记录
+                groupChatMap.splice(index1,1);
+                store.setStore('groupChatMap',groupChatMap);
+            }
+
+            const lastChat = store.getStore(`lastChat`, []);
+            const index2 = lastChat.findIndex(item => item[0] === gid && item[2] === GENERATOR_TYPE.GROUP);
+            if (index2 > -1) { // 删除最近对话记录
+                lastChat.splice(index1,1);
+                store.setStore('lastChat',lastChat);
+            }
+        } else {
+            alert('退出群组失败');
+        }
+    });
+}
