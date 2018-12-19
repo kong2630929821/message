@@ -11,11 +11,12 @@ import { read } from '../../../../pi_pt/db';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
 import { Tr } from '../../../../pi_pt/rust/pi_db/mgr';
-import { setMqttTopic, unsetMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
+import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
+import { delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid, delGidFromApplygroup } from '../../../utils/util';
 import * as CONSTANT from '../constant';
+import { UserHistoryCursor, GroupHistoryCursor, MsgLock } from '../db/message.s';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -174,6 +175,7 @@ export const acceptUser = (agree: GroupAgree): Result => {
 
         res.r = 1; // successfully add user
     }
+    moveGroupCursor(agree.gid,agree.uid);
 
     return res;
 };
@@ -215,7 +217,7 @@ export const inviteUsers = (invites: InviteArray): Result => {
             logger.debug('be invited user: ', rid, 'is exist in this group:',gid);
             continue;
         }
-        cInfo.applyGroup.push(gid);
+        cInfo.applyGroup.indexOf(genGuid(gid,rid)) === -1 && cInfo.applyGroup.push(genGuid(gid,rid));
         contactBucket.put(rid, cInfo);
         logger.debug('Invite user: ', rid, 'to group: ', gid);
     }
@@ -238,13 +240,13 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(agree.gid)[0];
     const cInfo = contactBucket.get<number, [Contact]>(uid)[0];
     // 判断群组是否邀请了该用户,如果没有邀请，则直接返回
-    if (cInfo.applyGroup.findIndex(item => item === agree.gid) === -1) {
+    if (cInfo.applyGroup.findIndex(item => getGidFromGuid(item) === agree.gid) === -1) {
         gInfo.gid = -1; // gid = -1 indicate that user don't want to join this group
         
         return gInfo; 
     }
     // 删除applyGroup并放回db中
-    cInfo.applyGroup = delValueFromArray(agree.gid, cInfo.applyGroup);   
+    cInfo.applyGroup = delGidFromApplygroup(agree.gid, cInfo.applyGroup);   
     
     if (agree.agree) {
         cInfo.group.push(agree.gid);
@@ -275,9 +277,36 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         groupUserLinkBucket.put(gul.guid, gul);
         logger.debug('Add user: ', uid, 'to groupUserLinkBucket');
     }
+    moveGroupCursor(agree.gid,agree.uid);
 
     return gInfo;
 };
+
+/**
+ * 用户被动或主动进入群组后创建一个游标
+ * @param guid 
+ */
+const moveGroupCursor=(gid:number,rid:number)=>{
+    logger.debug('JoinGroup moveGroupCursor gid: ',gid,'rid: ',rid);
+
+    const dbMgr = getEnv().getDbMgr();
+    const guid = genGuid(gid,rid);
+    const groupHistoryCursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
+    const msgLockBucket = new Bucket('file',CONSTANT.MSG_LOCK_TABLE,dbMgr);
+    const msglock = msgLockBucket.get<string,MsgLock>(genGroupHid(gid))[0];
+    
+    let ridGroupCursor = groupHistoryCursorBucket.get<string,GroupHistoryCursor>(guid)[0];
+    // 游标表中是否有该用户的记录
+    if (!ridGroupCursor) { 
+        ridGroupCursor = new UserHistoryCursor();
+        ridGroupCursor.guid = guid;
+        ridGroupCursor.cursor = -1;
+    }
+    ridGroupCursor.cursor = msglock ? msglock.current :-1;
+    
+    logger.debug('JoinGroup moveGroupCursor guid: ', guid, 'ridGroupCursor: ', ridGroupCursor);
+    groupHistoryCursorBucket.put(guid,ridGroupCursor);
+}
 
 /**
  * 转移群主

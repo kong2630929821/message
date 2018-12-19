@@ -2,8 +2,10 @@
  * 一些全局方法
  */
 // =====================================导入
-import { FriendLink, UserInfo } from '../../../server/data/db/user.s';import { genUuid } from '../../../utils/util';
+import { FriendLink, UserInfo, GENERATOR_TYPE } from '../../../server/data/db/user.s';import { genUuid, genGroupHid } from '../../../utils/util';
 import * as store from '../data/store';
+import { userExitGroup } from '../../../server/data/rpc/group.p';
+import { clientRpcFunc, unSubscribe } from '../net/init';
 
 // =====================================导出
 
@@ -61,3 +63,31 @@ export const getFriendAlias = (rid:number) => {
 
     return friend.alias || user.name;
 };
+
+/**
+ * 退出群组，取消订阅
+ */
+export const exitGroup = (gid:number) => {
+    clientRpcFunc(userExitGroup,gid,(r) => {
+        console.log('========deleteGroup',r);
+        if (r.r === 1) { // 退出成功取消订阅群消息
+            unSubscribe(`ims/group/msg/${gid}`);
+
+            const groupChatMap = store.getStore('groupChatMap',[]);
+            const index1 = groupChatMap.indexOf(genGroupHid(gid));
+            if (index1 > -1) { // 删除聊天记录
+                groupChatMap.splice(index1,1);
+                store.setStore('groupChatMap',groupChatMap);
+            }
+
+            const lastChat = store.getStore(`lastChat`, []);
+            const index2 = lastChat.findIndex(item => item[0] === gid && item[2] === GENERATOR_TYPE.GROUP);
+            if (index2 > -1) { // 删除最近对话记录
+                lastChat.splice(index1,1);
+                store.setStore('lastChat',lastChat);
+            }
+        } else {
+            alert('退出群组失败');
+        }
+    });
+}

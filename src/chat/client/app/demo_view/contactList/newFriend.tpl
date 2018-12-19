@@ -10,7 +10,7 @@
             {{end}}
             {{for i,v of it1.applyGroup}}
             <div ev-agree-group="agreeGroupApply">
-                <chat-client-app-demo_view-contactList-applyUser>{id: {{v}}, chatType: "group", isActiveToGroup: false}</chat-client-app-demo_view-contactList-applyUser>
+                <chat-client-app-demo_view-contactList-applyUser>{guid: {{v}}, chatType: "group", isActiveToGroup: false}</chat-client-app-demo_view-contactList-applyUser>
             </div>
             {{end}}
         </div>

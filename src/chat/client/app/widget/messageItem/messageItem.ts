@@ -88,7 +88,7 @@ const parseEmoji = (msg:UserMsg):UserMsg => {
             // FIXME: 不应该写死,应该动态获取
             // url = url.replace('../../','/client/app/');
 
-            return `<img src="/chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
+            return `<img src="../../chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;
         }

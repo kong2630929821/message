@@ -9,6 +9,15 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
+import { getOpenId } from '../../../../../app/api/JSAPI';
+import { UserInfo } from '../../../../server/data/db/user.s';
+import { walletLogin } from '../../net/rpc';
+import { updateUserMessage } from '../../data/parse';
+import { UserHistory } from '../../../../server/data/db/message.s';
+import { subscribe, clientRpcFunc } from '../../net/init';
+import { init } from '../login/login';
+import { changeUserInfo } from '../../../../server/data/rpc/user.p';
+import * as walletStore from '../../../../../app/store/memstore';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -30,6 +39,20 @@ export class Contact extends Widget {
             { iconPath:'scan.png',utilText:'扫一扫' },
             { iconPath:'add-friend.png',utilText:'我的信息' }
         ];
+        this.props.isOnline = store.getStore('uid',0) !== 0;
+
+        // 判断是否从钱包项目进入
+        // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
+            const uid = store.getStore('uid');
+            const user1 = walletStore.getStore('user/info',{nickName:undefined});
+            const user2 = store.getStore(`userInfoMap/${uid}`,new UserInfo());
+            // 如果聊天未登录，或者钱包修改姓名、头像等
+            if(!uid || user1.nickName !== user2.name || user1.avatar !== user2.avatar){
+                store.initStore();
+                this.paint();
+                this.walletSignIn();
+            }
+        // }
     }
 
     public chat(id:number, chatType:GENERATOR_TYPE) {
@@ -42,10 +65,54 @@ export class Contact extends Widget {
         
     }
 
+    /**
+     * 钱包登陆
+     */
+    public walletSignIn(){
+        getOpenId('101',(r)=>{
+            const openId = String(r.openid);
+            if(openId){
+                walletLogin(openId,'',(r:UserInfo) => {
+                    this.props.isOnline = true;
+
+                    if (r && r.uid > 0) {
+                        store.setStore(`uid`,r.uid);
+                        store.setStore(`userInfoMap/${r.uid}`,r);        
+                        init(r.uid); 
+                        subscribe(r.uid.toString(), UserHistory, (v: UserHistory) => {
+                            updateUserMessage(v.msg.sid,v);
+                        });
+                        this.paint();
+
+                        const user = walletStore.getStore('user/info');
+                        if(r.name !== user.nickName || r.avatar !== user.avatar){
+                            r.name = user.nickName;
+                            r.avatar = user.avatar;
+                            r.tel = user.phoneNumber;
+                            clientRpcFunc(changeUserInfo,r,(res)=>{
+                                if(res && res.uid>0){
+                                    store.setStore(`userInfoMap/${r.uid}`,r);  
+
+                                }
+                            });
+                        }
+                    }else{
+                        alert('钱包登陆失败');
+                    }
+                });
+            }
+        })
+            
+    }
+
     // 打开更多功能
     public getMore() {
-        this.props.isUtilVisible = !this.props.isUtilVisible;
-        this.paint();
+        if(this.props.isOnline){
+            this.props.isUtilVisible = !this.props.isUtilVisible;
+            this.paint();
+        }else{
+            alert('请先登陆钱包');
+        }
     }
 
     public closeMore() {
@@ -90,6 +157,7 @@ interface Props {
     messageList:any[];
     isUtilVisible:boolean;
     utilList:any[];
+    isOnline:boolean;
 }
 store.register('friendLinkMap',() => {
     const w = forelet.getWidget(WIDGET_NAME);

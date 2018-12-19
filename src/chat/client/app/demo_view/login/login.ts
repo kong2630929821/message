@@ -13,13 +13,14 @@ import { getFriendLinks } from '../../../../server/data/rpc/basic.p';
 import { FriendLinkArray, GetFriendLinksReq, GroupUserLinkArray } from '../../../../server/data/rpc/basic.s';
 import { getGroupUserLink } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
-import { genUuid } from '../../../../utils/util';
+import { genUuid, getGidFromGuid } from '../../../../utils/util';
 import { getFriendHistory, getMyGroupHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { clientRpcFunc, subscribe as subscribeMsg } from '../../net/init';
-import { login as userLogin, walletLogin } from '../../net/rpc';
+import { login as userLogin } from '../../net/rpc';
 import * as subscribedb from '../../net/subscribedb';
+import { exitGroup } from '../../logic/logic';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -61,31 +62,18 @@ export class Login extends Widget {
         for (let i = 0;i < inputs.length;i++) {
             inputs[i].blur();
         }
-        if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {
-            walletLogin(getOpenId('101'),'',(r:UserInfo) => {
-                if (r.uid > 0) {
-                    store.setStore(`uid`,r.uid);
-                    store.setStore(`userInfoMap/${r.uid}`,r);        
-                    init(r.uid); 
-                    popNew('chat-client-app-demo_view-chat-contact', { sid: this.props.uid });
-                    subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
-                        updateUserMessage(v.msg.sid,v);
-                    });
-                }
-            });
-        } else {
-            userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
-                if (r.uid > 0) {
-                    store.setStore(`uid`,r.uid);
-                    store.setStore(`userInfoMap/${r.uid}`,r);        
-                    init(r.uid); 
-                    popNew('chat-client-app-demo_view-chat-contact', { sid: this.props.uid });
-                    subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
-                        updateUserMessage(v.msg.sid,v);
-                    });
-                }
-            });
-        }
+        
+        userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
+            if (r.uid > 0) {
+                store.setStore(`uid`,r.uid);
+                store.setStore(`userInfoMap/${r.uid}`,r);        
+                init(r.uid); 
+                popNew('chat-client-app-demo_view-chat-contact', { sid: this.props.uid });
+                subscribeMsg(this.props.uid.toString(), UserHistory, (v: UserHistory) => {
+                    updateUserMessage(v.msg.sid,v);
+                });
+            }
+        });
         
     }
 
@@ -104,11 +92,15 @@ export class Login extends Widget {
  * 登录成功获取各种数据表的变化
  * @param uid user id
  */
-const init = (uid:number) => {
+export const init = (uid:number) => {
     subscribedb.subscribeContact(uid,(r:Contact) => {
-        updateUsers(r,uid);        
+        if(r && r.uid == uid){
+            updateUsers(r,uid);        
+        }
     },(r:Contact) => {
-        updateGroup(r,uid);
+        if(r && r.uid == uid){
+            updateGroup(r,uid);
+        }
     });
 
     // TODO:
@@ -134,6 +126,7 @@ const updateGroup = (r:Contact,uid:number) => {
     const gInfoMap = store.getStore(`groupInfoMap`);    
     delGroup.forEach((gid:number) => {
         gInfoMap.delete(gid);
+        exitGroup(gid);
     });
     store.setStore(`groupInfoMap`, gInfoMap);
     // 订阅群组聊天消息
@@ -143,10 +136,9 @@ const updateGroup = (r:Contact,uid:number) => {
             updateGroupMessage(gid,r);
         });
     });
-    // 订阅群组基础信息，包括邀请我进群的群组信息
-    addGroup.concat(r.applyGroup).forEach((gid) => {
+    // 订阅我已经加入的群组基础信息
+    addGroup.forEach((gid) => {
         subscribedb.subscribeGroupInfo(gid,() => {
-            // TODO
             clientRpcFunc(getGroupUserLink,gid,(r:GroupUserLinkArray) => {
                 logger.debug('===============',r);
                 // 判断是否返回成功
@@ -158,6 +150,13 @@ const updateGroup = (r:Contact,uid:number) => {
             });
         });
     });
+    // 订阅邀请我进群的群组信息
+    r.applyGroup.forEach(guid=>{
+        const gid = getGidFromGuid(guid);
+        subscribedb.subscribeGroupInfo(gid,()=>{
+            // TODO
+        })
+    })
     
 };
 

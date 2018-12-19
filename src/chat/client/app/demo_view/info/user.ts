@@ -85,7 +85,7 @@ export class User extends Widget {
         test.uid = this.props.sid;
         test.name = this.props.name;
         test.tel = this.props.tel;
-        test.avator = userinfo.avator;
+        test.avatar = userinfo.avatar;
         test.sex = userinfo.sex;
         test.note = userinfo.note;
         

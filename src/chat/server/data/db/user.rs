@@ -21,7 +21,7 @@ enum GENERATOR_TYPE {
 struct UserInfo {
     uid: u32,//用户id,自增,-1代表不存在
     name: String,//用户自己设置的用户名
-    avator: String,//头像
+    avatar: String,//头像
     sex: u32,//性别
     tel: String,//电话
     note: String,//用户自己的备注信息
@@ -75,7 +75,7 @@ struct Contact {
     temp_chat: &[u32],//临时用户id
     group: &[u32],//群组id
     applyUser:&[u32],//其他用户申请添加当前用户为好友
-    applyGroup:&[u32],//其他群组申请添加当前用户为好友
+    applyGroup:&[String],//guid 其他群组的某个成员邀请当前用户加入
     blackList: &[u32]
 }
 

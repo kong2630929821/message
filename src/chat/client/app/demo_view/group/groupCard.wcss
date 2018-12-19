@@ -45,7 +45,7 @@
     font-size: 32px;
     font-family: PingFangSC-Regular;
 }
-.avator-wrap{
+.avatar-wrap{
     position:absolute;
     width:106px;
     height:106px;
@@ -54,7 +54,7 @@
     border-radius:50%;
     
 }
-.group-avator{
+.group-avatar{
     width:106px;
     height:106px; 
 }

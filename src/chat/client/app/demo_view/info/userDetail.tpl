@@ -2,7 +2,7 @@
     <div w-class="top-main-wrap" ev-next-click="handleMoreContactor" ev-back-click="goBack">
         <chat-client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap">
-            <img w-class="avator" src="../../res/images/img_avatar1.png" />
+            <img w-class="avatar" src="../../res/images/img_avatar1.png" />
             <div w-class="nameText" ev-input-blur="changeFriendAlias" ev-input-change="aliasChange">
                 {{if it.editable}}
                     <widget w-class="aliasInput" w-tag="chat-client-app-widget-input-input" on-tap="editAlias">{input:{{it.alias}},style:"padding:0px;background:none;color:#fff;",itype:"text",maxLength:10 }</widget>

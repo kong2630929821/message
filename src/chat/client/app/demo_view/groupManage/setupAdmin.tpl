@@ -17,8 +17,8 @@
         {{end}}
         <div style="height:120px;" on-tap="openAddAdmin">
             <div w-class="contact-wrap">
-                <div w-class="avator-wrap">
-                    <img w-class="avator" src="../../res/images/add_group_user.png" />
+                <div w-class="avatar-wrap">
+                    <img w-class="avatar" src="../../res/images/add_group_user.png" />
                 </div>
                 <span w-class="text">添加管理员</span>
             </div>

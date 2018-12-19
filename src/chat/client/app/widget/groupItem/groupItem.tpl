@@ -1,7 +1,7 @@
 <div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
         <div w-class="group-item-wrap">
-            <div w-class="avator-wrap">
-                <img w-class="avator" src="../../res/images/{{it.groupAvatorPath}}" />
+            <div w-class="avatar-wrap">
+                <img w-class="avatar" src="../../res/images/{{it.groupAvatorPath}}" />
             </div>
             <div w-class="group-info-wrap">
                 <div w-class="info-wrap">

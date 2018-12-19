@@ -1,8 +1,8 @@
 <div class="new-page" ev-back-click="back">
     <img src="../../res/images/home_bg.png" w-class="home_bg"/>
     <chat-client-app-widget-topBar-topBar w-class="title">{title:"注册",background:"none"}</chat-client-app-widget-topBar-topBar>
-    <div w-class="avator-wrap">
-        <img w-class="avator" src="../../res/images/user.png" />
+    <div w-class="avatar-wrap">
+        <img w-class="avatar" src="../../res/images/user.png" />
         <span w-class="upload" on-tap="upload">上传头像</span>
     </div>
     <div w-class="input-wrap" ev-psw-change="inputPasswd">

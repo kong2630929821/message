@@ -25,7 +25,7 @@
     margin-right:auto;
     border-radius:50%;
 }
-.avator{
+.avatar{
     width:46px;
 }
 .get-more{

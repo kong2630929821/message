@@ -10,8 +10,8 @@
             <span w-class="scan-text">扫码加群</span>
         </div>
     </div>
-    <div w-class="avator-wrap">
-        <img w-class="group-avator" src="../../res/images/user.png"/>
+    <div w-class="avatar-wrap">
+        <img w-class="group-avatar" src="../../res/images/user.png"/>
     </div>
 </div>
 
