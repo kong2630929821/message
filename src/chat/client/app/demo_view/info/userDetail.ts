@@ -125,21 +125,18 @@ export class UserDetail extends Widget {
      */
     public delFriend(uid:number) {
         delUserFriend(uid,(r:Result) => {
-            if (r.r === 1) { // 删除成功取消订阅好友消息
+            if (r && r.r === 1) { // 删除成功取消订阅好友消息并清空本地数据
                 unSubscribe(uid.toString());
 
                 const sid = store.getStore('uid');
                 const userChatMap = store.getStore('userChatMap',[]);
-                const index1 = userChatMap.indexOf(genUserHid(sid,uid));
-                if (index1 > -1) { // 删除聊天记录
-                    userChatMap.splice(index1,1);
-                    store.setStore('userChatMap',userChatMap);
-                }
+                userChatMap.delete(genUserHid(sid,uid));  // 删除聊天记录
+                store.setStore('userChatMap',userChatMap);
 
                 const lastChat = store.getStore(`lastChat`, []);
-                const index2 = lastChat.findIndex(item => item[0] === uid && item[2] === GENERATOR_TYPE.USER);
-                if (index2 > -1) { // 删除最近对话记录
-                    lastChat.splice(index1,1);
+                const index = lastChat.findIndex(item => item[0] === uid && item[2] === GENERATOR_TYPE.USER);
+                if (index > -1) { // 删除最近对话记录
+                    lastChat.splice(index,1);
                     store.setStore('lastChat',lastChat);
                 }
             } else {

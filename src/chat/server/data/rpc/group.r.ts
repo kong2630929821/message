@@ -14,9 +14,9 @@ import { Tr } from '../../../../pi_pt/rust/pi_db/mgr';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid, delGidFromApplygroup } from '../../../utils/util';
+import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
-import { UserHistoryCursor, GroupHistoryCursor, MsgLock } from '../db/message.s';
+import { GroupHistoryCursor, MsgLock, UserHistoryCursor } from '../db/message.s';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -284,9 +284,8 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
 
 /**
  * 用户被动或主动进入群组后创建一个游标
- * @param guid 
  */
-const moveGroupCursor=(gid:number,rid:number)=>{
+const moveGroupCursor = (gid:number,rid:number) => {
     logger.debug('JoinGroup moveGroupCursor gid: ',gid,'rid: ',rid);
 
     const dbMgr = getEnv().getDbMgr();
@@ -295,18 +294,14 @@ const moveGroupCursor=(gid:number,rid:number)=>{
     const msgLockBucket = new Bucket('file',CONSTANT.MSG_LOCK_TABLE,dbMgr);
     const msglock = msgLockBucket.get<string,MsgLock>(genGroupHid(gid))[0];
     
-    let ridGroupCursor = groupHistoryCursorBucket.get<string,GroupHistoryCursor>(guid)[0];
-    // 游标表中是否有该用户的记录
-    if (!ridGroupCursor) { 
-        ridGroupCursor = new UserHistoryCursor();
-        ridGroupCursor.guid = guid;
-        ridGroupCursor.cursor = -1;
-    }
+    const ridGroupCursor = new GroupHistoryCursor();
+    ridGroupCursor.guid = guid;
+    ridGroupCursor.cursor = -1;
     ridGroupCursor.cursor = msglock ? msglock.current :-1;
     
     logger.debug('JoinGroup moveGroupCursor guid: ', guid, 'ridGroupCursor: ', ridGroupCursor);
     groupHistoryCursorBucket.put(guid,ridGroupCursor);
-}
+};
 
 /**
  * 转移群主
@@ -546,6 +541,7 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
     
     const gla = new GroupUserLinkArray();
     const m = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    logger.debug('getGroupUserLink gid: ',gid,'groupInfo: ',m);
        
     const guids = m.memberids.map(item => genGuid(gid,item));  
     gla.arr = groupUserLinkBucket.get(guids);

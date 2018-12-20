@@ -271,7 +271,7 @@ export const moveGroupCursor = (gid:number,current:number) => {
 
         // 游标表中是否有该用户的记录
         if (!ridGroupCursor) { 
-            ridGroupCursor = new UserHistoryCursor();
+            ridGroupCursor = new GroupHistoryCursor();
             ridGroupCursor.guid = guid;
             ridGroupCursor.cursor = -1;
         }

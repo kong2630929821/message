@@ -196,18 +196,6 @@ export const acceptUserJoin = (uid: number, accept: boolean) => {
     });
 };
 
-export const sendAnnounce = (gid: number) => {
-    const a = new AnnounceSend();
-    a.gid = gid;
-    a.msg = 'new announcement';
-    a.mtype = 1;
-    a.time = Date.now();
-
-    clientRpcFunc(sendAnnouncement, a, (r) => {
-        console.log(r);
-    });
-};
-
 export const inviteUsersToGroup = () => {
     const ia = new InviteArray();
     const invite1 = new Invite();

@@ -183,7 +183,7 @@ export interface Store {
  * 上次阅读到哪一条消息
  */
 export interface LastReadMsgId {
-    msgType: string; // 单聊、群聊、群公告
+    msgType: string; // 单聊、群聊
     msgId: string; // hIncId
 }
 // ============================================ 本地
