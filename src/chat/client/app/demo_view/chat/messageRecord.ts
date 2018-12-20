@@ -4,7 +4,7 @@
 // ================================================ 导入
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
+import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { FriendLink, GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genUserHid, genUuid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
@@ -29,7 +29,7 @@ export class MessageRecord extends Widget {
             const hid = friendLink.hid;
             const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
             const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-            this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : '没有最新消息';
+            this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
             const lastHincId = store.getStore(`lastRead/${genUserHid(sid,this.props.rid)}`,{ msgId:undefined }).msgId;
 
             // 计算有多少条新消息记录
@@ -42,7 +42,7 @@ export class MessageRecord extends Widget {
             this.props.name = groupInfo.name;
             const hIncIdArr = store.getStore(`groupChatMap/${genGroupHid(this.props.rid)}`,[]);
             const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-            this.props.lastMessage = hincId ? store.getStore(`groupHistoryMap/${hincId}`,'') : '没有最新消息';
+            this.props.lastMessage = hincId ? store.getStore(`groupHistoryMap/${hincId}`,'') : new GroupMsg();
             const lastHincId = store.getStore(`lastRead/${genGroupHid(this.props.rid)}`,{ msgId:undefined }).msgId;
 
             // 计算有多少条新消息记录
@@ -68,10 +68,13 @@ export class MessageRecord extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        store.register(`userChatMap/${genUserHid(store.getStore('uid'), this.props.rid)}`, this.bindCB);
-        store.register(`groupChatMap/${genGroupHid(this.props.rid)}`, this.bindCB);
-        store.register(`lastRead/${genUserHid(store.getStore('uid'), this.props.rid)}`,this.bindCB);
-        store.register(`lastRead/${genGroupHid(this.props.rid)}`,this.bindCB);
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            store.register(`userChatMap/${genUserHid(store.getStore('uid'), this.props.rid)}`, this.bindCB);
+            store.register(`lastRead/${genUserHid(store.getStore('uid'), this.props.rid)}`,this.bindCB);
+        } else {
+            store.register(`groupChatMap/${genGroupHid(this.props.rid)}`, this.bindCB);
+            store.register(`lastRead/${genGroupHid(this.props.rid)}`,this.bindCB);
+        }
     }
     public updateMessage() {
         this.setProps(this.props);

@@ -175,6 +175,7 @@ export const groupChatChange = () => {
         value.groupHistoryMap = store.getStore('groupHistoryMap'); // 群组聊天
         value.groupChatMap = store.getStore('groupChatMap');
         value.announceHistoryMap = store.getStore('announceHistoryMap'); // 群组公告
+        value.lastChat = store.getStore('lastChat');  // 最近聊天记录
 
         setTimeout(() => {
             writeFile(id, value, () => {

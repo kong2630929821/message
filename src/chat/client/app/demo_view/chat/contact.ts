@@ -38,18 +38,22 @@ export class Contact extends Widget {
             { iconPath:'scan.png',utilText:'扫一扫' },
             { iconPath:'add-friend.png',utilText:'我的信息' }
         ];
-        this.props.isOnline = store.getStore('uid',0) !== 0;
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
+        const wUser = walletStore.getStore('user/info',{ nickName:'' });  // 钱包
         const uid = store.getStore('uid');
-        const user1 = walletStore.getStore('user/info',{ nickName:undefined });
-        const user2 = store.getStore(`userInfoMap/${uid}`,new UserInfo());
-            // 如果聊天未登录，或者钱包修改姓名、头像等
-        if (!uid || user1.nickName !== user2.name || user1.avatar !== user2.avatar) {
+        const cUser = store.getStore(`userInfoMap/${uid}`,new UserInfo());  // 聊天
+        this.props.isOnline = wUser.nickName !== ''; 
+
+        // 如果聊天未登录，或钱包修改了姓名、头像等，或钱包退出登陆
+        if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
             store.initStore();
-            this.paint();
-            this.walletSignIn();
+            this.state = []; // 清空记录 lastChat
+            this.paint(true);
+            if (this.props.isOnline) { // 钱包已登录才去登陆聊天
+                this.walletSignIn();
+            }
         }
         // }
     }

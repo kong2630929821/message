@@ -41,7 +41,6 @@ export class AddUser extends Widget {
 
             return;
         }
-        
         applyUserFriend(this.props.rid,(r:Result) => {
             if (r.r === 0) {
                 alert(`${this.props.rid}已经是你的好友`);

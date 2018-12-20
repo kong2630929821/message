@@ -1,5 +1,5 @@
 <div class="new-page" w-class="new-page" ev-send="send" ev-back-click="goBack">
-    <chat-client-app-widget-topBar-topBar>{title:{{it.groupName}},background:"#fff",nextImg:"more-dot-white.png"}</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget-topBar-topBar>{title:{{it.groupName}},nextImg:"more-dot-white.png"}</chat-client-app-widget-topBar-topBar>
     
     <div w-class="messageBox">
         {{for key,value of it.hidIncArray}}
