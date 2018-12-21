@@ -46,7 +46,11 @@ export const initClient =  () => {
 export const clientRpcFunc = (name: string, req: any, callback: Function, timeout: number = 2000) => {
     if (!clientRpc) return;
     clientRpc(name, req, (r: Struct) => {
-        return callback(r);
+        if (!r) {
+            alert(`${name} 失败了，返回结果 ${r}`);
+        } else {
+            return callback(r);
+        }
     }, timeout);
 };
 
@@ -66,7 +70,9 @@ export const registerRpcStruct = (fileMap) => {
         const exp = pi_modules[filePath] && pi_modules[filePath].exports;
         for (const kk in exp) {
             if (Struct.isPrototypeOf(exp[kk]) && exp[kk]._$info && exp[kk]._$info.name) {
-                (<any>self).__mgr.register(exp[kk]._$info.nameHash, exp[kk], exp[kk]._$info.name);
+                if (!(<any>self).__mgr.lookup(exp[kk]._$info.name_hash)) {
+                    (<any>self).__mgr.register(exp[kk]._$info.name_hash, exp[kk], exp[kk]._$info.name);
+                }
             }
         }
     }

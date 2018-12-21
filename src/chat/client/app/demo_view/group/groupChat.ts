@@ -92,7 +92,7 @@ export class GroupChat extends Widget {
 
             return (r: GroupHistory) => {
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    logger.debug('发送失败！');
+                    alert('发送失败！');
                     
                     return;
                 }

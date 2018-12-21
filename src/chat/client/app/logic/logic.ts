@@ -71,7 +71,7 @@ export const exitGroup = (gid:number) => {
     unSubscribe(`ims/group/msg/${gid}`);
 
     const groupChatMap = store.getStore('groupChatMap',new Map());
-    groupChatMap.delete(genGroupHid(gid),1); // 删除聊天记录
+    groupChatMap.delete(genGroupHid(gid)); // 删除聊天记录
     store.setStore('groupChatMap',groupChatMap);
 
     const lastChat = store.getStore(`lastChat`, []);

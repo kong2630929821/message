@@ -16,7 +16,7 @@ import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
-import { GroupHistoryCursor, MsgLock, UserHistoryCursor } from '../db/message.s';
+import { GroupHistoryCursor, MsgLock } from '../db/message.s';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -552,7 +552,7 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
         return gla;
     }
     gla.arr = [];
-    
+
     return gla;
 };
 
@@ -637,13 +637,24 @@ export const dissolveGroup = (gid: number): Result => {
 
     const res = new Result();
 
-    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid);
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
 
-    if (uid === gInfo[0].ownerid) {
-        gInfo[0].state = 1;
-        groupInfoBucket.put(gid, gInfo[0]);
-        logger.debug('After group dissovled: ', groupInfoBucket.get(gid)[0]);
+    if (uid === gInfo.ownerid) {
+        gInfo.state = 1;
+        groupInfoBucket.put(gid, gInfo);
+        logger.debug('After group dissovled: ', gInfo);
 
+        const contactBucket = getContactBucket();
+        gInfo.memberids.forEach((uid) => {
+            const contact = contactBucket.get<number, [Contact]>(uid)[0];
+            const index = contact.group.indexOf(gid); 
+            if (index > -1) {
+                contact.group.splice(index,1);
+            }
+            contactBucket.put(uid, contact);
+            logger.debug('dissolveGroup uid: ', uid,'contact', contact);
+        });
+        
         res.r = 1;
 
         return res;

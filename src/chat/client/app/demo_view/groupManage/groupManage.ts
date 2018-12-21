@@ -96,6 +96,7 @@ export class ManageItem extends Widget {
                 logger.debug('dissolveGroup');
                 clientRpcFunc(dissolveGroup,this.props.gid,(r) => {
                     logger.debug('========dissolveGroup',r);
+                    this.ok();
                 });
             },
             () => {
