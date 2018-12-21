@@ -9,14 +9,15 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GroupHistory, UserHistory } from '../../../../server/data/db/message.s';
 import { Contact, FriendLink, UserInfo } from '../../../../server/data/db/user.s';
-import { getFriendLinks } from '../../../../server/data/rpc/basic.p';
-import { FriendLinkArray, GetFriendLinksReq, GetUserInfoReq, GroupUserLinkArray } from '../../../../server/data/rpc/basic.s';
+import { getFriendLinks, getGroupsInfo } from '../../../../server/data/rpc/basic.p';
+import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GroupArray, GroupUserLinkArray } from '../../../../server/data/rpc/basic.s';
 import { getGroupUserLink } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
-import { genUuid } from '../../../../utils/util';
+import { genUuid, getGidFromGuid } from '../../../../utils/util';
 import { getFriendHistory, getMyGroupHistory } from '../../data/initStore';
 import { updateGroupMessage, updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
+import { exitGroup } from '../../logic/logic';
 import { clientRpcFunc, subscribe as subscribeMsg } from '../../net/init';
 import { login as userLogin } from '../../net/rpc';
 import * as subscribedb from '../../net/subscribedb';
@@ -61,6 +62,7 @@ export class Login extends Widget {
         for (let i = 0;i < inputs.length;i++) {
             inputs[i].blur();
         }
+        
         userLogin(this.props.uid, this.props.passwd, (r: UserInfo) => {
             if (r.uid > 0) {
                 store.setStore(`uid`,r.uid);
@@ -90,11 +92,15 @@ export class Login extends Widget {
  * 登录成功获取各种数据表的变化
  * @param uid user id
  */
-const init = (uid:number) => {
+export const init = (uid:number) => {
     subscribedb.subscribeContact(uid,(r:Contact) => {
-        updateUsers(r,uid);        
+        if (r && r.uid === uid) {
+            updateUsers(r,uid);        
+        }
     },(r:Contact) => {
-        updateGroup(r,uid);
+        if (r && r.uid === uid) {
+            updateGroup(r,uid);
+        }
     });
 
     // TODO:
@@ -116,27 +122,22 @@ const updateGroup = (r:Contact,uid:number) => {
         return r.group.findIndex(item => item === gid) === -1;
     });
     
-    // 删除群组信息 // 取消订阅已退出的群组消息
-    const gInfoMap = store.getStore(`groupInfoMap`);    
+    // 主动或被动退出的群组
     delGroup.forEach((gid:number) => {
-        gInfoMap.delete(gid);
+        exitGroup(gid);
     });
-    store.setStore(`groupInfoMap`, gInfoMap);
-    // 订阅群组聊天消息
+
+    // 订阅我已经加入的群组基础信息
     addGroup.forEach((gid) => {
         getMyGroupHistory(gid); // 获取群组离线消息
         subscribeMsg(`ims/group/msg/${gid}`, GroupHistory, (r: GroupHistory) => {
             updateGroupMessage(gid,r);
         });
-    });
-    // 订阅群组基础信息，包括邀请我进群的群组信息
-    addGroup.concat(r.applyGroup).forEach((gid) => {
         subscribedb.subscribeGroupInfo(gid,() => {
-            // TODO
             clientRpcFunc(getGroupUserLink,gid,(r:GroupUserLinkArray) => {
                 logger.debug('===============',r);
                 // 判断是否返回成功
-                if (r.arr.length > 0) {
+                if (r && r.arr.length > 0) {
                     r.arr.forEach((item:GroupUserLink) => {
                         store.setStore(`groupUserLinkMap/${item.guid}`,item);
                     });
@@ -144,6 +145,24 @@ const updateGroup = (r:Contact,uid:number) => {
             });
         });
     });
+    // 获取邀请我进群的群组信息
+    const groups = new GetGroupInfoReq();
+    groups.gids = [];
+    r.applyGroup.forEach(guid => {
+        const gid = getGidFromGuid(guid);
+        groups.gids.push(gid);
+    });
+    console.log('邀请我入群',groups);
+    if (groups.gids.length > 0) {
+        clientRpcFunc(getGroupsInfo, groups, (r:GroupArray) => {
+            console.log(r);
+            if (r && r.arr.length > 0) {
+                r.arr.forEach(item => {
+                    store.setStore(`groupInfoMap/${item.gid}`,item);
+                });
+            }
+        });
+    }
     
 };
 

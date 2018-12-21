@@ -24,13 +24,12 @@ export class GroupMember extends Widget {
     public props:Props = {
         gid: null,
         groupInfo:{},
-        isMemberDeleteState:false
+        deleteBtn:false
     };
     public setProps(props:any) {        
         super.setProps(props); 
         this.props.groupInfo = this.getGroupInfo();
-        this.props.isMemberDeleteState = this.props.isMemberDeleteState || false;
-        logger.debug('============groupmember memebers',this.props);
+        this.props.deleteBtn = this.props.deleteBtn || false;
     }
     public goBack() {
         this.ok();
@@ -56,12 +55,12 @@ export class GroupMember extends Widget {
     // 进入移除成员操作状态
     public deleteMember() {
         const uid = store.getStore('uid');
-        if (uid !== this.props.groupInfo.ownerid && this.props.groupInfo.adminids.indexOf(uid) === -1) {
-            logger.debug('user:',uid,'have not the permission of remove member');
+        if (uid !== this.props.groupInfo.ownerid && this.props.groupInfo.adminids.indexOf(uid) === -1) {  // 用户既不是群主也不是管理员
+            alert('您没有权限执行此操作');
 
             return ;
         }
-        this.props.isMemberDeleteState = true;
+        this.props.deleteBtn = true;
         this.paint();
     }
     // 移除成员
@@ -77,5 +76,5 @@ export class GroupMember extends Widget {
 interface Props {
     gid: number;
     groupInfo:Json; // 群信息
-    isMemberDeleteState:boolean; // 群成员是否处于移除状态
+    deleteBtn:boolean; // 群成员是否处于移除状态
 }

@@ -3,7 +3,7 @@
         <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",moreImg:"more-dot-white.png",background:"transparent"}</widget>
         
         <div w-class="home-info-wrap">
-            <img w-class="avator" src="../../res/images/img_avatar1.png" />
+            <img w-class="avatar" src="../../res/images/img_avatar1.png" />
             <div w-class="nameText">
                 {{if it.editable}}
                     <input type="text" value="{{it.groupAlias}}" w-class="groupAliasInput" maxlength="10" on-blur="changeGroupAlias" on-tap="editGroupAlias" on-input="groupAliasChange"/>

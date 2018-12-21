@@ -1,8 +1,8 @@
 <div>
     {{if it.show}}
     <div w-class="contact-wrap">
-        <div w-class="avator-wrap">
-            <img w-class="avator" src="../../res/images/user.png" />
+        <div w-class="avatar-wrap">
+            <img w-class="avatar" src="../../res/images/user.png" />
         </div>
         <span w-class="text">{{it.text ? it.text : it.name}}</span>
         {{if it.totalNew>0}}

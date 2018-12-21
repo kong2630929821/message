@@ -10,6 +10,7 @@ import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';import * as store from '../../data/store';
 import { getUsersInfo } from '../../../../server/data/rpc/basic.p';
 import { GetUserInfoReq, UserArray } from '../../../../server/data/rpc/basic.s';
+import { getGidFromGuid, getUidFromGuid } from '../../../../utils/util';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -21,6 +22,7 @@ const logger = new Logger(WIDGET_NAME);
 export class ApplyUser extends Widget {
     public props: Props = {
         id:null,
+        guid:null,
         name:'',
         chatType:GENERATOR_TYPE.USER,
         applyInfo: '',
@@ -36,7 +38,7 @@ export class ApplyUser extends Widget {
             logger.debug('------------',store.getStore(`userInfoMap/${this.props.id}`));
             const userInfo = store.getStore(`userInfoMap/${this.props.id}`);
             this.props.name = userInfo ? userInfo.name : '';
-            this.props.applyInfo = `${this.props.name}请求添加你为好友`;
+            this.props.applyInfo = '请求添加你为好友';
         }
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             if (this.props.isActiveToGroup) { // 主动申请加群
@@ -52,9 +54,12 @@ export class ApplyUser extends Widget {
                 });
                 
             } else { // 被动进群
-                const ginfo = store.getStore(`groupInfoMap/${this.props.id}`);
-                this.props.name = ginfo ? ginfo.name : ''; 
-                this.props.applyInfo = `邀请你加入群组：${this.props.name}`;
+                const gid = getGidFromGuid(this.props.guid);
+                const rid = getUidFromGuid(this.props.guid);
+                const ginfo = store.getStore(`groupInfoMap/${gid}`);
+                const userInfo = store.getStore(`userInfoMap/${rid}`);
+                this.props.name = userInfo ? userInfo.name : ''; 
+                this.props.applyInfo = `邀请你加入群组：${ginfo ? ginfo.name :''}`;
             }
             
         }
@@ -83,7 +88,7 @@ export class ApplyUser extends Widget {
             if (this.props.isActiveToGroup) { // 主动申请加群
                 notify(e.node,'ev-agree-joinGroup',{ value:this.props.id });
             } else { // 被动进群
-                notify(e.node,'ev-agree-group',{ value:this.props.id });
+                notify(e.node,'ev-agree-group',{ value:getGidFromGuid(this.props.guid) });
             }  
         }
         this.props.isagree = true;
@@ -94,6 +99,7 @@ export class ApplyUser extends Widget {
 // ================================================ 本地
 interface Props {
     id?: number; // 用户id或群组id
+    guid:string; // 群内成员ID
     name?: string; // 用户名或群名
     chatType: GENERATOR_TYPE; // 是用户还是群组
     applyInfo?: string; // 验证信息

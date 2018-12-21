@@ -258,7 +258,6 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
  * 群聊游标移动
  */
 export const moveGroupCursor = (gid:number,current:number) => {
-    const sid = getUid();
     const dbMgr = getEnv().getDbMgr();
     const groupHistoryCursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
     const gInfoBucket = new Bucket('file', CONSTANT.GROUP_INFO_TABLE, dbMgr);
@@ -266,11 +265,14 @@ export const moveGroupCursor = (gid:number,current:number) => {
     
     // 群组中的所有成员都是接收者，包括发送者
     gInfo.memberids.forEach(elem => {
-        let ridGroupCursor = groupHistoryCursorBucket.get(genGuid(gid,elem))[0];
+        const guid = genGuid(gid,elem);
+        let ridGroupCursor = groupHistoryCursorBucket.get(guid)[0];
+        logger.debug('sendGroupMessage moveGroupCursor begin guid', guid, 'ridGroupCursor: ', ridGroupCursor);
+
         // 游标表中是否有该用户的记录
         if (!ridGroupCursor) { 
-            ridGroupCursor = new UserHistoryCursor();
-            ridGroupCursor.guid = genGuid(gid,elem);
+            ridGroupCursor = new GroupHistoryCursor();
+            ridGroupCursor.guid = guid;
             ridGroupCursor.cursor = -1;
         }
         // 用户是否在线，在线则更新游标
@@ -279,8 +281,8 @@ export const moveGroupCursor = (gid:number,current:number) => {
             ridGroupCursor.cursor = current;
         }
         
-        logger.debug('moveGroupCursor ridGroupCursor: ', ridGroupCursor);
-        groupHistoryCursorBucket.put(genGuid(gid,sid),ridGroupCursor);
+        logger.debug('sendGroupMessage moveGroupCursor guid', guid, 'ridGroupCursor: ', ridGroupCursor);
+        groupHistoryCursorBucket.put(guid,ridGroupCursor);
     });
 
 };

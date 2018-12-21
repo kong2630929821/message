@@ -2,8 +2,10 @@
  * 一些全局方法
  */
 // =====================================导入
-import { FriendLink, UserInfo } from '../../../server/data/db/user.s';import { genUuid } from '../../../utils/util';
+import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+import { genGroupHid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
+import { unSubscribe } from '../net/init';
 
 // =====================================导出
 
@@ -60,4 +62,44 @@ export const getFriendAlias = (rid:number) => {
     const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,new FriendLink());
 
     return friend.alias || user.name;
+};
+
+/**
+ * 用户退出群组后取消订阅清空本地数据
+ */
+export const exitGroup = (gid:number) => {
+    unSubscribe(`ims/group/msg/${gid}`);
+
+    const groupChatMap = store.getStore('groupChatMap',new Map());
+    groupChatMap.delete(genGroupHid(gid),1); // 删除聊天记录
+    store.setStore('groupChatMap',groupChatMap);
+
+    const lastChat = store.getStore(`lastChat`, []);
+    const index = lastChat.findIndex(item => item[0] === gid && item[2] === GENERATOR_TYPE.GROUP);
+    if (index > -1) { // 删除最近对话记录
+        lastChat.splice(index,1);
+        store.setStore('lastChat',lastChat);
+    }
+
+    const gInfoMap = store.getStore(`groupInfoMap`,new Map());    
+    gInfoMap.delete(gid);  // 删除群组信息
+    store.setStore(`groupInfoMap`, gInfoMap);
+};
+
+// 复制到剪切板
+export const copyToClipboard = (copyText) => {
+    const input = document.createElement('input');
+    input.setAttribute('readonly', 'readonly');
+    input.setAttribute('value', copyText);
+    input.setAttribute('style', 'position:absolute;top:-9999px;');
+    document.body.appendChild(input);
+    if (navigator.userAgent.match(/(iPhone|iPod|iPad);?/i)) {
+        input.setSelectionRange(0, 9999);
+    } else {
+        input.select();
+    }
+    if (document.execCommand('copy')) {
+        document.execCommand('copy');
+    }
+    document.body.removeChild(input);
 };

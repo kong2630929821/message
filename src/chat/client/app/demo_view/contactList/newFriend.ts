@@ -39,7 +39,7 @@ export class NewFriend extends Widget {
     // 同意入群申请（被动）
     public agreeGroupApply(e:any) {
         const gid = parseInt(e.value,10);
-        logger.debug(gid);
+        logger.debug('agreeGroupApply',gid);
         const agree = new GroupAgree();
         agree.agree = true;
         agree.gid = gid;

@@ -2,14 +2,17 @@
     <div w-class="top-main-wrap" ev-next-click="handleMoreContactor" ev-back-click="goBack">
         <chat-client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap">
-            <img w-class="avator" src="../../res/images/img_avatar1.png" />
+            <img w-class="avatar" src="../../res/images/img_avatar1.png" />
             <div w-class="nameText" ev-input-blur="changeFriendAlias" ev-input-change="aliasChange">
                 {{if it.editable}}
                     <widget w-class="aliasInput" w-tag="chat-client-app-widget-input-input" on-tap="editAlias">{input:{{it.alias}},style:"padding:0px;background:none;color:#fff;",itype:"text",maxLength:10 }</widget>
                 {{else}}
                     {{it.alias||it.userInfo.name}}
                 {{end}}
+
+                {{if it.isFriend}}
                 <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="editAlias"/>
+                {{end}}
             </div>
             <div>ID：{{it.uid}}</div>
             <div>昵称：{{it.userInfo.name}}</div>
@@ -45,11 +48,15 @@
                     <span>消息免打扰</span>
                     <chat-client-app-widget-switch-switch>{types:false,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                 </li>
+                {{if it.isFriend}}
                 <li w-class="liItem" on-tap="startChat" style="color: #318DE6;margin-bottom: 110px;">开始对话</li>
+                {{else}}
+                <li w-class="liItem" on-tap="addUser" style="color: #318DE6;margin-bottom: 110px;">添加好友</li>
+                {{end}}
             </ul>
         </div>
     </div>
-    {{if it.isContactorOpVisible}}
+    {{if it.isContactorOpVisible && it.isFriend}}
     <div w-class="contactorOpList" ev-handleFatherTap="handleFatherTap">
         <chat-client-app-widget-utilList-utilList>{utilList:{{it.utilList}} }</chat-client-app-widget-utilList-utilList>
     </div>

@@ -239,7 +239,7 @@ export const changeUserInfo = (userinfo:UserInfo):UserInfo => {
         userInfoBucket.put(sid,userinfo);
         newUser = userinfo;
     } else {
-        logger.debug('curUser: ',sid,' changeUser: ',userinfo.uid);
+        logger.debug('curUser: ',sid,' changeUser: ',userinfo);
         newUser.uid = -1;
     }
     

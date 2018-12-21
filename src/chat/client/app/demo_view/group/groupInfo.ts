@@ -7,14 +7,13 @@ import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
-import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
 import { getGroupUserLink, updateGroupAlias, userExitGroup } from '../../../../server/data/rpc/group.p';
 import { GroupAlias } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
-import { depCopy, genGroupHid } from '../../../../utils/util';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { clientRpcFunc, unSubscribe } from '../../net/init';
+import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -99,47 +98,21 @@ export class GroupInfos extends Widget {
                 popNew('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' });
                 break;
             case 2: // 删除，退出群
-                this.deleteGroup();
+                popNew('chat-client-app-widget-modalBox-modalBox', { content:'删除后，将不再接受此群消息',style:'color:#F7931A' },() => {
+                    clientRpcFunc(userExitGroup,this.props.gid,(r) => {
+                        console.log('========deleteGroup',r);
+                        if (r.r === 1) { // 退出成功关闭当前页面
+                            this.ok();
+                        } else {
+                            alert('退出群组失败');
+                        }
+                    });
+                });
                 break;
             default:
         }
         
         this.paint();
-    }
-
-    /**
-     * 退出群
-     */
-    public deleteGroup() {
-        popNew('chat-client-app-widget-modalBox-modalBox', { content:'删除后，将不再接受此群消息',style:'color:#F7931A' },
-        () => {
-            logger.debug('===============deleteGroup');
-            clientRpcFunc(userExitGroup,this.props.gid,(r) => {
-                logger.debug('========deleteGroup',r);
-                if (r.r === 1) { // 退出成功取消订阅群消息
-                    unSubscribe(`ims/group/msg/${this.props.gid}`);
-
-                    const groupChatMap = store.getStore('groupChatMap',[]);
-                    const index1 = groupChatMap.indexOf(genGroupHid(this.props.gid));
-                    if (index1 > -1) { // 删除聊天记录
-                        groupChatMap.splice(index1,1);
-                        store.setStore('groupChatMap',groupChatMap);
-                    }
-
-                    const lastChat = store.getStore(`lastChat`, []);
-                    const index2 = lastChat.findIndex(item => item[0] === this.props.gid && item[2] === GENERATOR_TYPE.GROUP);
-                    if (index2 > -1) { // 删除最近对话记录
-                        lastChat.splice(index1,1);
-                        store.setStore('lastChat',lastChat);
-                    }
-                } else {
-                    alert('退出群组失败');
-                }
-            });
-        },
-        () => {
-            logger.debug('=============== cancel deleteGroup');
-        });
     }
 
     // 页面点击

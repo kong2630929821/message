@@ -6,13 +6,13 @@
     align-items:center;
     border-bottom: solid #DBDBE5 1px;
 }
-.avator-wrap{
+.avatar-wrap{
     width:80px;
     height:80px;
     border-radius:50%;
     margin-right:30px;
 }
-.avator{
+.avatar{
     width:80px;
 }
 .text{ 

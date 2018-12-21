@@ -4,22 +4,24 @@
 
 // ================================================ 导入
 import { popNew } from '../../../../../pi/ui/root';
+import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
+import { Contact } from '../../../../server/data/db/user.s';
 import { applyJoinGroup } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
+import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
-
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
+export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
 export class GroupListt extends Widget {
     public ok:() => void;
     public props:Props = {
-        inputGid:null,
-        groups:[]
+        inputGid:null
     };
     public goBack() {
         this.ok();
@@ -55,34 +57,13 @@ export class GroupListt extends Widget {
 }
 
 // ================================================ 本地
+store.register('contactMap', (r: Map<number, Contact>) => {
+    // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
+    for (const value of r.values()) {
+        forelet.paint(value);
+    }    
+});
+
 interface Props {
     inputGid:number; // 用户输入的要添加的群组id
-    groups:number[]; // 群组列表
 }
-
-/**
- * 更新群组公告相关信息
- * @param r 群组信息
- * @param gid 当前群组id
- */
-// const updateAnnounce = (r:GroupInfo,gid:number) => {
-//     const oldAnnounce = store.getStore(`groupInfoMap/${gid}`, new GroupInfo()).annoceids;
-//     logger.debug('oldAnnounce===========',oldAnnounce);
-//     const addAnnounce = r.annoceids.filter(aid => {
-//         return oldAnnounce.findIndex(item => item === aid) === -1;
-//     });
-//     logger.debug('addAnnounce===========',addAnnounce);
-//     if (addAnnounce.length === 0) {
-//         addAnnounce.push(oldAnnounce[oldAnnounce.length - 1]);
-//     }
-//     const aids = new AnnouceIds();
-//     aids.arr = addAnnounce;
-//     clientRpcFunc(getAnnoucements,aids,(r:AnnounceHistoryArray) => {
-//         logger.debug('===============success',r);
-//         if (r && r.arr) {
-//             r.arr.forEach(item => {
-//                 store.setStore(`announceHistoryMap/${item.aIncId}`,item);  
-//             });
-//         }
-//     });
-// };

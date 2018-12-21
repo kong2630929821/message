@@ -8,7 +8,7 @@
     
     <div w-class="a-part" ev-changeSelect="changeSelect">
         <div w-class="a">群聊</div>
-        {{for index,item of it.groups}}
+        {{for index,item of it1.group}}
         <div on-tap="showInfo({{item}})">
             <chat-client-app-demo_view-contactList-contactItem>{id: {{item}}, chatType: "group"}</chat-client-app-demo_view-contactList-contactItem>
         </div>

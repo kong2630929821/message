@@ -11,13 +11,13 @@ export class UserInfo extends Struct {
 
     uid: number;
     name: string;
-    avator: string;
+    avatar: string;
     sex: number;
     tel: string;
     note: string;
 	static _$info =  new StructInfo("chat/server/data/db/user.UserInfo",1769539731,  new Map( [["primary","uid"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("uid", 
 new EnumType( Type.U32 ), null), new FieldInfo("name", 
-new EnumType( Type.Str ), null), new FieldInfo("avator", 
+new EnumType( Type.Str ), null), new FieldInfo("avatar", 
 new EnumType( Type.Str ), null), new FieldInfo("sex", 
 new EnumType( Type.U32 ), null), new FieldInfo("tel", 
 new EnumType( Type.Str ), null), new FieldInfo("note", 
@@ -39,7 +39,7 @@ new EnumType( Type.Str ), null) ]);
 	bonDecode(bb:BonBuffer) {
 		this.uid = bb.readInt();
 		this.name = bb.readUtf8();
-		this.avator = bb.readUtf8();
+		this.avatar = bb.readUtf8();
 		this.sex = bb.readInt();
 		this.tel = bb.readUtf8();
 		this.note = bb.readUtf8();
@@ -50,7 +50,7 @@ new EnumType( Type.Str ), null) ]);
                 
         bb.writeUtf8(this.name);
                 
-        bb.writeUtf8(this.avator);
+        bb.writeUtf8(this.avatar);
                 
         bb.writeInt(this.sex);
                 
@@ -205,7 +205,7 @@ export class Contact extends Struct {
     temp_chat: Array<number>;
     group: Array<number>;
     applyUser: Array<number>;
-    applyGroup: Array<number>;
+    applyGroup: Array<string>;
     blackList: Array<number>;
 	static _$info =  new StructInfo("chat/server/data/db/user.Contact",2474863549,  new Map( [["primary","uid"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("uid", 
 new EnumType( Type.U32 ), null), new FieldInfo("friends", 
@@ -218,7 +218,7 @@ new EnumType( Type.U32 ) ), null), new FieldInfo("applyUser",
 new EnumType( Type.Arr, 
 new EnumType( Type.U32 ) ), null), new FieldInfo("applyGroup", 
 new EnumType( Type.Arr, 
-new EnumType( Type.U32 ) ), null), new FieldInfo("blackList", 
+new EnumType( Type.Str ) ), null), new FieldInfo("blackList", 
 new EnumType( Type.Arr, 
 new EnumType( Type.U32 ) ), null) ]);
 
@@ -254,7 +254,7 @@ new EnumType( Type.U32 ) ), null) ]);
 })
 ;
 		this.applyGroup = bb.readArray(() => {
-	return     bb.readInt();
+	return     bb.readUtf8();
 })
 ;
 		this.blackList = bb.readArray(() => {
@@ -287,7 +287,7 @@ new EnumType( Type.U32 ) ), null) ]);
         });
                 
         bb.writeArray(this.applyGroup, (el) => {    
-            bb.writeInt(el);
+            bb.writeUtf8(el);
             
         });
                 

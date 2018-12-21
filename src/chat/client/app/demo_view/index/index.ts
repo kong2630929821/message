@@ -2,8 +2,9 @@
  * 项目入口
  */
 // ============================== 导入
-import { destory, popNew } from '../../../../../pi/ui/root';
+import { popNew } from '../../../../../pi/ui/root';
 import { addWidget } from '../../../../../pi/widget/util';
+
 // ============================== 导出
 export const run = () => {
     const currentTime = (new Date()).getTime();

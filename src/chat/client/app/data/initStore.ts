@@ -57,6 +57,10 @@ export const getFriendHistory = (rid: number) => {
     };
     if (!userflag.hIncId) {  // 如果本地没有记录，则请求后端存的游标
         clientRpcFunc(getUserHistoryCursor, rid, (r: UserHistoryCursor) => {
+            const lastRead = {
+                msgId: '',
+                msgType: GENERATOR_TYPE.USER
+            };
             if (r && r.uuid === genUuid(sid,rid)) { // 有返回值且是正确的返回值
                 lastRead.msgId = genHIncId(hid,r.cursor);
                 // console.error('rid: ',rid,'lastread ',lastRead);
@@ -97,9 +101,12 @@ export const getMyGroupHistory = (gid: number) => {
     };
     if (!groupflag.hIncId) {  // 如果本地没有记录，则请求后端存的游标
         clientRpcFunc(getGroupHistoryCursor, gid, (r: GroupHistoryCursor) => {
+            const lastRead = {
+                msgId: '',
+                msgType: GENERATOR_TYPE.GROUP
+            };
             if (r && r.guid === genGuid(gid,sid)) { // 有返回值且是正确的返回值
                 lastRead.msgId = genHIncId(hid,r.cursor);
-                console.error('gid: ',gid,'lastread ',lastRead);
             } 
             store.setStore(`lastRead/${hid}`,lastRead); 
         });
@@ -107,10 +114,9 @@ export const getMyGroupHistory = (gid: number) => {
     } else {
         store.setStore(`lastRead/${hid}`,lastRead);
     } 
-    
+
     clientRpcFunc(getGroupHistory,groupflag,(r:GroupHistoryArray) => {
-        console.error('guid: ',hid,'initStore getMyGroupHistory',r);
-        if (r.newMess > 0) {
+        if (r && r.newMess > 0) {
             r.arr.forEach(element => {
                 updateGroupMessage(gid, element);
             });
@@ -175,6 +181,7 @@ export const groupChatChange = () => {
         value.groupHistoryMap = store.getStore('groupHistoryMap'); // 群组聊天
         value.groupChatMap = store.getStore('groupChatMap');
         value.announceHistoryMap = store.getStore('announceHistoryMap'); // 群组公告
+        value.lastChat = store.getStore('lastChat');  // 最近聊天记录
 
         setTimeout(() => {
             writeFile(id, value, () => {

@@ -3,7 +3,7 @@
     <div w-class="outer">
         <div w-class="ga-top-banner" >
             <div w-class="left-container">
-                <img on-tap="tomyHome" src="../../res/images/user.png" w-class="avator" />
+                <img on-tap="tomyHome" src="../../res/images/user.png" w-class="avatar" />
             </div>
             <img on-tap="getMore" src="../../res/images/add-blue.png" w-class="get-more" />
             <img on-tap="refreshPage" src="../../res/images/refresh_blue.png" w-class="refreshBtn"/>
