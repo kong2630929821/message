@@ -2,7 +2,8 @@
  * 一些全局方法
  */
 // =====================================导入
-import { FriendLink, UserInfo, GENERATOR_TYPE } from '../../../server/data/db/user.s';import { genUuid, genGroupHid } from '../../../utils/util';
+import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+import { genGroupHid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { unSubscribe } from '../net/init';
 
@@ -83,4 +84,22 @@ export const exitGroup = (gid:number) => {
     const gInfoMap = store.getStore(`groupInfoMap`,new Map());    
     gInfoMap.delete(gid);  // 删除群组信息
     store.setStore(`groupInfoMap`, gInfoMap);
+};
+
+// 复制到剪切板
+export const copyToClipboard = (copyText) => {
+    const input = document.createElement('input');
+    input.setAttribute('readonly', 'readonly');
+    input.setAttribute('value', copyText);
+    input.setAttribute('style', 'position:absolute;top:-9999px;');
+    document.body.appendChild(input);
+    if (navigator.userAgent.match(/(iPhone|iPod|iPad);?/i)) {
+        input.setSelectionRange(0, 9999);
+    } else {
+        input.select();
+    }
+    if (document.execCommand('copy')) {
+        document.execCommand('copy');
+    }
+    document.body.removeChild(input);
 };

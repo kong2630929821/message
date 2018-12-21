@@ -57,6 +57,10 @@ export const getFriendHistory = (rid: number) => {
     };
     if (!userflag.hIncId) {  // 如果本地没有记录，则请求后端存的游标
         clientRpcFunc(getUserHistoryCursor, rid, (r: UserHistoryCursor) => {
+            const lastRead = {
+                msgId: '',
+                msgType: GENERATOR_TYPE.USER
+            };
             if (r && r.uuid === genUuid(sid,rid)) { // 有返回值且是正确的返回值
                 lastRead.msgId = genHIncId(hid,r.cursor);
                 // console.error('rid: ',rid,'lastread ',lastRead);

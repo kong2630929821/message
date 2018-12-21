@@ -543,11 +543,16 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
     const m = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
     logger.debug('getGroupUserLink gid: ',gid,'groupInfo: ',m);
        
-    const guids = m.memberids.map(item => genGuid(gid,item));  
-    gla.arr = groupUserLinkBucket.get(guids);
+    if (m) {
+        const guids = m.memberids.map(item => genGuid(gid,item));  
+        gla.arr = groupUserLinkBucket.get(guids);
 
-    logger.debug('Get group user link: ', gla);
+        logger.debug('Get group user link: ', gla);
 
+        return gla;
+    }
+    gla.arr = [];
+    
     return gla;
 };
 
