@@ -9,6 +9,7 @@ import { DBToMqttMonitor, registerDbToMqttMonitor } from '../../pi_pt/rust/pi_se
 import { cloneServerNode, setMqttTopic } from '../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../utils/db';
 import { ACCOUNT_GENERATOR_TABLE, GROUP_INFO_TABLE, USER_INFO_TABLE, WARE_NAME } from './data/constant';
+import { GROUP_STATE } from './data/db/group.s';
 import { AccountGenerator, GENERATOR_TYPE } from './data/db/user.s';
 
 declare var pi_modules;
@@ -23,7 +24,7 @@ const init = () => {
 };
 
 const initAccountGenerator = () => {
-    const bkt = new Bucket('file', ACCOUNT_GENERATOR_TABLE, dbMgr);    
+    const bkt = new Bucket('file', ACCOUNT_GENERATOR_TABLE, dbMgr);
     if (bkt.get(GENERATOR_TYPE.USER)[0] === undefined) {
         const userAccountGenerator = new AccountGenerator();
         userAccountGenerator.index = GENERATOR_TYPE.USER;
@@ -31,7 +32,7 @@ const initAccountGenerator = () => {
         bkt.put(GENERATOR_TYPE.USER, userAccountGenerator);
     }
     if (bkt.get(GENERATOR_TYPE.GROUP)[0] === undefined) {
-        const groupAccountGenerator = new AccountGenerator();        
+        const groupAccountGenerator = new AccountGenerator();
         groupAccountGenerator.index = GENERATOR_TYPE.GROUP;
         groupAccountGenerator.currentIndex = ACCOUNT_START;
         bkt.put(GENERATOR_TYPE.GROUP, groupAccountGenerator);
@@ -79,15 +80,17 @@ const createRoster = (): Map<string, Map<string, boolean>> => {
     return map;
 };
 
-const initMqttTopic = () => {    
+const initMqttTopic = () => {
     // 注册群组主题
     const gInfoBucket = new Bucket('file', GROUP_INFO_TABLE, dbMgr);
     const gItr = gInfoBucket.iter(undefined);
     let gInfo = gItr.nextElem();
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-    if (gInfo) {
-        const groupTopic = `ims/group/msg/${gInfo[1].gid}`;        
-        setMqttTopic(mqttServer, groupTopic, true, true);
+    while (gInfo) {
+        if (gInfo[1].state === GROUP_STATE.CREATED) {
+            const groupTopic = `ims/group/msg/${gInfo[1].gid}`;
+            setMqttTopic(mqttServer, groupTopic, true, true);
+        }
         gInfo = gItr.nextElem();
     }
 };
