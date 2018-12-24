@@ -19,6 +19,7 @@ import { OnlineUsers } from '../db/user.s';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GroupInfo } from '../db/group.s';
 import { getUid } from './group.r';
+import { GROUP_STATE } from '../db/group.s';
 
 const logger = new Logger('MESSAGE');
 
@@ -66,13 +67,13 @@ export const getUserHistoryCursor = (uid: number): UserHistoryCursor => {
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
     const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
-    let userCursor = userHistoryCursorBucket.get(genUuid(sid,uid))[0];
+    let userCursor = userHistoryCursorBucket.get(genUuid(sid, uid))[0];
     if (!userCursor) {
         userCursor = new UserHistoryCursor();
-        userCursor.uuid = genUuid(sid,uid);
+        userCursor.uuid = genUuid(sid, uid);
         userCursor.cursor = -1;
     }
-    logger.debug('getUserHistoryCursor userCursor',userCursor);
+    logger.debug('getUserHistoryCursor userCursor', userCursor);
 
     return userCursor;
 };
@@ -81,17 +82,17 @@ export const getUserHistoryCursor = (uid: number): UserHistoryCursor => {
  * 获取群聊消息游标
  */
 // #[rpc=rpcServer]
-export const getGroupHistoryCursor = (gid: number):  GroupHistoryCursor => {
+export const getGroupHistoryCursor = (gid: number): GroupHistoryCursor => {
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
     const groupHistoryCursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
-    let groupCursor = groupHistoryCursorBucket.get(genGuid(gid,sid))[0];
+    let groupCursor = groupHistoryCursorBucket.get(genGuid(gid, sid))[0];
     if (!groupCursor) {
         groupCursor = new GroupHistoryCursor();
-        groupCursor.guid = genGuid(gid,sid);
+        groupCursor.guid = genGuid(gid, sid);
         groupCursor.cursor = -1;
     }
-    logger.debug('getGroupHistoryCursor groupCursor',groupCursor);
+    logger.debug('getGroupHistoryCursor groupCursor', groupCursor);
 
     return groupCursor;
 };
@@ -116,8 +117,8 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     gmsg.mtype = message.mtype;
     gmsg.send = true;
     gmsg.sid = getUid();
-    gmsg.time = message.time;
-    gmsg.cancel = false;    
+    gmsg.time = Date.now(); // 发送时间由服务器设置
+    gmsg.cancel = false;
     gh.msg = gmsg;
     // 判断是否是群组成员
     logger.debug(`sid is : ${gmsg.sid}`);
@@ -126,35 +127,35 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 
         return gh;
     }
-
-    // 判断群是否已被解散
-    if (gInfo.state === 1) {
+    //判断群是否解散
+    if (gInfo.state === GROUP_STATE.DISSOLVE) {
         gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
 
         return gh;
     }
+
     logger.debug(`before read and write`);
-    
+
     // 消息撤回
     if (message.mtype === MSG_TYPE.RECALL) {
         // 需要撤回的消息key
         const recallKey = message.msg;
         // 获取撤回消息的基础信息
         const v = groupHistoryBucket.get<string, GroupHistory>(recallKey)[0];
-        logger.debug('sendGroupMessage grouphistory begin v:',v);
+        logger.debug('sendGroupMessage grouphistory begin v:', v);
         // TODO 判断撤回时间
         if (v !== undefined) {
             v.msg.cancel = true;
             // v.msg.mtype = MSG_TYPE.RECALL;
             groupHistoryBucket.put(recallKey, v);
-            logger.debug('sendGroupMessage grouphistory v:',v);
+            logger.debug('sendGroupMessage grouphistory v:', v);
 
             // 发布消息通知
             const buf = new BonBuffer();
             v.bonEncode(buf);
 
             const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-            const groupTopic = `ims/group/msg/${ message.gid}`;
+            const groupTopic = `ims/group/msg/${message.gid}`;
             logger.debug(`before publish ,the topic is : ${groupTopic}`);
             // directly send message to group topic
             mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
@@ -162,11 +163,11 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
             // return v;
         } else {
             gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
-            logger.debug('sendGroupMessage grouphistory gh:',gh);
+            logger.debug('sendGroupMessage grouphistory gh:', gh);
 
             return gh;
         }
-        
+
     }
 
     // 公告消息撤回
@@ -182,7 +183,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         const noticeBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE, dbMgr);
         // 获取撤回消息的基础信息
         const v = noticeBucket.get<string, AnnounceHistory>(recallKey)[0];
-        logger.debug('sendGroupMessage AnnounceHistory',v);
+        logger.debug('sendGroupMessage AnnounceHistory', v);
         // TODO 判断撤回时间
         if (v !== undefined) {
             v.announce.cancel = true;
@@ -191,30 +192,30 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 
             const buf = new BonBuffer();
             v.bonEncode(buf);
-            
+
             const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-            const groupTopic = `ims/group/msg/${ message.gid}`;
+            const groupTopic = `ims/group/msg/${message.gid}`;
             logger.debug(`before publish ,the topic is : ${groupTopic}`);
             // directly send message to group topic
             mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
         } else {
             gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
-            logger.debug('sendGroupMessage grouphistory gh:',gh);
-    
+            logger.debug('sendGroupMessage grouphistory gh:', gh);
+
             return gh;
         }
-        
+
     }
 
     // 生成消息ID
     const msgLock = new MsgLock();
     msgLock.hid = genGroupHid(message.gid);
     // 这是一个事务
-    msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
+    msgLockBucket.readAndWrite(msgLock.hid, (mLock) => {
         mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
 
         return msgLock;
-    });    
+    });
     logger.debug(`after read and write`);
     gh.hIncId = genHIncId(msgLock.hid, msgLock.current);
 
@@ -243,17 +244,17 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         noticeBucket.put(ah.aIncId, ah);
         logger.debug('sendGroupMessage annoucement: ', ah, 'to group: ', message.gid);
         gInfo.annoceids.push(gh.hIncId);
-        gInfoBucket.put(message.gid,gInfo);
+        gInfoBucket.put(message.gid, gInfo);
     }
     groupHistoryBucket.put(gh.hIncId, gh);
     // 移动游标表
-    moveGroupCursor(message.gid,msgLock.current);
+    moveGroupCursor(message.gid, msgLock.current);
 
     const buf = new BonBuffer();
     gh.bonEncode(buf);
 
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-    const groupTopic = `ims/group/msg/${ message.gid}`;
+    const groupTopic = `ims/group/msg/${message.gid}`;
     logger.debug(`before publish ,the topic is : ${groupTopic}`);
     // directly send message to group topic
     mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
@@ -265,20 +266,20 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 /**
  * 群聊游标移动
  */
-export const moveGroupCursor = (gid:number,current:number) => {
+export const moveGroupCursor = (gid: number, current: number) => {
     const dbMgr = getEnv().getDbMgr();
     const groupHistoryCursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
     const gInfoBucket = new Bucket('file', CONSTANT.GROUP_INFO_TABLE, dbMgr);
-    const gInfo = gInfoBucket.get(gid)[0];     
-    
+    const gInfo = gInfoBucket.get(gid)[0];
+
     // 群组中的所有成员都是接收者，包括发送者
     gInfo.memberids.forEach(elem => {
-        const guid = genGuid(gid,elem);
+        const guid = genGuid(gid, elem);
         let ridGroupCursor = groupHistoryCursorBucket.get(guid)[0];
         logger.debug('sendGroupMessage moveGroupCursor begin guid', guid, 'ridGroupCursor: ', ridGroupCursor);
 
         // 游标表中是否有该用户的记录
-        if (!ridGroupCursor) { 
+        if (!ridGroupCursor) {
             ridGroupCursor = new GroupHistoryCursor();
             ridGroupCursor.guid = guid;
             ridGroupCursor.cursor = -1;
@@ -288,9 +289,9 @@ export const moveGroupCursor = (gid:number,current:number) => {
         if (res.r === 1) {
             ridGroupCursor.cursor = current;
         }
-        
+
         logger.debug('sendGroupMessage moveGroupCursor guid', guid, 'ridGroupCursor: ', ridGroupCursor);
-        groupHistoryCursorBucket.put(guid,ridGroupCursor);
+        groupHistoryCursorBucket.put(guid, ridGroupCursor);
     });
 
 };
@@ -313,7 +314,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     // 获取对方联系人列表
     const sContactInfo = contactBucket.get(message.rid)[0];
     // 判断当前用户是否在对方的好友列表中
-    
+
     // 消息撤回
     if (message.mtype === MSG_TYPE.RECALL) {
         // 需要撤回的消息key
@@ -324,7 +325,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
         if (v !== undefined) {
             v.msg.cancel = true;   // 撤回该条消息，但是该消息本身不是一条撤回标记
             // v.msg.mtype = MSG_TYPE.RECALL;
-            userHistoryBucket.put(recallKey, v);  
+            userHistoryBucket.put(recallKey, v);
 
             const buf = new BonBuffer();
             v.bonEncode(buf);
@@ -335,7 +336,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
 
             // return v;        
         } else {  // 错误的撤回请求
-            userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
+            userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
 
             return userHistory;
         }
@@ -351,52 +352,52 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userHistory.msg = userMsg;
     // logger.debug(`friends is : ${JSON.stringify(sContactInfo.friends)}, sid is : ${sid}`);
     if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
-        userHistory.hIncId =  CONSTANT.DEFAULT_ERROR_STR;
+        userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
 
         return userHistory;
     }
-    
+
     const msgLock = new MsgLock();
     msgLock.hid = genUserHid(sid, message.rid);
     // 这是一个事务
     logger.debug('before readAndWrite');
-    msgLockBucket.readAndWrite(msgLock.hid,(mLock) => {
+    msgLockBucket.readAndWrite(msgLock.hid, (mLock) => {
         mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
         logger.debug('readAndWrite...');
 
         return msgLock;
     });
     logger.debug('after readAndWrite');
-    userHistory.hIncId =  genHIncId(msgLock.hid, msgLock.current);
-    
+    userHistory.hIncId = genHIncId(msgLock.hid, msgLock.current);
+
     userHistoryBucket.put(userHistory.hIncId, userHistory);
     logger.debug('Persist user history message to DB: ', userHistory);
 
     const buf = new BonBuffer();
     userHistory.bonEncode(buf);
 
-    const userHistoryCursorBucket = new Bucket('file',CONSTANT.USER_HISTORY_CURSOR_TABLE,dbMgr);
-    let sidHistoryCursor = userHistoryCursorBucket.get(genUuid(sid,message.rid))[0];
-    let ridHistoryCursor = userHistoryCursorBucket.get(genUuid(message.rid,sid))[0];
+    const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
+    let sidHistoryCursor = userHistoryCursorBucket.get(genUuid(sid, message.rid))[0];
+    let ridHistoryCursor = userHistoryCursorBucket.get(genUuid(message.rid, sid))[0];
     logger.debug('sendUserMessage begin sidHistoryCursor: ', sidHistoryCursor);
     logger.debug('sendUserMessage begin ridHistoryCursor: ', ridHistoryCursor);
-    
+
     // 游标表中是否有该用户的记录
-    if (sidHistoryCursor) { 
+    if (sidHistoryCursor) {
         sidHistoryCursor.cursor = msgLock.current; // 发送者的游标一定在变化
     } else {
         sidHistoryCursor = new UserHistoryCursor();
-        sidHistoryCursor.uuid = genUuid(sid,message.rid);
+        sidHistoryCursor.uuid = genUuid(sid, message.rid);
         sidHistoryCursor.cursor = msgLock.current;
     }
-    
+
     logger.debug('sendUserMessage sidHistoryCursor: ', sidHistoryCursor);
-    userHistoryCursorBucket.put(genUuid(sid,message.rid),sidHistoryCursor);
+    userHistoryCursorBucket.put(genUuid(sid, message.rid), sidHistoryCursor);
 
     // 游标表中是否有该用户的记录
     if (!ridHistoryCursor) {
         ridHistoryCursor = new UserHistoryCursor();
-        ridHistoryCursor.uuid = genUuid(message.rid,sid);
+        ridHistoryCursor.uuid = genUuid(message.rid, sid);
         ridHistoryCursor.cursor = -1;
     }
     // 对方是否在线，不在线则不推送消息
@@ -405,11 +406,11 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
         const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
         mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
         logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(userHistory)}`);
-        
-        ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
-    } 
 
-    userHistoryCursorBucket.put(genUuid(message.rid,sid),ridHistoryCursor); 
+        ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
+    }
+
+    userHistoryCursorBucket.put(genUuid(message.rid, sid), ridHistoryCursor);
     logger.debug(`sendUserMessage ridHistoryCursor: ${JSON.stringify(ridHistoryCursor)}`);
 
     return userHistory;
