@@ -9,6 +9,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
+import { doScanQrCode } from '../../logic/native';
 import { acceptFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../net/rpc';
 
 // ================================================ 导出
@@ -62,14 +63,33 @@ export class AddUser extends Widget {
             // TODO:
         });
     }
+
+    // 查看好友信息
     public showInfo(uid:number) {
         popNew('chat-client-app-demo_view-info-user', { sid:this.props.sid,rid:uid });
     }
+
+    // 删除好友
     public delFriend(uid:number) {
         delUserFriend(uid,(r:Result) => {
             // TODO:
         });
     }
+
+    // 展示我的二维码
+    public showQrcode() {
+        popNew('app-view-mine-other-addFriend');
+    }
+
+    /**
+     * 扫描二维码
+     */
+    public scanQrcode() {
+        doScanQrCode((res) => {
+            console.log(res);
+        });
+    }
+
 }
 
 // ================================================ 本地

@@ -17,6 +17,7 @@ import { Logger } from '../../../utils/logger';
 import { OnlineUsers } from '../db/user.s';
 
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
+import { GroupInfo } from '../db/group.s';
 import { getUid } from './group.r';
 import { GROUP_STATE } from '../db/group.s';
 
@@ -108,7 +109,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
     const gInfoBucket = new Bucket('file', CONSTANT.GROUP_INFO_TABLE, dbMgr);
-    const gInfo = gInfoBucket.get(message.gid)[0];
+    const gInfo = gInfoBucket.get<number,GroupInfo>(message.gid)[0];        
 
     const gh = new GroupHistory();
     const gmsg = new GroupMsg();

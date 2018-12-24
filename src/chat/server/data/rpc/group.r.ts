@@ -640,31 +640,34 @@ export const dissolveGroup = (gid: number): Result => {
 
     const res = new Result();
 
-    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid);
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
 
-    if (uid === gInfo[0].ownerid) {
-        gInfo[0].state = GROUP_STATE.DISSOLVE;
-        groupInfoBucket.put(gid, gInfo[0]);
+    if (uid === gInfo.ownerid) {
+        gInfo.state = GROUP_STATE.DISSOLVE;
+        groupInfoBucket.put(gid, gInfo);
         logger.debug('After group dissovled: ', groupInfoBucket.get(gid)[0]);
 
-        // 删除群主题
+        const contactBucket = getContactBucket();
+        gInfo.memberids.forEach((uid) => {
+            const contact = contactBucket.get<number, [Contact]>(uid)[0];
+            const index = contact.group.indexOf(gid); 
+            if (index > -1) {
+                contact.group.splice(index,1);
+            }
+            contactBucket.put(uid, contact);
+            logger.debug('dissolveGroup uid: ', uid,'contact', contact);
+        });
+         // 删除群主题
         const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
         const groupTopic = `ims/group/msg/${gid}`;
-        console.log("删除群主题！！！！！！！！！！！！！！", groupTopic);
+        console.log('删除群主题！！！！！！！！！！！！！！', groupTopic);
         unsetMqttTopic(mqttServer, groupTopic);
-        console.log("删除群主题！！！！！！！！！！！！！！ok");
-        // 发送解散群消息
-        const sendMsg = new GroupSend();
-        sendMsg.gid = gid;
-        sendMsg.mtype = MSG_TYPE.DISSOLUTION;
-        sendMsg.msg = '';
-        sendGroupMessage(sendMsg);
+        console.log('删除群主题！！！！！！！！！！！！！！ok');
         res.r = 1;
 
         return res;
     }
 
-    // TODO: delete group topic
 };
 
 /**

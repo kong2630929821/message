@@ -13,7 +13,6 @@ enum MSG_TYPE {
     RECALL = 5,      //撤回消息
     NOTICE = 6,      //公告消息
     RENOTICE = 7,    //撤回公告消息
-    DISSOLUTION = 8, //群解散消息
 }
 
 /**

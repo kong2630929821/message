@@ -132,7 +132,7 @@ const registerDataChange = () => {
         initAccount(); // 登陆成功后更新当前用户的历史数据
     });
 
-    register('userHistoryMap',() => {
+    register('userChatMap',() => {
         userChatChange();  // 新的聊天数据
     });
     
@@ -144,7 +144,7 @@ const registerDataChange = () => {
         friendChange();  // 好友数据更新
     });
 
-    register('groupHistoryMap',() => {
+    register('groupChatMap',() => {
         groupChatChange();  // 群组聊天数据更新
     });
 
