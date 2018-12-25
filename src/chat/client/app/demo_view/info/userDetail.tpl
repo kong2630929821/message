@@ -39,19 +39,19 @@
         <div w-class="other-wrap">
             <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
             <ul w-class="ul-wrap">
-                <li w-class="liItem">搜索聊天记录</li>
-                <li style="display:flex;justify-content:space-between;align-items: center;" w-class="liItem">
+                <li w-class="liItem" style="padding:0 0 20px;">搜索聊天记录</li>
+                <li w-class="liItem">
                     <span>聊天置顶</span>
                     <chat-client-app-widget-switch-switch>{types:false,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                 </li>
-                <li style="display:flex;justify-content:space-between;align-items: center;" w-class="liItem">
+                <li w-class="liItem">
                     <span>消息免打扰</span>
                     <chat-client-app-widget-switch-switch>{types:false,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                 </li>
                 {{if it.isFriend}}
-                <li w-class="liItem" on-tap="startChat" style="color: #318DE6;margin-bottom: 110px;">开始对话</li>
+                <li w-class="liItem" on-tap="startChat" style="color: #318DE6;">开始对话</li>
                 {{else}}
-                <li w-class="liItem" on-tap="addUser" style="color: #318DE6;margin-bottom: 110px;">添加好友</li>
+                <li w-class="liItem" on-tap="addUser" style="color: #318DE6;">添加好友</li>
                 {{end}}
             </ul>
         </div>

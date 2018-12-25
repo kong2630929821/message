@@ -6,7 +6,7 @@
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupInfo } from '../../../../server/data/db/group.s';
+import { GROUP_STATE } from '../../../../server/data/db/group.s';
 import { delMember } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import { genGuid } from '../../../../utils/util';
@@ -21,25 +21,37 @@ const logger = new Logger(WIDGET_NAME);
 
 export class GroupMember extends Widget {
     public ok:() => void;
-    public props:Props = {
-        gid: null,
-        groupInfo:{},
-        deleteBtn:false
-    };
+    public props:Props;
+    public bindCB:any;
+    constructor () {
+        super();
+        this.props = {
+            gid: null,
+            groupInfo:{},
+            deleteBtn:false
+        };
+        this.bindCB = this.updateInfo.bind(this);
+    }
+
     public setProps(props:any) {        
         super.setProps(props); 
         this.props.groupInfo = this.getGroupInfo();
         this.props.deleteBtn = this.props.deleteBtn || false;
+        const uid = store.getStore('uid');
+        if (this.props.groupInfo.memberids.indexOf(uid) < 0) {
+            alert('您已被移除该群');
+            this.ok();
+        } else  if (this.props.groupInfo.state === GROUP_STATE.DISSOLVE) {
+            alert('该群已被解散');
+            this.ok();
+        }
     }
     public goBack() {
         this.ok();
     }
     public firstPaint() {
         super.firstPaint();
-        store.register(`groupInfoMap/${this.props.gid}`,(r:GroupInfo) => {
-            this.setProps(this.props);
-            this.paint();
-        });
+        store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
     }
     // 获取群组信息
     public getGroupInfo() {
@@ -69,6 +81,18 @@ export class GroupMember extends Widget {
         clientRpcFunc(delMember,guid,(r) => {
             logger.debug('===============removeMember',r);
         });
+    }
+
+    // 群组信息变化更新
+    public updateInfo() {
+        this.setProps(this.props);
+        this.paint();
+    }
+
+    public destroy() {
+        store.unregister(`groupInfoMap/${this.props.gid}`,this.bindCB);
+
+        return super.destroy();
     }
 }
 

@@ -6,10 +6,11 @@
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
-import { GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
+import { AnnounceHistory, GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { getGidFromHincid } from '../../../../utils/util';
+import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -18,7 +19,8 @@ export class AnnounceDetail extends Widget {
 
     public setProps(props:any) {
         super.setProps(props); 
-        this.props.content = '欢迎大家入群';    
+        const announce = store.getStore(`announceHistoryMap/${props.aIncId}`,new AnnounceHistory()).announce;  
+        this.props.content = announce ? announce.msg :'';  
     }
     
     // 点击删除公告

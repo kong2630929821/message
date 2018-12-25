@@ -44,7 +44,7 @@ export class NewFriendApply extends Widget {
     }
 
     // 点击拒绝添加好友/群
-    public reject() {
+    public rejectBtn() {
         if (this.props.chatType === 'user') {
             acceptFriend(this.props.id,false,(r:Result) => {
                 // TODO:
@@ -71,7 +71,7 @@ export class NewFriendApply extends Widget {
     }
 
     // 点击同意添加好友/群
-    public agree() {
+    public agreeBtn() {
         if (this.props.chatType === 'user') {
             acceptFriend(this.props.id,true,(r:Result) => {
             // TODO:

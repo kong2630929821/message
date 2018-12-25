@@ -1,6 +1,6 @@
 <div class="new-page">
-    <div ev-back-click="goBack" ev-complete="completeEdit">
-        <chat-client-app-widget-topBar-topBar>{title:"编辑群公告",background:"#fff",completeImg:"complete.png"}</chat-client-app-widget-topBar-topBar>
+    <div ev-back-click="goBack" ev-next-click="completeEdit">
+        <chat-client-app-widget-topBar-topBar>{title:"编辑群公告",nextImg:"complete.png"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div ev-input-change="inputChange" w-class="title-wrap">
         <widget w-tag="chat-client-app-widget-input-input" >{placeHolder:"标题（必填），1-40字",style:"border-radius: 12px;"}</widget>  

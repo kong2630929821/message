@@ -1,6 +1,6 @@
 <div class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar>{title:"群管理",background:"#fff"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget-topBar-topBar>{title:"群管理"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="group-manage-wrap" ev-openManageItem="openManageItem">
         <chat-client-app-widget-manageItem-manageItem>{manageList:{{it.manageList}}}</chat-client-app-widget-manageItem-manageItem>

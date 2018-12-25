@@ -1,6 +1,6 @@
-<div w-class="new-page" on-tap="pageClick" class="new-page" ev-handleMoreContactor="handleMoreGroup" ev-back-click="goBack">
+<div w-class="new-page" on-tap="pageClick" class="new-page" ev-next-click="handleMoreGroup" ev-back-click="goBack">
     <div w-class="top-main-wrap">
-        <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",moreImg:"more-dot-white.png",background:"transparent"}</widget>
+        <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",nextImg:"more-dot-white.png",background:"transparent"}</widget>
         
         <div w-class="home-info-wrap">
             <img w-class="avatar" src="../../res/images/img_avatar1.png" />
@@ -59,7 +59,9 @@
             <div w-class="member-wrap">
                 <img w-class="grouperIcon" src="../../res/images/add_group_user.png" />
                 {{for i, v of it.members}}
-                <img w-class="grouperIcon" src="../../res/images/user.png" />
+                    {{if i < 5 }}
+                    <img w-class="grouperIcon" src="../../res/images/user.png" />
+                    {{end}}
                 {{end}}
                 <img w-class="more" src="../../res/images/more-gray.png" />
             </div>

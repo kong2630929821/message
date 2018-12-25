@@ -1,12 +1,12 @@
 /**
- * 登录
+ * 添加好友
  */
 
 // ================================================ 导入
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { Contact } from '../../../../server/data/db/user.s';
+import { Contact, GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
 import { doScanQrCode } from '../../logic/native';
@@ -37,6 +37,11 @@ export class AddUser extends Widget {
 
     public applyFriend() {
         const sid = store.getStore('uid');
+        if (!this.props.rid) {
+            // alert('请输入好友ID');
+
+            return;
+        }
         if (this.props.rid === sid) {
             alert('不能添加自己为好友');
 
@@ -51,7 +56,7 @@ export class AddUser extends Widget {
         });
     }
     public chat(uid:number) {
-        popNew('chat-client-app-demo_view-chat-chat', { sid:this.props.sid,rid:uid });
+        popNew('chat-client-app-demo_view-chat-chat', { id:uid, chatType:GENERATOR_TYPE.USER });
     }
     public agree(uid:number) {
         acceptFriend(uid,true,(r:Result) => {
@@ -62,11 +67,6 @@ export class AddUser extends Widget {
         acceptFriend(uid,false,(r:Result) => {
             // TODO:
         });
-    }
-
-    // 查看好友信息
-    public showInfo(uid:number) {
-        popNew('chat-client-app-demo_view-info-user', { sid:this.props.sid,rid:uid });
     }
 
     // 删除好友

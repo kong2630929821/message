@@ -11,7 +11,7 @@ import { Result } from '../../../../server/data/rpc/basic.s';
 import { inviteUsers } from '../../../../server/data/rpc/group.p';
 import { Invite, InviteArray } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
-import { delValueFromArray, genGuid } from '../../../../utils/util';
+import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
  
@@ -73,6 +73,7 @@ export class InviteMember extends Widget {
                 logger.debug(`邀请加入群失败`);
             }
             logger.debug('成功发送邀请好友信息');
+            this.ok();
         });
     }
 }

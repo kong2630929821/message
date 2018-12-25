@@ -60,6 +60,7 @@ export class ApplyUser extends Widget {
                 const userInfo = store.getStore(`userInfoMap/${rid}`);
                 this.props.name = userInfo ? userInfo.name : ''; 
                 this.props.applyInfo = `邀请你加入群组：${ginfo ? ginfo.name :''}`;
+                this.props.id = gid;
             }
             
         }

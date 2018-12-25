@@ -1,5 +1,5 @@
-<div class="new-page" ev-unfold="unfold" ev-back-click="goBack">
-    <chat-client-app-widget-topBar-topBar>{title:"群聊",unfoldImg:"add-blue.png",background:"#fff"}</chat-client-app-widget-topBar-topBar>
+<div class="new-page" ev-next-click="groupChat" ev-back-click="goBack">
+    <chat-client-app-widget-topBar-topBar>{title:"群聊",nextImg:"add-blue.png"}</chat-client-app-widget-topBar-topBar>
 
     <div w-class="search-input" ev-input-change="inputGid">
         <chat-client-app-widget-input-input>{placeHolder : "搜索群聊",style : "font-size:32px;color:#ccc;padding-left:82px;border-radius: 12px;"}</chat-client-app-widget-input-input>

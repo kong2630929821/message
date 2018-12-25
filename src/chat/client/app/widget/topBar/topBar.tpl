@@ -12,23 +12,5 @@
         {{if it.refreshImg}}
         <img on-tap="refreshPage" src="../../res/images/{{it.refreshImg}}" w-class="refreshBtn" class="{{it1.refresh?'refreshing':''}}"/>
         {{end}}
-        {{if it.unfoldImg}}
-        <img on-tap="unfold" src="../../res/images/{{it.unfoldImg}}" w-class="unfoldBtn" />
-        {{end}}
-        {{if it.moreImg}}
-        <img on-tap="more" src="../../res/images/{{it.moreImg}}" w-class="more-dot" />
-        {{end}}
-        {{if it.searchImg}}
-        <img on-tap="search" src="../../res/images/{{it.searchImg}}" w-class="searchImg" />
-        {{end}}
-        {{if it.completeImg}}
-        <img on-tap="complete" src="../../res/images/{{it.completeImg}}" w-class="completeImg" />
-        {{end}}
-        {{if it.shareImg}}
-        <img on-tap="share" src="../../res/images/{{it.shareImg}}" w-class="shareImg" />
-        {{end}}
-        {{if it.editImg}}
-        <img on-tap="edit" src="../../res/images/{{it.editImg}}" w-class="editImg" />
-        {{end}}
     </div>
 </div>

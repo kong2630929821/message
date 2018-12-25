@@ -1,6 +1,6 @@
 <div class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar>{title:"新的朋友",background:"#fff"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget-topBar-topBar>{title:"新的朋友"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="newfriend-wrap">
         <chat-client-app-widget-featureBar-featureBar>{iconPath:"user.png",text:{{it.name}} }</chat-client-app-widget-featureBar-featureBar>
@@ -11,8 +11,8 @@
     </div>
     {{if !it.isSolve}}
     <div w-class="agree-wrap">
-        <span w-class="reject" on-tap="reject">拒绝</span>
-        <span w-class="agree" on-tap="agree">同意</span>
+        <span w-class="reject" on-tap="rejectBtn">拒绝</span>
+        <span w-class="agree" on-tap="agreeBtn">同意</span>
     </div>
     {{else}}
     <div w-class="solved">{{it.isSolve}}</div>

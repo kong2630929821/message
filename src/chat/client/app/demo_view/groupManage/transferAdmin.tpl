@@ -1,7 +1,7 @@
 {{let membersButnoOwner = it.ginfo.memberids.filter(item => item !== it.ginfo.ownerid)}}
 <div class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar>{title:"转让群主",background:"#fff"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget-topBar-topBar>{title:"转让群主"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="search-input">
         <chat-client-app-widget-input-input>{placeHolder : "搜索成员",style : "font-size:32px;color:#ccc;padding-left:82px;"}</chat-client-app-widget-input-input>

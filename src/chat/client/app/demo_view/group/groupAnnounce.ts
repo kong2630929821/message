@@ -43,6 +43,8 @@ export class GroupAnnounce extends Widget {
         // 群主才能编辑公告
         if (uid === ownerid) {
             popNew('chat-client-app-demo_view-group-announceEdit',{ gid:this.props.gid });
+        } else {
+            alert('您没有权限执行此操作');
         }
     }
     

@@ -64,12 +64,14 @@ export class SetGroupChat extends Widget {
                 invite.rid = id;
                 invites.arr.push(invite);
             });
+
             clientRpcFunc(inviteUsers, invites, (r: Result) => {
                 if (r.r !== 1) {
                     logger.debug(`邀请加入群失败`);
                 }
                 logger.debug('成功发送邀请好友信息');
             });
+            this.ok();
         });
     }
 

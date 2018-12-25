@@ -60,12 +60,7 @@ export class Contact extends Widget {
 
     public chat(id:number, chatType:GENERATOR_TYPE) {
         this.closeMore();
-        if (chatType === GENERATOR_TYPE.USER) {
-            popNew('chat-client-app-demo_view-chat-chat', { rid:id });
-        } else if (chatType === GENERATOR_TYPE.GROUP) {
-            popNew('chat-client-app-demo_view-group-groupChat', { gid:id });
-        }
-        
+        popNew('chat-client-app-demo_view-chat-chat', { id:id, chatType:chatType });
     }
 
     /**
@@ -128,10 +123,10 @@ export class Contact extends Widget {
             case 0:// 搜索
                 break;
             case 1:// 点击通讯录
-                popNew('chat-client-app-demo_view-contactList-contactList',{ sid : this.props.sid });
+                popNew('chat-client-app-demo_view-contactList-contactList');
                 break;
             case 2:// 点击添加好友
-                popNew('chat-client-app-demo_view-chat-addUser', { sid: this.props.sid });
+                popNew('chat-client-app-demo_view-chat-addUser');
                 break;
             case 3:// 创建群聊 setGroupChat
                 popNew('chat-client-app-demo_view-group-setGroupChat');

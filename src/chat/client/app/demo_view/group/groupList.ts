@@ -53,6 +53,11 @@ export class GroupListt extends Widget {
         }
         
     }
+
+    // 创建群聊
+    public groupChat() {
+        popNew('chat-client-app-demo_view-group-setGroupChat');
+    }
     
 }
 

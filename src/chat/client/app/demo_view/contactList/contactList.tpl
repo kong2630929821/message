@@ -1,7 +1,7 @@
 {{: it1 = it1 || {"friends":[], "applyUser":[], "applyGroup":[]} }}
 <div w-class="contact-list-wrap" class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar w-class="title">{title:"通讯录",background:"#fff",unfoldImg:"add-blue.png"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget-topBar-topBar w-class="title">{title:"通讯录"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="topic-wrap">
         <div on-tap="toNewFriend" style="border-bottom: 1px solid #DBDBE5;">

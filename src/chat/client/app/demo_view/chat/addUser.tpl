@@ -10,5 +10,5 @@
     <div w-class="featureBar-code-wrap" on-tap="showQrcode">
         <chat-client-app-widget-featureBar-featureBar>{iconPath:"two-code.png",text:"我的二维码"}</chat-client-app-widget-featureBar-featureBar>
     </div>
-    <div on-tap="applyFriend" w-class="applyBtn">添加好友</div>
+    <div on-tap="applyFriend" w-class="applyBtn" class="ripple">添加好友</div>
 </div>

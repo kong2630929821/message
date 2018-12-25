@@ -1,6 +1,6 @@
 <div class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar>{title:"群成员",background:"#fff"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget-topBar-topBar>{title:"群成员"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="search-input" ev-input-change="inputMember">
         <chat-client-app-widget-input-input>{placeHolder : "搜索成员",style : "font-size:32px;color:#ccc;padding-left:82px;"}</chat-client-app-widget-input-input>
