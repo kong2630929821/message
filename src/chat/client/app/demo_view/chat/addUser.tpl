@@ -7,8 +7,8 @@
     <div w-class="featureBar-scan-wrap" on-tap="scanQrcode">
         <chat-client-app-widget-featureBar-featureBar>{iconPath:"scan-circle.png",text:"扫一扫"}</chat-client-app-widget-featureBar-featureBar>
     </div>
-    <div w-class="featureBar-code-wrap" on-tap="showQrcode">
+    <div w-class="featureBar-code-wrap" on-tap="showQrcode" class="ripple">
         <chat-client-app-widget-featureBar-featureBar>{iconPath:"two-code.png",text:"我的二维码"}</chat-client-app-widget-featureBar-featureBar>
     </div>
-    <div on-tap="applyFriend" w-class="applyBtn" class="ripple">添加好友</div>
+    <div on-tap="applyFriend" w-class="applyBtn">添加好友</div>
 </div>

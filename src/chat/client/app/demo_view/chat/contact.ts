@@ -60,7 +60,9 @@ export class Contact extends Widget {
 
     public chat(id:number, chatType:GENERATOR_TYPE) {
         this.closeMore();
-        popNew('chat-client-app-demo_view-chat-chat', { id:id, chatType:chatType });
+        setTimeout(() => {
+            popNew('chat-client-app-demo_view-chat-chat', { id:id, chatType:chatType });
+        }, 500);
     }
 
     /**

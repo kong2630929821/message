@@ -5,20 +5,21 @@
 // ================================================ 导入
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { GroupHistory, MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
-import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
-import { GroupSend } from '../../../../server/data/rpc/message.s';
+import { sendGroupMessage, sendUserMessage } from '../../../../server/data/rpc/message.p';
+import { GroupSend, UserSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
-import { genUserHid, genUuid, getIndexFromHIncId } from '../../../../utils/util';
+import { depCopy, genUserHid, genUuid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { getFriendAlias } from '../../logic/logic';
+import { getFriendAlias, timestampFormat } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
-import { sendMessage } from '../../net/rpc';
+import { parseMessage } from '../../widget/messageItem/messageItem';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -40,6 +41,7 @@ export class Chat extends Widget {
         super.setProps(props);
         this.props.sid = store.getStore('uid');
         this.props.inputMessage = '';
+        this.props.newMsg = undefined;
 
         if (props.chatType === GENERATOR_TYPE.GROUP) {
             this.initGroup();
@@ -47,6 +49,7 @@ export class Chat extends Widget {
             this.initUser();
         }
         logger.debug('============groupChat',this.props);
+        this.latestMsg();
     }
 
     /**
@@ -55,7 +58,7 @@ export class Chat extends Widget {
     public initUser() {
         this.props.name = getFriendAlias(this.props.id);
         const hIncIdArr = store.getStore(`userChatMap/${this.getHid()}`, []);
-        this.props.hidIncArray = hIncIdArr;
+        this.props.hidIncArray = hIncIdArr; 
 
         // 更新上次阅读到哪一条记录
         const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
@@ -103,12 +106,7 @@ export class Chat extends Widget {
         } else {
             store.register(`userChatMap/${this.getHid()}`,this.bindCB);
         }
-        
-        // 第一次进入定位到最新的一条消息
-        setTimeout(() => {
-            document.querySelector('#messEnd').scrollIntoView();
-            this.paint();
-        }, 200);
+    
     }
 
     /**
@@ -117,11 +115,7 @@ export class Chat extends Widget {
     public updateChat() {
         this.setProps(this.props);
         this.paint();
-        // 有新消息来时定位到最新消息
-        setTimeout(() => {
-            document.querySelector('#messEnd').scrollIntoView();
-            this.paint();
-        }, 100);
+        
     }
 
     /**
@@ -140,39 +134,53 @@ export class Chat extends Widget {
             message.msg = this.props.inputMessage;
             message.mtype = e.msgType || MSG_TYPE.TXT;
             message.time = (new Date()).getTime();
-            clientRpcFunc(sendGroupMessage, message, (() => {
-    
-                return (r: GroupHistory) => {
-                    if (r.hIncId === DEFAULT_ERROR_STR) {
-                        alert('发送失败！');
-                        
-                        return;
-                    }
+            if (e.msgType < 5) {
+                this.props.newMsg = {
+                    msg:parseMessage(depCopy(message)).msg,
+                    time:timestampFormat(message.time,1)
                 };
-            })());
+            }
+            clientRpcFunc(sendGroupMessage, message, (r: GroupHistory) => {
+    
+                if (r.hIncId === DEFAULT_ERROR_STR) {
+                    alert('发送失败！');
+                    
+                    return;
+                } 
+            });
 
         } else {
             
             logger.debug('=========单聊信息发送',e);
-            sendMessage(this.props.id, e.value, (() => {
+            const info = new UserSend();
+            info.msg = this.props.inputMessage;
+            info.mtype = e.msgType || MSG_TYPE.TXT;
+            info.rid = this.props.id;
+            info.time = (new Date()).getTime();
+            if (e.msgType < 5) {
+                this.props.newMsg = {
+                    msg:parseMessage(depCopy(info)).msg,
+                    time:timestampFormat(info.time,1)
+                };
+            }
+            clientRpcFunc(sendUserMessage, info, (r:UserHistory) => {
                 const nextside = this.props.id;
     
-                return (r: UserHistory) => {
-                    if (r.hIncId === DEFAULT_ERROR_STR) {
-                        alert('对方不是你的好友！');
-                        
-                        return;
-                    } else if (r.msg.mtype === MSG_TYPE.RECALL) {
-                        const mess = store.getStore(`userHistoryMap/${r.msg.msg}`);
-                        mess.cancel = true;
-                        store.setStore(`userHistoryMap/${r.msg.msg}`,mess);
-                    }
-                    updateUserMessage(nextside, r);
-                    this.props.inputMessage = '';
-                    this.paint();
-                };
-            })(), e.msgType || MSG_TYPE.TXT);
+                if (r.hIncId === DEFAULT_ERROR_STR) {
+                    alert('对方不是你的好友！');
+                    
+                    return;
+                } else if (r.msg.mtype === MSG_TYPE.RECALL) {
+                    const mess = store.getStore(`userHistoryMap/${r.msg.msg}`);
+                    mess.cancel = true;
+                    store.setStore(`userHistoryMap/${r.msg.msg}`,mess);
+                }
+                updateUserMessage(nextside, r);
+            });
         }
+        this.props.inputMessage = '';
+        this.paint();
+        this.latestMsg();
     }
 
     /**
@@ -197,6 +205,7 @@ export class Chat extends Widget {
     public openEmoji() {
         this.props.isOnEmoji = !this.props.isOnEmoji;
         this.paint();
+        this.latestMsg();
     }
 
     /**
@@ -205,6 +214,7 @@ export class Chat extends Widget {
     public inputFocus() {
         this.props.isOnEmoji = false;
         this.paint();
+        this.latestMsg();
     }
 
     /**
@@ -213,6 +223,22 @@ export class Chat extends Widget {
     public pickEmoji(emoji:any) {
         this.props.inputMessage += `[${emoji}]`;
         this.paint();
+    }
+
+    // 关闭公告
+    public closeAnnounce() {
+        this.props.lastAnnounce = undefined;
+        this.paint();
+    }
+
+    /**
+     * 定位最新消息
+     */
+    public latestMsg() {
+        setTimeout(() => {
+            getRealNode((<any>this.tree).children[1]).scrollTop = getRealNode((<any>this.tree).children[1]).scrollHeight;
+            this.paint();
+        }, 100);
     }
 
     public destroy() {
@@ -251,4 +277,5 @@ interface Props {
     hidIncArray: string[]; // 消息历史记录
     isOnEmoji:boolean; // 是否打开表情选择区
     lastAnnounce:string; // 最新一条公告，群聊
+    newMsg:any; // 我发布的一条新消息
 }

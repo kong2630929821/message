@@ -83,7 +83,7 @@ export class UserDetail extends Widget {
         if (this.props.inFlag) { // 如果是从chat页面进入则返回chat页面
             this.ok();
         } else {
-            popNew('chat-client-app-demo_view-chat-chat',{ id:this.props.uid, chatType:GENERATOR_TYPE.GROUP });
+            popNew('chat-client-app-demo_view-chat-chat',{ id:this.props.uid, chatType:GENERATOR_TYPE.USER });
         }
     }  
 
