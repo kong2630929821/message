@@ -16,6 +16,7 @@ import { unsetMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
+import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistoryCursor, MSG_TYPE, MsgLock, UserHistoryCursor } from '../db/message.s';
 import { sendGroupMessage } from './message.r';
@@ -650,14 +651,14 @@ export const dissolveGroup = (gid: number): Result => {
         const contactBucket = getContactBucket();
         gInfo.memberids.forEach((uid) => {
             const contact = contactBucket.get<number, [Contact]>(uid)[0];
-            const index = contact.group.indexOf(gid); 
+            const index = contact.group.indexOf(gid);
             if (index > -1) {
-                contact.group.splice(index,1);
+                contact.group.splice(index, 1);
             }
             contactBucket.put(uid, contact);
-            logger.debug('dissolveGroup uid: ', uid,'contact', contact);
+            logger.debug('dissolveGroup uid: ', uid, 'contact', contact);
         });
-         // 删除群主题
+        // 删除群主题
         const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
         const groupTopic = `ims/group/msg/${gid}`;
         console.log('删除群主题！！！！！！！！！！！！！！', groupTopic);
@@ -701,12 +702,13 @@ export const updateGroupAlias = (gAlias: GroupAlias): Result => {
 };
 
 export const getUid = () => {
-    const dbMgr = getEnv().getDbMgr();
-    const session = getEnv().getSession();
-    let uid;
-    read(dbMgr, (tr: Tr) => {
-        uid = session.get(tr, 'uid');
-    });
+    // const dbMgr = getEnv().getDbMgr();
+    // const session = getEnv().getSession();
+    // let uid;
+    // read(dbMgr, (tr: Tr) => {
+    //     uid = session.get(tr, 'uid');
+    // });
+    const uid = getSession('uid');
 
     return parseInt(uid, 10);
 };

@@ -3,14 +3,13 @@
  * 后端不应该相信前端发送的uid信息，应该自己从会话中获取
  */
 // ================================================================= 导入
-import { read, write } from '../../../../pi_pt/db';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
-import { Tr } from '../../../../pi_pt/rust/pi_db/mgr';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
+import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
@@ -109,7 +108,7 @@ export const login = (user: UserType): UserInfo => {
             const userAcc = new UserAccount();
             userAcc.user = openid;
             userAcc.uid = userinfo.uid;
-            const v = userAccountBucket.put(openid,userAcc);
+            const v = userAccountBucket.put(openid, userAcc);
             loginReq.uid = userinfo.uid;
         } else {
             loginReq.uid = v.uid;
@@ -124,7 +123,7 @@ export const login = (user: UserType): UserInfo => {
             userInfo.uid = -1;
             userInfo.sex = 0;
             logger.debug('user does not exist: ', loginReq.uid);
-            
+
             return userInfo;
         }
     }
@@ -136,17 +135,20 @@ export const login = (user: UserType): UserInfo => {
 
     // save session
     const session = getEnv().getSession();
-    write(dbMgr, (tr: Tr) => {
-        session.set(tr, 'uid', loginReq.uid.toString());
-        logger.info('set session value of uid: ', loginReq.uid.toString());
-    });
+    // write(dbMgr, (tr: Tr) => {
+    //     session.set(tr, 'uid', loginReq.uid.toString());
+    //     logger.info('set session value of uid: ', loginReq.uid.toString());
+    // });
+    setSession('uid', loginReq.uid.toString(), loginReq.uid.toString());
 
     // TODO: debug purpose
-    read(dbMgr, (tr: Tr) => {
-        const v = session.get(tr, 'uid');
-        logger.debug('read session value of uid: ', v);
-        logger.debug('user login session id: ', session.getId());
-    });
+    // read(dbMgr, (tr: Tr) => {
+    //     const v = session.get(tr, 'uid');
+    //     logger.debug('read session value of uid: ', v);
+    //     logger.debug('user login session id: ', session.getId());
+    // });
+    const v = getSession('uid');
+    logger.debug('read session value of uid: ', v);
 
     const onlineUsersBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
     const onlineUsersReverseIndexBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_REVERSE_INDEX_TABLE, dbMgr);
@@ -265,7 +267,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
 
     let fg = 1;
     let index = -1;
-    let groupCursor = groupHistorycursorBucket.get<String, GroupHistoryCursor>(genGuid(param.gid,sid))[0];
+    let groupCursor = groupHistorycursorBucket.get<String, GroupHistoryCursor>(genGuid(param.gid, sid))[0];
     logger.debug(`getGroupHistory begin index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
 
     if (param.hIncId) {  // 如果本地有记录则取本地记录
@@ -290,7 +292,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     if (!groupCursor) {
 
         groupCursor = new UserHistoryCursor();
-        groupCursor.guid = genGuid(param.gid,sid);
+        groupCursor.guid = genGuid(param.gid, sid);
     }
     groupCursor.cursor = index - 1;
     groupHistorycursorBucket.put(groupCursor.guid, groupCursor);
@@ -401,9 +403,9 @@ export const getAnnoucements = (param: AnnouceIds): AnnounceHistoryArray => {
     const announceHistory = new AnnounceHistoryArray();
 
     const aids = param.arr;
-    
+
     announceHistory.arr = announceHistoryBucket.get(aids);
-    logger.debug('getAnnoucements announceHistory',announceHistory);
+    logger.debug('getAnnoucements announceHistory', announceHistory);
 
     return announceHistory;
 };

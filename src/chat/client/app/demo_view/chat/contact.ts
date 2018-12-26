@@ -14,8 +14,8 @@ import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { clientRpcFunc, subscribe } from '../../net/init';
-import { walletLogin } from '../../net/rpc';
+import { UserType } from '../../logic/autologin';
+import { clientRpcFunc, login as mqttLogin, subscribe } from '../../net/init';
 import { init } from '../login/login';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -24,27 +24,27 @@ export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 export class Contact extends Widget {
-    public props:Props;
+    public props: Props;
 
-    public setProps(props:Json) {
+    public setProps(props: Json) {
         super.setProps(props);
         this.props.messageList = [];
         this.props.isUtilVisible = false;
         this.props.utilList = [
-            { iconPath:'search.png',utilText:'搜索' },
-            { iconPath:'adress-book.png',utilText:'通讯录' },
-            { iconPath:'add-blue.png',utilText:'添加好友' },
-            { iconPath:'group-chat.png',utilText:'创建群聊' },
-            { iconPath:'scan.png',utilText:'扫一扫' },
-            { iconPath:'add-friend.png',utilText:'我的信息' }
+            { iconPath: 'search.png', utilText: '搜索' },
+            { iconPath: 'adress-book.png', utilText: '通讯录' },
+            { iconPath: 'add-blue.png', utilText: '添加好友' },
+            { iconPath: 'group-chat.png', utilText: '创建群聊' },
+            { iconPath: 'scan.png', utilText: '扫一扫' },
+            { iconPath: 'add-friend.png', utilText: '我的信息' }
         ];
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        const wUser = walletStore.getStore('user/info',{ nickName:'' });  // 钱包
+        const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
         const uid = store.getStore('uid');
-        const cUser = store.getStore(`userInfoMap/${uid}`,new UserInfo());  // 聊天
-        this.props.isOnline = wUser.nickName !== ''; 
+        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
+        this.props.isOnline = wUser.nickName !== '';
 
         // 如果聊天未登录，或钱包修改了姓名、头像等，或钱包退出登陆
         if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
@@ -58,7 +58,7 @@ export class Contact extends Widget {
         // }
     }
 
-    public chat(id:number, chatType:GENERATOR_TYPE) {
+    public chat(id: number, chatType: GENERATOR_TYPE) {
         this.closeMore();
         setTimeout(() => {
             popNew('chat-client-app-demo_view-chat-chat', { id:id, chatType:chatType });
@@ -69,18 +69,18 @@ export class Contact extends Widget {
      * 钱包登陆
      */
     public walletSignIn() {
-        getOpenId('101',(r) => {
+        getOpenId('101', (r) => {
             const openId = String(r.openid);
             if (openId) {
-                walletLogin(openId,'',(r:UserInfo) => {
+                mqttLogin(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
                     this.props.isOnline = true;
 
                     if (r && r.uid > 0) {
-                        store.setStore(`uid`,r.uid);
-                        store.setStore(`userInfoMap/${r.uid}`,r);        
-                        init(r.uid); 
+                        store.setStore(`uid`, r.uid);
+                        store.setStore(`userInfoMap/${r.uid}`, r);
+                        init(r.uid);
                         subscribe(r.uid.toString(), UserHistory, (v: UserHistory) => {
-                            updateUserMessage(v.msg.sid,v);
+                            updateUserMessage(v.msg.sid, v);
                         });
                         this.paint();
 
@@ -89,9 +89,9 @@ export class Contact extends Widget {
                             r.name = user.nickName;
                             r.avatar = user.avatar;
                             r.tel = user.phoneNumber;
-                            clientRpcFunc(changeUserInfo,r,(res) => {
+                            clientRpcFunc(changeUserInfo, r, (res) => {
                                 if (res && res.uid > 0) {
-                                    store.setStore(`userInfoMap/${r.uid}`,r);  
+                                    store.setStore(`userInfoMap/${r.uid}`, r);
 
                                 }
                             });
@@ -100,9 +100,37 @@ export class Contact extends Widget {
                         alert('钱包登陆失败');
                     }
                 });
+                // walletLogin(openId, '', (r: UserInfo) => {
+                //     this.props.isOnline = true;
+
+                //     if (r && r.uid > 0) {
+                //         store.setStore(`uid`, r.uid);
+                //         store.setStore(`userInfoMap/${r.uid}`, r);
+                //         init(r.uid);
+                //         subscribe(r.uid.toString(), UserHistory, (v: UserHistory) => {
+                //             updateUserMessage(v.msg.sid, v);
+                //         });
+                //         this.paint();
+
+                //         const user = walletStore.getStore('user/info');
+                //         if (r.name !== user.nickName || r.avatar !== user.avatar) {
+                //             r.name = user.nickName;
+                //             r.avatar = user.avatar;
+                //             r.tel = user.phoneNumber;
+                //             clientRpcFunc(changeUserInfo, r, (res) => {
+                //                 if (res && res.uid > 0) {
+                //                     store.setStore(`userInfoMap/${r.uid}`, r);
+
+                //                 }
+                //             });
+                //         }
+                //     } else {
+                //         alert('钱包登陆失败');
+                //     }
+                // });
             }
         });
-            
+
     }
 
     // 打开更多功能
@@ -120,7 +148,7 @@ export class Contact extends Widget {
         this.paint();
     }
 
-    public handleFatherTap(e:any) {
+    public handleFatherTap(e: any) {
         switch (e.index) {
             case 0:// 搜索
                 break;
@@ -146,20 +174,20 @@ export class Contact extends Widget {
     }
 }
 
-store.register(`lastChat`,(r:[number,number][]) => {    
-    console.log('最近聊天数据',r);
+store.register(`lastChat`, (r: [number, number][]) => {
+    console.log('最近聊天数据', r);
     forelet.paint(r);
 });
 
 // ================================================ 本地
 interface Props {
     sid: number;
-    messageList:any[];
-    isUtilVisible:boolean;
-    utilList:any[];
-    isOnline:boolean;
+    messageList: any[];
+    isUtilVisible: boolean;
+    utilList: any[];
+    isOnline: boolean;
 }
-store.register('friendLinkMap',() => {
+store.register('friendLinkMap', () => {
     const w = forelet.getWidget(WIDGET_NAME);
     if (w) {
         w.paint(true);
