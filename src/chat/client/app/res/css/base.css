@@ -85,7 +85,6 @@ div{
     position: relative;
     overflow: hidden;
 }
-
 .ripple:after {
     content: "";
     display: block;
@@ -95,16 +94,18 @@ div{
     top: 0;
     left: 0;
     pointer-events: none;
-    background-image: radial-gradient(circle, #666 10%, transparent 10%);
+    background-image: radial-gradient(circle, #666 10%, transparent 20%);
     background-repeat: no-repeat;
     background-position: 50%;
-    transform: scale(10, 10);
+    transform: scale(10);
     opacity: 0;
     transition: transform .3s, opacity .5s;
 }
-
 .ripple:active:after {
-    transform: scale(0, 0);
+    transform: scale(0);
     opacity: .3;
     transition: 0s;
+}
+.scrollSmooth{
+    scroll-behavior: smooth
 }

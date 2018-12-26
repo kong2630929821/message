@@ -3,7 +3,6 @@
  */
 
 // ================================================ 导入
-import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -118,13 +117,6 @@ export class Chat extends Widget {
         
     }
 
-    /**
-     * 查看用户详情
-     */
-    public goUserDetail(e:any) {
-        popNew('chat-client-app-demo_view-info-userDetail',{ uid: e.rid, inFlag: 1 });
-    }
-
     public send(e:any) {
         this.props.inputMessage = e.value;
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
@@ -236,9 +228,19 @@ export class Chat extends Widget {
      */
     public latestMsg() {
         setTimeout(() => {
-            getRealNode((<any>this.tree).children[1]).scrollTop = getRealNode((<any>this.tree).children[1]).scrollHeight;
+            this.getScrollElem().scrollTop = this.getScrollElem().scrollHeight;
+            this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
+            getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
             this.paint();
         }, 100);
+        
+    }
+
+    /**
+     * 获取滚动区元素
+     */
+    public getScrollElem() {
+        return getRealNode((<any>this.tree).children[1]);
     }
 
     public destroy() {

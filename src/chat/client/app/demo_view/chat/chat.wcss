@@ -1,12 +1,12 @@
 .new-page{
     display: flex;
     flex-direction: column;
+    visibility: hidden;
 }
 .messageBox{
     overflow-x: hidden;
     overflow-y: auto;
     flex: 1 0 0;
-    scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     display: flex;
     flex-direction: column;

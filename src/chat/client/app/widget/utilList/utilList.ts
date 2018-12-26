@@ -16,12 +16,7 @@ interface Props {
 
 // ===========================导出
 export class UtilList extends Widget {
-    
-    public props: Props = {
-        utilList : [{ iconPath : 'emoji.png',utilText : '搜索' },
-                    { iconPath : 'emoji.png',utilText : '通讯录' },
-                    { iconPath : '',utilText : '添加好友' }]
-    };   
+    public props: Props;  
         
     // 处理点击每一项功能列表
     public handleUtilItemTap(event:any,index:number) {

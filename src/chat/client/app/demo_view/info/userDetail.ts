@@ -55,6 +55,7 @@ export class UserDetail extends Widget {
         if (!this.props.alias) {
             this.getUserData(this.props.uid);
         }
+        logger.debug(props);
     }
 
     // 非好友展示信息
@@ -80,25 +81,28 @@ export class UserDetail extends Widget {
 
     // 开始对话
     public startChat() {
-        if (this.props.inFlag) { // 如果是从chat页面进入则返回chat页面
-            this.ok();
-        } else {
-            popNew('chat-client-app-demo_view-chat-chat',{ id:this.props.uid, chatType:GENERATOR_TYPE.USER });
-        }
+        setTimeout(() => {
+            if (this.props.inFlag === 1) { // 如果是从chat页面单聊进入则返回chat页面
+                this.ok();
+            } else {
+                popNew('chat-client-app-demo_view-chat-chat',{ id:this.props.uid, chatType:GENERATOR_TYPE.USER });
+            }
+        }, 500);
     }  
 
     // 添加好友
     public addUser() {
-        applyFriend(this.props.uid,(r:Result) => {
-            if (r.r === 0) {
-                alert(`${this.props.uid}已经是你的好友`);
-            }
-        });
+        setTimeout(() => {
+            applyFriend(this.props.uid,(r:Result) => {
+                if (r.r === 0) {
+                    alert(`${this.props.uid}已经是你的好友`);
+                }
+            });
+        }, 500);
     }
 
     // 点击联系人操作列表项
     public handleFatherTap(e:any) {
-        console.log('handleFatherTap');
         this.props.isContactorOpVisible = false;
         if (e.index === 1) { // 清空聊天记录
             popNew('chat-client-app-widget-modalBox-modalBox',{ title:'清空聊天记录',content:'确定清空和' + `${this.props.userInfo.name}` + '的聊天记录吗' });
@@ -195,7 +199,7 @@ export class UserDetail extends Widget {
 
 interface Props {
     uid: number;
-    inFlag:number; // 从某个页面进入，0 contactList进入, 1 chat进入
+    inFlag:number; // 从某个页面进入，0 contactList进入, 1 chat 单聊进入，2 chat 群聊进入
     editable:boolean; // 是否可编辑别名
     isContactorOpVisible:boolean;
     utilList:any;

@@ -63,7 +63,8 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
     }
 
     public userDetail() {
-        popNew('chat-client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid });
+        const fg = this.props.chatType === GENERATOR_TYPE.USER ? 1 :2;
+        popNew('chat-client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid, inFlag: fg });
     }
 
     // 长按打开消息撤回条组件

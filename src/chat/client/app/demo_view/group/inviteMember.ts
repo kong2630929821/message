@@ -58,6 +58,8 @@ export class InviteMember extends Widget {
      // 点击添加
     public completeAddGroupMember() {
         if (this.props.applyGroupMembers.length <= 0) {
+            alert('请至少选择一位邀请好友');
+
             return ;
         }
         const invites = new InviteArray();
@@ -70,9 +72,9 @@ export class InviteMember extends Widget {
         });
         clientRpcFunc(inviteUsers, invites, (r: Result) => {
             if (r.r !== 1) {
-                logger.debug(`邀请加入群失败`);
+                alert(`邀请好友入群失败`);
             }
-            logger.debug('成功发送邀请好友信息');
+            alert('成功发送邀请好友信息');
             this.ok();
         });
     }

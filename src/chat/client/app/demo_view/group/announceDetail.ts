@@ -23,7 +23,7 @@ export class AnnounceDetail extends Widget {
         this.props.content = announce ? announce.msg :'';  
     }
     
-    // 点击删除公告
+    // 点击撤回公告
     public deleteAnnounce(e:any) {
         popNew('chat-client-app-widget-openLink-openLink',{ text:'确认删除' },() => {
             const message = new GroupSend();
@@ -34,9 +34,11 @@ export class AnnounceDetail extends Widget {
             clientRpcFunc(sendGroupMessage, message, (r:GroupHistory) => {
                 // TODO
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    console.log('删除公告失败');
+                    alert('撤回公告失败');
                         
                     return;
+                } else {
+                    alert('撤回公告成功');
                 }
             });
         });

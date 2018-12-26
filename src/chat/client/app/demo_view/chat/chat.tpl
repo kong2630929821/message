@@ -1,7 +1,7 @@
 <div class="new-page" ev-back-click="goBack" w-class="new-page" ev-send="send" >
     <chat-client-app-widget-topBar-topBar>{title:{{it.name}}}</chat-client-app-widget-topBar-topBar>
     
-    <div w-class="messageBox" ev-avatar-click="goUserDetail" on-tap="pageClick">
+    <div w-class="messageBox" on-tap="pageClick">
         {{for i,v of it.hidIncArray}}
             <chat-client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}} }</chat-client-app-widget-messageItem-messageItem>
         {{end}} 

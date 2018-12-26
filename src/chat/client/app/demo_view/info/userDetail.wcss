@@ -1,6 +1,8 @@
 .new-page{
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 .top-main-wrap{
     width:100%;
@@ -68,20 +70,25 @@
 .moreChooseIcon{
     width:48px;
     height: 48px;
-    margin-right:40px;
 }
 .ul-wrap{
     margin:0;
     flex: 1 0 0;
 }
 .liItem{
-    padding:20px 0;
+    padding-bottom: 40px;
+    padding-left: 40px;
     margin: 0;
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
     display:flex;
     justify-content:space-between;
     align-items: center;
+}
+.liItem1{
+    border: 40px solid transparent;
+    font-size: 32px;
+    color: #318DE6;
 }
 .contactorOpList{
     position:absolute;

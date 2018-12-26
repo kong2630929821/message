@@ -3,7 +3,6 @@
  */
 
  // ================================================ 导入
-import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -24,18 +23,20 @@ export class ContactList extends Widget {
     public goBack() {
         this.ok();
     }
-     // 跳转至新的朋友验证状态界面
-    public toNewFriend() {
-        popNew('chat-client-app-demo_view-contactList-newFriend');
-    }
 
-    public toGroup() {
-        popNew(`chat-client-app-demo_view-group-groupList`);
-    }
-
-    // 查看好友详细信息
-    public friendInfo(i:number) {
-        popNew('chat-client-app-demo_view-info-userDetail',{ uid:i });
+    public goNext(i:number,uid:number) {
+        switch (i) {
+            case 0:
+                popNew('chat-client-app-demo_view-contactList-newFriend'); // 新好友验证
+                break;
+            case 1:
+                popNew(`chat-client-app-demo_view-group-groupList`);  // 群聊列表
+                break;
+            case 2:
+                popNew('chat-client-app-demo_view-info-userDetail',{ uid:uid });  // 好友详情
+                break;
+            default:
+        }
     }
 }
 
