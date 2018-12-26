@@ -3,17 +3,22 @@
  */
 
 // ================================================ 导入
-import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
-import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
+import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
+import { GroupHistory, MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { sendGroupMessage, sendUserMessage } from '../../../../server/data/rpc/message.p';
+import { GroupSend, UserSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
-import { genUserHid, genUuid } from '../../../../utils/util';
+import { depCopy, genUserHid, genUuid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { getFriendAlias } from '../../logic/logic';
-import { sendMessage } from '../../net/rpc';
+import { getFriendAlias, timestampFormat } from '../../logic/logic';
+import { clientRpcFunc } from '../../net/init';
+import { parseMessage } from '../../widget/messageItem/messageItem';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -28,37 +33,79 @@ export class Chat extends Widget {
     public ok: () => void;
     constructor() {
         super();
-        this.props = {
-            sid: null,
-            rid: null,
-            name:'',
-            inputMessage:'',
-            hidIncArray: []
-        }; 
         this.bindCB = this.updateChat.bind(this);
     }
+
     public setProps(props:any) {
         super.setProps(props);
         this.props.sid = store.getStore('uid');
-        this.props.name = getFriendAlias(this.props.rid);
+        this.props.inputMessage = '';
+        this.props.newMsg = undefined;
+
+        if (props.chatType === GENERATOR_TYPE.GROUP) {
+            this.initGroup();
+        } else {
+            this.initUser();
+        }
+        logger.debug('============groupChat',this.props);
+        this.latestMsg();
+    }
+
+    /**
+     * 好友聊天初始化
+     */
+    public initUser() {
+        this.props.name = getFriendAlias(this.props.id);
         const hIncIdArr = store.getStore(`userChatMap/${this.getHid()}`, []);
-        this.props.hidIncArray = hIncIdArr;
+        this.props.hidIncArray = hIncIdArr; 
 
         // 更新上次阅读到哪一条记录
         const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-        const lastRead = store.getStore(`lastRead/${genUserHid(this.props.sid,this.props.rid)}`,{ msgId:undefined,msgType:'user' });
+        const lastRead = store.getStore(`lastRead/${genUserHid(this.props.sid,this.props.id)}`,{ msgId:undefined,msgType:GENERATOR_TYPE.USER });
         lastRead.msgId = hincId;
-        store.setStore(`lastRead/${genUserHid(this.props.sid,this.props.rid)}`,lastRead);
+        store.setStore(`lastRead/${genUserHid(this.props.sid,this.props.id)}`,lastRead);
+    }
+
+    /**
+     * 群组聊天初始化
+     */
+    public initGroup() {
+        this.props.hidIncArray = store.getStore(`groupChatMap/${this.getHid()}`,[]);
+        const gInfo = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
+        const lastRead = store.getStore(`lastRead/${this.getHid()}`,{ msgId:undefined,msgType:GENERATOR_TYPE.GROUP });
+        this.props.name = gInfo.name;
+
+        const annouces = gInfo.annoceids;
+        const lastAnnounce = annouces && annouces.length > 0 ? annouces[annouces.length - 1] :undefined ;
+        // 最新一条公告是否已读
+        const count1 = lastAnnounce ? getIndexFromHIncId(lastAnnounce) :-1 ;
+        const count2 = lastRead.msgId ? getIndexFromHIncId(lastRead.msgId)  :-1;
+        this.props.lastAnnounce = count1 > count2 ? lastAnnounce :undefined;
+        
+        // 更新上次阅读到哪一条记录        
+        const hincId = this.props.hidIncArray.length > 0 ? this.props.hidIncArray[this.props.hidIncArray.length - 1] : undefined;
+        lastRead.msgId = hincId;
+        store.setStore(`lastRead/${this.getHid()}`,lastRead);
+
+        // 是否已被踢出群或群已经解散
+        if (gInfo.state === GROUP_STATE.DISSOLVE) {
+            alert('该群已被解散');
+            this.ok();
+        } else if (gInfo.memberids.indexOf(this.props.sid) < 0) {
+            alert('您已被移除该群');
+            this.ok();
+        }
     }
 
     public firstPaint() {
         super.firstPaint();
-        store.register(`userChatMap/${this.getHid()}`,this.bindCB);
-        // 第一次进入定位到最新的一条消息
-        setTimeout(() => {
-            document.querySelector('#messEnd').scrollIntoView();
-            this.paint();
-        }, 200);
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            store.register(`groupChatMap/${this.getHid()}`,this.bindCB);
+            store.register(`groupInfoMap/${this.props.id}`,this.bindCB);
+        } else {
+            store.register(`userChatMap/${this.getHid()}`,this.bindCB);
+        }
+    
     }
 
     /**
@@ -67,27 +114,50 @@ export class Chat extends Widget {
     public updateChat() {
         this.setProps(this.props);
         this.paint();
-        // 有新消息来时定位到最新消息
-        setTimeout(() => {
-            document.querySelector('#messEnd').scrollIntoView();
-            this.paint();
-        }, 100);
-    }
-
-    /**
-     * 查看用户详情
-     */
-    public goUserDetail(e:any) {
-        popNew('chat-client-app-demo_view-info-userDetail',{ uid: e.rid, inFlag: 1 });
+        
     }
 
     public send(e:any) {
-        logger.debug('=========send chat',e);
         this.props.inputMessage = e.value;
-        sendMessage(this.props.rid, e.value, (() => {
-            const nextside = this.props.rid;
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            logger.debug('====群组聊天信息发送',e);
+            const message = new GroupSend();
+            message.gid = this.props.id;
+            message.msg = this.props.inputMessage;
+            message.mtype = e.msgType || MSG_TYPE.TXT;
+            message.time = (new Date()).getTime();
+            if (e.msgType < 5) {
+                this.props.newMsg = {
+                    msg:parseMessage(depCopy(message)).msg,
+                    time:timestampFormat(message.time,1)
+                };
+            }
+            clientRpcFunc(sendGroupMessage, message, (r: GroupHistory) => {
+    
+                if (r.hIncId === DEFAULT_ERROR_STR) {
+                    alert('发送失败！');
+                    
+                    return;
+                } 
+            });
 
-            return (r: UserHistory) => {
+        } else {
+            
+            logger.debug('=========单聊信息发送',e);
+            const info = new UserSend();
+            info.msg = this.props.inputMessage;
+            info.mtype = e.msgType || MSG_TYPE.TXT;
+            info.rid = this.props.id;
+            info.time = (new Date()).getTime();
+            if (e.msgType < 5) {
+                this.props.newMsg = {
+                    msg:parseMessage(depCopy(info)).msg,
+                    time:timestampFormat(info.time,1)
+                };
+            }
+            clientRpcFunc(sendUserMessage, info, (r:UserHistory) => {
+                const nextside = this.props.id;
+    
                 if (r.hIncId === DEFAULT_ERROR_STR) {
                     alert('对方不是你的好友！');
                     
@@ -98,11 +168,88 @@ export class Chat extends Widget {
                     store.setStore(`userHistoryMap/${r.msg.msg}`,mess);
                 }
                 updateUserMessage(nextside, r);
-            };
-        })(), e.msgType);
+            });
+        }
+        this.props.inputMessage = '';
+        this.paint();
+        this.latestMsg();
     }
+
+    /**
+     * 输入框内容变化
+     */ 
+    public msgChange(e:any) {
+        this.props.inputMessage = e.value;
+        this.paint();
+    }
+
+    /**
+     * 点击页面
+     */
+    public pageClick() {
+        this.props.isOnEmoji = false;
+        this.paint();
+    }
+
+    /**
+     * 打开表情库
+     */
+    public openEmoji() {
+        this.props.isOnEmoji = !this.props.isOnEmoji;
+        this.paint();
+        this.latestMsg();
+    }
+
+    /**
+     * 输入框聚焦
+     */
+    public inputFocus() {
+        this.props.isOnEmoji = false;
+        this.paint();
+        this.latestMsg();
+    }
+
+    /**
+     * 选择表情
+     */
+    public pickEmoji(emoji:any) {
+        this.props.inputMessage += `[${emoji}]`;
+        this.paint();
+    }
+
+    // 关闭公告
+    public closeAnnounce() {
+        this.props.lastAnnounce = undefined;
+        this.paint();
+    }
+
+    /**
+     * 定位最新消息
+     */
+    public latestMsg() {
+        setTimeout(() => {
+            this.getScrollElem().scrollTop = this.getScrollElem().scrollHeight;
+            this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
+            getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
+            this.paint();
+        }, 100);
+        
+    }
+
+    /**
+     * 获取滚动区元素
+     */
+    public getScrollElem() {
+        return getRealNode((<any>this.tree).children[1]);
+    }
+
     public destroy() {
-        store.unregister(`userChatMap/${this.getHid()}`,this.bindCB);
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            store.unregister(`groupChatMap/${this.getHid()}`,this.bindCB);
+            store.unregister(`groupInfoMap/${this.props.id}`,this.bindCB);
+        } else {
+            store.unregister(`userChatMap/${this.getHid()}`,this.bindCB);
+        }
 
         return super.destroy();
     }
@@ -111,17 +258,26 @@ export class Chat extends Widget {
     }
 
     private getHid() {
-        const friendLink = store.getStore(`friendLinkMap/${genUuid(this.props.sid, this.props.rid)}`);
-        
-        return friendLink && friendLink.hid;
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+
+            return store.getStore(`groupInfoMap/${this.props.id}`).hid;
+        } else {
+            const friendLink = store.getStore(`friendLinkMap/${genUuid(this.props.sid, this.props.id)}`);
+
+            return friendLink && friendLink.hid;
+        }
     }
 }
 
 // ================================================ 本地
 interface Props {
-    sid: number;
-    rid: number;
-    name:string;
-    inputMessage:string;
-    hidIncArray: string[];
+    sid: number;  // 我的ID
+    id: number;  // 好友ID|群ID
+    chatType:string; // 群聊|单聊
+    name:string;  // 群名或好友名
+    inputMessage:string;  // 输入框内容
+    hidIncArray: string[]; // 消息历史记录
+    isOnEmoji:boolean; // 是否打开表情选择区
+    lastAnnounce:string; // 最新一条公告，群聊
+    newMsg:any; // 我发布的一条新消息
 }

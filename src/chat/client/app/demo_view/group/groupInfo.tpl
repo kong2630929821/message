@@ -1,6 +1,6 @@
-<div w-class="new-page" on-tap="pageClick" class="new-page" ev-handleMoreContactor="handleMoreGroup" ev-back-click="goBack">
+<div w-class="new-page" on-tap="pageClick" class="new-page" ev-next-click="handleMoreGroup" ev-back-click="goBack">
     <div w-class="top-main-wrap">
-        <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",moreImg:"more-dot-white.png",background:"transparent"}</widget>
+        <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",nextImg:"more-dot-white.png",background:"transparent"}</widget>
         
         <div w-class="home-info-wrap">
             <img w-class="avatar" src="../../res/images/img_avatar1.png" />
@@ -38,8 +38,8 @@
             </div>
             <div w-class="other-wrap">
                 <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
-                <ul style="flex:1 0 0;margin: 0;">
-                    <li w-class="liItem" style="margin-top:0;" >搜索聊天记录</li>
+                <ul w-class="ul-wrap">
+                    <li w-class="liItem" >搜索聊天记录</li>
                     <li w-class="liItem">
                         <span>聊天置顶</span>
                         <chat-client-app-widget-switch-switch>{types:false,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
@@ -49,7 +49,7 @@
                         <chat-client-app-widget-switch-switch>{types:true,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                     </li>
                     <li w-class="liItem" on-tap="openGroupManage">群管理</li>
-                    <li w-class="liItem" on-tap="openGroupChat" style="color:#318DE6;">开始聊天</li>
+                    <li style="margin-bottom: 40px;"><span w-class="liItem1" on-tap="openGroupChat" class="ripple">开始聊天</span></li>
                 </ul>
             </div>
         </div>
@@ -59,7 +59,9 @@
             <div w-class="member-wrap">
                 <img w-class="grouperIcon" src="../../res/images/add_group_user.png" />
                 {{for i, v of it.members}}
-                <img w-class="grouperIcon" src="../../res/images/user.png" />
+                    {{if i < 5 }}
+                    <img w-class="grouperIcon" src="../../res/images/user.png" />
+                    {{end}}
                 {{end}}
                 <img w-class="more" src="../../res/images/more-gray.png" />
             </div>

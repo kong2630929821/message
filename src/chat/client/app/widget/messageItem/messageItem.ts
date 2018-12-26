@@ -63,7 +63,8 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
     }
 
     public userDetail() {
-        popNew('chat-client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid });
+        const fg = this.props.chatType === GENERATOR_TYPE.USER ? 1 :2;
+        popNew('chat-client-app-demo_view-info-userDetail',{ uid:this.props.msg.sid, inFlag: fg });
     }
 
     // 长按打开消息撤回条组件
@@ -81,7 +82,7 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
 
 // ================================================ 本地
 
-const parseEmoji = (msg:UserMsg):UserMsg => {    
+const parseEmoji = (msg:any) => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
         const url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
@@ -97,14 +98,14 @@ const parseEmoji = (msg:UserMsg):UserMsg => {
     return msg;
 };
 
-const parseImg = (msg:UserMsg):UserMsg => {    
+const parseImg = (msg:any) => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, url) => {
         return `<img src="${downloadFileUrlPrefix}${url}" alt="img" class='imgMsg'></img>`;
     });
 
     return msg;
 };
-const parseMessage = (msg:UserMsg):UserMsg => {
+export const parseMessage = (msg:any):any => {
     switch (msg.mtype) {
         case MSG_TYPE.TXT:
             return parseEmoji(msg);

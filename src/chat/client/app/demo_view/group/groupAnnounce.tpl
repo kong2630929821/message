@@ -1,6 +1,6 @@
 <div class="new-page">
-    <div ev-back-click="goBack" ev-handleEdit="editGroupAnnounce">
-        <chat-client-app-widget-topBar-topBar>{title:"群公告",background:"#fff",editImg:"edit.png"}</chat-client-app-widget-topBar-topBar>
+    <div ev-back-click="goBack" ev-next-click="editGroupAnnounce">
+        <chat-client-app-widget-topBar-topBar>{title:"群公告",nextImg:"edit.png"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="outter">
         <div w-class="inner">

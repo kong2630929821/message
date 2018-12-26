@@ -39,19 +39,27 @@ export class GroupListt extends Widget {
 
     // 主动添加群聊
     public applyGroup() {
-        if (this.props.inputGid) {
-            clientRpcFunc(applyJoinGroup, this.props.inputGid, ((r) => {
-                logger.debug('===========主动添加群聊返回',r);
-                if (r.r === -2) {
-                    alert('申请的群不存在');
-                } else if (r.r === -1) {
-                    alert('您已经是该群的成员');
-                }
-            }));
-        } else {
-            alert('请输入想要加入的群组');
-        }
+        setTimeout(() => {
+            if (!this.props.inputGid) {
+                alert('请输入想要加入的群组ID');
+               
+            } else {
+                clientRpcFunc(applyJoinGroup, this.props.inputGid, ((r) => {
+                    logger.debug('===========主动添加群聊返回',r);
+                    if (r.r === -2) {
+                        alert('申请的群不存在');
+                    } else if (r.r === -1) {
+                        alert('您已经是该群的成员');
+                    }
+                }));
+            }
+        }, 500);
         
+    }
+
+    // 创建群聊
+    public groupChat() {
+        popNew('chat-client-app-demo_view-group-setGroupChat');
     }
     
 }

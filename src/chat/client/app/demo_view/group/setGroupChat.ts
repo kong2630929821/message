@@ -39,9 +39,8 @@ export class SetGroupChat extends Widget {
         this.ok();
     }
     public createGroup() {
-        console.log(`start create Group`);
-        if (this.props.name.length <= 0 || this.props.applyMembers.length <= 0) {
-            logger.debug('群名不能为空，且必须选择了除自己以外的用户');
+        if (!this.props.name) {
+            alert('群名不能为空');
 
             return;          
         } 
@@ -50,26 +49,32 @@ export class SetGroupChat extends Widget {
         groupInfo.note = '';
         clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
-                logger.debug(`创建群组失败`);
+                alert(`创建群组失败`);
 
                 return;
             }
-            logger.debug(`创建群成功,gid is : ${r.gid}`);
+            alert(`创建群组成功`);
             store.setStore(`groupInfoMap/${r.gid}`, r);
-            const invites = new InviteArray();
-            invites.arr = [];
-            this.props.applyMembers.forEach((id) => {
-                const invite = new Invite();
-                invite.gid = r.gid;
-                invite.rid = id;
-                invites.arr.push(invite);
-            });
-            clientRpcFunc(inviteUsers, invites, (r: Result) => {
-                if (r.r !== 1) {
-                    logger.debug(`邀请加入群失败`);
-                }
-                logger.debug('成功发送邀请好友信息');
-            });
+
+            // 邀请好友进群
+            if (this.props.applyMembers.length > 0) {
+                const invites = new InviteArray();
+                invites.arr = [];
+                this.props.applyMembers.forEach((id) => {
+                    const invite = new Invite();
+                    invite.gid = r.gid;
+                    invite.rid = id;
+                    invites.arr.push(invite);
+                });
+
+                clientRpcFunc(inviteUsers, invites, (r: Result) => {
+                    if (r.r !== 1) {
+                        alert(`邀请好友入群失败`);
+                    }
+                    alert('成功发送邀请好友信息');
+                });
+            }
+            this.ok();
         });
     }
 

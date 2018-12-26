@@ -1,7 +1,7 @@
 {{let membersButnoOwnerAdmins = it.ginfo.memberids.filter(item => (item !== it.ginfo.ownerid && it.ginfo.adminids.indexOf(item) === -1))}}
 <div class="new-page">
-    <div ev-back-click="goBack" ev-complete="completeAddAdmin">
-        <chat-client-app-widget-topBar-topBar>{title:"添加管理员",completeImg:"complete.png",background:"#fff"}</chat-client-app-widget-topBar-topBar>
+    <div ev-back-click="goBack" ev-next-click="completeAddAdmin">
+        <chat-client-app-widget-topBar-topBar>{title:"添加管理员",nextImg:"complete.png"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="search-input">
         <chat-client-app-widget-input-input>{placeHolder : "搜索成员",style : "font-size:32px;color:#ccc;padding-left:82px;"}</chat-client-app-widget-input-input>

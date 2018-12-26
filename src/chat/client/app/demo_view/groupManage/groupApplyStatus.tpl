@@ -1,6 +1,6 @@
 <div class="new-page">
     <div ev-back-click="goBack">    
-        <chat-client-app-widget-topBar-topBar>{title:"入群申请",background:"#fff"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget-topBar-topBar>{title:"入群申请"}</chat-client-app-widget-topBar-topBar>
     </div>
         {{if it.groupInfo.applyUser.length>0}}
         <div w-class="apply-status-wrap">

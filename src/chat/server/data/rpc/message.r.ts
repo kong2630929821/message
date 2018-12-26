@@ -18,8 +18,8 @@ import { OnlineUsers } from '../db/user.s';
 
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GroupInfo } from '../db/group.s';
-import { getUid } from './group.r';
 import { GROUP_STATE } from '../db/group.s';
+import { getUid } from './group.r';
 
 const logger = new Logger('MESSAGE');
 
@@ -127,7 +127,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 
         return gh;
     }
-    //判断群是否解散
+    // 判断群是否解散
     if (gInfo.state === GROUP_STATE.DISSOLVE) {
         gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
 

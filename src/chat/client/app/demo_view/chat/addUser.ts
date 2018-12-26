@@ -1,16 +1,16 @@
 /**
- * 登录
+ * 添加好友
  */
 
 // ================================================ 导入
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { Contact } from '../../../../server/data/db/user.s';
+import { Contact, GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
 import { doScanQrCode } from '../../logic/native';
-import { acceptFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../net/rpc';
+import { applyFriend as applyUserFriend } from '../../net/rpc';
 
 // ================================================ 导出
 export const forelet = new Forelet();
@@ -35,8 +35,16 @@ export class AddUser extends Widget {
         this.props.rid = parseInt(e.value,10);
     }
 
+    /**
+     * 添加好友
+     */
     public applyFriend() {
         const sid = store.getStore('uid');
+        if (!this.props.rid) {
+            alert('请输入好友ID');
+
+            return;
+        }
         if (this.props.rid === sid) {
             alert('不能添加自己为好友');
 
@@ -51,43 +59,27 @@ export class AddUser extends Widget {
         });
     }
     public chat(uid:number) {
-        popNew('chat-client-app-demo_view-chat-chat', { sid:this.props.sid,rid:uid });
-    }
-    public agree(uid:number) {
-        acceptFriend(uid,true,(r:Result) => {
-            // TODO:
-        });
-    }
-    public reject(uid:number) {
-        acceptFriend(uid,false,(r:Result) => {
-            // TODO:
-        });
+        popNew('chat-client-app-demo_view-chat-chat', { id:uid, chatType:GENERATOR_TYPE.USER });
     }
 
-    // 查看好友信息
-    public showInfo(uid:number) {
-        popNew('chat-client-app-demo_view-info-user', { sid:this.props.sid,rid:uid });
-    }
-
-    // 删除好友
-    public delFriend(uid:number) {
-        delUserFriend(uid,(r:Result) => {
-            // TODO:
-        });
-    }
-
-    // 展示我的二维码
-    public showQrcode() {
-        popNew('app-view-mine-other-addFriend');
-    }
-
-    /**
-     * 扫描二维码
-     */
-    public scanQrcode() {
-        doScanQrCode((res) => {
-            console.log(res);
-        });
+    public goNext(i:number) {
+        setTimeout(() => {
+            switch (i) {
+                case 0:
+                    doScanQrCode((res) => {  // 扫描二维码
+                        console.log(res);
+                        // TODO
+                    });
+                    break;
+                case 1:
+                    popNew('app-view-mine-other-addFriend'); // 展示我的二维码
+                    break;
+                case 2:
+                    this.applyFriend();  // 添加好友
+                    break;
+                default:
+            }
+        }, 500);
     }
 
 }

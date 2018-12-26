@@ -668,6 +668,9 @@ export const dissolveGroup = (gid: number): Result => {
 
         return res;
     }
+    res.r = 0;
+
+    return res;
 
 };
 

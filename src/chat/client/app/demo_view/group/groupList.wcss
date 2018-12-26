@@ -1,3 +1,7 @@
+.new-page{
+    display: flex;
+    flex-direction: column;
+}
 .search-input{
     position:relative;
     margin-left: 20px;
@@ -15,7 +19,7 @@
     width:32px;
     height:32px;
 }
-.a-part{
+.groupPart{
     width:710px;
     border-radius: 12px;
     margin-left: 20px;
@@ -43,4 +47,9 @@
     font-size: 32px;
     border-radius: 12px;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 2px 0px;
+}
+.content{
+    flex: 1 0 0;
+    overflow-x: hidden;
+    overflow-y: auto;
 }

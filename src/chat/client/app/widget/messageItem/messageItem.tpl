@@ -1,8 +1,8 @@
-<div on-tap="closeMessageRecall">
+<div>
     {{if !it.msg.cancel && it.msg.mtype < 5 }}
     <div style="overflow: hidden;">
         {{if it.me}}
-        <div style="position:relative;margin: 10px 40px 0;float: right;" on-longtap="openMessageRecall">
+        <div style="position:relative;margin: 10px 40px 0;float: right;" on-longtap="openMessageRecall" on-tap="closeMessageRecall">
             <div w-class="text-wrap">
                 <widget w-tag="pi-ui-html" style="display: inline;white-space: pre-wrap;">{{it.msg.msg}}</widget>
                 <div w-class="corner">
