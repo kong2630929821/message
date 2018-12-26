@@ -8,6 +8,7 @@ import { Tr } from '../../../../pi_pt/rust/pi_db/mgr';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
+import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { Contact, FriendLink, UserInfo } from '../db/user.s';
 import { Result } from './basic.s';
@@ -30,16 +31,16 @@ export const applyFriend = (uid: number): Result => {
     const result = new Result();
     if (sid === uid) {
         result.r = -1;  // 不能添加自己为好友
-        
+
         return result;
     }
     const dbMgr = getEnv().getDbMgr();
     // 取出联系人表
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
     const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
-    const friend1 = friendLinkBucket.get(genUuid(sid,uid))[0];
-    const friend2 = friendLinkBucket.get(genUuid(sid,uid))[0];
-    logger.debug('applyFriend friend1: ',friend1,'friend2: ',friend2);
+    const friend1 = friendLinkBucket.get(genUuid(sid, uid))[0];
+    const friend2 = friendLinkBucket.get(genUuid(sid, uid))[0];
+    logger.debug('applyFriend friend1: ', friend1, 'friend2: ', friend2);
     if (friend1 && friend2) {
         result.r = 0;   // 已经是好友，不需要重复添加
 
@@ -47,7 +48,7 @@ export const applyFriend = (uid: number): Result => {
     }
     // 取出对应的那一个联系人
     const contactInfo = contactBucket.get(uid)[0];
-    contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);      
+    contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);
     contactBucket.put(uid, contactInfo);
 
     result.r = 1;
@@ -73,8 +74,8 @@ export const acceptFriend = (agree: UserAgree): Result => {
         if (sContactInfo.applyUser.findIndex(item => item === rid) === -1) {
             const rlt = new Result();
             rlt.r = -1;
-            
-            return rlt; 
+
+            return rlt;
         }
 
         sContactInfo.applyUser = delValueFromArray(rid, sContactInfo.applyUser);
@@ -90,12 +91,12 @@ export const acceptFriend = (agree: UserAgree): Result => {
         // 分别插入到friendLink中去
         const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
         const friendLink = new FriendLink();
-        friendLink.uuid = genUuid(sid,rid);
+        friendLink.uuid = genUuid(sid, rid);
         friendLink.alias = '';
         friendLink.hid = genUserHid(sid, rid);
-        friendLinkBucket.put(friendLink.uuid,friendLink);
-        friendLink.uuid = genUuid(rid,sid);
-        friendLinkBucket.put(friendLink.uuid,friendLink);
+        friendLinkBucket.put(friendLink.uuid, friendLink);
+        friendLink.uuid = genUuid(rid, sid);
+        friendLinkBucket.put(friendLink.uuid, friendLink);
 
     };
 
@@ -123,7 +124,7 @@ export const delFriend = (uid: number): Result => {
         contactBucket.put(sid, sContactInfo);
         // 从friendLink中删除
         const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
-        friendLinkBucket.delete(genUuid(sid,rid));        
+        friendLinkBucket.delete(genUuid(sid, rid));
     };
 
     _delFriend(getUid(), uid);
@@ -141,11 +142,12 @@ export const delFriend = (uid: number): Result => {
 export const addToBlackList = (peerUid: number): Result => {
     const dbMgr = getEnv().getDbMgr();
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
-    const session = getEnv().getSession();
-    let uid;
-    read(dbMgr, (tr: Tr) => {
-        uid = session.get(tr, 'uid');
-    });
+    // const session = getEnv().getSession();
+    // let uid;
+    // read(dbMgr, (tr: Tr) => {
+    //     uid = session.get(tr, 'uid');
+    // });
+    const uid = getSession('uid');
     const result = new Result();
     const contactInfo = contactBucket.get<number, [Contact]>(uid)[0];
     const index = contactInfo.blackList.indexOf(peerUid);
@@ -173,11 +175,12 @@ export const addToBlackList = (peerUid: number): Result => {
 export const removeFromBlackList = (peerUid: number): Result => {
     const dbMgr = getEnv().getDbMgr();
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
-    const session = getEnv().getSession();
-    let uid;
-    read(dbMgr, (tr: Tr) => {
-        uid = session.get(tr, 'uid');
-    });
+    // const session = getEnv().getSession();
+    // let uid;
+    // read(dbMgr, (tr: Tr) => {
+    //     uid = session.get(tr, 'uid');
+    // });
+    const uid = getSession('uid');
     const result = new Result();
     const contactInfo = contactBucket.get<number, [Contact]>(uid)[0];
     const index = contactInfo.blackList.indexOf(peerUid);
@@ -202,12 +205,12 @@ export const removeFromBlackList = (peerUid: number): Result => {
  * @param alias user alias
  */
 // #[rpc=rpcServer]
-export const changeFriendAlias = (friendAlias:FriendAlias):Result => {
+export const changeFriendAlias = (friendAlias: FriendAlias): Result => {
     const dbMgr = getEnv().getDbMgr();
-    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME,CONSTANT.FRIEND_LINK_TABLE,dbMgr);
+    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
     const sid = getUid();
-    const uuid = genUuid(sid,friendAlias.rid);
+    const uuid = genUuid(sid, friendAlias.rid);
     const result = new Result();
     const contactInfo = contactBucket.get(sid)[0];
     const index = contactInfo.friends.indexOf(friendAlias.rid);
@@ -215,13 +218,13 @@ export const changeFriendAlias = (friendAlias:FriendAlias):Result => {
     if (index > -1) {
         const friend = friendLinkBucket.get(uuid)[0];
         friend.alias = friendAlias.alias;
-        friendLinkBucket.put(uuid,friend);
+        friendLinkBucket.put(uuid, friend);
         result.r = 1;
     } else {
-        logger.debug('user: ',friendAlias.rid,' is not your friend');
+        logger.debug('user: ', friendAlias.rid, ' is not your friend');
         result.r = 0;
     }
-    
+
     return result;
 };
 
@@ -230,19 +233,19 @@ export const changeFriendAlias = (friendAlias:FriendAlias):Result => {
  * @param userinfo user info
  */
 // #[rpc=rpcServer]
-export const changeUserInfo = (userinfo:UserInfo):UserInfo => {
+export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
     const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,CONSTANT.USER_INFO_TABLE,dbMgr);
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.USER_INFO_TABLE, dbMgr);
     const sid = getUid();
     let newUser = new UserInfo();
     if (userinfo.uid === sid) {
-        userInfoBucket.put(sid,userinfo);
+        userInfoBucket.put(sid, userinfo);
         newUser = userinfo;
     } else {
-        logger.debug('curUser: ',sid,' changeUser: ',userinfo);
+        logger.debug('curUser: ', sid, ' changeUser: ', userinfo);
         newUser.uid = -1;
     }
-    
+
     return newUser;
 };
 
