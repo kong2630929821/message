@@ -21,3 +21,10 @@ struct GroupSend {
     msg: String,//内容,可能是url
     time: usize,//时间
 }
+
+//获取游标和最新消息
+struct HistoryCursor {
+    code:u32,//返回状态
+    cursor:u32,//用户游标
+    last:u32,//最新消息
+}

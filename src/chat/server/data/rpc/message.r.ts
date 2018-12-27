@@ -4,7 +4,7 @@
 // ================================================================= 导入
 import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, UserHistory, UserHistoryCursor, UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
-import { GroupSend, UserSend } from './message.s';
+import { GroupSend, HistoryCursor, UserSend } from './message.s';
 
 import { BonBuffer } from '../../../../pi/util/bon';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
@@ -17,8 +17,7 @@ import { Logger } from '../../../utils/logger';
 import { OnlineUsers } from '../db/user.s';
 
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
-import { GroupInfo } from '../db/group.s';
-import { GROUP_STATE } from '../db/group.s';
+import { GROUP_STATE, GroupInfo } from '../db/group.s';
 import { getUid } from './group.r';
 
 const logger = new Logger('MESSAGE');
@@ -63,38 +62,58 @@ const logger = new Logger('MESSAGE');
  * 获取单聊消息游标
  */
 // #[rpc=rpcServer]
-export const getUserHistoryCursor = (uid: number): UserHistoryCursor => {
+export const getUserHistoryCursor = (uid: number): HistoryCursor => {
+    console.log('getuserHistoryCursor uid:', uid);
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
     const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
-    let userCursor = userHistoryCursorBucket.get(genUuid(sid, uid))[0];
-    if (!userCursor) {
-        userCursor = new UserHistoryCursor();
-        userCursor.uuid = genUuid(sid, uid);
-        userCursor.cursor = -1;
-    }
-    logger.debug('getUserHistoryCursor userCursor', userCursor);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+    const lastID = msgLockBucket.get(genUserHid(sid, uid))[0];
+    const userCursor = userHistoryCursorBucket.get(genUuid(sid, uid))[0];
+    const historyCursor = new HistoryCursor();
+    if (!userCursor || !lastID) {
+        historyCursor.code = -1;
+        historyCursor.cursor = 0;
+        historyCursor.last = 0;
 
-    return userCursor;
+        return historyCursor;
+    }
+    logger.debug('getUserHistoryCursor userCursor', userCursor, lastID);
+    historyCursor.code = 1;
+    historyCursor.cursor = userCursor.cursor;
+    historyCursor.last = lastID.current;
+    logger.debug('getUserHistoryCursor historyCursor', historyCursor);
+
+    return historyCursor;
 };
 
 /**
  * 获取群聊消息游标
  */
 // #[rpc=rpcServer]
-export const getGroupHistoryCursor = (gid: number): GroupHistoryCursor => {
+export const getGroupHistoryCursor = (gid: number): HistoryCursor => {
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
     const groupHistoryCursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
-    let groupCursor = groupHistoryCursorBucket.get(genGuid(gid, sid))[0];
-    if (!groupCursor) {
-        groupCursor = new GroupHistoryCursor();
-        groupCursor.guid = genGuid(gid, sid);
-        groupCursor.cursor = -1;
-    }
-    logger.debug('getGroupHistoryCursor groupCursor', groupCursor);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+    const lastID = msgLockBucket.get(genGroupHid(gid))[0];
+    const groupCursor = groupHistoryCursorBucket.get(genGuid(gid, sid))[0];
+    const historyCursor = new HistoryCursor();
+    if (!groupCursor || !lastID) {
+        historyCursor.code = -1;
+        historyCursor.cursor = 0;
+        historyCursor.last = 0;
 
-    return groupCursor;
+        return historyCursor;
+    }
+    historyCursor.code = 1;
+    historyCursor.cursor = groupCursor.cursor;
+    historyCursor.last = lastID.current;
+    logger.debug('getGroupHistoryCursor groupCursor', groupCursor, lastID);
+
+    logger.debug('getGroupHistoryCursor historyCursor', historyCursor);
+
+    return historyCursor;
 };
 
 // ================================================================= 导出
@@ -109,7 +128,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
     const gInfoBucket = new Bucket('file', CONSTANT.GROUP_INFO_TABLE, dbMgr);
-    const gInfo = gInfoBucket.get<number,GroupInfo>(message.gid)[0];        
+    const gInfo = gInfoBucket.get<number, GroupInfo>(message.gid)[0];
 
     const gh = new GroupHistory();
     const gmsg = new GroupMsg();
@@ -248,7 +267,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     }
     groupHistoryBucket.put(gh.hIncId, gh);
     // 移动游标表
-    moveGroupCursor(message.gid, msgLock.current);
+    // moveGroupCursor(message.gid, msgLock.current);
 
     const buf = new BonBuffer();
     gh.bonEncode(buf);
@@ -376,30 +395,30 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const buf = new BonBuffer();
     userHistory.bonEncode(buf);
 
-    const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
-    let sidHistoryCursor = userHistoryCursorBucket.get(genUuid(sid, message.rid))[0];
-    let ridHistoryCursor = userHistoryCursorBucket.get(genUuid(message.rid, sid))[0];
-    logger.debug('sendUserMessage begin sidHistoryCursor: ', sidHistoryCursor);
-    logger.debug('sendUserMessage begin ridHistoryCursor: ', ridHistoryCursor);
+    // const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
+    // const sidHistoryCursor = userHistoryCursorBucket.get(genUuid(sid, message.rid))[0];
+    // const ridHistoryCursor = userHistoryCursorBucket.get(genUuid(message.rid, sid))[0];
+    // logger.debug('sendUserMessage begin sidHistoryCursor: ', sidHistoryCursor);
+    // logger.debug('sendUserMessage begin ridHistoryCursor: ', ridHistoryCursor);
+
+    // // 游标表中是否有该用户的记录
+    // if (sidHistoryCursor) {
+    //     sidHistoryCursor.cursor = msgLock.current; // 发送者的游标一定在变化
+    // } else {
+    //     sidHistoryCursor = new UserHistoryCursor();
+    //     sidHistoryCursor.uuid = genUuid(sid, message.rid);
+    //     sidHistoryCursor.cursor = msgLock.current;
+    // }
+
+    // logger.debug('sendUserMessage sidHistoryCursor: ', sidHistoryCursor);
+    // userHistoryCursorBucket.put(genUuid(sid, message.rid), sidHistoryCursor);
 
     // 游标表中是否有该用户的记录
-    if (sidHistoryCursor) {
-        sidHistoryCursor.cursor = msgLock.current; // 发送者的游标一定在变化
-    } else {
-        sidHistoryCursor = new UserHistoryCursor();
-        sidHistoryCursor.uuid = genUuid(sid, message.rid);
-        sidHistoryCursor.cursor = msgLock.current;
-    }
-
-    logger.debug('sendUserMessage sidHistoryCursor: ', sidHistoryCursor);
-    userHistoryCursorBucket.put(genUuid(sid, message.rid), sidHistoryCursor);
-
-    // 游标表中是否有该用户的记录
-    if (!ridHistoryCursor) {
-        ridHistoryCursor = new UserHistoryCursor();
-        ridHistoryCursor.uuid = genUuid(message.rid, sid);
-        ridHistoryCursor.cursor = -1;
-    }
+    // if (!ridHistoryCursor) {
+    //     ridHistoryCursor = new UserHistoryCursor();
+    //     ridHistoryCursor.uuid = genUuid(message.rid, sid);
+    //     ridHistoryCursor.cursor = -1;
+    // }
     // 对方是否在线，不在线则不推送消息
     const res = isUserOnline(message.rid);
     if (res.r === 1) {
@@ -407,11 +426,11 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
         mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
         logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(userHistory)}`);
 
-        ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
+        // ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
     }
 
-    userHistoryCursorBucket.put(genUuid(message.rid, sid), ridHistoryCursor);
-    logger.debug(`sendUserMessage ridHistoryCursor: ${JSON.stringify(ridHistoryCursor)}`);
+    // userHistoryCursorBucket.put(genUuid(message.rid, sid), ridHistoryCursor);
+    // logger.debug(`sendUserMessage ridHistoryCursor: ${JSON.stringify(ridHistoryCursor)}`);
 
     return userHistory;
 };

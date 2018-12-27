@@ -554,10 +554,12 @@ new EnumType( Type.U8 ), null) ]);
 export class UserHistoryFlag extends Struct {
 
     rid: number;
-    hIncId: string;
+    start: number;
+    end: number;
 	static _$info =  new StructInfo("chat/server/data/rpc/basic.UserHistoryFlag",4006120980, null, [new FieldInfo("rid", 
-new EnumType( Type.U32 ), null), new FieldInfo("hIncId", 
-new EnumType( Type.Str ), null) ]);
+new EnumType( Type.U32 ), null), new FieldInfo("start", 
+new EnumType( Type.U32 ), null), new FieldInfo("end", 
+new EnumType( Type.U32 ), null) ]);
 
 
 
@@ -565,13 +567,16 @@ new EnumType( Type.Str ), null) ]);
 
 	bonDecode(bb:BonBuffer) {
 		this.rid = bb.readInt();
-		this.hIncId = bb.readUtf8();
+		this.start = bb.readInt();
+		this.end = bb.readInt();
 	}
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.rid);
                 
-        bb.writeUtf8(this.hIncId);
+        bb.writeInt(this.start);
+                
+        bb.writeInt(this.end);
         
 	}
 }
@@ -580,10 +585,12 @@ new EnumType( Type.Str ), null) ]);
 export class GroupHistoryFlag extends Struct {
 
     gid: number;
-    hIncId: string;
+    start: number;
+    end: number;
 	static _$info =  new StructInfo("chat/server/data/rpc/basic.GroupHistoryFlag",229723152, null, [new FieldInfo("gid", 
-new EnumType( Type.U32 ), null), new FieldInfo("hIncId", 
-new EnumType( Type.Str ), null) ]);
+new EnumType( Type.U32 ), null), new FieldInfo("start", 
+new EnumType( Type.U32 ), null), new FieldInfo("end", 
+new EnumType( Type.U32 ), null) ]);
 
 
 
@@ -591,13 +598,16 @@ new EnumType( Type.Str ), null) ]);
 
 	bonDecode(bb:BonBuffer) {
 		this.gid = bb.readInt();
-		this.hIncId = bb.readUtf8();
+		this.start = bb.readInt();
+		this.end = bb.readInt();
 	}
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.gid);
                 
-        bb.writeUtf8(this.hIncId);
+        bb.writeInt(this.start);
+                
+        bb.writeInt(this.end);
         
 	}
 }

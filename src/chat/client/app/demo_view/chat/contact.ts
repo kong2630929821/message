@@ -61,7 +61,7 @@ export class Contact extends Widget {
     public chat(id: number, chatType: GENERATOR_TYPE) {
         this.closeMore();
         setTimeout(() => {
-            popNew('chat-client-app-demo_view-chat-chat', { id:id, chatType:chatType });
+            popNew('chat-client-app-demo_view-chat-chat', { id: id, chatType: chatType });
         }, 500);
     }
 
@@ -100,34 +100,6 @@ export class Contact extends Widget {
                         alert('钱包登陆失败');
                     }
                 });
-                // walletLogin(openId, '', (r: UserInfo) => {
-                //     this.props.isOnline = true;
-
-                //     if (r && r.uid > 0) {
-                //         store.setStore(`uid`, r.uid);
-                //         store.setStore(`userInfoMap/${r.uid}`, r);
-                //         init(r.uid);
-                //         subscribe(r.uid.toString(), UserHistory, (v: UserHistory) => {
-                //             updateUserMessage(v.msg.sid, v);
-                //         });
-                //         this.paint();
-
-                //         const user = walletStore.getStore('user/info');
-                //         if (r.name !== user.nickName || r.avatar !== user.avatar) {
-                //             r.name = user.nickName;
-                //             r.avatar = user.avatar;
-                //             r.tel = user.phoneNumber;
-                //             clientRpcFunc(changeUserInfo, r, (res) => {
-                //                 if (res && res.uid > 0) {
-                //                     store.setStore(`userInfoMap/${r.uid}`, r);
-
-                //                 }
-                //             });
-                //         }
-                //     } else {
-                //         alert('钱包登陆失败');
-                //     }
-                // });
             }
         });
 

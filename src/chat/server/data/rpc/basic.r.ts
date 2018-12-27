@@ -258,47 +258,63 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
 export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
+    const start = param.start;
+    const end = param.end;
+    if (!start && !end) {
+
+        throw new Error(`param error start:${start} end:${end}`);
+    }
     const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
     const groupHistorycursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
 
     const hid = genGroupHid(param.gid); // 删除好友也应该可以看到以前发送的历史记录，所以不从friendLink中获取
     const groupHistoryArray = new GroupHistoryArray();
     groupHistoryArray.arr = [];
+    groupHistoryArray.newMess = 0;
 
-    let fg = 1;
-    let index = -1;
+    // let fg = 1;
+    // let index = -1;
     let groupCursor = groupHistorycursorBucket.get<String, GroupHistoryCursor>(genGuid(param.gid, sid))[0];
-    logger.debug(`getGroupHistory begin index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
+    // logger.debug(`getGroupHistory begin index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
 
-    if (param.hIncId) {  // 如果本地有记录则取本地记录
-        index = getIndexFromHIncId(param.hIncId);
+    // if (param.hIncId) {  // 如果本地有记录则取本地记录
+    //     index = getIndexFromHIncId(param.hIncId);
 
-    } else if (groupCursor) { // 如果本地没有记录且cursor存在则从cursor中获取，否则从0开始
-        index = groupCursor.cursor;
+    // } else if (groupCursor) { // 如果本地没有记录且cursor存在则从cursor中获取，否则从0开始
+    //     index = groupCursor.cursor;
+    // }
+
+    const historyKeys = [];
+    for (let id = start; id <= end; id++) {
+        historyKeys.push(genHIncId(hid, id));
     }
+    const mess = groupHistoryBucket.get<String[], UserHistory[]>(historyKeys);
+    // while (fg === 1) {
+    //     index++;
+    //     const oneMess = groupHistoryBucket.get<String, UserHistory>(genHIncId(hid, index))[0];
+    //     logger.debug('getGroupHistory oneMess: ', oneMess);
+    //     if (oneMess) {
+    //         groupHistoryArray.arr.push(oneMess);
+    //     } else {
+    //         fg = 0;
+    //     }
+    // }
 
-    while (fg === 1) {
-        index++;
-        const oneMess = groupHistoryBucket.get<String, UserHistory>(genHIncId(hid, index))[0];
-        logger.debug('getGroupHistory oneMess: ', oneMess);
-        if (oneMess) {
-            groupHistoryArray.arr.push(oneMess);
-        } else {
-            fg = 0;
-        }
-    }
-
+    groupHistoryArray.arr = mess;
     // 游标表中是否有该用户的记录
     if (!groupCursor) {
 
         groupCursor = new UserHistoryCursor();
         groupCursor.guid = genGuid(param.gid, sid);
+        groupCursor.cursor = 0;
     }
-    groupCursor.cursor = index - 1;
+    if (end > groupCursor.cursor) {
+        groupHistoryArray.newMess = end - groupCursor.cursor;
+        groupCursor.cursor = end;
+    }
     groupHistorycursorBucket.put(groupCursor.guid, groupCursor);
-    logger.debug(`getGroupHistory index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
+    // logger.debug(`getGroupHistory index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
 
-    groupHistoryArray.newMess = groupHistoryArray.arr.length;
     logger.debug('getGroupHistory rid: ', param.gid, 'history: ', groupHistoryArray);
 
     return groupHistoryArray;
@@ -310,6 +326,12 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
 // #[rpc=rpcServer]
 export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     logger.debug('getUserHistory param', param);
+    const start = param.start;
+    const end = param.end;
+    if (!start && !end) {
+
+        throw new Error(`param error start:${start} end:${end}`);
+    }
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
@@ -317,41 +339,52 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     const hid = genUserHid(sid, param.rid); // 删除好友也应该可以看到以前发送的历史记录，所以不从friendLink中获取
     const userHistoryArray = new UserHistoryArray();
     userHistoryArray.arr = [];
+    userHistoryArray.newMess = 0;
 
-    let fg = 1;
-    let index = -1;
+    // let fg = 1;
+    // let index = -1;
     let userCursor = userHistoryCursorBucket.get<String, UserHistoryCursor>(genUuid(sid, param.rid))[0];
-    logger.debug(`getUserHistory begin index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
+    // logger.debug(`getUserHistory begin index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
-    if (param.hIncId) {  // 如果本地有记录则取本地记录
-        index = getIndexFromHIncId(param.hIncId);
+    // if (param.hIncId) {  // 如果本地有记录则取本地记录
+    //     index = getIndexFromHIncId(param.hIncId);
 
-    } else if (userCursor) { // 如果本地没有记录且cursor存在则从cursor中获取，否则从0开始
-        index = userCursor.cursor;
+    // } else if (userCursor) { // 如果本地没有记录且cursor存在则从cursor中获取，否则从0开始
+    //     index = userCursor.cursor;
+    // }
+    const historyKeys = [];
+    for (let id = start; id <= end; id++) {
+        historyKeys.push(genHIncId(hid, id));
     }
 
-    while (fg === 1) {
-        index++;
-        const oneMess = userHistoryBucket.get<String, UserHistory>(genHIncId(hid, index))[0];
-        logger.debug('getUserHistory oneMess: ', oneMess);
-        if (oneMess) {
-            userHistoryArray.arr.push(oneMess);
-        } else {
-            fg = 0;
-        }
-    }
-
+    const mess = userHistoryBucket.get<String[], UserHistory[]>(historyKeys);
+    // while (fg === 1) {
+    //     index++;
+    //     const oneMess = userHistoryBucket.get<String, UserHistory>(genHIncId(hid, index))[0];
+    //     logger.debug('getUserHistory oneMess: ', oneMess);
+    //     if (oneMess) {
+    //         userHistoryArray.arr.push(oneMess);
+    //     } else {
+    //         fg = 0;
+    //     }
+    // }
+    userHistoryArray.arr = mess;
     // 游标表中是否有该用户的记录
     if (!userCursor) {
 
         userCursor = new UserHistoryCursor();
         userCursor.uuid = genUuid(sid, param.rid);
+        userCursor.cursor = 0;
     }
-    userCursor.cursor = index - 1;
+    if (end > userCursor.cursor) {
+        userHistoryArray.newMess = end - userCursor.cursor;
+        userCursor.cursor = end;
+    }
+    // userCursor.cursor = index - 1;
     userHistoryCursorBucket.put(userCursor.uuid, userCursor);
-    logger.debug(`getUserHistory index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
+    // logger.debug(`getUserHistory index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
-    userHistoryArray.newMess = userHistoryArray.arr.length;
+    // userHistoryArray.newMess = userHistoryArray.arr.length;
     logger.debug('getUserHistory rid: ', param.rid, 'history: ', userHistoryArray);
 
     return userHistoryArray;

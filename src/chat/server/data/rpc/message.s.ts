@@ -108,3 +108,34 @@ new EnumType( Type.Usize ), null) ]);
 	}
 }
 
+
+export class HistoryCursor extends Struct {
+
+    code: number;
+    cursor: number;
+    last: number;
+	static _$info =  new StructInfo("chat/server/data/rpc/message.HistoryCursor",452972435, null, [new FieldInfo("code", 
+new EnumType( Type.U32 ), null), new FieldInfo("cursor", 
+new EnumType( Type.U32 ), null), new FieldInfo("last", 
+new EnumType( Type.U32 ), null) ]);
+
+
+
+
+
+	bonDecode(bb:BonBuffer) {
+		this.code = bb.readInt();
+		this.cursor = bb.readInt();
+		this.last = bb.readInt();
+	}
+
+	bonEncode(bb:BonBuffer) {        
+        bb.writeInt(this.code);
+                
+        bb.writeInt(this.cursor);
+                
+        bb.writeInt(this.last);
+        
+	}
+}
+

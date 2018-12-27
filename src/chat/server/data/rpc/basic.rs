@@ -97,10 +97,12 @@ struct LoginReply {
 
 struct UserHistoryFlag {
     rid:u32, // 好友ID
-    hIncId:String // 历史记录ID
+    start:u32, // 消息记录ID
+    end:u32, //结束消息ID
 }
 
 struct GroupHistoryFlag {
     gid:u32, // 群组ID
-    hIncId:String // 历史记录ID
+    start:u32, // 消息记录ID
+    end:u32, //结束消息ID
 }

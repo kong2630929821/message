@@ -6,13 +6,13 @@
 *消息类型
 */
 enum MSG_TYPE {
-    TXT = 1,         //文本
-    IMG = 2,         //图片
-    VOICE = 3,       //声音
-    VIDEO = 4,       //视频
-    RECALL = 5,      //撤回消息
-    NOTICE = 6,      //公告消息
-    RENOTICE = 7,    //撤回公告消息
+    TXT = 1,      //文本
+    IMG = 2,      //图片
+    VOICE = 3,    //声音
+    VIDEO = 4,    //视频
+    RECALL = 5,   //撤回消息
+    NOTICE = 6,   //公告消息
+    RENOTICE = 7, //撤回公告消息
 }
 
 /**
@@ -98,7 +98,7 @@ struct UserHistoryCursor {
 }
 
 /**
-*用户历史记录游标
+*群历史记录游标
 */
 #[primary=guid,db=file]
 struct GroupHistoryCursor {
