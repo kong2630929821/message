@@ -27,7 +27,7 @@ export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => 
     info.name = name;
     info.passwdHash = passwdHash;
     clientRpcFunc(registerUser, info, (r: UserInfo) => {
-        setStore(`userInfoMap/${r.uid}`,r);
+        setStore(`userInfoMap/${r.uid}`, r);
         cb(r);
     });
 };
@@ -39,7 +39,7 @@ export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => 
  * @param cb callback
  */
 export const login = (uid: number, passwdHash: string, cb: (r: UserInfo) => void) => {
-   
+
     // 本地账户登录
     const userType = new UserType();
     userType.enum_type = UserType_Enum.DEF;
@@ -73,10 +73,10 @@ export const walletLogin = (openid: string, sign: string, cb: (r: UserInfo) => v
  *
  * @param uid user id 
  */
-export const getUsersBasicInfo = (uids:number[],cb: (r:UserArray) => void) => {
+export const getUsersBasicInfo = (uids: number[], cb: (r: UserArray) => void) => {
     const info = new GetUserInfoReq();
     info.uids = uids;
-    clientRpcFunc(getUsersInfo,info,(r:UserArray) => {
+    clientRpcFunc(getUsersInfo, info, (r: UserArray) => {
         cb(r);
     });
 };
@@ -86,7 +86,7 @@ export const getUsersBasicInfo = (uids:number[],cb: (r:UserArray) => void) => {
  * @param msg message
  * @param cb callback
  */
-export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => void, msgType= MSG_TYPE.TXT) => {    
+export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => void, msgType = MSG_TYPE.TXT) => {
     const info = new UserSend();
     info.msg = msg;
     info.mtype = msgType;
@@ -103,8 +103,8 @@ export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => vo
  * @param rid reader id
  * @param cb callback
  */
-export const applyFriend = (rid: number, cb: (r:Result) => void) => {
-    clientRpcFunc(applyUserFriend, rid, (r: Result) => {
+export const applyFriend = (user: string, cb: (r: Result) => void) => {
+    clientRpcFunc(applyUserFriend, user, (r: Result) => {
         cb(r);
     });
 };
@@ -114,7 +114,7 @@ export const applyFriend = (rid: number, cb: (r:Result) => void) => {
  * @param rid reader
  * @param cb callback
  */
-export const acceptFriend = (rid: number, agree: boolean, cb: (r:Result) => void) => {
+export const acceptFriend = (rid: number, agree: boolean, cb: (r: Result) => void) => {
     const userAgree = new UserAgree();
     userAgree.uid = rid;
     userAgree.agree = agree;
@@ -128,7 +128,7 @@ export const acceptFriend = (rid: number, agree: boolean, cb: (r:Result) => void
  * @param rid reader id
  * @param cb callback
  */
-export const delFriend = (rid: number, cb: (r:Result) => void) => {
+export const delFriend = (rid: number, cb: (r: Result) => void) => {
     clientRpcFunc(delUserFriend, rid, (r: Result) => {
         cb(r);
     });
