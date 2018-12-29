@@ -125,6 +125,7 @@ export const getGroupHistoryCursor = (gid: number): HistoryCursor => {
 // #[rpc=rpcServer]
 // tslint:disable-next-line:max-func-body-length
 export const sendGroupMessage = (message: GroupSend): GroupHistory => {
+    logger.debug(`!!!!!!!!!!sendGroupMessage message: ${message}`);
     const dbMgr = getEnv().getDbMgr();
     const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
