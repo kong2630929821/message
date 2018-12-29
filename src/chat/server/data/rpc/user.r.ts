@@ -2,9 +2,7 @@
  * 用户相关的rpc操作
  */
 // ================================================================= 导入
-import { read } from '../../../../pi_pt/db';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
-import { Tr } from '../../../../pi_pt/rust/pi_db/mgr';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
@@ -39,7 +37,7 @@ export const applyFriend = (uid: number): Result => {
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
     const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
     const friend1 = friendLinkBucket.get(genUuid(sid, uid))[0];
-    const friend2 = friendLinkBucket.get(genUuid(sid, uid))[0];
+    const friend2 = friendLinkBucket.get(genUuid(uid, sid))[0];
     logger.debug('applyFriend friend1: ', friend1, 'friend2: ', friend2);
     if (friend1 && friend2) {
         result.r = 0;   // 已经是好友，不需要重复添加
@@ -125,6 +123,7 @@ export const delFriend = (uid: number): Result => {
         // 从friendLink中删除
         const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
         friendLinkBucket.delete(genUuid(sid, rid));
+        logger.debug('delFriend friendLink ',genUuid(sid, rid));
     };
 
     _delFriend(getUid(), uid);

@@ -7,15 +7,27 @@ import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
-import { selectImage } from '../../logic/native';
-import { uploadFile } from '../../net/upload';
+import { sendImg } from '../../logic/logic';
 
 // ===========================导出
 export class InputMessage extends Widget {
     public props:Props = {
         message:'',
-        isOnEmoji:false
+        isOnEmoji:false,
+        isOnTools:false,
+        toolList:[]
     };
+
+    public setProps(props:any) {
+        super.setProps(props);
+        this.props.toolList = [
+            { name:'拍摄',img:'tool-camera.png' },
+            { name:'相册',img:'tool-pictures.png' },
+            { name:'红包',img:'tool-redEnv.png' },
+            { name:'转账',img:'tool-transaction.png' },
+            { name:'名片',img:'tool-card.png' }
+        ];
+    }
 
     // 麦克风输入处理
     public playRadio() {
@@ -24,7 +36,6 @@ export class InputMessage extends Widget {
 
     // 打开表情包图库
     public playEmoji(e:any) {
-        
         getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight()}px`;
 
@@ -33,8 +44,11 @@ export class InputMessage extends Widget {
 
     // 打开更多功能
     public openTool(e:any) {
-        // FIXEME: 直接写的选择照片
-        this.sendImg(e);
+        getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
+        document.getElementById('toolsMap').style.height = `${getKeyBoardHeight()}px`;
+
+        notify(e.node,'ev-open-Tools',{});
+        // this.sendImg(e);
     }
 
     // 点击发送
@@ -46,18 +60,25 @@ export class InputMessage extends Widget {
         this.paint();
     }
 
-    public sendImg(e:any) {
-        // FIXME: 此方法不应该写在这里，只是为了测试，请把我挪走
-        selectImage((width, height, base64) => {
-            uploadFile(base64, (imgUrlSuf:string) => {
-                notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
-            });            
-        });
+    // 选择功能
+    public pickTool(e:any,i:number) {
+        switch (i) {
+            case 0:
+                break;
+            case 1:
+                sendImg(e);
+                break;
+            case 2:
+                break;
+            default:
+        }
     }
 
 }
 // ===========================本地
 interface Props {
-    isOnEmoji:boolean;
-    message:string;
+    isOnEmoji:boolean; // 是否打开表情图库
+    message:string; // 消息内容
+    isOnTools:boolean;  // 是否打开更多功能
+    toolList:any[];  // 更多功能列表
 }

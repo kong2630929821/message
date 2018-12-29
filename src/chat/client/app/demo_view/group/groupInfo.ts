@@ -179,9 +179,9 @@ export class GroupInfos extends Widget {
     // 打开群聊天
     public openGroupChat() {
         setTimeout(() => {
-            this.pageClick();
             popNew('chat-client-app-demo_view-chat-chat',{ id:this.props.gid, chatType:GENERATOR_TYPE.GROUP });
-        }, 500);
+            this.pageClick();
+        }, 0);
     }
     // 打开群成员
     public openGroupMember() {

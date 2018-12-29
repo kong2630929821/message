@@ -1,0 +1,33 @@
+.refreshBtn{
+    width: 48px;
+    height: 48px;
+    border: 20px solid transparent;
+    border-left-width: 10px;
+    position: absolute;
+    right: 0;
+}
+.topBar{
+    width: 100%;
+}
+.topBar-content{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 88px;
+}
+.userHead{
+    border: 2px solid #ffffff;  
+    margin: 20px;
+}
+.total-asset{
+    font-size: 32px;
+    color: #fff;
+}
+.nextBtn{
+    width: 48px;
+    height: 48px;
+    border: 20px solid transparent;
+    border-right-width: 10px;
+    position: absolute;
+    right: 90px;
+}

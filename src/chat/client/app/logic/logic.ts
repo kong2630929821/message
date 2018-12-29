@@ -2,10 +2,14 @@
  * 一些全局方法
  */
 // =====================================导入
+import { notify } from '../../../../pi/widget/event';
+import { MSG_TYPE } from '../../../server/data/db/message.s';
 import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { genGroupHid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { unSubscribe } from '../net/init';
+import { uploadFile } from '../net/upload';
+import { selectImage } from './native';
 
 // =====================================导出
 
@@ -102,4 +106,13 @@ export const copyToClipboard = (copyText) => {
         document.execCommand('copy');
     }
     document.body.removeChild(input);
+};
+
+// 发送图片消息
+export const sendImg = (e:any) => {
+    selectImage((width, height, base64) => {
+        uploadFile(base64, (imgUrlSuf:string) => {
+            notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+        });            
+    });
 };

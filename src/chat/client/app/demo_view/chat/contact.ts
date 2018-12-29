@@ -38,6 +38,7 @@ export class Contact extends Widget {
             { iconPath: 'scan.png', utilText: '扫一扫' },
             { iconPath: 'add-friend.png', utilText: '我的信息' }
         ];
+        this.props.netClose = false;
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
@@ -59,10 +60,10 @@ export class Contact extends Widget {
     }
 
     public chat(id: number, chatType: GENERATOR_TYPE) {
-        this.closeMore();
         setTimeout(() => {
+            this.closeMore();
             popNew('chat-client-app-demo_view-chat-chat', { id: id, chatType: chatType });
-        }, 500);
+        }, 0);
     }
 
     /**
@@ -157,7 +158,8 @@ interface Props {
     messageList: any[];
     isUtilVisible: boolean;
     utilList: any[];
-    isOnline: boolean;
+    isOnline: boolean; // 钱包是否已经登陆
+    netClose:boolean; // 网络链接是否断开
 }
 store.register('friendLinkMap', () => {
     const w = forelet.getWidget(WIDGET_NAME);
