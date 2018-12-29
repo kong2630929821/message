@@ -166,11 +166,7 @@ export class Chat extends Widget {
                     alert('对方不是你的好友！');
                     
                     return;
-                } else if (r.msg.mtype === MSG_TYPE.RECALL) {
-                    const mess = store.getStore(`userHistoryMap/${r.msg.msg}`);
-                    mess.cancel = true;
-                    store.setStore(`userHistoryMap/${r.msg.msg}`,mess);
-                }
+                } 
                 updateUserMessage(nextside, r);
             });
         }

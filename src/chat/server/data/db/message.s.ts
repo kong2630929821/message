@@ -3,7 +3,7 @@ import { BonBuffer } from "../../../../pi/util/bon";
 import { addToMeta, removeFromMeta, Struct, notifyModify, StructMgr} from "../../../../pi/struct/struct_mgr";
 import { StructInfo, Type, FieldInfo, EnumType, EnumInfo} from "../../../../pi/struct/sinfo";
 
-export enum MSG_TYPE{TXT=1,IMG=2,VOICE=3,VIDEO=4,RECALL=5,NOTICE=6,RENOTICE=7 }
+export enum MSG_TYPE{TXT=1,IMG=2,VOICE=3,VIDEO=4,RECALL=5,NOTICE=6,RENOTICE=7,ADDUSER=8 }
 
 export class UserMsg extends Struct {
 
@@ -223,140 +223,141 @@ export class AnnounceHistory extends Struct {
 
     aIncId: string;
     announce: Announcement;
-	static _$info =  new StructInfo("chat/server/data/db/message.AnnounceHistory",258960833,  new Map( [["primary","aIncId"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("aIncId", 
+	static _$info =  new StructInfo("chat/server/data/db/message.AnnounceHistory",258960833,  new Map( [["primary","aIncId"],['db','file'],["dbMonitor","true"]]), [new FieldInfo('aIncId', 
 new EnumType( Type.Str ), null), new FieldInfo("announce", 
 new EnumType(Type.Struct, Announcement._$info ), null) ]);
 
 
-	addMeta(mgr: StructMgr){
-		if(this._$meta)
-			return;
-		this.announce && this.announce.addMeta(mgr);
-		addToMeta(mgr, this);
-	}
+    public addMeta(mgr: StructMgr){
+        if(this._$meta) {
+            return;
+        }
+        this.announce && this.announce.addMeta(mgr);
+        addToMeta(mgr, this);
+    }
 
-	removeMeta(){
-		removeFromMeta(this);
-		this.announce && this.announce.removeMeta();
-	}
+    public removeMeta(){
+        removeFromMeta(this);
+        this.announce && this.announce.removeMeta();
+    }
 
 
 
-	bonDecode(bb:BonBuffer) {
-		this.aIncId = bb.readUtf8();
-		this.announce =  bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.announce):Announcement);
-	}
+    public bonDecode(bb:BonBuffer) {
+        this.aIncId = bb.readUtf8();
+        this.announce =  bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.announce):Announcement);
+    }
 
-	bonEncode(bb:BonBuffer) {        
+    public bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.aIncId);
                 
         bb.writeBonCode(this.announce);
         
-	}
+    }
 }
 
 
 export class MsgLock extends Struct {
 
-    hid: string;
-    current: number;
-	static _$info =  new StructInfo("chat/server/data/db/message.MsgLock",2621969715,  new Map( [["primary","hid"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("hid", 
+    public hid: string;
+    public current: number;
+    public static _$info =  new StructInfo("chat/server/data/db/message.MsgLock",2621969715,  new Map( [["primary","hid"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("hid", 
 new EnumType( Type.Str ), null), new FieldInfo("current", 
 new EnumType( Type.U32 ), null) ]);
 
 
-	addMeta(mgr: StructMgr){
-		if(this._$meta)
-			return;
-		addToMeta(mgr, this);
-	}
+    public addMeta(mgr: StructMgr){
+        if(this._$meta) {
+            return;
+        }
+        addToMeta(mgr, this);
+    }
 
-	removeMeta(){
-		removeFromMeta(this);
-	}
+    public removeMeta(){
+        removeFromMeta(this);
+    }
 
 
 
-	bonDecode(bb:BonBuffer) {
-		this.hid = bb.readUtf8();
-		this.current = bb.readInt();
-	}
+    public bonDecode(bb:BonBuffer) {
+        this.hid = bb.readUtf8();
+        this.current = bb.readInt();
+    }
 
-	bonEncode(bb:BonBuffer) {        
+    public bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.hid);
                 
         bb.writeInt(this.current);
         
-	}
+    }
 }
 
 
 export class UserHistoryCursor extends Struct {
 
-    uuid: string;
-    cursor: number;
-	static _$info =  new StructInfo("chat/server/data/db/message.UserHistoryCursor",1069557091,  new Map( [["primary","uuid"],["db","file"]]), [new FieldInfo("uuid", 
+    public uuid: string;
+    public cursor: number;
+    public static _$info =  new StructInfo("chat/server/data/db/message.UserHistoryCursor",1069557091,  new Map( [["primary","uuid"],["db","file"]]), [new FieldInfo("uuid", 
 new EnumType( Type.Str ), null), new FieldInfo("cursor", 
 new EnumType( Type.I32 ), null) ]);
 
 
-	addMeta(mgr: StructMgr){
-		if(this._$meta)
-			return;
-		addToMeta(mgr, this);
-	}
+    public addMeta(mgr: StructMgr){
+        if(this._$meta) {
+            return;
+        }
+        addToMeta(mgr, this);
+    }
 
-	removeMeta(){
-		removeFromMeta(this);
-	}
+    public removeMeta(){
+        removeFromMeta(this);
+    }
 
 
 
-	bonDecode(bb:BonBuffer) {
-		this.uuid = bb.readUtf8();
-		this.cursor = bb.readInt();
-	}
+    public bonDecode(bb:BonBuffer) {
+        this.uuid = bb.readUtf8();
+        this.cursor = bb.readInt();
+    }
 
-	bonEncode(bb:BonBuffer) {        
+    public bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.uuid);
                 
         bb.writeInt(this.cursor);
         
-	}
+    }
 }
 
 
 export class GroupHistoryCursor extends Struct {
 
-    guid: string;
-    cursor: number;
-	static _$info =  new StructInfo("chat/server/data/db/message.GroupHistoryCursor",2372808082,  new Map( [["primary","guid"],["db","file"]]), [new FieldInfo("guid", 
+    public guid: string;
+    public cursor: number;
+    public static _$info =  new StructInfo("chat/server/data/db/message.GroupHistoryCursor",2372808082,  new Map( [["primary","guid"],["db","file"]]), [new FieldInfo("guid", 
 new EnumType( Type.Str ), null), new FieldInfo("cursor", 
 new EnumType( Type.I32 ), null) ]);
 
 
-	addMeta(mgr: StructMgr){
-		if(this._$meta)
-			return;
-		addToMeta(mgr, this);
-	}
+    public addMeta(mgr: StructMgr){
+        if(this._$meta) {
+            return;
+        }
+        addToMeta(mgr, this);
+    }
 
-	removeMeta(){
-		removeFromMeta(this);
-	}
+    public removeMeta(){
+        removeFromMeta(this);
+    }
 
+    public bonDecode(bb:BonBuffer) {
+        this.guid = bb.readUtf8();
+        this.cursor = bb.readInt();
+    }
 
-
-	bonDecode(bb:BonBuffer) {
-		this.guid = bb.readUtf8();
-		this.cursor = bb.readInt();
-	}
-
-	bonEncode(bb:BonBuffer) {        
+    public bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.guid);
                 
         bb.writeInt(this.cursor);
         
-	}
+    }
 }
-
