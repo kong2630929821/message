@@ -11,7 +11,9 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
+import { SendMsg } from '../../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
+import { getFriendHistory } from '../../data/initStore';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { UserType } from '../../logic/autologin';
@@ -80,8 +82,11 @@ export class Contact extends Widget {
                         store.setStore(`uid`, r.uid);
                         store.setStore(`userInfoMap/${r.uid}`, r);
                         init(r.uid);
-                        subscribe(r.uid.toString(), UserHistory, (v: UserHistory) => {
-                            updateUserMessage(v.msg.sid, v);
+                        subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
+                            if (v.code === 1) {
+                                getFriendHistory(v.rid);
+                            }
+                            // updateUserMessage(v.msg.sid, v);
                         });
                         this.paint();
 

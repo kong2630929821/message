@@ -92,7 +92,7 @@ export const subscribe = (platerTopic: string, returnStruct: any, cb: Function, 
     const option = {
         qos: 0,
         onSuccess: () => {
-            console.log('subsuccess!===============================');
+            console.log('subsuccess!===============================', platerTopic);
         },
         onFailure: (e) => {
             console.log('subfail!=============================== ', e);

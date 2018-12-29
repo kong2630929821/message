@@ -17,6 +17,13 @@ export enum UserType {
     WALLET
 }
 
+// 重登录状态
+export enum ReLoginState {
+    START,
+    ING,
+    END
+}
+
 // 自动登录管理
 export class AutoLoginMgr {
     public subMgr: SubMgr;
@@ -27,7 +34,7 @@ export class AutoLoginMgr {
     private clientRpc: any;
     private server: string;
     private port: number;
-    private relogin: boolean = false;
+    private relogin: ReLoginState;
 
     constructor(server?: string, port?: number) {
         this.server = server ? server : '127.0.0.1';
@@ -49,9 +56,12 @@ export class AutoLoginMgr {
                 console.log('reconnect 连接成功！！！！！！！');
                 // 连接成功
                 this.conState = true;
-                if (this.relogin) {
+                if (this.relogin === ReLoginState.START) {
                     alert(`连接成功！！！`);
+                    this.relogin = ReLoginState.ING;
                     this.autoLogin();
+                } else if (this.relogin === ReLoginState.ING) {
+                    alert(`重新打开APP！！！`);
                 }
             },
             onFailure: (r) => {
@@ -66,7 +76,7 @@ export class AutoLoginMgr {
             console.log('connectinLost:r', r);
             alert(`连接断开！！！`);
             this.conState = false;
-            this.relogin = true;
+            this.relogin = ReLoginState.START;
         });
 
         return client;
@@ -122,6 +132,7 @@ export class AutoLoginMgr {
         login.uid = this.uid;
         clientRpcFunc(auto_login, login, (r: Token) => {
             console.log('!!!!!!!!!!!!!!token:', r);
+            this.relogin = ReLoginState.END;
             // 重新订阅topic
             this.subMgr.reSubs();
         });

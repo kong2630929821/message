@@ -139,3 +139,34 @@ new EnumType( Type.U32 ), null) ]);
 	}
 }
 
+
+export class SendMsg extends Struct {
+
+    code: number;
+    rid: number;
+    last: number;
+	static _$info =  new StructInfo("chat/server/data/rpc/message.SendMsg",3272782018, null, [new FieldInfo("code", 
+new EnumType( Type.U32 ), null), new FieldInfo("rid", 
+new EnumType( Type.U32 ), null), new FieldInfo("last", 
+new EnumType( Type.U32 ), null) ]);
+
+
+
+
+
+	bonDecode(bb:BonBuffer) {
+		this.code = bb.readInt();
+		this.rid = bb.readInt();
+		this.last = bb.readInt();
+	}
+
+	bonEncode(bb:BonBuffer) {        
+        bb.writeInt(this.code);
+                
+        bb.writeInt(this.rid);
+                
+        bb.writeInt(this.last);
+        
+	}
+}
+
