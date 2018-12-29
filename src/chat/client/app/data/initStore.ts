@@ -42,7 +42,7 @@ export const initAccount = () => {
 /**
  * 请求好友发的消息历史记录
  */
-export const getFriendHistory = (rid: number) => {
+export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
     const sid = store.getStore('uid');
     const hid = genUserHid(sid, rid);
     if (sid === rid) return;
@@ -57,7 +57,7 @@ export const getFriendHistory = (rid: number) => {
             lastRead.msgId = genHIncId(hid, r.cursor);
             const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
             const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
-            if (cursor > localCursor) {
+            if (cursor > localCursor && upLastRead) {
                 store.setStore(`lastRead/${hid}`, lastRead);
             }
             // 服务器最新消息
@@ -65,9 +65,9 @@ export const getFriendHistory = (rid: number) => {
             const userflag = new UserHistoryFlag();
             userflag.rid = rid;
             const hIncIdArr = store.getStore(`userChatMap/${hid}`, []);
-            userflag.start = hIncIdArr && hIncIdArr.length > 0 ? getUidFromUuid(hIncIdArr[hIncIdArr.length - 1]) : 0;
+            userflag.start = hIncIdArr && hIncIdArr.length > 0 ? getUidFromUuid(hIncIdArr[hIncIdArr.length - 1]) + 1 : 1;
             userflag.end = lastMsgId;
-            if (userflag.end > userflag.start) {
+            if (userflag.end >= userflag.start) {
                 clientRpcFunc(getUserHistory, userflag, (r: UserHistoryArray) => {
                     // console.error('uuid: ',hid,'initStore getFriendHistory',r);
                     if (r.newMess > 0) {
@@ -86,7 +86,7 @@ export const getFriendHistory = (rid: number) => {
 /**
  * 请求群聊消息历史记录
  */
-export const getMyGroupHistory = (gid: number) => {
+export const getMyGroupHistory = (gid: number, upLastRead: boolean = false) => {
     const hid = genGroupHid(gid);
 
     // 获取最新消息和游标
@@ -103,16 +103,16 @@ export const getMyGroupHistory = (gid: number) => {
             lastRead.msgId = genHIncId(hid, r.cursor);
             const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
             const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
-            if (cursor > localCursor) {
+            if (cursor > localCursor && upLastRead) {
                 store.setStore(`lastRead/${hid}`, lastRead);
             }
             const groupflag = new GroupHistoryFlag();
             groupflag.gid = gid;
             const hIncIdArr = store.getStore(`groupChatMap/${hid}`, []);
             // 获取本地最新消息ID
-            groupflag.start = hIncIdArr && hIncIdArr.length > 0 ? getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) : 0;
+            groupflag.start = hIncIdArr && hIncIdArr.length > 0 ? getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1 : 1;
             groupflag.end = lastMsgId;
-            if (groupflag.end > groupflag.start) {
+            if (groupflag.end >= groupflag.start) {
                 clientRpcFunc(getGroupHistory, groupflag, (r: GroupHistoryArray) => {
                     if (r && r.newMess > 0) {
                         r.arr.forEach(element => {
