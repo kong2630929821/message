@@ -6,7 +6,8 @@
 import { Json } from '../../../../../pi/lang/type';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
-import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias } from '../../logic/logic';
 
@@ -34,7 +35,12 @@ export class ContactItem extends Widget {
         
         if (!this.props.text) {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
-                this.props.name = getFriendAlias(this.props.id);
+                if (this.props.id !== store.getStore('uid')) {
+                    this.props.name = getFriendAlias(this.props.id);
+                } else {
+                    this.props.name = depCopy(store.getStore(`userInfoMap/${this.props.id}`,new UserInfo()).name);
+                    this.props.name += '(本人)';
+                }
             }
             if (this.props.chatType === GENERATOR_TYPE.GROUP) {
                 const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());

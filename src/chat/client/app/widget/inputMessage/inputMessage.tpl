@@ -11,4 +11,16 @@
 	</div>
 
 	<widget w-tag="chat-client-app-widget-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}"></widget>
+	
+	<div w-class="toolsMap" id="toolsMap" style="display:{{it.isOnTools ? 'block' : 'none'}}">
+		<div style="display:flex;flex-wrap: wrap;">
+			{{for i,v of it.toolList}}
+			<div w-class="toolItem" on-tap="pickTool(e,{{i}})">
+				<div w-class="toolImg"><img src="../../res/images/{{v.img}}" style="width:100px;margin: 10px;"/></div>
+				<span style="margin:5px;">{{v.name}}</span>
+			</div>
+			{{end}}
+		</div>
+	</div>
+	
 </div>

@@ -87,7 +87,8 @@ export class UserDetail extends Widget {
             } else {
                 popNew('chat-client-app-demo_view-chat-chat',{ id:this.props.uid, chatType:GENERATOR_TYPE.USER });
             }
-        }, 500);
+            this.pageClick();
+        }, 0);
     }  
 
     // 添加好友

@@ -18,6 +18,12 @@ const logger = new Logger(WIDGET_NAME);
 
 export class ContactList extends Widget {
     public ok:() => void;
+    constructor() {
+        super();
+        this.props = {
+            sid:store.getStore('uid')
+        };
+    }
 
      // 返回上一页
     public goBack() {
@@ -33,6 +39,9 @@ export class ContactList extends Widget {
                 popNew(`chat-client-app-demo_view-group-groupList`);  // 群聊列表
                 break;
             case 2:
+                popNew('chat-client-app-demo_view-info-user'); // 本人信息
+                break;
+            case 3:
                 popNew('chat-client-app-demo_view-info-userDetail',{ uid:uid });  // 好友详情
                 break;
             default:

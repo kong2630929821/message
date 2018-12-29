@@ -99,6 +99,10 @@ export class Chat extends Widget {
 
     public firstPaint() {
         super.firstPaint();
+        setTimeout(() => {
+            this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
+            getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
+        }, 500);
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.register(`groupChatMap/${this.getHid()}`,this.bindCB);
             store.register(`groupInfoMap/${this.props.id}`,this.bindCB);
@@ -188,6 +192,7 @@ export class Chat extends Widget {
      */
     public pageClick() {
         this.props.isOnEmoji = false;
+        this.props.isOnTools = false;
         this.paint();
     }
 
@@ -196,6 +201,17 @@ export class Chat extends Widget {
      */
     public openEmoji() {
         this.props.isOnEmoji = !this.props.isOnEmoji;
+        this.props.isOnTools = false;
+        this.paint();
+        this.latestMsg();
+    }
+
+    /**
+     * 打开更多功能
+     */
+    public openTools() {
+        this.props.isOnTools = !this.props.isOnTools;
+        this.props.isOnEmoji = false;
         this.paint();
         this.latestMsg();
     }
@@ -205,6 +221,7 @@ export class Chat extends Widget {
      */
     public inputFocus() {
         this.props.isOnEmoji = false;
+        this.props.isOnTools = false;
         this.paint();
         this.latestMsg();
     }
@@ -229,8 +246,6 @@ export class Chat extends Widget {
     public latestMsg() {
         setTimeout(() => {
             this.getScrollElem().scrollTop = this.getScrollElem().scrollHeight;
-            this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
-            getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
             this.paint();
         }, 100);
         
@@ -280,4 +295,5 @@ interface Props {
     isOnEmoji:boolean; // 是否打开表情选择区
     lastAnnounce:string; // 最新一条公告，群聊
     newMsg:any; // 我发布的一条新消息
+    isOnTools:boolean; // 是否打开更多功能
 }
