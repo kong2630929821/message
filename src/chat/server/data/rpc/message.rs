@@ -28,3 +28,10 @@ struct HistoryCursor {
     cursor:u32,//用户游标
     last:u32,//最新消息
 }
+
+//推送新信息
+struct SendMsg {
+    code: u32, //返回状态
+    rid: u32, //发送者ID
+    last: u32, //最新消息ID
+}

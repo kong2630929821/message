@@ -4,7 +4,7 @@
 // ================================================================= 导入
 import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, UserHistory, UserHistoryCursor, UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
-import { GroupSend, HistoryCursor, UserSend } from './message.s';
+import { GroupSend, HistoryCursor, SendMsg, UserSend } from './message.s';
 
 import { BonBuffer } from '../../../../pi/util/bon';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
@@ -71,17 +71,17 @@ export const getUserHistoryCursor = (uid: number): HistoryCursor => {
     const lastID = msgLockBucket.get(genUserHid(sid, uid))[0];
     const userCursor = userHistoryCursorBucket.get(genUuid(sid, uid))[0];
     const historyCursor = new HistoryCursor();
-    if (!userCursor || !lastID) {
-        historyCursor.code = -1;
-        historyCursor.cursor = 0;
-        historyCursor.last = 0;
+    // if (!userCursor || !lastID) {
+    //     historyCursor.code = -1;
+    //     historyCursor.cursor = 0;
+    //     historyCursor.last = 0;
 
-        return historyCursor;
-    }
+    //     return historyCursor;
+    // }
     logger.debug('getUserHistoryCursor userCursor', userCursor, lastID);
     historyCursor.code = 1;
-    historyCursor.cursor = userCursor.cursor;
-    historyCursor.last = lastID.current;
+    historyCursor.cursor = userCursor ? userCursor.cursor : 0;
+    historyCursor.last = lastID ? lastID.current : 0;
     logger.debug('getUserHistoryCursor historyCursor', historyCursor);
 
     return historyCursor;
@@ -99,16 +99,17 @@ export const getGroupHistoryCursor = (gid: number): HistoryCursor => {
     const lastID = msgLockBucket.get(genGroupHid(gid))[0];
     const groupCursor = groupHistoryCursorBucket.get(genGuid(gid, sid))[0];
     const historyCursor = new HistoryCursor();
-    if (!groupCursor || !lastID) {
-        historyCursor.code = -1;
-        historyCursor.cursor = 0;
-        historyCursor.last = 0;
+    console.log('!!!!!!!!!!!!!!!!!groupCursor', groupCursor, lastID);
+    // if (!groupCursor || !lastID) {
+    //     historyCursor.code = -1;
+    //     historyCursor.cursor = 0;
+    //     historyCursor.last = 0;
 
-        return historyCursor;
-    }
+    //     return historyCursor;
+    // }
     historyCursor.code = 1;
-    historyCursor.cursor = groupCursor.cursor;
-    historyCursor.last = lastID.current;
+    historyCursor.cursor = groupCursor ? groupCursor.cursor : 0;
+    historyCursor.last = lastID ? lastID.current : 0;
     logger.debug('getGroupHistoryCursor groupCursor', groupCursor, lastID);
 
     logger.debug('getGroupHistoryCursor historyCursor', historyCursor);
@@ -169,15 +170,15 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
             groupHistoryBucket.put(recallKey, v);
             logger.debug('sendGroupMessage grouphistory v:', v);
 
-            // 发布消息通知
-            const buf = new BonBuffer();
-            v.bonEncode(buf);
+            // // 发布消息通知
+            // const buf = new BonBuffer();
+            // v.bonEncode(buf);
 
-            const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-            const groupTopic = `ims/group/msg/${message.gid}`;
-            logger.debug(`before publish ,the topic is : ${groupTopic}`);
-            // directly send message to group topic
-            mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
+            // const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+            // const groupTopic = `ims/group/msg/${message.gid}`;
+            // logger.debug(`before publish ,the topic is : ${groupTopic}`);
+            // // directly send message to group topic
+            // mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
 
             // return v;
         } else {
@@ -209,14 +210,14 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
             // v.announce.mtype = MSG_TYPE.RENOTICE;
             noticeBucket.put(recallKey, v);
 
-            const buf = new BonBuffer();
-            v.bonEncode(buf);
+            // const buf = new BonBuffer();
+            // v.bonEncode(buf);
 
-            const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-            const groupTopic = `ims/group/msg/${message.gid}`;
-            logger.debug(`before publish ,the topic is : ${groupTopic}`);
-            // directly send message to group topic
-            mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
+            // const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+            // const groupTopic = `ims/group/msg/${message.gid}`;
+            // logger.debug(`before publish ,the topic is : ${groupTopic}`);
+            // // directly send message to group topic
+            // mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
         } else {
             gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
             logger.debug('sendGroupMessage grouphistory gh:', gh);
@@ -269,8 +270,15 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     // 移动游标表
     // moveGroupCursor(message.gid, msgLock.current);
 
+    // const buf = new BonBuffer();
+    // gh.bonEncode(buf);
+
+    const sendMsg = new SendMsg();
+    sendMsg.code = 1;
+    sendMsg.last = msgLock.current;
+    sendMsg.rid = gmsg.sid;
     const buf = new BonBuffer();
-    gh.bonEncode(buf);
+    sendMsg.bonEncode(buf);
 
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
     const groupTopic = `ims/group/msg/${message.gid}`;
@@ -346,12 +354,12 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
             // v.msg.mtype = MSG_TYPE.RECALL;
             userHistoryBucket.put(recallKey, v);
 
-            const buf = new BonBuffer();
-            v.bonEncode(buf);
+            // const buf = new BonBuffer();
+            // v.bonEncode(buf);
 
-            const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-            mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
-            logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(v)}`);
+            // const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+            // mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
+            // logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(v)}`);
 
             // return v;        
         } else {  // 错误的撤回请求
@@ -392,42 +400,18 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userHistoryBucket.put(userHistory.hIncId, userHistory);
     logger.debug('Persist user history message to DB: ', userHistory);
 
+    // 推送消息ID
+    const sendMsg = new SendMsg();
+    sendMsg.code = 1;
+    sendMsg.last = msgLock.current;
+    sendMsg.rid = sid;
     const buf = new BonBuffer();
-    userHistory.bonEncode(buf);
-
-    // const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
-    // const sidHistoryCursor = userHistoryCursorBucket.get(genUuid(sid, message.rid))[0];
-    // const ridHistoryCursor = userHistoryCursorBucket.get(genUuid(message.rid, sid))[0];
-    // logger.debug('sendUserMessage begin sidHistoryCursor: ', sidHistoryCursor);
-    // logger.debug('sendUserMessage begin ridHistoryCursor: ', ridHistoryCursor);
-
-    // // 游标表中是否有该用户的记录
-    // if (sidHistoryCursor) {
-    //     sidHistoryCursor.cursor = msgLock.current; // 发送者的游标一定在变化
-    // } else {
-    //     sidHistoryCursor = new UserHistoryCursor();
-    //     sidHistoryCursor.uuid = genUuid(sid, message.rid);
-    //     sidHistoryCursor.cursor = msgLock.current;
+    sendMsg.bonEncode(buf);
+    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
+    logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(sendMsg)}`, buf.getBuffer());
+    // ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
     // }
-
-    // logger.debug('sendUserMessage sidHistoryCursor: ', sidHistoryCursor);
-    // userHistoryCursorBucket.put(genUuid(sid, message.rid), sidHistoryCursor);
-
-    // 游标表中是否有该用户的记录
-    // if (!ridHistoryCursor) {
-    //     ridHistoryCursor = new UserHistoryCursor();
-    //     ridHistoryCursor.uuid = genUuid(message.rid, sid);
-    //     ridHistoryCursor.cursor = -1;
-    // }
-    // 对方是否在线，不在线则不推送消息
-    const res = isUserOnline(message.rid);
-    if (res.r === 1) {
-        const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-        mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
-        logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(userHistory)}`);
-
-        // ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
-    }
 
     // userHistoryCursorBucket.put(genUuid(message.rid, sid), ridHistoryCursor);
     // logger.debug(`sendUserMessage ridHistoryCursor: ${JSON.stringify(ridHistoryCursor)}`);
