@@ -38,9 +38,13 @@ export const applyFriend = (user: string): Result => {
             return uid = r.uid;
         }
     });
-    console.log('!!!!!!!!!!!uid:', uid);
-
     const result = new Result();
+    if (!uid) {
+        result.r = -2;  // 不能添加自己为好友
+
+        return result;
+    }
+    console.log('!!!!!!!!!!!uid:', uid);
     if (sid === uid) {
         result.r = -1;  // 不能添加自己为好友
 
