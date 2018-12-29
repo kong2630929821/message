@@ -8,7 +8,7 @@ import { Logger } from '../../../utils/logger';
 import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { Contact, FriendLink, UserInfo } from '../db/user.s';
+import { Contact, FriendLink, UserFind, UserInfo } from '../db/user.s';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { FriendAlias, UserAgree } from './user.s';
@@ -24,15 +24,28 @@ const logger = new Logger(WIDGET_NAME);
  * @param uid uid
  */
 // #[rpc=rpcServer]
-export const applyFriend = (uid: number): Result => {
+export const applyFriend = (user: string): Result => {
+    const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
+    // 获取用户UID
+    const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name, dbMgr);
+    const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`]);
+    console.log('!!!!!!!!!!!!!!!applyFriend rArr:', rArr);
+
+    let uid;
+    rArr.forEach((r) => {
+        if (r) {
+            return uid = r.uid;
+        }
+    });
+    console.log('!!!!!!!!!!!uid:', uid);
+
     const result = new Result();
     if (sid === uid) {
         result.r = -1;  // 不能添加自己为好友
 
         return result;
     }
-    const dbMgr = getEnv().getDbMgr();
     // 取出联系人表
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
     const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
@@ -123,7 +136,7 @@ export const delFriend = (uid: number): Result => {
         // 从friendLink中删除
         const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
         friendLinkBucket.delete(genUuid(sid, rid));
-        logger.debug('delFriend friendLink ',genUuid(sid, rid));
+        logger.debug('delFriend friendLink ', genUuid(sid, rid));
     };
 
     _delFriend(getUid(), uid);
@@ -235,7 +248,37 @@ export const changeFriendAlias = (friendAlias: FriendAlias): Result => {
 export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
     const dbMgr = getEnv().getDbMgr();
     const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.USER_INFO_TABLE, dbMgr);
+    const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name, dbMgr);
     const sid = getUid();
+    const oldUserinfo = userInfoBucket.get<number, UserInfo[]>(sid)[0];
+    console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!oldUserinfo:', oldUserinfo);
+    // 添加手机查找用户
+    if (!(oldUserinfo.tel === userinfo.tel) && !(userinfo.tel === '')) {
+        const phoneFind = new UserFind();
+        phoneFind.user = `p:${userinfo.tel}`;
+        phoneFind.uid = sid;
+        console.log('!!!!!!!!!!!!!!!!!add phone!1212121', phoneFind);
+        userFindBucket.put(phoneFind.user, phoneFind);
+    }
+    console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!1111111111111');
+    // 添加钱包地址查询用户
+    if (!(oldUserinfo.wallet_addr === userinfo.wallet_addr) && !(userinfo.wallet_addr === '')) {
+        const walletFind = new UserFind();
+        walletFind.user = `w:${userinfo.wallet_addr}`;
+        walletFind.uid = sid;
+        userFindBucket.put(walletFind.user, walletFind);
+    }
+    const uidFind = userFindBucket.get<string, UserFind[]>(`u:${sid}`)[0];
+    console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!22222222222', uidFind);
+    // 添加用户ID查询用户
+    if (!uidFind) {
+        const newUidFind = new UserFind();
+        newUidFind.user = `u:${sid}`;
+        newUidFind.uid = sid;
+        console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!232233', newUidFind);
+        userFindBucket.put(newUidFind.user, newUidFind);
+    }
+    console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!333333333333333333');
     let newUser = new UserInfo();
     if (userinfo.uid === sid) {
         userInfoBucket.put(sid, userinfo);

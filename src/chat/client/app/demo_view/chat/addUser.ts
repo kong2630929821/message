@@ -16,9 +16,9 @@ import { applyFriend as applyUserFriend } from '../../net/rpc';
 export const forelet = new Forelet();
 
 export class AddUser extends Widget {
-    public props:Props;
-    public state:Contact;
-    public ok:() => void;
+    public props: Props;
+    public state: Contact;
+    public ok: () => void;
     constructor() {
         super();
         this.props = {
@@ -31,8 +31,8 @@ export class AddUser extends Widget {
         this.ok();
     }
 
-    public inputUid(e:any) {
-        this.props.rid = parseInt(e.value,10);
+    public inputUid(e: any) {
+        this.props.rid = e.value;
     }
 
     /**
@@ -45,24 +45,24 @@ export class AddUser extends Widget {
 
             return;
         }
-        if (this.props.rid === sid) {
-            alert('不能添加自己为好友');
+        // if (this.props.rid === sid) {
+        //     alert('不能添加自己为好友');
 
-            return;
-        }
-        applyUserFriend(this.props.rid,(r:Result) => {
+        //     return;
+        // }
+        applyUserFriend(this.props.rid, (r: Result) => {
             if (r.r === 0) {
                 alert(`${this.props.rid}已经是你的好友`);
-    
+
                 return;
             }
         });
     }
-    public chat(uid:number) {
-        popNew('chat-client-app-demo_view-chat-chat', { id:uid, chatType:GENERATOR_TYPE.USER });
+    public chat(uid: number) {
+        popNew('chat-client-app-demo_view-chat-chat', { id: uid, chatType: GENERATOR_TYPE.USER });
     }
 
-    public goNext(i:number) {
+    public goNext(i: number) {
         setTimeout(() => {
             switch (i) {
                 case 0:
@@ -87,12 +87,12 @@ export class AddUser extends Widget {
 // ================================================ 本地
 interface Props {
     sid: number;
-    rid: number;
+    rid: string;
 }
 
 store.register('contactMap', (r: Map<number, Contact>) => {
     // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
     for (const value of r.values()) {
         forelet.paint(value);
-    }    
+    }
 });

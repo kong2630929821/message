@@ -21,7 +21,8 @@ export enum UserType {
 export enum ReLoginState {
     START,
     ING,
-    END
+    END,
+    ERROR
 }
 
 // 自动登录管理
@@ -35,6 +36,10 @@ export class AutoLoginMgr {
     private server: string;
     private port: number;
     private relogin: ReLoginState;
+    private userType: UserType;
+    private user: string;
+    private pwd: string;
+    private loginCb: any;
 
     constructor(server?: string, port?: number) {
         this.server = server ? server : '127.0.0.1';
@@ -99,6 +104,10 @@ export class AutoLoginMgr {
     }
     // 登录
     public login(userType: UserType, user: string, pwd: string, cb: (r: UserInfo) => void) {
+        this.userType = userType;
+        this.user = user;
+        this.pwd = pwd;
+        this.loginCb = cb;
         if (userType === UserType.DEF) {
             defLogin(Number(user), pwd, (r: UserInfo) => {
                 this.uid = r.uid.toString();
@@ -132,9 +141,18 @@ export class AutoLoginMgr {
         login.uid = this.uid;
         clientRpcFunc(auto_login, login, (r: Token) => {
             console.log('!!!!!!!!!!!!!!token:', r);
-            this.relogin = ReLoginState.END;
-            // 重新订阅topic
-            this.subMgr.reSubs();
+            if (r.code === 1) {
+                this.relogin = ReLoginState.END;
+                // 重新订阅topic
+                this.subMgr.reSubs();
+            } else {
+                this.relogin = ReLoginState.ERROR;
+                // 登录
+                this.login(this.userType, this.user, this.pwd, this.loginCb);
+                // 重新订阅topic
+                this.subMgr.reSubs();
+            }
+
         });
     }
     // 设置连接状态

@@ -17,7 +17,8 @@ const logger = new Logger('session');
 // 自动登录
 // #[rpc=rpcServer]
 export const auto_login = (login: AutoLogin): AutoLoginResult => {
-    const token = get_cache_session(login.uid, 'token')[0].value;
+    const session = get_cache_session(login.uid, 'token')[0];
+    const token = session ? session.value : undefined;
     const result = new AutoLoginResult();
     // tslint:disable-next-line:possible-timing-attack
     if (login.token !== token) {
@@ -128,6 +129,9 @@ export const get_cache_session = (uid: string, key?: string): Session[] => {
     const dbMgr = getEnv().getDbMgr();
     const sessionTab = new Bucket('memory', SessionTab._$info.name, dbMgr);
     const sessions = sessionTab.get<string, [SessionTab]>(uid)[0];
+    if (!sessions) {
+        return [];
+    }
     if (!key) {
 
         return sessions.sessions;

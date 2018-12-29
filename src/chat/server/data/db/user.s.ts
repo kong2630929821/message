@@ -15,12 +15,14 @@ export class UserInfo extends Struct {
     sex: number;
     tel: string;
     note: string;
+    wallet_addr: string;
 	static _$info =  new StructInfo("chat/server/data/db/user.UserInfo",1769539731,  new Map( [["primary","uid"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("uid", 
 new EnumType( Type.U32 ), null), new FieldInfo("name", 
 new EnumType( Type.Str ), null), new FieldInfo("avatar", 
 new EnumType( Type.Str ), null), new FieldInfo("sex", 
 new EnumType( Type.U32 ), null), new FieldInfo("tel", 
 new EnumType( Type.Str ), null), new FieldInfo("note", 
+new EnumType( Type.Str ), null), new FieldInfo("wallet_addr", 
 new EnumType( Type.Str ), null) ]);
 
 
@@ -43,6 +45,7 @@ new EnumType( Type.Str ), null) ]);
 		this.sex = bb.readInt();
 		this.tel = bb.readUtf8();
 		this.note = bb.readUtf8();
+		this.wallet_addr = bb.readUtf8();
 	}
 
 	bonEncode(bb:BonBuffer) {        
@@ -57,6 +60,8 @@ new EnumType( Type.Str ), null) ]);
         bb.writeUtf8(this.tel);
                 
         bb.writeUtf8(this.note);
+                
+        bb.writeUtf8(this.wallet_addr);
         
 	}
 }
@@ -102,6 +107,41 @@ export class UserAccount extends Struct {
     user: string;
     uid: number;
 	static _$info =  new StructInfo("chat/server/data/db/user.UserAccount",2938095008,  new Map( [["primary","user"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("user", 
+new EnumType( Type.Str ), null), new FieldInfo("uid", 
+new EnumType( Type.U32 ), null) ]);
+
+
+	addMeta(mgr: StructMgr){
+		if(this._$meta)
+			return;
+		addToMeta(mgr, this);
+	}
+
+	removeMeta(){
+		removeFromMeta(this);
+	}
+
+
+
+	bonDecode(bb:BonBuffer) {
+		this.user = bb.readUtf8();
+		this.uid = bb.readInt();
+	}
+
+	bonEncode(bb:BonBuffer) {        
+        bb.writeUtf8(this.user);
+                
+        bb.writeInt(this.uid);
+        
+	}
+}
+
+
+export class UserFind extends Struct {
+
+    user: string;
+    uid: number;
+	static _$info =  new StructInfo("chat/server/data/db/user.UserFind",965565401,  new Map( [["primary","user"],["db","file"],["dbMonitor","true"]]), [new FieldInfo("user", 
 new EnumType( Type.Str ), null), new FieldInfo("uid", 
 new EnumType( Type.U32 ), null) ]);
 

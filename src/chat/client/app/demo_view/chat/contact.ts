@@ -91,10 +91,12 @@ export class Contact extends Widget {
                         this.paint();
 
                         const user = walletStore.getStore('user/info');
+                        const walletAddr = walletStore.getStore('user/id');
                         if (r.name !== user.nickName || r.avatar !== user.avatar) {
                             r.name = user.nickName;
                             r.avatar = user.avatar;
                             r.tel = user.phoneNumber;
+                            r.wallet_addr = walletAddr;
                             clientRpcFunc(changeUserInfo, r, (res) => {
                                 if (res && res.uid > 0) {
                                     store.setStore(`userInfoMap/${r.uid}`, r);
@@ -164,7 +166,7 @@ interface Props {
     isUtilVisible: boolean;
     utilList: any[];
     isOnline: boolean; // 钱包是否已经登陆
-    netClose:boolean; // 网络链接是否断开
+    netClose: boolean; // 网络链接是否断开
 }
 store.register('friendLinkMap', () => {
     const w = forelet.getWidget(WIDGET_NAME);
