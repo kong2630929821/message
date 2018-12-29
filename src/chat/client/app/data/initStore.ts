@@ -48,13 +48,14 @@ export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
     if (sid === rid) return;
 
     clientRpcFunc(getUserHistoryCursor, rid, (r: HistoryCursor) => {
+        console.log('获取游标',r);
         const lastRead = {
             msgId: '',
             msgType: GENERATOR_TYPE.USER
         };
         if (r && r.code === 1) {
             const cursor = r.cursor;
-            lastRead.msgId = genHIncId(hid, r.cursor);
+            lastRead.msgId = genHIncId(hid, cursor);
             const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
             const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
             if (cursor > localCursor && upLastRead) {
@@ -65,7 +66,10 @@ export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
             const userflag = new UserHistoryFlag();
             userflag.rid = rid;
             const hIncIdArr = store.getStore(`userChatMap/${hid}`, []);
-            userflag.start = hIncIdArr && hIncIdArr.length > 0 ? getUidFromUuid(hIncIdArr[hIncIdArr.length - 1]) + 1 : 1;
+            
+            // 如果本地有记录从本地最后一条记录开始获取聊天消息
+            // 本地没有记录则从服务器游标开始获取聊天消息
+            userflag.start = hIncIdArr && hIncIdArr.length > 0 ? getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1 : cursor + 1;
             userflag.end = lastMsgId;
             if (userflag.end >= userflag.start) {
                 clientRpcFunc(getUserHistory, userflag, (r: UserHistoryArray) => {
@@ -139,7 +143,6 @@ export const userChatChange = () => {
         value.userHistoryMap = store.getStore('userHistoryMap'); // 单人聊天历史记录变化
         value.userChatMap = store.getStore('userChatMap');  // 单人聊天历史记录索引变化
         value.lastChat = store.getStore('lastChat');  // 最近聊天记录
-        value.lastRead = store.getStore('lastRead');// 当前已读
 
         setTimeout(() => {
             writeFile(id, value, () => {
@@ -185,7 +188,6 @@ export const groupChatChange = () => {
         value.groupChatMap = store.getStore('groupChatMap');
         value.announceHistoryMap = store.getStore('announceHistoryMap'); // 群组公告
         value.lastChat = store.getStore('lastChat');  // 最近聊天记录
-        value.lastRead = store.getStore('lastRead');// 当前已读
 
         setTimeout(() => {
             writeFile(id, value, () => {
@@ -211,6 +213,24 @@ export const groupUserLinkChange = () => {
         }
         value.groupUserLinkMap = store.getStore('groupUserLinkMap'); // 群组用户
         writeFile(id, value);
+    }, () => {
+        console.log('read error');
+    });
+};
+
+/**
+ * 已读消息游标更新
+ */
+export const lastReadChange = () => {
+    const id = store.getStore('uid');
+    getFile(id, (value) => {
+        if (!value) {
+            value = {};
+        }
+        setTimeout(() => {
+            value.lastRead = store.getStore('lastRead');// 当前已读
+            writeFile(id, value);
+        }, 0);
     }, () => {
         console.log('read error');
     });

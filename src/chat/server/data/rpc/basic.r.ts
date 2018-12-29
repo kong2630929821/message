@@ -353,7 +353,7 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     //     index = userCursor.cursor;
     // }
     const historyKeys = [];
-    for (let id = start + 1; id <= end; id++) {
+    for (let id = start; id <= end; id++) {
         historyKeys.push(genHIncId(hid, id));
     }
 

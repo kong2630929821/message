@@ -1,8 +1,7 @@
 .refreshBtn{
     width: 48px;
     height: 48px;
-    border: 20px solid transparent;
-    border-left-width: 10px;
+    border: 24px solid transparent;
     position: absolute;
     right: 0;
 }
@@ -26,8 +25,7 @@
 .nextBtn{
     width: 48px;
     height: 48px;
-    border: 20px solid transparent;
-    border-right-width: 10px;
+    border: 24px solid transparent;
     position: absolute;
     right: 90px;
 }

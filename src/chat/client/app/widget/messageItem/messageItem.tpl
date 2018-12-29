@@ -36,5 +36,7 @@
     </div>
     {{elseif it.msg.mtype == 5}}
     <div w-class="recallMsg">{{it.me ? "你" : it.name}}撤回了一条消息</div>
+    {{elseif it.msg.mtype == 8}}
+    <div w-class="recallMsg" style="font-size:32px;">你们已经成为好友，开始聊天吧</div>
     {{end}}
 </div>

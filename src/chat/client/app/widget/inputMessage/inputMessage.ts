@@ -7,7 +7,8 @@ import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
-import { sendImg } from '../../logic/logic';
+import { openCamera, selectImage } from '../../logic/native';
+import { uploadFile } from '../../net/upload';
 
 // ===========================导出
 export class InputMessage extends Widget {
@@ -64,9 +65,19 @@ export class InputMessage extends Widget {
     public pickTool(e:any,i:number) {
         switch (i) {
             case 0:
+                openCamera((res) => {
+                    console.log('拍摄的照片',res);
+                    uploadFile(res, (imgUrlSuf:string) => {
+                        notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+                    });
+                });
                 break;
             case 1:
-                sendImg(e);
+                selectImage((width,height,url) => {  // 发送图片消息
+                    uploadFile(url, (imgUrlSuf:string) => {
+                        notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+                    });     
+                });
                 break;
             case 2:
                 break;

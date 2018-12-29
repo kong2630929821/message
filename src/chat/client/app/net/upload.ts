@@ -1,3 +1,5 @@
+import { resize } from '../../../../pi/widget/resize/resize';
+
 /**
  * uploadFile to server
  * @param base64 base54 encode
@@ -47,6 +49,36 @@ const base64ToBlob = (base64: string) => {
     }
 
     return new Blob([u8arr], { type: mime });
+};
+
+/**
+ * arrayBuffer转file格式
+ */
+export const arrayBuffer2File = (buffer:ArrayBuffer) => {
+    const u8Arr = new Uint8Array(buffer);
+    const blob = new Blob([u8Arr], { type: 'image/jpeg' });
+    const newFile = new File([blob], 'avatar.jpeg', { type: blob.type });
+    console.log('arrayBuffer2File = ',newFile);
+
+    return newFile;
+};
+
+/**
+ * arrayBuffer图片压缩
+ * @param buffer 图片arraybuffer
+ */
+export const imgResize = (buffer:ArrayBuffer,callback:Function) => {
+    const file = arrayBuffer2File(buffer);
+    const fr = new FileReader();
+    fr.readAsDataURL(file); 
+    fr.onload = () => { 
+        const dataUrl = fr.result.toString();  
+        resize({ url: dataUrl, width: 140, ratio: 0.3, type: 'jpeg' }, (res) => {
+            console.log('resize---------', res);
+            callback(res);
+        });
+    };
+    
 };
 
 // FIXME: 临时使用的kuplay的服务
