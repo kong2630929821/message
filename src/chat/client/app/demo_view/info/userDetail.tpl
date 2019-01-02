@@ -36,6 +36,7 @@
                 </div>
             </div>
         </div>
+        {{if it.inFlag != 1}}
         <div w-class="other-wrap">
             <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
             <ul w-class="ul-wrap">
@@ -55,6 +56,7 @@
                 {{end}}
             </ul>
         </div>
+        {{end}}
     </div>
     {{if it.isContactorOpVisible && it.isFriend}}
     <div w-class="contactorOpList" ev-handleFatherTap="handleFatherTap">

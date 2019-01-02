@@ -13,6 +13,7 @@ enum MSG_TYPE {
     RECALL = 5,   //撤回消息
     NOTICE = 6,   //公告消息
     RENOTICE = 7, //撤回公告消息
+    ADDUSER = 8,  // 添加好友后发送的第一条假消息
 }
 
 /**

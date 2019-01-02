@@ -36,7 +36,8 @@ export class GroupInfos extends Widget {
             utilList:[],
             editable:false,
             groupAlias:'',
-            isOwner: false
+            isOwner: false,
+            isAdmin:false
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -54,14 +55,13 @@ export class GroupInfos extends Widget {
         this.props.groupAlias = depCopy(ginfo.name);
         
         const uid = store.getStore('uid');
-        const members = this.props.groupInfo.memberids;
-        this.props.members = members ? members : [];
+        this.props.members = this.props.groupInfo.memberids || [];
         if (uid === this.props.groupInfo.ownerid) {
             this.props.isOwner = true;
         }
 
-        if (ginfo.memberids.indexOf(uid) < 0) {
-            this.ok();
+        if (ginfo.adminids.indexOf(uid) > -1) {
+            this.props.isAdmin = true;
         }
     }
 
@@ -70,6 +70,7 @@ export class GroupInfos extends Widget {
         this.getGroupUserLinkInfo(this.props.gid);
         store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
     }
+    
     public goBack() {
         this.ok();
     }
@@ -216,6 +217,7 @@ interface Props {
     editable:boolean; // 是否可编辑
     groupAlias:string; // 群别名
     isOwner:boolean; // 是否是群主
+    isAdmin:boolean;// 是否时管理员
 }
 
 const MAX_DURING = 600;

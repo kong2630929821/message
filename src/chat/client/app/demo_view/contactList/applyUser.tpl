@@ -9,6 +9,6 @@
     {{if !it.isagree}}
     <span w-class="seeText" on-tap="agreenBtn">同意</span>
     {{else}}
-    <span w-class="seeText" style="border:none;color: #888888;">已添加</span>
+    <span w-class="seeText" style="border:none;color: #888888;font-size: 28px;">已添加</span>
     {{end}}
 </div>

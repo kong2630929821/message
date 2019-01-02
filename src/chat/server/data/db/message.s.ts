@@ -3,7 +3,7 @@ import { BonBuffer } from "../../../../pi/util/bon";
 import { addToMeta, removeFromMeta, Struct, notifyModify, StructMgr} from "../../../../pi/struct/struct_mgr";
 import { StructInfo, Type, FieldInfo, EnumType, EnumInfo} from "../../../../pi/struct/sinfo";
 
-export enum MSG_TYPE{TXT=1,IMG=2,VOICE=3,VIDEO=4,RECALL=5,NOTICE=6,RENOTICE=7 }
+export enum MSG_TYPE{TXT=1,IMG=2,VOICE=3,VIDEO=4,RECALL=5,NOTICE=6,RENOTICE=7,ADDUSER=8 }
 
 export class UserMsg extends Struct {
 
