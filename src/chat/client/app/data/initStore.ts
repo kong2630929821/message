@@ -6,7 +6,7 @@ import { getGroupHistory, getUserHistory } from '../../../server/data/rpc/basic.
 import { GroupHistoryArray, GroupHistoryFlag, UserHistoryArray, UserHistoryFlag } from '../../../server/data/rpc/basic.s';
 import { getGroupHistoryCursor, getUserHistoryCursor } from '../../../server/data/rpc/message.p';
 import { HistoryCursor } from '../../../server/data/rpc/message.s';
-import { genGroupHid, genGuid, genHIncId, genUserHid, genUuid, getIndexFromHIncId, getUidFromUuid } from '../../../utils/util';
+import { genGroupHid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { clientRpcFunc } from '../net/init';
 import { getFile, initFileStore, writeFile } from './lcstore';
 import { updateGroupMessage, updateUserMessage } from './parse';

@@ -2,7 +2,7 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, UserHistory, UserHistoryCursor, UserMsg } from '../db/message.s';
+import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
 import { GroupSend, HistoryCursor, SendMsg, UserSend } from './message.s';
 
@@ -80,7 +80,7 @@ export const getUserHistoryCursor = (uid: number): HistoryCursor => {
     // }
     logger.debug('getUserHistoryCursor userCursor', userCursor, lastID);
     historyCursor.code = 1;
-    historyCursor.cursor = userCursor ? userCursor.cursor : 0;
+    historyCursor.cursor = userCursor ? userCursor.cursor : -1; // 消息ID从0开始，-1表示没有消息
     historyCursor.last = lastID ? lastID.current : 0;
     logger.debug('getUserHistoryCursor historyCursor', historyCursor);
 
@@ -108,7 +108,7 @@ export const getGroupHistoryCursor = (gid: number): HistoryCursor => {
     //     return historyCursor;
     // }
     historyCursor.code = 1;
-    historyCursor.cursor = groupCursor ? groupCursor.cursor : 0;
+    historyCursor.cursor = groupCursor ? groupCursor.cursor : -1;
     historyCursor.last = lastID ? lastID.current : 0;
     logger.debug('getGroupHistoryCursor groupCursor', groupCursor, lastID);
 

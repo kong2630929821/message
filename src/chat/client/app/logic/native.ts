@@ -10,7 +10,7 @@ import { WebViewManager } from '../../../../pi/browser/webview';
 /**
  * 选择图片
  */
-export const selectImage = (ok?,cancel?) => {
+export const selectImage = (ok?, cancel?) => {
     console.log('选择图片');
     const image = new ImagePicker();
     image.init();
@@ -32,7 +32,7 @@ export const selectImage = (ok?,cancel?) => {
 /**
  * 打开照相机
  */
-export const openCamera = (ok?) => {
+export const openCamera = (ok?, cancel?) => {
     console.log('打开照相机');
     const camera = new CameraPicker();
     camera.init();
@@ -40,10 +40,12 @@ export const openCamera = (ok?) => {
         success:(res) => {
             ok && ok(res);
         },
-        fail:() => {
-            alert('打开照相机失败');
+        fail: (result) => {
+            cancel && cancel(result);
         }
     });
+    
+    return camera;
 };
 
 /**
