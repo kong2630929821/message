@@ -58,7 +58,7 @@ export class UserDetail extends Widget {
         logger.debug(props);
     }
 
-    // 非好友展示信息
+    // 非好友获取信息
     public getUserData(uid: number) {
         const info = new GetUserInfoReq();
         info.uids = [uid];
@@ -130,9 +130,13 @@ export class UserDetail extends Widget {
                 unSubscribe(uid.toString());
 
                 const sid = store.getStore('uid');
-                const userChatMap = store.getStore('userChatMap', []);
+                const userChatMap = store.getStore('userChatMap', new Map());
                 userChatMap.delete(genUserHid(sid, uid));  // 删除聊天记录
                 store.setStore('userChatMap', userChatMap);
+
+                const userInfoMap = store.getStore('userInfoMap', new Map());
+                userInfoMap.delete(uid);  // 删除用户信息
+                store.setStore('userInfoMap', userInfoMap);
 
                 const lastChat = store.getStore(`lastChat`, []);
                 const index = lastChat.findIndex(item => item[0] === uid && item[2] === GENERATOR_TYPE.USER);
@@ -196,7 +200,7 @@ export class UserDetail extends Widget {
 
 interface Props {
     uid: number;
-    inFlag: number; // 从某个页面进入，0 contactList进入, 1 chat 单聊进入，2 chat 群聊进入
+    inFlag: number; // 从某个页面进入，0 contactList进入, 1 chat 单聊进入，2 chat 群聊进入，3 newfriendapply 新朋友申请进入
     editable: boolean; // 是否可编辑别名
     isContactorOpVisible: boolean;
     utilList: any;

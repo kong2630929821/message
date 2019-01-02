@@ -36,7 +36,11 @@
                 </div>
             </div>
         </div>
-        {{if it.inFlag != 1}}
+        {{if it.inFlag == 3 || !it.isFriend}}
+        <div style="margin: 40px 80px;">
+            <span w-class="liItem1" on-tap="addUser" class="ripple" >加为好友</span>
+        </div>
+        {{else}}
         <div w-class="other-wrap">
             <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
             <ul w-class="ul-wrap">
@@ -49,11 +53,8 @@
                     <span>消息免打扰</span>
                     <chat-client-app-widget-switch-switch>{types:false,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                 </li>
-                {{if it.isFriend}}
+
                 <span w-class="liItem1" on-tap="startChat" class="ripple">开始对话</span>
-                {{else}}
-                <span w-class="liItem1" on-tap="addUser" class="ripple">添加好友</span>
-                {{end}}
             </ul>
         </div>
         {{end}}

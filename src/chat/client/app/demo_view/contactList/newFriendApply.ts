@@ -101,7 +101,7 @@ export class NewFriendApply extends Widget {
     // 点击查看用户或群组详情
     public goDetail() {
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            popNew('chat-client-app-demo_view-info-userDetail',{ uid:this.props.id, inFlag: 1 });  // 仅查看信息，不能发起聊天
+            popNew('chat-client-app-demo_view-info-userDetail',{ uid:this.props.id, inFlag: 3 });  // 仅查看信息，不能发起聊天
         } else {
             popNew('chat-client-app-demo_view-group-groupInfo', { gid:this.props.id });
         }
