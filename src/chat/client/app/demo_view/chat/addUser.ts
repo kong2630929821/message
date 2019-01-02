@@ -55,6 +55,10 @@ export class AddUser extends Widget {
                 alert(`${this.props.rid}已经是你的好友`);
 
                 return;
+            } else if (r.r === -2) {
+                alert(`${this.props.rid}用户不存在`);
+
+                return;
             }
         });
     }
