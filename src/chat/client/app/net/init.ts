@@ -11,6 +11,7 @@ import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
+import { initPush } from './receive';
 
 // ================================================ 导出
 
@@ -19,9 +20,10 @@ import { AutoLoginMgr, UserType } from '../logic/autologin';
  */
 export const initClient = () => {
     if (!rootClient) {
-        mqtt = new AutoLoginMgr('192.168.9.29', 1234);
+        mqtt = new AutoLoginMgr('192.168.9.25', 1234);
         rootClient = mqtt.connection();
     }
+    initPush();
 };
 
 // 登录

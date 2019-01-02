@@ -9,6 +9,7 @@ import { UserInfo } from '../../../server/data/db/user.s';
 import { auto_login, getToken } from '../../../server/rpc/session.p';
 import { AutoLogin, GetToken, Token } from '../../../server/rpc/session.s';
 import { clientRpcFunc, subscribe } from '../net/init';
+import { initReceive } from '../net/receive';
 import { login as defLogin, walletLogin } from '../net/rpc';
 
 // 用户类型
@@ -111,6 +112,7 @@ export class AutoLoginMgr {
         if (userType === UserType.DEF) {
             defLogin(Number(user), pwd, (r: UserInfo) => {
                 this.uid = r.uid.toString();
+                initReceive(r.uid);
                 // 获取自动登录凭证
                 this.getToken();
                 cb(r);
@@ -118,6 +120,7 @@ export class AutoLoginMgr {
         } else if (userType === UserType.WALLET) {
             walletLogin(user, pwd, (r: UserInfo) => {
                 this.uid = r.uid.toString();
+                initReceive(r.uid);
                 // 获取自动登录凭证
                 this.getToken();
                 cb(r);
