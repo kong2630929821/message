@@ -10,10 +10,11 @@
             <div w-class="total-asset">{{it.text}}</div>
             {{end}}
         </div>
+        
+        <img src="../../res/images/{{opca>0?'refresh_blue.png':'refresh_white.png'}}" w-class="refreshBtn" on-tap="refreshPage" class="{{it.refresh ?'refreshing':''}}"/>
         {{if it.nextImg}}
         <img on-tap="goNext" src="{{it.nextImg}}" w-class="nextBtn" />
         {{end}}
-        <img src="../../res/images/{{opca>0?'refresh_blue.png':'refresh_white.png'}}" w-class="refreshBtn" on-tap="refreshPage" class="{{it.refresh ?'refreshing':''}}"/>
     </div>
 </div>
     

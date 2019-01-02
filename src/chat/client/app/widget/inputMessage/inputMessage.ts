@@ -7,7 +7,8 @@ import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
-import { sendImg } from '../../logic/logic';
+import { openCamera, selectImage } from '../../logic/native';
+import { imgResize, uploadFile } from '../../net/upload';
 
 // ===========================导出
 export class InputMessage extends Widget {
@@ -64,9 +65,10 @@ export class InputMessage extends Widget {
     public pickTool(e:any,i:number) {
         switch (i) {
             case 0:
+                sendPicture(e);
                 break;
             case 1:
-                sendImg(e);
+                sendImage(e);
                 break;
             case 2:
                 break;
@@ -82,3 +84,35 @@ interface Props {
     isOnTools:boolean;  // 是否打开更多功能
     toolList:any[];  // 更多功能列表
 }
+
+/**
+ * 发送图片消息
+ */
+export const sendImage = (e:any) => {
+    const imagePicker = selectImage(() => { 
+        imagePicker.getContent({
+            success(buffer:ArrayBuffer) {
+                imgResize(buffer,(res) => {
+                    uploadFile(res.base64,(imgUrlSuf:string) => {
+                        console.log('选择的照片',imgUrlSuf);
+                        notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+                    });
+                });
+            }
+        });
+    });
+};
+
+/**
+ * 拍摄照片
+ */
+export const sendPicture = (e:any) => {
+    openCamera((res) => { 
+        imgResize(res,(res) => {
+            uploadFile(res.base64,(imgUrlSuf:string) => {
+                console.log('拍摄的照片',imgUrlSuf);
+                notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+            });
+        });
+    });
+};

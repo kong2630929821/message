@@ -32,11 +32,13 @@ export class NewFriend extends Widget {
     public agreeClick(e:any) {
         const v = parseInt(e.value,10);
         acceptFriend(v,true,(r:Result) => {
-            // TODO:
+            if (r.r !== 1) {
+                alert('添加好友失败');
+            }
         });
     }
 
-    // 同意入群申请（被动）
+    // 同意入群邀请（被动）
     public agreeGroupApply(e:any) {
         const gid = parseInt(e.value,10);
         logger.debug('agreeGroupApply',gid);

@@ -1,27 +1,51 @@
+/**
+ * 一些底层操作
+ */
+import { CameraPicker } from '../../../../pi/browser/cameraPicker';
 import { ImagePicker } from '../../../../pi/browser/imagePicker';
 import { QRCode } from '../../../../pi/browser/qrcode';
 import { DeviceIdProvider } from '../../../../pi/browser/systemInfoProvider';
 import { WebViewManager } from '../../../../pi/browser/webview';
 
 /**
- * 一些底层操作
+ * 选择图片
  */
-
-export const selectImage = (ok?,cancel?) => {
+export const selectImage = (ok?, cancel?) => {
     console.log('选择图片');
     const image = new ImagePicker();
     image.init();
     image.selectFromLocal({
-        success: (width, height, result) => {
-            ok && ok(width, height, result);            
+        success: (width, height, url) => {
+            ok && ok(width, height, url);            
         },
         fail: (result) => {
             cancel && cancel(result);
         },
-        useCamera: 1,
+        useCamera: 0,
         single: 1,
         max: 1
     });    
+
+    return image;
+};
+
+/**
+ * 打开照相机
+ */
+export const openCamera = (ok?, cancel?) => {
+    console.log('打开照相机');
+    const camera = new CameraPicker();
+    camera.init();
+    camera.takePhoto({
+        success:(res) => {
+            ok && ok(res);
+        },
+        fail: (result) => {
+            cancel && cancel(result);
+        }
+    });
+    
+    return camera;
 };
 
 /**

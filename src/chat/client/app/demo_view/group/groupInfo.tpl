@@ -48,7 +48,9 @@
                         <span>消息免打扰</span>
                         <chat-client-app-widget-switch-switch>{types:true,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                     </li>
+                    {{if it.isAdmin}}
                     <li w-class="liItem" on-tap="openGroupManage">群管理</li>
+                    {{end}}
                     <li style="margin-bottom: 40px;"><span w-class="liItem1" on-tap="openGroupChat" class="ripple">开始聊天</span></li>
                 </ul>
             </div>

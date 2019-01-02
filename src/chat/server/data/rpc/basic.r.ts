@@ -328,7 +328,7 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     logger.debug('getUserHistory param', param);
     const start = param.start;
     const end = param.end;
-    if (!start && !end) {
+    if (end < start) {
 
         throw new Error(`param error start:${start} end:${end}`);
     }
@@ -336,7 +336,7 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     const sid = getUid();
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
     const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE, dbMgr);
-    const hid = genUserHid(sid, param.rid); // 删除好友也应该可以看到以前发送的历史记录，所以不从friendLink中获取
+    const hid = genUserHid(sid, param.rid);
     const userHistoryArray = new UserHistoryArray();
     userHistoryArray.arr = [];
     userHistoryArray.newMess = 0;
@@ -374,7 +374,7 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
 
         userCursor = new UserHistoryCursor();
         userCursor.uuid = genUuid(sid, param.rid);
-        userCursor.cursor = 0;
+        userCursor.cursor = -1;
     }
     if (end > userCursor.cursor) {
         userHistoryArray.newMess = end - userCursor.cursor;

@@ -23,7 +23,8 @@ export class AddUser extends Widget {
         super();
         this.props = {
             sid: null,
-            rid: null
+            rid: null,
+            isSuccess:false
         };
     }
 
@@ -33,6 +34,8 @@ export class AddUser extends Widget {
 
     public inputUid(e: any) {
         this.props.rid = e.value;
+        this.props.isSuccess = false;
+        this.paint();
     }
 
     /**
@@ -45,11 +48,11 @@ export class AddUser extends Widget {
 
             return;
         }
-        // if (this.props.rid === sid) {
-        //     alert('不能添加自己为好友');
+        if (this.props.rid === sid.toString()) {
+            alert('不能添加自己为好友');
 
-        //     return;
-        // }
+            return;
+        }
         applyUserFriend(this.props.rid, (r: Result) => {
             if (r.r === 0) {
                 alert(`${this.props.rid}已经是你的好友`);
@@ -60,8 +63,11 @@ export class AddUser extends Widget {
 
                 return;
             }
+            this.props.isSuccess = true;
+            this.paint();
         });
     }
+
     public chat(uid: number) {
         popNew('chat-client-app-demo_view-chat-chat', { id: uid, chatType: GENERATOR_TYPE.USER });
     }
@@ -71,8 +77,9 @@ export class AddUser extends Widget {
             switch (i) {
                 case 0:
                     doScanQrCode((res) => {  // 扫描二维码
+                        this.props.rid = res;
                         console.log(res);
-                        // TODO
+                        this.paint();
                     });
                     break;
                 case 1:
@@ -92,6 +99,7 @@ export class AddUser extends Widget {
 interface Props {
     sid: number;
     rid: string;
+    isSuccess:boolean; // 是否添加好友成功
 }
 
 store.register('contactMap', (r: Map<number, Contact>) => {

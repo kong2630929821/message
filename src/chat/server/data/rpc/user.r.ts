@@ -8,9 +8,12 @@ import { Logger } from '../../../utils/logger';
 import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
+import { MSG_TYPE } from '../db/message.s';
 import { Contact, FriendLink, UserFind, UserInfo } from '../db/user.s';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
+import { sendUserMessage } from './message.r';
+import { UserSend } from './message.s';
 import { FriendAlias, UserAgree } from './user.s';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -40,7 +43,7 @@ export const applyFriend = (user: string): Result => {
     });
     const result = new Result();
     if (!uid) {
-        result.r = -2;  // 不能添加自己为好友
+        result.r = -2;  // 添加的好友不存在
 
         return result;
     }
@@ -101,6 +104,13 @@ export const acceptFriend = (agree: UserAgree): Result => {
             contactBucket.put(rid, rContactInfo);
             // 在当前用户列表中添加好友
             sContactInfo.friends.findIndex(item => item === rid) === -1 && sContactInfo.friends.push(rid);
+            // 发布一条添加成功的消息
+            const info = new UserSend();
+            info.msg = '你们已经成为好友，开始聊天吧';
+            info.mtype = MSG_TYPE.ADDUSER;
+            info.rid = rid;
+            info.time = Date.now();
+            sendUserMessage(info);
         }
         contactBucket.put(sid, sContactInfo);
         // 分别插入到friendLink中去
