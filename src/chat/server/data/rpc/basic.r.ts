@@ -8,6 +8,7 @@ import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
+import { send } from '../../../utils/send';
 import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
@@ -131,6 +132,8 @@ export const login = (user: UserType): UserInfo => {
     userInfo = userInfoBucket.get(loginReq.uid)[0];
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
     setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
+    // 后端统一推送消息topic
+    setMqttTopic(mqttServer, `send/${loginReq.uid.toString()}`, true, true);
     logger.debug('Set user topic: ', loginReq.uid.toString());
 
     // save session

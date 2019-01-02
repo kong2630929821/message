@@ -5,6 +5,7 @@
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
+import { send } from '../../../utils/send';
 import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
@@ -105,6 +106,15 @@ export const acceptFriend = (agree: UserAgree): Result => {
             contactBucket.put(rid, rContactInfo);
             // 在当前用户列表中添加好友
             sContactInfo.friends.findIndex(item => item === rid) === -1 && sContactInfo.friends.push(rid);
+            // 分别插入到friendLink中去
+            const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
+            const friendLink = new FriendLink();
+            friendLink.uuid = genUuid(sid, rid);
+            friendLink.alias = '';
+            friendLink.hid = genUserHid(sid, rid);
+            friendLinkBucket.put(friendLink.uuid, friendLink);
+            friendLink.uuid = genUuid(rid, sid);
+            friendLinkBucket.put(friendLink.uuid, friendLink);
             // 发布一条添加成功的消息
             const info = new UserSend();
             info.msg = '你们已经成为好友，开始聊天吧';
@@ -112,17 +122,11 @@ export const acceptFriend = (agree: UserAgree): Result => {
             info.rid = rid;
             info.time = Date.now();
             sendUserMessage(info);
+        } else {
+            // 拒绝好友
+            send(rid, CONSTANT.SEND_REFUSED, '');
         }
         contactBucket.put(sid, sContactInfo);
-        // 分别插入到friendLink中去
-        const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
-        const friendLink = new FriendLink();
-        friendLink.uuid = genUuid(sid, rid);
-        friendLink.alias = '';
-        friendLink.hid = genUserHid(sid, rid);
-        friendLinkBucket.put(friendLink.uuid, friendLink);
-        friendLink.uuid = genUuid(rid, sid);
-        friendLinkBucket.put(friendLink.uuid, friendLink);
 
     };
 

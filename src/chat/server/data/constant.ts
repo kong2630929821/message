@@ -35,3 +35,6 @@ export const ONLINE_USERS_REVERSE_INDEX_TABLE = 'chat/server/data/db/user.Online
 export const ADDRESS_INFO_TABLE = 'chat/server/data/db/extra.AddressInfo';
 export const DEFAULT_ERROR_STR = '-1';
 export const DEFAULT_ERROR_NUMBER = -1;
+
+// 推送cmd
+export const SEND_REFUSED = 'refused_add'; // 拒绝好友
