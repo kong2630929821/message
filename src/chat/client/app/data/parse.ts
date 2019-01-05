@@ -3,7 +3,7 @@
  */
 import { AnnounceHistory, GroupHistory, GroupMsg, MSG_TYPE, UserHistory, UserMsg } from '../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
-import { getHidFromhIncId } from '../../../utils/util';
+import { genGroupHid, genUserHid, getHidFromhIncId, getUidFromUuid } from '../../../utils/util';
 import * as store from './store';
 /**
  * 更新userHistoryMap/userChatMap,lastChat
@@ -57,7 +57,26 @@ export const updateGroupMessage = (gid:number,msg:GroupHistory) => {
 const pushLastChat = (value:[number,number,GENERATOR_TYPE]) => {
     const lastChat = store.getStore(`lastChat`, []);
     const index = lastChat.findIndex(item => item[0] === value[0] && item[2] === value[2]);
-    index > -1 && lastChat.splice(index, 1);    
-    lastChat.unshift(value); // 向前压入数组中
+    const setting = store.getStore('setting',{ msgTop:[] });
+
+    let topFg;  // 消息是否置顶
+    let topLen;  // 置顶消息个数
+    if (value[2] === GENERATOR_TYPE.USER) {  // 单聊消息
+        const sid = store.getStore('uid');
+        const hid = genUserHid(sid,value[0]);
+        topFg = setting.msgTop.findIndex(item => item === hid) > -1;
+        topLen = setting.msgTop.length;
+        
+    } else {  // 群聊消息
+        const hid = genGroupHid(value[0]);
+        topFg = setting.msgTop.findIndex(item => item === hid) > -1;
+        topLen = setting.msgTop.length;
+        
+    }
+    // 置顶消息不改变位置，不置顶消息放到置顶消息后
+    if (!topFg) { 
+        index > -1 && lastChat.splice(index, 1);  
+        lastChat.splice(topLen, 0, value);
+    } 
     store.setStore(`lastChat`,lastChat);
 };

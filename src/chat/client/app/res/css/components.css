@@ -111,17 +111,17 @@ input:disabled{
     color:    #cccccc;
 }
 
-.pi-input textarea::-webkit-input-placeholder { /* WebKit browsers */
-    color: #8E96AB;
+.chat-input textarea::-webkit-input-placeholder { /* WebKit browsers */
+    color: #cccccc;
 }
-.pi-input textarea:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-    color: #8E96AB;
+.chat-input textarea:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: #cccccc;
 }
-.pi-input textarea::-moz-placeholder { /* Mozilla Firefox 19+ */
-    color: #8E96AB;
+.chat-input textarea::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: #cccccc;
 }
-.pi-input textarea:-ms-input-placeholder { /* Internet Explorer 10+ */
-    color:#8E96AB;
+.chat-input textarea:-ms-input-placeholder { /* Internet Explorer 10+ */
+    color:#cccccc;
 }
 
 

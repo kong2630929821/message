@@ -36,6 +36,7 @@ export const notify = (cmd: string, msg: string) => {
 
 // 主动推送
 export const initPush = () => {
+    // 拒绝好友添加
     addEvent(CONSTANT.SEND_REFUSED, (r) => {
         console.log('!!!!!!!!!!!!r:', r);
         alert(r);

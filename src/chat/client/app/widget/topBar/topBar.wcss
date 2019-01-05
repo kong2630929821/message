@@ -2,7 +2,6 @@
     background-color: #fff;
     width: 100%;
     position: relative;
-    padding-top: 40px;
 }
 .outer-bottom{
     border-bottom: 1px solid #cccccc;

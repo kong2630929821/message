@@ -8,12 +8,11 @@ import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { send } from '../../../utils/send';
-import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid, getIndexFromHIncId } from '../../../utils/util';
+import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid } from '../../../utils/util';
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
+import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
 
@@ -230,7 +229,7 @@ export const getContact = (getContactReq: GetContactReq): Contact => {
 };
 
 /**
- * 获取好友别名和历史记录
+ * 获取好友别名
  * @param uuidArr userid:userid
  */
 // #[rpc=rpcServer]
@@ -277,7 +276,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
 
     // let fg = 1;
     // let index = -1;
-    let groupCursor = groupHistorycursorBucket.get<String, GroupHistoryCursor>(genGuid(param.gid, sid))[0];
+    let groupCursor = groupHistorycursorBucket.get<string, GroupHistoryCursor>(genGuid(param.gid, sid))[0];
     // logger.debug(`getGroupHistory begin index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
 
     // if (param.hIncId) {  // 如果本地有记录则取本地记录
@@ -291,10 +290,10 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     for (let id = start; id <= end; id++) {
         historyKeys.push(genHIncId(hid, id));
     }
-    const mess = groupHistoryBucket.get<String[], UserHistory[]>(historyKeys);
+    const mess = groupHistoryBucket.get<string[], UserHistory[]>(historyKeys);
     // while (fg === 1) {
     //     index++;
-    //     const oneMess = groupHistoryBucket.get<String, UserHistory>(genHIncId(hid, index))[0];
+    //     const oneMess = groupHistoryBucket.get<string, UserHistory>(genHIncId(hid, index))[0];
     //     logger.debug('getGroupHistory oneMess: ', oneMess);
     //     if (oneMess) {
     //         groupHistoryArray.arr.push(oneMess);
@@ -346,7 +345,7 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
 
     // let fg = 1;
     // let index = -1;
-    let userCursor = userHistoryCursorBucket.get<String, UserHistoryCursor>(genUuid(sid, param.rid))[0];
+    let userCursor = userHistoryCursorBucket.get<string, UserHistoryCursor>(genUuid(sid, param.rid))[0];
     // logger.debug(`getUserHistory begin index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
     // if (param.hIncId) {  // 如果本地有记录则取本地记录
@@ -360,10 +359,11 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
         historyKeys.push(genHIncId(hid, id));
     }
 
-    const mess = userHistoryBucket.get<String[], UserHistory[]>(historyKeys);
+    const mess = userHistoryBucket.get<string[], UserHistory[]>(historyKeys);
+    logger.debug('getuserhistory historyKeys: ',historyKeys,'mess: ',mess);
     // while (fg === 1) {
     //     index++;
-    //     const oneMess = userHistoryBucket.get<String, UserHistory>(genHIncId(hid, index))[0];
+    //     const oneMess = userHistoryBucket.get<string, UserHistory>(genHIncId(hid, index))[0];
     //     logger.debug('getUserHistory oneMess: ', oneMess);
     //     if (oneMess) {
     //         userHistoryArray.arr.push(oneMess);
@@ -444,6 +444,50 @@ export const getAnnoucements = (param: AnnouceIds): AnnounceHistoryArray => {
     logger.debug('getAnnoucements announceHistory', announceHistory);
 
     return announceHistory;
+};
+
+/**
+ * 前端需要存储的内容
+ */
+// #[rpc=rpcServer]
+export const setData = (param:string):FrontStoreData => {
+    logger.debug('setData param: ',param);
+    const dbMgr = getEnv().getDbMgr();
+    const storeBucket = new Bucket('file',CONSTANT.FRONT_STORE_DATA,dbMgr);
+    const uid = getUid();
+    let store = storeBucket.get<number,FrontStoreData>(uid)[0];
+    if (!store) {
+        store = new FrontStoreData();
+        store.uid = uid;
+    } 
+    store.value = param;
+    storeBucket.put(uid,store);
+    logger.debug('setData store: ',store);
+
+    return store;
+};
+
+/**
+ * 获取前端存储的内容
+ */
+// #[rpc=rpcServer]
+export const getData = (uid:number):FrontStoreData => {
+    const dbMgr = getEnv().getDbMgr();
+    const storeBucket = new Bucket('file',CONSTANT.FRONT_STORE_DATA,dbMgr);
+    const sid = getUid();
+    logger.debug('getData uid: ',uid,'sid: ',sid);
+    if (sid !== uid) {
+        return new FrontStoreData();
+    }
+    let store = storeBucket.get<number,FrontStoreData>(sid)[0];
+    if (!store) {
+        store = new FrontStoreData();
+        store.uid = sid;
+        store.value = '';
+    }
+    logger.debug('getData store: ',store);
+
+    return store;
 };
 
 // ================================================================= 本地

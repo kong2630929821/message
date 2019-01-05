@@ -99,3 +99,12 @@ struct OnlineUsersReverseIndex {
     sessionId: u32,
     uid: u32,
 }
+
+/**
+*前端需要存储的数据
+*/
+#[primary=uid,db=file]
+struct FrontStoreData {
+    uid:u32,
+    value:String,
+}

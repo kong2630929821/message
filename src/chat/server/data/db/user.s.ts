@@ -409,3 +409,38 @@ new EnumType( Type.U32 ), null) ]);
 	}
 }
 
+
+export class FrontStoreData extends Struct {
+
+    uid: number;
+    value: string;
+	static _$info =  new StructInfo("chat/server/data/db/user.FrontStoreData",2236816187,  new Map( [["primary","uid"],["db","file"]]), [new FieldInfo("uid", 
+new EnumType( Type.U32 ), null), new FieldInfo("value", 
+new EnumType( Type.Str ), null) ]);
+
+
+	addMeta(mgr: StructMgr){
+		if(this._$meta)
+			return;
+		addToMeta(mgr, this);
+	}
+
+	removeMeta(){
+		removeFromMeta(this);
+	}
+
+
+
+	bonDecode(bb:BonBuffer) {
+		this.uid = bb.readInt();
+		this.value = bb.readUtf8();
+	}
+
+	bonEncode(bb:BonBuffer) {        
+        bb.writeInt(this.uid);
+                
+        bb.writeUtf8(this.value);
+        
+	}
+}
+

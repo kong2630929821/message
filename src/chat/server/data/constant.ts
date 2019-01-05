@@ -30,6 +30,7 @@ export const CONTACT_TABLE = 'chat/server/data/db/user.Contact';
 export const LAST_READ_MESSAGE_ID_TABLE = 'chat/server/data/db/user.LastReadMessageId';
 export const ONLINE_USERS_TABLE = 'chat/server/data/db/user.OnlineUsers';
 export const ONLINE_USERS_REVERSE_INDEX_TABLE = 'chat/server/data/db/user.OnlineUsersReverseIndex';
+export const FRONT_STORE_DATA = 'chat/server/data/db/user.FrontStoreData';
 
 // 其他
 export const ADDRESS_INFO_TABLE = 'chat/server/data/db/extra.AddressInfo';
