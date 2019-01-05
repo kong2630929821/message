@@ -1,0 +1,109 @@
+/**
+ * applyUser 组件相关处理
+ */ 
+
+// ================================================ 导入
+import { popNew } from '../../../../../pi/ui/root';
+import { notify } from '../../../../../pi/widget/event';
+import { Widget } from '../../../../../pi/widget/widget';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { Logger } from '../../../../utils/logger';import * as store from '../../data/store';
+import { getUsersInfo } from '../../../../server/data/rpc/basic.p';
+import { GetUserInfoReq, UserArray } from '../../../../server/data/rpc/basic.s';
+import { getGidFromGuid, getUidFromGuid } from '../../../../utils/util';
+import { clientRpcFunc } from '../../net/init';
+
+// ================================================ 导出
+ // tslint:disable-next-line:no-reserved-keywords
+declare var module;
+const WIDGET_NAME = module.id.replace(/\//g, '-');
+const logger = new Logger(WIDGET_NAME);
+
+export class ApplyUser extends Widget {
+    public props: Props = {
+        id:null,
+        guid:null,
+        name:'',
+        chatType:GENERATOR_TYPE.USER,
+        applyInfo: '',
+        isActiveToGroup:true,
+        isagree:false,
+        activeToGGid:null
+    };
+
+    public setProps(props:any) {
+        super.setProps(props);
+        this.props.isagree = false;
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            logger.debug('------------',store.getStore(`userInfoMap/${this.props.id}`));
+            const userInfo = store.getStore(`userInfoMap/${this.props.id}`);
+            this.props.name = userInfo ? userInfo.name : '';
+            this.props.applyInfo = '请求添加你为好友';
+        }
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            if (this.props.isActiveToGroup) { // 主动申请加群
+                const info = new GetUserInfoReq();
+                info.uids = [this.props.id];
+                clientRpcFunc(getUsersInfo,info,(r:UserArray) => {
+                    if (r.arr.length > 0) {
+                        this.props.name = r.arr[0].name; 
+                        this.props.applyInfo = `用户${this.props.name}申请进群`;
+                        this.paint();
+                    }
+                });
+                
+            } else { // 被动进群
+                const gid = getGidFromGuid(this.props.guid);
+                const rid = getUidFromGuid(this.props.guid);
+                const ginfo = store.getStore(`groupInfoMap/${gid}`);
+                const userInfo = store.getStore(`userInfoMap/${rid}`);
+                this.props.name = ginfo ? ginfo.name :'';
+                this.props.applyInfo = `${userInfo ? userInfo.name : ''}邀请你加入群`;
+                this.props.id = gid;
+            }
+            
+        }
+    }
+        // 查看申请详细信息 
+    public viewApplyDetail() {
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            popNew('chat-client-app-view-contactList-newFriendApply',{ ...this.props,title:'新的朋友' });
+        }
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            if (this.props.isActiveToGroup) { // 主动申请加群
+                popNew('chat-client-app-view-contactList-newFriendApply',{ ...this.props,title:'申请入群' });
+            } else { // 被动进群
+                popNew('chat-client-app-view-contactList-newFriendApply',{ ...this.props,title:'邀请入群' });
+            }
+            
+        }
+        
+    }
+
+    public agreenBtn(e:any) {
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            notify(e.node,'ev-agree-friend',{ value:this.props.id });
+        }
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            if (this.props.isActiveToGroup) { // 主动申请加群
+                notify(e.node,'ev-agree-joinGroup',{ value:this.props.id });
+            } else { // 被动进群
+                notify(e.node,'ev-agree-group',{ value:getGidFromGuid(this.props.guid) });
+            }  
+        }
+        this.props.isagree = true;
+        this.paint();
+    }
+}
+
+// ================================================ 本地
+interface Props {
+    id?: number; // 用户id或群组id
+    guid?:string; // 群内成员ID
+    name?: string; // 用户名或群名
+    chatType: GENERATOR_TYPE; // 是用户还是群组
+    applyInfo?: string; // 验证信息
+    isActiveToGroup: boolean; // 是否主动加群
+    isagree:boolean;
+    activeToGGid:number; // 主动入群 群id
+}

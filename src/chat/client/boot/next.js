@@ -65,7 +65,7 @@ winit.initNext = function () {
 
 		//加载APP部分代码，实际项目中会分的更细致
 		var loadChatApp = function () {
-			util.loadDir(["chat/client/app/demo_view/","chat/client/app/widget/","chat/client/app/res/css/","chat/client/app/res/images/"], flags, fm, undefined, function (fileMap) {
+			util.loadDir(["chat/client/app/view/","chat/client/app/widget/","chat/client/app/res/css/","chat/client/app/res/images/"], flags, fm, undefined, function (fileMap) {
 				console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
 				var tab = util.loadCssRes(fileMap);
 				// 将预加载的资源缓冲90秒，释放
@@ -79,7 +79,7 @@ winit.initNext = function () {
 				root.cfg.hscale = 0.25;
 				root.cfg.wscale = 0;
 
-				var index = pi_modules.commonjs.exports.relativeGet("chat/client/app/demo_view/index/index").exports;
+				var index = pi_modules.commonjs.exports.relativeGet("chat/client/app/view/index/index").exports;
 				index.run();
 
 				document.body.removeChild(div);
