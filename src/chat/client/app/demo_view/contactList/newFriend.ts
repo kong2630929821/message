@@ -23,15 +23,15 @@ const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
 export class NewFriend extends Widget {
-    public ok:() => void;
-    
+    public ok: () => void;
+
     public goBack() {
         this.ok();
     }
     // 同意好友申请
-    public agreeClick(e:any) {
-        const v = parseInt(e.value,10);
-        acceptFriend(v,true,(r:Result) => {
+    public agreeClick(e: any) {
+        const v = parseInt(e.value, 10);
+        acceptFriend(v, true, (r: Result) => {
             if (r.r !== 1) {
                 alert('添加好友失败');
             }
@@ -39,19 +39,19 @@ export class NewFriend extends Widget {
     }
 
     // 同意入群邀请（被动）
-    public agreeGroupApply(e:any) {
-        const gid = parseInt(e.value,10);
-        logger.debug('agreeGroupApply',gid);
+    public agreeGroupApply(e: any) {
+        const gid = parseInt(e.value, 10);
+        logger.debug('agreeGroupApply', gid);
         const agree = new GroupAgree();
         agree.agree = true;
         agree.gid = gid;
         agree.uid = store.getStore(`uid`);
-        clientRpcFunc(agreeJoinGroup, agree,(gInfo:GroupInfo) => {
-            if (gInfo.gid === -1) {
+        clientRpcFunc(agreeJoinGroup, agree, (gInfo: GroupInfo) => {
+            if (gInfo.gid < 0) {
 
                 return;
             }
-            store.setStore(`groupInfoMap/${gInfo.gid}`,gInfo);
+            store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
         });
     }
 }
@@ -61,5 +61,5 @@ store.register('contactMap', (r: Map<number, Contact>) => {
     // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
     for (const value of r.values()) {
         forelet.paint(value);
-    }    
+    }
 });

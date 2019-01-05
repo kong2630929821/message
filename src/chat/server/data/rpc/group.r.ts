@@ -153,6 +153,8 @@ export const acceptUser = (agree: GroupAgree): Result => {
     if (gInfo.memberids.indexOf(agree.uid) > -1 || gInfo.adminids.indexOf(agree.uid) > -1) {
         res.r = 2; // user has been exist
         logger.debug('User: ', agree.uid, 'has been exist');
+
+        return res;
     } else if (contact === undefined) {
         res.r = -1; // agree.uid is not a registered user
         logger.error('user: ', agree.uid, 'is not a registered user');
@@ -252,9 +254,6 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     // 删除applyGroup并放回db中
     cInfo.applyGroup = delGidFromApplygroup(agree.gid, cInfo.applyGroup);
 
-    if (agree.agree) {
-        cInfo.group.push(agree.gid);
-    }
     contactBucket.put(uid, cInfo);
     if (!agree.agree) {
         logger.debug('User: ', uid, 'don\'t want to join group: ', agree.gid);
@@ -265,7 +264,14 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
 
     if (gInfo.memberids.indexOf(uid) > -1) {
         logger.debug('User: ', uid, 'has been exist');
+        gInfo.gid = -3;
+
+        return gInfo;
+
     } else {
+        if (agree.agree) {
+            cInfo.group.push(agree.gid);
+        }
         gInfo.memberids.push(uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('User: ', uid, 'agree to join group: ', agree.gid);
