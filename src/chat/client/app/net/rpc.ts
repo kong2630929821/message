@@ -8,8 +8,8 @@ import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, regist
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createGroupp, delMember, dissolveGroup, inviteUsers } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, Invite, InviteArray } from '../../../server/data/rpc/group.s';
-import { isUserOnline, sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
-import { AnnounceSend, GroupSend, UserSend } from '../../../server/data/rpc/message.s';
+import { sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
+import { GroupSend, UserSend } from '../../../server/data/rpc/message.s';
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
 import { setStore } from '../data/store';
@@ -226,12 +226,6 @@ export const getGroupInfo = () => {
     });
 };
 
-export const userOnline = (uid: number) => {
-    clientRpcFunc(isUserOnline, uid, (r) => {
-        console.log(r);
-    });
-};
-
 export const friendLinks = (uuid: string) => {
     const x = new GetFriendLinksReq();
     x.uuid = [uuid];
@@ -245,10 +239,6 @@ export const friendLinks = (uuid: string) => {
     friendLinks(uuid);
 };
 
-(<any>self).userOnline = (uid: number) => {
-    userOnline(uid);
-};
-
 (<any>self).subscribeGroupMsg = (topicName: string) => {
     subscribe(topicName, GroupMsg, (r) => {
         // TODO:
@@ -257,10 +247,6 @@ export const friendLinks = (uuid: string) => {
 
 (<any>self).getGroupInfo = () => {
     getGroupInfo();
-};
-
-(<any>self).setUserInfo = () => {
-    setUserInfo();
 };
 
 (<any>self).login = (uid: number, passwdHash: string) => {
@@ -307,10 +293,6 @@ export const friendLinks = (uuid: string) => {
 
 (<any>self).acceptUserJoin = (uid: number, accept: boolean) => {
     acceptUserJoin(uid, accept);
-};
-
-(<any>self).sendAnnouncement = (gid: number) => {
-    sendAnnounce(gid);
 };
 
 (<any>self).inviteUsersToGroup = (gid: number) => {

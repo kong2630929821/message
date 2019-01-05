@@ -1,6 +1,6 @@
 <div class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar>{title:"新的朋友"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget-topBar-topBar>{title:{{it.title}} }</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="newfriend-wrap" on-tap="goDetail">
         <chat-client-app-widget-featureBar-featureBar>{iconPath:"user.png",text:{{it.name}} }</chat-client-app-widget-featureBar-featureBar>

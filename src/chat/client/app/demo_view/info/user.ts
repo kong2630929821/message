@@ -2,13 +2,17 @@
  * 我的个人信息
  */
 // ================================================ 导入
+import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
+import { bottomNotice, copyToClipboard, getUserAvatar } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
+
 export class User extends Widget {
     public ok:() => void;
+    public props:Props;
     constructor() {
         super();
         this.props = {
@@ -16,8 +20,8 @@ export class User extends Widget {
             info:new UserInfo(),
             tel:'',
             name:'',
-            nameEdit:false,
-            phoneEdit:false
+            phoneEdit:false,
+            avatar:''
         };
     }
 
@@ -27,7 +31,9 @@ export class User extends Widget {
         this.props.info = store.getStore(`userInfoMap/${this.props.sid}`,new UserInfo());
         this.props.tel = this.props.info.tel || '未知';
         this.props.name = this.props.info.name;
+        this.props.avatar = getUserAvatar(this.props.sid) || '../../res/images/img_avatar1.png';
     }
+
     public goBack() {
         this.ok();
     } 
@@ -39,25 +45,41 @@ export class User extends Widget {
         const userinfo = store.getStore(`userInfoMap/${this.props.sid}`,new UserInfo());
         this.props.name = this.props.name || userinfo.name;
         this.props.tel = this.props.tel || '未知';
-        this.props.nameEdit = false;
         this.props.phoneEdit = false;
         this.paint();
     }
 
-    /**
-     * 点击后可编辑昵称
-     */
-    public editName() {
-        this.props.nameEdit = true;
-        this.paint();
-    }
+    // /**
+    //  * 点击后可编辑昵称
+    //  */
+    // public editName() {
+    //     this.props.nameEdit = true;
+    //     this.paint();
+    // }
 
     /**
      * 昵称更改
      */
-    public nameChange(e:any) {
-        this.props.name = e.value;
-        this.paint();
+    public nameChange() {
+        popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'修改昵称', contentInput:this.props.name },(res:any) => {
+            const userinfo = store.getStore(`userInfoMap/${this.props.sid}`,new UserInfo());
+            const test = new UserInfo();
+            test.uid = this.props.sid;
+            test.name = res.content;
+            test.tel = userinfo.tel;
+            test.avatar = userinfo.avatar;
+            test.sex = userinfo.sex;
+            test.note = userinfo.note;
+        
+            clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
+            // todo
+                if (r.uid !== -1) {
+                    store.setStore(`userInfoMap/${this.props.sid}`,test);
+                    bottomNotice('修改个人信息成功');
+                }
+            });
+        });
+        
     }
 
     /**
@@ -92,10 +114,32 @@ export class User extends Widget {
         clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
             // todo
             if (r.uid !== -1) {
-                const sid = store.getStore('uid');
-                store.setStore(`userInfoMap/${sid}`,test);
-                console.log('修改个人信息成功',r);
+                store.setStore(`userInfoMap/${this.props.sid}`,test);
+                bottomNotice('修改个人信息成功');
             }
         });
     }
+
+    /**
+     * 点击复制
+     */
+    public doCopy(i:number) {
+        if (i === 0) {
+            copyToClipboard(this.props.sid);
+        } else if (i === 1) {
+            copyToClipboard(this.props.info.wallet_addr);
+        } else {
+            copyToClipboard(this.props.info.tel);
+        }
+        bottomNotice('复制成功');
+    }
 }   
+
+interface Props  {
+    sid:number;
+    info:UserInfo;
+    tel:string;
+    name:string;
+    phoneEdit:boolean;
+    avatar:string;
+}

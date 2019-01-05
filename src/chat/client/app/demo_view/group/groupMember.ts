@@ -28,7 +28,8 @@ export class GroupMember extends Widget {
         this.props = {
             gid: null,
             groupInfo:{},
-            deleteBtn:false
+            deleteBtn:false,
+            isAdmin:false
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -38,6 +39,9 @@ export class GroupMember extends Widget {
         this.props.groupInfo = this.getGroupInfo();
         this.props.deleteBtn = this.props.deleteBtn || false;
         const uid = store.getStore('uid');
+        if (this.props.groupInfo.adminids.indexOf(uid) > -1) {  // 当前用户是管理员
+            this.props.isAdmin = true;
+        }
         if (this.props.groupInfo.memberids.indexOf(uid) < 0) {
             alert('您已被移除该群');
             this.ok();
@@ -45,6 +49,7 @@ export class GroupMember extends Widget {
             alert('该群已被解散');
             this.ok();
         }
+        
     }
     public goBack() {
         this.ok();
@@ -66,12 +71,6 @@ export class GroupMember extends Widget {
     }
     // 进入移除成员操作状态
     public deleteMember() {
-        const uid = store.getStore('uid');
-        if (uid !== this.props.groupInfo.ownerid && this.props.groupInfo.adminids.indexOf(uid) === -1) {  // 用户既不是群主也不是管理员
-            alert('您没有权限执行此操作');
-
-            return ;
-        }
         this.props.deleteBtn = true;
         this.paint();
     }
@@ -101,4 +100,5 @@ interface Props {
     gid: number;
     groupInfo:Json; // 群信息
     deleteBtn:boolean; // 群成员是否处于移除状态
+    isAdmin:boolean; // 是否是管理员
 }

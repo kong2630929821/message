@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -13,7 +14,7 @@ import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { sendGroupMessage, sendUserMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend, UserSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
-import { depCopy, genUserHid, genUuid, getIndexFromHIncId } from '../../../../utils/util';
+import { depCopy, genUuid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias, timestampFormat } from '../../logic/logic';
@@ -42,12 +43,14 @@ export class Chat extends Widget {
         this.props.inputMessage = '';
         this.props.newMsg = undefined;
 
-        if (props.chatType === GENERATOR_TYPE.GROUP) {
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            this.props.hid = store.getStore(`groupInfoMap/${this.props.id}`,{ hid:'' }).hid;
             this.initGroup();
         } else {
+            this.props.hid = store.getStore(`friendLinkMap/${genUuid(this.props.sid, this.props.id)}`,{ hid:'' }).hid;
             this.initUser();
         }
-        logger.debug('============groupChat',this.props);
+       
         this.latestMsg();
     }
 
@@ -56,24 +59,24 @@ export class Chat extends Widget {
      */
     public initUser() {
         this.props.name = getFriendAlias(this.props.id);
-        const hIncIdArr = store.getStore(`userChatMap/${this.getHid()}`, []);
+        const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`, []);
         this.props.hidIncArray = hIncIdArr; 
 
         // 更新上次阅读到哪一条记录
         const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-        const lastRead = store.getStore(`lastRead/${genUserHid(this.props.sid,this.props.id)}`,{ msgId:undefined,msgType:GENERATOR_TYPE.USER });
+        const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.USER });
         lastRead.msgId = hincId;
-        store.setStore(`lastRead/${genUserHid(this.props.sid,this.props.id)}`,lastRead);
+        store.setStore(`lastRead/${this.props.hid}`,lastRead);
     }
 
     /**
      * 群组聊天初始化
      */
     public initGroup() {
-        this.props.hidIncArray = store.getStore(`groupChatMap/${this.getHid()}`,[]);
+        this.props.hidIncArray = store.getStore(`groupChatMap/${this.props.hid}`,[]);
         const gInfo = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
-        const lastRead = store.getStore(`lastRead/${this.getHid()}`,{ msgId:undefined,msgType:GENERATOR_TYPE.GROUP });
-        this.props.name = gInfo.name;
+        const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.GROUP });
+        this.props.name = `${gInfo.name}(${gInfo.memberids.length})`;
 
         const annouces = gInfo.annoceids;
         const lastAnnounce = annouces && annouces.length > 0 ? annouces[annouces.length - 1] :undefined ;
@@ -85,7 +88,7 @@ export class Chat extends Widget {
         // 更新上次阅读到哪一条记录        
         const hincId = this.props.hidIncArray.length > 0 ? this.props.hidIncArray[this.props.hidIncArray.length - 1] : undefined;
         lastRead.msgId = hincId;
-        store.setStore(`lastRead/${this.getHid()}`,lastRead);
+        store.setStore(`lastRead/${this.props.hid}`,lastRead);
 
         // 是否已被踢出群或群已经解散
         if (gInfo.state === GROUP_STATE.DISSOLVE) {
@@ -104,10 +107,10 @@ export class Chat extends Widget {
             getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
         }, 500);
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            store.register(`groupChatMap/${this.getHid()}`,this.bindCB);
+            store.register(`groupChatMap/${this.props.hid}`,this.bindCB);
             store.register(`groupInfoMap/${this.props.id}`,this.bindCB);
         } else {
-            store.register(`userChatMap/${this.getHid()}`,this.bindCB);
+            store.register(`userChatMap/${this.props.hid}`,this.bindCB);
         }
     
     }
@@ -254,12 +257,19 @@ export class Chat extends Widget {
         return getRealNode((<any>this.tree).children[1]);
     }
 
+    /**
+     * 查看群详细信息
+     */
+    public groupDetail() {
+        popNew('chat-client-app-demo_view-group-groupInfo', { gid:this.props.id });
+    }
+
     public destroy() {
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            store.unregister(`groupChatMap/${this.getHid()}`,this.bindCB);
+            store.unregister(`groupChatMap/${this.props.hid}`,this.bindCB);
             store.unregister(`groupInfoMap/${this.props.id}`,this.bindCB);
         } else {
-            store.unregister(`userChatMap/${this.getHid()}`,this.bindCB);
+            store.unregister(`userChatMap/${this.props.hid}`,this.bindCB);
         }
 
         return super.destroy();
@@ -268,22 +278,13 @@ export class Chat extends Widget {
         this.ok();
     }
 
-    private getHid() {
-        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-
-            return store.getStore(`groupInfoMap/${this.props.id}`).hid;
-        } else {
-            const friendLink = store.getStore(`friendLinkMap/${genUuid(this.props.sid, this.props.id)}`);
-
-            return friendLink && friendLink.hid;
-        }
-    }
 }
 
 // ================================================ 本地
 interface Props {
     sid: number;  // 我的ID
     id: number;  // 好友ID|群ID
+    hid:string;  // 好友hid|群hid
     chatType:string; // 群聊|单聊
     name:string;  // 群名或好友名
     inputMessage:string;  // 输入框内容

@@ -4,6 +4,7 @@
 }
 .topBack{
     background:linear-gradient(to right,#318DE6,#38CFE7);
+    position: relative;
 }
 .backImg{
     position: absolute;
@@ -52,4 +53,13 @@
     padding: 20px 30px;
     background: #E9F9FF;
     height: 88px;
+}
+.redSpot{
+    width:10px;
+    height:10px;
+    background:rgba(206,57,57,1);
+    position: absolute;
+    border-radius: 50%;
+    right: 114px;
+    bottom: 60px;
 }

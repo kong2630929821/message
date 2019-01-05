@@ -1,6 +1,6 @@
-<div w-class="message-record-wrap">
+<div w-class="message-record-wrap" style="background-color:{{it.msgTop?'#f0f0f0;':'#fff'}}">
     <div w-class="avatar-wrap">
-        <img w-class="avatar" src="../../res/images/user.png" />
+        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
     </div>
     <div w-class="user-info-wrap">
         <div w-class="info-wrap">
@@ -8,7 +8,7 @@
             <img w-class="resIcon" src="../../res/images/group-icon.png" />
             {{end}}
             <span w-class="userName">{{it.name}}</span>
-            {{if it.isNotDisturb}}
+            {{if it.msgAvoid}}
             <img w-class="notDisturbIcon" src="../../res/images/not-disturb.png" />
             {{end}}
         </div>
@@ -17,7 +17,7 @@
     <div w-class="right-wrap">
         <span w-class="recordTime">{{it.time}}</span>
         {{if it.unReadCount}}
-        <span w-class="unread" style="background:{{it.isNotDisturb ? '#ccc' : '#F7931A'}}">{{it.unReadCount}}</span>
+        <span w-class="unread" style="background:{{it.msgAvoid ? '#ccc' : '#F7931A'}}">{{it.unReadCount}}</span>
         {{end}}
     </div>
 </div>

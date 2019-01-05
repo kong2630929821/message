@@ -1,8 +1,8 @@
 /**
  * 初始化store
  */
-import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
-import { getGroupHistory, getUserHistory } from '../../../server/data/rpc/basic.p';
+import { FrontStoreData, GENERATOR_TYPE } from '../../../server/data/db/user.s';
+import { getData, getGroupHistory, getUserHistory } from '../../../server/data/rpc/basic.p';
 import { GroupHistoryArray, GroupHistoryFlag, UserHistoryArray, UserHistoryFlag } from '../../../server/data/rpc/basic.s';
 import { getGroupHistoryCursor, getUserHistoryCursor } from '../../../server/data/rpc/message.p';
 import { HistoryCursor } from '../../../server/data/rpc/message.s';
@@ -31,12 +31,16 @@ export const initAccount = () => {
             store.setStore('announceHistoryMap', value.announceHistoryMap || new Map(), false);
             store.setStore('lastChat', value.lastChat || []);
             store.setStore('lastRead', value.lastRead || new Map());
+            store.setStore('setting', value.setting || null);
+            
+            if (!value.setting) {
+                getSetting(); // 获取设置，本地没有则从服务器获取
+            }
             console.log('store init success', store);
         }, () => {
             console.log('read error');
         });
     });
-
 };
 
 /**
@@ -143,6 +147,7 @@ export const userChatChange = () => {
         value.userHistoryMap = store.getStore('userHistoryMap'); // 单人聊天历史记录变化
         value.userChatMap = store.getStore('userChatMap');  // 单人聊天历史记录索引变化
         value.lastChat = store.getStore('lastChat');  // 最近聊天记录
+        value.lastRead = store.getStore('lastRead');// 当前已读
 
         setTimeout(() => {
             writeFile(id, value, () => {
@@ -188,6 +193,7 @@ export const groupChatChange = () => {
         value.groupChatMap = store.getStore('groupChatMap');
         value.announceHistoryMap = store.getStore('announceHistoryMap'); // 群组公告
         value.lastChat = store.getStore('lastChat');  // 最近聊天记录
+        value.lastRead = store.getStore('lastRead');// 当前已读
 
         setTimeout(() => {
             writeFile(id, value, () => {
@@ -233,5 +239,34 @@ export const lastReadChange = () => {
         }, 0);
     }, () => {
         console.log('read error');
+    });
+};
+
+/**
+ * 设置内容更新
+ */
+export const settingChange = () => {
+    const id = store.getStore('uid');
+    getFile(id, (value) => {
+        if (!value) {
+            value = {};
+        }
+        value.setting = store.getStore('setting'); // 群组用户
+        writeFile(id, value);
+    }, () => {
+        console.log('read error');
+    });
+};
+
+/**
+ * 获取额外设置
+ */
+export const getSetting = () => {
+    const sid = store.getStore('uid');
+    clientRpcFunc(getData,sid,(r:FrontStoreData) => {
+        if (r && r.uid === sid) {
+            const setting = r.value ? JSON.parse(r.value) :{ msgAvoid:[],msgTop:[] };
+            store.setStore('setting',setting);
+        } 
     });
 };

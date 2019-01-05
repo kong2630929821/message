@@ -1,5 +1,5 @@
-<div class="new-page" ev-back-click="goBack" w-class="new-page" ev-send="send" >
-    <chat-client-app-widget-topBar-topBar>{title:{{it.name}}}</chat-client-app-widget-topBar-topBar>
+<div class="new-page" ev-back-click="goBack" w-class="new-page" ev-send="send" ev-next-click="groupDetail">
+    <chat-client-app-widget-topBar-topBar>{title:{{it.name}},nextImg:{{it.chatType=="group" ? "more-dot-blue.png":""}} }</chat-client-app-widget-topBar-topBar>
     
     <div w-class="messageBox" on-tap="pageClick">
         {{for i,v of it.hidIncArray}}

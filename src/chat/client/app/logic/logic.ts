@@ -2,8 +2,10 @@
  * 一些全局方法
  */
 // =====================================导入
+import { uploadFileUrlPrefix } from '../../../../app/config';
+import { popNew } from '../../../../pi/ui/root';
 import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
-import { genGroupHid, genUuid } from '../../../utils/util';
+import { depCopy, genGroupHid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { unSubscribe } from '../net/init';
 
@@ -102,4 +104,20 @@ export const copyToClipboard = (copyText) => {
         document.execCommand('copy');
     }
     document.body.removeChild(input);
+};
+
+// 底部提示
+export const bottomNotice = (content:string) => {
+    popNew('app-components1-message-message',{ content: content });
+};
+
+// 获取用户头像
+export const getUserAvatar = (rid:number) => {
+    const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
+    let avatar = user.avatar ? depCopy(user.avatar) : '';
+    if (avatar && avatar.indexOf('data:image') < 0) {
+        avatar = `${uploadFileUrlPrefix}${avatar}`;
+    }
+
+    return avatar;
 };

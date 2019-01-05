@@ -1,7 +1,8 @@
-<div w-class="new-page" on-tap="pageClick" class="new-page" ev-next-click="handleMoreGroup" ev-back-click="goBack">
-    <div w-class="top-main-wrap">
-        <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",nextImg:"more-dot-white.png",background:"transparent"}</widget>
-        
+<div w-class="new-page" on-tap="pageClick" class="new-page" on-scroll="scrollPage" id="groupInfo">
+    <div w-class="top-main-wrap" ev-next-click="handleMoreGroup" ev-back-click="goBack">
+        <div style="position:relative;min-height: 128px;">
+            <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
+        </div>
         <div w-class="home-info-wrap">
             <img w-class="avatar" src="../../res/images/img_avatar1.png" />
             <div w-class="nameText">
@@ -40,13 +41,13 @@
                 <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
                 <ul w-class="ul-wrap">
                     <li w-class="liItem" >搜索聊天记录</li>
-                    <li w-class="liItem">
+                    <li w-class="liItem" ev-switch-click="msgTop">
                         <span>聊天置顶</span>
-                        <chat-client-app-widget-switch-switch>{types:false,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
+                        <chat-client-app-widget-switch-switch>{types:{{it.msgTop}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                     </li>
-                    <li w-class="liItem">
+                    <li w-class="liItem" ev-switch-click="msgAvoid">
                         <span>消息免打扰</span>
-                        <chat-client-app-widget-switch-switch>{types:true,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
+                        <chat-client-app-widget-switch-switch>{types:{{it.msgAvoid}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                     </li>
                     {{if it.isAdmin}}
                     <li w-class="liItem" on-tap="openGroupManage">群管理</li>

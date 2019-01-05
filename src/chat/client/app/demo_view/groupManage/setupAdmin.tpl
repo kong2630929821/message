@@ -7,7 +7,7 @@
         <div w-class="a">管理员{{admins.length}}/5</div>
         {{for index,item of admins}}
         <div style="position:relative;">
-            <chat-client-app-demo_view-contactList-contactItem>{id:{{item}},chatType:"user"}</chat-client-app-demo_view-contactList-contactItem>
+            <chat-client-app-demo_view-contactList-contactItem>{id:{{item}},chatType:"user",img:"../../res/images/user.png"}</chat-client-app-demo_view-contactList-contactItem>
             {{if item !== it.ginfo.ownerid}}
             <img on-tap="removeAdmin({{item}})" src="../../res/images/icon_remove.png" style="position:absolute;right:36px;top:36px;"/>
             {{else}}

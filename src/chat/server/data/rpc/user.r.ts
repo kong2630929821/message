@@ -98,12 +98,12 @@ export const acceptFriend = (agree: UserAgree): Result => {
         }
 
         sContactInfo.applyUser = delValueFromArray(rid, sContactInfo.applyUser);
+        // 在对方的列表中添加好友
+        const rContactInfo = contactBucket.get(rid)[0];
+        rContactInfo.applyUser = delValueFromArray(sid, rContactInfo.applyUser);
         if (agree) {
-            // 在对方的列表中添加好友
-            const rContactInfo = contactBucket.get(rid)[0];
+            
             rContactInfo.friends.findIndex(item => item === sid) === -1 && rContactInfo.friends.push(sid);
-            rContactInfo.applyUser = delValueFromArray(sid, rContactInfo.applyUser);
-            contactBucket.put(rid, rContactInfo);
             // 在当前用户列表中添加好友
             sContactInfo.friends.findIndex(item => item === rid) === -1 && sContactInfo.friends.push(rid);
             // 分别插入到friendLink中去
@@ -115,6 +115,9 @@ export const acceptFriend = (agree: UserAgree): Result => {
             friendLinkBucket.put(friendLink.uuid, friendLink);
             friendLink.uuid = genUuid(rid, sid);
             friendLinkBucket.put(friendLink.uuid, friendLink);
+            contactBucket.put(sid, sContactInfo);
+            contactBucket.put(rid, rContactInfo);
+            
             // 发布一条添加成功的消息
             const info = new UserSend();
             info.msg = '你们已经成为好友，开始聊天吧';
@@ -126,8 +129,7 @@ export const acceptFriend = (agree: UserAgree): Result => {
             // 拒绝好友
             send(rid, CONSTANT.SEND_REFUSED, '');
         }
-        contactBucket.put(sid, sContactInfo);
-
+        
     };
 
     _acceptFriend(getUid(), agree.uid, agree.agree);

@@ -5,10 +5,10 @@
     <div w-class="content">
         <div w-class="topic-wrap">
             <div on-tap="goNext(0)" >
-                <chat-client-app-demo_view-contactList-contactItem>{text:"新的朋友",totalNew:{{it1.applyUser.length + it1.applyGroup.length}} }</chat-client-app-demo_view-contactList-contactItem>
+                <chat-client-app-demo_view-contactList-contactItem>{text:"新的朋友", totalNew:{{it1.applyUser.length + it1.applyGroup.length}}, img:"../../res/images/new-friend.png" }</chat-client-app-demo_view-contactList-contactItem>
             </div>
             <div on-tap="goNext(1)" >
-                <chat-client-app-demo_view-contactList-contactItem>{text:"群聊"}</chat-client-app-demo_view-contactList-contactItem>
+                <chat-client-app-demo_view-contactList-contactItem>{text:"群聊", img:"../../res/images/groups.png"}</chat-client-app-demo_view-contactList-contactItem>
             </div>
         </div>
         <div w-class="friendPart">

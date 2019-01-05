@@ -8,11 +8,12 @@ import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { setData } from '../../../../server/data/rpc/basic.p';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
 import { getGroupUserLink, updateGroupAlias, userExitGroup } from '../../../../server/data/rpc/group.p';
 import { GroupAlias } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
-import { depCopy } from '../../../../utils/util';
+import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
 
@@ -37,7 +38,11 @@ export class GroupInfos extends Widget {
             editable:false,
             groupAlias:'',
             isOwner: false,
-            isAdmin:false
+            isAdmin:false,
+            scrollHeight:0,
+            setting:null,
+            msgAvoid:false,
+            msgTop:false
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -63,6 +68,10 @@ export class GroupInfos extends Widget {
         if (ginfo.adminids.indexOf(uid) > -1) {
             this.props.isAdmin = true;
         }
+
+        this.props.setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
+        this.props.msgTop = this.props.setting.msgTop.findIndex(item => item === genGroupHid(this.props.gid)) > -1;
+        this.props.msgAvoid = this.props.setting.msgAvoid.findIndex(item => item === genGroupHid(this.props.gid)) > -1;
     }
 
     public firstPaint() {
@@ -201,6 +210,65 @@ export class GroupInfos extends Widget {
 
         return super.destroy();
     }
+
+    /**
+     * 屏幕滑动
+     */
+    public scrollPage() {
+        const scrollTop = document.getElementById('groupInfo').scrollTop;
+        this.props.scrollHeight = scrollTop;
+        this.paint();
+    }
+
+    /**
+     * 设置消息免打扰
+     */
+    public msgAvoid(e:any) {
+        this.props.msgAvoid = e.newType;
+        const setting = this.props.setting;
+        const hid = genGroupHid(this.props.gid);
+        const index = setting.msgAvoid.findIndex(item => item === hid);
+        if (e.newType) {
+            index === -1 && setting.msgAvoid.push(hid);
+        } else {
+            setting.msgAvoid.splice(index,1);
+        }
+        this.props.setting = setting;
+        store.setStore('setting',setting);
+        clientRpcFunc(setData,JSON.stringify(setting),(res) => {
+            // TODO
+            console.log(res);
+        });
+    }
+
+    /**
+     * 设置消息置顶
+     */
+    public msgTop(e:any) {
+        this.props.msgTop = e.newType;
+        const setting = this.props.setting;
+        const hid = genGroupHid(this.props.gid);
+        const index = setting.msgTop.findIndex(item => item === hid);
+        if (e.newType) {
+            index === -1 && setting.msgTop.push(hid);
+            
+            const lastChat = store.getStore(`lastChat`, []);
+            const ind = lastChat.findIndex(item => item[0] === this.props.gid && item[2] === GENERATOR_TYPE.GROUP);
+            ind > -1 && lastChat.splice(index, 1);    
+            lastChat.unshift([]); // 向前压入数组中
+            store.setStore(`lastChat`,lastChat);
+
+        } else {
+            setting.msgTop.splice(index,1);
+        }
+        this.props.setting = setting;
+        store.setStore('setting',setting);
+
+        clientRpcFunc(setData,JSON.stringify(setting),(res) => {
+            // TODO
+            console.log(res);
+        });
+    }
 }
 
 // ================================================ 本地
@@ -218,6 +286,10 @@ interface Props {
     groupAlias:string; // 群别名
     isOwner:boolean; // 是否是群主
     isAdmin:boolean;// 是否时管理员
+    scrollHeight:number; 
+    setting:any; // 额外设置，免打扰|置顶
+    msgTop:boolean; // 置顶
+    msgAvoid:boolean; // 免打扰
 }
 
 const MAX_DURING = 600;

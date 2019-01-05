@@ -1,31 +1,26 @@
-<div w-class="new-page" class="new-page" on-tap="pageClick" ev-back-click="goBack">
+<div w-class="new-page" class="new-page" on-tap="pageClick" ev-back-click="goBack" >
     <div w-class="top-main-wrap">
         <chat-client-app-widget-topBar-topBar>{title:"",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap">
-            <img w-class="avatar" src="../../res/images/img_avatar1.png" />
-            <div w-class="nameText" ev-input-blur="changeUserInfo" ev-input-change="nameChange">
-                {{if it.nameEdit}}
-                    <widget w-class="aliasInput" w-tag="chat-client-app-widget-input-input" on-tap="editName">{input:{{it.name}},style:"padding:0px;background:none;color:#fff;",itype:"text",maxLength:10 }</widget>
-                {{else}}
-                    {{it.name}}
-                {{end}}
-                <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="editName"/>
+            <img w-class="avatar" src="{{it.avatar}}" />
+            <div w-class="nameText">
+                {{it.name}}
             </div>
-            <div>ID：{{it.info.uid}}</div>
+            <div on-tap="doCopy(0)" style="border-bottom: 40px solid transparent;">ID：{{it.info.uid}}</div>
         </div>
     </div>  
 
     <div w-class="detail-info-wrap">
         <div w-class="detail-info">
-            <div style="margin-bottom:40px;">
+            <div style="margin-bottom:40px;" on-tap="doCopy(1)">
                 <div w-class="adress-wrap">
                     <img w-class="adressIcon" src="../../res/images/adress-book.png" />
-                    <span w-class="mainText">0x58b0b586b0b50x58b0b586vcbvcbvc0b586b586</span>
+                    <span w-class="mainText">{{it.info.wallet_addr}}</span>
                 </div>
                 <span w-class="flag">地址</span>
             </div>
             
-            <div style="margin-bottom:40px;">
+            <div style="margin-bottom:40px;" on-tap="doCopy(2)">
                 <div ev-input-change="phoneChange" ev-input-blur="changeUserInfo" w-class="adress-wrap">
                     <img w-class="adressIcon" src="../../res/images/phone.png" />
                     {{if it.phoneEdit}}
@@ -33,7 +28,7 @@
                     {{else}}
                         <span w-class="mainText">{{it.tel}}</span>
                     {{end}}
-                    <span style="font-size:32px;color:#ccc;" on-tap="editPhone">编辑</span>
+                    
                 </div>
                 <span w-class="flag">电话</span>
                 
@@ -52,5 +47,5 @@
            </div>
         </div>
     </div>
-    
+
 </div>

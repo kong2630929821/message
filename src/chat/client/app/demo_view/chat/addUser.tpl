@@ -1,7 +1,7 @@
 <div class="new-page" ev-back-click="back" style="overflow-x:hidden;overflow-y:auto;">
     <chat-client-app-widget-topBar-topBar w-class="title">{title:"添加好友"}</chat-client-app-widget-topBar-topBar>
     <div w-class="search-input" ev-input-change="inputUid">
-        <chat-client-app-widget-input-input w-class="pi-input idInput">{placeHolder : "搜索用户ID",style : "font-size:32px;padding-left:82px;border-radius: 12px;"}</chat-client-app-widget-input-input>
+        <chat-client-app-widget-input-input w-class="pi-input idInput">{placeHolder:"搜索用户ID",style:"font-size:32px;padding-left:82px;border-radius: 12px;",input:{{it.rid}} }</chat-client-app-widget-input-input>
         <img w-class="searchIcon" src="../../res/images/search-gray.png" />
     </div>
     <div w-class="applyBtn" on-tap="goNext(2)" class="ripple">{{it.isSuccess?'发送成功':'添加好友'}}</div>

@@ -105,3 +105,10 @@
     font-size: 32px;
     color: #222222;
 }
+.contactorOpList{
+    position:absolute;
+    left: 427px;
+    top: 128px;
+    width: 273px;
+    height: 324px;
+}

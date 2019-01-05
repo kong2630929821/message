@@ -9,14 +9,13 @@ import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { SendMsg } from '../../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import { getFriendHistory } from '../../data/initStore';
-import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { UserType } from '../../logic/autologin';
+import { getUserAvatar } from '../../logic/logic';
 import { clientRpcFunc, login as mqttLogin, subscribe } from '../../net/init';
 import { init } from '../login/login';
 // ================================================ 导出
@@ -48,7 +47,10 @@ export class Contact extends Widget {
         const uid = store.getStore('uid');
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         this.props.isOnline = wUser.nickName !== '';
-
+        if (uid) {
+            this.props.avatar = getUserAvatar(uid);
+        }
+        
         // 如果聊天未登录，或钱包修改了姓名、头像等，或钱包退出登陆
         if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
             store.initStore();
@@ -88,6 +90,7 @@ export class Contact extends Widget {
                             }
                             // updateUserMessage(v.msg.sid, v);
                         });
+                        this.props.avatar = getUserAvatar(r.uid);
                         this.paint();
 
                         const user = walletStore.getStore('user/info');
@@ -152,12 +155,8 @@ export class Contact extends Widget {
         this.closeMore();
         this.paint();
     }
-}
 
-store.register(`lastChat`, (r: [number, number][]) => {
-    console.log('最近聊天数据', r);
-    forelet.paint(r);
-});
+}
 
 // ================================================ 本地
 interface Props {
@@ -167,7 +166,23 @@ interface Props {
     utilList: any[];
     isOnline: boolean; // 钱包是否已经登陆
     netClose: boolean; // 网络链接是否断开
+    avatar:string; // 头像
 }
+const STATE = {
+    lastChat:[],
+    contactMap:''
+};
+store.register(`lastChat`, (r: [number, number][]) => {
+    STATE.lastChat = r;
+    console.log('STATE############',STATE);
+    forelet.paint(STATE);
+});
+store.register('contactMap', (r) => {
+    for (const value of r.values()) {
+        STATE.contactMap = value;
+        forelet.paint(STATE);
+    }  
+});
 store.register('friendLinkMap', () => {
     const w = forelet.getWidget(WIDGET_NAME);
     if (w) {

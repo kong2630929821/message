@@ -7,14 +7,14 @@ import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
-import { getUsersInfo } from '../../../../server/data/rpc/basic.p';
+import { getUsersInfo, setData } from '../../../../server/data/rpc/basic.p';
 import { GetUserInfoReq, Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { Logger } from '../../../../utils/logger';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias } from '../../logic/logic';
+import { bottomNotice, copyToClipboard, getFriendAlias, getUserAvatar } from '../../logic/logic';
 import { clientRpcFunc, unSubscribe } from '../../net/init';
 import { applyFriend, delFriend as delUserFriend } from '../../net/rpc';
 
@@ -26,29 +26,40 @@ const logger = new Logger(WIDGET_NAME);
 // ================================================ 导出
 export class UserDetail extends Widget {
     public ok: () => void;
-    public props: Props = {
-        uid: null,
-        inFlag: 0,
-        editable: false,
-        isContactorOpVisible: false,
-        utilList: [],
-        userInfo: {},
-        alias: '',
-        isFriend: true
-    };
+    public props: Props;
+    constructor() {
+        super();
+        this.props = {
+            uid: null,
+            inFlag: 0,
+            isContactorOpVisible: false,
+            utilList: [],
+            userInfo: {},
+            alias: '',
+            isFriend: true,
+            avatar:'',
+            setting:null,
+            msgAvoid:false,
+            msgTop:false
+        };
+    }
 
     public setProps(props: Json) {
         super.setProps(props);
         this.props.userInfo = {};
-        this.props.utilList = [
+        if (props.inFlag === 3) {
+            this.props.utilList = [{ utilText: '加入黑名单' }];
+        } else {
+            this.props.utilList = [
+            { utilText: '修改备注' },
             { utilText: '发送名片' },
             { utilText: '删除聊天记录' },
             { utilText: '加入黑名单' },
             { utilText: '删除' }
-        ];
+            ];
+        }
 
         this.props.isContactorOpVisible = false;
-        this.props.editable = false;
         this.props.isFriend = true;
         this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
         this.props.alias = getFriendAlias(this.props.uid);
@@ -56,6 +67,13 @@ export class UserDetail extends Widget {
             this.getUserData(this.props.uid);
         }
         logger.debug(props);
+        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/img_avatar1.png';
+        
+        const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
+        const sid = store.getStore('uid');
+        this.props.setting = setting;
+        this.props.msgTop = setting.msgTop.findIndex(item => item === genUserHid(sid,this.props.uid)) > -1;
+        this.props.msgAvoid = setting.msgAvoid.findIndex(item => item === genUserHid(sid,this.props.uid)) > -1;
     }
 
     // 非好友获取信息
@@ -101,19 +119,33 @@ export class UserDetail extends Widget {
     // 点击联系人操作列表项
     public handleFatherTap(e: any) {
         this.props.isContactorOpVisible = false;
-        if (e.index === 1) { // 清空聊天记录
-            popNew('chat-client-app-widget-modalBox-modalBox', { title: '清空聊天记录', content: '确定清空和' + `${this.props.userInfo.name}` + '的聊天记录吗' });
-        }
-        if (e.index === 2) { // 加入黑名单
-            popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
-        }
-        if (e.index === 3) { // 删除联系人
-            popNew('chat-client-app-widget-modalBox-modalBox', { title: '删除联系人', content: '将联系人' + `${this.props.userInfo.name}` + '删除，同时删除聊天记录', sureText: '删除', cancelText: '取消' }, () => {
-                this.delFriend(this.props.uid);
-                this.goBack();
-            });
-        }
         this.paint();
+        if (this.props.inFlag === 3) {
+            popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
+            
+            return;
+        }
+        switch (e.index) {
+            case 0: // 修改备注
+                this.changeFriendAlias();
+                break;
+            case 1: // 发送名片
+
+                break;
+            case 2: // 清空聊天记录
+                popNew('chat-client-app-widget-modalBox-modalBox', { title: '清空聊天记录', content: `确定清空和${this.props.userInfo.name}的聊天记录吗` });
+                break;
+            case 3: // 加入黑名单
+                popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
+                break;
+            case 4: // 删除联系人
+                popNew('chat-client-app-widget-modalBox-modalBox', { title: '删除联系人', content: `将联系人${this.props.userInfo.name}删除，同时删除聊天记录`, sureText: '删除' }, () => {
+                    this.delFriend(this.props.uid);
+                    this.goBack();
+                });
+                break;
+            default:
+        }
     }
 
     public goBack() {
@@ -151,28 +183,10 @@ export class UserDetail extends Widget {
     }
 
     /**
-     * 编辑好友别名
-     */
-    public editAlias() {
-        this.props.editable = true;
-        this.paint();
-    }
-
-    /**
      * 页面点击
      */
     public pageClick() {
-        this.props.alias = this.props.alias;
-        this.props.editable = false;
         this.props.isContactorOpVisible = false;
-        this.paint();
-    }
-
-    /**
-     * 好友别名更改
-     */
-    public aliasChange(e: any) {
-        this.props.alias = e.value;
         this.paint();
     }
 
@@ -180,19 +194,101 @@ export class UserDetail extends Widget {
      * 修改好友备注
      */
     public changeFriendAlias() {
-        const friend = new FriendAlias();
-        friend.rid = this.props.uid;
-        friend.alias = this.props.alias;
-        clientRpcFunc(changeFriendAlias, friend, (r: Result) => {
-            // todo
-            if (r.r === 1) {
-                const sid = store.getStore('uid');
-                const friendlink = store.getStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, {});
-                friendlink.alias = this.props.alias;
-                store.setStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, friendlink);
-                console.log('修改好友备注成功', this.props.alias);
-            }
+        popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'修改备注', contentInput:this.props.alias },(res:any) => {
+            const friend = new FriendAlias();
+            friend.rid = this.props.uid;
+            friend.alias = res.content;
+            clientRpcFunc(changeFriendAlias, friend, (r: Result) => {
+                if (r.r === 1) {
+                    const sid = store.getStore('uid');
+                    const friendlink = store.getStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, {});
+                    friendlink.alias = friend.alias;
+                    store.setStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, friendlink);
+                    this.props.alias = friend.alias;
+                    this.paint();
+                    bottomNotice('修改好友备注成功');
+
+                } else {
+                    bottomNotice('修改好友备注失败');
+                }
+            });
         });
+        
+    }
+
+    /**
+     * 点击复制
+     */
+    public doCopy(i:number) {
+        if (i === 0) {
+            copyToClipboard(this.props.uid);
+        } else if (i === 1) {
+            copyToClipboard(this.props.userInfo.wallet_addr);
+        } else {
+            copyToClipboard(this.props.userInfo.tel);
+        }
+        this.props.isContactorOpVisible = false;
+        this.paint();
+        bottomNotice('复制成功');
+    }
+
+    /**
+     * 设置消息免打扰
+     */
+    public msgAvoid(e:any) {
+        this.props.msgAvoid = e.newType;
+        const setting = this.props.setting;
+        const sid = store.getStore('uid');
+        const hid = genUserHid(sid,this.props.uid);
+        const index = setting.msgAvoid.findIndex(item => item === hid);
+        if (e.newType) {
+            index === -1 && setting.msgAvoid.push(hid);
+        } else {
+            setting.msgAvoid.splice(index,1);
+        }
+        this.props.setting = setting;
+        store.setStore('setting',setting);
+        clientRpcFunc(setData,JSON.stringify(setting),(res) => {
+            // TODO
+            console.log(res);
+        });
+    }
+
+    /**
+     * 设置消息置顶
+     */
+    public msgTop(e:any) {
+        this.props.msgTop = e.newType;
+        const setting = this.props.setting;
+        const sid = store.getStore('uid');
+        const hid = genUserHid(sid,this.props.uid);
+        const index = setting.msgTop.findIndex(item => item === hid);
+        if (e.newType) {
+            index === -1 && setting.msgTop.push(hid);
+        } else {
+            setting.msgTop.splice(index,1);
+        }
+        this.props.setting = setting;        
+        store.setStore('setting',setting);
+        this.pushLastChat(e.newType,setting);
+        clientRpcFunc(setData,JSON.stringify(setting),(res) => {
+            // TODO
+            console.log(res);
+        });
+    }
+
+    public pushLastChat(fg:boolean,setting:any) {
+        const lastChat = store.getStore(`lastChat`, []);
+        const ind = lastChat.findIndex(item => item[0] === this.props.uid && item[2] === GENERATOR_TYPE.USER);
+        ind > -1 && lastChat.splice(ind, 1); 
+        if (fg) { // 置顶放到最前面
+            lastChat.unshift([this.props.uid, Date.now(), GENERATOR_TYPE.USER]); // 向前压入数组中
+        } else {  // 取消置顶放到置顶消息后
+            const len = setting.msgTop.length;
+            lastChat.splice(len, 0, [this.props.uid, Date.now(), GENERATOR_TYPE.USER]); // 压入到置顶消息后
+        }
+        store.setStore(`lastChat`,lastChat);
+
     }
 }
 
@@ -201,10 +297,14 @@ export class UserDetail extends Widget {
 interface Props {
     uid: number;
     inFlag: number; // 从某个页面进入，0 contactList进入, 1 chat 单聊进入，2 chat 群聊进入，3 newfriendapply 新朋友申请进入
-    editable: boolean; // 是否可编辑别名
     isContactorOpVisible: boolean;
     utilList: any;
     userInfo: any;
     alias: string; // 好友别名
+    // editable: boolean; // 是否可编辑别名
     isFriend: boolean; // 是否是好友
+    avatar:string; // 头像
+    setting:any; // 额外设置，免打扰|置顶
+    msgTop:boolean; // 置顶
+    msgAvoid:boolean; // 免打扰
 }

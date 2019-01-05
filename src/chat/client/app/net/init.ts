@@ -14,13 +14,15 @@ import { AutoLoginMgr, UserType } from '../logic/autologin';
 import { initPush } from './receive';
 
 // ================================================ 导出
+export const sourceIp = '192.168.9.29';
+export const sourcePort = 1234;
 
 /**
  * 客户端初始化
  */
 export const initClient = () => {
     if (!rootClient) {
-        mqtt = new AutoLoginMgr('192.168.9.25', 1234);
+        mqtt = new AutoLoginMgr(sourceIp, sourcePort);
         rootClient = mqtt.connection();
     }
     initPush();

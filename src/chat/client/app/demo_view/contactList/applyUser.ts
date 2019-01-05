@@ -48,7 +48,6 @@ export class ApplyUser extends Widget {
                     if (r.arr.length > 0) {
                         this.props.name = r.arr[0].name; 
                         this.props.applyInfo = `用户${this.props.name}申请进群`;
-                        this.props.activeToGGid = props.activeToGGid;
                         this.paint();
                     }
                 });
@@ -58,8 +57,8 @@ export class ApplyUser extends Widget {
                 const rid = getUidFromGuid(this.props.guid);
                 const ginfo = store.getStore(`groupInfoMap/${gid}`);
                 const userInfo = store.getStore(`userInfoMap/${rid}`);
-                this.props.name = userInfo ? userInfo.name : ''; 
-                this.props.applyInfo = `邀请你加入群组：${ginfo ? ginfo.name :''}`;
+                this.props.name = ginfo ? ginfo.name :'';
+                this.props.applyInfo = `${userInfo ? userInfo.name : ''}邀请你加入群`;
                 this.props.id = gid;
             }
             
@@ -68,13 +67,13 @@ export class ApplyUser extends Widget {
         // 查看申请详细信息 
     public viewApplyDetail() {
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            popNew('chat-client-app-demo_view-contactList-newFriendApply',this.props);
+            popNew('chat-client-app-demo_view-contactList-newFriendApply',{ ...this.props,title:'新的朋友' });
         }
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             if (this.props.isActiveToGroup) { // 主动申请加群
-                popNew('chat-client-app-demo_view-groupManage-groupApplyInfo',this.props);
+                popNew('chat-client-app-demo_view-contactList-newFriendApply',{ ...this.props,title:'申请入群' });
             } else { // 被动进群
-                popNew('chat-client-app-demo_view-contactList-newFriendApply',this.props);
+                popNew('chat-client-app-demo_view-contactList-newFriendApply',{ ...this.props,title:'邀请入群' });
             }
             
         }
@@ -100,7 +99,7 @@ export class ApplyUser extends Widget {
 // ================================================ 本地
 interface Props {
     id?: number; // 用户id或群组id
-    guid:string; // 群内成员ID
+    guid?:string; // 群内成员ID
     name?: string; // 用户名或群名
     chatType: GENERATOR_TYPE; // 是用户还是群组
     applyInfo?: string; // 验证信息
