@@ -63,11 +63,11 @@ export class AutoLoginMgr {
                 // 连接成功
                 this.conState = true;
                 if (this.relogin === ReLoginState.START) {
-                    alert(`连接成功！！！`);
+                    // console.log(`连接成功！！！`);
                     this.relogin = ReLoginState.ING;
                     this.autoLogin();
                 } else if (this.relogin === ReLoginState.ING) {
-                    alert(`重新打开APP！！！`);
+                    // console.log(`重新打开APP！！！`);
                 }
             },
             onFailure: (r) => {
@@ -80,7 +80,7 @@ export class AutoLoginMgr {
         client.setOnConnectionLost((r) => {
             // 连接断开调用
             console.log('connectinLost:r', r);
-            alert(`连接断开！！！`);
+            // console.log(`连接断开！！！`);
             this.conState = false;
             this.relogin = ReLoginState.START;
         });

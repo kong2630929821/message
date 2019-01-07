@@ -92,10 +92,10 @@ export class Chat extends Widget {
 
         // 是否已被踢出群或群已经解散
         if (gInfo.state === GROUP_STATE.DISSOLVE) {
-            alert('该群已被解散');
+            console.log('该群已被解散');
             this.ok();
         } else if (gInfo.memberids.indexOf(this.props.sid) < 0) {
-            alert('您已被移除该群');
+            console.log('您已被移除该群');
             this.ok();
         }
     }
@@ -142,7 +142,7 @@ export class Chat extends Widget {
             clientRpcFunc(sendGroupMessage, message, (r: GroupHistory) => {
     
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    alert('发送失败！');
+                    console.log('发送失败！');
                     
                     return;
                 } 
@@ -166,7 +166,7 @@ export class Chat extends Widget {
                 const nextside = this.props.id;
     
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    alert('对方不是你的好友！');
+                    console.log('对方不是你的好友！');
                     
                     return;
                 } 

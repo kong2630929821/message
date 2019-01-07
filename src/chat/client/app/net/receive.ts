@@ -39,6 +39,6 @@ export const initPush = () => {
     // 拒绝好友添加
     addEvent(CONSTANT.SEND_REFUSED, (r) => {
         console.log('!!!!!!!!!!!!r:', r);
-        alert(r);
+        console.log(r);
     });
 };

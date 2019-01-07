@@ -76,7 +76,7 @@ export class ManageItem extends Widget {
         if (e.value === 2) { // 入群申请
             popNew('chat-client-app-view-groupManage-groupApplyStatus',{ gid:this.props.gid });
         } else if (ownerid !== uid) {  // 是否是群主
-            alert('你没有权限执行此操作');
+            console.log('你没有权限执行此操作');
 
             return;
         }

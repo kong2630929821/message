@@ -1,5 +1,6 @@
 {{: it1 = it1 || {lastChat:[],contactMap:""} }}
 <div w-class="new-page" class="new-page" on-tap="closeMore">
+    {{if it.isLogin}}
     <div w-class="topBack" ev-next-click="getMore" ev-refresh-click="refreshPage">
         <img src="../../res/images/topbar_backimg.png" w-class="backImg"/>
         {{if it1.contactMap && (it1.contactMap.applyUser.length + it1.contactMap.applyGroup.length) > 0}}
@@ -41,4 +42,7 @@
     </div>
     {{end}}
 
+    {{else}}
+    <app-view-chat-home-home></app-view-chat-home-home>
+    {{end}}
 </div>
