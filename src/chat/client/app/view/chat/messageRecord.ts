@@ -70,6 +70,8 @@ export class MessageRecord extends Widget {
                 this.props.msg = '新公告';
             } else if (this.props.lastMessage.mtype === MSG_TYPE.RENOTICE) {
                 this.props.msg = '公告撤回';
+            } else if (this.props.lastMessage.mtype === MSG_TYPE.REDENVELOPE) {
+                this.props.msg = '[快抢红包]';
             }
         } 
 

@@ -47,6 +47,7 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
         this.props.me = this.props.msg.sid === store.getStore('uid');
         const time = depCopy(this.props.msg.time);
         this.props.time = timestampFormat(time,1);
+        console.log('messageItem#####',this.props.msg);
     }
 
     public firstPaint() {
@@ -78,6 +79,11 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
         this.props.isMessageRecallVisible = false;
         this.paint();
     }
+
+    // 点击打开红包
+    public openRedEnvelope() {
+        // popNew()
+    }
 }
 
 // ================================================ 本地
@@ -105,16 +111,27 @@ const parseImg = (msg:any) => {
 
     return msg;
 };
+
+const parseRedEnv = (msg:any) => {
+    msg.msg = JSON.parse(msg.msg).message || '恭喜发财，万事如意';
+
+    return msg;
+};
 export const parseMessage = (msg:any):any => {
     switch (msg.mtype) {
-        case MSG_TYPE.TXT:
+        case MSG_TYPE.REDENVELOPE: // 红包
+
+            return parseRedEnv(msg);
+        case MSG_TYPE.TXT:  // 文本，表情
+
             return parseEmoji(msg);
-        case MSG_TYPE.IMG:
+        case MSG_TYPE.IMG:  // 图片
+
             return parseImg(msg);
-        case MSG_TYPE.VOICE:
+        case MSG_TYPE.VOICE:  // 语音
         // TODO:
             return msg;
-        case MSG_TYPE.VIDEO:
+        case MSG_TYPE.VIDEO: // 视频
         // TODO:
             return msg;
         default:

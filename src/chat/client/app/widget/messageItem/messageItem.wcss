@@ -2,7 +2,6 @@
     max-width:512px;
     padding:16px;
     font-size: 32px;
-    font-family: PingFangSC-Regular;
     border-radius:16px;
     color: rgba(255, 255, 255, 1);
     background:#3FA2F7;
@@ -19,7 +18,6 @@
 .sendTime{   
     color: #BBE5FE;
     font-size: 24px;
-    font-family: PingFangSC-Regular;
 }
 .isRead{
     height:32px;

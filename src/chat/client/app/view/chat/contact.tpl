@@ -24,7 +24,7 @@
         {{elseif it1.lastChat}}
         <div w-class="inner-wrap" style="margin-top:{{it.netClose?'10px':'30px;'}}">
             {{for i,v of it1.lastChat}}
-            <div on-tap="chat({{v[0]}},'{{v[2]}}')" style="margin-bottom: 10px;" class="ripple">
+            <div on-down="chat({{v[0]}},'{{v[2]}}')" style="margin-bottom: 10px;" class="ripple">
                 <widget w-tag="chat-client-app-view-chat-messageRecord">{rid:{{v[0]}},time:{{v[1]}},chatType:{{v[2]}} }</widget>
             </div>
             {{end}} 
