@@ -83,6 +83,7 @@ export class Contact extends Widget {
             if (openId) {
                 mqttLogin(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
                     this.props.isOnline = true;
+                    console.log('聊天登陆成功！！！！！！！！！！！！！！');
 
                     if (r && r.uid > 0) {
                         store.setStore(`uid`, r.uid);
