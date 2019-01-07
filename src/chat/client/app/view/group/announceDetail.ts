@@ -34,11 +34,11 @@ export class AnnounceDetail extends Widget {
             clientRpcFunc(sendGroupMessage, message, (r:GroupHistory) => {
                 // TODO
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    console.log('撤回公告失败');
+                    bottomNotice('撤回公告失败');
                         
                     return;
                 } else {
-                    console.log('撤回公告成功');
+                    bottomNotice('撤回公告成功');
                 }
             });
         });

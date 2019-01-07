@@ -13,6 +13,7 @@ import { GroupCreate, Invite, InviteArray } from '../../../../server/data/rpc/gr
 import { Logger } from '../../../../utils/logger';
 import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -40,7 +41,7 @@ export class SetGroupChat extends Widget {
     }
     public createGroup() {
         if (!this.props.name) {
-            console.log('群名不能为空');
+            bottomNotice('群名不能为空');
 
             return;          
         } 
@@ -49,11 +50,10 @@ export class SetGroupChat extends Widget {
         groupInfo.note = '';
         clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
-                console.log(`创建群组失败`);
+                bottomNotice(`创建群组失败`);
 
                 return;
             }
-            console.log(`创建群组成功`);
             store.setStore(`groupInfoMap/${r.gid}`, r);
 
             // 邀请好友进群
@@ -69,9 +69,8 @@ export class SetGroupChat extends Widget {
 
                 clientRpcFunc(inviteUsers, invites, (r: Result) => {
                     if (r.r !== 1) {
-                        console.log(`邀请好友入群失败`);
+                        bottomNotice(`邀请好友入群失败`);
                     }
-                    console.log('成功发送邀请好友信息');
                 });
             }
             this.ok();

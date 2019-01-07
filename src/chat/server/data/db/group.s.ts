@@ -45,33 +45,35 @@ new EnumType( Type.U32 ) ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.gid = bb.readInt();
-		this.name = bb.readUtf8();
-		this.ownerid = bb.readInt();
-		this.adminids = bb.readArray(() => {
+		(<any>this).gid = bb.readInt();
+		(<any>this).name = bb.readUtf8();
+		(<any>this).ownerid = bb.readInt();
+		(<any>this).adminids = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
-		this.memberids = bb.readArray(() => {
+		(<any>this).memberids = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
-		this.annoceids = bb.readArray(() => {
+		(<any>this).annoceids = bb.readArray(() => {
 	return     bb.readUtf8();
 })
 ;
-		this.hid = bb.readUtf8();
-		this.create_time = bb.readInt();
-		this.dissolve_time = bb.readInt();
-		this.join_method = bb.readInt() as JOIN_METHOD;
-		this.note = bb.readUtf8();
-		this.state = bb.readInt() as GROUP_STATE;
-		this.applyUser = bb.readArray(() => {
+		(<any>this).hid = bb.readUtf8();
+		(<any>this).create_time = bb.readInt();
+		(<any>this).dissolve_time = bb.readInt();
+		(<any>this).join_method = bb.readInt() as JOIN_METHOD;
+		(<any>this).note = bb.readUtf8();
+		(<any>this).state = bb.readInt() as GROUP_STATE;
+		(<any>this).applyUser = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.gid);
@@ -141,13 +143,15 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.guid = bb.readUtf8();
-		this.groupAlias = bb.readUtf8();
-		this.userAlias = bb.readUtf8();
-		this.hid = bb.readUtf8();
-		this.join_time = bb.readInt();
+		(<any>this).guid = bb.readUtf8();
+		(<any>this).groupAlias = bb.readUtf8();
+		(<any>this).userAlias = bb.readUtf8();
+		(<any>this).hid = bb.readUtf8();
+		(<any>this).join_time = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.guid);

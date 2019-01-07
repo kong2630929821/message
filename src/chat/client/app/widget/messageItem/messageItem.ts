@@ -49,7 +49,6 @@ export class MessageItem extends Widget {
         this.props.me = this.props.msg.sid === store.getStore('uid');
         const time = depCopy(this.props.msg.time);
         this.props.time = timestampFormat(time,1);
-        console.log('messageItem#####',this.props.msg);
     }
 
     public firstPaint() {
@@ -76,13 +75,13 @@ export class MessageItem extends Widget {
         popNew('chat-client-app-view-info-userDetail',{ uid:this.props.msg.sid, inFlag: fg });
     }
 
-    // 长按打开消息撤回条组件
+    // 长按打开消息撤回
     public openMessageRecall() {
         this.props.isMessageRecallVisible = true;
         this.paint();
     }
 
-    // 点击关闭消息撤回组件
+    // 点击关闭消息撤回
     public closeMessageRecall() {
         this.props.isMessageRecallVisible = false;
         this.paint();

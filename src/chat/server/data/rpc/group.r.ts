@@ -7,20 +7,15 @@ import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.
 import { GroupUserLinkArray, Result } from './basic.s';
 import { GroupAgree, GroupAlias, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray } from './group.s';
 
-import { read } from '../../../../pi_pt/db';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
-import { Tr } from '../../../../pi_pt/rust/pi_db/mgr';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
-import { unsetMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { GroupHistoryCursor, MSG_TYPE, MsgLock, UserHistoryCursor } from '../db/message.s';
-import { sendGroupMessage } from './message.r';
-import { GroupSend } from './message.s';
+import { GroupHistoryCursor, MsgLock  } from '../db/message.s';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -255,6 +250,7 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     cInfo.applyGroup = delGidFromApplygroup(agree.gid, cInfo.applyGroup);
 
     contactBucket.put(uid, cInfo);
+    // 拒绝加入群组
     if (!agree.agree) {
         logger.debug('User: ', uid, 'don\'t want to join group: ', agree.gid);
         gInfo.gid = -2; // gid = -1 indicate that user don't want to join this group
@@ -262,6 +258,7 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         return gInfo;
     }
 
+    // 已经在群组中
     if (gInfo.memberids.indexOf(uid) > -1) {
         logger.debug('User: ', uid, 'has been exist');
         gInfo.gid = -3;
@@ -269,9 +266,7 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         return gInfo;
 
     } else {
-        if (agree.agree) {
-            cInfo.group.push(agree.gid);
-        }
+        cInfo.group.push(agree.gid);
         gInfo.memberids.push(uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('User: ', uid, 'agree to join group: ', agree.gid);
@@ -665,11 +660,11 @@ export const dissolveGroup = (gid: number): Result => {
             logger.debug('dissolveGroup uid: ', uid, 'contact', contact);
         });
         // 删除群主题
-        const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-        const groupTopic = `ims/group/msg/${gid}`;
-        console.log('删除群主题！！！！！！！！！！！！！！', groupTopic);
-        unsetMqttTopic(mqttServer, groupTopic);
-        console.log('删除群主题！！！！！！！！！！！！！！ok');
+        // const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+        // const groupTopic = `ims/group/msg/${gid}`;
+        // console.log('删除群主题！！！！！！！！！！！！！！', groupTopic);
+        // unsetMqttTopic(mqttServer, groupTopic);
+        // console.log('删除群主题！！！！！！！！！！！！！！ok');
         res.r = 1;
 
         return res;

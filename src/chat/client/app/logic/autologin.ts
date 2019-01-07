@@ -11,6 +11,7 @@ import { AutoLogin, GetToken, Token } from '../../../server/rpc/session.s';
 import { clientRpcFunc, subscribe } from '../net/init';
 import { initReceive } from '../net/receive';
 import { login as defLogin, walletLogin } from '../net/rpc';
+import { bottomNotice } from './logic';
 
 // 用户类型
 export enum UserType {
@@ -63,11 +64,11 @@ export class AutoLoginMgr {
                 // 连接成功
                 this.conState = true;
                 if (this.relogin === ReLoginState.START) {
-                    // console.log(`连接成功！！！`);
+                    bottomNotice(`连接成功！！！`);
                     this.relogin = ReLoginState.ING;
                     this.autoLogin();
                 } else if (this.relogin === ReLoginState.ING) {
-                    // console.log(`重新打开APP！！！`);
+                    bottomNotice(`重新打开APP！！！`);
                 }
             },
             onFailure: (r) => {
@@ -80,7 +81,7 @@ export class AutoLoginMgr {
         client.setOnConnectionLost((r) => {
             // 连接断开调用
             console.log('connectinLost:r', r);
-            // console.log(`连接断开！！！`);
+            bottomNotice(`连接断开！！！`);
             this.conState = false;
             this.relogin = ReLoginState.START;
         });

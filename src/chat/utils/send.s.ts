@@ -15,10 +15,12 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.cmd = bb.readUtf8();
-		this.msg = bb.readUtf8();
+		(<any>this).cmd = bb.readUtf8();
+		(<any>this).msg = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.cmd);

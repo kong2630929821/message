@@ -15,10 +15,12 @@ new EnumType( Type.U8 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.name = bb.readUtf8();
-		this.age = bb.readInt();
+		(<any>this).name = bb.readUtf8();
+		(<any>this).age = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.name);
@@ -41,10 +43,12 @@ new EnumType( Type.U8 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.name = bb.readUtf8();
-		this.age = bb.readInt();
+		(<any>this).name = bb.readUtf8();
+		(<any>this).age = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.name);

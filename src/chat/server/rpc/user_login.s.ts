@@ -15,10 +15,12 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readUtf8();
-		this.passwdHash = bb.readUtf8();
+		(<any>this).uid = bb.readUtf8();
+		(<any>this).passwdHash = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.uid);
@@ -39,9 +41,11 @@ new EnumType( Type.Bool ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.ack = bb.readBool();
+		(<any>this).ack = bb.readBool();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeBool(this.ack);

@@ -5,6 +5,7 @@
 // ================================================ 导入
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
@@ -15,6 +16,7 @@ import { GroupAlias } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { bottomNotice, rippleStyle } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -119,10 +121,10 @@ export class GroupInfos extends Widget {
                     clientRpcFunc(userExitGroup,this.props.gid,(r) => {
                         console.log('========deleteGroup',r);
                         if (r.r === 1) { // 退出成功关闭当前页面
-                            console.log('退出群组成功');
+                            bottomNotice('退出群组成功');
                             this.ok();
                         } else {
-                            console.log('退出群组失败');
+                            bottomNotice('退出群组失败');
                         }
                     });
                 });
@@ -183,15 +185,15 @@ export class GroupInfos extends Widget {
         if (ownerid === uid || adminids.indexOf(uid) > -1) {
             popNew('chat-client-app-view-groupManage-groupManage',{ gid : this.props.gid });
         } else {
-            console.log('您没有权限执行此操作');
+            bottomNotice('您没有权限执行此操作');
         }
     }
     // 打开群聊天
-    public openGroupChat() {
-        setTimeout(() => {
-            popNew('chat-client-app-view-chat-chat',{ id:this.props.gid, chatType:GENERATOR_TYPE.GROUP });
-            this.pageClick();
-        }, 0);
+    public openGroupChat(e:any) {
+        rippleStyle(e);
+        this.pageClick();
+        popNew('chat-client-app-view-chat-chat',{ id:this.props.gid, chatType:GENERATOR_TYPE.GROUP });
+        
     }
     // 打开群成员
     public openGroupMember() {

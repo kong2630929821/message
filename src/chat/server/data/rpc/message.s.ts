@@ -20,12 +20,14 @@ new EnumType( Type.Usize ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.gid = bb.readInt();
-		this.mtype = bb.readInt() as MSG_TYPE;
-		this.msg = bb.readUtf8();
-		this.time = bb.readInt();
+		(<any>this).gid = bb.readInt();
+		(<any>this).mtype = bb.readInt() as MSG_TYPE;
+		(<any>this).msg = bb.readUtf8();
+		(<any>this).time = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.gid);
@@ -55,12 +57,14 @@ new EnumType( Type.Usize ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.rid = bb.readInt();
-		this.mtype = bb.readInt() as MSG_TYPE;
-		this.msg = bb.readUtf8();
-		this.time = bb.readInt();
+		(<any>this).rid = bb.readInt();
+		(<any>this).mtype = bb.readInt() as MSG_TYPE;
+		(<any>this).msg = bb.readUtf8();
+		(<any>this).time = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.rid);
@@ -90,12 +94,14 @@ new EnumType( Type.Usize ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.gid = bb.readInt();
-		this.mtype = bb.readInt() as MSG_TYPE;
-		this.msg = bb.readUtf8();
-		this.time = bb.readInt();
+		(<any>this).gid = bb.readInt();
+		(<any>this).mtype = bb.readInt() as MSG_TYPE;
+		(<any>this).msg = bb.readUtf8();
+		(<any>this).time = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.gid);
@@ -123,11 +129,13 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.code = bb.readInt();
-		this.cursor = bb.readInt();
-		this.last = bb.readInt();
+		(<any>this).code = bb.readInt();
+		(<any>this).cursor = bb.readInt();
+		(<any>this).last = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.code);
@@ -154,11 +162,13 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.code = bb.readInt();
-		this.rid = bb.readInt();
-		this.last = bb.readInt();
+		(<any>this).code = bb.readInt();
+		(<any>this).rid = bb.readInt();
+		(<any>this).last = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.code);

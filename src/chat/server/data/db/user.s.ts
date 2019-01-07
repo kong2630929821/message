@@ -38,15 +38,17 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
-		this.name = bb.readUtf8();
-		this.avatar = bb.readUtf8();
-		this.sex = bb.readInt();
-		this.tel = bb.readUtf8();
-		this.note = bb.readUtf8();
-		this.wallet_addr = bb.readUtf8();
+		(<any>this).uid = bb.readInt();
+		(<any>this).name = bb.readUtf8();
+		(<any>this).avatar = bb.readUtf8();
+		(<any>this).sex = bb.readInt();
+		(<any>this).tel = bb.readUtf8();
+		(<any>this).note = bb.readUtf8();
+		(<any>this).wallet_addr = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);
@@ -88,10 +90,12 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
-		this.passwdHash = bb.readUtf8();
+		(<any>this).uid = bb.readInt();
+		(<any>this).passwdHash = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);
@@ -123,10 +127,12 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.user = bb.readUtf8();
-		this.uid = bb.readInt();
+		(<any>this).user = bb.readUtf8();
+		(<any>this).uid = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.user);
@@ -158,10 +164,12 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.user = bb.readUtf8();
-		this.uid = bb.readInt();
+		(<any>this).user = bb.readUtf8();
+		(<any>this).uid = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.user);
@@ -184,10 +192,12 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.index = bb.readUtf8();
-		this.currentIndex = bb.readInt();
+		(<any>this).index = bb.readUtf8();
+		(<any>this).currentIndex = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.index);
@@ -221,11 +231,13 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uuid = bb.readUtf8();
-		this.alias = bb.readUtf8();
-		this.hid = bb.readUtf8();
+		(<any>this).uuid = bb.readUtf8();
+		(<any>this).alias = bb.readUtf8();
+		(<any>this).hid = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.uuid);
@@ -275,33 +287,35 @@ new EnumType( Type.U32 ) ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
-		this.friends = bb.readArray(() => {
+		(<any>this).uid = bb.readInt();
+		(<any>this).friends = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
-		this.temp_chat = bb.readArray(() => {
+		(<any>this).temp_chat = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
-		this.group = bb.readArray(() => {
+		(<any>this).group = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
-		this.applyUser = bb.readArray(() => {
+		(<any>this).applyUser = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
-		this.applyGroup = bb.readArray(() => {
+		(<any>this).applyGroup = bb.readArray(() => {
 	return     bb.readUtf8();
 })
 ;
-		this.blackList = bb.readArray(() => {
+		(<any>this).blackList = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);
@@ -361,10 +375,12 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
-		this.sessionId = bb.readInt();
+		(<any>this).uid = bb.readInt();
+		(<any>this).sessionId = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);
@@ -396,10 +412,12 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.sessionId = bb.readInt();
-		this.uid = bb.readInt();
+		(<any>this).sessionId = bb.readInt();
+		(<any>this).uid = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.sessionId);
@@ -431,10 +449,12 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
-		this.value = bb.readUtf8();
+		(<any>this).uid = bb.readInt();
+		(<any>this).value = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);

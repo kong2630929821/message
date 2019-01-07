@@ -11,6 +11,7 @@ import { GroupInfo } from '../../../../server/data/db/group.s';
 import { dissolveGroup } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
+import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -76,7 +77,7 @@ export class ManageItem extends Widget {
         if (e.value === 2) { // 入群申请
             popNew('chat-client-app-view-groupManage-groupApplyStatus',{ gid:this.props.gid });
         } else if (ownerid !== uid) {  // 是否是群主
-            console.log('你没有权限执行此操作');
+            bottomNotice('你没有权限执行此操作');
 
             return;
         }

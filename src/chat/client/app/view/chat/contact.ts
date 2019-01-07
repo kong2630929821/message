@@ -15,7 +15,7 @@ import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import { getFriendHistory } from '../../data/initStore';
 import * as store from '../../data/store';
 import { UserType } from '../../logic/autologin';
-import { getUserAvatar } from '../../logic/logic';
+import { bottomNotice, getUserAvatar, rippleStyle } from '../../logic/logic';
 import { clientRpcFunc, login as mqttLogin, subscribe } from '../../net/init';
 import { init } from '../login/login';
 // ================================================ 导出
@@ -44,7 +44,6 @@ export class Contact extends Widget {
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
         this.props.isLogin = walletStore.getStore('user/isLogin',false);
-
         if (this.props.isLogin) {
             const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
             const uid = store.getStore('uid');
@@ -63,16 +62,16 @@ export class Contact extends Widget {
                     this.walletSignIn();
                 }
             }
-        } 
+        }
         
         // }
     }
 
-    public chat(id: number, chatType: GENERATOR_TYPE) {
-        setTimeout(() => {
-            this.closeMore();
-            popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
-        }, 0);
+    public chat(e:any, id: number, chatType: GENERATOR_TYPE) {
+        rippleStyle(e);
+        this.closeMore();
+        popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
+
     }
 
     /**
@@ -113,7 +112,7 @@ export class Contact extends Widget {
                             });
                         }
                     } else {
-                        console.log('钱包登陆失败');
+                        bottomNotice('钱包登陆失败');
                     }
                 });
             }
@@ -127,7 +126,7 @@ export class Contact extends Widget {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
         } else {
-            console.log('请先登陆钱包');
+            bottomNotice('请先登陆钱包');
         }
     }
 

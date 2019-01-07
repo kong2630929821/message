@@ -7,7 +7,6 @@ import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
-import { Logger } from '../../../utils/logger';
 import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid } from '../../../utils/util';
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
@@ -16,11 +15,6 @@ import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, 
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
 
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
-
 // ================================================================= 导出
 /**
  * 用户注册
@@ -28,7 +22,7 @@ const logger = new Logger(WIDGET_NAME);
  */
 // #[rpc=rpcServer]
 export const registerUser = (registerInfo: UserRegister): UserInfo => {
-    logger.debug('user try to register with: ', registerInfo);
+    console.log('user try to register with: ', registerInfo);
     const dbMgr = getEnv().getDbMgr();
     const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE, dbMgr);
     const userCredentialBucket = new Bucket('file', CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
@@ -56,7 +50,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     userCredential.passwdHash = registerInfo.passwdHash;
 
     userInfoBucket.put(userInfo.uid, userInfo);
-    logger.debug('sucessfully registered user', userInfo);
+    console.log('sucessfully registered user', userInfo);
     userCredentialBucket.put(userInfo.uid, userCredential);
 
     // write contact info
@@ -74,9 +68,9 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     if (c === undefined) {
         const v = contactBucket.put(userInfo.uid, contact);
         if (v) {
-            logger.debug('Create user contact success');
+            console.log('Create user contact success');
         } else {
-            logger.error('Create user contact failed');
+            console.error('Create user contact failed');
         }
     }
 
@@ -85,7 +79,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
 
 // #[rpc=rpcServer]
 export const login = (user: UserType): UserInfo => {
-    // logger.debug('user try to login with uid: ', loginReq.uid);
+    // console.log('user try to login with uid: ', loginReq.uid);
     const dbMgr = getEnv().getDbMgr();
     const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE, dbMgr);
     const userCredentialBucket = new Bucket('file', CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
@@ -122,7 +116,7 @@ export const login = (user: UserType): UserInfo => {
         if ((expectedPasswdHash[0] === undefined) || (passwdHash !== expectedPasswdHash[0].passwdHash)) {
             userInfo.uid = -1;
             userInfo.sex = 0;
-            logger.debug('user does not exist: ', loginReq.uid);
+            console.log('user does not exist: ', loginReq.uid);
 
             return userInfo;
         }
@@ -133,7 +127,7 @@ export const login = (user: UserType): UserInfo => {
     setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
     // 后端统一推送消息topic
     setMqttTopic(mqttServer, `send/${loginReq.uid.toString()}`, true, true);
-    logger.debug('Set user topic: ', loginReq.uid.toString());
+    console.log('Set user topic: ', loginReq.uid.toString());
 
     // save session
     const session = getEnv().getSession();
@@ -146,11 +140,11 @@ export const login = (user: UserType): UserInfo => {
     // TODO: debug purpose
     // read(dbMgr, (tr: Tr) => {
     //     const v = session.get(tr, 'uid');
-    //     logger.debug('read session value of uid: ', v);
-    //     logger.debug('user login session id: ', session.getId());
+    //     console.log('read session value of uid: ', v);
+    //     console.log('user login session id: ', session.getId());
     // });
     const v = getSession('uid');
-    logger.debug('read session value of uid: ', v);
+    console.log('read session value of uid: ', v);
 
     const onlineUsersBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
     const onlineUsersReverseIndexBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_REVERSE_INDEX_TABLE, dbMgr);
@@ -160,14 +154,14 @@ export const login = (user: UserType): UserInfo => {
     online.sessionId = session.getId();
     onlineUsersBucket.put(online.uid, online);
 
-    logger.debug('Add user: ', loginReq.uid, 'to online users bucket with sessionId: ', online.sessionId);
+    console.log('Add user: ', loginReq.uid, 'to online users bucket with sessionId: ', online.sessionId);
 
     const onlineReverse = new OnlineUsersReverseIndex();
     onlineReverse.sessionId = session.getId();
     onlineReverse.uid = loginReq.uid;
     onlineUsersReverseIndexBucket.put(onlineReverse.sessionId, onlineReverse);
 
-    logger.debug('Add user: ', loginReq.uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
+    console.log('Add user: ', loginReq.uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
 
     userInfo.sex = 0;
 
@@ -186,7 +180,7 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
 
     const uids = getUserInfoReq.uids;
     const values: any = userInfoBucket.get(uids);
-    logger.debug('Read userinfo: ', uids, values);
+    console.log('Read userinfo: ', uids, values);
 
     // FIXME: check if `values` have undefined element, or will crash
     const res = new UserArray();
@@ -239,7 +233,7 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
 
     const friendLinkArray = new FriendLinkArray();
     // const friend = new FriendLink();
-    logger.debug(`uuid is : ${JSON.stringify(getFriendLinksReq.uuid)}`);
+    console.log(`uuid is : ${JSON.stringify(getFriendLinksReq.uuid)}`);
     const friends = friendLinkBucket.get<string[], FriendLink[]>(getFriendLinksReq.uuid);
     // no friends found
     // if (friends === undefined) {
@@ -247,7 +241,7 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
     //     friend.hid = 0;
     //     friend.uuid = '';
     // }
-    logger.debug(`friendLinkArray is : ${JSON.stringify(friends)}`);
+    console.log(`friendLinkArray is : ${JSON.stringify(friends)}`);
     friendLinkArray.arr = friends || [];
 
     return friendLinkArray;
@@ -277,7 +271,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     // let fg = 1;
     // let index = -1;
     let groupCursor = groupHistorycursorBucket.get<string, GroupHistoryCursor>(genGuid(param.gid, sid))[0];
-    // logger.debug(`getGroupHistory begin index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
+    // console.log(`getGroupHistory begin index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
 
     // if (param.hIncId) {  // 如果本地有记录则取本地记录
     //     index = getIndexFromHIncId(param.hIncId);
@@ -294,7 +288,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     // while (fg === 1) {
     //     index++;
     //     const oneMess = groupHistoryBucket.get<string, UserHistory>(genHIncId(hid, index))[0];
-    //     logger.debug('getGroupHistory oneMess: ', oneMess);
+    //     console.log('getGroupHistory oneMess: ', oneMess);
     //     if (oneMess) {
     //         groupHistoryArray.arr.push(oneMess);
     //     } else {
@@ -315,9 +309,9 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
         groupCursor.cursor = end;
     }
     groupHistorycursorBucket.put(groupCursor.guid, groupCursor);
-    // logger.debug(`getGroupHistory index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
+    // console.log(`getGroupHistory index:${index}, groupHistorycursor: ${JSON.stringify(groupCursor)}`);
 
-    logger.debug('getGroupHistory rid: ', param.gid, 'history: ', groupHistoryArray);
+    console.log('getGroupHistory rid: ', param.gid, 'history: ', groupHistoryArray);
 
     return groupHistoryArray;
 };
@@ -327,7 +321,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
  */
 // #[rpc=rpcServer]
 export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
-    logger.debug('getUserHistory param', param);
+    console.log('getUserHistory param', param);
     const start = param.start;
     const end = param.end;
     if (end < start) {
@@ -346,7 +340,7 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     // let fg = 1;
     // let index = -1;
     let userCursor = userHistoryCursorBucket.get<string, UserHistoryCursor>(genUuid(sid, param.rid))[0];
-    // logger.debug(`getUserHistory begin index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
+    // console.log(`getUserHistory begin index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
     // if (param.hIncId) {  // 如果本地有记录则取本地记录
     //     index = getIndexFromHIncId(param.hIncId);
@@ -360,11 +354,11 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     }
 
     const mess = userHistoryBucket.get<string[], UserHistory[]>(historyKeys);
-    logger.debug('getuserhistory historyKeys: ',historyKeys,'mess: ',mess);
+    console.log('getuserhistory historyKeys: ',historyKeys,'mess: ',mess);
     // while (fg === 1) {
     //     index++;
     //     const oneMess = userHistoryBucket.get<string, UserHistory>(genHIncId(hid, index))[0];
-    //     logger.debug('getUserHistory oneMess: ', oneMess);
+    //     console.log('getUserHistory oneMess: ', oneMess);
     //     if (oneMess) {
     //         userHistoryArray.arr.push(oneMess);
     //     } else {
@@ -385,10 +379,10 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     }
     // userCursor.cursor = index - 1;
     userHistoryCursorBucket.put(userCursor.uuid, userCursor);
-    // logger.debug(`getUserHistory index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
+    // console.log(`getUserHistory index:${index}, userHistoryCursor: ${JSON.stringify(userCursor)}`);
 
     // userHistoryArray.newMess = userHistoryArray.arr.length;
-    logger.debug('getUserHistory rid: ', param.rid, 'history: ', userHistoryArray);
+    console.log('getUserHistory rid: ', param.rid, 'history: ', userHistoryArray);
 
     return userHistoryArray;
 };
@@ -441,7 +435,7 @@ export const getAnnoucements = (param: AnnouceIds): AnnounceHistoryArray => {
     const aids = param.arr;
 
     announceHistory.arr = announceHistoryBucket.get(aids);
-    logger.debug('getAnnoucements announceHistory', announceHistory);
+    console.log('getAnnoucements announceHistory', announceHistory);
 
     return announceHistory;
 };
@@ -451,7 +445,7 @@ export const getAnnoucements = (param: AnnouceIds): AnnounceHistoryArray => {
  */
 // #[rpc=rpcServer]
 export const setData = (param:string):FrontStoreData => {
-    logger.debug('setData param: ',param);
+    console.log('setData param: ',param);
     const dbMgr = getEnv().getDbMgr();
     const storeBucket = new Bucket('file',CONSTANT.FRONT_STORE_DATA,dbMgr);
     const uid = getUid();
@@ -462,7 +456,7 @@ export const setData = (param:string):FrontStoreData => {
     } 
     store.value = param;
     storeBucket.put(uid,store);
-    logger.debug('setData store: ',store);
+    console.log('setData store: ',store);
 
     return store;
 };
@@ -475,7 +469,7 @@ export const getData = (uid:number):FrontStoreData => {
     const dbMgr = getEnv().getDbMgr();
     const storeBucket = new Bucket('file',CONSTANT.FRONT_STORE_DATA,dbMgr);
     const sid = getUid();
-    logger.debug('getData uid: ',uid,'sid: ',sid);
+    console.log('getData uid: ',uid,'sid: ',sid);
     if (sid !== uid) {
         return new FrontStoreData();
     }
@@ -485,7 +479,7 @@ export const getData = (uid:number):FrontStoreData => {
         store.uid = sid;
         store.value = '';
     }
-    logger.debug('getData store: ',store);
+    console.log('getData store: ',store);
 
     return store;
 };
