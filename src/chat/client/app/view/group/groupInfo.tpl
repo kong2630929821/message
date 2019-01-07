@@ -40,7 +40,7 @@
             <div w-class="other-wrap">
                 <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
                 <ul w-class="ul-wrap">
-                    <li w-class="liItem" >搜索聊天记录</li>
+                    <li w-class="liItem" style="padding-top:0;">搜索聊天记录</li>
                     <li w-class="liItem" ev-switch-click="msgTop">
                         <span>聊天置顶</span>
                         <chat-client-app-widget-switch-switch>{types:{{it.msgTop}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
@@ -50,9 +50,9 @@
                         <chat-client-app-widget-switch-switch>{types:{{it.msgAvoid}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                     </li>
                     {{if it.isAdmin}}
-                    <li w-class="liItem" on-tap="openGroupManage">群管理</li>
+                    <div w-class="liItem1" style="color: #222222;" on-tap="openGroupManage">群管理</div>
                     {{end}}
-                    <li style="margin-bottom: 40px;"><span w-class="liItem1" on-tap="openGroupChat" class="ripple">开始聊天</span></li>
+                    <div w-class="liItem1" style="margin-bottom: 40px;" on-tap="openGroupChat(e)">开始聊天</div>
                 </ul>
             </div>
         </div>

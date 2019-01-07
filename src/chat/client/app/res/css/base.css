@@ -81,6 +81,11 @@ div{
    animation: refreshingRotated 1s infinite;
 }
 
+/* 水波纹点击效果 */
+@keyframes rippleVary{
+    0% {transform: scale(0);opacity: .3;}
+    100% {transform: scale(10);opacity: 0;}
+}
 .ripple {
     position: relative;
     overflow: hidden;
@@ -99,13 +104,8 @@ div{
     background-position: 50%;
     transform: scale(10);
     opacity: 0;
-    transition: transform .3s, opacity .5s;
-}
-.ripple:active:after {
-    transform: scale(0);
-    opacity: .3;
-    transition: 0s;
+    animation: rippleVary 0.5s;
 }
 .scrollSmooth{
-    scroll-behavior: smooth
+    scroll-behavior: smooth;
 }

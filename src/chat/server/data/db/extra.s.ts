@@ -24,10 +24,12 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
-		this.addr = bb.readUtf8();
+		(<any>this).uid = bb.readInt();
+		(<any>this).addr = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);

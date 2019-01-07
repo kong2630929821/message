@@ -4,6 +4,7 @@
 // =====================================导入
 import { uploadFileUrlPrefix } from '../../../../app/config';
 import { popNew } from '../../../../pi/ui/root';
+import { getRealNode } from '../../../../pi/widget/painter';
 import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
@@ -120,4 +121,13 @@ export const getUserAvatar = (rid:number) => {
     }
 
     return avatar;
+};
+
+// 水波纹动画效果展示
+export const rippleStyle = (e:any) => {
+    getRealNode(e.node).classList.add('ripple');
+
+    setTimeout(() => {
+        getRealNode(e.node).classList.remove('ripple');
+    }, 500);
 };

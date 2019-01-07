@@ -30,13 +30,15 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
-		this.phone = bb.readUtf8();
-		this.ethAddr = bb.readUtf8();
-		this.note = bb.readUtf8();
-		this.bio = bb.readUtf8();
+		(<any>this).uid = bb.readInt();
+		(<any>this).phone = bb.readUtf8();
+		(<any>this).ethAddr = bb.readUtf8();
+		(<any>this).note = bb.readUtf8();
+		(<any>this).bio = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);

@@ -4,7 +4,6 @@
 // ================================================================= 导入
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { Bucket } from '../../../utils/db';
-import { Logger } from '../../../utils/logger';
 import { send } from '../../../utils/send';
 import { delValueFromArray, genUserHid, genUuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
@@ -16,11 +15,6 @@ import { getUid } from './group.r';
 import { sendUserMessage } from './message.r';
 import { UserSend } from './message.s';
 import { FriendAlias, UserAgree } from './user.s';
-
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
 
 // ================================================================= 导出
 /**
@@ -59,7 +53,7 @@ export const applyFriend = (user: string): Result => {
     const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
     const friend1 = friendLinkBucket.get(genUuid(sid, uid))[0];
     const friend2 = friendLinkBucket.get(genUuid(uid, sid))[0];
-    logger.debug('applyFriend friend1: ', friend1, 'friend2: ', friend2);
+    console.log('applyFriend friend1: ', friend1, 'friend2: ', friend2);
     if (friend1 && friend2) {
         result.r = 0;   // 已经是好友，不需要重复添加
 
@@ -157,7 +151,7 @@ export const delFriend = (uid: number): Result => {
         // 从friendLink中删除
         const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
         friendLinkBucket.delete(genUuid(sid, rid));
-        logger.debug('delFriend friendLink ', genUuid(sid, rid));
+        console.log('delFriend friendLink ', genUuid(sid, rid));
     };
 
     _delFriend(getUid(), uid);
@@ -185,14 +179,14 @@ export const addToBlackList = (peerUid: number): Result => {
     const contactInfo = contactBucket.get<number, [Contact]>(uid)[0];
     const index = contactInfo.blackList.indexOf(peerUid);
     if (index > -1) {
-        logger.debug('User: ', peerUid, 'has already in blacklist of user: ', uid);
+        console.log('User: ', peerUid, 'has already in blacklist of user: ', uid);
         result.r = 0;
 
         return result;
     } else {
         contactInfo.blackList.push(peerUid);
         contactBucket.put(uid, contactInfo);
-        logger.debug('Add user: ', peerUid, 'to blacklist of user: ', uid);
+        console.log('Add user: ', peerUid, 'to blacklist of user: ', uid);
 
         result.r = 1;
 
@@ -220,12 +214,12 @@ export const removeFromBlackList = (peerUid: number): Result => {
     if (index > -1) {
         contactInfo.blackList.splice(index, 1);
         contactBucket.put(uid, contactInfo);
-        logger.debug('Remove user: ', peerUid, 'from blacklist of user: ', uid);
+        console.log('Remove user: ', peerUid, 'from blacklist of user: ', uid);
         result.r = 1;
 
         return result;
     } else {
-        logger.debug('User: ', peerUid, 'is not banned by user: ', uid);
+        console.log('User: ', peerUid, 'is not banned by user: ', uid);
         result.r = 0;
 
         return result;
@@ -254,7 +248,7 @@ export const changeFriendAlias = (friendAlias: FriendAlias): Result => {
         friendLinkBucket.put(uuid, friend);
         result.r = 1;
     } else {
-        logger.debug('user: ', friendAlias.rid, ' is not your friend');
+        console.log('user: ', friendAlias.rid, ' is not your friend');
         result.r = 0;
     }
 
@@ -305,7 +299,7 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
         userInfoBucket.put(sid, userinfo);
         newUser = userinfo;
     } else {
-        logger.debug('curUser: ', sid, ' changeUser: ', userinfo);
+        console.log('curUser: ', sid, ' changeUser: ', userinfo);
         newUser.uid = -1;
     }
 

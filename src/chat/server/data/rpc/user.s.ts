@@ -15,10 +15,12 @@ new EnumType( Type.Bool ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
-		this.agree = bb.readBool();
+		(<any>this).uid = bb.readInt();
+		(<any>this).agree = bb.readBool();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);
@@ -41,10 +43,12 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.rid = bb.readInt();
-		this.alias = bb.readUtf8();
+		(<any>this).rid = bb.readInt();
+		(<any>this).alias = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.rid);

@@ -15,7 +15,7 @@ import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import { getFriendHistory } from '../../data/initStore';
 import * as store from '../../data/store';
 import { UserType } from '../../logic/autologin';
-import { getUserAvatar } from '../../logic/logic';
+import { bottomNotice, getUserAvatar, rippleStyle } from '../../logic/logic';
 import { clientRpcFunc, login as mqttLogin, subscribe } from '../../net/init';
 import { init } from '../login/login';
 // ================================================ 导出
@@ -43,8 +43,8 @@ export class Contact extends Widget {
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        const isLogin = walletStore.getStore('user/isLogin',false);
-        if (isLogin) {
+        this.props.isLogin = walletStore.getStore('user/isLogin',false);
+        if (this.props.isLogin) {
             const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
             const uid = store.getStore('uid');
             const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
@@ -62,18 +62,16 @@ export class Contact extends Widget {
                     this.walletSignIn();
                 }
             }
-        } else {
-            popNew('app-view-chat-home-home');
         }
         
         // }
     }
 
-    public chat(id: number, chatType: GENERATOR_TYPE) {
-        setTimeout(() => {
-            this.closeMore();
-            popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
-        }, 0);
+    public chat(e:any, id: number, chatType: GENERATOR_TYPE) {
+        rippleStyle(e);
+        this.closeMore();
+        popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
+
     }
 
     /**
@@ -114,7 +112,7 @@ export class Contact extends Widget {
                             });
                         }
                     } else {
-                        alert('钱包登陆失败');
+                        bottomNotice('钱包登陆失败');
                     }
                 });
             }
@@ -128,7 +126,7 @@ export class Contact extends Widget {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
         } else {
-            alert('请先登陆钱包');
+            bottomNotice('请先登陆钱包');
         }
     }
 
@@ -173,6 +171,7 @@ interface Props {
     isOnline: boolean; // 钱包是否已经登陆
     netClose: boolean; // 网络链接是否断开
     avatar:string; // 头像
+    isLogin:boolean; // 是否登陆
 }
 const STATE = {
     lastChat:[],

@@ -14,12 +14,14 @@ new EnumType( Type.U32 ) ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.arr = bb.readArray(() => {
+		(<any>this).arr = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeArray(this.arr, (el) => {    
@@ -43,10 +45,12 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.name = bb.readUtf8();
-		this.note = bb.readUtf8();
+		(<any>this).name = bb.readUtf8();
+		(<any>this).note = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.name);
@@ -71,11 +75,13 @@ new EnumType( Type.Bool ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.gid = bb.readInt();
-		this.uid = bb.readInt();
-		this.agree = bb.readBool();
+		(<any>this).gid = bb.readInt();
+		(<any>this).uid = bb.readInt();
+		(<any>this).agree = bb.readBool();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.gid);
@@ -100,10 +106,12 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.gid = bb.readInt();
-		this.rid = bb.readInt();
+		(<any>this).gid = bb.readInt();
+		(<any>this).rid = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.gid);
@@ -125,12 +133,14 @@ new EnumType(Type.Struct, Invite._$info ) ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.arr = bb.readArray(() => {
+		(<any>this).arr = bb.readArray(() => {
 	return      bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.arr):Invite);
 })
 ;
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeArray(this.arr, (el) => {    
@@ -152,9 +162,11 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uid = bb.readInt();
+		(<any>this).uid = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.uid);
@@ -174,12 +186,14 @@ new EnumType( Type.U32 ) ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.members = bb.readArray(() => {
+		(<any>this).members = bb.readArray(() => {
 	return     bb.readInt();
 })
 ;
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeArray(this.members, (el) => {    
@@ -202,12 +216,14 @@ new EnumType( Type.Str ) ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.guids = bb.readArray(() => {
+		(<any>this).guids = bb.readArray(() => {
 	return     bb.readUtf8();
 })
 ;
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeArray(this.guids, (el) => {    
@@ -231,10 +247,12 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.gid = bb.readInt();
-		this.groupAlias = bb.readUtf8();
+		(<any>this).gid = bb.readInt();
+		(<any>this).groupAlias = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.gid);

@@ -11,6 +11,7 @@ import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
+import { bottomNotice } from '../logic/logic';
 import { initPush } from './receive';
 
 // ================================================ 导出
@@ -49,13 +50,13 @@ export const clientRpcFunc = (name: string, req: any, callback: Function, timeou
         }
     }
     if (!mqtt.getState()) {
-        alert(`网络连接中！！！！`);
+        bottomNotice(`网络连接中！！！！`);
 
         return;
     }
     clientRpc(name, req, (r: Struct) => {
         if (!r) {
-            alert(`${name} 失败了，返回结果 ${r}`);
+            bottomNotice(`${name} 失败了，返回结果 ${r}`);
         } else {
             return callback(r);
         }

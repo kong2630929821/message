@@ -11,8 +11,8 @@
     </div>
     {{if !it.isSolve}}
     <div w-class="agree-wrap">
-        <span w-class="reject" on-tap="rejectBtn">拒绝</span>
-        <span w-class="agree" on-tap="agreeBtn">同意</span>
+        <span w-class="reject" on-tap="rejectBtn(e)">拒绝</span>
+        <span w-class="agree" on-tap="agreeBtn(e)">同意</span>
     </div>
     {{else}}
     <div w-class="solved">{{it.isSolve}}</div>

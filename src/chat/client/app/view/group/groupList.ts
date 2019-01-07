@@ -10,6 +10,7 @@ import { Contact } from '../../../../server/data/db/user.s';
 import { applyJoinGroup } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
+import { bottomNotice, rippleStyle } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -38,23 +39,22 @@ export class GroupListt extends Widget {
     }
 
     // 主动添加群聊
-    public applyGroup() {
-        setTimeout(() => {
-            if (!this.props.inputGid) {
-                alert('请输入想要加入的群组ID');
-               
-            } else {
-                clientRpcFunc(applyJoinGroup, this.props.inputGid, ((r) => {
-                    logger.debug('===========主动添加群聊返回',r);
-                    if (r.r === -2) {
-                        alert('申请的群不存在');
-                    } else if (r.r === -1) {
-                        alert('您已经是该群的成员');
-                    }
-                }));
-            }
-        }, 500);
-        
+    public applyGroup(e:any) {
+        rippleStyle(e);
+        if (!this.props.inputGid) {
+            bottomNotice('请输入群聊ID');
+           
+        } else {
+            clientRpcFunc(applyJoinGroup, this.props.inputGid, ((r) => {
+                logger.debug('===========主动添加群聊返回',r);
+                if (r.r === -2) {
+                    bottomNotice('申请的群不存在');
+                } else if (r.r === -1) {
+                    bottomNotice('您已经是该群的成员');
+                }
+            }));
+        }
+
     }
 
     // 创建群聊

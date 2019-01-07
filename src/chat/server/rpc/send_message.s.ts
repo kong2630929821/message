@@ -21,13 +21,15 @@ new EnumType( Type.Str ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.src = bb.readUtf8();
-		this.dst = bb.readUtf8();
-		this.msgType = bb.readInt();
-		this.msgId = bb.readInt();
-		this.payload = bb.readUtf8();
+		(<any>this).src = bb.readUtf8();
+		(<any>this).dst = bb.readUtf8();
+		(<any>this).msgType = bb.readInt();
+		(<any>this).msgId = bb.readInt();
+		(<any>this).payload = bb.readUtf8();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.src);
@@ -54,9 +56,11 @@ new EnumType( Type.Bool ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.ack = bb.readBool();
+		(<any>this).ack = bb.readBool();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeBool(this.ack);
@@ -75,9 +79,11 @@ new EnumType( Type.Bool ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.ack = bb.readBool();
+		(<any>this).ack = bb.readBool();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeBool(this.ack);

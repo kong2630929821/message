@@ -13,6 +13,7 @@ import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as store from '../../data/store';
+import { bottomNotice, rippleStyle } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -44,12 +45,16 @@ export class NewFriendApply extends Widget {
     }
 
     // 点击拒绝添加好友/群
-    public rejectBtn() {
+    public rejectBtn(e:any) {
+        rippleStyle(e);
+        setTimeout(() => {
+            this.props.isSolve = '已拒绝';
+            this.paint();
+        }, 500);
+
         if (this.props.chatType === 'user') {
             acceptFriend(this.props.id,false,(r:Result) => {
                 // TODO:
-                this.props.isSolve = '已拒绝';
-                this.paint();
             });
         } else if (!this.props.activeToGGid) {
             logger.debug('==============group reject');
@@ -58,34 +63,32 @@ export class NewFriendApply extends Widget {
             agree.gid = this.props.id;
             agree.uid = store.getStore(`uid`);
             clientRpcFunc(agreeJoinGroup, agree,(gInfo:GroupInfo) => {
-                if (gInfo.gid === -2) {
-                    this.props.isSolve = '已拒绝';
-                    this.paint();
-
-                    return;
-                }
+                // TODO
             });
         } else {
             const agree = new GroupAgree();
             agree.gid = this.props.activeToGGid;
             agree.uid = this.props.id;
             agree.agree = false;
-            logger.debug('==========active GroupApplyInfo reject',agree);
+            
             clientRpcFunc(acceptUser,agree,(r) => {
-                logger.debug('==========active GroupApplyInfo reject result',r);
-                this.props.isSolve = '已拒绝';
-                this.paint();
+                // TODO
             });
         }
         
     }
 
     // 点击同意添加好友/群
-    public agreeBtn() {
+    public agreeBtn(e:any) {
+        rippleStyle(e);
+        setTimeout(() => {
+            this.props.isSolve = '已同意';
+            this.paint();
+        }, 500);
+
         if (this.props.chatType === 'user') {
             acceptFriend(this.props.id,true,(r:Result) => {
-                this.props.isSolve = '已同意';
-                this.paint();
+                // TODO
             });
         } else if (!this.props.activeToGGid) {
             logger.debug('==============group agree');
@@ -94,13 +97,7 @@ export class NewFriendApply extends Widget {
             agree.gid = this.props.id;
             agree.uid = store.getStore(`uid`);
             clientRpcFunc(agreeJoinGroup, agree,(gInfo:GroupInfo) => {
-                if (gInfo.gid === -1) {
-
-                    return;
-                }
                 store.setStore(`groupInfoMap/${gInfo.gid}`,gInfo);
-                this.props.isSolve = '已同意';
-                this.paint();
             });
         } else {
             const agree = new GroupAgree();
@@ -109,11 +106,10 @@ export class NewFriendApply extends Widget {
             agree.agree = true;
             logger.debug('==========active GroupApplyInfo agree',agree);
             clientRpcFunc(acceptUser,agree,(r) => {
-                logger.debug('==========active GroupApplyInfo agree result',r);
-                this.props.isSolve = '已同意';
-                this.paint();
+                // TODO
             });
         }
+
     }
     
     // 点击查看用户或群组详情

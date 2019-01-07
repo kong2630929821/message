@@ -18,6 +18,6 @@
         </div>
         {{end}}
         
-        <div on-tap="applyGroup" w-class="applyBtn" class="ripple">添加群聊</div>
+        <div on-tap="applyGroup(e)" w-class="applyBtn">添加群聊</div>
     </div>
 </div>

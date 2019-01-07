@@ -34,13 +34,13 @@
         </div>
         {{if it.inFlag == 3 || !it.isFriend}}
         <div style="margin: 40px 80px;">
-            <span w-class="liItem1" on-tap="addUser" class="ripple" >加为好友</span>
+            <div w-class="liItem1" on-tap="addUser(e)" >加为好友</div>
         </div>
         {{else}}
         <div w-class="other-wrap">
             <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
             <ul w-class="ul-wrap">
-                <li w-class="liItem">搜索聊天记录</li>
+                <li w-class="liItem" style="padding-top:0;">搜索聊天记录</li>
                 <li w-class="liItem" ev-switch-click="msgTop">
                     <span>聊天置顶</span>
                     <chat-client-app-widget-switch-switch>{types:{{it.msgTop}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
@@ -51,7 +51,7 @@
                 </li>
 
                 {{if it.inFlag != 1}}
-                <span w-class="liItem1" on-tap="startChat" class="ripple">开始对话</span>
+                    <div w-class="liItem1" on-tap="startChat(e)">开始对话</div>
                 {{end}}
             </ul>
         </div>

@@ -13,6 +13,7 @@ import { Invite, InviteArray } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
  
   // ================================================ 导出
@@ -58,7 +59,7 @@ export class InviteMember extends Widget {
      // 点击添加
     public completeAddGroupMember() {
         if (this.props.applyGroupMembers.length <= 0) {
-            alert('请至少选择一位邀请好友');
+            bottomNotice('请至少选择一位邀请好友');
 
             return ;
         }
@@ -72,9 +73,9 @@ export class InviteMember extends Widget {
         });
         clientRpcFunc(inviteUsers, invites, (r: Result) => {
             if (r.r !== 1) {
-                alert(`邀请好友入群失败`);
+                bottomNotice(`邀请好友入群失败`);
             }
-            alert('成功发送邀请好友信息');
+            bottomNotice('成功发送邀请好友信息');
             this.ok();
         });
     }

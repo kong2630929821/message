@@ -11,6 +11,7 @@ import { delMember } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import { genGuid } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -43,10 +44,10 @@ export class GroupMember extends Widget {
             this.props.isAdmin = true;
         }
         if (this.props.groupInfo.memberids.indexOf(uid) < 0) {
-            alert('您已被移除该群');
+            bottomNotice('您已被移除该群');
             this.ok();
         } else  if (this.props.groupInfo.state === GROUP_STATE.DISSOLVE) {
-            alert('该群已被解散');
+            bottomNotice('该群已被解散');
             this.ok();
         }
         

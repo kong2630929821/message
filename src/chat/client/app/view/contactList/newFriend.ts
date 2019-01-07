@@ -13,6 +13,7 @@ import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as  store from '../../data/store';
+import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -33,7 +34,7 @@ export class NewFriend extends Widget {
         const v = parseInt(e.value, 10);
         acceptFriend(v, true, (r: Result) => {
             if (r.r !== 1) {
-                alert('添加好友失败');
+                bottomNotice('添加好友失败');
             }
         });
     }

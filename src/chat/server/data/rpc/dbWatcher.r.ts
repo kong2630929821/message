@@ -7,18 +7,12 @@ import { ab2hex } from '../../../../pi/util/util';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
-import { Logger } from '../../../utils/logger';
 import * as CONSTANT from '../constant';
 import { AddressInfo } from '../db/extra.s';
 import { GroupInfo, GroupUserLink } from '../db/group.s';    
 import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../db/message.s';
 import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../db/user.s';
 import { iterTable } from '../util';
-
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
 
 // ================================================================= 导出
      
@@ -154,11 +148,11 @@ export const watchInfo = (keyName:string, keyValue:any, tableStruct:any, keyDefa
     // 返回当前值
     const dbMgr = getEnv().getDbMgr();
     const infoBucket = new Bucket(CONSTANT.WARE_NAME, tableStruct._$info.name, dbMgr); 
-    logger.debug(`${tableStruct._$info.name} iter`);
+    console.log(`${tableStruct._$info.name} iter`);
     iterTable(dbMgr,tableStruct);
-    logger.debug(`keyName is : ${keyName}, keyValue is : ${keyValue}, info is : ${infoBucket.get(keyValue)[0]}`);  
+    console.log(`keyName is : ${keyName}, keyValue is : ${keyValue}, info is : ${infoBucket.get(keyValue)[0]}`);  
     const info = infoBucket.get(keyValue)[0] || new tableStruct();
-    logger.debug(tableStruct._$info.name);
+    console.log(tableStruct._$info.name);
     info[keyName] = info[keyName] || keyDefaultValue;
 
     return info;

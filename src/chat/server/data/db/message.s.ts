@@ -27,15 +27,17 @@ new EnumType( Type.Bool ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.sid = bb.readInt();
-		this.mtype = bb.readInt() as MSG_TYPE;
-		this.msg = bb.readUtf8();
-		this.time = bb.readInt();
-		this.send = bb.readBool();
-		this.read = bb.readBool();
-		this.cancel = bb.readBool();
+		(<any>this).sid = bb.readInt();
+		(<any>this).mtype = bb.readInt() as MSG_TYPE;
+		(<any>this).msg = bb.readUtf8();
+		(<any>this).time = bb.readInt();
+		(<any>this).send = bb.readBool();
+		(<any>this).read = bb.readBool();
+		(<any>this).cancel = bb.readBool();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.sid);
@@ -75,14 +77,16 @@ new EnumType( Type.Bool ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.sid = bb.readInt();
-		this.mtype = bb.readInt() as MSG_TYPE;
-		this.msg = bb.readUtf8();
-		this.time = bb.readInt();
-		this.send = bb.readBool();
-		this.cancel = bb.readBool();
+		(<any>this).sid = bb.readInt();
+		(<any>this).mtype = bb.readInt() as MSG_TYPE;
+		(<any>this).msg = bb.readUtf8();
+		(<any>this).time = bb.readInt();
+		(<any>this).send = bb.readBool();
+		(<any>this).cancel = bb.readBool();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.sid);
@@ -120,14 +124,16 @@ new EnumType( Type.Bool ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.sid = bb.readInt();
-		this.mtype = bb.readInt() as MSG_TYPE;
-		this.msg = bb.readUtf8();
-		this.time = bb.readInt();
-		this.send = bb.readBool();
-		this.cancel = bb.readBool();
+		(<any>this).sid = bb.readInt();
+		(<any>this).mtype = bb.readInt() as MSG_TYPE;
+		(<any>this).msg = bb.readUtf8();
+		(<any>this).time = bb.readInt();
+		(<any>this).send = bb.readBool();
+		(<any>this).cancel = bb.readBool();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeInt(this.sid);
@@ -168,10 +174,12 @@ new EnumType(Type.Struct, UserMsg._$info ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.hIncId = bb.readUtf8();
-		this.msg =  bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.msg):UserMsg);
+		(<any>this).hIncId = bb.readUtf8();
+		(<any>this).msg =  bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.msg):UserMsg);
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.hIncId);
@@ -205,10 +213,12 @@ new EnumType(Type.Struct, GroupMsg._$info ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.hIncId = bb.readUtf8();
-		this.msg =  bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.msg):GroupMsg);
+		(<any>this).hIncId = bb.readUtf8();
+		(<any>this).msg =  bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.msg):GroupMsg);
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.hIncId);
@@ -242,10 +252,12 @@ new EnumType(Type.Struct, Announcement._$info ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.aIncId = bb.readUtf8();
-		this.announce =  bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.announce):Announcement);
+		(<any>this).aIncId = bb.readUtf8();
+		(<any>this).announce =  bb.readBonCode((<any>this)._$EnumTypeMap?(<any>this)._$EnumTypeMap(this.announce):Announcement);
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.aIncId);
@@ -277,10 +289,12 @@ new EnumType( Type.U32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.hid = bb.readUtf8();
-		this.current = bb.readInt();
+		(<any>this).hid = bb.readUtf8();
+		(<any>this).current = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.hid);
@@ -312,10 +326,12 @@ new EnumType( Type.I32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.uuid = bb.readUtf8();
-		this.cursor = bb.readInt();
+		(<any>this).uuid = bb.readUtf8();
+		(<any>this).cursor = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.uuid);
@@ -347,10 +363,12 @@ new EnumType( Type.I32 ), null) ]);
 
 
 
+
 	bonDecode(bb:BonBuffer) {
-		this.guid = bb.readUtf8();
-		this.cursor = bb.readInt();
+		(<any>this).guid = bb.readUtf8();
+		(<any>this).cursor = bb.readInt();
 	}
+
 
 	bonEncode(bb:BonBuffer) {        
         bb.writeUtf8(this.guid);
