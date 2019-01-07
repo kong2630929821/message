@@ -19,8 +19,8 @@
             {{end}}
 
             {{if it.isMessageRecallVisible}}
-            <div style="position:absolute;top:0px;left:-240px;">
-                <widget w-tag="chat-client-app-widget-messageRecall-messageRecall">{chatType:{{it.chatType}}, hidInc:{{it.hIncId}} }</widget>
+            <div style="position:absolute;bottom: 0;left:-150px;">
+                <div w-class="recallBtn" on-tap="recall">撤回</div>
             </div>
             {{end}}
         </div>

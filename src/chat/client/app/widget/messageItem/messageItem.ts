@@ -3,6 +3,7 @@
  */
 // ================================================ 导入
 import { popNew } from '../../../../../pi/ui/root';
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
@@ -17,7 +18,8 @@ import { EMOJIS_MAP } from '../emoji/emoji';
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
+const logger = new Logger(WIDGET_NAME);
+export class MessageItem extends Widget {
     constructor() {
         super();
         this.props = {
@@ -63,6 +65,12 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
         });  
     }
 
+    // 点击撤回
+    public recall(e:any) {
+        notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
+        this.closeMessageRecall();
+    }
+
     public userDetail() {
         const fg = this.props.chatType === GENERATOR_TYPE.USER ? 1 :2;
         popNew('chat-client-app-view-info-userDetail',{ uid:this.props.msg.sid, inFlag: fg });
@@ -82,7 +90,11 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
 
     // 点击打开红包
     public openRedEnvelope() {
-        // popNew()
+        popNew('app-view-earn-exchange-openRedEnv', { 
+            inFlag: 'chat',
+            cid: this.props.msg.redEnvId,
+            message: this.props.msg.msg
+        });
     }
 }
 
@@ -113,7 +125,9 @@ const parseImg = (msg:any) => {
 };
 
 const parseRedEnv = (msg:any) => {
-    msg.msg = JSON.parse(msg.msg).message || '恭喜发财，万事如意';
+    const value = JSON.parse(msg.msg);
+    msg.msg = value.message || '恭喜发财，万事如意';
+    msg.redEnvId = value.rid;
 
     return msg;
 };

@@ -59,3 +59,13 @@
     color: #888;
     margin: 20px;
 }
+.recallBtn{
+    width: 170px;
+    height: 80px;
+    background: rgb(255, 255, 255);
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 20px 0px;
+    border-radius: 6px;
+    font-size: 32px;
+    line-height: 80px;
+    padding-left: 20px;
+}
