@@ -2,7 +2,7 @@
  * inputMessage 组件相关处理
  */
 // ===========================导入
-import { getKeyBoardHeight } from '../../../../../pi/ui/root';
+import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -71,6 +71,7 @@ export class InputMessage extends Widget {
                 sendImage(e);
                 break;
             case 2:
+                sendRedEnv(e);
                 break;
             default:
         }
@@ -114,5 +115,17 @@ export const sendPicture = (e:any) => {
                 notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
             });
         });
+    });
+};
+
+// 发送红包
+export const sendRedEnv = (e:any) => {
+    popNew('app-view-earn-redEnvelope-writeRedEnv',{ inFlag:'chat' },(res) => {
+        /**
+         * res:{message,rid} 留言，红包ID
+         */
+        if (res && res.rid) {
+            notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.REDENVELOPE });
+        }
     });
 };

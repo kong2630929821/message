@@ -1,57 +1,47 @@
-.name-card-wrap{
-    position:absolute;
-    left: 230px;
-    top: 220px;
-    width: 490px;
-    height: 210px;
-    border-radius: 12px;
-    background-color: rgba(255, 255, 255, 1);
-
-}
 .name-info-wrap{  
     width: 490px;
     height: 166px;
     display:flex;
     align-items:center;
     border-bottom:solid gray 1px;
+    background: #ffffff;
 }
 .avatar-wrap{
     width:80px;
     height:80px;
     border-radius:50%;
-    margin-left:30px;
-    margin-right:30px;
-}
-.avatar{
-    width:80px;
 }
 .name-card-info{
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
-    font-family: PingFangSC-Medium;
     font-weight:bold;
+    display: inline-block;
+    width: 300px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+    margin-left: 30px;
 }
 .cardType{   
-    color: rgba(136, 136, 136, 1);
+    color: rgb(136, 136, 136);
     font-size: 24px;
-    font-family: PingFangSC-Regular;
-    margin-left:30px;
-    display:inline-block;
-    height:44px;
-    line-height:44px;
+    padding-left: 30px;
+    height: 44px;
+    line-height: 44px;
+    background: rgb(255, 255, 255);
+    border-radius: 0 0 12px 12px;
 }
-.bubbleTail{
-    position:absolute;
-    left:100%;
-    bottom:-16px;
-    width:16px;
-    height:16px;
-    border-width:0;
-    border-style:solid;
-    border-color:transparent;
-    margin-left:-5px;
-    border-top-width:10px;
-    border-top-color:currentColor;
-    border-radius:0 32px 0 0;
-    color:rgba(255, 255, 255, 1);
+.redEnvTop{
+    width:490px;
+    height:166px;
+    background:rgba(235,79,79,1);
+    border-radius:12px 12px 0px 0px;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+}
+.redEnvImg{
+    width: 62px;
+    height: 80px;
+    margin: 10px;
 }

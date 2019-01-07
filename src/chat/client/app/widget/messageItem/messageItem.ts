@@ -3,6 +3,7 @@
  */
 // ================================================ 导入
 import { popNew } from '../../../../../pi/ui/root';
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
@@ -17,7 +18,8 @@ import { EMOJIS_MAP } from '../emoji/emoji';
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
 const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
+const logger = new Logger(WIDGET_NAME);
+export class MessageItem extends Widget {
     constructor() {
         super();
         this.props = {
@@ -47,6 +49,7 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
         this.props.me = this.props.msg.sid === store.getStore('uid');
         const time = depCopy(this.props.msg.time);
         this.props.time = timestampFormat(time,1);
+        console.log('messageItem#####',this.props.msg);
     }
 
     public firstPaint() {
@@ -60,6 +63,12 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
             this.setProps(this.props);
             this.paint();
         });  
+    }
+
+    // 点击撤回
+    public recall(e:any) {
+        notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
+        this.closeMessageRecall();
     }
 
     public userDetail() {
@@ -77,6 +86,15 @@ const logger = new Logger(WIDGET_NAME);export class MessageItem extends Widget {
     public closeMessageRecall() {
         this.props.isMessageRecallVisible = false;
         this.paint();
+    }
+
+    // 点击打开红包
+    public openRedEnvelope() {
+        popNew('app-view-earn-exchange-openRedEnv', { 
+            inFlag: 'chat',
+            cid: this.props.msg.redEnvId,
+            message: this.props.msg.msg
+        });
     }
 }
 
@@ -105,16 +123,29 @@ const parseImg = (msg:any) => {
 
     return msg;
 };
+
+const parseRedEnv = (msg:any) => {
+    const value = JSON.parse(msg.msg);
+    msg.msg = value.message || '恭喜发财，万事如意';
+    msg.redEnvId = value.rid;
+
+    return msg;
+};
 export const parseMessage = (msg:any):any => {
     switch (msg.mtype) {
-        case MSG_TYPE.TXT:
+        case MSG_TYPE.REDENVELOPE: // 红包
+
+            return parseRedEnv(msg);
+        case MSG_TYPE.TXT:  // 文本，表情
+
             return parseEmoji(msg);
-        case MSG_TYPE.IMG:
+        case MSG_TYPE.IMG:  // 图片
+
             return parseImg(msg);
-        case MSG_TYPE.VOICE:
+        case MSG_TYPE.VOICE:  // 语音
         // TODO:
             return msg;
-        case MSG_TYPE.VIDEO:
+        case MSG_TYPE.VIDEO: // 视频
         // TODO:
             return msg;
         default:
