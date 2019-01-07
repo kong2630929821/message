@@ -6,6 +6,7 @@
 declare var pi_modules;
 
 // ================================================ 导入
+import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
@@ -15,15 +16,13 @@ import { bottomNotice } from '../logic/logic';
 import { initPush } from './receive';
 
 // ================================================ 导出
-export const sourceIp = '192.168.9.29';
-export const sourcePort = 1234;
 
 /**
  * 客户端初始化
  */
 export const initClient = () => {
     if (!rootClient) {
-        mqtt = new AutoLoginMgr(sourceIp, sourcePort);
+        mqtt = new AutoLoginMgr(chatLogicIp, chatLogicPort);
         rootClient = mqtt.connection();
     }
     initPush();
