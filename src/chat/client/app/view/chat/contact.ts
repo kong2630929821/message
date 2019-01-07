@@ -43,23 +43,29 @@ export class Contact extends Widget {
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
-        const uid = store.getStore('uid');
-        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
-        this.props.isOnline = wUser.nickName !== '';
-        if (uid) {
-            this.props.avatar = getUserAvatar(uid);
+        const isLogin = walletStore.getStore('user/isLogin',false);
+        if (isLogin) {
+            const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
+            const uid = store.getStore('uid');
+            const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
+            this.props.isOnline = wUser.nickName !== '';
+            if (uid) {
+                this.props.avatar = getUserAvatar(uid);
+            }
+        
+            // 如果聊天未登录，或钱包修改了姓名、头像等，或钱包退出登陆
+            if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
+                store.initStore();
+                this.state = []; // 清空记录 lastChat
+                this.paint(true);
+                if (this.props.isOnline) { // 钱包已登录才去登陆聊天
+                    this.walletSignIn();
+                }
+            }
+        } else {
+            popNew('app-view-chat-home-home');
         }
         
-        // 如果聊天未登录，或钱包修改了姓名、头像等，或钱包退出登陆
-        if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
-            store.initStore();
-            this.state = []; // 清空记录 lastChat
-            this.paint(true);
-            if (this.props.isOnline) { // 钱包已登录才去登陆聊天
-                this.walletSignIn();
-            }
-        }
         // }
     }
 
