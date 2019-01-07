@@ -43,10 +43,10 @@ export class GroupMember extends Widget {
             this.props.isAdmin = true;
         }
         if (this.props.groupInfo.memberids.indexOf(uid) < 0) {
-            alert('您已被移除该群');
+            console.log('您已被移除该群');
             this.ok();
         } else  if (this.props.groupInfo.state === GROUP_STATE.DISSOLVE) {
-            alert('该群已被解散');
+            console.log('该群已被解散');
             this.ok();
         }
         

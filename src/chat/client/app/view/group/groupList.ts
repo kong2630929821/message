@@ -41,15 +41,15 @@ export class GroupListt extends Widget {
     public applyGroup() {
         setTimeout(() => {
             if (!this.props.inputGid) {
-                alert('请输入想要加入的群组ID');
+                console.log('请输入想要加入的群组ID');
                
             } else {
                 clientRpcFunc(applyJoinGroup, this.props.inputGid, ((r) => {
                     logger.debug('===========主动添加群聊返回',r);
                     if (r.r === -2) {
-                        alert('申请的群不存在');
+                        console.log('申请的群不存在');
                     } else if (r.r === -1) {
-                        alert('您已经是该群的成员');
+                        console.log('您已经是该群的成员');
                     }
                 }));
             }

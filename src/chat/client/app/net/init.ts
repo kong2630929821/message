@@ -49,13 +49,13 @@ export const clientRpcFunc = (name: string, req: any, callback: Function, timeou
         }
     }
     if (!mqtt.getState()) {
-        alert(`网络连接中！！！！`);
+        console.log(`网络连接中！！！！`);
 
         return;
     }
     clientRpc(name, req, (r: Struct) => {
         if (!r) {
-            alert(`${name} 失败了，返回结果 ${r}`);
+            console.log(`${name} 失败了，返回结果 ${r}`);
         } else {
             return callback(r);
         }

@@ -43,8 +43,9 @@ export class Contact extends Widget {
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        const isLogin = walletStore.getStore('user/isLogin',false);
-        if (isLogin) {
+        this.props.isLogin = walletStore.getStore('user/isLogin',false);
+
+        if (this.props.isLogin) {
             const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
             const uid = store.getStore('uid');
             const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
@@ -62,9 +63,7 @@ export class Contact extends Widget {
                     this.walletSignIn();
                 }
             }
-        } else {
-            popNew('app-view-chat-home-home');
-        }
+        } 
         
         // }
     }
@@ -114,7 +113,7 @@ export class Contact extends Widget {
                             });
                         }
                     } else {
-                        alert('钱包登陆失败');
+                        console.log('钱包登陆失败');
                     }
                 });
             }
@@ -128,7 +127,7 @@ export class Contact extends Widget {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
         } else {
-            alert('请先登陆钱包');
+            console.log('请先登陆钱包');
         }
     }
 
@@ -173,6 +172,7 @@ interface Props {
     isOnline: boolean; // 钱包是否已经登陆
     netClose: boolean; // 网络链接是否断开
     avatar:string; // 头像
+    isLogin:boolean; // 是否登陆
 }
 const STATE = {
     lastChat:[],

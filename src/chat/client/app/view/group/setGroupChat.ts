@@ -40,7 +40,7 @@ export class SetGroupChat extends Widget {
     }
     public createGroup() {
         if (!this.props.name) {
-            alert('群名不能为空');
+            console.log('群名不能为空');
 
             return;          
         } 
@@ -49,11 +49,11 @@ export class SetGroupChat extends Widget {
         groupInfo.note = '';
         clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
-                alert(`创建群组失败`);
+                console.log(`创建群组失败`);
 
                 return;
             }
-            alert(`创建群组成功`);
+            console.log(`创建群组成功`);
             store.setStore(`groupInfoMap/${r.gid}`, r);
 
             // 邀请好友进群
@@ -69,9 +69,9 @@ export class SetGroupChat extends Widget {
 
                 clientRpcFunc(inviteUsers, invites, (r: Result) => {
                     if (r.r !== 1) {
-                        alert(`邀请好友入群失败`);
+                        console.log(`邀请好友入群失败`);
                     }
-                    alert('成功发送邀请好友信息');
+                    console.log('成功发送邀请好友信息');
                 });
             }
             this.ok();

@@ -44,22 +44,22 @@ export class AddUser extends Widget {
     public applyFriend() {
         const sid = store.getStore('uid');
         if (!this.props.rid) {
-            alert('请输入好友ID');
+            console.log('请输入好友ID');
 
             return;
         }
         if (this.props.rid === sid.toString()) {
-            alert('不能添加自己为好友');
+            console.log('不能添加自己为好友');
 
             return;
         }
         applyUserFriend(this.props.rid, (r: Result) => {
             if (r.r === 0) {
-                alert(`${this.props.rid}已经是你的好友`);
+                console.log(`${this.props.rid}已经是你的好友`);
 
                 return;
             } else if (r.r === -2) {
-                alert(`${this.props.rid}用户不存在`);
+                console.log(`${this.props.rid}用户不存在`);
 
                 return;
             }

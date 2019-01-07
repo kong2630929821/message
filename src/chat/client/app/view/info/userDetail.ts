@@ -110,7 +110,7 @@ export class UserDetail extends Widget {
         setTimeout(() => {
             applyFriend(this.props.uid.toString(), (r: Result) => {
                 if (r.r === 0) {
-                    alert(`${this.props.uid}已经是你的好友`);
+                    console.log(`${this.props.uid}已经是你的好友`);
                 }
             });
         }, 500);
@@ -177,7 +177,7 @@ export class UserDetail extends Widget {
                     store.setStore('lastChat', lastChat);
                 }
             } else {
-                alert('删除好友失败');
+                console.log('删除好友失败');
             }
         });
     }

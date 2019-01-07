@@ -119,10 +119,10 @@ export class GroupInfos extends Widget {
                     clientRpcFunc(userExitGroup,this.props.gid,(r) => {
                         console.log('========deleteGroup',r);
                         if (r.r === 1) { // 退出成功关闭当前页面
-                            alert('退出群组成功');
+                            console.log('退出群组成功');
                             this.ok();
                         } else {
-                            alert('退出群组失败');
+                            console.log('退出群组失败');
                         }
                     });
                 });
@@ -183,7 +183,7 @@ export class GroupInfos extends Widget {
         if (ownerid === uid || adminids.indexOf(uid) > -1) {
             popNew('chat-client-app-view-groupManage-groupManage',{ gid : this.props.gid });
         } else {
-            alert('您没有权限执行此操作');
+            console.log('您没有权限执行此操作');
         }
     }
     // 打开群聊天
