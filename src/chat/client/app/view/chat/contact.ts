@@ -15,7 +15,7 @@ import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import { getFriendHistory } from '../../data/initStore';
 import * as store from '../../data/store';
 import { UserType } from '../../logic/autologin';
-import { bottomNotice, getUserAvatar, rippleStyle } from '../../logic/logic';
+import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
 import { clientRpcFunc, login as mqttLogin, subscribe } from '../../net/init';
 import { init } from '../login/login';
 // ================================================ 导出
@@ -68,7 +68,7 @@ export class Contact extends Widget {
     }
 
     public chat(e:any, id: number, chatType: GENERATOR_TYPE) {
-        rippleStyle(e);
+        rippleShow(e);
         this.closeMore();
         popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
 

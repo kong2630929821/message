@@ -5,18 +5,17 @@
 // ================================================ 导入
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
-import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
-import { getGroupUserLink, updateGroupAlias, userExitGroup } from '../../../../server/data/rpc/group.p';
+import { applyJoinGroup, getGroupUserLink, updateGroupAlias, userExitGroup } from '../../../../server/data/rpc/group.p';
 import { GroupAlias } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice, rippleStyle } from '../../logic/logic';
+import { bottomNotice, rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -44,7 +43,8 @@ export class GroupInfos extends Widget {
             scrollHeight:0,
             setting:null,
             msgAvoid:false,
-            msgTop:false
+            msgTop:false,
+            inFlag:0
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -190,7 +190,7 @@ export class GroupInfos extends Widget {
     }
     // 打开群聊天
     public openGroupChat(e:any) {
-        rippleStyle(e);
+        rippleShow(e);
         this.pageClick();
         popNew('chat-client-app-view-chat-chat',{ id:this.props.gid, chatType:GENERATOR_TYPE.GROUP });
         
@@ -271,6 +271,20 @@ export class GroupInfos extends Widget {
             console.log(res);
         });
     }
+
+    /**
+     * 申请加入群组
+     */
+    public applyGroup() {
+        clientRpcFunc(applyJoinGroup, this.props.gid, ((r) => {
+            logger.debug('===========主动添加群聊返回',r);
+            if (r.r === -2) {
+                bottomNotice('您申请的群不存在');
+            } else if (r.r === -1) {
+                bottomNotice('您已经是该群的成员');
+            }
+        }));
+    }
 }
 
 // ================================================ 本地
@@ -292,6 +306,7 @@ interface Props {
     setting:any; // 额外设置，免打扰|置顶
     msgTop:boolean; // 置顶
     msgAvoid:boolean; // 免打扰
+    inFlag:number; // 从哪里进入 0 contactList进入，1 chat进入，2 newFriendApply进入，受邀加入群组
 }
 
 const MAX_DURING = 600;

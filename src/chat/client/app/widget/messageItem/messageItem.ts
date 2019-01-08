@@ -8,17 +8,13 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
-import { Logger } from '../../../../utils/logger';
 import { depCopy, genGuid, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { timestampFormat } from '../../logic/logic';
 import { downloadFileUrlPrefix } from '../../net/upload';
 import { EMOJIS_MAP } from '../emoji/emoji';
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
+
 export class MessageItem extends Widget {
     constructor() {
         super();
@@ -67,7 +63,8 @@ export class MessageItem extends Widget {
     // 点击撤回
     public recall(e:any) {
         notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
-        this.closeMessageRecall();
+        this.props.isMessageRecallVisible = false;
+        this.paint();
     }
 
     public userDetail() {
@@ -81,10 +78,11 @@ export class MessageItem extends Widget {
         this.paint();
     }
 
-    // 点击关闭消息撤回
-    public closeMessageRecall() {
+    // 点击消息内容
+    public msgDetailClick(e:any) {
         this.props.isMessageRecallVisible = false;
         this.paint();
+        // const links = getRealNode(e.node).getElementsByClassName('linkMsg');
     }
 
     // 点击打开红包
@@ -99,7 +97,16 @@ export class MessageItem extends Widget {
 
 // ================================================ 本地
 
+// 转换文字中的链接
+const httpHtml = (str:string) => {
+    const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-|:|#)+)/g;
+    
+    return str.replace(reg, '<a href="javascript:;" class="linkMsg">$1$2</a>');
+};
+
+// 转换表情包
 const parseEmoji = (msg:any) => {    
+    msg.msg = httpHtml(msg.msg);
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
         const url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
@@ -115,6 +122,7 @@ const parseEmoji = (msg:any) => {
     return msg;
 };
 
+// 转换图片;
 const parseImg = (msg:any) => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, url) => {
         return `<img src="${downloadFileUrlPrefix}${url}" alt="img" class='imgMsg'></img>`;
@@ -123,6 +131,7 @@ const parseImg = (msg:any) => {
     return msg;
 };
 
+// 转换红包
 const parseRedEnv = (msg:any) => {
     const value = JSON.parse(msg.msg);
     msg.msg = value.message || '恭喜发财，万事如意';
@@ -130,6 +139,7 @@ const parseRedEnv = (msg:any) => {
 
     return msg;
 };
+
 export const parseMessage = (msg:any):any => {
     switch (msg.mtype) {
         case MSG_TYPE.REDENVELOPE: // 红包

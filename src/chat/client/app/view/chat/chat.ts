@@ -18,6 +18,7 @@ import { depCopy, genUuid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { bottomNotice, getFriendAlias, timestampFormat } from '../../logic/logic';
+import { openNewActivity } from '../../logic/native';
 import { clientRpcFunc } from '../../net/init';
 import { parseMessage } from '../../widget/messageItem/messageItem';
 
@@ -112,7 +113,7 @@ export class Chat extends Widget {
         } else {
             store.register(`userChatMap/${this.props.hid}`,this.bindCB);
         }
-    
+        
     }
 
     /**
@@ -244,6 +245,13 @@ export class Chat extends Widget {
      */
     public latestMsg() {
         setTimeout(() => {
+            const links = document.getElementsByClassName('linkMsg');
+            for (const i of links) {
+                i.addEventListener('click', () => {
+                    openNewActivity(i.innerHTML);
+                    console.log(i.innerHTML);
+                });
+            }
             this.getScrollElem().scrollTop = this.getScrollElem().scrollHeight;
             this.paint();
         }, 100);
@@ -261,7 +269,7 @@ export class Chat extends Widget {
      * 查看群详细信息
      */
     public groupDetail() {
-        popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id });
+        popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag:1 });
     }
 
     public destroy() {

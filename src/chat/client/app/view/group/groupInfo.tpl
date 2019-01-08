@@ -1,7 +1,11 @@
 <div w-class="new-page" on-tap="pageClick" class="new-page" on-scroll="scrollPage" id="groupInfo">
     <div w-class="top-main-wrap" ev-next-click="handleMoreGroup" ev-back-click="goBack">
         <div style="position:relative;min-height: 128px;">
+            {{if it.inFlag != 2}}
             <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
+            {{else}}
+            <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
+            {{end}}
         </div>
         <div w-class="home-info-wrap">
             <img w-class="avatar" src="../../res/images/img_avatar1.png" />
@@ -38,28 +42,37 @@
                 </div>
             </div>
             <div w-class="other-wrap">
-                <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
-                <ul w-class="ul-wrap">
-                    <li w-class="liItem" style="padding-top:0;">搜索聊天记录</li>
-                    <li w-class="liItem" ev-switch-click="msgTop">
-                        <span>聊天置顶</span>
-                        <chat-client-app-widget-switch-switch>{types:{{it.msgTop}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
-                    </li>
-                    <li w-class="liItem" ev-switch-click="msgAvoid">
-                        <span>消息免打扰</span>
-                        <chat-client-app-widget-switch-switch>{types:{{it.msgAvoid}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
-                    </li>
-                    {{if it.isAdmin}}
-                    <div w-class="liItem1" style="color: #222222;" on-tap="openGroupManage">群管理</div>
-                    {{end}}
-                    <div w-class="liItem1" style="margin-bottom: 40px;" on-tap="openGroupChat(e)">开始聊天</div>
-                </ul>
+                {{if it.inFlag == 2}}
+                    <div style="margin: 0 60px 20px;">
+                        <div w-class="liItem1" on-tap="applyGroup(e)" >加入群</div>
+                    </div>
+                {{else}}
+                    <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
+                    <ul w-class="ul-wrap">
+                        <li w-class="liItem" style="padding-top:0;">搜索聊天记录</li>
+                        <li w-class="liItem" ev-switch-click="msgTop">
+                            <span>聊天置顶</span>
+                            <chat-client-app-widget-switch-switch>{types:{{it.msgTop}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
+                        </li>
+                        <li w-class="liItem" ev-switch-click="msgAvoid">
+                            <span>消息免打扰</span>
+                            <chat-client-app-widget-switch-switch>{types:{{it.msgAvoid}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
+                        </li>
+                        {{if it.isAdmin}}
+                        <div w-class="liItem1" style="color: #222222;" on-tap="openGroupManage">群管理</div>
+                        {{end}}
+                        {{if it.inFlag != 1}}
+                        <div w-class="liItem1" style="margin-bottom: 40px;" on-tap="openGroupChat(e)">开始聊天</div>
+                        {{end}}
+                    </ul>
+                {{end}}
             </div>
         </div>
 
-        <div w-class="a-part" on-tap="openGroupMember">
+        <div w-class="a-part">
             <div w-class="a">成员（{{it.members.length}}/500）</div>
-            <div w-class="member-wrap">
+            {{if it.inFlag != 2}}
+            <div w-class="member-wrap" on-tap="openGroupMember">
                 <img w-class="grouperIcon" src="../../res/images/add_group_user.png" />
                 {{for i, v of it.members}}
                     {{if i < 5 }}
@@ -68,6 +81,7 @@
                 {{end}}
                 <img w-class="more" src="../../res/images/more-gray.png" />
             </div>
+            {{end}}
         </div>
     </div>
 

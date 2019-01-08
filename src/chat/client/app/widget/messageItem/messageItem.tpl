@@ -8,7 +8,7 @@
             <span w-class="rightDownTail" style="border-top: 10px solid #fff;"></span>
 
             {{else}}
-            <div w-class="text-wrap" on-longtap="openMessageRecall" on-tap="closeMessageRecall">
+            <div w-class="text-wrap" on-longtap="openMessageRecall" on-tap="msgDetailClick(e)">
                 <widget w-tag="pi-ui-html" style="display: inline;white-space: pre-wrap;">{{it.msg.msg}}</widget>
                 <div w-class="corner">
                     <span w-class="sendTime">{{it.time}}</span>
@@ -34,7 +34,7 @@
             <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.msg.msg}},cardType:"redEnv"}</widget>
             {{else}}
             <span w-class="leftDownTail"></span>
-            <div w-class="text-wrap" style="color:#222222;background:#fff;" on-longtap="openMessageRecall" on-tap="closeMessageRecall">
+            <div w-class="text-wrap" style="color:#222222;background:#fff;" on-longtap="openMessageRecall" on-tap="msgDetailClick(e)">
                 <widget w-tag="pi-ui-html" style="display: inline;white-space: pre-wrap;">{{it.msg.msg}}</widget>
                 <div w-class="corner">
                     <span w-class="sendTime" style="color:#297FCA">{{it.time}}</span>
