@@ -124,7 +124,7 @@ export const getUserAvatar = (rid:number) => {
 };
 
 // 水波纹动画效果展示
-export const rippleStyle = (e:any) => {
+export const rippleShow = (e:any) => {
     getRealNode(e.node).classList.add('ripple');
 
     setTimeout(() => {

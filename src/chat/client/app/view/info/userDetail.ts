@@ -15,7 +15,7 @@ import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { Logger } from '../../../../utils/logger';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice, copyToClipboard, getFriendAlias, getUserAvatar, rippleStyle } from '../../logic/logic';
+import { bottomNotice, copyToClipboard, getFriendAlias, getUserAvatar, rippleShow } from '../../logic/logic';
 import { clientRpcFunc, unSubscribe } from '../../net/init';
 import { applyFriend, delFriend as delUserFriend } from '../../net/rpc';
 
@@ -100,14 +100,14 @@ export class UserDetail extends Widget {
 
     // 开始对话
     public startChat(e:any) {
-        rippleStyle(e);
+        rippleShow(e);
         this.pageClick();
         popNew('chat-client-app-view-chat-chat', { id: this.props.uid, chatType: GENERATOR_TYPE.USER });
     }
 
     // 添加好友
     public addUser(e:any) {
-        rippleStyle(e);
+        rippleShow(e);
         this.pageClick();
         applyFriend(this.props.uid.toString(), (r: Result) => {
             if (r.r === 0) {

@@ -10,7 +10,7 @@ import { Contact } from '../../../../server/data/db/user.s';
 import { applyJoinGroup } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { bottomNotice, rippleStyle } from '../../logic/logic';
+import { bottomNotice, rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -40,7 +40,7 @@ export class GroupListt extends Widget {
 
     // 主动添加群聊
     public applyGroup(e:any) {
-        rippleStyle(e);
+        rippleShow(e);
         if (!this.props.inputGid) {
             bottomNotice('请输入群聊ID');
            
@@ -48,7 +48,7 @@ export class GroupListt extends Widget {
             clientRpcFunc(applyJoinGroup, this.props.inputGid, ((r) => {
                 logger.debug('===========主动添加群聊返回',r);
                 if (r.r === -2) {
-                    bottomNotice('申请的群不存在');
+                    bottomNotice('您申请的群不存在');
                 } else if (r.r === -1) {
                     bottomNotice('您已经是该群的成员');
                 }

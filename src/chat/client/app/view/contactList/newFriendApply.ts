@@ -13,7 +13,7 @@ import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as store from '../../data/store';
-import { bottomNotice, rippleStyle } from '../../logic/logic';
+import { bottomNotice, rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -46,7 +46,7 @@ export class NewFriendApply extends Widget {
 
     // 点击拒绝添加好友/群
     public rejectBtn(e:any) {
-        rippleStyle(e);
+        rippleShow(e);
         setTimeout(() => {
             this.props.isSolve = '已拒绝';
             this.paint();
@@ -80,7 +80,7 @@ export class NewFriendApply extends Widget {
 
     // 点击同意添加好友/群
     public agreeBtn(e:any) {
-        rippleStyle(e);
+        rippleShow(e);
         setTimeout(() => {
             this.props.isSolve = '已同意';
             this.paint();
@@ -119,7 +119,7 @@ export class NewFriendApply extends Widget {
         } else if (this.props.activeToGGid) {
             popNew('chat-client-app-view-info-userDetail',{ uid:this.props.id }); 
         } else {
-            popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id });
+            popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag: 2 });  // 未加入的群组
         }
     }
 }

@@ -9,7 +9,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { Contact, GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
-import { bottomNotice, rippleStyle } from '../../logic/logic';
+import { bottomNotice, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { applyFriend as applyUserFriend } from '../../net/rpc';
 
@@ -86,7 +86,7 @@ export class AddUser extends Widget {
                 popNew('app-view-mine-other-addFriend'); // 展示我的二维码
                 break;
             case 2:
-                rippleStyle(e);
+                rippleShow(e);
                 this.applyFriend();  // 添加好友
                 break;
             default:
