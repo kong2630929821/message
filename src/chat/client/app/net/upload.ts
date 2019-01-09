@@ -1,14 +1,14 @@
+import { uploadFileUrl } from '../../../../app/config';
 import { resize } from '../../../../pi/widget/resize/resize';
 
 /**
  * uploadFile to server
- * @param base64 base54 encode
+ * @param file file
  */
-export const uploadFile = async (base64, successCb?:(imgUrlSuf:string) => void,faileCb?:(err:any) => void) => {
-    const file = base64ToFile(base64);
+export const uploadFile = async (file, successCb?:(imgUrlSuf:string) => void,faileCb?:(err:any) => void) => {
     const formData = new FormData();
     formData.append('upload',file);
-    fetch(`${uploadFileUrlPrefix}?$forceServer=1`, {
+    fetch(`${uploadFileUrl}?$forceServer=1`, {
         body: formData, // must match 'Content-Type' header
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         mode: 'cors' // no-cors, cors, *same-origin
@@ -80,16 +80,3 @@ export const imgResize = (buffer:ArrayBuffer,callback:Function) => {
     };
     
 };
-
-// FIXME: 临时使用的kuplay的服务
-// 资源服务器ip
-const sourceIp = 'app.kuplay.io';
-
-// 资源服务器port
-const sourcePort = '80';
-
-// 上传图片的url前缀
-const uploadFileUrlPrefix = `http://${sourceIp}:${sourcePort}/service/upload`;
-
-// 下载图片的url前缀
-export const downloadFileUrlPrefix = `http://${sourceIp}:${sourcePort}/service/get_file?sid=`;

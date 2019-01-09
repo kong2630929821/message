@@ -124,7 +124,7 @@ export class GroupInfos extends Widget {
                             bottomNotice('退出群组成功');
                             this.ok();
                         } else {
-                            bottomNotice('退出群组失败');
+                            bottomNotice('群主不能退出');
                         }
                     });
                 });
@@ -254,22 +254,30 @@ export class GroupInfos extends Widget {
         if (e.newType) {
             index === -1 && setting.msgTop.push(hid);
             
-            const lastChat = store.getStore(`lastChat`, []);
-            const ind = lastChat.findIndex(item => item[0] === this.props.gid && item[2] === GENERATOR_TYPE.GROUP);
-            ind > -1 && lastChat.splice(index, 1);    
-            lastChat.unshift([]); // 向前压入数组中
-            store.setStore(`lastChat`,lastChat);
-
         } else {
             setting.msgTop.splice(index,1);
         }
         this.props.setting = setting;
         store.setStore('setting',setting);
-
+        this.pushLastChat(e.newType, setting);
         clientRpcFunc(setData,JSON.stringify(setting),(res) => {
             // TODO
             console.log(res);
         });
+    }
+
+    public pushLastChat(fg:boolean,setting:any) {
+        const lastChat = store.getStore(`lastChat`, []);
+        const ind = lastChat.findIndex(item => item[0] === this.props.gid && item[2] === GENERATOR_TYPE.GROUP);
+        ind > -1 && lastChat.splice(ind, 1); 
+        if (fg) { // 置顶放到最前面
+            lastChat.unshift([this.props.gid, Date.now(), GENERATOR_TYPE.GROUP]); // 向前压入数组中
+        } else {  // 取消置顶放到置顶消息后
+            const len = setting.msgTop.length;
+            lastChat.splice(len, 0, [this.props.gid, Date.now(), GENERATOR_TYPE.GROUP]); // 压入到置顶消息后
+        }
+        store.setStore(`lastChat`,lastChat);
+
     }
 
     /**

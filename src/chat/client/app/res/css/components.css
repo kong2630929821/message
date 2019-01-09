@@ -314,8 +314,9 @@ li{
     height: 48px;
 }
 .imgMsg{
-    max-width: 300px;
-    max-height: 300px;
+    max-width: 500px;
+    max-height: 500px;
+    border-radius: 12px;
 }
 .linkMsg{
     color: #0c6bc7;

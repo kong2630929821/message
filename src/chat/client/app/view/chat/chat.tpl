@@ -8,16 +8,7 @@
 
         {{if it.newMsg}}
         <div>
-            <div w-class="newMsg">
-                <div w-class="text-wrap">
-                    <widget w-tag="pi-ui-html" style="display: inline;white-space: pre-wrap;">{{it.newMsg.msg}}</widget>
-                    <div w-class="corner">
-                        <span w-class="sendTime">{{it.newMsg.time}}</span>
-                        <img w-class="isRead" src="../../res/images/unread.png" />
-                    </div>
-                </div>
-                <span w-class="rightDownTail"></span>
-            </div>
+            <widget w-tag="chat-client-app-widget-messageItem-messageItem" style="float:right;">{{it.newMsg}}</widget>
             <img src="../../res/images/loading.gif" w-class="loading"/>
         </div>
         {{end}}
@@ -29,7 +20,7 @@
     </div>
     {{end}}
 
-    <div ev-open-Emoji="openEmoji" ev-input-focus="inputFocus" ev-input-change="msgChange" ev-emoji-click="pickEmoji" ev-open-Tools="openTools">
+    <div ev-open-Emoji="openEmoji" ev-input-focus="inputFocus" ev-input-change="msgChange" ev-emoji-click="pickEmoji" ev-open-Tools="openTools" ev-send-before="sendImgBefore">
         <widget w-tag="chat-client-app-widget-inputMessage-inputMessage">{isOnEmoji:{{it.isOnEmoji}},message:{{it.inputMessage}},isOnTools:{{it.isOnTools}} }</widget>  
     </div>
 </div>

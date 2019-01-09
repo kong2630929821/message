@@ -2,6 +2,7 @@
  * textMessage 组件相关处理
  */
 // ================================================ 导入
+import { uploadFileUrlPrefix } from '../../../../../app/config';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -11,7 +12,6 @@ import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { depCopy, genGuid, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { timestampFormat } from '../../logic/logic';
-import { downloadFileUrlPrefix } from '../../net/upload';
 import { EMOJIS_MAP } from '../emoji/emoji';
 // ================================================ 导出
 
@@ -34,17 +34,20 @@ export class MessageItem extends Widget {
 
     public setProps(props:any) {
         super.setProps(props);
-        if (this.props.chatType === GENERATOR_TYPE.USER) {
-            this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
-        } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
-            const gid = getGidFromHincid(this.props.hIncId);
-            this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.msg.sid)}`, new GroupUserLink()).userAlias;
+        if (this.props.hIncId) {
+            if (this.props.chatType === GENERATOR_TYPE.USER) {
+                this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
+            } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+                this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
+                const gid = getGidFromHincid(this.props.hIncId);
+                this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.msg.sid)}`, new GroupUserLink()).userAlias;
+            }
+            this.props.msg = parseMessage(depCopy(this.props.msg));
+            this.props.me = this.props.msg.sid === store.getStore('uid');
+            const time = depCopy(this.props.msg.time);
+            this.props.time = timestampFormat(time,1);
         }
-        this.props.msg = parseMessage(depCopy(this.props.msg));
-        this.props.me = this.props.msg.sid === store.getStore('uid');
-        const time = depCopy(this.props.msg.time);
-        this.props.time = timestampFormat(time,1);
+        
     }
 
     public firstPaint() {
@@ -62,9 +65,11 @@ export class MessageItem extends Widget {
 
     // 点击撤回
     public recall(e:any) {
-        notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
-        this.props.isMessageRecallVisible = false;
-        this.paint();
+        if (this.props.hIncId) {  // 真实发送成功的消息才可以撤回
+            notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
+            this.props.isMessageRecallVisible = false;
+            this.paint();
+        }
     }
 
     public userDetail() {
@@ -92,6 +97,12 @@ export class MessageItem extends Widget {
             cid: this.props.msg.redEnvId,
             message: this.props.msg.msg
         });
+    }
+
+    // 点击查看大图
+    public openBigImage() {
+        const url = this.props.msg.msg.split('"')[1];
+        popNew('chat-client-app-widget-bigImage-bigImage',{ img: url });
     }
 }
 
@@ -125,7 +136,7 @@ const parseEmoji = (msg:any) => {
 // 转换图片;
 const parseImg = (msg:any) => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, url) => {
-        return `<img src="${downloadFileUrlPrefix}${url}" alt="img" class='imgMsg'></img>`;
+        return `<img src="${uploadFileUrlPrefix}${url}" alt="img" class='imgMsg'></img>`;
     });
 
     return msg;
