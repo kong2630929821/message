@@ -21,3 +21,5 @@ src/chat/server/rpc/*.s.ts
 src/chat/server/rpc/*.c.ts
 src/chat/server/data/db/*.s.ts
 *.p.ts
+*.s.ts
+*.c.ts

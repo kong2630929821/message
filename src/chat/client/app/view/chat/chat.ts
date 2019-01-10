@@ -124,7 +124,29 @@ export class Chat extends Widget {
         this.paint();
         
     }
+    /**
+     * 发送图片消息之前,预览
+     */
+    public sendImgBefore(e:any) {
+        const message = {
+            msg:e.value,
+            mtype:e.mtype,
+            time:Date.now()
+        };
+        this.props.newMsg = {
+            hIncId:null,
+            name:this.props.name,
+            me:true,
+            msg:parseMessage(depCopy(message)),
+            time:timestampFormat(message.time,1),
+            chatType:this.props.chatType
+        };
+        this.paint();
+    }
 
+    /**
+     * 发送真实消息
+     */
     public send(e:any) {
         this.props.inputMessage = e.value;
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
@@ -136,8 +158,12 @@ export class Chat extends Widget {
             message.time = (new Date()).getTime();
             if (e.msgType < 5) {
                 this.props.newMsg = {
-                    msg:parseMessage(depCopy(message)).msg,
-                    time:timestampFormat(message.time,1)
+                    hIncId:null,
+                    name:this.props.name,
+                    me:true,
+                    msg:parseMessage(depCopy(message)),
+                    time:timestampFormat(message.time,1),
+                    chatType:this.props.chatType
                 };
             }
             clientRpcFunc(sendGroupMessage, message, (r: GroupHistory) => {
@@ -159,8 +185,12 @@ export class Chat extends Widget {
             info.time = (new Date()).getTime();
             if (e.msgType < 5) {
                 this.props.newMsg = {
-                    msg:parseMessage(depCopy(info)).msg,
-                    time:timestampFormat(info.time,1)
+                    hIncId:null,
+                    name:this.props.name,
+                    me:true,
+                    msg:parseMessage(depCopy(info)),
+                    time:timestampFormat(info.time,1),
+                    chatType:this.props.chatType
                 };
             }
             clientRpcFunc(sendUserMessage, info, (r:UserHistory) => {
@@ -248,7 +278,7 @@ export class Chat extends Widget {
             const links = document.getElementsByClassName('linkMsg');
             for (const i of links) {
                 i.addEventListener('click', () => {
-                    openNewActivity(i.innerHTML);
+                    openNewActivity(i.innerHTML,'其他网页');
                     console.log(i.innerHTML);
                 });
             }

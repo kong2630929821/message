@@ -3,12 +3,13 @@
  */
 // ===========================导入
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
+import { arrayBufferToBase64 } from '../../../../../pi/util/base64';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { openCamera, selectImage } from '../../logic/native';
-import { imgResize, uploadFile } from '../../net/upload';
+import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ===========================导出
 export class InputMessage extends Widget {
@@ -75,6 +76,7 @@ export class InputMessage extends Widget {
                 break;
             default:
         }
+        notify(e.node,'ev-open-Tools',{});
     }
 
 }
@@ -87,18 +89,19 @@ interface Props {
 }
 
 /**
- * 发送图片消息
+ * 选择相册
  */
 export const sendImage = (e:any) => {
-    const imagePicker = selectImage(() => { 
+    const imagePicker = selectImage((w,h,url) => {
+        // notify(e.node,'ev-send-before',{ value:`[${url}]`, msgType:MSG_TYPE.IMG }); 
+
         imagePicker.getContent({
             success(buffer:ArrayBuffer) {
-                imgResize(buffer,(res) => {
-                    uploadFile(res.base64,(imgUrlSuf:string) => {
-                        console.log('选择的照片',imgUrlSuf);
-                        notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
-                    });
+                uploadFile(arrayBuffer2File(buffer),(imgUrlSuf:string) => {
+                    console.log('选择的照片',imgUrlSuf);
+                    notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
                 });
+                
             }
         });
     });
@@ -108,12 +111,12 @@ export const sendImage = (e:any) => {
  * 拍摄照片
  */
 export const sendPicture = (e:any) => {
-    openCamera((res) => { 
-        imgResize(res,(res) => {
-            uploadFile(res.base64,(imgUrlSuf:string) => {
-                console.log('拍摄的照片',imgUrlSuf);
-                notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
-            });
+    openCamera((buffer:ArrayBuffer) => { 
+        // notify(e.node,'ev-send-before',{ value:arrayBufferToBase64(buffer), msgType:MSG_TYPE.IMG }); 
+
+        uploadFile(arrayBuffer2File(buffer),(imgUrlSuf:string) => {
+            console.log('拍摄的照片',imgUrlSuf);
+            notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
         });
     });
 };

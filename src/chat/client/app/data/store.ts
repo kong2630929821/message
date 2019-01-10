@@ -8,7 +8,7 @@ import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { friendChange, groupChatChange, groupUserLinkChange, initAccount, lastReadChange, settingChange, userChatChange } from './initStore';
+import { friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, settingChange, userChatChange } from './initStore';
 
 // ============================================ 导出
 
@@ -151,6 +151,9 @@ const registerDataChange = () => {
 
     register('groupUserLinkMap',() => {
         groupUserLinkChange();  // 群组用户数据更新
+    });
+    register('lastChat',() => {
+        lastChatChange(); // 最近会话更新
     });
     register('lastRead',() => {
         lastReadChange(); // 已读消息游标更新
