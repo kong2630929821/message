@@ -15,7 +15,7 @@ import { Logger } from '../../../utils/logger';
 import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { GroupHistoryCursor, MsgLock  } from '../db/message.s';
+import { GroupHistoryCursor, MsgLock } from '../db/message.s';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -267,6 +267,8 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
 
     } else {
         cInfo.group.push(agree.gid);
+        console.log('!!!!!!!!!!!!!!11111111111cInfo3:', cInfo);
+        contactBucket.put(uid, cInfo);
         gInfo.memberids.push(uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('User: ', uid, 'agree to join group: ', agree.gid);
