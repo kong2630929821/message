@@ -2,7 +2,7 @@
 <div w-class="new-page" class="new-page" on-tap="closeMore">
     {{if it.isLogin}}
         <div w-class="topBack" ev-next-click="getMore" ev-refresh-click="refreshPage">
-            <img src="../../res/images/topbar_backimg.png" w-class="backImg"/>
+            <div w-class="backImg"></div>
             {{if it1.contactMap && (it1.contactMap.applyUser.length + it1.contactMap.applyGroup.length) > 0}}
             <span w-class="redSpot" ></span>
             {{end}}

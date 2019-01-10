@@ -67,6 +67,14 @@ export class Contact extends Widget {
         // }
     }
 
+    public firstPaint() {
+        super.firstPaint();
+        walletStore.register('user/isLogin',() => {
+            this.setProps(this.props);
+            this.paint();
+        });
+    }
+
     public chat(e:any, id: number, chatType: GENERATOR_TYPE) {
         rippleShow(e);
         this.closeMore();
@@ -180,7 +188,6 @@ const STATE = {
 };
 store.register(`lastChat`, (r: [number, number][]) => {
     STATE.lastChat = r;
-    console.log('STATE############',STATE);
     forelet.paint(STATE);
 });
 store.register('contactMap', (r) => {

@@ -11,8 +11,9 @@
     top: 0px;
     right: 0;
     width: 276px;
-    height: 341px;
+    height: 150px;
     border-radius: 18px;
+    background-image: url(../../res/images/topbar_backimg.png);
 }
 .history-wrap{
     overflow-x: hidden;

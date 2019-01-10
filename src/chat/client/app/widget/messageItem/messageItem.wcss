@@ -69,3 +69,17 @@
     line-height: 80px;
     padding-left: 20px;
 }
+.img-wrap{
+    position: relative;
+}
+.imgCorner{
+    position: absolute;
+    bottom: 10px;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    background: rgba(34, 34, 34, 0.5);
+    padding: 0 10px;
+    border-radius: 18px;
+    font-size: 24px;
+}

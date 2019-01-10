@@ -52,7 +52,7 @@ export const applyJoinGroup = (gid: number): Result => {
 
         return res;
     }
-    gInfo.applyUser.push(uid);
+    gInfo.applyUser.findIndex(item => item === uid) < 0 && gInfo.applyUser.push(uid);
     groupInfoBucket.put(gid, gInfo);
     res.r = 1;
 
@@ -159,6 +159,7 @@ export const acceptUser = (agree: GroupAgree): Result => {
         gInfo.memberids.push(agree.uid);
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('Accept user: ', agree.uid, 'to group: ', agree.gid);
+        contact.applyGroup = delValueFromArray(agree.gid,contact.applyGroup);  // 同意用户入群，清空该用户受该群组的邀请记录
         contact.group.push(agree.gid);
         contactBucket.put(agree.uid, contact);
         logger.debug('Add group: ', agree.gid, 'to user\'s contact: ', contact.group);
@@ -248,8 +249,8 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     }
     // 删除applyGroup并放回db中
     cInfo.applyGroup = delGidFromApplygroup(agree.gid, cInfo.applyGroup);
-
     contactBucket.put(uid, cInfo);
+
     // 拒绝加入群组
     if (!agree.agree) {
         logger.debug('User: ', uid, 'don\'t want to join group: ', agree.gid);
@@ -257,7 +258,7 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
 
         return gInfo;
     }
-
+    
     // 已经在群组中
     if (gInfo.memberids.indexOf(uid) > -1) {
         logger.debug('User: ', uid, 'has been exist');
@@ -267,7 +268,9 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
 
     } else {
         cInfo.group.push(agree.gid);
+        contactBucket.put(uid, cInfo);
         gInfo.memberids.push(uid);
+        gInfo.applyUser = delValueFromArray(agree.uid, gInfo.applyUser); // 用户同意入群，清空该群组该用户的申请记录
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('User: ', uid, 'agree to join group: ', agree.gid);
 

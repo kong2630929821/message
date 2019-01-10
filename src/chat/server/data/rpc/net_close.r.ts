@@ -17,10 +17,10 @@ export const close_connect = (e: NetEvent) => {
     const reverseBucket = new Bucket('memory', CONSTANT.ONLINE_USERS_REVERSE_INDEX_TABLE, dbMgr);
     const bucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
     const reverseIndex = reverseBucket.get<number, [OnlineUsersReverseIndex]>(sessionId)[0];
-    if (reverseIndex.uid !== -1) {
+    if (reverseIndex) {
         reverseBucket.delete(reverseIndex.sessionId);
         const onlineUser = bucket.get(reverseIndex.uid)[0];
-        if (onlineUser.sessionId !== -1) {
+        if (onlineUser) {
             bucket.delete(reverseIndex.uid);
         }
         

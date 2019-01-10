@@ -19,26 +19,61 @@ export const initAccount = () => {
     initFileStore().then(() => {
         const sid = store.getStore('uid');
         if (!sid) return;
-        getFile(sid, (value) => {
+        // 单聊历史记录
+        getFile(`${sid}-userChatMap`, (value) => {
             if (!value) return;
             store.setStore('userHistoryMap', value.userHistoryMap || new Map(), false);
             store.setStore('userChatMap', value.userChatMap || new Map(), false);
-            store.setStore('friendLinkMap', value.friendLinkMap || new Map(), false);
+        },() => {
+            console.log('read userChatMap error');
+        });
+        // 好友信息
+        getFile(`${sid}-userInfoMap`, (value) => {
+            if (!value) return;
             store.setStore('userInfoMap', value.userInfoMap || new Map(), false);
+            store.setStore('friendLinkMap', value.friendLinkMap || new Map(), false);
+        },() => {
+            console.log('read userInfoMap error');
+        });
+        // 群聊历史记录
+        getFile(`${sid}-groupChatMap`, (value) => {
+            if (!value) return;
             store.setStore('groupHistoryMap', value.groupHistoryMap || new Map(), false);
             store.setStore('groupChatMap', value.groupChatMap || new Map(), false);
-            store.setStore('groupUserLinkMap', value.groupUserLinkMap || new Map(), false);
             store.setStore('announceHistoryMap', value.announceHistoryMap || new Map(), false);
-            store.setStore('lastChat', value.lastChat || []);
-            store.setStore('lastRead', value.lastRead || new Map());
-            store.setStore('setting', value.setting || null);
-            
-            if (!value.setting) {
+        },() => {
+            console.log('read groupChatMap error');
+        });
+        // 群成员信息
+        getFile(`${sid}-groupUserLinkMap`, (value) => {
+            if (!value) return;
+            store.setStore('groupUserLinkMap', value || new Map(), false);
+        },() => {
+            console.log('read groupUserLinkMap error');
+        });
+        // 最近会话列表
+        getFile(`${sid}-lastChat`, (value) => {
+            if (!value) return;
+            store.setStore('lastChat', value || []);
+        },() => {
+            console.log('read lastChat error');
+        });
+        // 已读消息记录
+        getFile(`${sid}-lastRead`, (value) => {
+            if (!value) return;
+            store.setStore('lastRead', value || new Map());
+        },() => {
+            console.log('read lastRead error');
+        });
+        // 额外设置信息
+        getFile(`${sid}-setting`, (value) => {
+            if (!value) return;
+            store.setStore('setting', value || null);
+            if (!value) {
                 getSetting(); // 获取设置，本地没有则从服务器获取
             }
-            console.log('store init success', store);
         }, () => {
-            console.log('read error');
+            console.log('read setting error');
         });
     });
 };
@@ -48,11 +83,10 @@ export const initAccount = () => {
  */
 export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
     const sid = store.getStore('uid');
-    const hid = genUserHid(sid, rid);
     if (sid === rid) return;
 
     clientRpcFunc(getUserHistoryCursor, rid, (r: HistoryCursor) => {
-        console.log('获取游标',r);
+        const hid = genUserHid(sid, rid);
         const lastRead = {
             msgId: '',
             msgType: GENERATOR_TYPE.USER
@@ -62,7 +96,7 @@ export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
             lastRead.msgId = genHIncId(hid, cursor);
             const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
             const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
-            if (cursor > localCursor && upLastRead) {
+            if (cursor > localCursor && (upLastRead || !lastHincId)) { // 本地没有记录时需要更新
                 store.setStore(`lastRead/${hid}`, lastRead);
             }
             // 服务器最新消息
@@ -73,7 +107,7 @@ export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
             
             // 如果本地有记录从本地最后一条记录开始获取聊天消息
             // 本地没有记录则从服务器游标开始获取聊天消息
-            userflag.start = hIncIdArr && hIncIdArr.length > 0 ? getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1 : cursor + 1;
+            userflag.start = hIncIdArr && hIncIdArr.length > 0 ? (getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1) : (cursor + 1);
             userflag.end = lastMsgId;
             if (userflag.end >= userflag.start) {
                 clientRpcFunc(getUserHistory, userflag, (r: UserHistoryArray) => {
@@ -118,7 +152,7 @@ export const getMyGroupHistory = (gid: number, upLastRead: boolean = false) => {
             groupflag.gid = gid;
             const hIncIdArr = store.getStore(`groupChatMap/${hid}`, []);
             // 获取本地最新消息ID
-            groupflag.start = hIncIdArr && hIncIdArr.length > 0 ? getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1 : 1;
+            groupflag.start = hIncIdArr && hIncIdArr.length > 0 ? (getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1) : (cursor + 1);
             groupflag.end = lastMsgId;
             if (groupflag.end >= groupflag.start) {
                 clientRpcFunc(getGroupHistory, groupflag, (r: GroupHistoryArray) => {
@@ -139,18 +173,16 @@ export const getMyGroupHistory = (gid: number, upLastRead: boolean = false) => {
  * 单聊数据变化
  */
 export const userChatChange = () => {
-    const id = store.getStore('uid');
-    getFile(id, (value) => {
+    const sid = store.getStore('uid');
+    getFile(`${sid}-userChatMap`, (value) => {
         if (!value) {
             value = {};
         }
         value.userHistoryMap = store.getStore('userHistoryMap'); // 单人聊天历史记录变化
         value.userChatMap = store.getStore('userChatMap');  // 单人聊天历史记录索引变化
-        value.lastChat = store.getStore('lastChat');  // 最近聊天记录
-        value.lastRead = store.getStore('lastRead');// 当前已读
 
         setTimeout(() => {
-            writeFile(id, value, () => {
+            writeFile(`${sid}-userChatMap`, value, () => {
                 console.log('write success');
             }, () => {
                 console.log('fail!!!!!!!!!!');
@@ -168,13 +200,13 @@ export const userChatChange = () => {
  */
 export const friendChange = () => {
     const id = store.getStore('uid');
-    getFile(id, (value) => {
+    getFile(`${id}-userInfoMap`, (value) => {
         if (!value) {
             value = {};
         }
         value.friendLinkMap = store.getStore('friendLinkMap'); // 好友链接
         value.userInfoMap = store.getStore('userInfoMap');  // 用户信息
-        writeFile(id, value);
+        writeFile(`${id}-userInfoMap`, value);
     }, () => {
         console.log('read error');
     });
@@ -185,18 +217,16 @@ export const friendChange = () => {
  */
 export const groupChatChange = () => {
     const id = store.getStore('uid');
-    getFile(id, (value) => {
+    getFile(`${id}-groupChatMap`, (value) => {
         if (!value) {
             value = {};
         }
         value.groupHistoryMap = store.getStore('groupHistoryMap'); // 群组聊天
         value.groupChatMap = store.getStore('groupChatMap');
         value.announceHistoryMap = store.getStore('announceHistoryMap'); // 群组公告
-        value.lastChat = store.getStore('lastChat');  // 最近聊天记录
-        value.lastRead = store.getStore('lastRead');// 当前已读
 
         setTimeout(() => {
-            writeFile(id, value, () => {
+            writeFile(`${id}-groupChatMap`, value, () => {
                 console.log('write success');
             }, () => {
                 console.log('fail!!!!!!!!!!');
@@ -213,12 +243,12 @@ export const groupChatChange = () => {
  */
 export const groupUserLinkChange = () => {
     const id = store.getStore('uid');
-    getFile(id, (value) => {
+    getFile(`${id}-groupUserLinkMap`, (value) => {
         if (!value) {
             value = {};
         }
-        value.groupUserLinkMap = store.getStore('groupUserLinkMap'); // 群组用户
-        writeFile(id, value);
+        value = store.getStore('groupUserLinkMap'); // 群组用户
+        writeFile(`${id}-groupUserLinkMap`, value);
     }, () => {
         console.log('read error');
     });
@@ -229,13 +259,31 @@ export const groupUserLinkChange = () => {
  */
 export const lastReadChange = () => {
     const id = store.getStore('uid');
-    getFile(id, (value) => {
+    getFile(`${id}-lastRead`, (value) => {
         if (!value) {
             value = {};
         }
         setTimeout(() => {
-            value.lastRead = store.getStore('lastRead');// 当前已读
-            writeFile(id, value);
+            value = store.getStore('lastRead');// 当前已读
+            writeFile(`${id}-lastRead`, value);
+        }, 0);
+    }, () => {
+        console.log('read error');
+    });
+};
+
+/**
+ * 最近会话列表更新
+ */
+export const lastChatChange = () => {
+    const id = store.getStore('uid');
+    getFile(`${id}-lastChat`, (value) => {
+        if (!value) {
+            value = {};
+        }
+        setTimeout(() => {
+            value = store.getStore('lastChat');// 最近会话
+            writeFile(`${id}-lastChat`, value);
         }, 0);
     }, () => {
         console.log('read error');
@@ -247,12 +295,12 @@ export const lastReadChange = () => {
  */
 export const settingChange = () => {
     const id = store.getStore('uid');
-    getFile(id, (value) => {
+    getFile(`${id}-setting`, (value) => {
         if (!value) {
             value = {};
         }
-        value.setting = store.getStore('setting'); // 群组用户
-        writeFile(id, value);
+        value = store.getStore('setting'); // 群组用户
+        writeFile(`${id}-setting`, value);
     }, () => {
         console.log('read error');
     });

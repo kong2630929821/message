@@ -7,12 +7,24 @@
             <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.msg.msg}},cardType:"redEnv"}</widget>
             <span w-class="rightDownTail" style="border-top: 10px solid #fff;"></span>
 
+            {{elseif it.msg.mtype == 2}}
+            <div w-class="img-wrap" on-tap="openBigImage">
+                <widget w-tag="pi-ui-html" style="display: inline;white-space: pre-wrap;">{{it.msg.msg}}</widget>
+                <div w-class="imgCorner">
+                    <span style="color:rgba(187, 229, 254, 1)">{{it.time}}</span>
+                    {{if it.chatType == "user"}}
+                    <img w-class="isRead" src="../../res/images/{{it.msg.read ? 'readed' : 'unread'}}.png" />
+                    {{end}}
+                </div>
+            </div>
             {{else}}
             <div w-class="text-wrap" on-longtap="openMessageRecall" on-tap="msgDetailClick(e)">
                 <widget w-tag="pi-ui-html" style="display: inline;white-space: pre-wrap;">{{it.msg.msg}}</widget>
                 <div w-class="corner">
                     <span w-class="sendTime">{{it.time}}</span>
+                    {{if it.chatType == "user"}}
                     <img w-class="isRead" src="../../res/images/{{it.msg.read ? 'readed' : 'unread'}}.png" />
+                    {{end}}
                 </div>
             </div>
             <span w-class="rightDownTail"></span>
@@ -32,6 +44,13 @@
             {{if it.msg.mtype == 9}}
             <span w-class="leftDownTail" style="border-bottom:10px solid rgba(235,79,79,1)"></span>
             <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.msg.msg}},cardType:"redEnv"}</widget>
+            {{elseif it.msg.mtype == 2}}
+            <div w-class="img-wrap" on-tap="openBigImage">
+                <widget w-tag="pi-ui-html" style="display: inline;white-space: pre-wrap;">{{it.msg.msg}}</widget>
+                <div w-class="imgCorner">
+                    <span style="color:rgba(187, 229, 254, 1)">{{it.time}}</span>
+                </div>
+            </div>
             {{else}}
             <span w-class="leftDownTail"></span>
             <div w-class="text-wrap" style="color:#222222;background:#fff;" on-longtap="openMessageRecall" on-tap="msgDetailClick(e)">

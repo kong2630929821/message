@@ -62,7 +62,7 @@
                         <div w-class="liItem1" style="color: #222222;" on-tap="openGroupManage">群管理</div>
                         {{end}}
                         {{if it.inFlag != 1}}
-                        <div w-class="liItem1" style="margin-bottom: 40px;" on-tap="openGroupChat(e)">开始聊天</div>
+                        <div w-class="liItem1" on-tap="openGroupChat(e)">开始聊天</div>
                         {{end}}
                     </ul>
                 {{end}}
