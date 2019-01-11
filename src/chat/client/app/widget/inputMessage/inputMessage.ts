@@ -3,13 +3,12 @@
  */
 // ===========================导入
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
-import { arrayBufferToBase64 } from '../../../../../pi/util/base64';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { openCamera, selectImage } from '../../logic/native';
-import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
+import { arrayBuffer2File, uploadFile } from '../../net/upload';
 
 // ===========================导出
 export class InputMessage extends Widget {
