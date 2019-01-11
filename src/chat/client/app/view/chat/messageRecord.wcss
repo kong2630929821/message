@@ -48,6 +48,7 @@
     white-space: nowrap;
     width: 450px;
     overflow: hidden;
+    height: 40px;
 }
 .right-wrap{
     display:flex;

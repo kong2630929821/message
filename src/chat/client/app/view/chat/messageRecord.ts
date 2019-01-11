@@ -48,9 +48,9 @@ export class MessageRecord extends Widget {
 
         // 计算有多少条新消息记录
         const lastHincId = store.getStore(`lastRead/${hid}`,{ msgId:undefined }).msgId; // 最后阅读的一条消息ID
-        const count1 = hincId ? getIndexFromHIncId(hincId) :-1;
-        const count2 = lastHincId ? getIndexFromHIncId(lastHincId) :-1;
-        this.props.unReadCount = count1 - count2;
+        const count1 = hincId ? getIndexFromHIncId(hincId) :-1; // 收到的最新消息ID
+        const count2 = lastHincId ? getIndexFromHIncId(lastHincId) :-1; // 已读的最后一条消息ID
+        this.props.unReadCount = count1 > count2 && (count1 - count2);
 
         // 消息额外设置，免打扰|置顶
         const setting = store.getStore('setting',{ msgTop:[],msgAvoid:[] });
@@ -73,7 +73,12 @@ export class MessageRecord extends Widget {
             } else if (this.props.lastMessage.mtype === MSG_TYPE.REDENVELOPE) {
                 this.props.msg = '[快抢红包]';
             }
-        } 
+        } else {
+            const mess = store.getStore('lastChat',[]);
+            const index = mess.findIndex(item => item[0] === this.props.rid && item[2] === this.props.chatType);
+            this.props.time = timestampFormat(mess[index][1],1);
+            this.props.msg = '';
+        }
 
     }
 
