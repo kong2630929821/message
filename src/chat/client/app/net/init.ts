@@ -8,7 +8,6 @@ declare var pi_modules;
 // ================================================ 导入
 import { getOpenId } from '../../../../../app/api/JSAPI';
 import * as walletStore from '../../../../../app/store/memstore';
-import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
@@ -32,9 +31,9 @@ import { initPush } from './receive';
 /**
  * 客户端初始化
  */
-export const initClient = () => {
+export const initClient = (server?: string, port?: number) => {
     if (!rootClient) {
-        mqtt = new AutoLoginMgr(chatLogicIp, chatLogicPort);
+        mqtt = new AutoLoginMgr(server, port);
         rootClient = mqtt.connection();
     }
     initPush();
@@ -308,6 +307,7 @@ let mqtt: any;
 let rootClient: Client;
 // root RPC
 let clientRpc: any;
+// 登陆聊天方法执行标记
 let loginChatFg: boolean;
 
 walletStore.register('user/isLogin',(r) => {
