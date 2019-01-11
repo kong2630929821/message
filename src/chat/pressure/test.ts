@@ -2,9 +2,7 @@ import { getFriendHistory } from '../client/app/data/initStore';
 import * as store from '../client/app/data/store';
 import { AutoLoginMgr, UserType } from '../client/app/logic/autologin';
 import * as net_init from '../client/app/net/init';
-import { clientRpcFunc } from '../client/app/net/init';
 import { acceptFriend, applyFriend } from '../client/app/net/rpc';
-import { init } from '../client/app/view/login/login';
 import { DEFAULT_ERROR_STR } from '../server/data/constant';
 import { GroupInfo } from '../server/data/db/group.s';
 import { GroupHistory, MSG_TYPE, UserHistory } from '../server/data/db/message.s';
@@ -38,7 +36,7 @@ export class Test {
                 responseTime(this, login, time);
                 store.setStore(`uid`, r.uid);
                 store.setStore(`userInfoMap/${r.uid}`, r);
-                init(r.uid);
+                net_init.init(r.uid);
                 net_init.subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
                     if (v.code === 1) {
                         getFriendHistory(v.rid);
@@ -48,7 +46,7 @@ export class Test {
                 if (r.name === '') {
                     r.name = user;
                     r.tel = r.uid.toString();
-                    clientRpcFunc(changeUserInfo, r, (res) => {
+                    net_init.clientRpcFunc(changeUserInfo, r, (res) => {
                         if (res && res.uid > 0) {
                             store.setStore(`userInfoMap/${r.uid}`, r);
 
@@ -120,7 +118,7 @@ export class Test {
         info.time = (new Date()).getTime();
         net_init.clientRpcFunc(sendUserMessage, info, (r: UserHistory) => {
             if (r.hIncId === DEFAULT_ERROR_STR) {
-                alert('对方不是你的好友！');
+                console.log('对方不是你的好友！');
 
                 return;
             }
@@ -150,11 +148,11 @@ export class Test {
         groupInfo.note = '';
         net_init.clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
-                alert(`创建群组失败`);
+                console.log('创建群组失败 r:', r);
 
                 return;
             }
-            alert(`创建群组成功`);
+            console.log('创建群组成功r:', r);
             store.setStore(`groupInfoMap/${r.gid}`, r);
         });
     }
@@ -169,7 +167,7 @@ export class Test {
         net_init.clientRpcFunc(sendGroupMessage, message, (r: GroupHistory) => {
 
             if (r.hIncId === DEFAULT_ERROR_STR) {
-                alert('发送失败！');
+                console.log('群聊发送失败r:', r);
 
                 return;
             }
