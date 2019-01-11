@@ -118,7 +118,7 @@ export class Test {
         info.time = (new Date()).getTime();
         net_init.clientRpcFunc(sendUserMessage, info, (r: UserHistory) => {
             if (r.hIncId === DEFAULT_ERROR_STR) {
-                alert('对方不是你的好友！');
+                console.log('对方不是你的好友！');
 
                 return;
             }
@@ -148,11 +148,11 @@ export class Test {
         groupInfo.note = '';
         net_init.clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
-                alert(`创建群组失败`);
+                console.log('创建群组失败 r:', r);
 
                 return;
             }
-            alert(`创建群组成功`);
+            console.log('创建群组成功r:', r);
             store.setStore(`groupInfoMap/${r.gid}`, r);
         });
     }
@@ -167,7 +167,7 @@ export class Test {
         net_init.clientRpcFunc(sendGroupMessage, message, (r: GroupHistory) => {
 
             if (r.hIncId === DEFAULT_ERROR_STR) {
-                alert('发送失败！');
+                console.log('群聊发送失败r:', r);
 
                 return;
             }
