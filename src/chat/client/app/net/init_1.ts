@@ -25,6 +25,14 @@ export const initClient = (server?: string, port?: number) => {
     init2.initClient(server, port);
 };
 
+/**
+ * 注册了所有可以rpc调用的结构体
+ * @param fileMap file map
+ */
+export const registerRpcStruct = (fileMap) => {
+    init2.registerRpcStruct(fileMap);
+};
+
 // ===================================登陆相关
 
 /**
