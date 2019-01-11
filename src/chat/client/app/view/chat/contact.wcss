@@ -23,7 +23,7 @@
     -webkit-overflow-scrolling: touch;
 }
 .inner-wrap{
-    margin: 30px 20px;
+    margin: 30px 20px 120px;
 }
 .util-wrap{
     position:absolute;

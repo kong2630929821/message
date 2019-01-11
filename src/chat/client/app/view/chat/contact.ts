@@ -39,13 +39,13 @@ export class Contact extends Widget {
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
         this.props.isLogin = walletStore.getStore('user/isLogin',false);
         const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
-        const uid = store.getStore('uid');
+        const uid = store.getStore('uid', 0);
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         this.props.isOnline = wUser.nickName !== '';
         this.props.avatar = getUserAvatar(uid);
         
-        // 如果钱包修改了姓名、头像等，或钱包退出登陆
-        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
+        // 聊天未登录，钱包修改了姓名、头像等，或钱包退出登陆
+        if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
             store.initStore();
             this.state = []; // 清空记录 lastChat
             this.paint(true);
