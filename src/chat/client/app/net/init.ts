@@ -6,8 +6,6 @@
 declare var pi_modules;
 
 // ================================================ 导入
-import { getOpenId } from '../../../../../app/api/JSAPI';
-import * as walletStore from '../../../../../app/store/memstore';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
@@ -17,7 +15,6 @@ import { getFriendLinks, getGroupsInfo } from '../../../server/data/rpc/basic.p'
 import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GroupArray, GroupUserLinkArray } from '../../../server/data/rpc/basic.s';
 import { getGroupUserLink } from '../../../server/data/rpc/group.p';
 import { SendMsg } from '../../../server/data/rpc/message.s';
-import { changeUserInfo } from '../../../server/data/rpc/user.p';
 import { genUuid, getGidFromGuid } from '../../../utils/util';
 import { getFriendHistory, getMyGroupHistory } from '../data/initStore';
 import * as store from '../data/store';
@@ -140,54 +137,6 @@ export const unSubscribe = (platerTopic: string) => {
 // ===================================登陆相关
 
 /**
- * 钱包 登陆或注册聊天
- */
-export const walletSignIn = () => {
-    if (!loginChatFg) {
-        getOpenId('101', (r) => {
-            const openId = String(r.openid);
-            if (openId) {
-                login(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
-                    console.log('聊天登陆成功！！！！！！！！！！！！！！');
-                    loginChatFg = false;
-
-                    if (r && r.uid > 0) {
-                        store.setStore(`uid`, r.uid);
-                        store.setStore(`userInfoMap/${r.uid}`, r);
-                        init(r.uid);
-                        subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
-                            if (v.code === 1) {
-                                getFriendHistory(v.rid);
-                            }
-                            // updateUserMessage(v.msg.sid, v);
-                        });
-                    
-                        const user = walletStore.getStore('user/info');
-                        const walletAddr = walletStore.getStore('user/id');
-                        if (r.name !== user.nickName || r.avatar !== user.avatar) {
-                            r.name = user.nickName;
-                            r.avatar = user.avatar;
-                            r.tel = user.phoneNumber;
-                            r.wallet_addr = walletAddr;
-                            clientRpcFunc(changeUserInfo, r, (res) => {
-                                if (res && res.uid > 0) {
-                                    store.setStore(`userInfoMap/${r.uid}`, r);
-
-                                }
-                            });
-                        }
-                    } else {
-                        bottomNotice('钱包登陆失败');
-                    }
-                });
-            }
-        });
-    }
-    loginChatFg = true;
-
-};
-
-/**
  * 登录成功获取各种数据表的变化
  * @param uid user id
  */
@@ -307,11 +256,3 @@ let mqtt: any;
 let rootClient: Client;
 // root RPC
 let clientRpc: any;
-// 登陆聊天方法执行标记
-let loginChatFg: boolean;
-
-walletStore.register('user/isLogin',(r) => {
-    if (r) {  // 如果钱包登陆成功，登陆聊天
-        walletSignIn();
-    }
-});
