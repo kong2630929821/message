@@ -6,13 +6,25 @@
 declare var pi_modules;
 
 // ================================================ 导入
+import { getOpenId } from '../../../../../app/api/JSAPI';
+import * as walletStore from '../../../../../app/store/memstore';
 import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
-import { UserInfo } from '../../../server/data/db/user.s';
+import { GroupUserLink } from '../../../server/data/db/group.s';
+import { Contact, FriendLink, UserInfo } from '../../../server/data/db/user.s';
+import { getFriendLinks, getGroupsInfo } from '../../../server/data/rpc/basic.p';
+import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GroupArray, GroupUserLinkArray } from '../../../server/data/rpc/basic.s';
+import { getGroupUserLink } from '../../../server/data/rpc/group.p';
+import { SendMsg } from '../../../server/data/rpc/message.s';
+import { changeUserInfo } from '../../../server/data/rpc/user.p';
+import { genUuid, getGidFromGuid } from '../../../utils/util';
+import { getFriendHistory, getMyGroupHistory } from '../data/initStore';
+import * as store from '../data/store';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
-import { bottomNotice } from '../logic/logic';
+import { bottomNotice, exitGroup } from '../logic/logic';
+import * as subscribedb from '../net/subscribedb';
 import { initPush } from './receive';
 
 // ================================================ 导出
@@ -126,6 +138,169 @@ export const unSubscribe = (platerTopic: string) => {
     mqtt.subMgr.del(platerTopic);
 };
 
+// ===================================登陆相关
+
+/**
+ * 钱包 登陆或注册聊天
+ */
+export const walletSignIn = () => {
+    if (!loginChatFg) {
+        getOpenId('101', (r) => {
+            const openId = String(r.openid);
+            if (openId) {
+                login(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
+                    console.log('聊天登陆成功！！！！！！！！！！！！！！');
+                    loginChatFg = false;
+
+                    if (r && r.uid > 0) {
+                        store.setStore(`uid`, r.uid);
+                        store.setStore(`userInfoMap/${r.uid}`, r);
+                        init(r.uid);
+                        subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
+                            if (v.code === 1) {
+                                getFriendHistory(v.rid);
+                            }
+                            // updateUserMessage(v.msg.sid, v);
+                        });
+                    
+                        const user = walletStore.getStore('user/info');
+                        const walletAddr = walletStore.getStore('user/id');
+                        if (r.name !== user.nickName || r.avatar !== user.avatar) {
+                            r.name = user.nickName;
+                            r.avatar = user.avatar;
+                            r.tel = user.phoneNumber;
+                            r.wallet_addr = walletAddr;
+                            clientRpcFunc(changeUserInfo, r, (res) => {
+                                if (res && res.uid > 0) {
+                                    store.setStore(`userInfoMap/${r.uid}`, r);
+
+                                }
+                            });
+                        }
+                    } else {
+                        bottomNotice('钱包登陆失败');
+                    }
+                });
+            }
+        });
+    }
+    loginChatFg = true;
+
+};
+
+/**
+ * 登录成功获取各种数据表的变化
+ * @param uid user id
+ */
+export const init = (uid: number) => {
+    subscribedb.subscribeContact(uid, (r: Contact) => {
+        if (r && r.uid === uid) {
+            updateUsers(r, uid);
+        }
+    }, (r: Contact) => {
+        if (r && r.uid === uid) {
+            updateGroup(r, uid);
+        }
+    });
+
+    // TODO:
+};
+
+/**
+ * 更新群组相关信息
+ * @param r 联系人列表
+ * @param uid 当前用户id
+ */
+const updateGroup = (r: Contact, uid: number) => {
+    // 判断群组是否发生了变化,需要重新订阅群组消息
+
+    const oldGroup = (store.getStore(`contactMap/${uid}`) || { group: [] }).group;
+    const addGroup = r.group.filter((gid) => {
+        return oldGroup.findIndex(item => item === gid) === -1;
+    });
+    const delGroup = oldGroup.filter((gid) => {
+        return r.group.findIndex(item => item === gid) === -1;
+    });
+
+    // 主动或被动退出的群组
+    delGroup.forEach((gid: number) => {
+        exitGroup(gid);
+    });
+
+    // 订阅我已经加入的群组基础信息
+    addGroup.forEach((gid) => {
+        getMyGroupHistory(gid); // 获取群组离线消息
+        subscribe(`ims/group/msg/${gid}`, SendMsg, (r: SendMsg) => {
+            if (r.code === 1) {
+                getMyGroupHistory(gid);
+            }
+        });
+        subscribedb.subscribeGroupInfo(gid, () => {
+            clientRpcFunc(getGroupUserLink, gid, (r: GroupUserLinkArray) => {
+                // 判断是否返回成功
+                if (r && r.arr.length > 0) {
+                    r.arr.forEach((item: GroupUserLink) => {
+                        store.setStore(`groupUserLinkMap/${item.guid}`, item);
+                    });
+                }
+            });
+        });
+    });
+    // 获取邀请我进群的群组信息
+    const groups = new GetGroupInfoReq();
+    groups.gids = [];
+    r.applyGroup.forEach(guid => {
+        const gid = getGidFromGuid(guid);
+        groups.gids.push(gid);
+    });
+    if (groups.gids.length > 0) {
+        clientRpcFunc(getGroupsInfo, groups, (r: GroupArray) => {
+            console.log(r);
+            if (r && r.arr.length > 0) {
+                r.arr.forEach(item => {
+                    store.setStore(`groupInfoMap/${item.gid}`, item);
+                });
+            }
+        });
+    }
+
+};
+
+/**
+ * 更新好友信息
+ * @param r 联系人列表
+ * @param uid 当前用户id
+ */
+const updateUsers = (r: Contact, uid: number) => {
+    const info = new GetFriendLinksReq();
+    info.uuid = [];
+    r.friends.forEach((rid: number) => {
+        info.uuid.push(genUuid(uid, rid));
+        getFriendHistory(rid);  // 获取好友发送的离线消息
+    });
+    if (info.uuid.length > 0) {
+        // 获取friendlink
+        clientRpcFunc(getFriendLinks, info, (r: FriendLinkArray) => {
+            if (r && r.arr && r.arr.length > 0) {
+                r.arr.forEach((e: FriendLink) => {
+                    store.setStore(`friendLinkMap/${e.uuid}`, e);
+                });
+            }
+
+        });
+
+    }
+    const uids = r.friends.concat(r.temp_chat, r.blackList, r.applyUser);
+    if (uids.length > 0) {
+        uids.forEach(elem => {
+            subscribedb.subscribeUserInfo(elem, (r: UserInfo) => {
+                // TODO
+            });
+        });
+
+    }
+};
+
 // ================================================ 本地
 // MQTT管理
 let mqtt: any;
@@ -133,3 +308,10 @@ let mqtt: any;
 let rootClient: Client;
 // root RPC
 let clientRpc: any;
+let loginChatFg: boolean;
+
+walletStore.register('user/isLogin',(r) => {
+    if (r) {  // 如果钱包登陆成功，登陆聊天
+        walletSignIn();
+    }
+});

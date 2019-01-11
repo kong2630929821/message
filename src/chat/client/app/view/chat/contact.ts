@@ -3,21 +3,15 @@
  */
 
 // ================================================ 导入
-import { getOpenId } from '../../../../../app/api/JSAPI';
 import * as walletStore from '../../../../../app/store/memstore';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
-import { SendMsg } from '../../../../server/data/rpc/message.s';
-import { changeUserInfo } from '../../../../server/data/rpc/user.p';
-import { getFriendHistory } from '../../data/initStore';
 import * as store from '../../data/store';
-import { UserType } from '../../logic/autologin';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
-import { clientRpcFunc, login as mqttLogin, subscribe } from '../../net/init';
-import { init } from '../login/login';
+import { walletSignIn } from '../../net/init';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -44,23 +38,19 @@ export class Contact extends Widget {
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
         this.props.isLogin = walletStore.getStore('user/isLogin',false);
-        if (this.props.isLogin) {
-            const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
-            const uid = store.getStore('uid');
-            const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
-            this.props.isOnline = wUser.nickName !== '';
-            if (uid) {
-                this.props.avatar = getUserAvatar(uid);
-            }
+        const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
+        const uid = store.getStore('uid');
+        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
+        this.props.isOnline = wUser.nickName !== '';
+        this.props.avatar = getUserAvatar(uid);
         
-            // 如果聊天未登录，或钱包修改了姓名、头像等，或钱包退出登陆
-            if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
-                store.initStore();
-                this.state = []; // 清空记录 lastChat
-                this.paint(true);
-                if (this.props.isOnline) { // 钱包已登录才去登陆聊天
-                    this.walletSignIn();
-                }
+        // 如果钱包修改了姓名、头像等，或钱包退出登陆
+        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
+            store.initStore();
+            this.state = []; // 清空记录 lastChat
+            this.paint(true);
+            if (this.props.isOnline) { // 钱包已登陆
+                walletSignIn();
             }
         }
         
@@ -69,9 +59,12 @@ export class Contact extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        walletStore.register('user/isLogin',() => {
+        
+        walletStore.register('user/info',() => { // 钱包用户信息修改
+            this.setProps(this.props);  
+        });
+        walletStore.register('user/isLogin',(r) => {
             this.setProps(this.props);
-            this.paint();
         });
     }
 
@@ -79,53 +72,6 @@ export class Contact extends Widget {
         rippleShow(e);
         this.closeMore();
         popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
-
-    }
-
-    /**
-     * 钱包登陆
-     */
-    public walletSignIn() {
-        getOpenId('101', (r) => {
-            const openId = String(r.openid);
-            if (openId) {
-                mqttLogin(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
-                    this.props.isOnline = true;
-                    console.log('聊天登陆成功！！！！！！！！！！！！！！');
-
-                    if (r && r.uid > 0) {
-                        store.setStore(`uid`, r.uid);
-                        store.setStore(`userInfoMap/${r.uid}`, r);
-                        init(r.uid);
-                        subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
-                            if (v.code === 1) {
-                                getFriendHistory(v.rid);
-                            }
-                            // updateUserMessage(v.msg.sid, v);
-                        });
-                        this.props.avatar = getUserAvatar(r.uid);
-                        this.paint();
-
-                        const user = walletStore.getStore('user/info');
-                        const walletAddr = walletStore.getStore('user/id');
-                        if (r.name !== user.nickName || r.avatar !== user.avatar) {
-                            r.name = user.nickName;
-                            r.avatar = user.avatar;
-                            r.tel = user.phoneNumber;
-                            r.wallet_addr = walletAddr;
-                            clientRpcFunc(changeUserInfo, r, (res) => {
-                                if (res && res.uid > 0) {
-                                    store.setStore(`userInfoMap/${r.uid}`, r);
-
-                                }
-                            });
-                        }
-                    } else {
-                        bottomNotice('钱包登陆失败');
-                    }
-                });
-            }
-        });
 
     }
 

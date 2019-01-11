@@ -114,13 +114,19 @@ export const bottomNotice = (content:string) => {
 
 // 获取用户头像
 export const getUserAvatar = (rid:number) => {
-    const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
-    let avatar = user.avatar ? depCopy(user.avatar) : '';
-    if (avatar && avatar.indexOf('data:image') < 0) {
-        avatar = `${uploadFileUrlPrefix}${avatar}`;
-    }
+    if (rid) {
+        const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
+        let avatar = user.avatar ? depCopy(user.avatar) : '';
+        if (avatar && avatar.indexOf('data:image') < 0) {
+            avatar = `${uploadFileUrlPrefix}${avatar}`;
+        }
 
-    return avatar;
+        return avatar;
+    } else {
+        
+        return '';
+    }
+    
 };
 
 // 水波纹动画效果展示
