@@ -57,8 +57,8 @@ export class MessageRecord extends Widget {
         this.props.msgTop = setting.msgTop.findIndex(item => item === hid) > -1;
         this.props.msgAvoid = setting.msgAvoid.findIndex(item => item === hid) > -1;
         
-        // 最新一条消息内容处理
-        if (this.props.lastMessage) {
+        // 最新一条消息内容处理，空结构体等于true
+        if (this.props.lastMessage.time) {
             const time:any = depCopy(this.props.lastMessage.time);
             this.props.time = timestampFormat(time,1);
             this.props.msg = depCopy(this.props.lastMessage.msg);
