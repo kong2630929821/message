@@ -3,7 +3,7 @@
  */
 import { AnnounceHistory, GroupHistory, GroupMsg, MSG_TYPE, UserHistory, UserMsg } from '../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
-import { genGroupHid, genUserHid, getHidFromhIncId, getUidFromUuid } from '../../../utils/util';
+import { genGroupHid, genUserHid, getHidFromhIncId } from '../../../utils/util';
 import * as store from './store';
 /**
  * 更新userHistoryMap/userChatMap,lastChat

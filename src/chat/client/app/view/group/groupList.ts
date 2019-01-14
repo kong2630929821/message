@@ -24,6 +24,13 @@ export class GroupListt extends Widget {
     public props:Props = {
         inputGid:null
     };
+    
+    public create() {
+        super.create();
+        const sid = store.getStore('uid').toString();
+        this.state = store.getStore('contactMap',new Contact()).get(sid);
+    }
+
     public goBack() {
         this.ok();
     }
