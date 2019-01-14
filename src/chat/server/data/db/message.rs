@@ -15,6 +15,7 @@ enum MSG_TYPE {
     RENOTICE = 7, //撤回公告消息
     ADDUSER = 8,  // 添加好友成功
     REDENVELOPE = 9, // 红包
+    ADDGROUP = 10, // 加群成功
 }
 
 /**

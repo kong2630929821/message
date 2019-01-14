@@ -15,7 +15,9 @@ import { Logger } from '../../../utils/logger';
 import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { GroupHistoryCursor, MsgLock  } from '../db/message.s';
+import { GroupHistoryCursor, MSG_TYPE, MsgLock  } from '../db/message.s';
+import { sendGroupMessage } from './message.r';
+import { GroupSend } from './message.s';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -139,46 +141,53 @@ export const acceptUser = (agree: GroupAgree): Result => {
         return res;
     }
 
+    // 拒绝入群申请
     if (!agree.agree) {
         res.r = 4; // admin refuse user to join
         logger.debug('Admin refuse user: ', agree.uid, 'to join in group: ', agree.gid);
 
         return res;
     }
-    if (gInfo.memberids.indexOf(agree.uid) > -1 || gInfo.adminids.indexOf(agree.uid) > -1) {
+    // 用户已经在群中
+    if (gInfo.memberids.indexOf(agree.uid) > -1) {
         res.r = 2; // user has been exist
         logger.debug('User: ', agree.uid, 'has been exist');
 
         return res;
-    } else if (contact === undefined) {
+    } else if (!contact) { // 用户是否存在
         res.r = -1; // agree.uid is not a registered user
         logger.error('user: ', agree.uid, 'is not a registered user');
 
         return res;
-    } else {
-        gInfo.memberids.push(agree.uid);
-        groupInfoBucket.put(gInfo.gid, gInfo);
-        logger.debug('Accept user: ', agree.uid, 'to group: ', agree.gid);
-        contact.applyGroup = delValueFromArray(agree.gid,contact.applyGroup);  // 同意用户入群，清空该用户受该群组的邀请记录
-        contact.group.push(agree.gid);
-        contactBucket.put(agree.uid, contact);
-        logger.debug('Add group: ', agree.gid, 'to user\'s contact: ', contact.group);
+    } 
+    gInfo.memberids.push(agree.uid);
+    groupInfoBucket.put(gInfo.gid, gInfo);
+    logger.debug('Accept user: ', agree.uid, 'to group: ', agree.gid);
+    contact.applyGroup = delValueFromArray(agree.gid,contact.applyGroup);  // 同意用户入群，清空该用户受该群组的邀请记录
+    contact.group.push(agree.gid);
+    contactBucket.put(agree.uid, contact);
+    logger.debug('Add group: ', agree.gid, 'to user\'s contact: ', contact.group);
 
-        const groupUserLinkBucket = getGroupUserLinkBucket();
-        const gul = new GroupUserLink();
-        gul.guid = `${agree.gid}:${agree.uid}`;
-        gul.hid = '';
-        gul.join_time = Date.now();
-        gul.userAlias = getCurrentUserInfo(agree.uid).name;
-        gul.groupAlias = '';
+    const groupUserLinkBucket = getGroupUserLinkBucket();
+    const gul = new GroupUserLink();
+    gul.guid = `${agree.gid}:${agree.uid}`;
+    gul.hid = '';
+    gul.join_time = Date.now();
+    gul.userAlias = getCurrentUserInfo(agree.uid).name;
+    gul.groupAlias = '';
 
-        groupUserLinkBucket.put(gul.guid, gul);
-        logger.debug('Add user: ', agree.uid, 'to groupUserLinkBucket');
-
-        res.r = 1; // successfully add user
-    }
+    groupUserLinkBucket.put(gul.guid, gul);
     moveGroupCursor(agree.gid, agree.uid);
+    logger.debug('Add user: ', agree.uid, 'to groupUserLinkBucket');
+    const info = new GroupSend();
+    info.msg = '用户加群成功';
+    info.mtype = MSG_TYPE.ADDGROUP;
+    info.gid = agree.gid;
+    info.time = Date.now();
+    sendGroupMessage(info);
 
+    res.r = 1; // successfully add user
+    
     return res;
 };
 
@@ -265,28 +274,33 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         gInfo.gid = -3;
 
         return gInfo;
+    } 
 
-    } else {
-        cInfo.group.push(agree.gid);
-        contactBucket.put(uid, cInfo);
-        gInfo.memberids.push(uid);
-        gInfo.applyUser = delValueFromArray(agree.uid, gInfo.applyUser); // 用户同意入群，清空该群组该用户的申请记录
-        groupInfoBucket.put(gInfo.gid, gInfo);
-        logger.debug('User: ', uid, 'agree to join group: ', agree.gid);
+    cInfo.group.push(agree.gid);
+    contactBucket.put(uid, cInfo);
+    gInfo.memberids.push(uid);
+    gInfo.applyUser = delValueFromArray(agree.uid, gInfo.applyUser); // 用户同意入群，清空该群组该用户的申请记录
+    groupInfoBucket.put(gInfo.gid, gInfo);
+    logger.debug('User: ', uid, 'agree to join group: ', agree.gid);
 
-        const groupUserLinkBucket = getGroupUserLinkBucket();
-        const gul = new GroupUserLink();
-        gul.guid = genGuid(agree.gid, uid);
-        gul.hid = gInfo.hid;
-        gul.join_time = Date.now();
-        gul.userAlias = getCurrentUserInfo().name;
-        gul.groupAlias = gInfo.name;
+    const groupUserLinkBucket = getGroupUserLinkBucket();
+    const gul = new GroupUserLink();
+    gul.guid = genGuid(agree.gid, uid);
+    gul.hid = gInfo.hid;
+    gul.join_time = Date.now();
+    gul.userAlias = getCurrentUserInfo().name;
+    gul.groupAlias = gInfo.name;
 
-        groupUserLinkBucket.put(gul.guid, gul);
-        logger.debug('Add user: ', uid, 'to groupUserLinkBucket');
-    }
+    groupUserLinkBucket.put(gul.guid, gul);
     moveGroupCursor(agree.gid, agree.uid);
-
+    logger.debug('Add user: ', uid, 'to groupUserLinkBucket');
+    const info = new GroupSend();
+    info.msg = '用户加群成功';
+    info.mtype = MSG_TYPE.ADDGROUP;
+    info.gid = agree.gid;
+    info.time = Date.now();
+    sendGroupMessage(info);
+    
     return gInfo;
 };
 

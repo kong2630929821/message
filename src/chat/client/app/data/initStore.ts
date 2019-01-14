@@ -145,7 +145,7 @@ export const getMyGroupHistory = (gid: number, upLastRead: boolean = false) => {
             lastRead.msgId = genHIncId(hid, r.cursor);
             const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
             const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
-            if (cursor > localCursor && upLastRead) {
+            if (cursor > localCursor &&  (upLastRead || !lastHincId)) { // 本地没有记录时需要更新
                 store.setStore(`lastRead/${hid}`, lastRead);
             }
             const groupflag = new GroupHistoryFlag();
