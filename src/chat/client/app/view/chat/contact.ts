@@ -11,7 +11,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
-import { walletSignIn } from '../../net/init';
+import { walletSignIn } from '../../net/init_1';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
