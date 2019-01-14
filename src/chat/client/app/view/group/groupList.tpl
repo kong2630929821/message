@@ -1,3 +1,4 @@
+{{: it1 = it1 || {"group":[]} }}
 <div class="new-page" ev-next-click="groupChat" ev-back-click="goBack" w-class="new-page">
     <chat-client-app-widget-topBar-topBar>{title:"群聊",nextImg:"add-blue.png"}</chat-client-app-widget-topBar-topBar>
 

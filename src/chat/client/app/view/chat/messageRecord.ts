@@ -76,7 +76,7 @@ export class MessageRecord extends Widget {
         } else {
             const mess = store.getStore('lastChat',[]);
             const index = mess.findIndex(item => item[0] === this.props.rid && item[2] === this.props.chatType);
-            this.props.time = timestampFormat(mess[index][1],1);
+            this.props.time = index > -1 && timestampFormat(mess[index][1],1);
             this.props.msg = '';
         }
 

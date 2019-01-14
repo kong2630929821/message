@@ -11,7 +11,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
-import { walletSignIn } from '../../net/init_1';
+import { setUserInfo } from '../../net/init_1';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -44,13 +44,13 @@ export class Contact extends Widget {
         this.props.isOnline = wUser.nickName !== '';
         this.props.avatar = getUserAvatar(uid);
         
-        // 聊天未登录，钱包修改了姓名、头像等，或钱包退出登陆
-        if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
+        // 钱包修改了姓名、头像等，或钱包退出登陆
+        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
             store.initStore();
             this.state = []; // 清空记录 lastChat
             this.paint(true);
             if (this.props.isOnline) { // 钱包已登陆
-                walletSignIn();
+                setUserInfo();
             }
         }
         
