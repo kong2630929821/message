@@ -45,7 +45,7 @@ export class AutoLoginMgr {
 
     constructor(server?: string, port?: number) {
         this.server = server ? server : '127.0.0.1';
-        this.port = port ? port : 1234;
+        this.port = port ? port : 9080;
         this.subMgr = new SubMgr();
     }
 

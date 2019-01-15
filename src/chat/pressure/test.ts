@@ -1,6 +1,6 @@
 import { getFriendHistory } from '../client/app/data/initStore';
 import * as store from '../client/app/data/store';
-import { AutoLoginMgr, UserType } from '../client/app/logic/autologin';
+import { UserType } from '../client/app/logic/autologin';
 import * as net_init from '../client/app/net/init';
 import { acceptFriend, applyFriend } from '../client/app/net/rpc';
 import { DEFAULT_ERROR_STR } from '../server/data/constant';

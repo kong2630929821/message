@@ -1,11 +1,18 @@
 const puppeteer = require('puppeteer');
 
 (async () => {
-    const browser = await puppeteer.launch();
     let pages = [];
+    //创建机器人数量
     let count = 5;
-    for (let i = 1; i <= count; i++) {
-        pages.push(addRobot(browser, i, 'xxx'));
+    //设置浏览器最大打开页面数
+    let pageMax = 30;
+
+    for (let i = 0; i < count; i++) {
+        let browser;
+        if (i % pageMax === 0) {
+            browser = await puppeteer.launch();
+        }
+        pages.push(addRobot(browser, i + 1, 'sign'));
     }
     await Promise.all(pages);
 })();
