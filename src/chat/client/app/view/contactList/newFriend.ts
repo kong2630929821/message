@@ -26,6 +26,12 @@ const logger = new Logger(WIDGET_NAME);
 export class NewFriend extends Widget {
     public ok: () => void;
 
+    public create() {
+        super.create();
+        const sid = store.getStore('uid').toString();
+        this.state = store.getStore('contactMap',new Contact()).get(sid);
+    }
+    
     public goBack() {
         this.ok();
     }

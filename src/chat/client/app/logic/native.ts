@@ -1,11 +1,13 @@
 /**
  * 一些底层操作
  */
+import { AudioRecorder } from '../../../../pi/browser/audio_recorder';
 import { CameraPicker } from '../../../../pi/browser/cameraPicker';
 import { ImagePicker } from '../../../../pi/browser/imagePicker';
 import { QRCode } from '../../../../pi/browser/qrcode';
 import { DeviceIdProvider } from '../../../../pi/browser/systemInfoProvider';
 import { WebViewManager } from '../../../../pi/browser/webview';
+import { bottomNotice } from './logic';
 
 /**
  * 选择图片
@@ -93,5 +95,54 @@ export const getDeviceId = (okCB?,errCB?) => {
             console.log(`获取设备的唯一id失败\t  ${result}`);
             errCB && errCB(result);
         }
+    });
+};
+
+/**
+ * 语音录制开始
+ */ 
+const recorder = new AudioRecorder();
+const audioContext = new AudioContext();
+export const startRadio = () => {
+    recorder.start(success => {
+        if (success) {
+            console.log('录音开始');
+        } else {
+            bottomNotice('录音开始，录制失败');
+        }
+    });
+};
+
+/**
+ * 语音录制结束
+ */
+export const endRadio = (cb:any) => {
+    recorder.stop(data => {
+        if (data) {
+            cb(data);
+            console.log('录音结束');
+        } else {
+            bottomNotice('录音结束，传送失败');
+        }
+    });
+};
+
+/**
+ * 播放语音
+ */
+export const playRadio = (data:any,cb:any) => {
+    if (!data) {
+        alert('无录音数据');
+
+        return;
+    }
+    const size = data.byteLength;
+    audioContext.decodeAudioData(data).then(data => {
+        console.log(`播放数据：${data}, length = ${size}`);
+        const source = audioContext.createBufferSource(); 
+        source.buffer = data;
+        source.loop = false; 
+        source.connect(audioContext.destination); 
+        source.start();
     });
 };

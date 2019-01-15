@@ -1,6 +1,6 @@
 <div w-class="outer" >
 	<div w-class="input-message-wrap">
-		<img w-class="audio" on-tap="playRadio" src="../../res/images/audio.png"/>
+		<img w-class="audio"  src="../../res/images/audio.png"/>
 		<chat-client-app-widget-input-textarea w-class="inputMessage">{placeHolder:"输入消息",input:{{it.message}} }</chat-client-app-widget-input-textarea>
 		<img w-class="emoji" on-tap="playEmoji" src="../../res/images/emoji.png"/>
 		{{if it.message}}
@@ -23,4 +23,9 @@
 		</div>
 	</div>
 	
+	<div w-class="radioWrap" style="display:{{it.isOnRadio?'block':'none'}}">
+		<div w-class="radioWrite" style="animation: radio1 1s infinite;"></div>
+		<div w-class="radioWrite" style="animation: radio2 1s infinite;"></div>
+		<div w-class="radioWrite"></div>
+	</div>
 </div>

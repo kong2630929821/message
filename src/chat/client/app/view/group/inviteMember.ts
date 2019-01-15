@@ -35,7 +35,10 @@ export class InviteMember extends Widget {
         this.props.gid = props.gid;
         this.props.ginfo = this.getGroupInfo(this.props.gid);
         this.props.applyGroupMembers = [];
+        const sid = store.getStore('uid').toString();
+        this.state = store.getStore('contactMap',new Contact()).get(sid);
     }
+    
     public goBack() {
         this.ok();
     }
