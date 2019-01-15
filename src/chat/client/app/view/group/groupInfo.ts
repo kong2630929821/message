@@ -114,7 +114,9 @@ export class GroupInfos extends Widget {
             case 0: // 发送名片
                 break;
             case 1:  // 清空聊天记录
-                popNew('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' });
+                popNew('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' },() => {
+                    store.setStore(`userChatMap/${genGroupHid(this.props.gid)}`,[]);
+                });
                 break;
             case 2: // 退出群
                 popNew('chat-client-app-widget-modalBox-modalBox', { content:'退出后，将不再接收此群任何消息',style:'color:#F7931A' },() => {

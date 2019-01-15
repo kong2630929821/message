@@ -5,7 +5,6 @@
 // ================================================ 导入
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
-import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { getUsersInfo, setData } from '../../../../server/data/rpc/basic.p';
@@ -54,9 +53,9 @@ export class UserDetail extends Widget {
             this.props.utilList = [
             { utilText: '修改备注' },
             { utilText: '发送名片' },
-            { utilText: '删除聊天记录' },
+            { utilText: '清空聊天记录' },
             { utilText: '加入黑名单' },
-            { utilText: '删除' }
+            { utilText: '删除好友' }
             ];
         }
 
@@ -133,7 +132,10 @@ export class UserDetail extends Widget {
 
                 break;
             case 2: // 清空聊天记录
-                popNew('chat-client-app-widget-modalBox-modalBox', { title: '清空聊天记录', content: `确定清空和${this.props.userInfo.name}的聊天记录吗` });
+                popNew('chat-client-app-widget-modalBox-modalBox', { title: '清空聊天记录', content: `确定清空和${this.props.userInfo.name}的聊天记录吗` },() => {
+                    const sid = store.getStore('uid');
+                    store.setStore(`userChatMap/${genUserHid(sid,this.props.uid)}`,[]);
+                });
                 break;
             case 3: // 加入黑名单
                 popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });

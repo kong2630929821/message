@@ -31,6 +31,7 @@ import { initPush } from './receive';
 export const initClient = (server?: string, port?: number) => {
     if (!rootClient) {
         mqtt = new AutoLoginMgr(server, port);
+        // mqtt = new AutoLoginMgr('192.168.9.29', port);
         rootClient = mqtt.connection();
     }
     initPush();

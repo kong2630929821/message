@@ -11,7 +11,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
-import { walletSignIn } from '../../net/init_1';
+import { setUserInfo } from '../../net/init_1';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -37,38 +37,38 @@ export class Contact extends Widget {
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        this.props.isLogin = walletStore.getStore('user/isLogin', false);
+        this.props.isLogin = walletStore.getStore('user/isLogin',false);
         const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
         const uid = store.getStore('uid', 0);
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         this.props.isOnline = wUser.nickName !== '';
         this.props.avatar = getUserAvatar(uid);
-
-        // 聊天未登录，钱包修改了姓名、头像等，或钱包退出登陆
-        if (!uid || wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
+        
+        // 钱包修改了姓名、头像等，或钱包退出登陆
+        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
             store.initStore();
             this.state = []; // 清空记录 lastChat
             this.paint(true);
             if (this.props.isOnline) { // 钱包已登陆
-                walletSignIn();
+                setUserInfo();
             }
         }
-
+        
         // }
     }
 
     public firstPaint() {
         super.firstPaint();
-
-        walletStore.register('user/info', () => { // 钱包用户信息修改
-            this.setProps(this.props);
+        
+        walletStore.register('user/info',() => { // 钱包用户信息修改
+            this.setProps(this.props);  
         });
-        walletStore.register('user/isLogin', (r) => {
+        walletStore.register('user/isLogin',(r) => {
             this.setProps(this.props);
         });
     }
 
-    public chat(e: any, id: number, chatType: GENERATOR_TYPE) {
+    public chat(e:any, id: number, chatType: GENERATOR_TYPE) {
         rippleShow(e);
         this.closeMore();
         popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
@@ -125,12 +125,12 @@ interface Props {
     utilList: any[];
     isOnline: boolean; // 钱包是否已经登陆
     netClose: boolean; // 网络链接是否断开
-    avatar: string; // 头像
-    isLogin: boolean; // 是否登陆
+    avatar:string; // 头像
+    isLogin:boolean; // 是否登陆
 }
 const STATE = {
-    lastChat: [],
-    contactMap: ''
+    lastChat:[],
+    contactMap:''
 };
 store.register(`lastChat`, (r: [number, number][]) => {
     STATE.lastChat = r;
@@ -140,7 +140,7 @@ store.register('contactMap', (r) => {
     for (const value of r.values()) {
         STATE.contactMap = value;
         forelet.paint(STATE);
-    }
+    }  
 });
 store.register('friendLinkMap', () => {
     const w = forelet.getWidget(WIDGET_NAME);

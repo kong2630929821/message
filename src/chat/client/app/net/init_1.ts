@@ -38,7 +38,7 @@ export const registerRpcStruct = (fileMap) => {
 /**
  * 钱包 登陆或注册聊天
  */
-export const walletSignIn = () => {
+const walletSignIn = () => {
     if (!loginChatFg) {
         getOpenId('101', (r) => {
             const openId = String(r.openid);
@@ -57,21 +57,8 @@ export const walletSignIn = () => {
                             }
                             // updateUserMessage(v.msg.sid, v);
                         });
+                        setUserInfo();
 
-                        const user = walletStore.getStore('user/info');
-                        const walletAddr = walletStore.getStore('user/id');
-                        if (r.name !== user.nickName || r.avatar !== user.avatar) {
-                            r.name = user.nickName;
-                            r.avatar = user.avatar;
-                            r.tel = user.phoneNumber;
-                            r.wallet_addr = walletAddr;
-                            init2.clientRpcFunc(changeUserInfo, r, (res) => {
-                                if (res && res.uid > 0) {
-                                    store.setStore(`userInfoMap/${r.uid}`, r);
-
-                                }
-                            });
-                        }
                     } else {
                         bottomNotice('钱包登陆失败');
                     }
@@ -81,6 +68,28 @@ export const walletSignIn = () => {
     }
     loginChatFg = true;
 
+};
+
+/**
+ * 改变用户信息
+ */
+export const setUserInfo = () => {
+    const user = walletStore.getStore('user/info');
+    const walletAddr = walletStore.getStore('user/id');
+    const r = new UserInfo();
+    r.uid = store.getStore('uid');
+    r.sex = 0;
+    r.note = '';
+    r.name = user.nickName;
+    r.avatar = user.avatar;
+    r.tel = user.phoneNumber;
+    r.wallet_addr = walletAddr;
+    init2.clientRpcFunc(changeUserInfo, r, (res) => {
+        if (res && res.uid > 0) {
+            store.setStore(`userInfoMap/${r.uid}`, r);
+
+        }
+    });
 };
 
 // 登陆聊天方法执行标记

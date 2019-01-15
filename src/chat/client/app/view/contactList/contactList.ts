@@ -18,11 +18,14 @@ const logger = new Logger(WIDGET_NAME);
 
 export class ContactList extends Widget {
     public ok:() => void;
-    constructor() {
-        super();
-        this.props = {
-            sid:store.getStore('uid')
-        };
+    public props:any = {
+        sid:store.getStore('uid')
+    };
+
+    public create() {
+        super.create();
+        const sid = store.getStore('uid').toString();
+        this.state = store.getStore('contactMap',new Contact()).get(sid);
     }
 
      // 返回上一页

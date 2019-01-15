@@ -256,7 +256,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     const sid = getUid();
     const start = param.start;
     const end = param.end;
-    if (!start && !end) {
+    if (end < start)  {
 
         throw new Error(`param error start:${start} end:${end}`);
     }
@@ -284,6 +284,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     for (let id = start; id <= end; id++) {
         historyKeys.push(genHIncId(hid, id));
     }
+    console.log('getGroupHistory historyKeys:',historyKeys);
     const mess = groupHistoryBucket.get<string[], UserHistory[]>(historyKeys);
     // while (fg === 1) {
     //     index++;
@@ -302,7 +303,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
 
         groupCursor = new UserHistoryCursor();
         groupCursor.guid = genGuid(param.gid, sid);
-        groupCursor.cursor = 0;
+        groupCursor.cursor = -1;
     }
     if (end > groupCursor.cursor) {
         groupHistoryArray.newMess = end - groupCursor.cursor;

@@ -84,6 +84,10 @@ export const exitGroup = (gid:number) => {
         store.setStore('lastChat',lastChat);
     }
 
+    const lastRead = store.getStore(`lastRead`, []);
+    lastRead.delete(genGroupHid(gid));  // 删除已读消息记录
+    store.setStore(`lastRead`, lastRead);
+
     const gInfoMap = store.getStore(`groupInfoMap`,new Map());    
     gInfoMap.delete(gid);  // 删除群组信息
     store.setStore(`groupInfoMap`, gInfoMap);
