@@ -64,7 +64,7 @@ export const inviteGroup = () => {
     const oldGroup = (store.getStore(`contactMap/${userInfo.uid}`) || { group: [] }).group;
     if (oldGroup.length === 0) {
         // 创建群
-        test.createGroup('test');
+        test.createGroup(`test${userInfo.uid}`);
     }
     // 判断是否超过上限
     for (const gid of oldGroup) {
