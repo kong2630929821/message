@@ -29,6 +29,12 @@ export class AddUser extends Widget {
         };
     }
 
+    public create() {
+        super.create();
+        const sid = store.getStore('uid').toString();
+        this.state = store.getStore('contactMap',new Contact()).get(sid);
+    }
+    
     public back() {
         this.ok();
     }
@@ -56,15 +62,15 @@ export class AddUser extends Widget {
         }
         applyUserFriend(this.props.rid, (r: Result) => {
             if (r.r === 0) {
-                bottomNotice(`${this.props.rid}已经是你的好友`);
+                bottomNotice(`你们已经是好友了`);
 
                 return;
             } else if (r.r === -2) {
-                bottomNotice(`${this.props.rid}用户不存在`);
+                bottomNotice(`用户不存在`);
 
                 return;
             }
-            this.props.isSuccess = true;
+            bottomNotice('发送成功');
             this.paint();
         });
     }

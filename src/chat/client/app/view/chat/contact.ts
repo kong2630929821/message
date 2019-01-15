@@ -11,6 +11,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
+import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -26,7 +27,6 @@ export class Contact extends Widget {
         this.props.messageList = [];
         this.props.isUtilVisible = false;
         this.props.utilList = [
-            { iconPath: 'search.png', utilText: '搜索' },
             { iconPath: 'adress-book.png', utilText: '通讯录' },
             { iconPath: 'add-blue.png', utilText: '添加好友' },
             { iconPath: 'group-chat.png', utilText: '创建群聊' },
@@ -37,11 +37,10 @@ export class Contact extends Widget {
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        this.props.isLogin = walletStore.getStore('user/isLogin',false);
+        this.props.isLogin = walletStore.getStore('user/isLogin',false); // 钱包是否登陆
         const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
         const uid = store.getStore('uid', 0);
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
-        this.props.isOnline = wUser.nickName !== '';
         this.props.avatar = getUserAvatar(uid);
         
         // 钱包修改了姓名、头像等，或钱包退出登陆
@@ -49,7 +48,7 @@ export class Contact extends Widget {
             store.initStore();
             this.state = []; // 清空记录 lastChat
             this.paint(true);
-            if (this.props.isOnline) { // 钱包已登陆
+            if (this.props.isLogin && !uid) { // 钱包、聊天已登陆
                 setUserInfo();
             }
         }
@@ -63,7 +62,7 @@ export class Contact extends Widget {
         walletStore.register('user/info',() => { // 钱包用户信息修改
             this.setProps(this.props);  
         });
-        walletStore.register('user/isLogin',(r) => {
+        walletStore.register('user/isLogin',() => {
             this.setProps(this.props);
         });
     }
@@ -77,7 +76,7 @@ export class Contact extends Widget {
 
     // 打开更多功能
     public getMore() {
-        if (this.props.isOnline) {
+        if (this.props.isLogin) {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
         } else {
@@ -92,20 +91,23 @@ export class Contact extends Widget {
 
     public handleFatherTap(e: any) {
         switch (e.index) {
-            case 0:// 搜索
-                break;
-            case 1:// 点击通讯录
+            case 0:// 点击通讯录
                 popNew('chat-client-app-view-contactList-contactList');
                 break;
-            case 2:// 点击添加好友
+            case 1:// 点击添加好友
                 popNew('chat-client-app-view-chat-addUser');
                 break;
-            case 3:// 创建群聊 setGroupChat
+            case 2:// 创建群聊 setGroupChat
                 popNew('chat-client-app-view-group-setGroupChat');
                 break;
-            case 4:// 扫一扫            
+            case 3:// 扫一扫   
+                doScanQrCode((res) => {  // 扫描二维码
+                    popNew('chat-client-app-view-chat-addUser',{ rid:res });
+                    console.log(res);
+                    this.paint();
+                });         
                 break;
-            case 5:
+            case 4:
                 popNew('chat-client-app-view-info-user');
                 break;
 
@@ -123,10 +125,9 @@ interface Props {
     messageList: any[];
     isUtilVisible: boolean;
     utilList: any[];
-    isOnline: boolean; // 钱包是否已经登陆
     netClose: boolean; // 网络链接是否断开
     avatar:string; // 头像
-    isLogin:boolean; // 是否登陆
+    isLogin:boolean; // 钱包是否已经登陆
 }
 const STATE = {
     lastChat:[],

@@ -7,7 +7,7 @@ import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
-import { openCamera, selectImage } from '../../logic/native';
+import { endRadio, openCamera, selectImage, startRadio } from '../../logic/native';
 import { arrayBuffer2File, uploadFile } from '../../net/upload';
 
 // ===========================导出
@@ -16,6 +16,7 @@ export class InputMessage extends Widget {
         message:'',
         isOnEmoji:false,
         isOnTools:false,
+        isOnRadio:false,
         toolList:[]
     };
 
@@ -31,8 +32,24 @@ export class InputMessage extends Widget {
     }
 
     // 麦克风输入处理
-    public playRadio() {
-        console.log('playRadio');
+    public radioStart() {
+        console.log('点击开始录音');
+        startRadio();
+        this.props.isOnRadio = true;
+        this.paint();
+    }
+
+    // 语音录入完成
+    public radioEnd(e:any) {
+        console.log('释放结束录音');
+        this.props.isOnRadio = false;
+        this.paint();
+        endRadio((buffer) => {
+            uploadFile(arrayBuffer2File(buffer),(radioUrl:string) => {
+                console.log('录制的音频',radioUrl);
+                notify(e.node,'ev-send',{ value:`[${radioUrl}]`, msgType:MSG_TYPE.VOICE });
+            });
+        });
     }
 
     // 打开表情包图库
@@ -85,6 +102,7 @@ interface Props {
     message:string; // 消息内容
     isOnTools:boolean;  // 是否打开更多功能
     toolList:any[];  // 更多功能列表
+    isOnRadio:boolean; // 是否正在录音
 }
 
 /**

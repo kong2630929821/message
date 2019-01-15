@@ -35,11 +35,20 @@ export class SetGroupChat extends Widget {
         };
         this.state = new Map();
     }
+    public create() {
+        super.create();
+        const sid = store.getStore('uid').toString();
+        this.state = store.getStore('contactMap',new Contact()).get(sid);
+    }
+    
     // 返回上一页
     public back() {
         this.ok();
     }
     public createGroup() {
+        if (!this.props.isSelect) {
+            return;
+        }
         if (!this.props.name) {
             bottomNotice('群名不能为空');
 
@@ -79,6 +88,8 @@ export class SetGroupChat extends Widget {
 
     public inputName(e:any) {
         this.props.name = e.value;
+        this.props.isSelect = e.value !== '';
+        this.paint();
     }
 
     public addMember(e:any) {

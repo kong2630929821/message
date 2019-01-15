@@ -61,6 +61,7 @@
     background:rgba(206,57,57,1);
     position: absolute;
     border-radius: 50%;
-    right: 114px;
-    bottom: 60px;
+    right: 115px;
+    bottom: 57px;
+    border: 1px solid #fff;
 }

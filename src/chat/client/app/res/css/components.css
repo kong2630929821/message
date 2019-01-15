@@ -323,3 +323,14 @@ li{
 .linkMsg{
     color: #0c6bc7;
 }
+/* 语音消息录制时动画 */
+@keyframes radio1{
+    50% {opacity: 0}
+    90%{opacity: 0}
+    100% {opacity: 1;}
+}
+@keyframes radio2{
+    50% {opacity: 0}
+    60%{opacity: 1}
+    100% {opacity: 1;}
+}

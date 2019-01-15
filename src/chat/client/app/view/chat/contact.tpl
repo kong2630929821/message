@@ -37,7 +37,7 @@
         <div w-class="util-wrap" ev-handleFatherTap="handleFatherTap">
             <chat-client-app-widget-utilList-utilList>{utilList:{{it.utilList}} }</chat-client-app-widget-utilList-utilList>
             {{if it1.contactMap && (it1.contactMap.applyUser.length + it1.contactMap.applyGroup.length) > 0}}
-            <span w-class="redSpot" style="right: 145px;top:100px;"></span>
+            <span w-class="redSpot" style="right: 145px;top:20px;"></span>
             {{end}}
         </div>
         {{end}}
