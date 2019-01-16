@@ -5,6 +5,7 @@
 import { uploadFileUrlPrefix } from '../../../../../app/config';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupUserLink } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
@@ -87,7 +88,6 @@ export class MessageItem extends Widget {
     public msgDetailClick(e:any) {
         this.props.isMessageRecallVisible = false;
         this.paint();
-        // const links = getRealNode(e.node).getElementsByClassName('linkMsg');
     }
 
     // 点击打开红包
@@ -103,6 +103,31 @@ export class MessageItem extends Widget {
     public openBigImage() {
         const url = this.props.msg.msg.split('"')[1];
         popNew('chat-client-app-widget-bigImage-bigImage',{ img: url });
+    }
+
+    // 点击播放语音
+    public playRadioMess(e:any) {
+        const elem = getRealNode(e.node).getElementsByTagName('audio')[0];
+        if (elem.currentTime > 0) {
+            this.props.playRadio = false;
+            console.log('暂停播放语音');
+            elem.pause();
+            elem.currentTime = 0;
+
+        } else {
+            this.props.playRadio = true;
+            console.log('开始播放语音');
+            elem.play();
+            
+            setTimeout(() => {
+                this.props.playRadio = false;
+                console.log('结束播放语音');
+                elem.pause();
+                elem.currentTime = 0;
+                this.paint();
+            }, elem.duration * 1000);
+        }
+        this.paint();
     }
 }
 
@@ -151,6 +176,15 @@ const parseRedEnv = (msg:any) => {
     return msg;
 };
 
+// 转换音频文件
+const parseRadio = (msg:any) => {
+    const value = JSON.parse(msg.msg);
+    msg.msg = `${value.time}"<audio src="${uploadFileUrlPrefix}${value.message}">语音信息</audio>`;
+    msg.width = value.time;
+
+    return msg;
+};
+
 export const parseMessage = (msg:any):any => {
     switch (msg.mtype) {
         case MSG_TYPE.REDENVELOPE: // 红包
@@ -164,7 +198,7 @@ export const parseMessage = (msg:any):any => {
             return parseImg(msg);
         case MSG_TYPE.VOICE:  // 语音
         // TODO:
-            return msg;
+            return parseRadio(msg);
         case MSG_TYPE.VIDEO: // 视频
         // TODO:
             return msg;

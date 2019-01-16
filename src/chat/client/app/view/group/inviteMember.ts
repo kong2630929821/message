@@ -9,7 +9,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import { inviteUsers } from '../../../../server/data/rpc/group.p';
-import { Invite, InviteArray } from '../../../../server/data/rpc/group.s';
+import { Invite, INVITE_TYPE, InviteArray } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
@@ -68,6 +68,7 @@ export class InviteMember extends Widget {
         }
         const invites = new InviteArray();
         invites.arr = [];
+        invites.inviteType = INVITE_TYPE.normal;
         this.props.applyGroupMembers.forEach((id) => {
             const invite = new Invite();
             invite.gid = this.props.gid;

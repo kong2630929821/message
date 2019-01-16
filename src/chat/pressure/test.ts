@@ -10,7 +10,7 @@ import { Contact, UserInfo } from '../server/data/db/user.s';
 import { login } from '../server/data/rpc/basic.p';
 import { Result } from '../server/data/rpc/basic.s';
 import { agreeJoinGroup, createGroup, inviteUsers } from '../server/data/rpc/group.p';
-import { GroupAgree, GroupCreate, Invite, InviteArray } from '../server/data/rpc/group.s';
+import { GroupAgree, GroupCreate, Invite, INVITE_TYPE, InviteArray } from '../server/data/rpc/group.s';
 import { sendGroupMessage, sendUserMessage } from '../server/data/rpc/message.p';
 import { GroupSend, SendMsg, UserSend } from '../server/data/rpc/message.s';
 import { changeUserInfo } from '../server/data/rpc/user.p';
@@ -129,6 +129,7 @@ export class Test {
     public inviteGroup(gid: number, rid: number) {
         const invites = new InviteArray();
         invites.arr = [];
+        invites.inviteType = INVITE_TYPE.normal;
         const invite = new Invite();
         invite.gid = gid;
         invite.rid = rid;

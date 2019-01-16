@@ -7,7 +7,7 @@ import { UserInfo } from '../../../server/data/db/user.s';
 import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, registerUser } from '../../../server/data/rpc/basic.p';
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createGroupp, delMember, dissolveGroup, inviteUsers } from '../../../server/data/rpc/group.p';
-import { GroupAgree, GroupCreate, Invite, InviteArray } from '../../../server/data/rpc/group.s';
+import { GroupAgree, GroupCreate, Invite, INVITE_TYPE, InviteArray } from '../../../server/data/rpc/group.s';
 import { sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, UserSend } from '../../../server/data/rpc/message.s';
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
@@ -211,6 +211,7 @@ export const inviteUsersToGroup = () => {
     invite3.rid = 10003;
 
     ia.arr = [invite1, invite2, invite3];
+    ia.inviteType = INVITE_TYPE.normal;
 
     clientRpcFunc(inviteUsers, ia, (r) => {
         console.log(r);

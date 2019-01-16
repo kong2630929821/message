@@ -9,7 +9,7 @@ import { GroupInfo } from '../../../../server/data/db/group.s';
 import { Contact } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import { createGroup, inviteUsers } from '../../../../server/data/rpc/group.p';
-import { GroupCreate, Invite, InviteArray } from '../../../../server/data/rpc/group.s';
+import { GroupCreate, Invite, INVITE_TYPE, InviteArray } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
@@ -69,6 +69,7 @@ export class SetGroupChat extends Widget {
             if (this.props.applyMembers.length > 0) {
                 const invites = new InviteArray();
                 invites.arr = [];
+                invites.inviteType = INVITE_TYPE.normal;
                 this.props.applyMembers.forEach((id) => {
                     const invite = new Invite();
                     invite.gid = r.gid;

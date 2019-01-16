@@ -48,7 +48,7 @@ export class Contact extends Widget {
             store.initStore();
             this.state = []; // 清空记录 lastChat
             this.paint(true);
-            if (this.props.isLogin && !uid) { // 钱包、聊天已登陆
+            if (this.props.isLogin && uid) { // 钱包、聊天已登陆
                 setUserInfo();
             }
         }

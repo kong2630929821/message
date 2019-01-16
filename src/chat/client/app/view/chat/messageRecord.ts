@@ -63,15 +63,17 @@ export class MessageRecord extends Widget {
             this.props.time = timestampFormat(time,1);
             this.props.msg = depCopy(this.props.lastMessage.msg);
             if (this.props.lastMessage.mtype === MSG_TYPE.IMG) {
-                this.props.msg = '图片';
+                this.props.msg = '[图片]';
             } else if (this.props.lastMessage.mtype === MSG_TYPE.RECALL) {
-                this.props.msg = '消息撤回';
+                this.props.msg = '[消息撤回]';
             } else if (this.props.lastMessage.mtype === MSG_TYPE.NOTICE) {
-                this.props.msg = '新公告';
+                this.props.msg = '[新公告]';
             } else if (this.props.lastMessage.mtype === MSG_TYPE.RENOTICE) {
-                this.props.msg = '公告撤回';
+                this.props.msg = '[公告撤回]';
             } else if (this.props.lastMessage.mtype === MSG_TYPE.REDENVELOPE) {
                 this.props.msg = '[快抢红包]';
+            } else if (this.props.lastMessage.mtype === MSG_TYPE.VOICE) {
+                this.props.msg = '[语音]';
             }
         } else {
             const mess = store.getStore('lastChat',[]);
