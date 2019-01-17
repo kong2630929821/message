@@ -96,7 +96,7 @@ export class Chat extends Widget {
             bottomNotice('该群已被解散');
             this.ok();
         } else if (gInfo.memberids.indexOf(this.props.sid) < 0) {
-            bottomNotice('您已被移除该群');
+            bottomNotice('您已离开该群');
             this.ok();
         }
     }

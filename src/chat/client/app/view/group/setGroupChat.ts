@@ -16,7 +16,7 @@ import * as store from '../../data/store';
 import { bottomNotice } from '../../logic/logic';
 import { selectImage } from '../../logic/native';
 import { clientRpcFunc } from '../../net/init';
-import { imgResize, uploadFile } from '../../net/upload';
+import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -34,7 +34,8 @@ export class SetGroupChat extends Widget {
             name:'',
             inviteMembers:[],
             isSelect:false,
-            avatarHtml:''
+            avatarHtml:'',
+            avatarUrl:''
         };
         this.state = new Map();
     }
@@ -56,12 +57,13 @@ export class SetGroupChat extends Widget {
         const imagePicker = selectImage((width, height, url) => {
             console.log('selectImage url = ',url);
             // tslint:disable-next-line:max-line-length
-            this.props.avatarHtml = `<div style="background-image: url(${url});width: 100%;height: 100%;position: absolute;top: 0;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
+            this.props.avatarHtml = `<div style="background-image: url(${url});width: 120px;height: 120px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
+            this.props.avatarUrl = url;
             this.paint();
             imagePicker.getContent({
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        uploadFile(res.base64);
+                        uploadFile(arrayBuffer2File(res.ab));
                     });
                 }
             });
@@ -82,7 +84,7 @@ export class SetGroupChat extends Widget {
         const groupInfo = new GroupCreate();
         groupInfo.name = this.props.name;
         groupInfo.note = '';
-        groupInfo.avatar = this.props.avatarHtml;
+        groupInfo.avatar = this.props.avatarUrl;
         clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
                 bottomNotice(`创建群组失败`);
@@ -109,8 +111,9 @@ export class SetGroupChat extends Widget {
                     }
                 });
             }
-            this.ok();
         });
+        this.ok();
+
     }
 
     public inputName(e:any) {
@@ -138,7 +141,8 @@ interface Props {
     name:string;// 群组名
     inviteMembers:number[];// 被邀请的成员
     isSelect:boolean;// 是否被选择
-    avatarHtml:string; // 群头像
+    avatarHtml:string; // 群头像展示
+    avatarUrl:string; // 群头像链接
 }
 
 store.register('contactMap', (r: Map<number, Contact>) => {

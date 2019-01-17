@@ -17,6 +17,7 @@
     margin-right:30px;
     background: #318DE6;
     text-align: center;
+    position: relative;
 }
 .group-camera{
     width: 48px;
