@@ -13,7 +13,7 @@
             <div w-class="a">群聊</div>
             {{for index,item of it1.group}}
             <div on-tap="showInfo({{item}})">
-                <chat-client-app-view-contactList-contactItem>{id: {{item}}, chatType: "group", img:"../../res/images/groups.png"}</chat-client-app-view-contactList-contactItem>
+                <chat-client-app-view-contactList-contactItem>{id: {{item}}, chatType: "group"}</chat-client-app-view-contactList-contactItem>
             </div>
             {{end}}
         </div>

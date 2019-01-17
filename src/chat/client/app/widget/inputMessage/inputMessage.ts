@@ -19,24 +19,29 @@ export class InputMessage extends Widget {
         isOnRadio:false,
         toolList:[]
     };
+    private radioTime:number;
 
     public setProps(props:any) {
         super.setProps(props);
         this.props.toolList = [
             { name:'拍摄',img:'tool-camera.png' },
             { name:'相册',img:'tool-pictures.png' },
-            { name:'红包',img:'tool-redEnv.png' },
-            { name:'转账',img:'tool-transaction.png' },
-            { name:'名片',img:'tool-card.png' }
+            { name:'红包',img:'tool-redEnv.png' }
         ];
     }
 
     // 麦克风输入处理
-    public radioStart() {
+    public radioStart(e:any) {
         console.log('点击开始录音');
-        startRadio();
         this.props.isOnRadio = true;
+        this.radioTime = Date.now();
         this.paint();
+        startRadio();
+
+        // 超过60秒自动停止录音
+        setTimeout(() => {
+            this.radioEnd(e);
+        }, 60000);
     }
 
     // 语音录入完成
@@ -47,7 +52,11 @@ export class InputMessage extends Widget {
         endRadio((buffer) => {
             uploadFile(arrayBuffer2File(buffer),(radioUrl:string) => {
                 console.log('录制的音频',radioUrl);
-                notify(e.node,'ev-send',{ value:`[${radioUrl}]`, msgType:MSG_TYPE.VOICE });
+                const res = {
+                    message:radioUrl,
+                    time:Math.ceil((Date.now() - this.radioTime) / 1000)
+                };
+                notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.VOICE });
             });
         });
     }

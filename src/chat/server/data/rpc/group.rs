@@ -4,7 +4,8 @@ struct MemberIdArray{
 
 struct GroupCreate{
     name:String,
-    note:String
+    note:String,
+    avatar:String
 }
 
 struct GroupAgree{
@@ -17,9 +18,16 @@ struct Invite{
     gid:u32,//群组
     rid:u32//接受邀请方
 }
-
+/**
+*邀请入群方式
+*/
+enum INVITE_TYPE {
+    normal=0,//普通邀请，需要同意
+    game=1,//游戏邀请，不需要同意
+}
 struct InviteArray{
-    arr:&[Invite]//被邀请的用户数组
+    arr:&[Invite],//被邀请的用户数组
+    inviteType:INVITE_TYPE //邀请类型
 }
 
 struct NotifyAdmin {
@@ -38,3 +46,4 @@ struct GroupAlias{
     gid:u32,
     groupAlias:String
 }
+

@@ -102,7 +102,6 @@ export const getDeviceId = (okCB?,errCB?) => {
  * 语音录制开始
  */ 
 const recorder = new AudioRecorder();
-const audioContext = new AudioContext();
 export const startRadio = () => {
     recorder.start(success => {
         if (success) {
@@ -124,25 +123,5 @@ export const endRadio = (cb:any) => {
         } else {
             bottomNotice('录音结束，传送失败');
         }
-    });
-};
-
-/**
- * 播放语音
- */
-export const playRadio = (data:any,cb:any) => {
-    if (!data) {
-        alert('无录音数据');
-
-        return;
-    }
-    const size = data.byteLength;
-    audioContext.decodeAudioData(data).then(data => {
-        console.log(`播放数据：${data}, length = ${size}`);
-        const source = audioContext.createBufferSource(); 
-        source.buffer = data;
-        source.loop = false; 
-        source.connect(audioContext.destination); 
-        source.start();
     });
 };

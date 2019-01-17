@@ -6,7 +6,7 @@
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupUserLink } from '../../../../server/data/db/group.s';
+import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
@@ -44,7 +44,8 @@ export class GroupInfos extends Widget {
             setting:null,
             msgAvoid:false,
             msgTop:false,
-            inFlag:0
+            inFlag:0,
+            avatar:''
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -57,9 +58,10 @@ export class GroupInfos extends Widget {
             { utilText : '退出该群' }];
         this.props.isGroupOpVisible = false;
         this.props.editable = false;
-        const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`);
+        const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
         this.props.groupInfo = ginfo;
         this.props.groupAlias = depCopy(ginfo.name);
+        this.props.avatar = ginfo.avatar || '../../res/images/img_avatar1.png';
         
         const uid = store.getStore('uid');
         this.props.members = this.props.groupInfo.memberids || [];
@@ -317,6 +319,7 @@ interface Props {
     msgTop:boolean; // 置顶
     msgAvoid:boolean; // 免打扰
     inFlag:number; // 从哪里进入 0 contactList进入，1 chat进入，2 newFriendApply进入，受邀加入群组
+    avatar:string; // 群头像
 }
 
 const MAX_DURING = 600;
