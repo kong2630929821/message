@@ -38,7 +38,7 @@
     text-transform:uppercase;   
 }
 .applyBtn{
-    margin: 100px 20px;
+    margin: 50px 20px;
     color: #fff;
     background: #318DE6;
     height: 100px;

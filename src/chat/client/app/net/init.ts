@@ -228,6 +228,7 @@ const updateUsers = (r: Contact, uid: number) => {
         getFriendHistory(rid);  // 获取好友发送的离线消息
     });
     if (info.uuid.length > 0) {
+        console.log(info.uuid);
         // 获取friendlink
         clientRpcFunc(getFriendLinks, info, (r: FriendLinkArray) => {
             if (r && r.arr && r.arr.length > 0) {
