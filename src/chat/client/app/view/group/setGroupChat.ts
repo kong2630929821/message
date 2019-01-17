@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
@@ -34,8 +35,7 @@ export class SetGroupChat extends Widget {
             name:'',
             inviteMembers:[],
             isSelect:false,
-            avatarHtml:'',
-            avatarUrl:''
+            avatarHtml:''
         };
         this.state = new Map();
     }
@@ -58,19 +58,25 @@ export class SetGroupChat extends Widget {
             console.log('selectImage url = ',url);
             // tslint:disable-next-line:max-line-length
             this.props.avatarHtml = `<div style="background-image: url(${url});width: 120px;height: 120px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
-            this.props.avatarUrl = url;
             this.paint();
+
+            const loading = popNew('app-components1-loading-loading', { text:'图片上传中' });
             imagePicker.getContent({
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        uploadFile(arrayBuffer2File(res.ab));
+                        uploadFile(arrayBuffer2File(res.ab),(url) => {
+                            bottomNotice('图片上传成功');
+                            avatarUrl = url;
+                            loading.callback(loading.widget);
+                        });
                     });
                 }
             });
-            
         });
     }
-    public createGroup() {
+
+    // 点击完成
+    public completeClick() {
         if (!this.props.name) {
             bottomNotice('群名不能为空');
 
@@ -81,10 +87,11 @@ export class SetGroupChat extends Widget {
 
             return;
         }
+       
         const groupInfo = new GroupCreate();
         groupInfo.name = this.props.name;
         groupInfo.note = '';
-        groupInfo.avatar = this.props.avatarUrl;
+        groupInfo.avatar = avatarUrl;
         clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
                 bottomNotice(`创建群组失败`);
@@ -113,7 +120,6 @@ export class SetGroupChat extends Widget {
             }
         });
         this.ok();
-
     }
 
     public inputName(e:any) {
@@ -142,9 +148,8 @@ interface Props {
     inviteMembers:number[];// 被邀请的成员
     isSelect:boolean;// 是否被选择
     avatarHtml:string; // 群头像展示
-    avatarUrl:string; // 群头像链接
 }
-
+let avatarUrl;  // 群头像链接
 store.register('contactMap', (r: Map<number, Contact>) => {
     // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
     for (const value of r.values()) {

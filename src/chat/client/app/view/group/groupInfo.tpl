@@ -8,7 +8,12 @@
             {{end}}
         </div>
         <div w-class="home-info-wrap">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"190px;"}</widget>
+            {{if it.avatarHtml}}
+            <widget w-tag="pi-ui-html" style="width:190px">{{it.avatarHtml}}</widget>
+            {{else}}
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="selectAvatar">{imgURL:{{it.avatar}},width:"190px;"}</widget>
+            {{end}}
+
             <div w-class="nameText">
                 {{if it.editable}}
                     <input type="text" value="{{it.groupAlias}}" w-class="groupAliasInput" maxlength="10" on-blur="changeGroupAlias" on-tap="editGroupAlias" on-input="groupAliasChange"/>

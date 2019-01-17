@@ -8,7 +8,7 @@ import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias, getUserAvatar, timestampFormat } from '../../logic/logic';
+import { getFriendAlias, getGroupAvatar, getUserAvatar, timestampFormat } from '../../logic/logic';
 // ================================================ 导出
 
 export class MessageRecord extends Widget {
@@ -37,7 +37,7 @@ export class MessageRecord extends Widget {
         } else { // 群聊
             const groupInfo = store.getStore(`groupInfoMap/${this.props.rid}`,new GroupInfo());
             this.props.name = groupInfo.name;
-            this.props.avatar = groupInfo.avatar || '../../res/images/groups.png';
+            this.props.avatar = getGroupAvatar(this.props.rid) || '../../res/images/groups.png';
             hid = genGroupHid(this.props.rid);
 
             const hIncIdArr = store.getStore(`groupChatMap/${hid}`,[]);

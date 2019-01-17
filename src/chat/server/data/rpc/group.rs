@@ -42,8 +42,10 @@ struct GuidsAdminArray{
     guids:&[String]//被添加的管理员数组
 }
 
-struct GroupAlias{
+struct NewGroup{
     gid:u32,
-    groupAlias:String
+    name:String,
+    avatar:String,
+    note:String
 }
 

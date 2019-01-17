@@ -1,5 +1,5 @@
 <div w-class="set-groupChat-wrap" class="new-page">
-    <div w-class="top-main-wrap" ev-next-click="createGroup" ev-back-click="back">
+    <div w-class="top-main-wrap" ev-next-click="completeClick" ev-back-click="back">
         <chat-client-app-widget-topBar-topBar>{title:"创建群聊({{it.inviteMembers.length}}/500)",nextImg:"{{it.isSelect?'complete_blue.png':'complete_gray.png'}}"}</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="group-info-wrap">
