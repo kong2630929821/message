@@ -4,7 +4,8 @@ struct MemberIdArray{
 
 struct GroupCreate{
     name:String,
-    note:String
+    note:String,
+    avatar:String
 }
 
 struct GroupAgree{

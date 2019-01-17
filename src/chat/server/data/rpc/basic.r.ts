@@ -10,7 +10,7 @@ import { Bucket } from '../../../utils/db';
 import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid } from '../../../utils/util';
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
+import { GroupHistory, GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
 import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
@@ -263,7 +263,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
     const groupHistorycursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
 
-    const hid = genGroupHid(param.gid); // 删除好友也应该可以看到以前发送的历史记录，所以不从friendLink中获取
+    const hid = genGroupHid(param.gid); 
     const groupHistoryArray = new GroupHistoryArray();
     groupHistoryArray.arr = [];
     groupHistoryArray.newMess = 0;
@@ -280,12 +280,17 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     //     index = groupCursor.cursor;
     // }
 
-    const historyKeys = [];
+    const mess = [];
     for (let id = start; id <= end; id++) {
-        historyKeys.push(genHIncId(hid, id));
+        const hIncId = genHIncId(hid, id);
+        const v = groupHistoryBucket.get<string, GroupHistory>(hIncId)[0];
+        if (v) {
+            mess.push(v);
+        }
     }
-    console.log('getGroupHistory historyKeys:',historyKeys);
-    const mess = groupHistoryBucket.get<string[], UserHistory[]>(historyKeys);
+    
+    console.log('getGroupHistory mess:',mess);
+    
     // while (fg === 1) {
     //     index++;
     //     const oneMess = groupHistoryBucket.get<string, UserHistory>(genHIncId(hid, index))[0];
@@ -349,13 +354,16 @@ export const getUserHistory = (param: UserHistoryFlag): UserHistoryArray => {
     // } else if (userCursor) { // 如果本地没有记录且cursor存在则从cursor中获取，否则从0开始
     //     index = userCursor.cursor;
     // }
-    const historyKeys = [];
+    const mess = [];
     for (let id = start; id <= end; id++) {
-        historyKeys.push(genHIncId(hid, id));
+        const hIncId = genHIncId(hid, id);
+        const v = userHistoryBucket.get<string, UserHistory>(hIncId)[0];
+        if (v) {
+            mess.push(v);
+        }
     }
 
-    const mess = userHistoryBucket.get<string[], UserHistory[]>(historyKeys);
-    console.log('getuserhistory historyKeys: ',historyKeys,'mess: ',mess);
+    console.log('getuserhistory mess: ',mess);
     // while (fg === 1) {
     //     index++;
     //     const oneMess = userHistoryBucket.get<string, UserHistory>(genHIncId(hid, index))[0];

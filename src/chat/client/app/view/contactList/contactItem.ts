@@ -47,6 +47,7 @@ export class ContactItem extends Widget {
                 const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
                 this.props.name = group.name; 
                 this.props.show = group.state === GROUP_STATE.CREATED;
+                this.props.img = group.avatar || '../../res/images/groups.png';
             }
         }
     }

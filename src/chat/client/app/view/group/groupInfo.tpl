@@ -8,7 +8,7 @@
             {{end}}
         </div>
         <div w-class="home-info-wrap">
-            <img w-class="avatar" src="../../res/images/img_avatar1.png" />
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"190px;"}</widget>
             <div w-class="nameText">
                 {{if it.editable}}
                     <input type="text" value="{{it.groupAlias}}" w-class="groupAliasInput" maxlength="10" on-blur="changeGroupAlias" on-tap="editGroupAlias" on-input="groupAliasChange"/>

@@ -45,11 +45,12 @@ export class Contact extends Widget {
         
         // 钱包修改了姓名、头像等，或钱包退出登陆
         if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
-            store.initStore();
-            this.state = []; // 清空记录 lastChat
-            this.paint(true);
             if (this.props.isLogin && uid) { // 钱包、聊天已登陆
                 setUserInfo();
+            } else {
+                store.initStore();
+                this.state = []; // 清空记录 lastChat
+                this.paint(true);
             }
         }
         

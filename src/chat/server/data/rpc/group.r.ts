@@ -620,6 +620,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.name = groupInfo.name;
         gInfo.hid = genGroupHid(gInfo.gid);
         gInfo.note = groupInfo.note;
+        gInfo.avatar = groupInfo.avatar;
         gInfo.adminids = [uid];
         // genAnnounceIncId(gInfo.gid, START_INDEX)
         gInfo.annoceids = [];

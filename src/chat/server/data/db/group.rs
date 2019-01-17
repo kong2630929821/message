@@ -35,6 +35,7 @@ struct GroupInfo {
     note:String,//群描述
     state:GROUP_STATE,//当前状态
     applyUser:&[u32],//主动申请加入群的用户id
+    avatar:String,//群头像 
 }
 
 /**

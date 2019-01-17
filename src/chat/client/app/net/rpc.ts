@@ -139,7 +139,8 @@ export const createGroup = () => {
     const x = new GroupCreate();
     x.note = 'wtf';
     x.name = 'xxx';
-
+    x.avatar = ''; 
+    
     clientRpcFunc(createGroupp, x, (r) => {
         console.log(r);
     });

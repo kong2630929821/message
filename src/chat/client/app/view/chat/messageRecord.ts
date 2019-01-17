@@ -37,7 +37,7 @@ export class MessageRecord extends Widget {
         } else { // 群聊
             const groupInfo = store.getStore(`groupInfoMap/${this.props.rid}`,new GroupInfo());
             this.props.name = groupInfo.name;
-            this.props.avatar = '../../res/images/groups.png';
+            this.props.avatar = groupInfo.avatar || '../../res/images/groups.png';
             hid = genGroupHid(this.props.rid);
 
             const hIncIdArr = store.getStore(`groupChatMap/${hid}`,[]);

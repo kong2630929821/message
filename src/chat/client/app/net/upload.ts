@@ -25,33 +25,6 @@ export const uploadFile = async (file, successCb?:(imgUrlSuf:string) => void,fai
 };
 
 /**
- * 图片base64转file格式
- */
-const base64ToFile = (base64: string) => {
-    const blob = base64ToBlob(base64);
-    const newFile = new File([blob], 'avatar.jpeg', { type: blob.type });
-    console.log(newFile);
-
-    return newFile;
-};
-
-/**
- * base64 to blob
- */
-const base64ToBlob = (base64: string) => {
-    const arr = base64.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-
-    return new Blob([u8arr], { type: mime });
-};
-
-/**
  * arrayBuffer转file格式
  */
 export const arrayBuffer2File = (buffer:ArrayBuffer) => {
@@ -73,7 +46,7 @@ export const imgResize = (buffer:ArrayBuffer,callback:Function) => {
     fr.readAsDataURL(file); 
     fr.onload = () => { 
         const dataUrl = fr.result.toString();  
-        resize({ url: dataUrl, width: 140, ratio: 0.3, type: 'jpeg' }, (res) => {
+        resize({ url: dataUrl, width: 200, ratio: 0.3, type: 'jpeg' }, (res) => {
             console.log('resize---------', res);
             callback(res);
         });
