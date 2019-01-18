@@ -5,8 +5,9 @@
  */
 
 // ================================================ 导入
-import { getOpenId } from '../../../../../app/api/JSAPI';
-import * as walletStore from '../../../../../app/store/memstore';
+import { getOpenId } from '../../../../app/api/JSAPI';
+import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
+import * as walletStore from '../../../../app/store/memstore';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
@@ -37,10 +38,9 @@ export const registerRpcStruct = (fileMap) => {
 
 /**
  * 钱包 登陆或注册聊天
- * @param fg 链接创建成功后强制执行登陆（钱包已登录，聊天未登录） 
  */
-export const walletSignIn = (fg= false) => {
-    if (!loginChatFg || fg) {
+export const walletSignIn = () => {
+    if (!loginChatFg) {
         getOpenId('101', (r) => {
             const openId = String(r.openid);
             if (openId) {
@@ -97,7 +97,7 @@ export const setUserInfo = () => {
 let loginChatFg: boolean;
 
 walletStore.register('user/isLogin', (r) => {
-    if (r) {  // 如果钱包登陆成功，登陆聊天
-        walletSignIn();
+    if (r) {  // 如果钱包登陆成功，聊天创建链接
+        initClient(chatLogicIp,chatLogicPort);
     }
 });

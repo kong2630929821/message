@@ -6,11 +6,12 @@
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
-import { AnnounceHistory, GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
+import { Announcement, GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
-import { getGidFromHincid } from '../../../../utils/util';
+import { depCopy, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -19,8 +20,12 @@ export class AnnounceDetail extends Widget {
 
     public setProps(props:any) {
         super.setProps(props); 
-        const announce = store.getStore(`announceHistoryMap/${props.aIncId}`,new AnnounceHistory()).announce;  
-        this.props.content = announce ? announce.msg :'';  
+        const announce = store.getStore(`announceHistoryMap/${props.aIncId}`,new Announcement()); 
+        if (announce.msg) {
+            const notice = depCopy(announce.msg);
+            this.props.title = JSON.parse(notice).title;
+            this.props.content = JSON.parse(notice).content;  
+        }
     }
     
     // 点击撤回公告
@@ -39,6 +44,7 @@ export class AnnounceDetail extends Widget {
                     return;
                 } else {
                     bottomNotice('撤回公告成功');
+                    this.ok();
                 }
             });
         });

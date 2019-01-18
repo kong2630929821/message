@@ -39,7 +39,7 @@ export class Input extends Widget {
     
     public setProps(props: Props, oldProps: Props) {
         super.setProps(props,oldProps);
-        
+        this.props.itype = props.itype || 'text';
         let currentValue = '';
         if (props.input) {
             currentValue = props.input;
@@ -91,8 +91,9 @@ export class Input extends Widget {
     /**
      * 用户输入完成,点击候选词或确认按钮时触发
      */
-    public compositionend() {
+    public compositionend(e:any) {
         this.state.inputLock = false;
+        this.change(e);  // 部分浏览器compositionend事件在input事件之前触发，导致输入值为空
     }
 
     /**

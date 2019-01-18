@@ -52,7 +52,7 @@ export class GroupAnnounce extends Widget {
         popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'编辑群公告',needTitle:true },(r:any) => {
             const message = new GroupSend();
             message.gid = this.props.gid;
-            message.msg = r.content;
+            message.msg = JSON.stringify(r);
             message.mtype = MSG_TYPE.NOTICE;
             message.time = (new Date()).getTime();
             clientRpcFunc(sendGroupMessage, message, () => {

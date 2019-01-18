@@ -3,12 +3,12 @@
  */
 
 // ================================================ 导入
+import { uploadFileUrlPrefix } from '../../../../../app/config';
 import * as walletStore from '../../../../../app/store/memstore';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
@@ -48,6 +48,8 @@ export class Contact extends Widget {
         if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
             if (this.props.isLogin && uid) { // 钱包、聊天已登陆
                 setUserInfo();
+                this.props.avatar = `${uploadFileUrlPrefix}${wUser.avatar}`;
+                this.paint();
             } else {
                 store.initStore();
                 this.state = []; // 清空记录 lastChat

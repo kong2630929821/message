@@ -7,10 +7,10 @@
    display:flex;
    align-items:center;
    font-size: 36px;
+   padding-left: 20px;
 }
 .topping{
    color:#318DE6;
-   margin-left: 20px;
    margin-right: 10px;
 }
 .content-wrap{
