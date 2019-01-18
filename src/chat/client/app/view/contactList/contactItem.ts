@@ -9,7 +9,7 @@ import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias, getUserAvatar } from '../../logic/logic';
+import { getFriendAlias, getGroupAvatar, getUserAvatar } from '../../logic/logic';
 
 interface Props {
     uid?:number;
@@ -47,7 +47,7 @@ export class ContactItem extends Widget {
                 const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
                 this.props.name = group.name; 
                 this.props.show = group.state === GROUP_STATE.CREATED;
-                this.props.img = group.avatar || '../../res/images/groups.png';
+                this.props.img = getGroupAvatar(this.props.id) || '../../res/images/groups.png';
             }
         }
     }

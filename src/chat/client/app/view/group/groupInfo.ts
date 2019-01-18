@@ -10,13 +10,15 @@ import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
-import { applyJoinGroup, getGroupUserLink, updateGroupAlias, userExitGroup } from '../../../../server/data/rpc/group.p';
-import { GroupAlias } from '../../../../server/data/rpc/group.s';
+import { applyJoinGroup, getGroupUserLink, updateGroupInfo, userExitGroup } from '../../../../server/data/rpc/group.p';
+import { NewGroup } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice, rippleShow } from '../../logic/logic';
+import { bottomNotice, getGroupAvatar, rippleShow } from '../../logic/logic';
+import { selectImage } from '../../logic/native';
 import { clientRpcFunc } from '../../net/init';
+import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -45,7 +47,8 @@ export class GroupInfos extends Widget {
             msgAvoid:false,
             msgTop:false,
             inFlag:0,
-            avatar:''
+            avatar:'',
+            avatarHtml:''
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -58,10 +61,11 @@ export class GroupInfos extends Widget {
             { utilText : '退出该群' }];
         this.props.isGroupOpVisible = false;
         this.props.editable = false;
+        gid = this.props.gid;
         const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
         this.props.groupInfo = ginfo;
         this.props.groupAlias = depCopy(ginfo.name);
-        this.props.avatar = ginfo.avatar || '../../res/images/img_avatar1.png';
+        this.props.avatar = getGroupAvatar(this.props.gid) || '../../res/images/img_avatar1.png';
         
         const uid = store.getStore('uid');
         this.props.members = this.props.groupInfo.memberids || [];
@@ -86,6 +90,42 @@ export class GroupInfos extends Widget {
     
     public goBack() {
         this.ok();
+    }
+
+    // 重新上传群头像
+    public selectAvatar() {
+        const imagePicker = selectImage((width, height, url) => {
+            console.log('selectImage url = ',url);
+            // tslint:disable-next-line:max-line-length
+            this.props.avatarHtml = `<div style="background-image: url(${url});width: 190px;height: 190px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
+            this.paint();
+
+            const loading = popNew('app-components1-loading-loading', { text:'图片上传中' });
+            imagePicker.getContent({
+                success(buffer:ArrayBuffer) {
+                    imgResize(buffer,(res) => {
+                        uploadFile(arrayBuffer2File(res.ab),(url) => {
+                            bottomNotice('图片上传成功');
+                            loading.callback(loading.widget);
+                            
+                            const ginfo = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
+                            const newGroup = new NewGroup();
+                            newGroup.gid = gid;
+                            newGroup.name = ginfo.name;
+                            newGroup.avatar = url;
+                            newGroup.note = '';
+                            clientRpcFunc(updateGroupInfo, newGroup, (r: Result) => {
+                                if (r.r === 1) {
+                                    this.props.groupInfo.avatar = url; 
+                                    store.setStore(`groupInfoMap/${this.props.gid}`,this.props.groupInfo);
+                                    logger.debug('==========修改群头像成功');
+                                }
+                            });
+                        });
+                    });
+                }
+            });
+        });
     }
 
     // 获取群内成员信息
@@ -159,11 +199,12 @@ export class GroupInfos extends Widget {
     }
     // 修改群名
     public changeGroupAlias() {
-        const gAlias = new GroupAlias();
-        gAlias.gid = this.props.gid;
-        gAlias.groupAlias = this.props.groupAlias || this.props.groupInfo.name;
-        clientRpcFunc(updateGroupAlias, gAlias, (r: Result) => {
-            logger.debug('====================changeGroupAlias',r);
+        const newGroup = new NewGroup();
+        newGroup.gid = this.props.gid;
+        newGroup.name = this.props.groupAlias || this.props.groupInfo.name;
+        newGroup.avatar = this.props.groupInfo.avatar;
+        newGroup.note = '';
+        clientRpcFunc(updateGroupInfo, newGroup, (r: Result) => {
             if (r.r === 1) {
                 this.props.groupInfo.name = this.props.groupAlias; 
                 
@@ -320,6 +361,9 @@ interface Props {
     msgAvoid:boolean; // 免打扰
     inFlag:number; // 从哪里进入 0 contactList进入，1 chat进入，2 newFriendApply进入，受邀加入群组
     avatar:string; // 群头像
+    avatarHtml:string; // 新群头像展示
 }
 
 const MAX_DURING = 600;
+
+let gid;  // 群ID

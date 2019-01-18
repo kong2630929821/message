@@ -7,6 +7,8 @@
             <chat-client-app-widget-input-input>{placeHolder : "搜索群聊",style : "font-size:32px;padding-left:82px;border-radius: 12px;"}</chat-client-app-widget-input-input>
             <img w-class="searchIcon" src="../../res/images/search-gray.png" />
         </div>
+
+        <div on-tap="applyGroup(e)" w-class="applyBtn">添加群聊</div>
         
         {{if it1.group.length>0}}
         <div w-class="groupPart" ev-changeSelect="changeSelect">
@@ -19,6 +21,5 @@
         </div>
         {{end}}
         
-        <div on-tap="applyGroup(e)" w-class="applyBtn">添加群聊</div>
     </div>
 </div>

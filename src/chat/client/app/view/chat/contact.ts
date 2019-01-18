@@ -8,6 +8,7 @@ import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
+import { GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';

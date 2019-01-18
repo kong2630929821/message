@@ -5,7 +5,7 @@
 import { GROUP_STATE, GroupInfo, GroupUserLink } from '../db/group.s';
 import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
-import { GroupAgree, GroupAlias, GroupCreate, GroupMembers, GuidsAdminArray, Invite, INVITE_TYPE, InviteArray } from './group.s';
+import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, INVITE_TYPE, InviteArray, NewGroup } from './group.s';
 
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
@@ -659,6 +659,12 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gulink.userAlias = getCurrentUserInfo(uid).name;
 
         groupUserLinkBucket.put(gulink.guid, gulink);
+        const info = new GroupSend();
+        info.msg = `你已经成功创建群 "${gInfo.name}"`;
+        info.mtype = MSG_TYPE.CREATEGROUP;
+        info.gid = gInfo.gid;
+        info.time = Date.now();
+        sendGroupMessage(info);
 
         return gInfo;
     }
@@ -709,25 +715,27 @@ export const dissolveGroup = (gid: number): Result => {
 };
 
 /**
- * 修改群名
+ * 修改群信息
  * @param gid group id
  * @param groupAlias group alias / new group name
  */
 // #[rpc=rpcServer]
-export const updateGroupAlias = (gAlias: GroupAlias): Result => {
+export const updateGroupInfo = (newGroup: NewGroup): Result => {
     const groupInfoBucket = getGroupInfoBucket();
-    const gid = gAlias.gid;
-    const newGroupName = gAlias.groupAlias;
+    const gid = newGroup.gid;
     const uid = getUid();
 
     const res = new Result();
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    logger.debug('updateGroupInfo group begin: ', gInfo);
 
     if (uid === gInfo.ownerid) {
-        gInfo.name = newGroupName;
+        gInfo.name = newGroup.name;
+        gInfo.avatar = newGroup.avatar;
+        gInfo.note = newGroup.note;
         groupInfoBucket.put(gid, gInfo);
-        logger.debug('After update group name: ', groupInfoBucket.get(gid)[0]);
+        logger.debug('updateGroupInfo group after: ', gInfo);
 
         res.r = 1;
 

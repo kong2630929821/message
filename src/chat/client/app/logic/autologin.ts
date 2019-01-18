@@ -3,12 +3,15 @@
  */
 
 // =====================================导入
+import * as walletStore from '../../../../../app/store/memstore';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { create } from '../../../../pi/net/rpc';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { auto_login, getToken } from '../../../server/rpc/session.p';
 import { AutoLogin, GetToken, Token } from '../../../server/rpc/session.s';
+import * as store from '../data/store';
 import { clientRpcFunc, subscribe } from '../net/init';
+import { walletSignIn } from '../net/init_1';
 import { initReceive } from '../net/receive';
 import { login as defLogin, walletLogin } from '../net/rpc';
 
@@ -62,6 +65,11 @@ export class AutoLoginMgr {
                 console.log('reconnect 连接成功！！！！！！！');
                 // 连接成功
                 this.conState = true;
+                const wLogin = walletStore.getStore('user/isLogin',false); // 钱包是否已经登陆
+                const cLogin = store.getStore('uid',0);  // 聊天是否已经登陆
+                if (wLogin && !cLogin) {
+                    walletSignIn(true);
+                }
                 if (this.relogin === ReLoginState.START) {
                     console.log(`连接成功！！！`);
                     this.relogin = ReLoginState.ING;

@@ -5,6 +5,7 @@
 import { uploadFileUrlPrefix } from '../../../../app/config';
 import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
+import { GroupInfo } from '../../../server/data/db/group.s';
 import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
@@ -121,6 +122,23 @@ export const getUserAvatar = (rid:number) => {
     if (rid) {
         const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
         let avatar = user.avatar ? depCopy(user.avatar) : '';
+        if (avatar && avatar.indexOf('data:image') < 0) {
+            avatar = `${uploadFileUrlPrefix}${avatar}`;
+        }
+
+        return avatar;
+    } else {
+        
+        return '';
+    }
+    
+};
+
+// 获取群组头像
+export const getGroupAvatar = (gid:number) => {
+    if (gid) {
+        const group = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
+        let avatar = group.avatar ? depCopy(group.avatar) : '';
         if (avatar && avatar.indexOf('data:image') < 0) {
             avatar = `${uploadFileUrlPrefix}${avatar}`;
         }

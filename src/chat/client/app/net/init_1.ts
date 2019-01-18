@@ -37,17 +37,18 @@ export const registerRpcStruct = (fileMap) => {
 
 /**
  * 钱包 登陆或注册聊天
+ * @param fg 链接创建成功后强制执行登陆（钱包已登录，聊天未登录） 
  */
-const walletSignIn = () => {
-    if (!loginChatFg) {
+export const walletSignIn = (fg= false) => {
+    if (!loginChatFg || fg) {
         getOpenId('101', (r) => {
             const openId = String(r.openid);
             if (openId) {
                 init2.login(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
-                    console.log('聊天登陆成功！！！！！！！！！！！！！！');
                     loginChatFg = false;
 
                     if (r && r.uid > 0) {
+                        console.log('聊天登陆成功！！！！！！！！！！！！！！');
                         store.setStore(`uid`, r.uid);
                         store.setStore(`userInfoMap/${r.uid}`, r);
                         init2.init(r.uid);
