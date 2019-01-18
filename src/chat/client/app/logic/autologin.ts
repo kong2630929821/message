@@ -68,7 +68,7 @@ export class AutoLoginMgr {
                 const wLogin = walletStore.getStore('user/isLogin',false); // 钱包是否已经登陆
                 const cLogin = store.getStore('uid',0);  // 聊天是否已经登陆
                 if (wLogin && !cLogin) {
-                    walletSignIn(true);
+                    walletSignIn();
                 }
                 if (this.relogin === ReLoginState.START) {
                     console.log(`连接成功！！！`);

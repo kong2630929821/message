@@ -5,8 +5,9 @@
 // ================================================ 导入
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
-import { AnnounceHistory } from '../../../../server/data/db/message.s';
+import { Announcement } from '../../../../server/data/db/message.s';
 import { Logger } from '../../../../utils/logger';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 
 // ================================================ 导出
@@ -19,11 +20,16 @@ export class LatestAnnounceItem extends Widget {
     public props:Props = {
         gid:null,
         aIncId : '',
-        announce: null
+        announce: null,
+        noticeTitle:''
     };
     public setProps(props:any) {
         super.setProps(props); 
-        this.props.announce = store.getStore(`announceHistoryMap/${this.props.aIncId}`,new AnnounceHistory()).announce;
+        this.props.announce = store.getStore(`announceHistoryMap/${this.props.aIncId}`,new Announcement());
+        if (this.props.announce) {
+            const notice = depCopy(this.props.announce.msg);
+            this.props.noticeTitle = JSON.parse(notice).title;
+        }
     }
     public firstPaint() {
         super.firstPaint();
@@ -44,4 +50,5 @@ interface Props {
     gid:number;
     aIncId:string;
     announce:any; // 公告详细
+    noticeTitle:string; // 公告标题
 }

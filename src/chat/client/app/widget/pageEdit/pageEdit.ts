@@ -3,7 +3,9 @@
  */
 
 // ================================================ 导入
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { bottomNotice } from '../../logic/logic';
 
 // ================================================ 导出
 
@@ -39,7 +41,24 @@ export class PageEdit extends Widget {
     }
     // 完成编辑
     public completeEdit() {
+        if (this.props.needTitle && !this.props.titleInput) {
+            bottomNotice('标题不能为空');
+
+            return;
+        }
+        if (!this.props.contentInput) {
+            bottomNotice('内容不能为空');
+
+            return;
+        }
         this.ok({ title:this.props.titleInput,content:this.props.contentInput });
+
+    }
+
+    // 聚焦内容输入框
+    public focusContent(e:any) {
+        const content = getRealNode(e.node).getElementsByTagName('textarea')[0];
+        content.focus();
     }
 }
 

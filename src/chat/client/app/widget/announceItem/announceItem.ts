@@ -3,10 +3,10 @@
  */
 
 // ================================================ 导入
-import { Json } from '../../../../../pi/lang/type';
 import { Widget } from '../../../../../pi/widget/widget';
-import { AnnounceHistory } from '../../../../server/data/db/message.s';
+import { Announcement } from '../../../../server/data/db/message.s';
 import { Logger } from '../../../../utils/logger';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { timestampFormat } from '../../logic/logic';
 
@@ -20,15 +20,21 @@ export class AnnounceItem extends Widget {
     public props:Props = {
         aIncId : '',
         announce: null,
-        time:''
+        time:'',
+        noticeTitle:''
     };
     public setProps(props:any) {
         super.setProps(props); 
         logger.debug(props.aIncId,'=============',this.props.aIncId);
-        this.props.announce = store.getStore(`announceHistoryMap/${this.props.aIncId}`,new AnnounceHistory()).announce;
-        logger.debug('====this.props.announce',this.props.announce);
-        const time = this.props.announce ? this.props.announce.time : null;
-        this.props.time = timestampFormat(time).substr(5,16);
+        const announce = store.getStore(`announceHistoryMap/${this.props.aIncId}`,new Announcement());
+        this.props.announce = announce;
+        if (announce) {
+            const notice = depCopy(announce.msg);
+            this.props.noticeTitle = JSON.parse(notice).title;
+            const time = announce.time;
+            this.props.time = timestampFormat(time).substr(5,16);
+        }
+        logger.debug('====this.props.announce',announce);
     }
 
     public firstPaint() {
@@ -46,4 +52,5 @@ interface Props {
     aIncId:string;
     announce:any; // 公告详细
     time:string;
+    noticeTitle:string;// 公告标题
 }
