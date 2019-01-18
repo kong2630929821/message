@@ -157,7 +157,7 @@ export class GroupInfos extends Widget {
                 break;
             case 1:  // 清空聊天记录
                 popNew('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' },() => {
-                    store.setStore(`userChatMap/${genGroupHid(this.props.gid)}`,[]);
+                    store.setStore(`groupChatMap/${genGroupHid(this.props.gid)}`,[]);
                 });
                 break;
             case 2: // 退出群

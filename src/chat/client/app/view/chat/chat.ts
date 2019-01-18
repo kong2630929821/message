@@ -137,7 +137,7 @@ export class Chat extends Widget {
             hIncId:null,
             name:this.props.name,
             me:true,
-            msg:parseMessage(depCopy(message)),
+            msg:message,
             time:timestampFormat(message.time,1),
             chatType:this.props.chatType
         };
