@@ -31,8 +31,7 @@ export class AnnounceItem extends Widget {
         if (announce) {
             const notice = depCopy(announce.msg);
             this.props.noticeTitle = JSON.parse(notice).title;
-            const time = announce.time;
-            this.props.time = timestampFormat(time).substr(5,16);
+            this.props.time = timestampFormat(announce.time,3);
         }
         logger.debug('====this.props.announce',announce);
     }

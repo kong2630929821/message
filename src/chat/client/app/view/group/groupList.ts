@@ -58,6 +58,8 @@ export class GroupListt extends Widget {
                     bottomNotice('您申请的群不存在');
                 } else if (r.r === -1) {
                     bottomNotice('您已经是该群的成员');
+                } else {
+                    bottomNotice('发送成功');
                 }
             }));
         }

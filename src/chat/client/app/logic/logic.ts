@@ -5,9 +5,9 @@
 import { uploadFileUrlPrefix } from '../../../../app/config';
 import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
-import { GroupInfo } from '../../../server/data/db/group.s';
+import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
-import { depCopy, genGroupHid, genUuid } from '../../../utils/util';
+import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { unSubscribe } from '../net/init';
 
@@ -15,7 +15,7 @@ import { unSubscribe } from '../net/init';
 
 /**
  * 时间戳格式化 毫秒为单位
- * timeType 1 返回时分
+ * timeType 1 返回时分， 2 返回月日， 3 返回月日时分
  */ 
 export const timestampFormat = (timestamp: number,timeType?: number) => {
     const date = new Date(timestamp);
@@ -28,6 +28,12 @@ export const timestampFormat = (timestamp: number,timeType?: number) => {
 
     if (timeType === 1) {
         return `${hour}:${minutes}`;
+    }
+    if (timeType === 2) {
+        return `${month}月${day}日`;
+    }
+    if (timeType === 3) {
+        return `${month}月${day}日 ${hour}:${minutes}`;
     }
 
     return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`;
@@ -139,6 +145,23 @@ export const getGroupAvatar = (gid:number) => {
     if (gid) {
         const group = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
         let avatar = group.avatar ? depCopy(group.avatar) : '';
+        if (avatar && avatar.indexOf('data:image') < 0) {
+            avatar = `${uploadFileUrlPrefix}${avatar}`;
+        }
+
+        return avatar;
+    } else {
+        
+        return '';
+    }
+    
+};
+
+// 获取群内用户头像
+export const getGroupUserAvatar = (gid:number,rid:number) => {
+    if (rid) {
+        const user = store.getStore(`groupUserLinkMap/${genGuid(gid,rid)}`,new GroupUserLink());
+        let avatar = user.avatar ? depCopy(user.avatar) : '';
         if (avatar && avatar.indexOf('data:image') < 0) {
             avatar = `${uploadFileUrlPrefix}${avatar}`;
         }

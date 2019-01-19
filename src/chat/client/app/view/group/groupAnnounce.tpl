@@ -4,10 +4,9 @@
     </div>
     <div w-class="outter">
         <div w-class="inner">
-            <div w-class="group-intro-wrap">
-                <span w-class="topping">置顶</span>
-                <span w-class="text">本群须知</span>
-                <span w-class="time">6月8日</span>
+            <div w-class="group-intro-wrap" on-tap="goDetail('')">
+                <span><span w-class="topping">置顶</span>本群须知</span>
+                <span w-class="time">{{it.createTime}}</span>
             </div>
             {{if it.aIncIdArray.length > 0}}
                 {{for index,item of it.aIncIdArray}}

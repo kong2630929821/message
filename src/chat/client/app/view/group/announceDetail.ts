@@ -20,12 +20,15 @@ export class AnnounceDetail extends Widget {
 
     public setProps(props:any) {
         super.setProps(props); 
-        const announce = store.getStore(`announceHistoryMap/${props.aIncId}`,new Announcement()); 
-        if (announce.msg) {
-            const notice = depCopy(announce.msg);
-            this.props.title = JSON.parse(notice).title;
-            this.props.content = JSON.parse(notice).content;  
-        }
+        if (props.aIncId) {
+            const announce = store.getStore(`announceHistoryMap/${props.aIncId}`,new Announcement());
+            if (announce.msg) {
+                const notice = depCopy(announce.msg);
+                this.props.title = JSON.parse(notice).title;
+                this.props.content = JSON.parse(notice).content;  
+            }
+        } 
+
     }
     
     // 点击撤回公告

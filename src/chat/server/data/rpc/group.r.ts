@@ -7,17 +7,18 @@ import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.
 import { GroupUserLinkArray, Result } from './basic.s';
 import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, INVITE_TYPE, InviteArray, NewGroup } from './group.s';
 
+import { BonBuffer } from '../../../../pi/util/bon';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
-import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
+import { mqttPublish, QoS, setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
-import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genNewIdFromOld, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
+import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genHIncId, genNewIdFromOld, genNextMessageIndex, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { GroupHistoryCursor, MSG_TYPE, MsgLock  } from '../db/message.s';
+import { GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock  } from '../db/message.s';
 import { sendGroupMessage } from './message.r';
-import { GroupSend } from './message.s';
+import { GroupSend, SendMsg } from './message.s';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -111,6 +112,7 @@ export const userExitGroup = (gid: number): Result => {
  * @param agree agree
  */
 // #[rpc=rpcServer]
+// tslint:disable-next-line:max-func-body-length
 export const acceptUser = (agree: GroupAgree): Result => {
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
@@ -163,28 +165,60 @@ export const acceptUser = (agree: GroupAgree): Result => {
     gInfo.memberids.push(agree.uid);
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('Accept user: ', agree.uid, 'to group: ', agree.gid);
-    contact.applyGroup = delValueFromArray(agree.gid,contact.applyGroup);  // 同意用户入群，清空该用户受该群组的邀请记录
+    contact.applyGroup = delGidFromApplygroup(agree.gid,contact.applyGroup);  // 同意用户入群，清空该用户受该群组的邀请记录
     contact.group.push(agree.gid);
     contactBucket.put(agree.uid, contact);
-    logger.debug('Add group: ', agree.gid, 'to user\'s contact: ', contact.group);
+    logger.debug('acceptUser uid', agree.uid, 'group ', contact.group,'applyGroup:',contact.applyGroup);
 
     const groupUserLinkBucket = getGroupUserLinkBucket();
+    const currentUser = getCurrentUserInfo(agree.uid);
     const gul = new GroupUserLink();
     gul.guid = `${agree.gid}:${agree.uid}`;
     gul.hid = '';
     gul.join_time = Date.now();
-    gul.userAlias = getCurrentUserInfo(agree.uid).name;
+    gul.userAlias = '';
     gul.groupAlias = '';
+    gul.avatar = currentUser.avatar;
 
     groupUserLinkBucket.put(gul.guid, gul);
     moveGroupCursor(agree.gid, agree.uid);
     logger.debug('Add user: ', agree.uid, 'to groupUserLinkBucket');
-    const info = new GroupSend();
-    info.msg = '用户加群成功';
-    info.mtype = MSG_TYPE.ADDGROUP;
-    info.gid = agree.gid;
-    info.time = Date.now();
-    sendGroupMessage(info);
+   
+    // 发布一条用户入群成功消息，发送者ID应该是入群者非当前用户
+    const dbMgr = getEnv().getDbMgr();
+    const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+    const gh = new GroupHistory();
+    const gmsg = new GroupMsg();
+    gmsg.msg = '用户加群成功';
+    gmsg.mtype = MSG_TYPE.ADDGROUP;
+    gmsg.send = true;
+    gmsg.sid = agree.uid;
+    gmsg.time = Date.now(); // 发送时间由服务器设置
+    gmsg.cancel = false;
+    gh.msg = gmsg;
+    // 生成消息ID
+    const msgLock = new MsgLock();
+    msgLock.hid = genGroupHid(agree.gid);
+    // 这是一个事务
+    msgLockBucket.readAndWrite(msgLock.hid, (mLock) => {
+        mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
+
+        return msgLock;
+    });
+    gh.hIncId = genHIncId(msgLock.hid, msgLock.current);
+    groupHistoryBucket.put(gh.hIncId, gh);
+    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    const sendMsg = new SendMsg();
+    sendMsg.code = 1;
+    sendMsg.last = msgLock.current;
+    sendMsg.rid = gmsg.sid;
+    const buf = new BonBuffer();
+    sendMsg.bonEncode(buf);
+    const groupTopic = `ims/group/msg/${agree.gid}`;
+    logger.debug(`before publish ,the topic is : ${groupTopic}`);
+    // directly send message to group topic
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
 
     res.r = 1; // successfully add user
     
@@ -299,12 +333,14 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     logger.debug('User: ', uid, 'agree to join group: ', agree.gid);
 
     const groupUserLinkBucket = getGroupUserLinkBucket();
+    const currentUser = getCurrentUserInfo();
     const gul = new GroupUserLink();
     gul.guid = genGuid(agree.gid, uid);
     gul.hid = gInfo.hid;
     gul.join_time = Date.now();
-    gul.userAlias = getCurrentUserInfo().name;
-    gul.groupAlias = gInfo.name;
+    gul.userAlias =  '';
+    gul.groupAlias = '';
+    gul.avatar = currentUser.avatar;
 
     groupUserLinkBucket.put(gul.guid, gul);
     moveGroupCursor(agree.gid, agree.uid);
@@ -333,7 +369,6 @@ const moveGroupCursor = (gid: number, rid: number) => {
 
     const ridGroupCursor = new GroupHistoryCursor();
     ridGroupCursor.guid = guid;
-    ridGroupCursor.cursor = -1;
     ridGroupCursor.cursor = msglock ? msglock.current : -1;
 
     logger.debug('JoinGroup moveGroupCursor guid: ', guid, 'ridGroupCursor: ', ridGroupCursor);
@@ -575,22 +610,33 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
     const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = getGroupInfoBucket();
     const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
+    const userInfoBucket = new Bucket('file',CONSTANT.USER_INFO_TABLE,dbMgr);
 
     const gla = new GroupUserLinkArray();
     const m = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
     logger.debug('getGroupUserLink gid: ', gid, 'groupInfo: ', m);
-
-    if (m) {
-        const guids = m.memberids.map(item => genGuid(gid, item));
-        gla.arr = groupUserLinkBucket.get(guids);
-
-        logger.debug('Get group user link: ', gla);
+    if (!m) {
+        gla.arr = [];
 
         return gla;
     }
+
+    const guids = m.memberids.map(item => genGuid(gid, item));
     gla.arr = [];
+    for (const i of guids) {
+        const userlink = groupUserLinkBucket.get<string,GroupUserLink>(i)[0];
+        const userInfo = userInfoBucket.get<number,UserInfo>(getUidFromGuid(i))[0];
+        if (!userlink.userAlias) {
+            userlink.userAlias = userInfo.name;
+        }
+        userlink.avatar = userInfo.avatar; 
+        gla.arr.push(userlink);
+    }
+
+    logger.debug('Get group user link: ', gla);
 
     return gla;
+    
 };
 
 /**
@@ -643,20 +689,24 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         const contact = contactBucket.get<number, [Contact]>(uid)[0];
         contact.group.push(gInfo.gid);
         contactBucket.put(uid, contact);
+        moveGroupCursor(gInfo.gid, uid);
         logger.debug('Add self: ', uid, 'to conatact group');
+
         // 发送一条当前群组创建成功的消息，其实不是必须的
         const groupTopic = `ims/group/msg/${gInfo.gid}`;
         const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
         setMqttTopic(mqttServer, groupTopic, true, true);
         logger.debug('Set mqtt topic for group: ', gInfo.gid, 'with topic name: ', groupTopic);
-        // 把创建群的任加入groupUserLink
+        // 把创建群的用户加入groupUserLink
         const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
+        const currentUser = getCurrentUserInfo(uid);
         const gulink = new GroupUserLink();
         gulink.groupAlias = '';
         gulink.guid = genGuid(gInfo.gid, uid);
         gulink.hid = '';
         gulink.join_time = Date.now();
-        gulink.userAlias = getCurrentUserInfo(uid).name;
+        gulink.userAlias = '';
+        gulink.avatar = currentUser.avatar;
 
         groupUserLinkBucket.put(gulink.guid, gulink);
         const info = new GroupSend();

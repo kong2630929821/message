@@ -48,4 +48,5 @@ struct GroupUserLink {
     userAlias:String,//该用户在群里的别名
     hid:String,//群历史记录id
     join_time: u32,//加入时间
+    avatar:String,// 用户头像
 }

@@ -11,7 +11,7 @@ import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { bottomNotice } from '../../logic/logic';
+import { bottomNotice, timestampFormat } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -25,16 +25,19 @@ export class GroupAnnounce extends Widget {
     public props:Props = {
         gid:null,
         aIncIdArray:[],
-        isOwner:false
+        isOwner:false,
+        createTime:''
     };
     public setProps(props:any) {
         super.setProps(props); 
-        this.props.aIncIdArray = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo()).annoceids;
+        const gInfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
+        this.props.aIncIdArray = gInfo.annoceids;
         const uid = store.getStore('uid');
-        const ownerid = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo()).ownerid;
+        const ownerid = gInfo.ownerid;
         if (uid === ownerid) {
             this.props.isOwner = true;
         }
+        this.props.createTime = timestampFormat(gInfo.create_time,2);
     }
     public goBack() {
         this.ok();
@@ -63,7 +66,11 @@ export class GroupAnnounce extends Widget {
     
     // 查看公告详情
     public goDetail(aIncId:string) {
-        popNew('chat-client-app-view-group-announceDetail',{ aIncId:aIncId });
+        if (aIncId) {
+            popNew('chat-client-app-view-group-announceDetail',{ aIncId:aIncId });
+        } else {
+            popNew('chat-client-app-view-group-announceDetail',{ title: '本群须知',content:'欢迎大家入群' });
+        }
     }
 }
 
@@ -72,4 +79,5 @@ interface Props {
     gid:number;
     aIncIdArray:string[]; // 公告消息记录
     isOwner:boolean; // 是否是群主
+    createTime:string; // 群创建时间
 }

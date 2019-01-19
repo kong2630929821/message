@@ -55,7 +55,7 @@
         {{else}}
         <div w-class="username">{{it.name}}</div>
         <div style="display:flex;margin:10px 20px;">
-            <img src="../../res/images/user.png" w-class="avatar" on-tap="userDetail"/>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="userDetail">{imgURL:{{it.avatar}},width:"80px;"}</widget>
             {{if it.msg.mtype == 9}}
             <span w-class="leftDownTail" style="border-bottom:10px solid rgba(235,79,79,1)"></span>
             <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.msg.msg}},cardType:"redEnv"}</widget>
