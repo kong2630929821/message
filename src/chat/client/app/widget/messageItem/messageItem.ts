@@ -110,12 +110,17 @@ export class MessageItem extends Widget {
 
     // 点击播放语音
     public playRadioMess(e:any) {
+        // 关掉所有语音
+        const audios = document.getElementsByTagName('audio');
+        for (const i of audios) {
+            i.pause();
+            i.currentTime = 0;
+        }
+        
         const elem = getRealNode(e.node).getElementsByTagName('audio')[0];
-        if (elem.currentTime > 0) {
+        if (this.props.playRadio) {
             this.props.playRadio = false;
             console.log('暂停播放语音');
-            elem.pause();
-            elem.currentTime = 0;
 
         } else {
             this.props.playRadio = true;
@@ -123,14 +128,19 @@ export class MessageItem extends Widget {
             elem.play();
             
             setTimeout(() => {
-                this.props.playRadio = false;
-                console.log('结束播放语音');
-                elem.pause();
-                elem.currentTime = 0;
-                this.paint();
-            }, elem.duration * 1000);
+                if (elem.currentTime === elem.duration) {
+                    this.props.playRadio = false;
+                    console.log('结束播放语音');
+                    elem.pause();
+                    elem.currentTime = 0;
+                    this.paint();
+                }
+                
+            }, elem.duration * 1000 + 500); // 多加半秒，确保语音播完
         }
         this.paint();
+        notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playRadio:this.props.playRadio });
+
     }
 }
 

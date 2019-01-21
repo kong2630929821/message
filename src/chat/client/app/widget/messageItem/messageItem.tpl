@@ -71,7 +71,7 @@
             {{elseif it.msg.mtype == 3}}
             <span w-class="leftDownTail"></span>
             <div w-class="radio-wrap" style="color:#222222;background:#fff;width:{{it.msg.width * 4 + 250}}px;" on-tap="playRadioMess">
-                <img w-class="playBtn" src="../../res/images/{{it.playRadio?'stop-radio.png':'play-radio.png'}}"/>
+                <img w-class="playBtn" src="../../res/images/{{it.playRadio?'stop-radio.png':'play-radio.png'}}" class="audioImage"/>
                 <widget w-tag="pi-ui-html" w-class="pi-html" style="flex:1 0 0;">{{it.msg.msg}}</widget>
                 <div w-class="corner">
                     <span w-class="sendTime" style="color:#297FCA">{{it.time}}</span>
