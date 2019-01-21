@@ -68,7 +68,6 @@ export class InviteMember extends Widget {
         }
         const invites = new InviteArray();
         invites.arr = [];
-        invites.inviteType = INVITE_TYPE.normal;
         this.props.applyGroupMembers.forEach((id) => {
             const invite = new Invite();
             invite.gid = this.props.gid;

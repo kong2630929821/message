@@ -52,9 +52,9 @@ export class UserDetail extends Widget {
         } else {
             this.props.utilList = [
             { utilText: '修改备注' },
-            { utilText: '发送名片' },
+            // { utilText: '发送名片' },
             { utilText: '清空聊天记录' },
-            { utilText: '加入黑名单' },
+            // { utilText: '加入黑名单' },
             { utilText: '删除好友' }
             ];
         }
@@ -128,19 +128,19 @@ export class UserDetail extends Widget {
             case 0: // 修改备注
                 this.changeFriendAlias();
                 break;
-            case 1: // 发送名片
+            // case 1: // 发送名片
 
-                break;
-            case 2: // 清空聊天记录
+            //     break;
+            case 1: // 清空聊天记录
                 popNew('chat-client-app-widget-modalBox-modalBox', { title: '清空聊天记录', content: `确定清空和${this.props.userInfo.name}的聊天记录吗` },() => {
                     const sid = store.getStore('uid');
                     store.setStore(`userChatMap/${genUserHid(sid,this.props.uid)}`,[]);
                 });
                 break;
-            case 3: // 加入黑名单
-                popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
-                break;
-            case 4: // 删除联系人
+            // case 3: // 加入黑名单
+            //     popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
+            //     break;
+            case 2: // 删除联系人
                 popNew('chat-client-app-widget-modalBox-modalBox', { title: '删除联系人', content: `将联系人${this.props.userInfo.name}删除，同时删除聊天记录`, sureText: '删除' }, () => {
                     this.delFriend(this.props.uid);
                     this.goBack();

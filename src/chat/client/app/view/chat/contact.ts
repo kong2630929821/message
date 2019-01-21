@@ -38,7 +38,7 @@ export class Contact extends Widget {
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        this.props.hasWallet = hasWallet();
+        this.props.hasWallet = !!walletStore.getStore('wallet');
         this.props.isLogin = walletStore.getStore('user/isLogin',false); // 钱包是否登陆
         const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
         const uid = store.getStore('uid', 0);

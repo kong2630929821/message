@@ -27,7 +27,6 @@ enum INVITE_TYPE {
 }
 struct InviteArray{
     arr:&[Invite],//被邀请的用户数组
-    inviteType:INVITE_TYPE //邀请类型
 }
 
 struct NotifyAdmin {
