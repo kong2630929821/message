@@ -306,7 +306,7 @@ export const getGroupHistory = (param: GroupHistoryFlag): GroupHistoryArray => {
     // 游标表中是否有该用户的记录
     if (!groupCursor) {
 
-        groupCursor = new UserHistoryCursor();
+        groupCursor = new GroupHistoryCursor();
         groupCursor.guid = genGuid(param.gid, sid);
         groupCursor.cursor = -1;
     }

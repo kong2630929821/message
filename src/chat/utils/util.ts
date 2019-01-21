@@ -129,7 +129,6 @@ export const delValueFromArray = (value: any, arr: any[]) => {
 
 /**
  * 删除申请或邀请加入群的群ID
- * @param index 
  */
 export const delGidFromApplygroup = (gid: number, arr: string[]) => {
     return arr.filter((ele) => {

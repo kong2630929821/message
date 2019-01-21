@@ -11,6 +11,7 @@ import { setOwner } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import { genGuid } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -41,14 +42,13 @@ export class TransferGroupOwner extends Widget {
         return ginfo;
     }
     public openConfirmTranBox(uid:number) {
-        logger.debug('openConfirmTranBox');
         const modalObj = { content:`"${uid}"将成为新群主，确认后您将你失去群主身份。`,sureText:'确定',cancelText:'取消',style:'color:#F7931A' };
         const guid = genGuid(this.props.gid,uid);
         popNew('chat-client-app-widget-modalBox-modalBox',modalObj,
         () => {
-            logger.debug('===============transGroupOwner');
             clientRpcFunc(setOwner,guid,(r) => {
-                logger.debug('========transGroupOwner',r);
+                bottomNotice('转让群主成功');
+                this.ok();
             });
         },
         () => {

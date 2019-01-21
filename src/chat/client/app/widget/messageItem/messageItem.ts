@@ -12,11 +12,12 @@ import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { depCopy, genGuid, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { timestampFormat } from '../../logic/logic';
+import { getGroupUserAvatar, getUserAvatar, timestampFormat } from '../../logic/logic';
 import { EMOJIS_MAP } from '../emoji/emoji';
 // ================================================ 导出
 
 export class MessageItem extends Widget {
+    public props:Props;
     constructor() {
         super();
         this.props = {
@@ -26,11 +27,11 @@ export class MessageItem extends Widget {
             me:true,
             time:'',
             chatType:GENERATOR_TYPE.USER,
-            isMessageRecallVisible:false
+            isMessageRecallVisible:false,
+            avatar:'',  // 对方的头像
+            playRadio:false
         };
-        this.props.hIncId = '';
-        this.props.msg = null; 
-        this.props.chatType = GENERATOR_TYPE.USER;
+       
     }     
 
     public setProps(props:any) {
@@ -38,10 +39,12 @@ export class MessageItem extends Widget {
         if (this.props.hIncId) {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
                 this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
+                this.props.avatar = getUserAvatar(this.props.msg.sid) || '../../res/images/user.png';
             } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
                 this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
                 const gid = getGidFromHincid(this.props.hIncId);
                 this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.msg.sid)}`, new GroupUserLink()).userAlias;
+                this.props.avatar = getGroupUserAvatar(gid,this.props.msg.sid) || '../../res/images/user.png';
             }
             this.props.msg = parseMessage(depCopy(this.props.msg));
             this.props.me = this.props.msg.sid === store.getStore('uid');
@@ -107,12 +110,17 @@ export class MessageItem extends Widget {
 
     // 点击播放语音
     public playRadioMess(e:any) {
+        // 关掉所有语音
+        const audios = document.getElementsByTagName('audio');
+        for (const i of audios) {
+            i.pause();
+            i.currentTime = 0;
+        }
+        
         const elem = getRealNode(e.node).getElementsByTagName('audio')[0];
-        if (elem.currentTime > 0) {
+        if (this.props.playRadio) {
             this.props.playRadio = false;
             console.log('暂停播放语音');
-            elem.pause();
-            elem.currentTime = 0;
 
         } else {
             this.props.playRadio = true;
@@ -120,18 +128,34 @@ export class MessageItem extends Widget {
             elem.play();
             
             setTimeout(() => {
-                this.props.playRadio = false;
-                console.log('结束播放语音');
-                elem.pause();
-                elem.currentTime = 0;
-                this.paint();
-            }, elem.duration * 1000);
+                if (elem.currentTime === elem.duration) {
+                    this.props.playRadio = false;
+                    console.log('结束播放语音');
+                    elem.pause();
+                    elem.currentTime = 0;
+                    this.paint();
+                }
+                
+            }, elem.duration * 1000 + 500); // 多加半秒，确保语音播完
         }
         this.paint();
+        notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playRadio:this.props.playRadio });
+
     }
 }
 
 // ================================================ 本地
+interface Props {
+    hIncId:string; // 消息ID
+    name:string; // 名称
+    msg:any; // 消息内容
+    me:boolean; // 是否是本人
+    time:string;// 消息发送时间
+    chatType:GENERATOR_TYPE;// 消息类型
+    isMessageRecallVisible:boolean;// 撤回按钮是否可见
+    avatar:string;  // 对方的头像
+    playRadio:boolean; // 是否正在播放语音
+}
 
 // 转换文字中的链接
 const httpHtml = (str:string) => {

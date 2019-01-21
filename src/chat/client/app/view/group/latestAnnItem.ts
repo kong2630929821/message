@@ -26,7 +26,7 @@ export class LatestAnnounceItem extends Widget {
     public setProps(props:any) {
         super.setProps(props); 
         this.props.announce = store.getStore(`announceHistoryMap/${this.props.aIncId}`,new Announcement());
-        if (this.props.announce) {
+        if (this.props.announce.msg) {
             const notice = depCopy(this.props.announce.msg);
             this.props.noticeTitle = JSON.parse(notice).title;
         }

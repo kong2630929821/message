@@ -40,13 +40,13 @@ export const arrayBuffer2File = (buffer:ArrayBuffer) => {
  * arrayBuffer图片压缩
  * @param buffer 图片arraybuffer
  */
-export const imgResize = (buffer:ArrayBuffer,callback:Function) => {
+export const imgResize = (buffer:ArrayBuffer,callback:Function,wid:number= 200) => {
     const file = arrayBuffer2File(buffer);
     const fr = new FileReader();
     fr.readAsDataURL(file); 
     fr.onload = () => { 
         const dataUrl = fr.result.toString();  
-        resize({ url: dataUrl, width: 200, ratio: 0.3, type: 'jpeg' }, (res) => {
+        resize({ url: dataUrl, width: wid, ratio: 0.3, type: 'jpeg' }, (res) => {
             console.log('resize---------', res);
             callback(res);
         });

@@ -55,7 +55,7 @@
         {{else}}
         <div w-class="username">{{it.name}}</div>
         <div style="display:flex;margin:10px 20px;">
-            <img src="../../res/images/user.png" w-class="avatar" on-tap="userDetail"/>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="userDetail">{imgURL:{{it.avatar}},width:"80px;"}</widget>
             {{if it.msg.mtype == 9}}
             <span w-class="leftDownTail" style="border-bottom:10px solid rgba(235,79,79,1)"></span>
             <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.msg.msg}},cardType:"redEnv"}</widget>
@@ -71,7 +71,7 @@
             {{elseif it.msg.mtype == 3}}
             <span w-class="leftDownTail"></span>
             <div w-class="radio-wrap" style="color:#222222;background:#fff;width:{{it.msg.width * 4 + 250}}px;" on-tap="playRadioMess">
-                <img w-class="playBtn" src="../../res/images/{{it.playRadio?'stop-radio.png':'play-radio.png'}}"/>
+                <img w-class="playBtn" src="../../res/images/{{it.playRadio?'stop-radio.png':'play-radio.png'}}" class="audioImage"/>
                 <widget w-tag="pi-ui-html" w-class="pi-html" style="flex:1 0 0;">{{it.msg.msg}}</widget>
                 <div w-class="corner">
                     <span w-class="sendTime" style="color:#297FCA">{{it.time}}</span>

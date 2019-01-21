@@ -3,12 +3,13 @@
  */
 // ===========================导入
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
+import { arrayBufferToBase64 } from '../../../../../pi/util/base64';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { endRadio, openCamera, selectImage, startRadio } from '../../logic/native';
-import { arrayBuffer2File, uploadFile } from '../../net/upload';
+import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ===========================导出
 export class InputMessage extends Widget {
@@ -25,8 +26,8 @@ export class InputMessage extends Widget {
         super.setProps(props);
         this.props.toolList = [
             { name:'拍摄',img:'tool-camera.png' },
-            { name:'相册',img:'tool-pictures.png' },
-            { name:'红包',img:'tool-redEnv.png' }
+            { name:'相册',img:'tool-pictures.png' }
+            // { name:'红包',img:'tool-redEnv.png' }
         ];
     }
 
@@ -119,15 +120,16 @@ interface Props {
  */
 export const sendImage = (e:any) => {
     const imagePicker = selectImage((w,h,url) => {
-        // notify(e.node,'ev-send-before',{ value:`[${url}]`, msgType:MSG_TYPE.IMG }); 
+        notify(e.node,'ev-send-before',{ value:`<img src="${url}" alt="img" class='imgMsg'></img>`, msgType:MSG_TYPE.IMG }); 
 
         imagePicker.getContent({
             success(buffer:ArrayBuffer) {
-                uploadFile(arrayBuffer2File(buffer),(imgUrlSuf:string) => {
-                    console.log('选择的照片',imgUrlSuf);
-                    notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
-                });
-                
+                imgResize(buffer,(res) => {
+                    uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
+                        console.log('选择的照片',imgUrlSuf);
+                        notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+                    });
+                },600);
             }
         });
     });
@@ -138,12 +140,15 @@ export const sendImage = (e:any) => {
  */
 export const sendPicture = (e:any) => {
     openCamera((buffer:ArrayBuffer) => { 
-        // notify(e.node,'ev-send-before',{ value:arrayBufferToBase64(buffer), msgType:MSG_TYPE.IMG }); 
+        notify(e.node,'ev-send-before',{ value:`<img src="data:image/jpeg;base64,${arrayBufferToBase64(buffer)}" alt="img" class='imgMsg'></img>`, msgType:MSG_TYPE.IMG }); 
 
-        uploadFile(arrayBuffer2File(buffer),(imgUrlSuf:string) => {
-            console.log('拍摄的照片',imgUrlSuf);
-            notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
-        });
+        imgResize(buffer,(res) => {
+            uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
+                console.log('拍摄的照片',imgUrlSuf);
+                notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+            });
+        },600);
+        
     });
 };
 

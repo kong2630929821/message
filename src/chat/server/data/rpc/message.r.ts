@@ -208,17 +208,8 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         // TODO 判断撤回时间
         if (v !== undefined) {
             v.announce.cancel = true;
-            // v.announce.mtype = MSG_TYPE.RENOTICE;
             noticeBucket.put(recallKey, v);
 
-            // const buf = new BonBuffer();
-            // v.bonEncode(buf);
-
-            // const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-            // const groupTopic = `ims/group/msg/${message.gid}`;
-            // logger.debug(`before publish ,the topic is : ${groupTopic}`);
-            // // directly send message to group topic
-            // mqttPublish(mqttServer, true, QoS.AtMostOnce, groupTopic, buf.getBuffer());
         } else {
             gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
             logger.debug('sendGroupMessage grouphistory gh:', gh);

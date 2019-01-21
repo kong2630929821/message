@@ -43,6 +43,7 @@ export class Chat extends Widget {
         this.props.sid = store.getStore('uid');
         this.props.inputMessage = '';
         this.props.newMsg = undefined;
+        this.props.onRadio = null;
 
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.hid = store.getStore(`groupInfoMap/${this.props.id}`,{ hid:'' }).hid;
@@ -137,7 +138,7 @@ export class Chat extends Widget {
             hIncId:null,
             name:this.props.name,
             me:true,
-            msg:parseMessage(depCopy(message)),
+            msg:message,
             time:timestampFormat(message.time,1),
             chatType:this.props.chatType
         };
@@ -302,6 +303,14 @@ export class Chat extends Widget {
         popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag:1 });
     }
 
+    /**
+     * 点击某个语音消息，关闭其他语言播放
+     */
+    public stopRadio(e:any) {
+        this.props.onRadio = e;
+        this.paint();
+    }
+
     public destroy() {
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.unregister(`groupChatMap/${this.props.hid}`,this.bindCB);
@@ -331,4 +340,5 @@ interface Props {
     lastAnnounce:string; // 最新一条公告，群聊
     newMsg:any; // 我发布的一条新消息
     isOnTools:boolean; // 是否打开更多功能
+    onRadio:any; // 当前点击的语音消息ID
 }
