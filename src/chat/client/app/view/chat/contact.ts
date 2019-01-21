@@ -5,6 +5,7 @@
 // ================================================ 导入
 import { uploadFileUrlPrefix } from '../../../../../app/config';
 import * as walletStore from '../../../../../app/store/memstore';
+import { hasWallet } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -34,10 +35,10 @@ export class Contact extends Widget {
             { iconPath: 'scan.png', utilText: '扫一扫' },
             { iconPath: 'add-friend.png', utilText: '我的信息' }
         ];
-        this.props.netClose = false;
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
+        this.props.hasWallet = hasWallet();
         this.props.isLogin = walletStore.getStore('user/isLogin',false); // 钱包是否登陆
         const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
         const uid = store.getStore('uid', 0);
@@ -132,6 +133,7 @@ interface Props {
     netClose: boolean; // 网络链接是否断开
     avatar:string; // 头像
     isLogin:boolean; // 钱包是否已经登陆
+    hasWallet:boolean; // 本地是否已经创建钱包
 }
 const STATE = {
     lastChat:[],
