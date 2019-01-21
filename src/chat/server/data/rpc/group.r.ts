@@ -247,17 +247,17 @@ export const inviteUsers = (invites: InviteArray): Result => {
     }
 
     // 普通邀请需要互为好友，游戏中邀请不需要互为好友
-    if (invites.inviteType === INVITE_TYPE.normal) {
+    // if (gInfo.inviteType === INVITE_TYPE.normal) {
         
         // 判断该用户是否和被邀请的用户是好友
-        const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
-        logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
-        logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);
-        invites.arr = invites.arr.filter((ele: Invite) => {
+    const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
+    logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
+    logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);
+    invites.arr = invites.arr.filter((ele: Invite) => {
         // 无法邀请不是好友的用户
-            return currentUserInfo.friends.findIndex(item => item === ele.rid) !== -1;
-        });
-    }
+        return currentUserInfo.friends.findIndex(item => item === ele.rid) !== -1;
+    });
+    // }
 
     logger.debug(`after filter invites is : ${JSON.stringify(invites.arr)}`);
     for (let i = 0; i < invites.arr.length; i++) {
@@ -273,13 +273,13 @@ export const inviteUsers = (invites: InviteArray): Result => {
         logger.debug('Invite user: ', rid, 'to group: ', gid);
         
         // 游戏中邀请自动同意入群
-        if (invites.inviteType === INVITE_TYPE.game) {
-            const agree = new GroupAgree();
-            agree.gid = gid;
-            agree.uid = uid;
-            agree.agree = true;
-            agreeJoinGroup(agree);
-        }
+        // if (invites.inviteType === INVITE_TYPE.game) {
+        //     const agree = new GroupAgree();
+        //     agree.gid = gid;
+        //     agree.uid = uid;
+        //     agree.agree = true;
+        //     agreeJoinGroup(agree);
+        // }
     }
 
     res.r = 1;

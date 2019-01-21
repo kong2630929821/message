@@ -104,7 +104,6 @@ export class SetGroupChat extends Widget {
             if (this.props.inviteMembers.length > 0) {
                 const invites = new InviteArray();
                 invites.arr = [];
-                invites.inviteType = INVITE_TYPE.normal;
                 this.props.inviteMembers.forEach((id) => {
                     const invite = new Invite();
                     invite.gid = r.gid;

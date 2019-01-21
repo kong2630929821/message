@@ -129,7 +129,6 @@ export class Test {
     public inviteGroup(gid: number, rid: number) {
         const invites = new InviteArray();
         invites.arr = [];
-        invites.inviteType = INVITE_TYPE.normal;
         const invite = new Invite();
         invite.gid = gid;
         invite.rid = rid;

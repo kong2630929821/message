@@ -56,7 +56,7 @@ export class GroupInfos extends Widget {
     public setProps(props:any) {
         super.setProps(props);
         this.props.utilList = [
-            { utilText : '发送名片' },
+            // { utilText : '发送名片' },
             { utilText : '清空聊天记录' },
             { utilText : '退出该群' }];
         this.props.isGroupOpVisible = false;
@@ -84,7 +84,7 @@ export class GroupInfos extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        this.getGroupUserLinkInfo(this.props.gid);
+        getGroupUserLinkInfo(this.props.gid);
         store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
     }
     
@@ -128,22 +128,6 @@ export class GroupInfos extends Widget {
         });
     }
 
-    // 获取群内成员信息
-    public getGroupUserLinkInfo(gid:number) {
-        if (Date.now() - store.getStore(`readGroupTimeMap/${gid}`, -1) > MAX_DURING) {
-            clientRpcFunc(getGroupUserLink,this.props.gid,(r:GroupUserLinkArray) => {
-                logger.debug('===============',r);
-                // 判断是否返回成功
-                if (r.arr.length > 0) {
-                    r.arr.forEach((item:GroupUserLink) => {
-                        store.setStore(`groupUserLinkMap/${item.guid}`,item);
-                    });
-                    store.setStore(`readGroupTimeMap/${gid}`, Date.now());
-                }
-            });
-        }
-        
-    }
     // 群信息更多 
     public handleMoreGroup() {
         this.props.isGroupOpVisible = !this.props.isGroupOpVisible;
@@ -153,14 +137,14 @@ export class GroupInfos extends Widget {
     public handleFatherTap(e:any) {
         this.props.isGroupOpVisible = false;
         switch (e.index) {
-            case 0: // 发送名片
-                break;
-            case 1:  // 清空聊天记录
+            // case 0: // 发送名片
+            //     break;
+            case 0:  // 清空聊天记录
                 popNew('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' },() => {
                     store.setStore(`groupChatMap/${genGroupHid(this.props.gid)}`,[]);
                 });
                 break;
-            case 2: // 退出群
+            case 1: // 退出群
                 popNew('chat-client-app-widget-modalBox-modalBox', { content:'退出后，将不再接收此群任何消息',style:'color:#F7931A' },() => {
                     clientRpcFunc(userExitGroup,this.props.gid,(r) => {
                         console.log('========deleteGroup',r);
@@ -367,3 +351,20 @@ interface Props {
 const MAX_DURING = 600;
 
 let gid;  // 群ID
+
+// 获取群内成员信息
+export const getGroupUserLinkInfo = (gid:number) => {
+    if (Date.now() - store.getStore(`readGroupTimeMap/${gid}`, -1) > MAX_DURING) {
+        clientRpcFunc(getGroupUserLink,gid,(r:GroupUserLinkArray) => {
+            logger.debug('===============',r);
+            // 判断是否返回成功
+            if (r.arr.length > 0) {
+                r.arr.forEach((item:GroupUserLink) => {
+                    store.setStore(`groupUserLinkMap/${item.guid}`,item);
+                });
+                store.setStore(`readGroupTimeMap/${gid}`, Date.now());
+            }
+        });
+    }
+    
+};

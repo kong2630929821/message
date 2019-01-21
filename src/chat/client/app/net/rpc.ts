@@ -212,7 +212,6 @@ export const inviteUsersToGroup = () => {
     invite3.rid = 10003;
 
     ia.arr = [invite1, invite2, invite3];
-    ia.inviteType = INVITE_TYPE.normal;
 
     clientRpcFunc(inviteUsers, ia, (r) => {
         console.log(r);
