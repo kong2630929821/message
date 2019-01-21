@@ -1,6 +1,6 @@
 {{: it1 = it1 || {lastChat:[],contactMap:""} }}
 <div w-class="new-page" class="new-page" on-tap="closeMore">
-    {{if it.isLogin}}
+    {{if it.hasWallet}}
         <div w-class="topBack" ev-next-click="getMore" ev-refresh-click="refreshPage">
             <div w-class="backImg"></div>
             {{if it1.contactMap && (it1.contactMap.applyUser.length + it1.contactMap.applyGroup.length) > 0}}
@@ -10,7 +10,7 @@
         </div>
         
         <div w-class="history-wrap">
-            {{if it.netClose}}
+            {{if !it.isLogin}}
             <div w-class="netClose">
                 <img src="../../res/images/question_blue.png" style="width:48px;margin-right: 20px;"/>
                 <span>网络连接不可用</span>
