@@ -36,6 +36,7 @@ struct GroupInfo {
     state:GROUP_STATE,//当前状态
     applyUser:&[u32],//主动申请加入群的用户id
     avatar:String,//群头像 
+    need_agree:bool,// 入群是否需要被同意
 }
 
 /**

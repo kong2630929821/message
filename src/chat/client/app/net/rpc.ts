@@ -2,12 +2,13 @@
  * 调用rpc接口
  */
 // ================================================ 导入
+import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, registerUser } from '../../../server/data/rpc/basic.p';
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createGroupp, delMember, dissolveGroup, inviteUsers } from '../../../server/data/rpc/group.p';
-import { GroupAgree, GroupCreate, Invite, INVITE_TYPE, InviteArray } from '../../../server/data/rpc/group.s';
+import { GroupAgree, GroupCreate, Invite, InviteArray } from '../../../server/data/rpc/group.s';
 import { sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, UserSend } from '../../../server/data/rpc/message.s';
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
@@ -135,14 +136,31 @@ export const delFriend = (rid: number, cb: (r: Result) => void) => {
 };
 // ================  debug purpose ==========================
 
-export const createGroup = () => {
-    const x = new GroupCreate();
-    x.note = 'wtf';
-    x.name = 'xxx';
-    x.avatar = ''; 
+// 创建群聊  need_agree：入群是否需要同意
+export const createGroup = (name:string, avatar:string, note:string,need_agree:boolean, cb: (r: GroupInfo) => void) => {
+    const group = new GroupCreate();
+    group.note = note;
+    group.name = name;
+    group.avatar = avatar; 
+    group.need_agree = need_agree;
     
-    clientRpcFunc(createGroupp, x, (r) => {
-        console.log(r);
+    clientRpcFunc(createGroupp, group, (r) => {
+        cb(r);
+    });
+};
+
+// 邀请用户入群
+export const inviteUsersToGroup = (gid:number, arr:number[], cb:(r:Result) => void) => {
+    const inviteArray = new InviteArray();
+    arr.forEach(item => {
+        const invite = new Invite();
+        invite.gid = gid;
+        invite.rid = item;
+        inviteArray.arr.push(invite);
+    });
+   
+    clientRpcFunc(inviteUsers, inviteArray, (r) => {
+        cb(r);
     });
 };
 
@@ -197,27 +215,6 @@ export const acceptUserJoin = (uid: number, accept: boolean) => {
     });
 };
 
-export const inviteUsersToGroup = () => {
-    const ia = new InviteArray();
-    const invite1 = new Invite();
-    invite1.gid = 11111;
-    invite1.rid = 10001;
-
-    const invite2 = new Invite();
-    invite2.gid = 11111;
-    invite2.rid = 10002;
-
-    const invite3 = new Invite();
-    invite3.gid = 11111;
-    invite3.rid = 10003;
-
-    ia.arr = [invite1, invite2, invite3];
-
-    clientRpcFunc(inviteUsers, ia, (r) => {
-        console.log(r);
-    });
-};
-
 export const getGroupInfo = () => {
     const groups = new GetGroupInfoReq();
     groups.gids = [11111];
@@ -260,10 +257,6 @@ export const friendLinks = (uuid: string) => {
     register(name, passwdHash, (r) => {
         console.log(r);
     });
-};
-
-(<any>self).createGroup = () => {
-    createGroup();
 };
 
 (<any>self).deleteGroupMember = () => {

@@ -10,7 +10,7 @@ import { GroupInfo } from '../../../../server/data/db/group.s';
 import { Contact } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import { createGroup, inviteUsers } from '../../../../server/data/rpc/group.p';
-import { GroupCreate, Invite, INVITE_TYPE, InviteArray } from '../../../../server/data/rpc/group.s';
+import { GroupCreate, Invite, InviteArray } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
@@ -92,6 +92,7 @@ export class SetGroupChat extends Widget {
         groupInfo.name = this.props.name;
         groupInfo.note = '';
         groupInfo.avatar = avatarUrl;
+        groupInfo.need_agree = true; // 入群需要同意
         clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
                 bottomNotice(`创建群组失败`);

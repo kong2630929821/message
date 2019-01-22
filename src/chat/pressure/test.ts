@@ -147,6 +147,7 @@ export class Test {
         groupInfo.name = name;
         groupInfo.note = '';
         groupInfo.avatar = '';
+        groupInfo.need_agree = true;
         net_init.clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
                 console.log('创建群组失败 r:', r);
