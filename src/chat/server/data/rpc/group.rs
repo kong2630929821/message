@@ -5,7 +5,8 @@ struct MemberIdArray{
 struct GroupCreate{
     name:String,
     note:String,
-    avatar:String
+    avatar:String,
+    need_agree:bool// 入群是否需要被同意
 }
 
 struct GroupAgree{

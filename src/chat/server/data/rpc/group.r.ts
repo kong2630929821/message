@@ -5,7 +5,7 @@
 import { GROUP_STATE, GroupInfo, GroupUserLink } from '../db/group.s';
 import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
-import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, INVITE_TYPE, InviteArray, NewGroup } from './group.s';
+import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray, NewGroup } from './group.s';
 
 import { BonBuffer } from '../../../../pi/util/bon';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
@@ -136,7 +136,8 @@ export const acceptUser = (agree: GroupAgree): Result => {
     gInfo.applyUser = delValueFromArray(agree.uid, gInfo.applyUser);
     groupInfoBucket.put(gInfo.gid, gInfo);
 
-    if (!(admins.indexOf(uid) > -1 || owner === uid)) {
+    // 进群需要同意，判断同意者是否是管理员
+    if (gInfo.need_agree && !(admins.indexOf(uid) > -1 || owner === uid)) {
         res.r = 3; // user is not admin or owner
         logger.debug('User: ', uid, 'is not amdin or owner');
 
@@ -182,7 +183,7 @@ export const acceptUser = (agree: GroupAgree): Result => {
 
     groupUserLinkBucket.put(gul.guid, gul);
     moveGroupCursor(agree.gid, agree.uid);
-    logger.debug('Add user: ', agree.uid, 'to groupUserLinkBucket');
+    logger.debug('Add user: ', agree.uid, 'to groupUserLinkBucket',gul);
    
     // 发布一条用户入群成功消息，发送者ID应该是入群者非当前用户
     const dbMgr = getEnv().getDbMgr();
@@ -238,6 +239,7 @@ export const inviteUsers = (invites: InviteArray): Result => {
     const gid = invites.arr[0].gid;
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    console.log('inviteUsers groupInfo: ',gInfo);
     // 判断该用户是否属于该群组
     if (gInfo.memberids.indexOf(uid) <= -1) {
         logger.debug('user: ', uid, 'is not a member of this group');
@@ -246,42 +248,45 @@ export const inviteUsers = (invites: InviteArray): Result => {
         return res;
     }
 
-    // 普通邀请需要互为好友，游戏中邀请不需要互为好友
-    // if (gInfo.inviteType === INVITE_TYPE.normal) {
+    // 入群需要同意需要判断是否是好友
+    if (gInfo.need_agree) {
         
         // 判断该用户是否和被邀请的用户是好友
-    const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
-    logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
-    logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);
-    invites.arr = invites.arr.filter((ele: Invite) => {
+        const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
+        logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
+        logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);
+        invites.arr = invites.arr.filter((ele: Invite) => {
         // 无法邀请不是好友的用户
-        return currentUserInfo.friends.findIndex(item => item === ele.rid) !== -1;
-    });
-    // }
+            return currentUserInfo.friends.findIndex(item => item === ele.rid) !== -1;
+        });
+    }
 
     logger.debug(`after filter invites is : ${JSON.stringify(invites.arr)}`);
     for (let i = 0; i < invites.arr.length; i++) {
         const rid = invites.arr[i].rid;
         const cInfo = contactBucket.get<number, [Contact]>(rid)[0];
-        // TODO: 判断对方是否已经在当前群中
+        // 判断对方是否已经在当前群中
         if (gInfo.memberids.indexOf(rid) > -1) {
             logger.debug('be invited user: ', rid, 'is exist in this group:', gid);
             continue;
         }
-        cInfo.applyGroup.indexOf(genGuid(gid, rid)) === -1 && cInfo.applyGroup.push(genGuid(gid, rid));
-        contactBucket.put(rid, cInfo);
-        logger.debug('Invite user: ', rid, 'to group: ', gid);
-        
-        // 游戏中邀请自动同意入群
-        // if (invites.inviteType === INVITE_TYPE.game) {
-        //     const agree = new GroupAgree();
-        //     agree.gid = gid;
-        //     agree.uid = uid;
-        //     agree.agree = true;
-        //     agreeJoinGroup(agree);
-        // }
+        if (gInfo.need_agree) {
+            cInfo.applyGroup.indexOf(genGuid(gid, uid)) === -1 && cInfo.applyGroup.push(genGuid(gid, uid));
+            contactBucket.put(rid, cInfo);
+            logger.debug('Invite user: ', rid, 'to group: ', gid);
+            
+        } else {// 入群不需要同意则直接自动入群
+            
+            gInfo.applyUser.findIndex(item => item === rid) === -1 && gInfo.applyUser.push(rid);
+            groupInfoBucket.put(gid,gInfo);
+            const agree = new GroupAgree();
+            agree.gid = gid;
+            agree.uid = rid;
+            agree.agree = true;
+            acceptUser(agree);
+        }
     }
-
+        
     res.r = 1;
 
     return res;
@@ -631,6 +636,7 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
         }
         userlink.avatar = userInfo.avatar; 
         gla.arr.push(userlink);
+        console.log('getGroupUserLink userlink: ',userlink,'userinfo: ',userInfo);
     }
 
     logger.debug('Get group user link: ', gla);
@@ -667,6 +673,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.hid = genGroupHid(gInfo.gid);
         gInfo.note = groupInfo.note;
         gInfo.avatar = groupInfo.avatar;
+        gInfo.need_agree = groupInfo.need_agree;
         gInfo.adminids = [uid];
         // genAnnounceIncId(gInfo.gid, START_INDEX)
         gInfo.annoceids = [];
