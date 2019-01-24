@@ -28,11 +28,16 @@
 .adress-wrap{
     display:flex;
     align-items:center;
+    margin-top: 40px;
 }
 .adressIcon{
     width:48px;
     height: 48px;
     margin-right:40px;
+}
+.adress-text-wrap{
+    display:flex;
+    flex-direction:column;
 }
 .mainText{   
     color: rgba(34, 34, 34, 1);
@@ -43,7 +48,6 @@
 .flag{
     color: rgba(136, 136, 136, 1);
     font-size: 24px;
-    margin-left: 90px;
 }
 .other-wrap{
     width:650px;
@@ -53,16 +57,6 @@
     width:48px;
     height: 48px;
     margin-right:40px;
-}
-.contactorOpList{
-    position:absolute;
-    left: 427px;
-    top: 128px;
-    width: 273px;
-    height: 324px;
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 1);
-    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.2);
 }
 .home-info-wrap{
     width:100%;
@@ -104,11 +98,4 @@
     margin-top: 50px;
     font-size: 32px;
     color: #222222;
-}
-.contactorOpList{
-    position:absolute;
-    left: 427px;
-    top: 128px;
-    width: 273px;
-    height: 324px;
 }

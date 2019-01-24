@@ -32,26 +32,12 @@
     align-items:center;
     margin-top: 40px;
 }
-.phone-wrap{
-    display:flex;
-    align-items:center;
-    margin-bottom: 40px;
-}
 .adressIcon{
     width:48px;
     height: 48px;
     margin-right:40px;
 }
-.phoneIcon{
-    width:48px;
-    height: 48px;
-    margin-right:40px;
-}
 .adress-text-wrap{
-    display:flex;
-    flex-direction:column;
-}
-.phone-text-wrap{
     display:flex;
     flex-direction:column;
 }

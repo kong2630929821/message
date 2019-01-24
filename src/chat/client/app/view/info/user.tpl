@@ -12,28 +12,20 @@
 
     <div w-class="detail-info-wrap">
         <div w-class="detail-info">
-            <div style="margin-bottom:40px;" on-tap="doCopy(1)">
-                <div w-class="adress-wrap">
-                    <img w-class="adressIcon" src="../../res/images/adress-book.png" />
-                    <span w-class="mainText">{{it.info.wallet_addr}}</span>
+            <div w-class="adress-wrap" on-tap="doCopy(1)">
+                <img w-class="adressIcon" src="../../res/images/adress-book.png" />
+                <div w-class="adress-text-wrap">
+                    <span w-class="mainText">{{it.info.uid}}</span>
+                    <span w-class="flag">ID</span>
                 </div>
-                <span w-class="flag">地址</span>
             </div>
-            
-            <div style="margin-bottom:40px;" on-tap="doCopy(2)">
-                <div ev-input-change="phoneChange" ev-input-blur="changeUserInfo" w-class="adress-wrap">
-                    <img w-class="adressIcon" src="../../res/images/phone.png" />
-                    {{if it.phoneEdit}}
-                        <widget w-class="mainText" w-tag="chat-client-app-widget-input-input" on-tap="editPhone" style="border-bottom:1px solid #DBDBE5;">{input:{{it.tel}},style:"padding:0px;",itype:"integer",maxLength:11 }</widget>
-                    {{else}}
-                        <span w-class="mainText">{{it.tel}}</span>
-                    {{end}}
-                    
+            <div w-class="adress-wrap" on-tap="doCopy(2)">
+                <img w-class="adressIcon" src="../../res/images/phone.png" />
+                <div w-class="adress-text-wrap">
+                    <span w-class="mainText">{{it.tel}}</span>
+                    <span w-class="flag">电话</span>
                 </div>
-                <span w-class="flag">电话</span>
-                
             </div>
-            
         </div>
 
         <div w-class="other-wrap">
