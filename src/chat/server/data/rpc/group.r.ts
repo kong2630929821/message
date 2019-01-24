@@ -717,7 +717,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
 
         groupUserLinkBucket.put(gulink.guid, gulink);
         const info = new GroupSend();
-        info.msg = `你已经成功创建群 "${gInfo.name}"`;
+        info.msg = `你已经成功创建群 \"${gInfo.name}\"`;
         info.mtype = MSG_TYPE.CREATEGROUP;
         info.gid = gInfo.gid;
         info.time = Date.now();

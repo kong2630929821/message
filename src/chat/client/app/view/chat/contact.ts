@@ -5,10 +5,11 @@
 // ================================================ 导入
 import { uploadFileUrlPrefix } from '../../../../../app/config';
 import * as walletStore from '../../../../../app/store/memstore';
-import { hasWallet } from '../../../../../app/utils/tools';
+import { WebViewManager } from '../../../../../pi/browser/webview';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
+import { loadDir } from '../../../../../pi/widget/util';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
@@ -23,6 +24,8 @@ const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 export class Contact extends Widget {
     public props: Props;
+    public web3Promise: Promise<string>;
+    public defaultInjectPromise: Promise<string>;
 
     public setProps(props: Json) {
         super.setProps(props);
@@ -81,6 +84,7 @@ export class Contact extends Widget {
 
     // 打开更多功能
     public getMore() {
+
         if (this.props.isLogin) {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
@@ -95,6 +99,7 @@ export class Contact extends Widget {
     }
 
     public handleFatherTap(e: any) {
+        
         switch (e.index) {
             case 0:// 点击通讯录
                 popNew('chat-client-app-view-contactList-contactList');
@@ -105,12 +110,37 @@ export class Contact extends Widget {
             case 2:// 创建群聊 setGroupChat
                 popNew('chat-client-app-view-group-setGroupChat');
                 break;
-            case 3:// 扫一扫   
-                doScanQrCode((res) => {  // 扫描二维码
-                    popNew('chat-client-app-view-chat-addUser',{ rid:res });
-                    console.log(res);
-                    this.paint();
-                });         
+            case 3:// 扫一扫 
+                this.web3Promise = new Promise((resolve) => {
+                    const path = 'chat/game_chat/gameChat.js.txt';
+                    loadDir([path], undefined, undefined, undefined, fileMap => {
+                        const arr = new Uint8Array(fileMap[path]);
+                // for (let i = 0; i < arr.length; ++i) {
+                //     content += String.fromCharCode(arr[i]);
+                // }
+                // content = decodeURIComponent(escape(atob(content)));
+                        const content = new TextDecoder().decode(arr);
+                        resolve(content);
+                    }, () => {}, () => {});
+                });
+
+                const defaultInjectText = `
+            window.piGameName = '测试';
+            `;
+                this.defaultInjectPromise = Promise.resolve(defaultInjectText);
+                const allPromise = Promise.all([this.defaultInjectPromise,this.web3Promise]);
+                const gameTitle = '测试';
+                const gameUrl =  'http://192.168.9.29/wallet/phoneRedEnvelope/openRedEnvelope.html';
+                allPromise.then(([defaultInjectContent,web3Content]) => {
+                    const content = defaultInjectContent + web3Content;
+                    WebViewManager.open(gameTitle, `${gameUrl}?${Math.random()}`, gameTitle, content);
+                });  
+
+                // doScanQrCode((res) => {  // 扫描二维码
+                //     popNew('chat-client-app-view-chat-addUser',{ rid:res });
+                //     console.log(res);
+                //     this.paint();
+                // });         
                 break;
             case 4:
                 popNew('chat-client-app-view-info-user');
