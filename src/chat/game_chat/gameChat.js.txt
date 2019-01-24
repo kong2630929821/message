@@ -1,0 +1,676 @@
+// PI_BEGIN
+console.log("注入 gameChat.js success");
+
+// 游戏中聊天页面
+
+window.pi_jsApi = {};
+
+
+function createStyleTag() {
+    var cssText = `/* chat */
+    .new-page{
+        display: flex;
+        flex-direction: column;
+        position:absolute;
+        top:0;
+        bottom:0;
+        left:0;
+        right:0;
+        background: #f9f9f9;
+    }
+    .messageBox{
+        overflow-x: hidden;
+        overflow-y: auto;
+        flex: 1 0 0;
+        -webkit-overflow-scrolling: touch;
+        display: flex;
+        flex-direction: column;
+    }
+    .text{
+        color: #888;
+        font-size: 32px;
+    }
+    .notice{
+        height:128px;
+        position:absolute;
+        top:129px;
+        left:0;
+        right: 0;
+    }
+    .loading{
+        float: right;
+        width: 30px;
+        margin-top: 10px;
+        margin-right: -35px;
+    }
+    
+    /* topbar */
+    .topbar{
+        width: 100%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: space-between; 
+        position: relative; 
+        color: rgb(34, 34, 34); 
+        box-sizing: border-box; 
+        height: 88px;
+    }
+    .topTitle{
+        flex: 1 0 0px; 
+        display: flex; 
+        align-items: center; 
+        line-height: 88px;
+        font-size: 32px;
+    }
+    .leftArrow{
+        width: 48px; 
+        height: 48px; 
+        margin: 0px 15px; 
+        border: 15px solid transparent; 
+        line-height: 88px;
+    }
+    
+    /* messageitem */
+    .text-wrap{
+        max-width:512px;
+        padding:16px;
+        font-size: 32px;
+        border-radius:16px;
+        color: rgba(255, 255, 255, 1);
+        background:#3FA2F7;
+        overflow: hidden;
+        word-break: break-all;
+    }
+    .corner{
+        float: right;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        margin-left: 20px;
+    }
+    .sendTime{   
+        color: #BBE5FE;
+        font-size: 24px;
+    }
+    .isRead{
+        height:32px;
+        width: 32px;
+        margin-left:10px;
+    }
+    .rightDownTail{
+        float: right;
+        transform: translateX(18px);  
+        width:20px;
+        height:20px;
+        margin-top: -20px;
+        border-radius:0 20px 0 0;
+        border-top: 10px solid rgb(63, 162, 247);
+    }
+    .leftDownTail{
+        width:20px;
+        height:20px;
+        margin-top: 20px;
+        border-radius: 0px 0px 0 20px;
+        border-bottom: 10px solid rgb(255, 255, 255);
+    }
+    .avatar{
+        width: 80px;
+        height: 80px;
+        margin-right: 10px;
+    }
+    .username{
+        height:33px;
+        font-size:24px;
+        color:rgba(136,136,136,1);
+        line-height:33px;
+        margin-left: 110px;
+        margin-top: 10px;
+    }
+    .recallMsg{
+        font-size: 22px;
+        text-align: center;
+        color: #888;
+        margin: 20px;
+    }
+    .recallBtn{
+        width: 170px;
+        height: 80px;
+        background: rgb(255, 255, 255);
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 20px 0px;
+        border-radius: 6px;
+        font-size: 32px;
+        line-height: 80px;
+        padding-left: 20px;
+    }
+    .img-wrap{
+        position: relative;
+    }
+    .imgCorner{
+        position: absolute;
+        bottom: 10px;
+        right: 5px;
+        display: flex;
+        align-items: center;
+        background: rgba(34, 34, 34, 0.5);
+        padding: 0 10px;
+        border-radius: 18px;
+        font-size: 24px;
+    }
+    .playBtn{
+        width: 35px;
+        height: 35px;
+        margin-right: 10px;
+    }
+    
+    /* inputmessage */
+    .inputOuter{
+        background-color: rgba(255, 255, 255, 1);
+    }
+    .input-message-wrap{
+        display: flex;
+        align-items:center;
+        border-top: 1px solid #cccccc;
+        border-bottom: 1px solid #cccccc;
+    }
+    .audio{
+        height: 60px;
+        margin: 5px 20px;
+        border: 20px solid transparent;
+    }
+    .inputMessage{
+        flex: 1 0 0;
+        outline:none;
+        border:none;
+        font-size:32px;
+    }
+    .emoji{
+        width: 48px;
+        height: 48px;
+        border: 20px solid transparent;
+    }
+    .unfold{
+        width: 44px;
+        height: 44px;
+        margin-right: 10px; 
+        border: 20px solid transparent;
+    }
+    .emojiMap{
+        height:420px;
+        overflow-x:hidden;
+        overflow-y:auto;
+        min-height: 420px;
+    }
+    .toolsMap{
+        height: 420px;
+        min-height: 420px;
+    }
+    .toolItem{
+        display: flex;
+        flex-direction: column;
+        font-size: 24px;
+        color: #888888;
+        align-items: center;
+        width: 120px;
+        margin-left: 50px;
+        margin-top: 40px;
+    }
+    .toolImg{
+        width:120px;
+        height:120px;
+        background:rgba(255,255,255,1);
+        border-radius:12px;
+        border:1px solid rgba(204,204,204,1);
+    }
+    .radioWrap{
+        position: absolute;
+        bottom: 200px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 180px;
+        height: 180px;
+        background: rgba(85,85,85,.5);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 40px;
+    }
+    .radioWrite{
+        width: 30px;
+        height: 15px;
+        background: #fff;
+        margin-top: 20px;
+        margin-left: 75px;
+    }
+    /* textarea */
+    .pi-input-box{
+        position: relative;
+        height: auto;
+        color: #222;
+        font-size: 32px;
+        max-height: 240px;
+        flex: 1 0 0;
+        margin-left: 20px;
+    }
+    .pi-input__inner{
+        appearance:none;
+        -moz-appearance:none; /* Firefox */
+        -webkit-appearance:none; /* Safari 和 Chrome */
+        background-color: #fff;
+        background-image: none;
+        border-radius: 4px;
+        border: none;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: inherit;
+        outline: 0;
+        -webkit-transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+        transition: border-color .2s cubic-bezier(.645,.045,.355,1);
+        width: 100%;
+        color: #222;
+        font-size: 32px;
+        position: absolute;
+        top: 20px;
+        bottom: 0;
+        word-break: break-all;
+        font-family: monospace;
+        line-height: 40px;
+    }
+    .hideMsg{
+        display:block;
+        visibility:hidden;
+        white-space: pre-wrap;
+        word-break: break-all;
+        padding: 20px 0;
+        font-family: monospace;
+        line-height: 40px;
+    }
+    /* 语音消息录制时动画 */
+    @keyframes radio1{
+        50% {opacity: 0}
+        90%{opacity: 0}
+        100% {opacity: 1;}
+    }
+    @keyframes radio2{
+        50% {opacity: 0}
+        60%{opacity: 1}
+        100% {opacity: 1;}
+    }
+    .emojiMsg{
+        width: 48px;
+        height: 48px;
+    }
+    .imgMsg{
+        max-width: 500px;
+        max-height: 500px;
+        min-width: 100px;
+        min-height: 100px;
+        border-radius: 12px;
+    }
+    .linkMsg{
+        color: #0c6bc7;
+    }`;
+    var style = document.createElement("style");
+    style.type = "text/css";
+    style.innerHTML = cssText;
+    document.getElementsByTagName("head")[0].appendChild(style);
+}
+
+function createElementTag(){
+    var htmlText = `<div class="new-page">
+    <div class="topbar">
+        <div class="topTitle">
+            <img src="${urlHead}/left_arrow_blue.png" class="leftArrow"/>
+            <span id="groupName">groupName(num)</span>
+        </div>
+    </div>
+    <div class="messageBox" id="messageBox"></div>
+    <div class="inputOuter" >
+        <div class="input-message-wrap">
+            <div class="pi-input-box chat-input">
+                <div class="hideMsg" id="hideMsg">1</div>
+                <textarea 
+                    id="chatTextarea"
+                    unchange = "true"
+                    class="pi-input__inner" 
+                    type="text" 
+                    autocomplete="off" 
+                    placeholder="输入消息"></textarea>
+            </div>
+            <img class="emoji" onclick="playEmoji()" src="${urlHead}/res/images/emoji.png"/>
+            <img class="unfold" onclick="sendMess()" src="${urlHead}/res/images/unfold.png"/>
+        </div>
+        <div class="emojiMap" id="emojiMap" style="display:none"></div>
+        <div class="radioWrap" style="display:none">
+            <div class="radioWrite" style="animation: radio1 1s infinite;"></div>
+            <div class="radioWrite" style="animation: radio2 1s infinite;"></div>
+            <div class="radioWrite"></div>
+        </div>
+    </div>
+</div>`;
+    var $root = document.createElement("div");
+    $root.setAttribute("class","pi-root");
+    $root.innerHTML = htmlText;
+
+    var $body = document.querySelector("body");
+    $body.appendChild($root);
+}
+
+function closePop(){
+  var $root = document.querySelector(".pi-root");
+  var $body = document.querySelector("body");
+  $body.removeChild($root);
+}
+
+const gid = 10001;
+const filePath = "chat/client/app/view/gameChatApi";
+var messList = [];
+var uid;
+const urlHead=`http://192.168.9.29/wallet/chat/client/app`;
+
+
+// 加载页面 立即执行
+window.onload = function(){
+    createStyleTag();
+    createElementTag();
+    pi_RPC_Method(filePath, "getBaseInfo", gid, function (error, result) {
+        uid = result.uid;
+        messList.push(result.lastRead);
+        document.getElementById('groupName').innerText = result.groupName;
+        getMessageList();
+    });
+
+};
+
+function getMessageList(){
+    setTimeout(() => {
+        pi_RPC_Method(filePath, "getMessList", gid, function (error, result) {
+            if(!error && result && result.length > 0 && messList[messList.length-1] != result[result.length-1]){
+                var ind = result.findIndex(item=>item==messList[messList.length-1]) + 1;
+                for(var i=ind; i<result.length; i++){
+                    const id = result[i];
+                    getMessDetail(id);
+                }
+            }
+        });
+        getMessageList();
+    }, 1000);
+}
+
+// 发送消息
+function sendMess(){
+    const mess = document.querySelector('.pi-input__inner').value;
+    const param = {
+        gid,
+        message:mess
+    }
+    document.querySelector('#chatTextarea').value = "";
+    document.querySelector('#hideMsg').innerText = "1";
+
+    pi_RPC_Method(filePath, "sendMessage", param, function (error, result) {
+        console.log('sendMessage',result);
+    });
+}
+
+// 获取消息内容
+function getMessDetail(id){
+    console.log("getdetail id:",id,"messList: ",messList);
+    const ind = messList.findIndex(item=>item==id);
+    if(ind > -1){
+        return;
+    }
+    requestAnimationFrame(function(){
+        pi_RPC_Method(filePath, "getDetail", id, function (error, result) {
+            console.log("getdetail id: ",id,",result: ",result);
+            const ind = messList.findIndex(item=>item==id);
+            if(ind > -1){
+                return;
+            }
+            if(!error && result){
+                addMessage(result, result.sid == uid);
+                messList.push(id);
+            }
+        });
+        
+    });
+}
+
+// 定位最新消息
+function lastestMsg(){
+    document.querySelector('#messageBox').scrollTop = document.querySelector('#messageBox').scrollHeight;
+}
+
+// 显示消息内容
+function addMessage(mess,me){
+    var item = document.createElement('div');
+    var innerhtml = '';
+    if(mess.cancel){
+        return;
+    }
+    if(mess.mtype<5 || mess.mtype==9){
+        if(me){
+            innerhtml +=  `<div style="overflow:hidden;">
+            <div style="position:relative;margin: 10px 40px 0;float: right;">`;
+        }else{
+            innerhtml += `<div style="overflow:hidden;">
+            <div class="username">${mess.name}</div>
+            <div style="display:flex;margin:10px 20px;">
+                <img src="../../res/images/user.png" class="avatar"/>`;
+        }
+    }
+    switch(mess.mtype){
+        case 1: // 文本消息
+            if(me){
+                innerhtml += `<div class="text-wrap">
+                <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
+                <div class="corner">
+                    <span class="sendTime">${mess.time}</span>
+                </div>
+            </div>
+            <span class="rightDownTail"></span>`;
+            }else{
+                innerhtml += `<span class="leftDownTail"></span>
+            <div class="text-wrap" style="color:#222222;background:#fff;" >
+                <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
+                <div class="corner">
+                    <span class="sendTime" style="color:#297FCA">${mess.time}</span>
+                </div>
+            </div>`;
+            }
+            
+            break;
+        case 2: // 图片
+            if(me){
+                innerhtml += `<div class="img-wrap" onclick="openBigImage()" >
+                    <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
+                    <div class="imgCorner">
+                        <span style="color:rgba(187, 229, 254, 1)">${mess.time}</span>
+                    </div>
+                </div>`
+            }else{
+                innerhtml += `<div class="img-wrap" onclick="openBigImage()">
+                <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
+                <div class="imgCorner">
+                    <span style="color:rgba(187, 229, 254, 1)">${mess.time}</span>
+                </div>
+            </div>`
+            }
+            
+            break;
+        case 3: // 语音
+            if(me){
+                innerhtml +=`<div class="text-wrap" onclick="playRadioMess()" style="width:500px;" >
+                    <img class="playBtn" src="../../res/images/play-radio.png"/>
+                    <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
+                    <div class="corner">
+                        <span class="sendTime">${mess.time}</span>
+                    </div>
+                </div>
+                <span class="rightDownTail"></span>`
+                break;
+            }else{
+                innerhtml += `<span class="leftDownTail"></span>
+            <div class="text-wrap" style="color:#222222;background:#fff;width:500px;" onclick="playRadioMess()">
+                <img class="playBtn" src="../../res/images/play-radio.png"/>
+                <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
+                <div class="corner">
+                    <span class="sendTime" style="color:#297FCA">${mess.time}</span>
+                </div>
+            </div>`
+            }
+            
+        case 5: // 撤回消息
+            innerhtml +=`<div class="recallMsg">${mess.me ? "你" : mess.name}撤回了一条消息</div>`
+            break;
+        case 9: // 红包
+            innerhtml += `<div class="recallMsg" style="font-size:32px;">有红包来了，可到平台中去领取</div>`
+            break;
+        case 10: // 创建群聊
+            innerhtml +=`<div class="recallMsg" style="font-size:32px;">${mess.msg}</div>`
+            break;
+        case 11: // 加群成功
+            innerhtml +=`<div class="recallMsg" style="font-size:32px;">${mess.me ? "你" : mess.name}已成功加入群组</div>`
+            break;
+        default: 
+    }
+    innerhtml += `</div></div>`
+    item.innerHTML = innerhtml;
+    document.getElementById('messageBox').appendChild(item);
+    lastestMsg();
+}
+
+window.pi_RPC_Method = (function() {
+    var rpcID = 0;
+    var rpcIDMap = {};
+
+    /**
+     * 往指定名字的WebView调用指定模块的导出方法
+     * data: 指定对方WebView执行的模块和导出方法
+     * callback：返回结果的回调函数
+     * 注：RPC都是一来一回的结构，没有注册一次可以调用多次的结构！
+     */
+    var rpcCall = function(moduleName, methodName, param, callback) {
+        var RPC_CALL_START = "$WEBVIEW_RPC_CALL: ";
+        var RPC_CALLBACK_PARAM = "$WEBVIEW_RPC_FUNCTION_PARAM: ";
+
+        var funcs = [callback];
+
+        var id = ++rpcID;
+        rpcIDMap[id] = funcs;
+
+        var sign = {
+            moduleName: moduleName, // 模块名
+            methodName: methodName, // 模块的导出方法名
+            params: [param, RPC_CALLBACK_PARAM + 0], // 参数组成的数组，这里参数的回调函数全部转成Callback ID
+            rpcID: id // 可选：调用rpc前注册到Map的RPC ID
+        };
+
+        var data = RPC_CALL_START + JSON.stringify(sign);
+
+        nativeCall("WebViewManager", "postWebViewMessage", 0, [
+            "default",
+            data
+        ]);
+    };
+
+    var webViewManager = undefined;
+    var webViewManagerCallWaits = [];
+
+    var nativeCall = function(className, methodName, listenerID, args) {
+        args = args || [];
+
+        if (!webViewManager && methodName !== "init") {
+            webViewManagerCallWaits.push([
+                className,
+                methodName,
+                listenerID,
+                args
+            ]);
+            return;
+        }
+
+        if (navigator.userAgent.indexOf("YINENG_ANDROID") >= 0) {
+            window.JSBridge.postMessage(
+                className,
+                methodName,
+                webViewManager || 0,
+                listenerID,
+                JSON.stringify(args)
+            );
+        } else if (navigator.userAgent.indexOf("YINENG_IOS") >= 0) {
+            window.webkit.messageHandlers.Native.postMessage([
+                className,
+                methodName,
+                webViewManager || 0,
+                listenerID,
+                ...args
+            ]);
+        }
+    };
+
+    window.handle_Native_ThrowError = function(className, methodName, message) {
+        alert(
+            "handle_Native_ThrowError, className = " +
+                className +
+                ", methodName = " +
+                methodName +
+                ", message = " +
+                message
+        );
+    };
+
+    window.handle_Native_Message = function(cbID, code, ...args) {
+        if (cbID === 0) return;
+
+        var cb = callIDMap[cbID];
+        if (cb) {
+            cb.apply(undefined, args);
+            delete callIDMap[cbID];
+        }
+    };
+
+    window["onWebViewPostMessage"] = function(fromWebView, message) {
+        var RPC_REPLY_START = "$WEBVIEW_RPC_REPLY: ";
+
+        // 收到对方的rpc回应，处理
+        if (message.startsWith(RPC_REPLY_START)) {
+            message = message.slice(RPC_REPLY_START.length);
+            var data = JSON.parse(message);
+            return handleRpcReply(data);
+        }
+    };
+
+    var handleRpcReply = function(sign) {
+        var funcs = rpcIDMap[sign.rpcID];
+        var f = funcs && funcs[sign.callbackID];
+        if (f) {
+            f.apply(undefined, sign.args);
+        }
+
+        delete rpcIDMap[rpcID];
+    };
+
+    var callIDMax = 0;
+    var callIDMap = {};
+
+    var callID = ++callIDMax;
+    callIDMap[callID] = function(id) {
+        webViewManager = id;
+
+        for (var i = 0; i < webViewManagerCallWaits.length; ++i) {
+            (function(w) {
+                setTimeout(() => {
+                    nativeCall(w[0], w[1], w[2], w[3]);
+                }, 0);
+            })(webViewManagerCallWaits[i]);
+        }
+
+        webViewManagerCallWaits.length = 0;
+    };
+
+    nativeCall("WebViewManager", "init", callID);
+    return rpcCall;
+})();
+
+// PI_END
