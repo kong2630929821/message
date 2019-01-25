@@ -12,11 +12,11 @@ function createStyleTag() {
         display: flex;
         flex-direction: column;
         position:absolute;
-        top:0;
+        height:680px;
         bottom:0;
         left:0;
         right:0;
-        background: #f9f9f9;
+        background: rgba(34, 34, 34, 0.95);
     }
     .messageBox{
         overflow-x: hidden;
@@ -51,51 +51,38 @@ function createStyleTag() {
         align-items: center; 
         justify-content: space-between; 
         position: relative; 
-        color: rgb(34, 34, 34); 
+        color: #fff; 
         box-sizing: border-box; 
-        height: 88px;
+        height: 80px;
+        background:rgba(59,61,67,1);
     }
     .topTitle{
         flex: 1 0 0px; 
         display: flex; 
         align-items: center; 
-        line-height: 88px;
-        font-size: 32px;
+        line-height: 80px;
+        font-size: 28px;
     }
-    .leftArrow{
-        width: 48px; 
-        height: 48px; 
-        margin: 0px 15px; 
-        border: 15px solid transparent; 
-        line-height: 88px;
+    .closePop{
+        width: 48px;
+        height: 48px;
+        margin: 0px 15px;
+        border: 15px solid transparent;
+        line-height: 80px;
+        position: absolute;
+        right: 0;
     }
     
     /* messageitem */
     .text-wrap{
         max-width:512px;
         padding:16px;
-        font-size: 32px;
+        font-size:24px;
         border-radius:16px;
-        color: rgba(255, 255, 255, 1);
-        background:#3FA2F7;
+        color: #fff;
+        background:#3B3D43;
         overflow: hidden;
         word-break: break-all;
-    }
-    .corner{
-        float: right;
-        margin-top: 20px;
-        display: flex;
-        align-items: center;
-        margin-left: 20px;
-    }
-    .sendTime{   
-        color: #BBE5FE;
-        font-size: 24px;
-    }
-    .isRead{
-        height:32px;
-        width: 32px;
-        margin-left:10px;
     }
     .rightDownTail{
         float: right;
@@ -104,14 +91,14 @@ function createStyleTag() {
         height:20px;
         margin-top: -20px;
         border-radius:0 20px 0 0;
-        border-top: 10px solid rgb(63, 162, 247);
+        border-top: 10px solid #3B3D43;
     }
     .leftDownTail{
         width:20px;
         height:20px;
         margin-top: 20px;
         border-radius: 0px 0px 0 20px;
-        border-bottom: 10px solid rgb(255, 255, 255);
+        border-bottom: 10px solid #3B3D43;
     }
     .avatar{
         width: 80px;
@@ -121,7 +108,7 @@ function createStyleTag() {
     .username{
         height:33px;
         font-size:24px;
-        color:rgba(136,136,136,1);
+        color:#888888;
         line-height:33px;
         margin-left: 110px;
         margin-top: 10px;
@@ -164,13 +151,11 @@ function createStyleTag() {
     
     /* inputmessage */
     .inputOuter{
-        background-color: rgba(255, 255, 255, 1);
+        background-color: #3B3D43;
     }
     .input-message-wrap{
         display: flex;
         align-items:center;
-        border-top: 1px solid #cccccc;
-        border-bottom: 1px solid #cccccc;
     }
     .audio{
         height: 60px;
@@ -256,9 +241,7 @@ function createStyleTag() {
         appearance:none;
         -moz-appearance:none; /* Firefox */
         -webkit-appearance:none; /* Safari 和 Chrome */
-        background-color: #fff;
-        background-image: none;
-        border-radius: 4px;
+        background-color: #3B3D43;
         border: none;
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
@@ -268,7 +251,7 @@ function createStyleTag() {
         -webkit-transition: border-color .2s cubic-bezier(.645,.045,.355,1);
         transition: border-color .2s cubic-bezier(.645,.045,.355,1);
         width: 100%;
-        color: #222;
+        color: #CCCCCC;
         font-size: 32px;
         position: absolute;
         top: 20px;
@@ -310,7 +293,29 @@ function createStyleTag() {
     }
     .linkMsg{
         color: #0c6bc7;
+    }
+    .bubble{
+        width:100px;
+        height:100px;
+        background:rgba(34,34,34,0.7);
+        border-radius: 50%;
+        text-align: center;
+        position: absolute;
+        top: 40%;
+        right: 0;
+    }
+    .redSpot{
+        width:10px;
+        height:10px;
+        background:rgba(206,57,57,1);
+        position: absolute;
+        border-radius: 50%;
+        top: 20px;
+        left: 70px;
+        border: 1px solid #fff;
+        display: none;
     }`;
+    
     var style = document.createElement("style");
     style.type = "text/css";
     style.innerHTML = cssText;
@@ -318,37 +323,45 @@ function createStyleTag() {
 }
 
 function createElementTag(){
-    var htmlText = `<div class="new-page">
-    <div class="topbar">
-        <div class="topTitle">
-            <img src="${urlHead}/left_arrow_blue.png" class="leftArrow"/>
-            <span id="groupName">groupName(num)</span>
-        </div>
+    var htmlText = `<section id="gamechat_section1">
+    <div class="bubble" id="gamechat_bubble" onclick="openChatPage()" >
+        <span class="redSpot" id="gamechat_redSpot"></span>
+        <img src="${chatBaseUrl}/res/images/chat-empty.png" style="width:40px;margin-top: 30px;"/>
     </div>
-    <div class="messageBox" id="messageBox"></div>
-    <div class="inputOuter" >
-        <div class="input-message-wrap">
-            <div class="pi-input-box chat-input">
-                <div class="hideMsg" id="hideMsg">1</div>
-                <textarea 
-                    id="chatTextarea"
-                    unchange = "true"
-                    class="pi-input__inner" 
-                    type="text" 
-                    autocomplete="off" 
-                    placeholder="输入消息"></textarea>
+    </section>
+    <!-- 展开页面 -->
+    <section id="gamechat_section2" style="display:none">
+    <div class="new-page">
+        <div class="topbar">
+            <div class="topTitle"> 
+                <span id="gameChat_groupName" style="margin-left:20px;">groupName(num)</span>
+                <img src="${chatBaseUrl}/res/images/close_blue.png" class="closePop" onclick="closePop()"/>
             </div>
-            <img class="emoji" onclick="playEmoji()" src="${urlHead}/res/images/emoji.png"/>
-            <img class="unfold" onclick="sendMess()" src="${urlHead}/res/images/unfold.png"/>
         </div>
-        <div class="emojiMap" id="emojiMap" style="display:none"></div>
-        <div class="radioWrap" style="display:none">
-            <div class="radioWrite" style="animation: radio1 1s infinite;"></div>
-            <div class="radioWrite" style="animation: radio2 1s infinite;"></div>
-            <div class="radioWrite"></div>
+        <div class="messageBox" id="gameChat_messageBox"></div>
+        <div class="inputOuter" >
+            <div class="input-message-wrap">
+                <div class="pi-input-box chat-input">
+                    <div class="hideMsg" id="gameChat_hideMsg">1</div>
+                    <textarea 
+                        id="gameChat_textarea"
+                        unchange = "true"
+                        class="pi-input__inner" 
+                        type="text" 
+                        autocomplete="off" 
+                        placeholder="输入消息"></textarea>
+                </div>
+                <img class="unfold" onclick="sendMess()" src="${chatBaseUrl}/res/images/send.png"/>
+            </div>
+            <div class="emojiMap" id="gameChat_emojiMap" style="display:none"></div>
+            <div class="radioWrap" style="display:none">
+                <div class="radioWrite" style="animation: radio1 1s infinite;"></div>
+                <div class="radioWrite" style="animation: radio2 1s infinite;"></div>
+                <div class="radioWrite"></div>
+            </div>
         </div>
     </div>
-</div>`;
+</section>`;
     var $root = document.createElement("div");
     $root.setAttribute("class","pi-root");
     $root.innerHTML = htmlText;
@@ -357,18 +370,56 @@ function createElementTag(){
     $body.appendChild($root);
 }
 
-function closePop(){
-  var $root = document.querySelector(".pi-root");
-  var $body = document.querySelector("body");
-  $body.removeChild($root);
+// 定义变量
+const gid = 10003;
+const filePath = "chat/client/app/view/gameChatApi";
+const chatBaseUrl=`http://192.168.9.29/wallet/chat/client/app`;
+var messList = [];
+var readLast = '';
+var uid;
+var uploadFileUrlPrefix; // 上传的文件链接
+
+// 打开聊天界面
+function openChatPage(){
+    document.querySelector('#gamechat_section1').style.display = 'none';
+    document.querySelector('#gamechat_section2').style.display = 'block';
+    document.querySelector('#gamechat_redSpot').style.display = 'none';
+    readLast = messList[messList.lengh-1];
 }
 
-const gid = 10001;
-const filePath = "chat/client/app/view/gameChatApi";
-var messList = [];
-var uid;
-const urlHead=`http://192.168.9.29/wallet/chat/client/app`;
+// 关闭聊天界面
+function closePop(){
+    document.querySelector('#gamechat_section1').style.display = 'block';
+    document.querySelector('#gamechat_section2').style.display = 'none';
+    document.querySelector('#gamechat_redSpot').style.display = 'none';
+    readLast = messList[messList.lengh-1];
+}
 
+// 点击气泡
+function touchBubble(){
+    event.preventDefault();
+    console.log('touchBubble',event.touches[0].pageY);
+}
+// 拖动气泡
+function moveBubble(){
+    const top = event.changedTouches[0].pageY;
+    const left = event.changedTouches[0].pageX;
+    document.querySelector('#gamechat_bubble').style.top=top+'px';
+    document.querySelector('#gamechat_bubble').style.left=left+'px';
+    console.log('moveBubble',top);
+}
+// 停止拖动，放置气泡
+function placeBubble(){
+    const top=event.changedTouches[0].pageY;
+    const left=event.changedTouches[0].pageX;
+    document.querySelector('#gamechat_bubble').style.top=top+'px';
+    if(left < document.body.clientWidth/2){
+        document.querySelector('#gamechat_bubble').style.left=0;
+    }else{
+        document.querySelector('#gamechat_bubble').style.left='none';
+    }
+    console.log('placeBubble',top);
+}
 
 // 加载页面 立即执行
 window.onload = function(){
@@ -377,7 +428,8 @@ window.onload = function(){
     pi_RPC_Method(filePath, "getBaseInfo", gid, function (error, result) {
         uid = result.uid;
         messList.push(result.lastRead);
-        document.getElementById('groupName').innerText = result.groupName;
+        document.getElementById('gameChat_groupName').innerText = result.groupName;
+        uploadFileUrlPrefix = result.uploadFileUrlPrefix;
         getMessageList();
     });
 
@@ -386,6 +438,9 @@ window.onload = function(){
 function getMessageList(){
     setTimeout(() => {
         pi_RPC_Method(filePath, "getMessList", gid, function (error, result) {
+            if(readLast != result[result.length-1]){
+                document.querySelector('#gamechat_redSpot').style.display = 'block';
+            }
             if(!error && result && result.length > 0 && messList[messList.length-1] != result[result.length-1]){
                 var ind = result.findIndex(item=>item==messList[messList.length-1]) + 1;
                 for(var i=ind; i<result.length; i++){
@@ -401,13 +456,23 @@ function getMessageList(){
 // 发送消息
 function sendMess(){
     const mess = document.querySelector('.pi-input__inner').value;
+    if(!mess){
+        return;
+    }
     const param = {
         gid,
         message:mess
     }
-    document.querySelector('#chatTextarea').value = "";
-    document.querySelector('#hideMsg').innerText = "1";
+    document.querySelector('#gameChat_textarea').value = "";
+    document.querySelector('#gameChat_hideMsg').innerText = "1";
 
+    pi_RPC_Method(filePath, "sendMessage", param, function (error, result) {
+        console.log('sendMessage',result);
+    });
+}
+
+// 查看大图
+function openBigImage(){
     pi_RPC_Method(filePath, "sendMessage", param, function (error, result) {
         console.log('sendMessage',result);
     });
@@ -436,9 +501,33 @@ function getMessDetail(id){
     });
 }
 
+// 深拷贝
+const depCopy = (v) => {
+    return JSON.parse(JSON.stringify(v));
+};
+
+// 转换图片;
+const parseImg = (msg) => {    
+    msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, url) => {
+        return `<img src="${uploadFileUrlPrefix}${url}" alt="img" class='imgMsg'></img>`;
+    });
+
+    return msg;
+};
+
+// 转换音频文件
+const parseRadio = (msg) => {
+    const value = JSON.parse(msg.msg);
+    msg.msg = `${value.time}"<audio src="${uploadFileUrlPrefix}${value.message}">语音信息</audio>`;
+    msg.width = value.time;
+
+    return msg;
+};
+
+
 // 定位最新消息
 function lastestMsg(){
-    document.querySelector('#messageBox').scrollTop = document.querySelector('#messageBox').scrollHeight;
+    document.querySelector('#gameChat_messageBox').scrollTop = document.querySelector('#gameChat_messageBox').scrollHeight;
 }
 
 // 显示消息内容
@@ -456,7 +545,7 @@ function addMessage(mess,me){
             innerhtml += `<div style="overflow:hidden;">
             <div class="username">${mess.name}</div>
             <div style="display:flex;margin:10px 20px;">
-                <img src="../../res/images/user.png" class="avatar"/>`;
+                <img src="${chatBaseUrl}/res/images/user.png" class="avatar"/>`;
         }
     }
     switch(mess.mtype){
@@ -464,59 +553,39 @@ function addMessage(mess,me){
             if(me){
                 innerhtml += `<div class="text-wrap">
                 <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
-                <div class="corner">
-                    <span class="sendTime">${mess.time}</span>
-                </div>
             </div>
             <span class="rightDownTail"></span>`;
             }else{
                 innerhtml += `<span class="leftDownTail"></span>
-            <div class="text-wrap" style="color:#222222;background:#fff;" >
+            <div class="text-wrap">
                 <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
-                <div class="corner">
-                    <span class="sendTime" style="color:#297FCA">${mess.time}</span>
-                </div>
             </div>`;
             }
             
             break;
         case 2: // 图片
+            const resMess = parseImg(depCopy(mess));
             if(me){
-                innerhtml += `<div class="img-wrap" onclick="openBigImage()" >
-                    <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
-                    <div class="imgCorner">
-                        <span style="color:rgba(187, 229, 254, 1)">${mess.time}</span>
-                    </div>
-                </div>`
+                innerhtml += `<div class="img-wrap" onclick="openBigImage()" >${resMess.msg}</div>`
             }else{
-                innerhtml += `<div class="img-wrap" onclick="openBigImage()">
-                <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
-                <div class="imgCorner">
-                    <span style="color:rgba(187, 229, 254, 1)">${mess.time}</span>
-                </div>
-            </div>`
+                innerhtml += `<div class="img-wrap" onclick="openBigImage()">${resMess.msg}</div>`
             }
             
             break;
         case 3: // 语音
+            const resMess = parseRadio(depCopy(mess));
             if(me){
                 innerhtml +=`<div class="text-wrap" onclick="playRadioMess()" style="width:500px;" >
-                    <img class="playBtn" src="../../res/images/play-radio.png"/>
-                    <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
-                    <div class="corner">
-                        <span class="sendTime">${mess.time}</span>
-                    </div>
+                    <img class="playBtn" src="${chatBaseUrl}/res/images/play-radio.png"/>
+                    <div style="display: inline;white-space: pre-wrap;">${resMess.msg}</div>
                 </div>
                 <span class="rightDownTail"></span>`
                 break;
             }else{
                 innerhtml += `<span class="leftDownTail"></span>
-            <div class="text-wrap" style="color:#222222;background:#fff;width:500px;" onclick="playRadioMess()">
-                <img class="playBtn" src="../../res/images/play-radio.png"/>
-                <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
-                <div class="corner">
-                    <span class="sendTime" style="color:#297FCA">${mess.time}</span>
-                </div>
+            <div class="text-wrap" style="width:500px;" onclick="playRadioMess()">
+                <img class="playBtn" src="${chatBaseUrl}/images/play-radio.png"/>
+                <div style="display: inline;white-space: pre-wrap;">${resMess.msg}</div>
             </div>`
             }
             
@@ -536,7 +605,7 @@ function addMessage(mess,me){
     }
     innerhtml += `</div></div>`
     item.innerHTML = innerhtml;
-    document.getElementById('messageBox').appendChild(item);
+    document.getElementById('gameChat_messageBox').appendChild(item);
     lastestMsg();
 }
 

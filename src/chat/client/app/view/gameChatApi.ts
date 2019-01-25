@@ -1,4 +1,5 @@
 
+import { uploadFileUrlPrefix } from '../../../../app/config';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupHistory, MSG_TYPE } from '../../../server/data/db/message.s';
@@ -85,7 +86,8 @@ export const getBaseInfo = (gid,cb) => {
     cb(null,{
         uid:store.getStore('uid'),
         lastRead:store.getStore(`lastRead/${hid}`,{ msgId:null }).msgId,
-        groupName:`${ginfo.name}(${ginfo.memberids.length})`
+        groupName:`${ginfo.name}(${ginfo.memberids.length})`,
+        uploadFileUrlPrefix:uploadFileUrlPrefix
     });
 };
 
