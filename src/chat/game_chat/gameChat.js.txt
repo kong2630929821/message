@@ -499,6 +499,7 @@ function getMessageList(){
 }
 
 // 发送消息
+var newMsg = false;
 function sendMess(){
     const mess = document.querySelector('.pi-input__inner').value;
     if(!mess){
@@ -515,7 +516,8 @@ function sendMess(){
         console.log('sendMessage',result);
         if(!error && result){
             addMessage(result.msg, result.msg.sid == uid);
-            messList.push(result.hIncId);
+            // messList.push(result.hIncId);
+            newMsg = true;
         }
     });
 }
@@ -548,6 +550,10 @@ function getMessDetail(id){
                 return;
             }
             if(!error && result){
+                if(newMsg){
+                    document.getElementById('gameChat_messageBox').lastChild.remove();// TODO
+                    newMsg = false;
+                }
                 addMessage(result, result.sid == uid);
                 messList.push(id);
             }
