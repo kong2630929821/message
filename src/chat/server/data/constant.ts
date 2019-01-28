@@ -36,6 +36,7 @@ export const FRONT_STORE_DATA = 'chat/server/data/db/user.FrontStoreData';
 export const ADDRESS_INFO_TABLE = 'chat/server/data/db/extra.AddressInfo';
 export const DEFAULT_ERROR_STR = '-1';
 export const DEFAULT_ERROR_NUMBER = -1;
+export const CUSTOMER_SERVICE = 10001;  // 客服账号
 
 // 推送cmd
 export const SEND_REFUSED = 'refused_add'; // 拒绝好友

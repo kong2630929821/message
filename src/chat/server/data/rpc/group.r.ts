@@ -240,18 +240,19 @@ export const inviteUsers = (invites: InviteArray): Result => {
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
     console.log('inviteUsers groupInfo: ',gInfo);
-    // 判断该用户是否属于该群组
-    if (gInfo.memberids.indexOf(uid) <= -1) {
-        logger.debug('user: ', uid, 'is not a member of this group');
-        res.r = 2; // User is not a member of this group
-
-        return res;
-    }
-
+    
     // 入群需要同意需要判断是否是好友
     if (gInfo.need_agree) {
+
+        // 判断当前登录用户是否属于该群组
+        if (gInfo.memberids.indexOf(uid) <= -1) {
+            logger.debug('user: ', uid, 'is not a member of this group');
+            res.r = 2; // User is not a member of this group
+
+            return res;
+        }
         
-        // 判断该用户是否和被邀请的用户是好友
+        // 判断当前登录用户是否和被邀请的用户是好友
         const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
         logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
         logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);

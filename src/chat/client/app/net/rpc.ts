@@ -152,6 +152,7 @@ export const createGroup = (name:string, avatar:string, note:string,need_agree:b
 // 邀请用户入群
 export const inviteUsersToGroup = (gid:number, arr:number[], cb:(r:Result) => void) => {
     const inviteArray = new InviteArray();
+    inviteArray.arr = [];
     arr.forEach(item => {
         const invite = new Invite();
         invite.gid = gid;
@@ -287,8 +288,4 @@ export const friendLinks = (uuid: string) => {
 
 (<any>self).acceptUserJoin = (uid: number, accept: boolean) => {
     acceptUserJoin(uid, accept);
-};
-
-(<any>self).inviteUsersToGroup = (gid: number) => {
-    inviteUsersToGroup();
 };
