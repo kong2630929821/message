@@ -17,16 +17,16 @@
 
     <div w-class="detail-info-wrap">
         <div w-class="detail-info">
-            <div w-class="adress-wrap" on-tap="doCopy(1)">
+            <div w-class="adress-wrap" style="margin:60px 0 20px;" on-tap="doCopy(1)">
                 <img w-class="adressIcon" src="../../res/images/adress-book.png" />
                 <div w-class="adress-text-wrap">
                     <span w-class="mainText">{{it.userInfo.wallet_addr}}</span>
                     <span w-class="flag">地址</span>
                 </div>
             </div>
-            <div w-class="phone-wrap" on-tap="doCopy(2)">
-                <img w-class="phoneIcon" src="../../res/images/phone.png" />
-                <div w-class="phone-text-wrap">
+            <div w-class="adress-wrap" on-tap="doCopy(2)">
+                <img w-class="adressIcon" src="../../res/images/phone.png" />
+                <div w-class="adress-text-wrap">
                     <span w-class="mainText">{{it.userInfo.tel ? it.userInfo.tel : "未知"}}</span>
                     <span w-class="flag">电话</span>
                 </div>

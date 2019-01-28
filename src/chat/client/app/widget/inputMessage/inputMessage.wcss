@@ -10,7 +10,7 @@
 }
 .audio{
     height: 60px;
-    margin: 5px 20px;
+    margin: 5px 0 5px 20px;
     border: 20px solid transparent;
 }
 .inputMessage{

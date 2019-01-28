@@ -41,8 +41,8 @@
                 <div w-class="adress-wrap" style="margin:0;">
                     <img w-class="adressIcon" src="../../res/images/group-code.png" />
                     <div w-class="adress-text-wrap">
-                        <span w-class="mainText">群名片</span>
-                        <span w-class="flag">群ID</span>
+                        <span w-class="mainText">{{it.groupInfo.gid}}</span>
+                        <span w-class="flag">群号</span>
                     </div>
                 </div>
             </div>
