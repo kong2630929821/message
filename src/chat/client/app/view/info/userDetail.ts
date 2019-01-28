@@ -17,6 +17,7 @@ import * as store from '../../data/store';
 import { bottomNotice, copyToClipboard, getFriendAlias, getUserAvatar, rippleShow } from '../../logic/logic';
 import { clientRpcFunc, unSubscribe } from '../../net/init';
 import { applyFriend, delFriend as delUserFriend } from '../../net/rpc';
+import { CUSTOMER_SERVICE } from '../../../../server/data/constant';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -49,14 +50,19 @@ export class UserDetail extends Widget {
         this.props.userInfo = {};
         if (props.inFlag === 3) {
             this.props.utilList = [{ utilText: '加入黑名单' }];
-        } else {
+        } else if(props.uid === CUSTOMER_SERVICE){
             this.props.utilList = [
             { utilText: '修改备注' },
-            // { utilText: '发送名片' },
-            { utilText: '清空聊天记录' },
-            // { utilText: '加入黑名单' },
-            { utilText: '删除好友' }
+            { utilText: '清空聊天记录' }
             ];
+        }else{
+            this.props.utilList = [
+                { utilText: '修改备注' },
+                // { utilText: '发送名片' },
+                { utilText: '清空聊天记录' },
+                // { utilText: '加入黑名单' },
+                { utilText: '删除好友' }
+                ];
         }
 
         this.props.isContactorOpVisible = false;
