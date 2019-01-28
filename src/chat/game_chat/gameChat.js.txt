@@ -408,7 +408,6 @@ var readLast = '';
 var uid;
 var uploadFileUrlHead; // 上传的文件链接
 var EMOJIS_MAP = new Map();
-var playRadioFlag = false; // 是否正在播放语音
 
 
 // 打开聊天界面
@@ -609,33 +608,41 @@ const parseRadio = (msg) => {
 
 // 点击播放语音
 const playRadioMess= ()=> {
+    // 当前点击的语音
+    const elem = event.currentTarget.getElementsByTagName('audio')[0];
+    const img = event.currentTarget.getElementsByTagName('img')[0];
     // 关掉所有语音
     const audios = document.getElementsByTagName('audio');
     for (const i of audios) {
-        i.pause();
-        i.currentTime = 0;
+        if(i.src!==elem.src){// 清空其他的语音播放
+            i.pause();
+            i.currentTime = 0;
+            i.parentElement.parentElement.getElementsByTagName('img')[0].src = `${chatBaseUrl}/res/images/play-radio.png`;
+            i.setAttribute('playing',false); 
+        }
     }
-    // 处理当前点击的语音
-    const elem = event.currentTarget.getElementsByTagName('audio')[0];
-    const img = event.currentTarget.getElementsByTagName('img')[0];
-    if (playRadioFlag) {
-        playRadioFlag = false;
+    
+    const isPlay = elem.getAttribute('playing'); // 当前语音的播放状态
+    if ( isPlay && isPlay != 'false') {
         img.src = `${chatBaseUrl}/res/images/play-radio.png`;
         console.log('暂停播放语音');
+        elem.setAttribute('playing',false);  // 暂停播放
+        for(const i of audios){
+        }
 
     } else {
-        playRadioFlag = true;
         console.log('开始播放语音');
         img.src = `${chatBaseUrl}/res/images/stop-radio.png`;
         elem.play();
+        elem.setAttribute('playing',true);  // 表示正在播放
         
         setTimeout(() => {
             if (elem.currentTime === elem.duration) {
-                playRadioFlag = false;
                 console.log('结束播放语音');
                 img.src = `${chatBaseUrl}/res/images/play-radio.png`;
                 elem.pause();
                 elem.currentTime = 0;
+                elem.setAttribute('playing',false);  // 停止播放
             }
             
         }, elem.duration * 1000 + 500); // 多加半秒，确保语音播完

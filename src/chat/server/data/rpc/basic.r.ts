@@ -14,6 +14,7 @@ import { GroupHistory, GroupHistoryCursor, UserHistory, UserHistoryCursor } from
 import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
+import { applyFriend } from './user.r';
 
 // ================================================================= 导出
 /**
@@ -163,7 +164,10 @@ export const login = (user: UserType): UserInfo => {
 
     console.log('Add user: ', loginReq.uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
 
-    userInfo.sex = 0;
+    const SUID = CONSTANT.CUSTOMER_SERVICE; // 客服账号
+    if(loginReq.uid !== SUID){
+        applyFriend(SUID.toString());
+    }
 
     return userInfo;
 };
