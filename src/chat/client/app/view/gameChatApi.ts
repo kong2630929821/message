@@ -5,39 +5,15 @@ import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupHistory, MSG_TYPE } from '../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../server/data/rpc/message.s';
-import { genGroupHid, genGuid, getGidFromHincid } from '../../../utils/util';
+import { genGroupHid, genGuid, getGidFromHincid, depCopy } from '../../../utils/util';
 import * as store from '../data/store';
 import { bottomNotice, timestampFormat } from '../logic/logic';
-import { endRadio, startRadio } from '../logic/native';
 import { clientRpcFunc } from '../net/init';
-import { arrayBuffer2File, uploadFile } from '../net/upload';
+import { EMOJIS } from '../widget/emoji/emoji';
 
 /**
  * 第三方应用中聊天接口
  */
-
-// 麦克风输入处理
-export const radioStart = () => {
-    console.log('点击开始录音');
-    startRadio();
-};
-
-// 语音录入完成
-export const radioEnd = (gid) => {
-    console.log('释放结束录音');
-    
-    endRadio((buffer) => {
-        uploadFile(arrayBuffer2File(buffer),(radioUrl) => {
-            console.log('录制的音频',radioUrl);
-            const param = {
-                gid,
-                msg:radioUrl,
-                mtype:MSG_TYPE.VOICE
-            };
-            sendMessage(param);
-        });
-    });
-};
 
 // 点击发送
 export const sendMessage = (param,cb?) => {
@@ -71,12 +47,16 @@ export const getDetail = (hIncId,cb) => {
     const msg = store.getStore(`groupHistoryMap/${hIncId}`);
     const gid = getGidFromHincid(hIncId);
     const name = store.getStore(`groupUserLinkMap/${genGuid(gid, msg.sid)}`).userAlias;
-    cb(null,{ 
+    var res = depCopy(msg.msg);
+    if(msg.mtype==MSG_TYPE.VOICE || msg.mtype==MSG_TYPE.REDENVELOPE){
+        res = JSON.parse(res);
+    }
+    cb(null, { 
         ...msg,
+        msg:res,
         name:name,
         time:timestampFormat(msg.time,1) 
     });
-
 };
 
 // 获取基础信息
@@ -87,11 +67,7 @@ export const getBaseInfo = (gid,cb) => {
         uid:store.getStore('uid'),
         lastRead:store.getStore(`lastRead/${hid}`,{ msgId:null }).msgId,
         groupName:`${ginfo.name}(${ginfo.memberids.length})`,
-        uploadFileUrlPrefix:uploadFileUrlPrefix
+        uploadFileUrlHead:uploadFileUrlPrefix,
+        EMOJIS:EMOJIS
     });
-};
-
-// 查看大图
-export const bigImage = (url,cb) => {
-    // TODO
 };

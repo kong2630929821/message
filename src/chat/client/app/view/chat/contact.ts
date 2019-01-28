@@ -16,6 +16,7 @@ import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
+import { getDetail } from '../gameChatApi';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;

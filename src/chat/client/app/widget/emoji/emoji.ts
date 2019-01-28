@@ -34,7 +34,7 @@ export class Emoji extends Widget {
 export let EMOJIS_MAP = new Map();
 
 // ================================================ 本地
-const EMOJIS = [
+export const EMOJIS = [
     ['微笑','0.gif','0.png'],
     ['撇嘴','1.gif','1.png'],
     ['色','2.gif','2.png'],

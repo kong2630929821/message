@@ -122,7 +122,7 @@ function createStyleTag() {
     .recallBtn{
         width: 170px;
         height: 80px;
-        background: rgb(255, 255, 255);
+        background: #fff;
         box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 20px 0px;
         border-radius: 6px;
         font-size: 32px;
@@ -131,6 +131,17 @@ function createStyleTag() {
     }
     .img-wrap{
         position: relative;
+    }
+    .radio-wrap{
+        padding:16px;
+        font-size: 32px;
+        border-radius:16px;
+        color: #fff;
+        background:#3B3D43;
+        display: flex;
+        align-items: center;
+        min-width: 250px;
+        max-width: 512px;
     }
     .imgCorner{
         position: absolute;
@@ -169,8 +180,8 @@ function createStyleTag() {
         font-size:32px;
     }
     .emoji{
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         border: 20px solid transparent;
     }
     .unfold{
@@ -180,10 +191,11 @@ function createStyleTag() {
         border: 20px solid transparent;
     }
     .emojiMap{
-        height:420px;
+        height:260px;
         overflow-x:hidden;
         overflow-y:auto;
-        min-height: 420px;
+        min-height: 300px;
+        border-top: 1px solid rgb(204, 204, 204);
     }
     .toolsMap{
         height: 420px;
@@ -281,12 +293,12 @@ function createStyleTag() {
         100% {opacity: 1;}
     }
     .emojiMsg{
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
     }
     .imgMsg{
-        max-width: 500px;
-        max-height: 500px;
+        max-width: 300px;
+        max-height: 300px;
         min-width: 100px;
         min-height: 100px;
         border-radius: 12px;
@@ -314,6 +326,19 @@ function createStyleTag() {
         left: 70px;
         border: 1px solid #fff;
         display: none;
+    }
+    .modal-mask{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(50, 50, 50, 1);
+        position:absolute;
+        width:100%;
+        height:100%;
+        top:0;
+        left:0;
+        overflow-x: hidden;
+        overflow-y: auto;
     }`;
     
     var style = document.createElement("style");
@@ -351,9 +376,10 @@ function createElementTag(){
                         autocomplete="off" 
                         placeholder="输入消息"></textarea>
                 </div>
+                <img class="emoji" onclick="playEmoji()" src="${chatBaseUrl}/res/images/emoji.png"/>
                 <img class="unfold" onclick="sendMess()" src="${chatBaseUrl}/res/images/send.png"/>
             </div>
-            <div class="emojiMap" id="gameChat_emojiMap" style="display:none"></div>
+            <div class="emojiMap" id="gameChat_emojiMap" style="display:none;"></div>
             <div class="radioWrap" style="display:none">
                 <div class="radioWrite" style="animation: radio1 1s infinite;"></div>
                 <div class="radioWrite" style="animation: radio2 1s infinite;"></div>
@@ -368,23 +394,29 @@ function createElementTag(){
 
     var $body = document.querySelector("body");
     $body.appendChild($root);
+    $root.addEventListener('click',function(){
+        document.querySelector('#gameChat_emojiMap').style.display = 'none';
+    })
 }
 
 // 定义变量
-const gid = 10003;
+const gid = 10001;
 const filePath = "chat/client/app/view/gameChatApi";
 const chatBaseUrl=`http://192.168.9.29/wallet/chat/client/app`;
 var messList = [];
 var readLast = '';
 var uid;
-var uploadFileUrlPrefix; // 上传的文件链接
+var uploadFileUrlHead; // 上传的文件链接
+var EMOJIS_MAP = new Map();
+var playRadioFlag = false; // 是否正在播放语音
+
 
 // 打开聊天界面
 function openChatPage(){
     document.querySelector('#gamechat_section1').style.display = 'none';
     document.querySelector('#gamechat_section2').style.display = 'block';
     document.querySelector('#gamechat_redSpot').style.display = 'none';
-    readLast = messList[messList.lengh-1];
+    readLast = messList[messList.length-1];
 }
 
 // 关闭聊天界面
@@ -392,34 +424,34 @@ function closePop(){
     document.querySelector('#gamechat_section1').style.display = 'block';
     document.querySelector('#gamechat_section2').style.display = 'none';
     document.querySelector('#gamechat_redSpot').style.display = 'none';
-    readLast = messList[messList.lengh-1];
+    readLast = messList[messList.length-1];
 }
 
-// 点击气泡
-function touchBubble(){
-    event.preventDefault();
-    console.log('touchBubble',event.touches[0].pageY);
-}
-// 拖动气泡
-function moveBubble(){
-    const top = event.changedTouches[0].pageY;
-    const left = event.changedTouches[0].pageX;
-    document.querySelector('#gamechat_bubble').style.top=top+'px';
-    document.querySelector('#gamechat_bubble').style.left=left+'px';
-    console.log('moveBubble',top);
-}
-// 停止拖动，放置气泡
-function placeBubble(){
-    const top=event.changedTouches[0].pageY;
-    const left=event.changedTouches[0].pageX;
-    document.querySelector('#gamechat_bubble').style.top=top+'px';
-    if(left < document.body.clientWidth/2){
-        document.querySelector('#gamechat_bubble').style.left=0;
-    }else{
-        document.querySelector('#gamechat_bubble').style.left='none';
-    }
-    console.log('placeBubble',top);
-}
+// // 点击气泡
+// function touchBubble(){
+//     event.preventDefault();
+//     console.log('touchBubble',event.touches[0].pageY);
+// }
+// // 拖动气泡
+// function moveBubble(){
+//     const top = event.changedTouches[0].pageY;
+//     const left = event.changedTouches[0].pageX;
+//     document.querySelector('#gamechat_bubble').style.top=top+'px';
+//     document.querySelector('#gamechat_bubble').style.left=left+'px';
+//     console.log('moveBubble',top);
+// }
+// // 停止拖动，放置气泡
+// function placeBubble(){
+//     const top=event.changedTouches[0].pageY;
+//     const left=event.changedTouches[0].pageX;
+//     document.querySelector('#gamechat_bubble').style.top=top+'px';
+//     if(left < document.body.clientWidth/2){
+//         document.querySelector('#gamechat_bubble').style.left=0;
+//     }else{
+//         document.querySelector('#gamechat_bubble').style.left='none';
+//     }
+//     console.log('placeBubble',top);
+// }
 
 // 加载页面 立即执行
 window.onload = function(){
@@ -428,13 +460,26 @@ window.onload = function(){
     pi_RPC_Method(filePath, "getBaseInfo", gid, function (error, result) {
         uid = result.uid;
         messList.push(result.lastRead);
+        readLast = result.lastRead;
         document.getElementById('gameChat_groupName').innerText = result.groupName;
-        uploadFileUrlPrefix = result.uploadFileUrlPrefix;
+        uploadFileUrlHead = result.uploadFileUrlHead;
+        for(var v of result.EMOJIS){ // 表情包图库
+            EMOJIS_MAP.set(v[0],v[2]);
+        }
         getMessageList();
+        addEmoji();
     });
 
 };
 
+// 打开表情包
+function playEmoji(){
+    event.stopPropagation();
+    const emojimap = document.querySelector('#gameChat_emojiMap');
+    emojimap.style.display = emojimap.style.display=='none'?'block':'none';
+}
+
+// 获取消息记录
 function getMessageList(){
     setTimeout(() => {
         pi_RPC_Method(filePath, "getMessList", gid, function (error, result) {
@@ -468,14 +513,24 @@ function sendMess(){
 
     pi_RPC_Method(filePath, "sendMessage", param, function (error, result) {
         console.log('sendMessage',result);
+        if(!error && result){
+            addMessage(result.msg, result.msg.sid == uid);
+            messList.push(result.hIncId);
+        }
     });
 }
 
 // 查看大图
 function openBigImage(){
-    pi_RPC_Method(filePath, "sendMessage", param, function (error, result) {
-        console.log('sendMessage',result);
-    });
+    const url = event.target.src; // 触发事件的子元素
+    const $image = document.createElement('div');
+    $image.classList.add('modal-mask');
+    $image.innerHTML = `<img src="${url}" style="max-width: 90%;"/>`;
+    var $body = document.querySelector("body");
+    $body.appendChild($image);
+    $image.addEventListener('click',function(){
+        $body.removeChild($image);
+    })
 }
 
 // 获取消息内容
@@ -506,10 +561,32 @@ const depCopy = (v) => {
     return JSON.parse(JSON.stringify(v));
 };
 
+// 转换文字中的链接
+const httpHtml = (str) => {
+    const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-|:|#)+)/g;
+    
+    return str.replace(reg, '<a href="javascript:;" class="linkMsg">$1$2</a>');
+};
+
+// 转换表情包
+const parseEmoji = (msg) => {    
+    msg.msg = httpHtml(msg.msg);
+    msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
+        const url = EMOJIS_MAP.get(capture) || undefined;
+        if (url) {
+            return `<img src="${chatBaseUrl}/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
+        } else {
+            return match;
+        }
+    });
+
+    return msg;
+};
+
 // 转换图片;
 const parseImg = (msg) => {    
     msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, url) => {
-        return `<img src="${uploadFileUrlPrefix}${url}" alt="img" class='imgMsg'></img>`;
+        return `<img src="${uploadFileUrlHead}${url}" alt="img" class='imgMsg'></img>`;
     });
 
     return msg;
@@ -517,13 +594,47 @@ const parseImg = (msg) => {
 
 // 转换音频文件
 const parseRadio = (msg) => {
-    const value = JSON.parse(msg.msg);
-    msg.msg = `${value.time}"<audio src="${uploadFileUrlPrefix}${value.message}">语音信息</audio>`;
+    const value = msg.msg;
+    msg.msg = `${value.time}"<audio src="${uploadFileUrlHead}${value.message}">语音信息</audio>`;
     msg.width = value.time;
 
     return msg;
 };
 
+// 点击播放语音
+const playRadioMess= ()=> {
+    // 关掉所有语音
+    const audios = document.getElementsByTagName('audio');
+    for (const i of audios) {
+        i.pause();
+        i.currentTime = 0;
+    }
+    // 处理当前点击的语音
+    const elem = event.currentTarget.getElementsByTagName('audio')[0];
+    const img = event.currentTarget.getElementsByTagName('img')[0];
+    if (playRadioFlag) {
+        playRadioFlag = false;
+        img.src = `${chatBaseUrl}/res/images/play-radio.png`;
+        console.log('暂停播放语音');
+
+    } else {
+        playRadioFlag = true;
+        console.log('开始播放语音');
+        img.src = `${chatBaseUrl}/res/images/stop-radio.png`;
+        elem.play();
+        
+        setTimeout(() => {
+            if (elem.currentTime === elem.duration) {
+                playRadioFlag = false;
+                console.log('结束播放语音');
+                img.src = `${chatBaseUrl}/res/images/play-radio.png`;
+                elem.pause();
+                elem.currentTime = 0;
+            }
+            
+        }, elem.duration * 1000 + 500); // 多加半秒，确保语音播完
+    }
+}
 
 // 定位最新消息
 function lastestMsg(){
@@ -550,21 +661,22 @@ function addMessage(mess,me){
     }
     switch(mess.mtype){
         case 1: // 文本消息
+            var resMess = parseEmoji(depCopy(mess));
             if(me){
                 innerhtml += `<div class="text-wrap">
-                <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
+                <div style="display: inline;white-space: pre-wrap;">${resMess.msg}</div>
             </div>
             <span class="rightDownTail"></span>`;
             }else{
                 innerhtml += `<span class="leftDownTail"></span>
             <div class="text-wrap">
-                <div style="display: inline;white-space: pre-wrap;">${mess.msg}</div>
+                <div style="display: inline;white-space: pre-wrap;">${resMess.msg}</div>
             </div>`;
             }
             
             break;
         case 2: // 图片
-            const resMess = parseImg(depCopy(mess));
+            var resMess = parseImg(depCopy(mess));
             if(me){
                 innerhtml += `<div class="img-wrap" onclick="openBigImage()" >${resMess.msg}</div>`
             }else{
@@ -573,9 +685,9 @@ function addMessage(mess,me){
             
             break;
         case 3: // 语音
-            const resMess = parseRadio(depCopy(mess));
+            var resMess = parseRadio(depCopy(mess));
             if(me){
-                innerhtml +=`<div class="text-wrap" onclick="playRadioMess()" style="width:500px;" >
+                innerhtml +=`<div class="radio-wrap" onclick="playRadioMess()" style="width:${resMess.width}px">
                     <img class="playBtn" src="${chatBaseUrl}/res/images/play-radio.png"/>
                     <div style="display: inline;white-space: pre-wrap;">${resMess.msg}</div>
                 </div>
@@ -583,12 +695,12 @@ function addMessage(mess,me){
                 break;
             }else{
                 innerhtml += `<span class="leftDownTail"></span>
-            <div class="text-wrap" style="width:500px;" onclick="playRadioMess()">
-                <img class="playBtn" src="${chatBaseUrl}/images/play-radio.png"/>
+            <div class="radio-wrap" onclick="playRadioMess()" style="width:${resMess.width}px">
+                <img class="playBtn" src="${chatBaseUrl}/res/images/play-radio.png"/>
                 <div style="display: inline;white-space: pre-wrap;">${resMess.msg}</div>
             </div>`
             }
-            
+            break;
         case 5: // 撤回消息
             innerhtml +=`<div class="recallMsg">${mess.me ? "你" : mess.name}撤回了一条消息</div>`
             break;
@@ -607,6 +719,22 @@ function addMessage(mess,me){
     item.innerHTML = innerhtml;
     document.getElementById('gameChat_messageBox').appendChild(item);
     lastestMsg();
+}
+
+// 添加表情
+function addEmoji(){
+    const emoji = document.querySelector('#gameChat_emojiMap');
+    var innerHTML = '';
+    for(var v of EMOJIS_MAP){
+        innerHTML += `<img style="width:44px;height:44px;border: 10px solid transparent;" src="${chatBaseUrl}/res/emoji/${v[1]}" alt="${v[0]}"  onclick="pickEmoji('[${v[0]}]')"/>`;
+    }
+    emoji.innerHTML = innerHTML;
+}
+
+// 选择表情
+function pickEmoji(emoji){
+    event.stopPropagation();
+    document.querySelector("#gameChat_textarea").value += emoji;
 }
 
 window.pi_RPC_Method = (function() {
