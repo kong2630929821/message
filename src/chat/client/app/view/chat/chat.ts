@@ -53,7 +53,7 @@ export class Chat extends Widget {
             this.initUser();
         }
        
-        this.latestMsg();
+        // this.latestMsg();
     }
 
     /**
@@ -104,10 +104,6 @@ export class Chat extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        setTimeout(() => {
-            this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
-            getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
-        }, 500);
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.register(`groupChatMap/${this.props.hid}`,this.bindCB);
             store.register(`groupInfoMap/${this.props.id}`,this.bindCB);
@@ -117,6 +113,18 @@ export class Chat extends Widget {
         
     }
 
+    public attach(){
+        const links = document.getElementsByClassName('linkMsg');
+        for (const i of links) {
+            i.addEventListener('click', () => {
+                openNewActivity(i.innerHTML,'其他网页');
+                console.log(i.innerHTML);
+            });
+        }
+        this.getScrollElem().scrollTop = this.getScrollElem().scrollHeight;
+        this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
+        getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
+    }
     /**
      * 更新聊天记录
      */
@@ -198,7 +206,17 @@ export class Chat extends Widget {
                 const nextside = this.props.id;
     
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    bottomNotice('对方不是你的好友！');
+                    const item = document.createElement('div');
+                    item.setAttribute('style','font-size: 24px;text-align: center;color: #888;margin: 20px;');
+                    item.innerHTML = `对方不是你的好友，立即`;
+                    const innerItem = document.createElement('span');
+                    innerItem.setAttribute('style','color:#3FA2F7;border:10px solid transparent;');
+                    innerItem.innerText = '添加好友'
+                    innerItem.addEventListener('click', () => {
+                        popNew('chat-client-app-view-chat-addUser',{rid:this.props.id});
+                    });
+                    item.appendChild(innerItem);
+                    document.getElementById('chatMessageBox').appendChild(item);
                     
                     return;
                 } 

@@ -5,7 +5,6 @@ import { AudioRecorder } from '../../../../pi/browser/audio_recorder';
 import { CameraPicker } from '../../../../pi/browser/cameraPicker';
 import { ImagePicker } from '../../../../pi/browser/imagePicker';
 import { QRCode } from '../../../../pi/browser/qrcode';
-import { DeviceIdProvider } from '../../../../pi/browser/systemInfoProvider';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { bottomNotice } from './logic';
 
@@ -78,24 +77,6 @@ export const doScanQrCode = (ok?,cancel?) => {
  */
 export const openNewActivity = (url:string,title:string= '') => {
     WebViewManager.open(title, `${url}?${Math.random()}`, title, '');
-};
-
-/**
- * 获取设备信息
- */
-export const getDeviceId = (okCB?,errCB?) => {
-    const systemInfo = new DeviceIdProvider();
-    systemInfo.init();
-    systemInfo.getDriverId({
-        success: (result) => {
-            console.log(`获取设备的唯一id成功\t ${result}`);
-            okCB && okCB(result);
-        }
-        , fail: (result) => {
-            console.log(`获取设备的唯一id失败\t  ${result}`);
-            errCB && errCB(result);
-        }
-    });
 };
 
 /**

@@ -16,7 +16,7 @@ import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
-import { getDetail } from '../gameChatApi';
+import { closeConnection } from '../../net/init';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -58,6 +58,7 @@ export class Contact extends Widget {
             } else {
                 store.initStore();
                 this.state = []; // 清空记录 lastChat
+                closeConnection();
                 this.paint(true);
             }
         }

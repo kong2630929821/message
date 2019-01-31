@@ -24,8 +24,7 @@ export class AddUser extends Widget {
         super();
         this.props = {
             sid: null,
-            rid: null,
-            isSuccess:false
+            rid: null
         };
     }
 
@@ -41,7 +40,6 @@ export class AddUser extends Widget {
 
     public inputUid(e: any) {
         this.props.rid = e.value;
-        this.props.isSuccess = false;
         this.paint();
     }
 
@@ -105,7 +103,6 @@ export class AddUser extends Widget {
 interface Props {
     sid: number;
     rid: string;
-    isSuccess:boolean; // 是否添加好友成功
 }
 
 store.register('contactMap', (r: Map<number, Contact>) => {
