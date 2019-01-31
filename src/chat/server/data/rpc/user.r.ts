@@ -5,10 +5,10 @@
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
-import { delValueFromArray, genUserHid, genUuid, genHIncId } from '../../../utils/util';
+import { delValueFromArray, genUserHid, genUuid, genHIncId, genNextMessageIndex } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { MSG_TYPE, UserHistory, UserMsg } from '../db/message.s';
+import { MSG_TYPE, UserHistory, UserMsg, MsgLock } from '../db/message.s';
 import { Contact, FriendLink, UserFind, UserInfo } from '../db/user.s';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
@@ -80,30 +80,8 @@ export const applyFriend = (user: string): Result => {
         serUser.friends.push(sid);
         contactBucket.put(SUID,serUser);  // 添加好友到客服联系人表
 
-        // 创建一条添加客服成功的消息
-        const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
-        const userHistory = new UserHistory();
-        const userMsg = new UserMsg();
-        userMsg.cancel = false;
-        userMsg.msg = '我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^';
-        userMsg.mtype = MSG_TYPE.TXT;
-        userMsg.read = false;
-        userMsg.send = false;
-        userMsg.sid = SUID;
-        userMsg.time = Date.now();
-        userHistory.msg = userMsg;
-        userHistory.hIncId = genHIncId(friendLink.hid, 0);  // 第一条消息
-        userHistoryBucket.put(userHistory.hIncId, userHistory);
-
-        // 推送消息ID
-        const sendMsg = new SendMsg();
-        sendMsg.code = 1;
-        sendMsg.last = 0;
-        sendMsg.rid = SUID;
-        const buf = new BonBuffer();
-        sendMsg.bonEncode(buf);
-        const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-        mqttPublish(mqttServer, true, QoS.AtMostOnce, SUID.toString(), buf.getBuffer());
+        // 客服发送的第一条欢迎消息
+        sendFirstWelcomeMessage();
         result.r = 1;
 
         return result;
@@ -116,6 +94,52 @@ export const applyFriend = (user: string): Result => {
     result.r = 1;
 
     return result;
+};
+/**
+ * 客服发送的第一条欢迎消息
+ */
+const sendFirstWelcomeMessage = (): UserHistory => {
+    const dbMgr = getEnv().getDbMgr();
+    const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+
+    const SUID = CONSTANT.CUSTOMER_SERVICE;  // 客服账号
+    const sid = getUid();
+    const userHistory = new UserHistory();
+    const userMsg = new UserMsg();
+
+    userMsg.cancel = false;
+    userMsg.msg = '我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^';
+    userMsg.mtype = MSG_TYPE.TXT;
+    userMsg.read = false;
+    userMsg.send = false;
+    userMsg.sid = SUID;
+    userMsg.time = Date.now();
+    userHistory.msg = userMsg;
+    
+    const msgLock = new MsgLock();
+    msgLock.hid = genUserHid(sid, SUID);
+    // 这是一个事务
+    msgLockBucket.readAndWrite(msgLock.hid, (mLock) => {
+    mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
+
+        return msgLock;
+    });
+    userHistory.hIncId = genHIncId(msgLock.hid, msgLock.current);
+    userHistoryBucket.put(userHistory.hIncId, userHistory);
+
+    // 推送消息ID
+    const sendMsg = new SendMsg();
+    sendMsg.code = 1;
+    sendMsg.last = msgLock.current;
+    sendMsg.rid = SUID;
+    const buf = new BonBuffer();
+    sendMsg.bonEncode(buf);
+    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, sid.toString(), buf.getBuffer());
+    console.log(`from ${SUID} to ${sid}, message is : ${JSON.stringify(sendMsg)}`);
+    
+    return userHistory;
 };
 
 /**
