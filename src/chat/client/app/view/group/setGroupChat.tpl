@@ -11,7 +11,7 @@
             {{end}}
         </div>
         <div w-class="groupName" ev-input-change="inputName">
-            <chat-client-app-widget-input-input>{placeHolder:"群名",style:"width:500px;padding:20px 0;border-bottom:solid #318DE6 1px;"}</chat-client-app-widget-input-input>
+            <chat-client-app-widget-input-input>{placeHolder:"群名",input:{{it.name}},style:"width:500px;padding:20px 0;border-bottom:solid #318DE6 1px;"}</chat-client-app-widget-input-input>
         </div>
     </div>
     

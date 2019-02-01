@@ -88,7 +88,8 @@ export const setUserInfo = () => {
     init2.clientRpcFunc(changeUserInfo, r, (res) => {
         if (res && res.uid > 0) {
             store.setStore(`userInfoMap/${r.uid}`, r);
-
+        } else {
+            bottomNotice('修改个人信息失败');
         }
     });
 };

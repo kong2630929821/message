@@ -165,7 +165,7 @@ export const login = (user: UserType): UserInfo => {
     console.log('Add user: ', loginReq.uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
 
     const SUID = CONSTANT.CUSTOMER_SERVICE; // 客服账号
-    if(loginReq.uid !== SUID){
+    if (loginReq.uid !== SUID) {
         applyFriend(SUID.toString());
     }
 
