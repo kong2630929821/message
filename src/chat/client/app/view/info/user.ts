@@ -72,10 +72,11 @@ export class User extends Widget {
             test.note = userinfo.note;
         
             clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
-            // todo
-                if (r.uid !== -1) {
+                if (r && r.uid > 0) {
                     store.setStore(`userInfoMap/${this.props.sid}`,test);
                     bottomNotice('修改个人信息成功');
+                } else {
+                    bottomNotice('修改个人信息失败');
                 }
             });
         });
@@ -113,9 +114,11 @@ export class User extends Widget {
         
         clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
             // todo
-            if (r.uid !== -1) {
+            if (r && r.uid > 0) {
                 store.setStore(`userInfoMap/${this.props.sid}`,test);
                 bottomNotice('修改个人信息成功');
+            } else {
+                bottomNotice('修改个人信息失败');
             }
         });
     }

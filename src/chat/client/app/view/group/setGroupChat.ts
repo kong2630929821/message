@@ -34,6 +34,7 @@ export class SetGroupChat extends Widget {
         this.props = {
             name:'',
             inviteMembers:[],
+            inviteUserName:[],
             isSelect:false,
             avatarHtml:''
         };
@@ -133,10 +134,13 @@ export class SetGroupChat extends Widget {
         logger.debug('=========创建群聊',uid);
         if (this.props.inviteMembers.findIndex(item => item === uid) === -1) {
             this.props.inviteMembers.push(uid);
+            this.props.inviteUserName.push(e.name);
         } else {
             this.props.inviteMembers = delValueFromArray(uid, this.props.inviteMembers);
+            this.props.inviteUserName = delValueFromArray(e.name, this.props.inviteUserName);
         }
         logger.debug(`inviteMembers is : ${JSON.stringify(this.props.inviteMembers)}`);
+        this.props.name = this.props.inviteUserName.slice(0,3).join('，');
         this.props.isSelect = e.value !== '' && this.props.inviteMembers.length > 0;
         this.paint();
     }
@@ -145,7 +149,8 @@ export class SetGroupChat extends Widget {
 // ================================================ 本地
 interface Props {
     name:string;// 群组名
-    inviteMembers:number[];// 被邀请的成员
+    inviteMembers:number[];// 被邀请的成员uid
+    inviteUserName:string[];// 被邀请的成员名字
     isSelect:boolean;// 是否被选择
     avatarHtml:string; // 群头像展示
 }

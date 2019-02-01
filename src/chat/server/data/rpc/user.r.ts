@@ -2,22 +2,22 @@
  * 用户相关的rpc操作
  */
 // ================================================================= 导入
+import { BonBuffer } from '../../../../pi/util/bon';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
+import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
+import { mqttPublish, QoS } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
-import { delValueFromArray, genUserHid, genUuid, genHIncId, genNextMessageIndex } from '../../../utils/util';
+import { delValueFromArray, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { MSG_TYPE, UserHistory, UserMsg, MsgLock } from '../db/message.s';
+import { MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
 import { Contact, FriendLink, UserFind, UserInfo } from '../db/user.s';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { sendUserMessage } from './message.r';
-import { UserSend, SendMsg } from './message.s';
+import { SendMsg, UserSend } from './message.s';
 import { FriendAlias, UserAgree } from './user.s';
-import { BonBuffer } from '../../../../pi/util/bon';
-import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
-import { mqttPublish, QoS } from '../../../../pi_pt/rust/pi_serv/js_net';
 
 // ================================================================= 导出
 /**
@@ -63,7 +63,7 @@ export const applyFriend = (user: string): Result => {
         return result;
     }
     const SUID = CONSTANT.CUSTOMER_SERVICE;  // 客服账号
-    if(user === SUID.toString()){   // 添加客服为好友，直接添加无需同意
+    if (user === SUID.toString()) {   // 添加客服为好友，直接添加无需同意
         const friendLink = new FriendLink();
         friendLink.uuid = genUuid(sid, SUID);
         friendLink.alias = '';
@@ -98,7 +98,7 @@ export const applyFriend = (user: string): Result => {
 /**
  * 客服发送的第一条欢迎消息
  */
-const sendFirstWelcomeMessage = (): UserHistory => {
+const sendFirstWelcomeMessage = () => {
     const dbMgr = getEnv().getDbMgr();
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
@@ -121,7 +121,7 @@ const sendFirstWelcomeMessage = (): UserHistory => {
     msgLock.hid = genUserHid(sid, SUID);
     // 这是一个事务
     msgLockBucket.readAndWrite(msgLock.hid, (mLock) => {
-    mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
+        mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
 
         return msgLock;
     });
@@ -138,8 +138,6 @@ const sendFirstWelcomeMessage = (): UserHistory => {
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
     mqttPublish(mqttServer, true, QoS.AtMostOnce, sid.toString(), buf.getBuffer());
     console.log(`from ${SUID} to ${sid}, message is : ${JSON.stringify(sendMsg)}`);
-    
-    return userHistory;
 };
 
 /**
@@ -341,6 +339,12 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
     const sid = getUid();
     const oldUserinfo = userInfoBucket.get<number, UserInfo[]>(sid)[0];
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!oldUserinfo:', oldUserinfo);
+    if (userinfo.uid !== CONSTANT.CUSTOMER_SERVICE && userinfo.name.indexOf('好嗨客服') > -1) {
+        const res = new UserInfo();
+        res.uid = 0;  // 名字中不能含有 '好嗨客服'
+
+        return res;
+    }
     // 添加手机查找用户
     if (!(oldUserinfo.tel === userinfo.tel) && !(userinfo.tel === '')) {
         const phoneFind = new UserFind();
@@ -374,7 +378,7 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
         newUser = userinfo;
     } else {
         console.log('curUser: ', sid, ' changeUser: ', userinfo);
-        newUser.uid = -1;
+        newUser.uid = -1; // 不能修改其他的人的信息
     }
 
     return newUser;

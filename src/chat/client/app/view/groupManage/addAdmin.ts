@@ -40,7 +40,7 @@ export class AddAdmin extends Widget {
 
         return ginfo;
     }
-    // 添加管理员
+    // 选择成员
     public addAdminMember(e:any) {
         const uid = e.value;
         logger.debug('添加管理员',uid);
@@ -51,7 +51,8 @@ export class AddAdmin extends Widget {
         }
         logger.debug(`applyAdminMembers is : ${JSON.stringify(this.props.applyAdminMembers)}`);
     }
-    // 点击添加
+
+    // 点击添加管理员
     public completeAddAdmin() {
         if (this.props.applyAdminMembers.length <= 0) {
             return ;
@@ -62,6 +63,7 @@ export class AddAdmin extends Widget {
         guidsAdmin.guids = guids;
         clientRpcFunc(addAdmin,guidsAdmin,(r) => {
             logger.debug('=============completeAddAdmin',r);
+            this.ok();
         });
     }
 }

@@ -1,4 +1,4 @@
-{{let membersButnoOwnerAdmins = it.ginfo.memberids.filter(item => (item !== it.ginfo.ownerid && it.ginfo.adminids.indexOf(item) === -1))}}
+{{let normalPersons = it.ginfo.memberids.filter(item => (item !== it.ginfo.ownerid && it.ginfo.adminids.indexOf(item) === -1))}}
 <div class="new-page">
     <div ev-back-click="goBack" ev-next-click="completeAddAdmin">
         <chat-client-app-widget-topBar-topBar>{title:"添加管理员",nextImg:"complete_blue.png"}</chat-client-app-widget-topBar-topBar>
@@ -9,9 +9,9 @@
     </div>
     <div w-class="a-part" ev-changeSelect="changeSelect">
         <div w-class="a">a</div>
-        {{for index,item of membersButnoOwnerAdmins}}
+        {{for index,item of normalPersons}}
         <div ev-addMember="addAdminMember">
-            <chat-client-app-widget-selectUser-selectUser>{id:{{item}}, chatType: "group"}</chat-client-app-widget-selectUser-selectUser>
+            <chat-client-app-widget-selectUser-selectUser>{id:{{item}}, chatType: "group",gid:{{it.gid}} }</chat-client-app-widget-selectUser-selectUser>
         </div>
         {{end}}
     </div>
