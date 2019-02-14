@@ -15,7 +15,7 @@ import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
-import { closeConnection } from '../../net/init';
+import { closeConnect } from '../../net/init';
 import { setUserInfo } from '../../net/init_1';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -58,7 +58,7 @@ export class Contact extends Widget {
             } else {
                 store.initStore();
                 this.state = []; // 清空记录 lastChat
-                closeConnection();
+                closeConnect();
                 this.paint(true);
             }
         }
@@ -132,7 +132,7 @@ export class Contact extends Widget {
                 this.defaultInjectPromise = Promise.resolve(defaultInjectText);
                 const allPromise = Promise.all([this.defaultInjectPromise,this.web3Promise]);
                 const gameTitle = '测试';
-                const gameUrl =  'http://192.168.9.29/wallet/phoneRedEnvelope/openRedEnvelope.html';
+                const gameUrl =  'http://192.168.31.226/wallet/phoneRedEnvelope/openRedEnvelope.html';
                 allPromise.then(([defaultInjectContent,web3Content]) => {
                     const content = defaultInjectContent + web3Content;
                     WebViewManager.open(gameTitle, `${gameUrl}?${Math.random()}`, gameTitle, content);

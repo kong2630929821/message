@@ -250,10 +250,15 @@ const updateUsers = (r: Contact, uid: number) => {
 
     }
 };
-export const closeConnection = () => {
-    rootClient = null;
-};
 
+/**
+ * 断开链接
+ */
+export const closeConnect = () => {
+    if (!rootClient) return;
+
+    rootClient.disconnect();
+};
 // ================================================ 本地
 // MQTT管理
 let mqtt: any;

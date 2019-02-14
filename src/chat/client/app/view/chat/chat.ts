@@ -53,7 +53,7 @@ export class Chat extends Widget {
             this.initUser();
         }
        
-        // this.latestMsg();
+        this.latestMsg();
     }
 
     /**
@@ -62,8 +62,10 @@ export class Chat extends Widget {
     public initUser() {
         this.props.name = getFriendAlias(this.props.id);
         const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`, []);
-        this.props.hidIncArray = hIncIdArr; 
-
+        this.props.hincIdArray = hIncIdArr;
+        // 第一次进入只加载最后20条记录
+        this.props.showHincIdArray = hIncIdArr.length > 20 ? hIncIdArr.slice(-20) :hIncIdArr ; 
+        
         // 更新上次阅读到哪一条记录
         const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
         const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.USER });
@@ -75,11 +77,13 @@ export class Chat extends Widget {
      * 群组聊天初始化
      */
     public initGroup() {
-        this.props.hidIncArray = store.getStore(`groupChatMap/${this.props.hid}`,[]);
+        const hIncIdArr = store.getStore(`groupChatMap/${this.props.hid}`,[]);
         const gInfo = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
         const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.GROUP });
         this.props.name = `${gInfo.name}(${gInfo.memberids.length})`;
-
+        this.props.hincIdArray = hIncIdArr;
+        // 第一次进入只加载最后20条记录
+        this.props.showHincIdArray = hIncIdArr.length > 20 ? hIncIdArr.slice(-20) :hIncIdArr; 
         const annouces = gInfo.annoceids;
         const lastAnnounce = annouces && annouces.length > 0 ? annouces[annouces.length - 1] :undefined ;
         // 最新一条公告是否已读
@@ -88,7 +92,7 @@ export class Chat extends Widget {
         this.props.lastAnnounce = count1 > count2 ? lastAnnounce :undefined;
         
         // 更新上次阅读到哪一条记录        
-        const hincId = this.props.hidIncArray.length > 0 ? this.props.hidIncArray[this.props.hidIncArray.length - 1] : undefined;
+        const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
         lastRead.msgId = hincId;
         store.setStore(`lastRead/${this.props.hid}`,lastRead);
 
@@ -104,6 +108,10 @@ export class Chat extends Widget {
 
     public firstPaint() {
         super.firstPaint();
+        setTimeout(() => {
+            this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
+            getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
+        }, 300);
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.register(`groupChatMap/${this.props.hid}`,this.bindCB);
             store.register(`groupInfoMap/${this.props.id}`,this.bindCB);
@@ -113,18 +121,6 @@ export class Chat extends Widget {
         
     }
 
-    public attach(){
-        const links = document.getElementsByClassName('linkMsg');
-        for (const i of links) {
-            i.addEventListener('click', () => {
-                openNewActivity(i.innerHTML,'其他网页');
-                console.log(i.innerHTML);
-            });
-        }
-        this.getScrollElem().scrollTop = this.getScrollElem().scrollHeight;
-        this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
-        getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
-    }
     /**
      * 更新聊天记录
      */
@@ -208,12 +204,12 @@ export class Chat extends Widget {
                 if (r.hIncId === DEFAULT_ERROR_STR) {
                     const item = document.createElement('div');
                     item.setAttribute('style','font-size: 24px;text-align: center;color: #888;margin: 20px;');
-                    item.innerHTML = `对方不是你的好友，立即`;
+                    item.innerText = `对方不是你的好友，立即`;
                     const innerItem = document.createElement('span');
                     innerItem.setAttribute('style','color:#3FA2F7;border:10px solid transparent;');
-                    innerItem.innerText = '添加好友'
+                    innerItem.innerText = '添加好友';
                     innerItem.addEventListener('click', () => {
-                        popNew('chat-client-app-view-chat-addUser',{rid:this.props.id});
+                        popNew('chat-client-app-view-chat-addUser',{ rid:this.props.id });
                     });
                     item.appendChild(innerItem);
                     document.getElementById('chatMessageBox').appendChild(item);
@@ -329,6 +325,25 @@ export class Chat extends Widget {
         this.paint();
     }
 
+    /**
+     * 滚动聊天记录，到最上方时加载更早之前的聊天记录
+     */
+    public scrollMessBox() {
+        const item = document.getElementById('chatMessageBox');
+        const showlist = this.props.showHincIdArray.length;
+        const totallist = this.props.hincIdArray.length;
+
+        if (item.scrollTop < 50 && totallist > showlist) {
+            if (totallist - showlist > 20) {
+                this.props.showHincIdArray = this.props.hincIdArray.slice(-showlist - 20);
+            } else {
+                this.props.showHincIdArray = this.props.hincIdArray;
+            }
+            console.log('！！！加载前20条内容！！！');
+            this.paint();
+        }
+    }
+
     public destroy() {
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.unregister(`groupChatMap/${this.props.hid}`,this.bindCB);
@@ -353,7 +368,8 @@ interface Props {
     chatType:string; // 群聊|单聊
     name:string;  // 群名或好友名
     inputMessage:string;  // 输入框内容
-    hidIncArray: string[]; // 消息历史记录
+    hincIdArray: string[]; // 消息历史记录
+    showHincIdArray:string[]; // 当前显示的消息记录
     isOnEmoji:boolean; // 是否打开表情选择区
     lastAnnounce:string; // 最新一条公告，群聊
     newMsg:any; // 我发布的一条新消息

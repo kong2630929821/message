@@ -340,7 +340,8 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
     const oldUserinfo = userInfoBucket.get<number, UserInfo[]>(sid)[0];
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!oldUserinfo:', oldUserinfo);
     if (userinfo.uid !== CONSTANT.CUSTOMER_SERVICE && userinfo.name.indexOf('好嗨客服') > -1) {
-        const res = new UserInfo();
+        let res = new UserInfo();
+        res = userinfo;
         res.uid = 0;  // 名字中不能含有 '好嗨客服'
 
         return res;

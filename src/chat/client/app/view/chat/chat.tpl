@@ -7,8 +7,8 @@
     </div>
     {{end}}
 
-    <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="stopRadio" id="chatMessageBox">
-        {{for i,v of it.hidIncArray}}
+    <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="stopRadio" id="chatMessageBox" on-scroll="scrollMessBox">
+        {{for i,v of it.showHincIdArray}}
            
             <chat-client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playRadio: {{it.onRadio && v == it.onRadio.hIncId ? it.onRadio.playRadio : false}} }</chat-client-app-widget-messageItem-messageItem>
         {{end}} 

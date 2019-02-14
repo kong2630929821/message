@@ -8,6 +8,7 @@
 import { getOpenId } from '../../../../app/api/JSAPI';
 import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
 import * as walletStore from '../../../../app/store/memstore';
+import { changeWalletName } from '../../../../app/utils/account';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
@@ -15,6 +16,7 @@ import { getFriendHistory } from '../data/initStore';
 import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { bottomNotice } from '../logic/logic';
+import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
 
 // ================================================ 导出
@@ -88,8 +90,18 @@ export const setUserInfo = () => {
     init2.clientRpcFunc(changeUserInfo, r, (res) => {
         if (res && res.uid > 0) {
             store.setStore(`userInfoMap/${r.uid}`, r);
+        } else if (res.uid === 0) {  // 普通用户 钱包名称中含有 “好嗨客服”
+            const chatUser = store.getStore(`userInfoMap/${r.uid}`,{ name:'' });
+            if (chatUser.name) {  // 有曾用名，直接改为曾用名
+                changeWalletName(chatUser.name);
+
+            } else { // 新创建的钱包
+                changeWalletName(playerName()); // 随机设置一个新名字
+                setUserInfo(); // 重新注册一次聊天
+            }
         } else {
             bottomNotice('修改个人信息失败');
+            
         }
     });
 };

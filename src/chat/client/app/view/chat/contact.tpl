@@ -12,8 +12,8 @@
         <div w-class="history-wrap">
             {{if !it.isLogin}}
             <div w-class="netClose">
-                <img src="../../res/images/question_blue.png" style="width:48px;margin-right: 20px;"/>
-                <span>网络连接不可用 <span style="color:#388EFF;">点击重连</span></span>
+                <img src="../../res/images/question_blue.png" style="width:32px;margin-right: 10px;"/>
+                <span>网络连接不可用&nbsp;<span style="color:#388EFF;" on-tap="reConnect">点击重连</span></span>
             </div>
             {{end}}
             
