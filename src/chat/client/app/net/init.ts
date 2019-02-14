@@ -250,9 +250,6 @@ const updateUsers = (r: Contact, uid: number) => {
 
     }
 };
-export const closeConnection = () => {
-    rootClient = null;
-};
 
 // ================================================ 本地
 // MQTT管理
