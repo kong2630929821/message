@@ -251,6 +251,12 @@ const updateUsers = (r: Contact, uid: number) => {
     }
 };
 
+/**
+ * 断开链接
+ */
+export const closeConnect = () => {
+    rootClient.disconnect();
+};
 // ================================================ 本地
 // MQTT管理
 let mqtt: any;

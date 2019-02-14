@@ -63,7 +63,7 @@ export class Chat extends Widget {
         this.props.name = getFriendAlias(this.props.id);
         const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`, []);
         this.props.hincIdArray = hIncIdArr;
-        // 第一次进入只加载最后10条记录
+        // 第一次进入只加载最后20条记录
         this.props.showHincIdArray = hIncIdArr.length > 20 ? hIncIdArr.slice(-20) :hIncIdArr ; 
         
         // 更新上次阅读到哪一条记录
@@ -82,7 +82,7 @@ export class Chat extends Widget {
         const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.GROUP });
         this.props.name = `${gInfo.name}(${gInfo.memberids.length})`;
         this.props.hincIdArray = hIncIdArr;
-        // 第一次进入只加载最后10条记录
+        // 第一次进入只加载最后20条记录
         this.props.showHincIdArray = hIncIdArr.length > 20 ? hIncIdArr.slice(-20) :hIncIdArr; 
         const annouces = gInfo.annoceids;
         const lastAnnounce = annouces && annouces.length > 0 ? annouces[annouces.length - 1] :undefined ;
@@ -92,7 +92,7 @@ export class Chat extends Widget {
         this.props.lastAnnounce = count1 > count2 ? lastAnnounce :undefined;
         
         // 更新上次阅读到哪一条记录        
-        const hincId = hIncIdArr > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
+        const hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
         lastRead.msgId = hincId;
         store.setStore(`lastRead/${this.props.hid}`,lastRead);
 
