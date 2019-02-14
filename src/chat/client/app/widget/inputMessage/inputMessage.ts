@@ -72,17 +72,19 @@ export class InputMessage extends Widget {
     public playEmoji(e:any) {
         getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight()}px`;
-
-        notify(e.node,'ev-open-Emoji',{});
+        setTimeout(() => {
+            notify(e.node,'ev-open-Emoji',{});
+        }, 100);
+        
     }
 
     // 打开更多功能
     public openTool(e:any) {
         getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
         document.getElementById('toolsMap').style.height = `${getKeyBoardHeight()}px`;
-
-        notify(e.node,'ev-open-Tools',{});
-        // this.sendImg(e);
+        setTimeout(() => {
+            notify(e.node,'ev-open-Tools',{});
+        }, 100);
     }
 
     // 点击发送
