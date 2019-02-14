@@ -58,7 +58,7 @@ export class Contact extends Widget {
             } else {
                 store.initStore();
                 this.state = []; // 清空记录 lastChat
-                // closeConnect();
+                closeConnect();
                 this.paint(true);
             }
         }

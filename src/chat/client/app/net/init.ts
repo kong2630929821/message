@@ -255,6 +255,8 @@ const updateUsers = (r: Contact, uid: number) => {
  * 断开链接
  */
 export const closeConnect = () => {
+    if (!rootClient) return;
+
     rootClient.disconnect();
 };
 // ================================================ 本地
