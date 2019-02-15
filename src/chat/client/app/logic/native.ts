@@ -88,7 +88,7 @@ export const startRadio = () => {
         if (success) {
             console.log('录音开始');
         } else {
-            bottomNotice('录音开始，录制失败');
+            console.log('录音开始，录制失败');
         }
     });
 };
@@ -102,7 +102,7 @@ export const endRadio = (cb:any) => {
             cb(data);
             console.log('录音结束');
         } else {
-            bottomNotice('录音结束，传送失败');
+            console.log('录音结束，传送失败');
         }
     });
 };
