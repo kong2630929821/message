@@ -402,7 +402,7 @@ function createElementTag(){
 // 定义变量
 const gid = 10001;
 const filePath = "chat/client/app/view/gameChatApi";
-const chatBaseUrl=`http://192.168.9.29/wallet/chat/client/app`;
+const chatBaseUrl = `http://192.168.31.226/chat/client/app`;  // TODO
 var messList = [];
 var readLast = '';
 var uid;

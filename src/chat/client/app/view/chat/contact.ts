@@ -58,7 +58,7 @@ export class Contact extends Widget {
             } else {
                 store.initStore();
                 this.state = []; // 清空记录 lastChat
-                closeConnect();
+                // closeConnect();
                 this.paint(true);
             }
         }
@@ -113,36 +113,36 @@ export class Contact extends Widget {
                 popNew('chat-client-app-view-group-setGroupChat');
                 break;
             case 3:// 扫一扫 
-                this.web3Promise = new Promise((resolve) => {
-                    const path = 'chat/game_chat/gameChat.js.txt';
-                    loadDir([path], undefined, undefined, undefined, fileMap => {
-                        const arr = new Uint8Array(fileMap[path]);
-                // for (let i = 0; i < arr.length; ++i) {
-                //     content += String.fromCharCode(arr[i]);
-                // }
-                // content = decodeURIComponent(escape(atob(content)));
-                        const content = new TextDecoder().decode(arr);
-                        resolve(content);
-                    }, () => {}, () => {});
-                });
+            //     this.web3Promise = new Promise((resolve) => {
+            //         const path = 'chat/game_chat/gameChat.js.txt';
+            //         loadDir([path], undefined, undefined, undefined, fileMap => {
+            //             const arr = new Uint8Array(fileMap[path]);
+            //     // for (let i = 0; i < arr.length; ++i) {
+            //     //     content += String.fromCharCode(arr[i]);
+            //     // }
+            //     // content = decodeURIComponent(escape(atob(content)));
+            //             const content = new TextDecoder().decode(arr);
+            //             resolve(content);
+            //         }, () => {}, () => {});
+            //     });
 
-                const defaultInjectText = `
-            window.piGameName = '测试';
-            `;
-                this.defaultInjectPromise = Promise.resolve(defaultInjectText);
-                const allPromise = Promise.all([this.defaultInjectPromise,this.web3Promise]);
-                const gameTitle = '测试';
-                const gameUrl =  'http://192.168.31.226/wallet/phoneRedEnvelope/openRedEnvelope.html';
-                allPromise.then(([defaultInjectContent,web3Content]) => {
-                    const content = defaultInjectContent + web3Content;
-                    WebViewManager.open(gameTitle, `${gameUrl}?${Math.random()}`, gameTitle, content);
-                });  
+            //     const defaultInjectText = `
+            // window.piGameName = '测试';
+            // `;
+            //     this.defaultInjectPromise = Promise.resolve(defaultInjectText);
+            //     const allPromise = Promise.all([this.defaultInjectPromise,this.web3Promise]);
+            //     const gameTitle = '测试';
+            //     const gameUrl =  'http://192.168.31.226/wallet/phoneRedEnvelope/openRedEnvelope.html';
+            //     allPromise.then(([defaultInjectContent,web3Content]) => {
+            //         const content = defaultInjectContent + web3Content;
+            //         WebViewManager.open(gameTitle, `${gameUrl}?${Math.random()}`, gameTitle, content);
+            //     });  
 
-                // doScanQrCode((res) => {  // 扫描二维码
-                //     popNew('chat-client-app-view-chat-addUser',{ rid:res });
-                //     console.log(res);
-                //     this.paint();
-                // });         
+                doScanQrCode((res) => {  // 扫描二维码
+                    popNew('chat-client-app-view-chat-addUser',{ rid:res });
+                    console.log(res);
+                    this.paint();
+                });         
                 break;
             case 4:
                 popNew('chat-client-app-view-info-user');

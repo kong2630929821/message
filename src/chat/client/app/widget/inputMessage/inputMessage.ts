@@ -42,7 +42,9 @@ export class InputMessage extends Widget {
 
         // 超过60秒自动停止录音
         setTimeout(() => {
-            this.radioEnd(e);
+            if (this.props.isOnRadio) {
+                this.radioEnd(e);
+            }
         }, 59000);
     }
 
