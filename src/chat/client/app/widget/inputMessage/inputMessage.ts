@@ -8,8 +8,7 @@ import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
-import { bottomNotice } from '../../logic/logic';
-import { endRadio, openCamera, selectImage, startRadio } from '../../logic/native';
+import { endRadio, getPromise, openCamera, selectImage, startRadio } from '../../logic/native';
 import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ===========================导出
@@ -34,18 +33,19 @@ export class InputMessage extends Widget {
 
     // 麦克风输入处理
     public radioStart(e:any) {
-        console.log('点击开始录音');
-        this.props.isOnRadio = true;
-        this.radioTime = Date.now();
-        this.paint();
-        startRadio();
-
-        // 超过60秒自动停止录音
-        setTimeout(() => {
-            if (this.props.isOnRadio) {
-                this.radioEnd(e);
-            }
-        }, 59000);
+        getPromise(() => {
+            console.log('点击开始录音');
+            this.props.isOnRadio = true;
+            this.radioTime = Date.now();
+            this.paint();
+            startRadio();
+                // 超过60秒自动停止录音
+            setTimeout(() => {
+                if (this.props.isOnRadio) {
+                    this.radioEnd(e);
+                }
+            }, 59000);
+        });
     }
 
     // 语音录入完成
@@ -56,16 +56,12 @@ export class InputMessage extends Widget {
         endRadio((buffer) => {
             uploadFile(arrayBuffer2File(buffer),(radioUrl:string) => {
                 console.log('录制的音频',radioUrl);
-                const t = (Date.now() - this.radioTime) / 1000;
-                if (t > 1) {
-                    const res = {
-                        message:radioUrl,
-                        time:Math.ceil(t)
-                    };
-                    notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.VOICE });
-                } else {
-                    bottomNotice('录音太短，发送失败');
-                }
+                const t = Date.now() - this.radioTime;
+                const res = {
+                    message:radioUrl,
+                    time:Math.ceil(t / 1000)
+                };
+                notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.VOICE });
             });
         });
     }
