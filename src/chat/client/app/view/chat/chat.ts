@@ -222,6 +222,7 @@ export class Chat extends Widget {
         this.props.inputMessage = '';
         this.paint();
         this.latestMsg();
+        store.setStore('setting/firstChat',true);
     }
 
     /**

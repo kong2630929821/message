@@ -1,11 +1,13 @@
 
 import { uploadFileUrlPrefix } from '../../../../app/config';
+import { WebViewManager } from '../../../../pi/browser/webview';
+import { loadDir } from '../../../../pi/widget/util';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupHistory, MSG_TYPE } from '../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../server/data/rpc/message.s';
-import { genGroupHid, genGuid, getGidFromHincid, depCopy } from '../../../utils/util';
+import { depCopy, genGroupHid, genGuid, getGidFromHincid } from '../../../utils/util';
 import * as store from '../data/store';
 import { bottomNotice, timestampFormat } from '../logic/logic';
 import { clientRpcFunc } from '../net/init';
@@ -47,8 +49,8 @@ export const getDetail = (hIncId,cb) => {
     const msg = store.getStore(`groupHistoryMap/${hIncId}`);
     const gid = getGidFromHincid(hIncId);
     const name = store.getStore(`groupUserLinkMap/${genGuid(gid, msg.sid)}`).userAlias;
-    var res = depCopy(msg.msg);
-    if(msg.mtype==MSG_TYPE.VOICE || msg.mtype==MSG_TYPE.REDENVELOPE){
+    let res = depCopy(msg.msg);
+    if (msg.mtype === MSG_TYPE.VOICE || msg.mtype === MSG_TYPE.REDENVELOPE) {
         res = JSON.parse(res);
     }
     cb(null, { 
@@ -69,5 +71,32 @@ export const getBaseInfo = (gid,cb) => {
         groupName:`${ginfo.name}(${ginfo.memberids.length})`,
         uploadFileUrlHead:uploadFileUrlPrefix,
         EMOJIS:EMOJIS
+    });
+};
+
+// 第三方聊天注入资源
+export const gameChatPromise = () => {
+    return new Promise<string>((resolve) => {
+        const path = 'chat/game_chat/gameChat.js.txt';
+        loadDir([path], undefined, undefined, undefined, fileMap => {
+            const arr = new Uint8Array(fileMap[path]);
+            // for (let i = 0; i < arr.length; ++i) {
+            //     content += String.fromCharCode(arr[i]);
+            // }
+            // content = decodeURIComponent(escape(atob(content)));
+            const content = new TextDecoder().decode(arr);
+            resolve(content);
+        }, () => {
+            // TODO 失败的回调
+        });
+    });
+};
+
+// 打开一个测试 webview
+export const openTestWebview = () => {
+    const gameTitle = '测试';
+    const gameUrl =  'http://192.168.31.226/wallet/phoneRedEnvelope/openRedEnvelope.html';
+    gameChatPromise().then(content => {
+        WebViewManager.open(gameTitle, `${gameUrl}?${Math.random()}`, gameTitle, content);
     });
 };

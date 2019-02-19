@@ -17,3 +17,4 @@ node_modules
 !/src/chat/server/cfg/server.c.ts
 package-lock.json
 /src/chat/pressure/xls/*.rs
+/src/app

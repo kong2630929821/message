@@ -88,7 +88,7 @@ export const startRadio = () => {
         if (success) {
             console.log('录音开始');
         } else {
-            console.log('录音开始，录制失败');
+            bottomNotice('录音开始，录制失败');
         }
     });
 };
@@ -102,7 +102,20 @@ export const endRadio = (cb:any) => {
             cb(data);
             console.log('录音结束');
         } else {
-            console.log('录音结束，传送失败');
+            bottomNotice('录音结束，传送失败');
+        }
+    });
+};
+
+/**
+ * 获取语音权限是否打开
+ */
+export const getPromise = (cb:any) => {
+    recorder.getPromission(success => {
+        if (success) {
+            cb && cb();
+        } else {
+            bottomNotice('未打开麦克风权限');
         }
     });
 };

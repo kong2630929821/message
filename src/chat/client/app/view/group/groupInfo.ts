@@ -77,9 +77,16 @@ export class GroupInfos extends Widget {
             this.props.isAdmin = true;
         }
 
-        this.props.setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
-        this.props.msgTop = this.props.setting.msgTop.findIndex(item => item === genGroupHid(this.props.gid)) > -1;
-        this.props.msgAvoid = this.props.setting.msgAvoid.findIndex(item => item === genGroupHid(this.props.gid)) > -1;
+        const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
+        if (!setting.msgTop) {
+            setting.msgTop = [];
+        }
+        if (!setting.msgAvoid) {
+            setting.msgAvoid = [];
+        }
+        this.props.setting = setting;
+        this.props.msgTop = setting.msgTop.findIndex(item => item === genGroupHid(this.props.gid)) > -1;
+        this.props.msgAvoid = setting.msgAvoid.findIndex(item => item === genGroupHid(this.props.gid)) > -1;
     }
 
     public firstPaint() {

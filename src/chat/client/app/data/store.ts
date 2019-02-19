@@ -121,7 +121,7 @@ export const initStore = () => {
         groupChatMap:new Map(),
         lastChat:[],
         lastRead:new Map(),
-        setting:null
+        setting:{}
     };
 };
 
@@ -186,7 +186,7 @@ export interface Store {
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
     // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
     lastRead:Map<string,LastReadMsgId>;// hid
-    setting:any; // 额外设置，免打扰|置顶
+    setting:any; // 额外设置，免打扰|置顶|首次聊天
 
 }
 
