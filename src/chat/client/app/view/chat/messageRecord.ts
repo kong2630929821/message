@@ -20,6 +20,7 @@ export class MessageRecord extends Widget {
         this.bindCB = this.updateMessage.bind(this);
     }
 
+    // tslint:disable-next-line:cyclomatic-complexity
     public setProps(props: any) {
         super.setProps(props);
         const sid = store.getStore(`uid`);
@@ -54,8 +55,8 @@ export class MessageRecord extends Widget {
 
         // 消息额外设置，免打扰|置顶
         const setting = store.getStore('setting',{ msgTop:[],msgAvoid:[] });
-        this.props.msgTop = setting.msgTop.findIndex(item => item === hid) > -1;
-        this.props.msgAvoid = setting.msgAvoid.findIndex(item => item === hid) > -1;
+        this.props.msgTop = setting.msgTop && setting.msgTop.findIndex(item => item === hid) > -1;
+        this.props.msgAvoid = setting.msgAvoid && setting.msgAvoid.findIndex(item => item === hid) > -1;
         
         // 最新一条消息内容处理，空结构体等于true
         if (this.props.lastMessage.time) {

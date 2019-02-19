@@ -77,12 +77,9 @@ export class UserDetail extends Widget {
         
         const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
         const sid = store.getStore('uid');
-        if (!setting.msgTop) {
-            setting.msgTop = [];
-        }
-        if (!setting.msgAvoid) {
-            setting.msgAvoid = [];
-        }
+        if (!setting.msgTop) setting.msgTop = [];
+        if (!setting.msgAvoid) setting.msgAvoid = [];
+        
         this.props.setting = setting;
         this.props.msgTop = setting.msgTop.findIndex(item => item === genUserHid(sid,this.props.uid)) > -1;
         this.props.msgAvoid = setting.msgAvoid.findIndex(item => item === genUserHid(sid,this.props.uid)) > -1;
