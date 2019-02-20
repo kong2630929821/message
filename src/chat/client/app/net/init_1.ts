@@ -5,8 +5,6 @@
  */
 
 // ================================================ 导入
-import { getOpenId } from '../../../../app/api/JSAPI';
-import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
 import * as walletStore from '../../../../app/store/memstore';
 import { changeWalletName } from '../../../../app/utils/account';
 import { UserInfo } from '../../../server/data/db/user.s';
@@ -22,13 +20,6 @@ import * as init2 from './init';
 // ================================================ 导出
 
 /**
- * 客户端初始化
- */
-export const initClient = (server?: string, port?: number) => {
-    init2.initClient(server, port);
-};
-
-/**
  * 注册了所有可以rpc调用的结构体
  * @param fileMap file map
  */
@@ -41,35 +32,28 @@ export const registerRpcStruct = (fileMap) => {
 /**
  * 钱包 登陆或注册聊天
  */
-export const walletSignIn = () => {
-    if (!loginChatFg) {
-        getOpenId('101', (r) => {
-            const openId = String(r.openid);
-            if (openId) {
-                init2.login(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
-                    loginChatFg = false;
+export const walletSignIn = (openid) => {
+    const openId = String(openid);
+    if (openId) {
+        init2.login(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
 
-                    if (r && r.uid > 0) {
-                        console.log('聊天登陆成功！！！！！！！！！！！！！！');
-                        store.setStore(`uid`, r.uid);
-                        store.setStore(`userInfoMap/${r.uid}`, r);
-                        init2.init(r.uid);
-                        init2.subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
-                            if (v.code === 1) {
-                                getFriendHistory(v.rid);
-                            }
-                            // updateUserMessage(v.msg.sid, v);
-                        });
-                        setUserInfo();
-
-                    } else {
-                        bottomNotice('钱包登陆失败');
+            if (r && r.uid > 0) {
+                console.log('聊天登陆成功！！！！！！！！！！！！！！');
+                store.setStore(`uid`, r.uid);
+                store.setStore(`userInfoMap/${r.uid}`, r);
+                init2.init(r.uid);
+                init2.subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
+                    if (v.code === 1) {
+                        getFriendHistory(v.rid);
                     }
                 });
+                setUserInfo();
+
+            } else {
+                bottomNotice('钱包登陆失败');
             }
         });
     }
-    loginChatFg = true;
 
 };
 
@@ -105,12 +89,3 @@ export const setUserInfo = () => {
         }
     });
 };
-
-// 登陆聊天方法执行标记
-let loginChatFg: boolean;
-
-walletStore.register('user/isLogin', (r) => {
-    if (r) {  // 如果钱包登陆成功，聊天创建链接
-        initClient(chatLogicIp,chatLogicPort);
-    }
-});

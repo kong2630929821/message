@@ -52,7 +52,7 @@ export class AutoLoginMgr {
     }
 
     // 连接服务器
-    public connection() {
+    public connection(success?:Function) {
         const options = {
             reconnect: true,
             timeout: 3,
@@ -65,11 +65,7 @@ export class AutoLoginMgr {
                 console.log('reconnect 连接成功！！！！！！！');
                 // 连接成功
                 this.conState = true;
-                const wLogin = walletStore.getStore('user/isLogin',false); // 钱包是否已经登陆
-                const cLogin = store.getStore('uid',0);  // 聊天是否已经登陆
-                if (wLogin && !cLogin) {
-                    walletSignIn();
-                }
+                
                 if (this.relogin === ReLoginState.START) {
                     console.log(`连接成功！！！`);
                     this.relogin = ReLoginState.ING;
@@ -77,6 +73,7 @@ export class AutoLoginMgr {
                 } else if (this.relogin === ReLoginState.ING) {
                     console.log(`重新打开APP！！！`);
                 }
+                success && success();
             },
             onFailure: (r) => {
                 console.log('connect fail', r);

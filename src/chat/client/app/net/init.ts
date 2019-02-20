@@ -6,6 +6,8 @@
 declare var pi_modules;
 
 // ================================================ 导入
+import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
+import { loginWallet, logoutWallet } from '../../../../app/net/login';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
@@ -21,6 +23,7 @@ import * as store from '../data/store';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
 import { bottomNotice, exitGroup } from '../logic/logic';
 import * as subscribedb from '../net/subscribedb';
+import { walletSignIn } from './init_1';
 import { initPush } from './receive';
 
 // ================================================ 导出
@@ -28,11 +31,13 @@ import { initPush } from './receive';
 /**
  * 客户端初始化
  */
-export const initClient = (server?: string, port?: number) => {
+export const initClient = (openId) => {
     if (!rootClient) {
-        mqtt = new AutoLoginMgr(server, port);
+        mqtt = new AutoLoginMgr(chatLogicIp, chatLogicPort);
         // mqtt = new AutoLoginMgr('192.168.9.29', port);
-        rootClient = mqtt.connection();
+        rootClient = mqtt.connection(() => {
+            walletSignIn(openId);
+        });
     }
     initPush();
 };
@@ -252,13 +257,14 @@ const updateUsers = (r: Contact, uid: number) => {
 };
 
 /**
- * 断开链接
+ * 主动断开mqtt连接
  */
-export const closeConnect = () => {
-    if (!rootClient) return;
-
+export const disconnect = () => {
     rootClient.disconnect();
+    rootClient = undefined;
+    clientRpc = undefined;
 };
+
 // ================================================ 本地
 // MQTT管理
 let mqtt: any;
@@ -266,3 +272,15 @@ let mqtt: any;
 let rootClient: Client;
 // root RPC
 let clientRpc: any;
+
+// 登录
+loginWallet('101',(openId:number) => {
+    console.log('获取到openId ====',openId);
+    initClient(openId);
+});
+
+// 登出
+logoutWallet(() => {
+    disconnect();
+    store.initStore();
+});

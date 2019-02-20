@@ -4,6 +4,7 @@
 
 // ================================================ 导入
 import { uploadFileUrlPrefix } from '../../../../../app/config';
+import { manualReconnect } from '../../../../../app/net/login';
 import * as walletStore from '../../../../../app/store/memstore';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
@@ -13,8 +14,8 @@ import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
-import { closeConnect } from '../../net/init';
 import { setUserInfo } from '../../net/init_1';
+import { createGroup } from '../../net/rpc';
 import { openTestWebview } from '../gameChatApi';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -38,11 +39,12 @@ export class Contact extends Widget {
             { iconPath: 'scan.png', utilText: '扫一扫' },
             { iconPath: 'add-friend.png', utilText: '我的信息' }
         ];
+        this.props.isLogin = walletStore.getStore('user/id') ? walletStore.getStore('user/isLogin') : true; // 钱包是否登陆成功
+        this.props.reconnecting = false;  
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
         this.props.hasWallet = !!walletStore.getStore('wallet');
-        this.props.isLogin = walletStore.getStore('user/isLogin',false); // 钱包是否登陆
         const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
         const uid = store.getStore('uid', 0);
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
@@ -57,8 +59,7 @@ export class Contact extends Widget {
             } else {
                 store.initStore();
                 this.state = []; // 清空记录 lastChat
-                // closeConnect();
-                this.paint(true);
+                this.paint();
             }
         }
         
@@ -112,13 +113,14 @@ export class Contact extends Widget {
                 popNew('chat-client-app-view-group-setGroupChat');
                 break;
             case 3:// 扫一扫 
-                // doScanQrCode((res) => {  // 扫描二维码
-                //     popNew('chat-client-app-view-chat-addUser',{ rid:res });
-                //     console.log(res);
-                //     this.paint();
-                // });
+                doScanQrCode((res) => {  // 扫描二维码
+                    popNew('chat-client-app-view-chat-addUser',{ rid:res });
+                    console.log(res);
+                    this.paint();
+                });
                    
-                openTestWebview();      
+                // openTestWebview();      
+                // createGroup('LOL竞猜官方群组','','',false);
                 break;
             case 4:
                 popNew('chat-client-app-view-info-user');
@@ -128,6 +130,26 @@ export class Contact extends Widget {
         }
         this.closeMore();
         this.paint();
+    }
+
+    /**
+     * 更新登陆状态
+     */
+    public updateLoginState(isLogin:boolean) {
+        this.props.isLogin = isLogin;
+        this.props.reconnecting = false;
+        this.paint();
+    }
+
+    /**
+     * 断线重连
+     */
+    public reConnect() {
+        if (this.props.reconnecting) return;
+        console.log('reconnect');
+        this.props.reconnecting = true;   // 正在连接
+        this.paint();
+        manualReconnect();
     }
 
 }
@@ -142,6 +164,7 @@ interface Props {
     avatar:string; // 头像
     isLogin:boolean; // 钱包是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
+    reconnecting:boolean; // 是否正在重连
 }
 const STATE = {
     lastChat:[],
@@ -161,5 +184,12 @@ store.register('friendLinkMap', () => {
     const w = forelet.getWidget(WIDGET_NAME);
     if (w) {
         w.paint(true);
+    }
+});
+walletStore.register('user/isLogin',(isLogin:boolean) => {
+    const w: any = forelet.getWidget(WIDGET_NAME);
+    const id = walletStore.getStore('user/id');
+    if (id) {
+        w && w.updateLoginState(isLogin);
     }
 });
