@@ -6,11 +6,14 @@ import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, registerUser } from '../../../server/data/rpc/basic.p';
+// tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { acceptUser, addAdmin, applyJoinGroup, createGroup as createGroupp, delMember, dissolveGroup, inviteUsers } from '../../../server/data/rpc/group.p';
+// tslint:disable-next-line:max-line-length
+import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, inviteUsers } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, Invite, InviteArray } from '../../../server/data/rpc/group.s';
 import { sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, UserSend } from '../../../server/data/rpc/message.s';
+// tslint:disable-next-line:max-line-length
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
 import { setStore } from '../data/store';
@@ -137,15 +140,15 @@ export const delFriend = (rid: number, cb: (r: Result) => void) => {
 // ================  debug purpose ==========================
 
 // 创建群聊  need_agree：入群是否需要同意
-export const createGroup = (name:string, avatar:string, note:string,need_agree:boolean, cb: (r: GroupInfo) => void) => {
+export const createGroup = (name:string, avatar:string, note:string, needAgree:boolean, cb?: (r: GroupInfo) => void) => {
     const group = new GroupCreate();
     group.note = note;
     group.name = name;
     group.avatar = avatar; 
-    group.need_agree = need_agree;
+    group.need_agree = needAgree;
     
-    clientRpcFunc(createGroupp, group, (r) => {
-        cb(r);
+    clientRpcFunc(createNewGroup, group, (r) => {
+        cb && cb(r);
     });
 };
 

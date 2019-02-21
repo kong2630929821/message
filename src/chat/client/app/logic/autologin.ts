@@ -3,15 +3,12 @@
  */
 
 // =====================================导入
-import * as walletStore from '../../../../../app/store/memstore';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { create } from '../../../../pi/net/rpc';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { auto_login, getToken } from '../../../server/rpc/session.p';
 import { AutoLogin, GetToken, Token } from '../../../server/rpc/session.s';
-import * as store from '../data/store';
 import { clientRpcFunc, subscribe } from '../net/init';
-import { walletSignIn } from '../net/init_1';
 import { initReceive } from '../net/receive';
 import { login as defLogin, walletLogin } from '../net/rpc';
 
@@ -23,6 +20,7 @@ export enum UserType {
 
 // 重登录状态
 export enum ReLoginState {
+    INIT,
     START,
     ING,
     END,
@@ -39,7 +37,7 @@ export class AutoLoginMgr {
     private clientRpc: any;
     private server: string;
     private port: number;
-    private relogin: ReLoginState;
+    private relogin: ReLoginState = ReLoginState.INIT;
     private userType: UserType;
     private user: string;
     private pwd: string;
@@ -52,7 +50,7 @@ export class AutoLoginMgr {
     }
 
     // 连接服务器
-    public connection() {
+    public connection(success?:Function,fail?:Function) {
         const options = {
             reconnect: true,
             timeout: 3,
@@ -65,11 +63,7 @@ export class AutoLoginMgr {
                 console.log('reconnect 连接成功！！！！！！！');
                 // 连接成功
                 this.conState = true;
-                const wLogin = walletStore.getStore('user/isLogin',false); // 钱包是否已经登陆
-                const cLogin = store.getStore('uid',0);  // 聊天是否已经登陆
-                if (wLogin && !cLogin) {
-                    walletSignIn();
-                }
+                
                 if (this.relogin === ReLoginState.START) {
                     console.log(`连接成功！！！`);
                     this.relogin = ReLoginState.ING;
@@ -77,9 +71,11 @@ export class AutoLoginMgr {
                 } else if (this.relogin === ReLoginState.ING) {
                     console.log(`重新打开APP！！！`);
                 }
+                success && success();
             },
             onFailure: (r) => {
                 console.log('connect fail', r);
+                fail && fail(r);
             }
         };
         // rootClient = new Client('127.0.0.1', 1234, 'clientId-wcd14PDgoZ', null, options);
@@ -102,6 +98,20 @@ export class AutoLoginMgr {
         }
 
     }
+
+    // 断开连接
+    public disconnect() {
+        if (this.rootClient) {
+            try {
+                this.rootClient.disconnect();
+            } catch (err) {
+                console.log(err);
+            }
+            
+            this.relogin = ReLoginState.INIT;
+        }
+    }
+
     // 获取MATT客户端
     public getClient() {
         return this.rootClient;
@@ -158,9 +168,9 @@ export class AutoLoginMgr {
             } else {
                 this.relogin = ReLoginState.ERROR;
                 // 登录
-                this.login(this.userType, this.user, this.pwd, this.loginCb);
-                // 重新订阅topic
-                this.subMgr.reSubs();
+                // this.login(this.userType, this.user, this.pwd, this.loginCb);
+                // // 重新订阅topic
+                // this.subMgr.reSubs();
             }
 
         });

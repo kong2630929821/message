@@ -37,6 +37,9 @@ export const ADDRESS_INFO_TABLE = 'chat/server/data/db/extra.AddressInfo';
 export const DEFAULT_ERROR_STR = '-1';
 export const DEFAULT_ERROR_NUMBER = -1;
 export const CUSTOMER_SERVICE = 10001;  // 客服账号
+export const TURNTABLE_GROUP = 10001; // 大转盘官方群
+export const OPENBOX_GROUP = 10002; // 开宝箱官方群
+export const LOLGUESS_GROUP = 10003; // LOL竞猜官方群
 
 // 推送cmd
 export const SEND_REFUSED = 'refused_add'; // 拒绝好友

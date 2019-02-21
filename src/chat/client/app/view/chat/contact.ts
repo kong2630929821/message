@@ -4,6 +4,7 @@
 
 // ================================================ 导入
 import { uploadFileUrlPrefix } from '../../../../../app/config';
+import { manualReconnect } from '../../../../../app/net/login';
 import * as walletStore from '../../../../../app/store/memstore';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
@@ -13,8 +14,8 @@ import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
-import { closeConnect } from '../../net/init';
 import { setUserInfo } from '../../net/init_1';
+import { createGroup } from '../../net/rpc';
 import { openTestWebview } from '../gameChatApi';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -38,11 +39,11 @@ export class Contact extends Widget {
             { iconPath: 'scan.png', utilText: '扫一扫' },
             { iconPath: 'add-friend.png', utilText: '我的信息' }
         ];
+        this.props.isLogin = store.getStore('isLogin');
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
         this.props.hasWallet = !!walletStore.getStore('wallet');
-        this.props.isLogin = walletStore.getStore('user/isLogin',false); // 钱包是否登陆
         const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
         const uid = store.getStore('uid', 0);
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
@@ -50,17 +51,16 @@ export class Contact extends Widget {
         
         // 钱包修改了姓名、头像等，或钱包退出登陆
         if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
-            if (this.props.isLogin && uid) { // 钱包、聊天已登陆
+            if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                 setUserInfo();
                 this.props.avatar = `${uploadFileUrlPrefix}${wUser.avatar}`;
                 this.paint();
             } else {
                 store.initStore();
                 this.state = []; // 清空记录 lastChat
-                // closeConnect();
-                this.paint(true);
+                this.paint();
             }
-        }
+        } 
         
         // }
     }
@@ -71,7 +71,7 @@ export class Contact extends Widget {
         walletStore.register('user/info',() => { // 钱包用户信息修改
             this.setProps(this.props);  
         });
-        walletStore.register('user/isLogin',() => {
+        store.register('isLogin',() => {
             this.setProps(this.props);
         });
     }
@@ -85,12 +85,11 @@ export class Contact extends Widget {
 
     // 打开更多功能
     public getMore() {
-
         if (this.props.isLogin) {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
         } else {
-            bottomNotice('请先登陆钱包');
+            bottomNotice('聊天未登陆');
         }
     }
 
@@ -112,13 +111,14 @@ export class Contact extends Widget {
                 popNew('chat-client-app-view-group-setGroupChat');
                 break;
             case 3:// 扫一扫 
-                // doScanQrCode((res) => {  // 扫描二维码
-                //     popNew('chat-client-app-view-chat-addUser',{ rid:res });
-                //     console.log(res);
-                //     this.paint();
-                // });
+                doScanQrCode((res) => {  // 扫描二维码
+                    popNew('chat-client-app-view-chat-addUser',{ rid:res });
+                    console.log(res);
+                    this.paint();
+                });
                    
-                openTestWebview();      
+                // openTestWebview();      
+                // createGroup('LOL竞猜官方群组','','',false);
                 break;
             case 4:
                 popNew('chat-client-app-view-info-user');
@@ -140,7 +140,7 @@ interface Props {
     utilList: any[];
     netClose: boolean; // 网络链接是否断开
     avatar:string; // 头像
-    isLogin:boolean; // 钱包是否已经登陆
+    isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
 }
 const STATE = {

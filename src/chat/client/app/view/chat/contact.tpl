@@ -10,13 +10,8 @@
         </div>
         
         <div w-class="history-wrap">
-            {{if !it.isLogin}}
-            <div w-class="netClose">
-                <img src="../../res/images/question_blue.png" style="width:32px;margin-right: 10px;"/>
-                <span>网络连接不可用&nbsp;<span style="color:#388EFF;" on-tap="reConnect">点击重连</span></span>
-            </div>
-            {{end}}
-            
+            <app-components1-offlineTip-offlineTip></app-components1-offlineTip-offlineTip>
+           
             {{if it1.lastChat && it1.lastChat.length == 0}}
             <div style="text-align: center;">
                 <img src="../../res/images/chatEmpty.png" w-class="emptyImg"/>

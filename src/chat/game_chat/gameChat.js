@@ -9,12 +9,13 @@ window.pi_jsApi = {};
 function createStyleTag() {
     var cssText = `/* chat */
     .pi-root{
-        position: absolute;
+        position: fixed;
         z-index: 999;
         width: 100%;
+        top:0;
         zoom: 0.5;
     }
-    .gameChat-page{
+    .gameChatPage{
         display: flex;
         flex-direction: column;
         position:absolute;
@@ -319,7 +320,6 @@ function createStyleTag() {
         border-radius: 50%;
         text-align: center;
         position: absolute;
-        top: 40%;
         right: 0;
     }
     .redSpot{
@@ -362,7 +362,7 @@ function createElementTag(){
     </section>
     <!-- 展开页面 -->
     <section id="gamechat_section2" style="display:none">
-    <div class="gameChat-page">
+    <div class="gameChatPage">
         <div class="topbar">
             <div class="topTitle"> 
                 <span id="gameChat_groupName" style="margin-left:20px;">groupName(num)</span>
