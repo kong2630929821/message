@@ -41,6 +41,7 @@ export const walletSignIn = (openid) => {
                 console.log('聊天登陆成功！！！！！！！！！！！！！！');
                 store.setStore(`uid`, r.uid);
                 store.setStore(`userInfoMap/${r.uid}`, r);
+                store.setStore('isLogin',true);
                 init2.init(r.uid);
                 init2.subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
                     if (v.code === 1) {

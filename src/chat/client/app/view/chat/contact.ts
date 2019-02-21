@@ -39,8 +39,7 @@ export class Contact extends Widget {
             { iconPath: 'scan.png', utilText: '扫一扫' },
             { iconPath: 'add-friend.png', utilText: '我的信息' }
         ];
-        this.props.isLogin = walletStore.getStore('user/id') ? walletStore.getStore('user/isLogin') : true; // 钱包是否登陆成功
-        this.props.reconnecting = false;  
+        this.props.isLogin = store.getStore('isLogin');
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
@@ -52,7 +51,7 @@ export class Contact extends Widget {
         
         // 钱包修改了姓名、头像等，或钱包退出登陆
         if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
-            if (this.props.isLogin && uid) { // 钱包、聊天已登陆
+            if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                 setUserInfo();
                 this.props.avatar = `${uploadFileUrlPrefix}${wUser.avatar}`;
                 this.paint();
@@ -61,7 +60,7 @@ export class Contact extends Widget {
                 this.state = []; // 清空记录 lastChat
                 this.paint();
             }
-        }
+        } 
         
         // }
     }
@@ -72,7 +71,7 @@ export class Contact extends Widget {
         walletStore.register('user/info',() => { // 钱包用户信息修改
             this.setProps(this.props);  
         });
-        walletStore.register('user/isLogin',() => {
+        store.register('isLogin',() => {
             this.setProps(this.props);
         });
     }
@@ -86,12 +85,11 @@ export class Contact extends Widget {
 
     // 打开更多功能
     public getMore() {
-
         if (this.props.isLogin) {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
         } else {
-            bottomNotice('请先登陆钱包');
+            bottomNotice('聊天未登陆');
         }
     }
 
@@ -132,26 +130,6 @@ export class Contact extends Widget {
         this.paint();
     }
 
-    /**
-     * 更新登陆状态
-     */
-    public updateLoginState(isLogin:boolean) {
-        this.props.isLogin = isLogin;
-        this.props.reconnecting = false;
-        this.paint();
-    }
-
-    /**
-     * 断线重连
-     */
-    public reConnect() {
-        if (this.props.reconnecting) return;
-        console.log('reconnect');
-        this.props.reconnecting = true;   // 正在连接
-        this.paint();
-        manualReconnect();
-    }
-
 }
 
 // ================================================ 本地
@@ -162,9 +140,8 @@ interface Props {
     utilList: any[];
     netClose: boolean; // 网络链接是否断开
     avatar:string; // 头像
-    isLogin:boolean; // 钱包是否已经登陆
+    isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
-    reconnecting:boolean; // 是否正在重连
 }
 const STATE = {
     lastChat:[],
@@ -184,12 +161,5 @@ store.register('friendLinkMap', () => {
     const w = forelet.getWidget(WIDGET_NAME);
     if (w) {
         w.paint(true);
-    }
-});
-walletStore.register('user/isLogin',(isLogin:boolean) => {
-    const w: any = forelet.getWidget(WIDGET_NAME);
-    const id = walletStore.getStore('user/id');
-    if (id) {
-        w && w.updateLoginState(isLogin);
     }
 });
