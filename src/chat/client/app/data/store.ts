@@ -122,7 +122,7 @@ export const initStore = () => {
         lastChat:[],
         lastRead:new Map(),
         setting:{},
-        isLogin:false,
+        isLogin:true,
         offLine:false
     };
 };
@@ -202,9 +202,6 @@ export interface LastReadMsgId {
     msgId: string; // hIncId
 }
 // ============================================ 本地
-
-// 本质上是主键
-export type MapName = 'groupInfoMap' | 'groupUserLinkMap' | 'userHistoryMap' | 'groupHistoryMap' | 'announceHistoryMap' | 'msgLockMap' | 'userInfoMap' | 'userCredentialMap' | 'accountGeneratorMap' | 'friendLinkMap' | 'contactMap' | 'addressInfoMap' | 'lastRead';
 
 export let store:Store;
 // ============================================ 可执行
