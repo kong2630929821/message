@@ -62,13 +62,13 @@ export const login = (userType: UserType, user: string, pwd: string, cb: (r: Use
  */
 export const clientRpcFunc = (name: string, req: any, callback: Function, timeout: number = 2000) => {
     if (!clientRpc) {
-        if (mqtt.getState()) {
+        if (mqtt && mqtt.getState()) {
             clientRpc = mqtt.getRpc();
         } else {
             return;
         }
     }
-    if (!mqtt.getState()) {
+    if (mqtt && !mqtt.getState()) {
         bottomNotice(`网络连接中！！！！`);
 
         return;
