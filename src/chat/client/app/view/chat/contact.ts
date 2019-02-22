@@ -4,7 +4,6 @@
 
 // ================================================ 导入
 import { uploadFileUrlPrefix } from '../../../../../app/config';
-import { manualReconnect } from '../../../../../app/net/login';
 import * as walletStore from '../../../../../app/store/memstore';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
@@ -15,8 +14,6 @@ import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
-import { createGroup } from '../../net/rpc';
-import { openTestWebview } from '../gameChatApi';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;

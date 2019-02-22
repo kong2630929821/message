@@ -75,6 +75,9 @@ export class AutoLoginMgr {
             },
             onFailure: (r) => {
                 console.log('connect fail', r);
+                if (!(typeof r === 'string')) {
+                    this.reconnect();
+                }
                 fail && fail(r);
             }
         };
