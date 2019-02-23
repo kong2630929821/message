@@ -74,29 +74,37 @@ export const getBaseInfo = (gid,cb) => {
     });
 };
 
-// 第三方聊天注入资源
-export const gameChatPromise = () => {
-    return new Promise<string>((resolve) => {
-        const path = 'chat/game_chat/gameChat.js.txt';
-        loadDir([path], undefined, undefined, undefined, fileMap => {
-            const arr = new Uint8Array(fileMap[path]);
+// 第三方聊天注入资源 返回两个propmise
+export const gameChatPromise = (gid) => {
+
+    return {
+        chatPromise: new Promise<string>((resolve) => {
+            const path = 'chat/game_chat/gameChat.js.txt';
+            loadDir([path], undefined, undefined, undefined, fileMap => {
+                const arr = new Uint8Array(fileMap[path]);
             // for (let i = 0; i < arr.length; ++i) {
             //     content += String.fromCharCode(arr[i]);
             // }
             // content = decodeURIComponent(escape(atob(content)));
-            const content = new TextDecoder().decode(arr);
-            resolve(content);
-        }, () => {
+                const content = new TextDecoder().decode(arr);
+                resolve(content);
+            }, () => {
             // TODO 失败的回调
-        });
-    });
+            });
+        }),
+        textPromise: Promise.resolve(`
+            window.piGroupId = '${gid}';
+        `)
+    };
 };
 
 // 打开一个测试 webview
-export const openTestWebview = () => {
+export const openTestWebview = (gid) => {
     const gameTitle = '测试';
     const gameUrl =  'http://192.168.31.226/wallet/phoneRedEnvelope/openRedEnvelope.html';
-    gameChatPromise().then(content => {
+    
+    Promise.all([gameChatPromise(gid).textPromise,gameChatPromise(gid).chatPromise]).then(([textContent,chatContent]) => {
+        const content = textContent + chatContent;
         WebViewManager.open(gameTitle, `${gameUrl}?${Math.random()}`, gameTitle, content);
     });
 };

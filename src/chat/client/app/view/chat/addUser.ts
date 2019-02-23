@@ -90,11 +90,15 @@ export class AddUser extends Widget {
                 popNew('app-view-mine-other-addFriend'); // 展示我的二维码
                 break;
             case 2:
-                rippleShow(e);
                 this.applyFriend();  // 添加好友
                 break;
             default:
         }
+    }
+    
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 
 }

@@ -17,6 +17,7 @@ import * as store from '../../data/store';
 import { bottomNotice } from '../../logic/logic';
 import { selectImage } from '../../logic/native';
 import { clientRpcFunc } from '../../net/init';
+import { createGroup as createNPGroup } from '../../net/rpc';
 import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ================================================ 导出
@@ -121,6 +122,18 @@ export class SetGroupChat extends Widget {
             }
         });
         this.ok();
+    }
+
+    /**
+     * 创建入群无需同意的群组
+     * 暂留接口
+     */
+    public createNPG() {
+        if (this.props.name) {
+            createNPGroup(this.props.name,'','',false);
+        } else {
+            bottomNotice('请输入群名');
+        }
     }
 
     public inputName(e:any) {

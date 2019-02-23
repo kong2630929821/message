@@ -46,8 +46,7 @@ export class GroupListt extends Widget {
     }
 
     // 主动添加群聊
-    public applyGroup(e:any) {
-        rippleShow(e);
+    public applyGroup() {
         if (!this.props.inputGid) {
             bottomNotice('请输入群聊ID');
            
@@ -64,6 +63,11 @@ export class GroupListt extends Widget {
             }));
         }
 
+    }
+
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 
     // 创建群聊

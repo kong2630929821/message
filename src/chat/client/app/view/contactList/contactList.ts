@@ -7,14 +7,13 @@ import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
-import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
+import { rippleShow } from '../../logic/logic';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
 export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
 
 export class ContactList extends Widget {
     public ok:() => void;
@@ -49,6 +48,11 @@ export class ContactList extends Widget {
                 break;
             default:
         }
+    }
+    
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 }
 

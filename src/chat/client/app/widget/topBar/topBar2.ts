@@ -5,11 +5,11 @@
 import { Json } from '../../../../../pi/lang/type';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { rippleShow } from '../../logic/logic';
 
 interface Props {
     scroll?:boolean;
     scrollHeight?:number;
-    refreshImg?:string;
     refresh?:boolean;
     text?:string;
     nextImg?:string;
@@ -22,19 +22,6 @@ export class TopBar2 extends Widget {
     public setProps(oldProps:Json,props:Json) {
         super.setProps(oldProps,props);
         this.props.refresh = false;
-    }
-
-    /**
-     * 刷新当前页
-     */
-    public refreshPage(event:any) {
-        this.props.refresh = true;
-        this.paint();
-        notify(event.node,'ev-refresh-click',{});
-        setTimeout(() => {
-            this.props.refresh = false;
-            this.paint();
-        }, 1000);
     }
 
     /**
@@ -51,4 +38,8 @@ export class TopBar2 extends Widget {
         notify(event.node,'ev-next-click',{});
     }
     
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
+    }
 }

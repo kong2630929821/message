@@ -111,7 +111,7 @@ export class Chat extends Widget {
         setTimeout(() => {
             this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
             getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
-        }, 300);
+        }, 100);
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.register(`groupChatMap/${this.props.hid}`,this.bindCB);
             store.register(`groupInfoMap/${this.props.id}`,this.bindCB);

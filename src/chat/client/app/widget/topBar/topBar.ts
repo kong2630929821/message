@@ -10,13 +10,13 @@
 import { Json } from '../../../../../pi/lang/type';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { rippleShow } from '../../logic/logic';
 
 interface Props {
     title:string;
     nextImg?:string;
     centerTitle?:boolean;
     background?:string;
-    refreshImg?:string;
 }
 
 // ================================ 导出
@@ -44,17 +44,9 @@ export class TopBar extends Widget {
         notify(event.node,'ev-next-click',{});
     }
 
-    /**
-     * 刷新当前页
-     */
-    public refreshPage(event:any) {
-        this.state.refresh = true;
-        this.paint();
-        notify(event.node,'ev-refresh-click',{});
-        setTimeout(() => {
-            this.state.refresh = false;
-            this.paint();
-        }, 1000);
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
     
 }
