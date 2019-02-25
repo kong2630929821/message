@@ -359,7 +359,7 @@ function createElementTag(){
     var htmlText = `<section id="gamechat_section1">
     <div class="bubble" id="gamechat_bubble" onclick="openChatPage()" >
         <span class="redSpot" id="gamechat_redSpot"></span>
-        <img src="${chatBaseUrl}/res/images/chat-empty.png" style="width:40px;margin-top: 30px;"/>
+        <img src="https://test.kuplay.io/chat-empty.png" style="width:40px;margin-top: 30px;"/>
     </div>
     </section>
     <!-- 展开页面 -->
@@ -410,12 +410,12 @@ function createElementTag(){
 }
 
 // 定义变量
-const gid = 10001;
 const filePath = "chat/client/app/view/gameChatApi";
-const chatBaseUrl=`http://192.168.31.226/wallet/chat/client/app`;
+const chatBaseUrl=`https://test.kuplay.io/wallet/chat/client/app`;
 var messList = [];
 var readLast = '';
-var uid;
+var gid;  // 群ID
+var uid;  // 用户ID
 var uploadFileUrlHead; // 上传的文件链接
 var EMOJIS_MAP = new Map();
 
@@ -468,6 +468,7 @@ function closePop(){
 window.onload = function(){
     createStyleTag();
     createElementTag();
+    gid = Number(window.piGroupId);
     pi_RPC_Method(filePath, "getBaseInfo", gid, function (error, result) {
         uid = result.uid;
         messList.push(result.lastRead);

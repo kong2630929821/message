@@ -6,6 +6,7 @@ import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { rippleShow } from '../../logic/logic';
 
 interface Props {
     avatar:string;
@@ -50,6 +51,11 @@ export class TopBar1 extends Widget {
      */
     public showMine() {
         popNew('app-view-mine-home-home');
+    }
+
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 
 }

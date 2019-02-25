@@ -4,12 +4,12 @@
         <chat-client-app-widget-input-input w-class="pi-input idInput">{placeHolder:"搜索用户ID",style:"font-size:32px;padding-left:82px;border-radius: 12px;",input:{{it.rid}} }</chat-client-app-widget-input-input>
         <img w-class="searchIcon" src="../../res/images/search-gray.png" />
     </div>
-    <div w-class="applyBtn" on-tap="goNext(e,2)">添加好友</div>
+    <div w-class="applyBtn" on-tap="goNext(e,2)" on-down="onShow">添加好友</div>
 
-    <div w-class="featureBar-scan-wrap" on-tap="goNext(e,0)" >
+    <div w-class="featureBar-scan-wrap" on-tap="goNext(e,0)" on-down="onShow">
         <chat-client-app-widget-featureBar-featureBar>{iconPath:"scan-circle.png",text:"扫一扫"}</chat-client-app-widget-featureBar-featureBar>
     </div>
-    <div w-class="featureBar-code-wrap" on-tap="goNext(e,1)" >
+    <div w-class="featureBar-code-wrap" on-tap="goNext(e,1)" on-down="onShow">
         <chat-client-app-widget-featureBar-featureBar>{iconPath:"two-code.png",text:"我的二维码"}</chat-client-app-widget-featureBar-featureBar>
     </div>
 </div>

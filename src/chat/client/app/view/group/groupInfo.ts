@@ -96,6 +96,11 @@ export class GroupInfos extends Widget {
         this.ok();
     }
 
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
+    }
+
     // 重新上传群头像
     public selectAvatar() {
         const imagePicker = selectImage((width, height, url) => {
@@ -222,8 +227,7 @@ export class GroupInfos extends Widget {
         }
     }
     // 打开群聊天
-    public openGroupChat(e:any) {
-        rippleShow(e);
+    public openGroupChat() {
         this.pageClick();
         popNew('chat-client-app-view-chat-chat',{ id:this.props.gid, chatType:GENERATOR_TYPE.GROUP });
         

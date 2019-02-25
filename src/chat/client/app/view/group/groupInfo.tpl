@@ -49,7 +49,7 @@
             <div w-class="other-wrap">
                 {{if it.inFlag == 2}}
                     <div style="margin: 0 60px 20px;">
-                        <div w-class="liItem1" on-tap="applyGroup(e)" >加入群</div>
+                        <div w-class="liItem1" on-tap="applyGroup(e)" on-down="onShow">加入群</div>
                     </div>
                 {{else}}
                     <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
@@ -67,7 +67,7 @@
                         <div w-class="liItem1" style="color: #222222;" on-tap="openGroupManage">群管理</div>
                         {{end}}
                         {{if it.inFlag != 1}}
-                        <div w-class="liItem1" on-tap="openGroupChat(e)">开始聊天</div>
+                        <div w-class="liItem1" on-tap="openGroupChat(e)" on-down="onShow">开始聊天</div>
                         {{end}}
                     </ul>
                 {{end}}

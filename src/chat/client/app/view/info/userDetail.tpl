@@ -34,7 +34,7 @@
         </div>
         {{if it.inFlag == 3 || !it.isFriend}}
         <div style="margin: 40px 80px;">
-            <div w-class="liItem1" on-tap="addUser(e)" >加为好友</div>
+            <div w-class="liItem1" on-tap="addUser(e)" on-down="onShow">加为好友</div>
         </div>
         {{else}}
         <div w-class="other-wrap">
@@ -51,7 +51,7 @@
                 </li>
 
                 {{if it.inFlag != 1}}
-                    <div w-class="liItem1" on-tap="startChat(e)">开始对话</div>
+                    <div w-class="liItem1" on-tap="startChat(e)" on-down="onShow">开始对话</div>
                 {{end}}
             </ul>
         </div>

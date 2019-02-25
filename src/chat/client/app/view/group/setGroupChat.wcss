@@ -51,3 +51,11 @@
     color:gray;
     text-transform:uppercase;  
 }
+.npgBtn{
+    font-size: 24px;
+    text-align: center;
+    height: 60px;
+    margin: 20px;
+    background: #eee;
+    line-height: 60px;
+}

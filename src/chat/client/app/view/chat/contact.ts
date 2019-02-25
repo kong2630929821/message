@@ -14,6 +14,7 @@ import * as store from '../../data/store';
 import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
+
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -73,11 +74,19 @@ export class Contact extends Widget {
         });
     }
 
-    public chat(e:any, id: number, chatType: GENERATOR_TYPE) {
-        rippleShow(e);
+    /**
+     * 进入聊天页面
+     * @param id 好友ID或群ID
+     * @param chatType 群聊或单聊
+     */
+    public chat(id: number, chatType: GENERATOR_TYPE) {
         this.closeMore();
         popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
+    }
 
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 
     // 打开更多功能
@@ -114,8 +123,7 @@ export class Contact extends Widget {
                     this.paint();
                 });
                    
-                // openTestWebview();      
-                // createGroup('LOL竞猜官方群组','','',false);
+                // openTestWebview(10001);      
                 break;
             case 4:
                 popNew('chat-client-app-view-info-user');

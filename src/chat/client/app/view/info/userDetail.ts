@@ -107,21 +107,23 @@ export class UserDetail extends Widget {
     }
 
     // 开始对话
-    public startChat(e:any) {
-        rippleShow(e);
+    public startChat() {
         this.pageClick();
         popNew('chat-client-app-view-chat-chat', { id: this.props.uid, chatType: GENERATOR_TYPE.USER });
     }
 
     // 添加好友
-    public addUser(e:any) {
-        rippleShow(e);
+    public addUser() {
         this.pageClick();
         applyFriend(this.props.uid.toString(), (r: Result) => {
             if (r.r === 0) {
                 bottomNotice(`${this.props.uid}已经是你的好友`);
             }
         });
+    }
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 
     // 点击联系人操作列表项

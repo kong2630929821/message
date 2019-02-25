@@ -5,6 +5,7 @@
 // ================================================ 导入
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { rippleShow } from '../../logic/logic';
 
 interface Util {
     iconPath ?: string; // 图标路径
@@ -21,5 +22,10 @@ export class UtilList extends Widget {
     // 处理点击每一项功能列表
     public handleUtilItemTap(event:any,index:number) {
         notify(event.node,'ev-handleFatherTap',{ index:index });
+    }
+    
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 }
