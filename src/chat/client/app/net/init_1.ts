@@ -72,6 +72,9 @@ export const setUserInfo = () => {
     r.avatar = user.avatar;
     r.tel = user.phoneNumber;
     r.wallet_addr = walletAddr;
+    if (!r.uid) {
+        return;
+    }
     init2.clientRpcFunc(changeUserInfo, r, (res) => {
         if (res && res.uid > 0) {
             store.setStore(`userInfoMap/${r.uid}`, r);
