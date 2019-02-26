@@ -14,8 +14,11 @@
             <chat-client-app-widget-input-input>{placeHolder:"群名",input:{{it.name}},style:"width:500px;padding:20px 0;border-bottom:solid #318DE6 1px;"}</chat-client-app-widget-input-input>
         </div>
     </div>
-    <div w-class="npgBtn" on-tap="createNPG">创建入群无需同意的群组</div>
     
+    {{if it.createNpg}}
+    <div w-class="npgBtn" on-tap="createNPG">创建入群无需同意的群组</div>
+    {{end}}
+
     <div w-class="a-part" ev-changeSelect="changeSelect">
         {{for index,item of it1.friends}}
         <div ev-addMember="addMember" style="position:relative;">

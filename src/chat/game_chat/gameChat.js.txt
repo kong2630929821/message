@@ -8,7 +8,7 @@ window.pi_jsApi = {};
 
 function createStyleTag() {
     var cssText = `/* chat */
-    .pi-root{
+    .pi_root_gamechat{
         position: fixed;
         z-index: 999;
         width: 100%;
@@ -335,7 +335,7 @@ function createStyleTag() {
         border: 1px solid #fff;
         display: none;
     }
-    .modal-mask{
+    .modalMask{
         display: flex;
         justify-content: center;
         align-items: center;
@@ -347,7 +347,89 @@ function createStyleTag() {
         left:0;
         overflow-x: hidden;
         overflow-y: auto;
-    }`;
+    }
+    .gamechat_modalMask{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 60px;
+        background-color: rgba(50, 50, 50, 0.5);
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    .gamechat_body{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 12px;
+        position:relative;
+        width:100%;
+    }
+    .gamechat_closeBtn{
+        margin-top:60px;
+        width:70px;
+        height:70px;
+        border-radius:50%;
+        border:2px solid white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .gamechat_btns{
+        background:#fff;
+        width: 100%;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .gamechat_btn1{
+        width:500px;
+        height:80px;
+        background:#FCDC3C;
+        border-radius:40px;
+        font-size:32px;
+        color:#222222;
+        line-height:80px;
+        text-align: center;  
+        margin: 50px 0 30px;
+    }
+    .gamechat_btn2{
+        width:500px;
+        height:80px;
+        background:#CCCCCC;
+        border-radius:40px;
+        font-size:32px;
+        color:#222222;
+        line-height:80px;
+        text-align: center;  
+    }
+    #pi_bttomMess{
+        position: fixed;
+        left: 50%;
+        bottom: 300px;
+        border-radius: 6px;
+        background-color: rgba(0, 0, 0, 0.9);
+        line-height: 45px;
+        color: rgba(255, 255, 255, 0.87);
+        font-size: 32px;
+        text-align: center;
+        padding: 18px 25px;
+        zoom:0.5;
+    }
+    .message_open{
+        transform: translateX(-50%);
+        transition: opacity 0.3s, transform .4s;
+    }
+    .message_fade_enter {
+        opacity: 0;
+        transform: translate(-50%, 100%);
+    }
+    `;
     
     var style = document.createElement("style");
     style.type = "text/css";
@@ -356,48 +438,65 @@ function createStyleTag() {
 }
 
 function createElementTag(){
-    var htmlText = `<section id="gamechat_section1">
-    <div class="bubble" id="gamechat_bubble" onclick="openChatPage()" >
-        <span class="redSpot" id="gamechat_redSpot"></span>
-        <img src="https://test.kuplay.io/chat-empty.png" style="width:40px;margin-top: 30px;"/>
-    </div>
+    var htmlText = `
+    <section id="gamechat_section1">
+        <div class="bubble" id="gamechat_bubble" onclick="openChatPage()" >
+            <span class="redSpot" id="gamechat_redSpot"></span>
+            <img src="${chatBaseUrl}/res/images/add-white.png" style="width:40px;margin-top: 30px;"/>
+        </div>
     </section>
     <!-- 展开页面 -->
     <section id="gamechat_section2" style="display:none">
-    <div class="gameChatPage">
-        <div class="topbar">
-            <div class="topTitle"> 
-                <span id="gameChat_groupName" style="margin-left:20px;">groupName(num)</span>
-                <img src="${chatBaseUrl}/res/images/close_blue.png" class="closePop" onclick="closePop()"/>
-            </div>
-        </div>
-        <div class="messageBox" id="gameChat_messageBox"></div>
-        <div class="inputOuter" >
-            <div class="input-message-wrap">
-                <div class="pi-input-box chat-input">
-                    <div class="hideMsg" id="gameChat_hideMsg">1</div>
-                    <textarea 
-                        id="gameChat_textarea"
-                        unchange = "true"
-                        class="pi-input__inner" 
-                        type="text" 
-                        autocomplete="off" 
-                        placeholder="输入消息"></textarea>
+        <div class="gameChatPage">
+            <div class="topbar">
+                <div class="topTitle"> 
+                    <span id="gameChat_groupName" style="margin-left:20px;">groupName(num)</span>
+                    <img src="${chatBaseUrl}/res/images/close_blue.png" class="closePop" onclick="closePop()"/>
                 </div>
-                <img class="emoji" onclick="playEmoji()" src="${chatBaseUrl}/res/images/emoji.png"/>
-                <img class="unfold" onclick="sendMess()" src="${chatBaseUrl}/res/images/send.png"/>
             </div>
-            <div class="emojiMap" id="gameChat_emojiMap" style="display:none;"></div>
-            <div class="radioWrap" style="display:none">
-                <div class="radioWrite" style="animation: radio1 1s infinite;"></div>
-                <div class="radioWrite" style="animation: radio2 1s infinite;"></div>
-                <div class="radioWrite"></div>
+            <div class="messageBox" id="gameChat_messageBox"></div>
+            <div class="inputOuter" >
+                <div class="input-message-wrap">
+                    <div class="pi-input-box chat-input">
+                        <div class="hideMsg" id="gameChat_hideMsg">1</div>
+                        <textarea 
+                            id="gameChat_textarea"
+                            unchange = "true"
+                            class="pi-input__inner" 
+                            type="text" 
+                            autocomplete="off" 
+                            placeholder="输入消息"></textarea>
+                    </div>
+                    <img class="emoji" onclick="playEmoji()" src="${chatBaseUrl}/res/images/emoji.png"/>
+                    <img class="unfold" onclick="sendMess()" src="${chatBaseUrl}/res/images/send.png"/>
+                </div>
+                <div class="emojiMap" id="gameChat_emojiMap" style="display:none;"></div>
+                <div class="radioWrap" style="display:none">
+                    <div class="radioWrite" style="animation: radio1 1s infinite;"></div>
+                    <div class="radioWrite" style="animation: radio2 1s infinite;"></div>
+                    <div class="radioWrite"></div>
+                </div>
             </div>
         </div>
-    </div>
-</section>`;
+    </section>
+    <!-- 未加入群聊弹窗 -->
+    <section id="gamechat_section3" style="display:none" onclick="javascript:event.stopPropagation();">
+        <div class="gamechat_modalMask" >
+            <div class="gamechat_body">
+                <img src="${chatBaseUrl}/res/images/addToGroup.png" style="height:300px;width:100%;"/>
+                <div class="gamechat_btns">
+                    <div class="gamechat_btn1" onclick="btnClick(1)">加入游戏群聊</div>
+                    <div class="gamechat_btn2" onclick="btnClick(2)">下次吧</div>
+                </div>
+            </div>
+            <div class="gamechat_closeBtn" onclick="closePop()">
+                <img src="${chatBaseUrl}/res/images/close_white.png" width="30px;" height="30px;" />
+            </div>
+        </div>
+    </section>
+    `;
     var $root = document.createElement("div");
-    $root.setAttribute("class","pi-root");
+    $root.setAttribute("class","pi_root_gamechat");
     // $root.setAttribute("style",browserAdaptive());
     
     $root.innerHTML = htmlText;
@@ -411,33 +510,60 @@ function createElementTag(){
 
 // 定义变量
 const filePath = "chat/client/app/view/gameChatApi";
-const chatBaseUrl=`https://test.kuplay.io/wallet/chat/client/app`;
+const chatBaseUrl=`http://192.168.31.226/wallet/chat/client/app`;
 var messList = [];
 var readLast = '';
 var gid;  // 群ID
 var uid;  // 用户ID
 var uploadFileUrlHead; // 上传的文件链接
 var EMOJIS_MAP = new Map();
+var isGroupMember; // 是否已经加入群
 
 
 // 打开聊天界面
 function openChatPage(){
     document.querySelector('#gamechat_section1').style.display = 'none';
-    document.querySelector('#gamechat_section2').style.display = 'block';
     document.querySelector('#gamechat_redSpot').style.display = 'none';
-    document.querySelector('.pi-root').style.height = '100%';
-    readLast = messList[messList.length-1];
+    document.querySelector('.pi_root_gamechat').style.height = '100%';
+    if(isGroupMember){
+        document.querySelector('#gamechat_section2').style.display = 'block';
+        readLast = messList[messList.length-1];
+    }else{
+        document.querySelector('#gamechat_section3').style.display = 'block';
+    }
 }
 
 // 关闭聊天界面
 function closePop(){
     document.querySelector('#gamechat_section1').style.display = 'block';
     document.querySelector('#gamechat_section2').style.display = 'none';
+    document.querySelector('#gamechat_section3').style.display = 'none';
     document.querySelector('#gamechat_redSpot').style.display = 'none';
-    document.querySelector('.pi-root').style.height = 'auto';
+    document.querySelector('.pi_root_gamechat').style.height = 'auto';
     readLast = messList[messList.length-1];
 }
 
+// 点击按钮
+function btnClick(num){
+    closePop();
+    if(num === 1){
+        const param = {
+            gid:gid,
+            uid:uid
+        }
+        pi_RPC_Method(filePath, "invitePersonToGroup", param, function (error, result) {
+            isGroupMember = result.flag;
+            if(isGroupMember){
+                requestAnimationFrame(function(){
+                    getBaseMess();
+                });
+                showNotice('加入群组成功');
+            }else{
+                showNotice('加入群组失败');
+            }
+        });
+    }
+}
 // // 点击气泡
 // function touchBubble(){
 //     event.preventDefault();
@@ -469,20 +595,50 @@ window.onload = function(){
     createStyleTag();
     createElementTag();
     gid = Number(window.piGroupId);
-    pi_RPC_Method(filePath, "getBaseInfo", gid, function (error, result) {
-        uid = result.uid;
-        messList.push(result.lastRead);
-        readLast = result.lastRead;
-        document.getElementById('gameChat_groupName').innerText = result.groupName;
-        uploadFileUrlHead = result.uploadFileUrlHead;
-        for(var v of result.EMOJIS){ // 表情包图库
-            EMOJIS_MAP.set(v[0],v[2]);
-        }
-        getMessageList();
-        addEmoji();
-    });
-
+    getBaseMess();
 };
+
+// 获取基础信息
+function getBaseMess(){
+    pi_RPC_Method(filePath, "getBaseInfo", gid, function (error, result) {
+        console.log('请求基础数据！！！',result)
+        uid = result.uid;
+        isGroupMember = result.flag;
+
+        if(isGroupMember){
+            document.getElementById('gamechat_section1').getElementsByTagName('img')[0].src = 'https://test.kuplay.io/chat-empty.png';
+            messList.push(result.lastRead);
+            readLast = result.lastRead;
+            document.getElementById('gameChat_groupName').innerText = result.groupName;
+            uploadFileUrlHead = result.uploadFileUrlHead;
+            for(var v of result.EMOJIS){ // 表情包图库
+                EMOJIS_MAP.set(v[0],v[2]);
+            }
+            getMessageList();
+            addEmoji();
+        }
+    });
+}
+
+function showNotice(mess){
+    var elem = document.createElement('div');
+    elem.setAttribute("id","pi_bttomMess");
+    elem.classList.add('message_fade_enter','message_open');
+    elem.innerText = mess;
+    document.body.appendChild(elem);
+
+    setTimeout(()=>{
+        elem.classList.remove('message_fade_enter');
+    },100);
+
+    setTimeout(() => {
+        elem.classList.add('message_fade_enter');
+        setTimeout(()=>{
+            document.body.removeChild(document.getElementById('pi_bttomMess'));
+        },300);
+        
+    }, 2000);
+}
 
 // 打开表情包
 function playEmoji(){
@@ -538,7 +694,7 @@ function sendMess(){
 function openBigImage(){
     const url = event.target.src; // 触发事件的子元素
     const $image = document.createElement('div');
-    $image.classList.add('modal-mask');
+    $image.classList.add('modalMask');
     $image.innerHTML = `<img src="${url}" style="max-width: 90%;"/>`;
     var $body = document.querySelector("body");
     $body.appendChild($image);
