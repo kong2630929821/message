@@ -97,7 +97,7 @@ export class MessageItem extends Widget {
     public openRedEnvelope() {
         popNew('app-view-earn-exchange-openRedEnv', { 
             inFlag: 'chat',
-            cid: this.props.msg.redEnvId,
+            rid: this.props.msg.redEnvId,
             message: this.props.msg.msg
         });
     }
