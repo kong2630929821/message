@@ -37,7 +37,8 @@ export class SetGroupChat extends Widget {
             inviteMembers:[],
             inviteUserName:[],
             isSelect:false,
-            avatarHtml:''
+            avatarHtml:'',
+            createNpg:true
         };
         this.state = new Map();
     }
@@ -131,6 +132,7 @@ export class SetGroupChat extends Widget {
     public createNPG() {
         if (this.props.name) {
             createNPGroup(this.props.name,'','',false);
+            this.ok();
         } else {
             bottomNotice('请输入群名');
         }
@@ -166,6 +168,7 @@ interface Props {
     inviteUserName:string[];// 被邀请的成员名字
     isSelect:boolean;// 是否被选择
     avatarHtml:string; // 群头像展示
+    createNpg:boolean; // 显示创建无需同意的群组按钮 测试
 }
 let avatarUrl;  // 群头像链接
 store.register('contactMap', (r: Map<number, Contact>) => {

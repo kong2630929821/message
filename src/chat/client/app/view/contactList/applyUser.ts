@@ -11,6 +11,7 @@ import { Logger } from '../../../../utils/logger';import * as store from '../../
 import { getUsersInfo } from '../../../../server/data/rpc/basic.p';
 import { GetUserInfoReq, UserArray } from '../../../../server/data/rpc/basic.s';
 import { getGidFromGuid, getUidFromGuid } from '../../../../utils/util';
+import { rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -93,6 +94,11 @@ export class ApplyUser extends Widget {
         }
         this.props.isagree = true;
         this.paint();
+    }
+
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 }
 

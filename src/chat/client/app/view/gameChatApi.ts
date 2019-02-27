@@ -11,6 +11,7 @@ import { depCopy, genGroupHid, genGuid, getGidFromHincid } from '../../../utils/
 import * as store from '../data/store';
 import { bottomNotice, timestampFormat } from '../logic/logic';
 import { clientRpcFunc } from '../net/init';
+import { inviteUsersToGroup } from '../net/rpc';
 import { EMOJIS } from '../widget/emoji/emoji';
 
 /**
@@ -64,13 +65,34 @@ export const getDetail = (hIncId,cb) => {
 // 获取基础信息
 export const getBaseInfo = (gid,cb) => {
     const hid = genGroupHid(gid);
-    const ginfo = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
-    cb(null,{
-        uid:store.getStore('uid'),
-        lastRead:store.getStore(`lastRead/${hid}`,{ msgId:null }).msgId,
-        groupName:`${ginfo.name}(${ginfo.memberids.length})`,
-        uploadFileUrlHead:uploadFileUrlPrefix,
-        EMOJIS:EMOJIS
+    const uid = store.getStore('uid');
+    const contact = store.getStore(`contactMap/${uid}`);
+    
+    if (contact.group.indexOf(gid) > -1) {
+        const ginfo = store.getStore(`groupInfoMap/${gid}`,null);
+        cb(null,{
+            uid:store.getStore('uid'),
+            lastRead:store.getStore(`lastRead/${hid}`,{ msgId:null }).msgId,
+            groupName:`${ginfo.name}(${ginfo.memberids.length})`,
+            uploadFileUrlHead:uploadFileUrlPrefix,
+            EMOJIS:EMOJIS,
+            flag:true
+        });
+    } else {
+        cb(null,{
+            uid:store.getStore('uid'),
+            flag:false
+        });
+    }
+    
+};
+
+// 邀请用户加入群组
+export const invitePersonToGroup = (param,cb) => {
+    inviteUsersToGroup(param.gid,[param.uid],(r) => {
+        cb(null,{
+            flag: r && r.r === 1 
+        });
     });
 };
 
