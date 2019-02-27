@@ -11,7 +11,7 @@ import { GroupInfo } from '../../../../server/data/db/group.s';
 import { dissolveGroup } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { bottomNotice } from '../../logic/logic';
+import { bottomNotice, rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -61,6 +61,10 @@ export class ManageItem extends Widget {
             this.setProps(this.props);
             this.paint();
         });
+    }
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
     // 获取群组信息
     public getGroupInfo(gid:number) {

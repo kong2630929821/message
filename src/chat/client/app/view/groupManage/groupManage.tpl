@@ -6,6 +6,6 @@
         <chat-client-app-widget-manageItem-manageItem>{manageList:{{it.manageList}}}</chat-client-app-widget-manageItem-manageItem>
     </div>
     
-    <div w-class="destroy" on-tap="destroyGroup">解散群</div>
+    <div w-class="destroy" on-tap="destroyGroup" on-down="onShow">解散群</div>
 </div>
 

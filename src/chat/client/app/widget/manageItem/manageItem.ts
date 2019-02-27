@@ -5,6 +5,7 @@
 // ================================================ 导入
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { rippleShow } from '../../logic/logic';
 
 // ================================================ 导出
 export class ManageItem extends Widget {
@@ -15,6 +16,10 @@ export class ManageItem extends Widget {
         notify(e.node,'ev-openManageItem',{ value : index });
     }
     
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
+    }
 }
 
 // ================================================ 本地

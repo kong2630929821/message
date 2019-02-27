@@ -182,3 +182,10 @@ export const rippleShow = (e:any) => {
         getRealNode(e.node).classList.remove('ripple');
     }, 500);
 };
+
+// 获取当前用户的所有好友ID
+export const getAllFriendIDs = () => {
+    const uid = store.getStore('uid');
+
+    return store.getStore(`contactMap/${uid}`,{ friends:[] }).friends; 
+};

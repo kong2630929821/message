@@ -1,4 +1,4 @@
-<div w-class="user-apply-wrap" on-tap="viewApplyDetail">
+<div w-class="user-apply-wrap" on-tap="viewApplyDetail" on-down="onShow">
     <div w-class="avatar-wrap">
         <img w-class="avatar" src="../../res/images/user.png" />
     </div>
