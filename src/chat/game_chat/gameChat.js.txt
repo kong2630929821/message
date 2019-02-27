@@ -547,11 +547,7 @@ function closePop(){
 function btnClick(num){
     closePop();
     if(num === 1){
-        const param = {
-            gid:gid,
-            uid:uid
-        }
-        pi_RPC_Method(filePath, "invitePersonToGroup", param, function (error, result) {
+        pi_RPC_Method(filePath, "invitePersonToGroup", gid, function (error, result) {
             isGroupMember = result.flag;
             if(isGroupMember){
                 requestAnimationFrame(function(){

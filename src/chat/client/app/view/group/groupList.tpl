@@ -8,7 +8,7 @@
             <img w-class="searchIcon" src="../../res/images/search-gray.png" />
         </div>
 
-        <div on-tap="applyGroup(e)" w-class="applyBtn">添加群聊</div>
+        <div on-tap="applyGroup(e)" w-class="applyBtn" on-down="onShow">添加群聊</div>
         
         {{if it1.group.length>0}}
         <div w-class="groupPart" ev-changeSelect="changeSelect">

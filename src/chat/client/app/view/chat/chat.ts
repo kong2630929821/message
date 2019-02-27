@@ -210,6 +210,7 @@ export class Chat extends Widget {
                     innerItem.innerText = '添加好友';
                     innerItem.addEventListener('click', () => {
                         popNew('chat-client-app-view-chat-addUser',{ rid:this.props.id });
+                        this.ok();
                     });
                     item.appendChild(innerItem);
                     document.getElementById('chatMessageBox').appendChild(item);
