@@ -167,6 +167,7 @@ export const acceptUser = (agree: GroupAgree): Result => {
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('Accept user: ', agree.uid, 'to group: ', agree.gid);
     contact.applyGroup = delGidFromApplygroup(agree.gid,contact.applyGroup);  // 同意用户入群，清空该用户受该群组的邀请记录
+    contact.group = delValueFromArray(agree.gid,contact.group);  // 同意用户入群，清空该用户错误的群组id
     contact.group.push(agree.gid);
     contactBucket.put(agree.uid, contact);
     logger.debug('acceptUser uid', agree.uid, 'group ', contact.group,'applyGroup:',contact.applyGroup);
@@ -241,26 +242,23 @@ export const inviteUsers = (invites: InviteArray): Result => {
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
     console.log('inviteUsers groupInfo: ',gInfo);
     
-    // 入群需要同意需要判断是否是好友
-    if (gInfo.need_agree) {
+    // 判断当前登录用户是否属于该群组
+    if (gInfo.memberids.indexOf(uid) <= -1) {
+        logger.debug('user: ', uid, 'is not a member of this group');
+        res.r = 2; // 当前登陆用户不是该群成员
 
-        // 判断当前登录用户是否属于该群组
-        if (gInfo.memberids.indexOf(uid) <= -1) {
-            logger.debug('user: ', uid, 'is not a member of this group');
-            res.r = 2; // User is not a member of this group
-
-            return res;
-        }
-        
-        // 判断当前登录用户是否和被邀请的用户是好友
-        const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
-        logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
-        logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);
-        invites.arr = invites.arr.filter((ele: Invite) => {
-        // 无法邀请不是好友的用户
-            return currentUserInfo.friends.findIndex(item => item === ele.rid) !== -1;
-        });
+        return res;
     }
+        
+    // 判断当前登录用户是否和被邀请的用户是好友
+    const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
+    logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
+    logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);
+    invites.arr = invites.arr.filter((ele: Invite) => {
+
+        // 无法邀请不是好友的用户
+        return currentUserInfo.friends.findIndex(item => item === ele.rid) !== -1;
+    });
 
     logger.debug(`after filter invites is : ${JSON.stringify(invites.arr)}`);
     for (let i = 0; i < invites.arr.length; i++) {
@@ -271,24 +269,44 @@ export const inviteUsers = (invites: InviteArray): Result => {
             logger.debug('be invited user: ', rid, 'is exist in this group:', gid);
             continue;
         }
-        if (gInfo.need_agree) {
-            cInfo.applyGroup.indexOf(genGuid(gid, uid)) === -1 && cInfo.applyGroup.push(genGuid(gid, uid));
-            contactBucket.put(rid, cInfo);
-            logger.debug('Invite user: ', rid, 'to group: ', gid);
+        cInfo.applyGroup.indexOf(genGuid(gid, uid)) === -1 && cInfo.applyGroup.push(genGuid(gid, uid));
+        contactBucket.put(rid, cInfo);
+        logger.debug('Invite user: ', rid, 'to group: ', gid);
             
-        } else {// 入群不需要同意则直接自动入群
-            
-            gInfo.applyUser.findIndex(item => item === rid) === -1 && gInfo.applyUser.push(rid);
-            groupInfoBucket.put(gid,gInfo);
-            const agree = new GroupAgree();
-            agree.gid = gid;
-            agree.uid = rid;
-            agree.agree = true;
-            acceptUser(agree);
-        }
     }
         
     res.r = 1;
+
+    return res;
+};
+
+/**
+ * 邀请当前用户进入无需同意的群组
+ */
+// #[rpc=rpcServer]
+export const inviteUserToNPG = (gid:number) => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const res = new Result();
+
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    console.log('inviteUserToNPG groupInfo: ',gInfo);
+    const rid = getUid();
+    // 判断用户是否已经在当前群中
+    if (gInfo.memberids.indexOf(rid) > -1) {
+        logger.debug('be invited user: ', rid, 'is exist in this group:', gid);
+        res.r = 0;
+        
+        return res;
+    }
+    // 添加该用户的申请信息
+    gInfo.applyUser.findIndex(item => item === rid) === -1 && gInfo.applyUser.push(rid);
+    groupInfoBucket.put(gid,gInfo);
+    const agree = new GroupAgree();
+    agree.gid = gid;
+    agree.uid = rid;
+    agree.agree = true;
+    const r = acceptUser(agree);
+    res.r = r.r;
 
     return res;
 };

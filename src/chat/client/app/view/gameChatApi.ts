@@ -3,7 +3,6 @@ import { uploadFileUrlPrefix } from '../../../../app/config';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { loadDir } from '../../../../pi/widget/util';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
-import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupHistory, MSG_TYPE } from '../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../server/data/rpc/message.s';
@@ -11,7 +10,7 @@ import { depCopy, genGroupHid, genGuid, getGidFromHincid } from '../../../utils/
 import * as store from '../data/store';
 import { bottomNotice, timestampFormat } from '../logic/logic';
 import { clientRpcFunc } from '../net/init';
-import { inviteUsersToGroup } from '../net/rpc';
+import { inviteUserToGroup } from '../net/rpc';
 import { EMOJIS } from '../widget/emoji/emoji';
 
 /**
@@ -88,8 +87,8 @@ export const getBaseInfo = (gid,cb) => {
 };
 
 // 邀请用户加入群组
-export const invitePersonToGroup = (param,cb) => {
-    inviteUsersToGroup(param.gid,[param.uid],(r) => {
+export const invitePersonToGroup = (gid,cb) => {
+    inviteUserToGroup(gid,(r) => {
         cb(null,{
             flag: r && r.r === 1 
         });

@@ -3,11 +3,8 @@
  */
 
 // ================================================ 导入
-import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { UserInfo } from '../../../../server/data/db/user.s';
 import { Logger } from '../../../../utils/logger';
-import { register as registerUser } from '../../net/rpc';
 import { playerName } from '../../widget/randomName/randomName';
 
 // tslint:disable-next-line:no-reserved-keywords
@@ -34,11 +31,11 @@ export class Login extends Widget {
         this.props.success = e.success;
     }
     public register(e:any) {
-        registerUser(this.props.name, this.props.passwd, (r: UserInfo) => {
-            logger.debug(JSON.stringify(r));
-            this.ok();
-            popNew('chat-client-app-view-register-registerSuccess',{ uid:r.uid });
-        });
+        // registerUser(this.props.name, this.props.passwd, (r: UserInfo) => {
+        //     logger.debug(JSON.stringify(r));
+        //     this.ok();
+        //     popNew('chat-client-app-view-register-registerSuccess',{ uid:r.uid });
+        // });
     }
 }
 

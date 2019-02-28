@@ -37,7 +37,7 @@ export class Contact extends Widget {
             { iconPath: 'scan.png', utilText: '扫一扫' },
             { iconPath: 'add-friend.png', utilText: '我的信息' }
         ];
-        this.props.isLogin = store.getStore('isLogin');
+        this.props.isLogin = !!store.getStore('uid');
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
@@ -69,7 +69,7 @@ export class Contact extends Widget {
         walletStore.register('user/info',() => { // 钱包用户信息修改
             this.setProps(this.props);  
         });
-        store.register('isLogin',() => {
+        store.register('uid',() => {  // 聊天用户登陆成功
             this.setProps(this.props);
         });
     }

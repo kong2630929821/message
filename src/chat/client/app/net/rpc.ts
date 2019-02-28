@@ -9,32 +9,16 @@ import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, regist
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 // tslint:disable-next-line:max-line-length
-import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, inviteUsers } from '../../../server/data/rpc/group.p';
-import { GroupAgree, GroupCreate, Invite, InviteArray } from '../../../server/data/rpc/group.s';
+import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, inviteUserToNPG } from '../../../server/data/rpc/group.p';
+import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
 import { sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
-import { setStore } from '../data/store';
 import { clientRpcFunc, subscribe } from './init';
 
 // ================================================ 导出
-/**
- * 普通用户注册
- * @param name user name 
- * @param passwd user passwd
- * @param cb callback
- */
-export const register = (name: string, passwdHash: string, cb: (r: UserInfo) => void) => {
-    const info = new UserRegister();
-    info.name = name;
-    info.passwdHash = passwdHash;
-    clientRpcFunc(registerUser, info, (r: UserInfo) => {
-        setStore(`userInfoMap/${r.uid}`, r);
-        cb(r);
-    });
-};
 
 /**
  * 普通用户登录
@@ -152,18 +136,10 @@ export const createGroup = (name:string, avatar:string, note:string, needAgree:b
     });
 };
 
-// 邀请用户入群
-export const inviteUsersToGroup = (gid:number, arr:number[], cb:(r:Result) => void) => {
-    const inviteArray = new InviteArray();
-    inviteArray.arr = [];
-    arr.forEach(item => {
-        const invite = new Invite();
-        invite.gid = gid;
-        invite.rid = item;
-        inviteArray.arr.push(invite);
-    });
-   
-    clientRpcFunc(inviteUsers, inviteArray, (r) => {
+// 邀请当前用户进入游戏群（无需同意）
+export const inviteUserToGroup = (gid:number, cb:(r:Result) => void) => {
+    
+    clientRpcFunc(inviteUserToNPG, gid, (r) => {
         cb(r);
     });
 };
@@ -253,12 +229,6 @@ export const friendLinks = (uuid: string) => {
 
 (<any>self).login = (uid: number, passwdHash: string) => {
     login(uid, passwdHash, (r) => {
-        console.log(r);
-    });
-};
-
-(<any>self).register = (name: string, passwdHash: string) => {
-    register(name, passwdHash, (r) => {
         console.log(r);
     });
 };

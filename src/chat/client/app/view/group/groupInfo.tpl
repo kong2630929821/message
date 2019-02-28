@@ -16,7 +16,7 @@
 
             <div w-class="nameText">
                 {{if it.editable}}
-                    <input type="text" value="{{it.groupAlias}}" w-class="groupAliasInput" maxlength="10" on-blur="changeGroupAlias" on-tap="editGroupAlias" on-input="groupAliasChange"/>
+                    <input type="text" value="{{it.groupAlias}}" w-class="groupAliasInput" maxlength="20" on-blur="changeGroupAlias" on-tap="editGroupAlias" on-input="groupAliasChange"/>
                 {{else}}
                     {{it.groupAlias || it.groupInfo.name}}
                 {{end}}

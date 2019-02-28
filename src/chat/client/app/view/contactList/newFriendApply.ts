@@ -13,7 +13,7 @@ import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as store from '../../data/store';
-import { bottomNotice, rippleShow } from '../../logic/logic';
+import { rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
