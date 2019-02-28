@@ -65,11 +65,13 @@ export class Contact extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        
         walletStore.register('user/info',() => { // 钱包用户信息修改
             this.setProps(this.props);  
         });
         store.register('uid',() => {  // 聊天用户登陆成功
+            this.setProps(this.props);
+        });
+        store.register('flags/logout',() => { // 退出钱包时刷新页面
             this.setProps(this.props);
         });
     }

@@ -15,4 +15,5 @@ loginWallet('101',(openId:number) => {
 logoutWallet(() => {
     disconnect();
     store.initStore();
+    store.setStore('flags/logout',true);
 });

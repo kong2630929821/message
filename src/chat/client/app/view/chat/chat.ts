@@ -223,8 +223,8 @@ export class Chat extends Widget {
         this.props.inputMessage = '';
         this.paint();
         this.latestMsg();
-        if (!store.getStore('setting',{}).firstChat) {
-            store.setStore('setting/firstChat',true);
+        if (!store.getStore('flags',{}).firstChat) {
+            store.setStore('flags/firstChat',true);
         }
     }
 
