@@ -289,7 +289,7 @@ export const inviteUserToNPG = (gid:number) => {
     const res = new Result();
 
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
-    console.log('inviteUsers groupInfo: ',gInfo);
+    console.log('inviteUserToNPG groupInfo: ',gInfo);
     const rid = getUid();
     // 判断用户是否已经在当前群中
     if (gInfo.memberids.indexOf(rid) > -1) {
@@ -298,16 +298,15 @@ export const inviteUserToNPG = (gid:number) => {
         
         return res;
     }
-    // 删除当前群中该用户的申请信息
+    // 添加该用户的申请信息
     gInfo.applyUser.findIndex(item => item === rid) === -1 && gInfo.applyUser.push(rid);
     groupInfoBucket.put(gid,gInfo);
     const agree = new GroupAgree();
     agree.gid = gid;
     agree.uid = rid;
     agree.agree = true;
-    acceptUser(agree);
-        
-    res.r = 1;
+    const r = acceptUser(agree);
+    res.r = r.r;
 
     return res;
 };
