@@ -78,6 +78,7 @@ function createStyleTag() {
         line-height: 80px;
         position: absolute;
         right: 0;
+        box-sizing: content-box;
     }
     
     /* messageitem */
@@ -179,6 +180,7 @@ function createStyleTag() {
         height: 60px;
         margin: 5px 20px;
         border: 20px solid transparent;
+        box-sizing: content-box;
     }
     .inputMessage{
         flex: 1 0 0;
@@ -190,12 +192,14 @@ function createStyleTag() {
         width: 44px;
         height: 44px;
         border: 20px solid transparent;
+        box-sizing: content-box;
     }
     .unfold{
         width: 44px;
         height: 44px;
         margin-right: 10px; 
         border: 20px solid transparent;
+        box-sizing: content-box;
     }
     .emojiMap{
         height:260px;
@@ -275,6 +279,7 @@ function createStyleTag() {
         position: absolute;
         top: 20px;
         bottom: 0;
+        left:0;
         word-break: break-all;
         font-family: monospace;
         line-height: 40px;
@@ -904,7 +909,7 @@ function addEmoji(){
     const emoji = document.querySelector('#gameChat_emojiMap');
     var innerHTML = '';
     for(var v of EMOJIS_MAP){
-        innerHTML += `<img style="width:44px;height:44px;border: 10px solid transparent;" src="${chatBaseUrl}/res/emoji/${v[1]}" alt="${v[0]}"  onclick="pickEmoji('[${v[0]}]')"/>`;
+        innerHTML += `<img style="width:44px;height:44px;border: 10px solid transparent;box-sizing: content-box;" src="${chatBaseUrl}/res/emoji/${v[1]}" alt="${v[0]}"  onclick="pickEmoji('[${v[0]}]')"/>`;
     }
     emoji.innerHTML = innerHTML;
 }
