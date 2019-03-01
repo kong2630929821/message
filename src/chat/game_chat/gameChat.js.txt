@@ -488,7 +488,12 @@ function createElementTag(){
     <section id="gamechat_section3" style="display:none" onclick="javascript:event.stopPropagation();">
         <div class="gamechat_modalMask" >
             <div class="gamechat_body">
-                <img src="${chatBaseUrl}/res/images/addToGroup.png" style="height:300px;width:100%;"/>
+                <div style="background:#FCDC3C;position:relative;width:100%;">
+                    <img src="${chatBaseUrl}/res/images/addToGroup.png" style="height:300px;width:100%;"/>
+                    <div style="position:absolute;top:20px;right:20px;font-size:28px;display: flex;align-items: center;" onclick="isRemind()">
+                        <img src="${chatBaseUrl}/res/images/icon_right.png" style="width:48px;height:48px;" id="gamechat_noRemind"/>不再提醒
+                    </div>
+                </div>
                 <div class="gamechat_btns">
                     <div class="gamechat_btn1" onclick="btnClick(1)">加入游戏群聊</div>
                     <div class="gamechat_btn2" onclick="btnClick(2)">下次吧</div>
@@ -523,6 +528,7 @@ var uid;  // 用户ID
 var uploadFileUrlHead; // 上传的文件链接
 var EMOJIS_MAP = new Map();
 var isGroupMember; // 是否已经加入群
+var noGroupRemind; // 不再提醒加群
 
 
 // 打开聊天界面
@@ -605,6 +611,7 @@ function getBaseMess(){
         console.log('请求基础数据！！！',result)
         uid = result.uid;
         isGroupMember = result.flag;
+        noGroupRemind = result.noGroupRemind;
 
         if(isGroupMember){
             document.getElementById('gamechat_section1').getElementsByTagName('img')[0].src = 'https://test.kuplay.io/chat-empty.png';
@@ -621,6 +628,28 @@ function getBaseMess(){
     });
 }
 
+// 是否设置不再提醒
+function isRemind(){
+    noGroupRemind = !noGroupRemind;
+    if(noGroupRemind){
+        document.getElementById('gamechat_noRemind').src=`${chatBaseUrl}/res/images/icon_right2.png`;
+    }else{
+        document.getElementById('gamechat_noRemind').src=`${chatBaseUrl}/res/images/icon_right.png`;
+    }
+    pi_RPC_Method(filePath,"setNoGroupRemind",noGroupRemind,function (error,result) {
+        console.log('设置加群消息不再提醒',result);
+    })
+}
+
+// 退出游戏弹出加群提示
+function exitGameWebview(){
+    if(!noGroupRemind){
+        document.querySelector('#gamechat_section3').style.display = 'block';
+        // TODO
+    }
+}
+
+// 展示底部提示信息
 function showNotice(mess){
     var elem = document.createElement('div');
     elem.setAttribute("id","pi_bttomMess");

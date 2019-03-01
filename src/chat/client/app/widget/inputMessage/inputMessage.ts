@@ -26,8 +26,8 @@ export class InputMessage extends Widget {
         super.setProps(props);
         this.props.toolList = [
             { name:'拍摄',img:'tool-camera.png' },
-            { name:'相册',img:'tool-pictures.png' }
-            // { name:'红包',img:'tool-redEnv.png' }
+            { name:'相册',img:'tool-pictures.png' },
+            { name:'红包',img:'tool-redEnv.png' }
         ];
     }
 
@@ -129,6 +129,7 @@ export const sendImage = (e:any) => {
         notify(e.node,'ev-send-before',{ value:`<img src="${url}" alt="img" class='imgMsg'></img>`, msgType:MSG_TYPE.IMG }); 
 
         imagePicker.getContent({
+            quality:70,
             success(buffer:ArrayBuffer) {
                 imgResize(buffer,(res) => {
                     uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
@@ -145,15 +146,18 @@ export const sendImage = (e:any) => {
  * 拍摄照片
  */
 export const sendPicture = (e:any) => {
-    openCamera((buffer:ArrayBuffer) => { 
+    const camera = openCamera((buffer:ArrayBuffer) => { 
         notify(e.node,'ev-send-before',{ value:`<img src="data:image/jpeg;base64,${arrayBufferToBase64(buffer)}" alt="img" class='imgMsg'></img>`, msgType:MSG_TYPE.IMG }); 
 
-        imgResize(buffer,(res) => {
-            uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
-                console.log('拍摄的照片',imgUrlSuf);
-                notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
-            });
-        },600);
+        camera.getContent({
+            quality:70,
+            success(buffer:ArrayBuffer) {
+                uploadFile(arrayBuffer2File(buffer),(imgUrlSuf:string) => {
+                    console.log('拍摄的照片',imgUrlSuf);
+                    notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+                });
+            }
+        });
         
     });
 };

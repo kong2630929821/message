@@ -60,10 +60,7 @@ const pushLastChat = (value:[number,number,GENERATOR_TYPE]) => {
     const lastChat = store.getStore(`lastChat`, []);
     const index = lastChat.findIndex(item => item[0] === value[0] && item[2] === value[2]);
     const setting = store.getStore('setting',{ msgTop:[] });
-    if (!setting.msgTop) {
-        setting.msgTop = [];
-    }
-
+    
     let topFg;  // 消息是否置顶
     let topLen;  // 置顶消息个数
     if (value[2] === GENERATOR_TYPE.USER) {  // 单聊消息

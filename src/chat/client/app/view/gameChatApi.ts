@@ -1,5 +1,6 @@
 
 import { uploadFileUrlPrefix } from '../../../../app/config';
+import { setStore } from '../../../../app/store/memstore';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { loadDir } from '../../../../pi/widget/util';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
@@ -75,12 +76,14 @@ export const getBaseInfo = (gid,cb) => {
             groupName:`${ginfo.name}(${ginfo.memberids.length})`,
             uploadFileUrlHead:uploadFileUrlPrefix,
             EMOJIS:EMOJIS,
-            flag:true
+            flag:true,
+            noGroupRemind:store.getStore('flags').noGroupRemind
         });
     } else {
         cb(null,{
             uid:store.getStore('uid'),
-            flag:false
+            flag:false,
+            noGroupRemind:store.getStore('flags').noGroupRemind
         });
     }
     
@@ -93,6 +96,12 @@ export const invitePersonToGroup = (gid,cb) => {
             flag: r && r.r === 1 
         });
     });
+};
+
+// 设置游戏中加群提示
+export const setNoGroupRemind = (noRemind,cb) => {
+    setStore('flags/noGroupRemind',noRemind);
+    cb(null,noRemind);
 };
 
 // 第三方聊天注入资源 返回两个propmise

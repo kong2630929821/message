@@ -78,8 +78,6 @@ export class GroupInfos extends Widget {
         }
 
         const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
-        if (!setting.msgTop) setting.msgTop = [];
-        if (!setting.msgAvoid) setting.msgAvoid = [];
         
         this.props.setting = setting;
         this.props.msgTop = setting.msgTop.findIndex(item => item === genGroupHid(this.props.gid)) > -1;

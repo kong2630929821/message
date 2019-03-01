@@ -8,7 +8,7 @@ import { getGroupHistoryCursor, getUserHistoryCursor } from '../../../server/dat
 import { HistoryCursor } from '../../../server/data/rpc/message.s';
 import { genGroupHid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { clientRpcFunc } from '../net/init';
-import { getFile, initFileStore, writeFile } from './lcstore';
+import { getFile, getLocalStorage, initFileStore, setLocalStorage, writeFile } from './lcstore';
 import { updateGroupMessage, updateUserMessage } from './parse';
 import * as store from './store';
 
@@ -16,8 +16,8 @@ import * as store from './store';
  * 更新当前用户的本地数据
  */
 export const initAccount = () => {
+    const sid = store.getStore('uid');
     initFileStore().then(() => {
-        const sid = store.getStore('uid');
         if (!sid) return;
         // 单聊历史记录
         getFile(`${sid}-userChatMap`, (value) => {
@@ -75,6 +75,10 @@ export const initAccount = () => {
         }, () => {
             console.log('read setting error');
         });
+    });
+    getLocalStorage(`${sid}-flags`,(value) => {
+        if (!value) return;
+        store.setStore('flags/noGroupRemind',value.noGroupRemind);
     });
 };
 
@@ -317,4 +321,12 @@ export const getSetting = () => {
             store.setStore('setting',setting);
         } 
     });
+};
+
+/**
+ * 标记设置
+ */
+export const flagsChange = () => {
+    const sid = store.getStore('uid');
+    setLocalStorage(`${sid}-flags`,store.getStore('flags'));
 };

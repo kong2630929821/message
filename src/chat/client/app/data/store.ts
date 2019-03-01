@@ -8,7 +8,7 @@ import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, settingChange, userChatChange } from './initStore';
+import { flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, settingChange, userChatChange } from './initStore';
 
 // ============================================ 导出
 
@@ -121,9 +121,10 @@ export const initStore = () => {
         groupChatMap:new Map(),
         lastChat:[],
         lastRead:new Map(),
-        setting:{},
+        setting:null,
         isLogin:true,
-        offLine:false
+        offLine:false,
+        flags:{}
     };
 };
 
@@ -163,6 +164,9 @@ const registerDataChange = () => {
     register('setting',() => {
         settingChange();
     });
+    register('flags/noGroupRemind',(r) => { // 不再提醒加群
+        flagsChange();
+    });
 };
 
 /**
@@ -188,9 +192,10 @@ export interface Store {
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
     // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
     lastRead:Map<string,LastReadMsgId>;// hid
-    setting:any; // 额外设置，免打扰|置顶|首次聊天
+    setting:any; // 额外设置，免打扰|置顶
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
+    flags:any; // 标记信息
 
 }
 
