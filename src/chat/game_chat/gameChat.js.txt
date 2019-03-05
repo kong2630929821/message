@@ -499,7 +499,7 @@ function createElementTag(){
                     <div class="gamechat_btn2" onclick="btnClick(2)">下次吧</div>
                 </div>
             </div>
-            <div class="gamechat_closeBtn" onclick="closePop()">
+            <div class="gamechat_closeBtn" onclick="btnClick(2)">
                 <img src="${chatBaseUrl}/res/images/close_white.png" width="30px;" height="30px;" />
             </div>
         </div>
@@ -529,6 +529,7 @@ var uploadFileUrlHead; // 上传的文件链接
 var EMOJIS_MAP = new Map();
 var isGroupMember; // 是否已经加入群
 var noGroupRemind; // 不再提醒加群
+var closeFg = false; // 是否退出当前游戏
 
 
 // 打开聊天界面
@@ -569,8 +570,14 @@ function btnClick(num){
                 showNotice('加入群组失败');
             }
         });
+    } else if (closeFg) {
+        // 关闭webview
+        pi_RPC_Method(filePath, 'closeTestWebview', window.piGameName||'测试', function(error,result){
+            console.log('关闭webview成功')
+        })
     }
 }
+
 // // 点击气泡
 // function touchBubble(){
 //     event.preventDefault();
@@ -603,6 +610,10 @@ window.onload = function(){
     createElementTag();
     gid = Number(window.piGroupId);
     getBaseMess();
+    pi_RPC_Event(function(){
+        console.log('12345567787889954325431324512345');
+        exitGameWebview();
+    })
 };
 
 // 获取基础信息
@@ -611,7 +622,7 @@ function getBaseMess(){
         console.log('请求基础数据！！！',result)
         uid = result.uid;
         isGroupMember = result.flag;
-        noGroupRemind = result.noGroupRemind;
+        noGroupRemind = result.noGroupRemind || result.flag;
 
         if(isGroupMember){
             document.getElementById('gamechat_section1').getElementsByTagName('img')[0].src = 'https://test.kuplay.io/chat-empty.png';
@@ -641,11 +652,19 @@ function isRemind(){
     })
 }
 
+
+
 // 退出游戏弹出加群提示
 function exitGameWebview(){
-    if(!noGroupRemind){
-        document.querySelector('#gamechat_section3').style.display = 'block';
-        // TODO
+    if(!noGroupRemind){  // 没有加群且没有设置不再提醒加群
+        openChatPage();
+        closeFg = true;
+
+    } else {
+        // 关闭webview
+        pi_RPC_Method(filePath, 'closeTestWebview', window.piGameName||'测试', function(error,result){
+            console.log('关闭webview成功')
+        })
     }
 }
 
@@ -1049,7 +1068,8 @@ window.pi_RPC_Method = (function() {
         }
     };
 
-    window.handle_Native_ThrowError = function(className, methodName, message) {
+
+    window.handle_native_throwerror = function(className, methodName, message) {
         alert(
             "handle_Native_ThrowError, className = " +
                 className +
@@ -1060,7 +1080,7 @@ window.pi_RPC_Method = (function() {
         );
     };
 
-    window.handle_Native_Message = function(cbID, code, ...args) {
+    window.handle_native_message = function(cbID, code, ...args) {
         if (cbID === 0) return;
 
         var cb = callIDMap[cbID];
@@ -1113,6 +1133,23 @@ window.pi_RPC_Method = (function() {
     return rpcCall;
 })();
 
+window.pi_RPC_Event = (function(){
+
+    var testCB = function(){}
+
+    var onBackPressed = function(cb){
+        testCB = cb;
+    }
+
+    window.handle_native_event = function(type, name, ...params){
+        if(type=="PI_Activity"){
+            if(name = "onBackPressed"){
+                testCB();
+            }
+        }
+    }
+    return onBackPressed;
+})();
 
 
 // PI_END

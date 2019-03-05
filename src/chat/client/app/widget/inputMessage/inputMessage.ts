@@ -26,8 +26,8 @@ export class InputMessage extends Widget {
         super.setProps(props);
         this.props.toolList = [
             { name:'拍摄',img:'tool-camera.png' },
-            { name:'相册',img:'tool-pictures.png' },
-            { name:'红包',img:'tool-redEnv.png' }
+            { name:'相册',img:'tool-pictures.png' }
+            // { name:'红包',img:'tool-redEnv.png' }
         ];
     }
 

@@ -128,13 +128,18 @@ export const gameChatPromise = (gid) => {
     };
 };
 
-// 打开一个测试 webview
+// 打开测试 webview
+
 export const openTestWebview = (gid) => {
     const gameTitle = '测试';
     const gameUrl =  'http://192.168.31.226/wallet/phoneRedEnvelope/openRedEnvelope.html';
-    
     Promise.all([gameChatPromise(gid).textPromise,gameChatPromise(gid).chatPromise]).then(([textContent,chatContent]) => {
         const content = textContent + chatContent;
         WebViewManager.open(gameTitle, `${gameUrl}?${Math.random()}`, gameTitle, content);
     });
+};
+
+// 关闭测试 webview
+export const closeTestWebview = (name) => {
+    WebViewManager.close(name);
 };
