@@ -19,6 +19,7 @@ import { OnlineUsers } from '../db/user.s';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GROUP_STATE, GroupInfo } from '../db/group.s';
 import { getUid } from './group.r';
+import { NOT_GROUP_OWNNER } from '../errorNum';
 
 const logger = new Logger('MESSAGE');
 
@@ -26,7 +27,6 @@ const logger = new Logger('MESSAGE');
  * 用户确认读取了的最新消息id
  * @param uid user id
  */
-// #[rpc=rpcServer]
 // export const messageReadAck = (cursor: LastReadMessageId): Result => {
 //     const dbMgr = getEnv().getDbMgr();
 //     const lastReadMessageidBucket = new Bucket('file', CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
@@ -320,7 +320,6 @@ export const moveGroupCursor = (gid: number, current: number) => {
  * @param message user send
  */
 // #[rpc=rpcServer]
-// tslint:disable-next-line:max-func-body-length
 export const sendUserMessage = (message: UserSend): UserHistory => {
     console.log('sendMsg!!!!!!!!!!!', message);
     const dbMgr = getEnv().getDbMgr();
@@ -330,9 +329,25 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const sid = getUid();
     const userHistory = new UserHistory();
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
-    // 获取对方联系人列表
-    const sContactInfo = contactBucket.get(message.rid)[0];
-    // 判断当前用户是否在对方的好友列表中
+    if (message.gid) {
+        // 参数中有gid，则是群内临时聊天
+        // 判断双方是否有一方是群主
+        const groupInfoBucket = new Bucket('file', GroupInfo._$info.name, dbMgr);
+        const gInfo = groupInfoBucket.get<number, [GroupInfo]>(message.gid)[0];
+        if (!(gInfo.ownerid === sid || gInfo.ownerid === message.rid)) {
+            userHistory.hIncId = NOT_GROUP_OWNNER.toString();
+        }
+    } else {
+        // 不是群内临时聊天，只有好友才能发送消息
+        // 获取对方联系人列表
+        const sContactInfo = contactBucket.get(message.rid)[0];
+        // 判断当前用户是否在对方的好友列表中
+        if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
+            userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+ 
+            return userHistory;
+        }
+    }
 
     // 消息撤回
     if (message.mtype === MSG_TYPE.RECALL) {
@@ -370,11 +385,6 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userMsg.time = Date.now();
     userHistory.msg = userMsg;
     // logger.debug(`friends is : ${JSON.stringify(sContactInfo.friends)}, sid is : ${sid}`);
-    if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
-        userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
-
-        return userHistory;
-    }
 
     const msgLock = new MsgLock();
     msgLock.hid = genUserHid(sid, message.rid);

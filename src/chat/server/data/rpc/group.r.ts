@@ -3,9 +3,9 @@
  */
 // ================================================================= 导入
 import { GROUP_STATE, GroupInfo, GroupUserLink } from '../db/group.s';
-import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo } from '../db/user.s';
+import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
-import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray, NewGroup } from './group.s';
+import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray, NewGroup, NeedAgree } from './group.s';
 
 import { BonBuffer } from '../../../../pi/util/bon';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
@@ -19,6 +19,7 @@ import * as CONSTANT from '../constant';
 import { GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock  } from '../db/message.s';
 import { sendGroupMessage } from './message.r';
 import { GroupSend, SendMsg } from './message.s';
+import { USER_GREATE_GROUP_OVERLIMIT, GROUP_MEMBERS_OVERLIMIT, OPERAT_WITHOUT_AUOTH } from '../errorNum';
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -49,9 +50,28 @@ export const applyJoinGroup = (gid: number): Result => {
 
         return res;
     }
+    // 群成员是否达到上限
+    if (gInfo.memberids.length >= gInfo.max_members) {
+        res.r = GROUP_MEMBERS_OVERLIMIT;
+
+        return res;
+    }
     if (gInfo.memberids.indexOf(uid) > -1) {
         res.r = -1;
         logger.debug(`user: ${uid}, is exist in group: ${gInfo.name}`);
+
+        return res;
+    }
+    // 加群是否需要管理员同意,不需要同意则直接进群
+    if (!gInfo.need_agree) {
+        const contactBucket = getContactBucket();
+        const contact = contactBucket.get<number, [Contact]>(uid)[0];
+        gInfo.memberids.push(uid);
+        groupInfoBucket.put(gInfo.gid, gInfo);
+        contact.group.push(gid);
+        contactBucket.put(uid, contact);
+        logger.debug('acceptUser uid', uid, 'group ', contact.group,'applyGroup:',contact.applyGroup);
+        res.r = CONSTANT.RESULT_SUCCESS;
 
         return res;
     }
@@ -163,6 +183,12 @@ export const acceptUser = (agree: GroupAgree): Result => {
 
         return res;
     } 
+    // 群成员是否达到上限
+    if (gInfo.memberids.length >= gInfo.max_members) {
+        res.r = GROUP_MEMBERS_OVERLIMIT;
+
+        return res;
+    }
     gInfo.memberids.push(agree.uid);
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('Accept user: ', agree.uid, 'to group: ', agree.gid);
@@ -249,6 +275,12 @@ export const inviteUsers = (invites: InviteArray): Result => {
 
         return res;
     }
+    // 群成员是否达到上限
+    if (gInfo.memberids.length >= gInfo.max_members) {
+        res.r = GROUP_MEMBERS_OVERLIMIT;
+
+        return res;
+    }
         
     // 判断当前登录用户是否和被邀请的用户是好友
     const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
@@ -298,6 +330,12 @@ export const inviteUserToNPG = (gid:number) => {
         
         return res;
     }
+    // 群成员是否达到上限
+    if (gInfo.memberids.length >= gInfo.max_members) {
+        res.r = GROUP_MEMBERS_OVERLIMIT;
+
+        return res;
+    }
     // 添加该用户的申请信息
     gInfo.applyUser.findIndex(item => item === rid) === -1 && gInfo.applyUser.push(rid);
     groupInfoBucket.put(gid,gInfo);
@@ -326,6 +364,12 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
     // 判断群组是否邀请了该用户,如果没有邀请，则直接返回
     if (cInfo.applyGroup.findIndex(item => getGidFromGuid(item) === agree.gid) === -1) {
         gInfo.gid = -1; // gid = -1 indicate that user don't want to join this group
+
+        return gInfo;
+    }
+    // 群成员是否达到上限
+    if (gInfo.memberids.length >= gInfo.max_members) {
+        gInfo.gid = GROUP_MEMBERS_OVERLIMIT;
 
         return gInfo;
     }
@@ -676,9 +720,47 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
     const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE, dbMgr);
-
+    const userLevelBucket = new Bucket('file', UserLevel._$info.name, dbMgr);
+    
     if (uid !== undefined) {
+        // 获取用户的权限等级和对应的群组限制
+        let level: number;
+        const userLevel = userLevelBucket.get<number,[UserLevel]>(uid)[0];
+        if (!userLevel) {
+            level = VIP_LEVEL.VIP0;
+        } else {
+            level = userLevel.level;
+        }
+        let groupLimit: number;
+        let groupMembersLimit: number;
+        let gmGroupe: boolean;
+        switch (level) {
+            case VIP_LEVEL.VIP0:
+                groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
+                groupMembersLimit = CONSTANT.VIP0_GROUP_MEMBERS_LIMIT;
+                gmGroupe = false;
+                break;
+            case VIP_LEVEL.VIP5:
+                groupLimit = CONSTANT.VIP5_GROUPS_LIMIT;
+                groupMembersLimit = CONSTANT.VIP5_GROUP_MEMBERS_LIMIT;
+                gmGroupe = true; // 官方账号创建的群标记为官方群
+                break;
+            default:
+                groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
+                groupMembersLimit = CONSTANT.VIP0_GROUP_MEMBERS_LIMIT;
+                gmGroupe = false;
+                break;
+        }
         const gInfo = new GroupInfo();
+        const contactBucket = getContactBucket();
+        const contact = contactBucket.get<number, [Contact]>(uid)[0];
+        // 判断用户创建的群聊是否超过上限
+        const groupCount = contact.myGroup.length;
+        if (groupCount >= groupLimit) {
+            gInfo.gid = USER_GREATE_GROUP_OVERLIMIT;
+
+            return gInfo;
+        }
         // 这是一个事务
         accountGeneratorBucket.readAndWrite(GENERATOR_TYPE.GROUP, (items: any[]) => {
             const accountGenerator = new AccountGenerator();
@@ -694,6 +776,8 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.avatar = groupInfo.avatar;
         gInfo.need_agree = groupInfo.need_agree;
         gInfo.adminids = [uid];
+        gInfo.gm_group = gmGroupe;
+        gInfo.max_members = groupMembersLimit;
         // genAnnounceIncId(gInfo.gid, START_INDEX)
         gInfo.annoceids = [];
         gInfo.create_time = Date.now();
@@ -711,8 +795,6 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('read group info: ', groupInfoBucket.get(gInfo.gid));
         // 修改创建群的人的联系人列表，把当前群组加进去
-        const contactBucket = getContactBucket();
-        const contact = contactBucket.get<number, [Contact]>(uid)[0];
         contact.group.push(gInfo.gid);
         contactBucket.put(uid, contact);
         moveGroupCursor(gInfo.gid, uid);
@@ -817,7 +899,32 @@ export const updateGroupInfo = (newGroup: NewGroup): Result => {
 
         return res;
     }
-};
+}; 
+
+/**
+ * 群管理员设置群是否需要验证加入群
+ * 
+ */
+// #[rpc=rpcServer]
+export const updateNeedAgree = (needAgree: NeedAgree): Result => {
+    const uid = getUid();
+    const gid = needAgree.gid;
+    const result = new Result();
+    // 获取群信息
+    const groupInfoBucket = getGroupInfoBucket();
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
+    // 判断用户是否是该群的管理员
+    if (!(gInfo.adminids.indexOf(uid) > -1 || gInfo.ownerid === uid)) {
+        result.r = OPERAT_WITHOUT_AUOTH;
+
+        return result;
+    }
+    gInfo.need_agree = needAgree.need_agree;
+    groupInfoBucket.put(gid, gInfo);
+    result.r = CONSTANT.RESULT_SUCCESS;
+
+    return result;
+} 
 
 export const getUid = () => {
     // const dbMgr = getEnv().getDbMgr();

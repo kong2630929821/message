@@ -9,8 +9,9 @@ struct AnnounceSend {
 }
 
 struct UserSend {
-    rid: u32,//接受者id
-    mtype: MSG_TYPE,
+    rid: u32, //接受者id
+    gid: Option<u32>, //群组id 该字段不为空则是群内临时聊天
+    mtype: MSG_TYPE, // 消息类型
     msg: String,//内容
     time: usize,//时间
 }

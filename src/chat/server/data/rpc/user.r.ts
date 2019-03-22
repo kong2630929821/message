@@ -12,12 +12,13 @@ import { delValueFromArray, genHIncId, genNextMessageIndex, genUserHid, genUuid 
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
-import { Contact, FriendLink, UserFind, UserInfo } from '../db/user.s';
+import { Contact, FriendLink, UserFind, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
 import { FriendAlias, UserAgree } from './user.s';
+import { FRIENDS_NUM_OVERLIMIT, APPLY_FRIENDS_OVERLIMIT } from '../errorNum';
 
 // ================================================================= 导出
 /**
@@ -28,6 +29,17 @@ import { FriendAlias, UserAgree } from './user.s';
 export const applyFriend = (user: string): Result => {
     const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
+    const result = new Result();
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+    const curUser = contactBucket.get<number, [Contact]>(sid)[0];
+    const friendsNumLimit = get_friends_limit(sid); // 当前用户的好友上限
+    // 当前用户好友数量达到上限，则申请失败
+    if (curUser.friends.length >= friendsNumLimit) {
+        result.r = FRIENDS_NUM_OVERLIMIT;
+
+        return result;
+    }
+    
     // 获取用户UID
     const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name, dbMgr);
     const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`]);
@@ -39,7 +51,6 @@ export const applyFriend = (user: string): Result => {
             return uid = r.uid;
         }
     });
-    const result = new Result();
     if (!uid) {
         result.r = -2;  // 添加的好友不存在
 
@@ -52,7 +63,6 @@ export const applyFriend = (user: string): Result => {
         return result;
     }
     // 取出联系人表
-    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
     const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
     const friend1 = friendLinkBucket.get(genUuid(sid, uid))[0];
     const friend2 = friendLinkBucket.get(genUuid(uid, sid))[0];
@@ -62,30 +72,40 @@ export const applyFriend = (user: string): Result => {
 
         return result;
     }
-    const SUID = CONSTANT.CUSTOMER_SERVICE;  // 客服账号
-    if (user === SUID.toString()) {   // 添加客服为好友，直接添加无需同意
+    const friendsNumLimit1 = get_friends_limit(uid); // 添加的好友的好友上限
+    const friendContact = contactBucket.get<number, [Contact]>(uid)[0];
+    // 对方的好友数量到达上限
+    if (friendContact.friends.length >= friendsNumLimit1) {
+        result.r = APPLY_FRIENDS_OVERLIMIT;
+
+        return result;
+    }
+    // 判断对方是否是官方账号
+    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name, dbMgr);
+    const userLevel1 = levelBucket.get<number, [UserLevel]>(uid)[0];
+    const level1 = userLevel1.level;
+    if (level1 === VIP_LEVEL.VIP5) { // 官方账号无需同意直接添加
         const friendLink = new FriendLink();
-        friendLink.uuid = genUuid(sid, SUID);
+        friendLink.uuid = genUuid(sid, uid);
         friendLink.alias = '';
-        friendLink.hid = genUserHid(sid, SUID);
+        friendLink.hid = genUserHid(sid, uid);
         friendLinkBucket.put(friendLink.uuid, friendLink);
-        friendLink.uuid = genUuid(SUID, sid);
+        friendLink.uuid = genUuid(uid, sid);
         friendLinkBucket.put(friendLink.uuid, friendLink);
-
-        const curUser = contactBucket.get(sid)[0];
-        curUser.friends.push(SUID);
+    
+        curUser.friends.push(uid);
         contactBucket.put(sid, curUser); // 添加好友到当前用户联系人表
-
-        const serUser = contactBucket.get(SUID)[0];
+    
+        const serUser = contactBucket.get(uid)[0];
         serUser.friends.push(sid);
-        contactBucket.put(SUID,serUser);  // 添加好友到客服联系人表
-
-        // 客服发送的第一条欢迎消息
-        sendFirstWelcomeMessage();
+        contactBucket.put(uid,serUser);  // 添加好友到官方账号联系人表
+        const SUID = CONSTANT.CUSTOMER_SERVICE;  // 好嗨客服账号
+        if (user === SUID.toString()) sendFirstWelcomeMessage(); // 好嗨客服发送第一条欢迎消息
         result.r = 1;
 
         return result;
     }
+    
     // 取出对应的那一个联系人
     const contactInfo = contactBucket.get(uid)[0];
     contactInfo.applyUser.findIndex(item => item === sid) === -1 && contactInfo.applyUser.push(sid);
@@ -153,15 +173,22 @@ export const acceptFriend = (agree: UserAgree): Result => {
         const sContactInfo = contactBucket.get(sid)[0];
         // 从申请列表中删除当前同意/拒绝的用户
         console.log(`sContactInfo.applyFriend is ${sContactInfo.applyUser}`);
-
+        // 判断当前用户的好友是否达到上限
+        const friendsNumLimit = get_friends_limit(sid); // 当前用户的好友上限
+        // 当前用户好友数量达到上限，则申请失败
+        if (sContactInfo.friends.length >= friendsNumLimit) {
+            result.r = FRIENDS_NUM_OVERLIMIT;
+            
+            return result;
+        }
         // 判断对方是否邀请了该用户,如果没有邀请，则直接返回
         if (sContactInfo.applyUser.findIndex(item => item === rid) === -1) {
             const rlt = new Result();
             rlt.r = -1;
-
+            
             return rlt;
         }
-
+        
         sContactInfo.applyUser = delValueFromArray(rid, sContactInfo.applyUser);
         // 在对方的列表中添加好友
         const rContactInfo = contactBucket.get(rid)[0];
@@ -385,4 +412,47 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
     return newUser;
 };
 
+/**
+ * 设置官方账号
+ * @param set_gmAccount uid
+ */
+// #[rpc=rpcServer]
+export const set_gmAccount = (uid: number): Result => {
+    const dbMgr = getEnv().getDbMgr();
+    const result = new Result();
+    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name, dbMgr); 
+    let userLevel = levelBucket.get<number, [UserLevel]>(uid)[0];
+    if (!userLevel) {
+        userLevel = new UserLevel();
+        userLevel.uid = uid;
+    }
+    userLevel.level = VIP_LEVEL.VIP5;
+    levelBucket.put(uid, userLevel);
+    result.r = CONSTANT.RESULT_SUCCESS;
+
+    return result;
+}
+
 // ================================================================= 本地
+
+// 获取好友上限
+export const get_friends_limit = (uid: number): number => {
+    const dbMgr = getEnv().getDbMgr();
+    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name, dbMgr); 
+    const userLevel = levelBucket.get<number, [UserLevel]>(uid)[0];
+    const level = userLevel.level;
+    let friendsNumLimit: number;
+    switch (level) {
+        case VIP_LEVEL.VIP0:
+            friendsNumLimit = CONSTANT.VIP0_FRIENDS_LIMIT;
+            break;
+        case VIP_LEVEL.VIP5:
+            friendsNumLimit = CONSTANT.VIP5_FRIENDS_LIMIT;
+            break;
+        default:
+            friendsNumLimit = CONSTANT.VIP0_FRIENDS_LIMIT;
+            break;
+    }
+
+    return friendsNumLimit;
+}
