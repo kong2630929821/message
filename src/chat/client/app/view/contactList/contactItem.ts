@@ -27,7 +27,8 @@ export class ContactItem extends Widget {
         name:'',
         chatType:GENERATOR_TYPE.USER,  
         text:'',
-        totalNew: null  
+        totalNew: null,
+        official:false  
     };
     public setProps(props: any) {
         super.setProps(props);
@@ -38,13 +39,14 @@ export class ContactItem extends Widget {
                 if (this.props.id !== store.getStore('uid')) {
                     this.props.name = getFriendAlias(this.props.id);
                 } else {
-                    this.props.name = depCopy(store.getStore(`userInfoMap/${this.props.id}`,new UserInfo()).name);
+                    this.props.name = depCopy(store.getStore(`userInfoMap/${this.props.id}`,new UserInfo()).name || '');
                     this.props.name += '(本人)';
                 }
                 this.props.img = getUserAvatar(this.props.id) || '../../res/images/user.png';
 
             } else {
                 const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
+                this.props.official = group.gm_group;
                 this.props.name = group.name; 
                 this.props.show = group.state === GROUP_STATE.CREATED;
                 this.props.img = getGroupAvatar(this.props.id) || '../../res/images/groups.png';
@@ -63,4 +65,5 @@ interface Props {
     totalNew?: number; // 多少条消息
     show?:boolean; // 是否显示
     img?:string; // 图标或头像
+    official:boolean; // 是否是官方群组
 }

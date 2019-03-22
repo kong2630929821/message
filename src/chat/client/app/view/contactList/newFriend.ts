@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
@@ -13,7 +14,6 @@ import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as  store from '../../data/store';
-import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -28,7 +28,7 @@ export class NewFriend extends Widget {
 
     public create() {
         super.create();
-        const sid = store.getStore('uid').toString();
+        const sid = store.getStore('uid','').toString();
         this.state = store.getStore('contactMap',new Contact()).get(sid);
     }
     
@@ -40,7 +40,7 @@ export class NewFriend extends Widget {
         const v = parseInt(e.value, 10);
         acceptFriend(v, true, (r: Result) => {
             if (r.r !== 1) {
-                bottomNotice('添加好友失败');
+                popNewMessage('添加好友失败');
             }
         });
     }

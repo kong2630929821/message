@@ -6,15 +6,6 @@
     background:linear-gradient(to right,#318DE6,#38CFE7);
     position: relative;
 }
-.backImg{
-    position: absolute;
-    top: 0px;
-    right: 0;
-    width: 276px;
-    height: 150px;
-    border-radius: 18px;
-    background-image: url(../../res/images/topbar_backimg.png);
-}
 .history-wrap{
     overflow-x: hidden;
     overflow-y: auto;
@@ -55,13 +46,16 @@
     background: #E9F9FF;
     height: 88px;
 }
-.redSpot{
-    width:10px;
-    height:10px;
-    background:rgba(206,57,57,1);
-    position: absolute;
-    border-radius: 50%;
-    right: 115px;
-    bottom: 57px;
-    border: 1px solid #fff;
+.emptyImg{
+    width: 200px;
+    height: 200px;
+    margin-top: 400px;
+}
+.emptyText{
+    height: 45px;
+    line-height: 45px;
+    color: rgba(136, 136, 136, 1);
+    font-size: 32px;
+    text-align: center;
+    margin-top: 20px;
 }

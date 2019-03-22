@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -10,7 +11,7 @@ import { Contact } from '../../../../server/data/db/user.s';
 import { applyJoinGroup } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { bottomNotice, rippleShow } from '../../logic/logic';
+import { rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -27,7 +28,7 @@ export class GroupListt extends Widget {
     
     public create() {
         super.create();
-        const sid = store.getStore('uid').toString();
+        const sid = store.getStore('uid','').toString();
         this.state = store.getStore('contactMap',new Contact()).get(sid);
     }
 
@@ -48,17 +49,17 @@ export class GroupListt extends Widget {
     // 主动添加群聊
     public applyGroup() {
         if (!this.props.inputGid) {
-            bottomNotice('请输入群聊ID');
+            popNewMessage('请输入群聊ID');
            
         } else {
             clientRpcFunc(applyJoinGroup, this.props.inputGid, ((r) => {
                 logger.debug('===========主动添加群聊返回',r);
                 if (r.r === -2) {
-                    bottomNotice('您申请的群不存在');
+                    popNewMessage('您申请的群不存在');
                 } else if (r.r === -1) {
-                    bottomNotice('您已经是该群的成员');
+                    popNewMessage('您已经是该群的成员');
                 } else {
-                    bottomNotice('发送成功');
+                    popNewMessage('发送成功');
                 }
             }));
         }

@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
@@ -11,7 +12,6 @@ import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { depCopy, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -42,11 +42,11 @@ export class AnnounceDetail extends Widget {
             clientRpcFunc(sendGroupMessage, message, (r:GroupHistory) => {
                 // TODO
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    bottomNotice('撤回公告失败');
+                    popNewMessage('撤回公告失败');
                         
                     return;
                 } else {
-                    bottomNotice('撤回公告成功');
+                    popNewMessage('撤回公告成功');
                     this.ok();
                 }
             });

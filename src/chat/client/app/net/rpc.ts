@@ -2,6 +2,7 @@
  * 调用rpc接口
  */
 // ================================================ 导入
+import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { UserInfo } from '../../../server/data/db/user.s';
@@ -61,12 +62,20 @@ export const walletLogin = (openid: string, sign: string, cb: (r: UserInfo) => v
  *
  * @param uid user id 
  */
-export const getUsersBasicInfo = (uids: number[], cb: (r: UserArray) => void) => {
+export const getUsersBasicInfo = (uids: number[]) => {
     const info = new GetUserInfoReq();
     info.uids = uids;
-    clientRpcFunc(getUsersInfo, info, (r: UserArray) => {
-        cb(r);
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(getUsersInfo, info, (r: UserArray) => {
+            if (r && r.arr.length > 0) {
+                resolve(r);
+            } else {
+                reject(r);
+            }
+        });
     });
+    
 };
 /**
  * 单聊
@@ -74,16 +83,24 @@ export const getUsersBasicInfo = (uids: number[], cb: (r: UserArray) => void) =>
  * @param msg message
  * @param cb callback
  */
-export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => void, msgType = MSG_TYPE.TXT) => {
+export const sendUserMsg = (rid: number, msg: string, msgType = MSG_TYPE.TXT) => {
     const info = new UserSend();
     info.msg = msg;
     info.mtype = msgType;
     info.rid = rid;
     info.time = (new Date()).getTime();
 
-    clientRpcFunc(sendUserMessage, info, (r: UserHistory) => {
-        cb(r);
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(sendUserMessage, info, (r: UserHistory) => {
+            if (r.hIncId !== DEFAULT_ERROR_STR) {
+                resolve(r);
+
+            } else {
+                reject(r);
+            }
+        });
     });
+    
 };
 
 /**
@@ -159,16 +176,23 @@ export const deleteGroup = () => {
     });
 };
 
-export const sendGroupMsg = () => {
+export const sendGroupMsg = (gid:number,message:string,mtype = MSG_TYPE.TXT) => {
     const msg = new GroupSend();
-    msg.gid = 11111;
-    msg.msg = 'hi group';
-    msg.mtype = 0;
+    msg.gid = gid;
+    msg.msg = message;
+    msg.mtype = mtype;
     msg.time = Date.now();
 
-    clientRpcFunc(sendGroupMessage, msg, (r) => {
-        console.log(r);
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(sendGroupMessage, msg, (r) => {
+            if (r.hIncId !== DEFAULT_ERROR_STR) {
+                resolve(r);
+            } else {
+                reject(r);
+            }
+        });
     });
+    
 };
 
 export const addAdministror = (uid: number) => {
@@ -246,7 +270,7 @@ export const friendLinks = (uuid: string) => {
 };
 
 (<any>self).sendMessage = (uid: number, msg: string) => {
-    sendMessage(uid, msg, (r) => {
+    sendUserMsg(uid, msg, (r) => {
         console.log(r);
     });
 };

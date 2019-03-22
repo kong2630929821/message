@@ -37,6 +37,7 @@ export class MessageRecord extends Widget {
             
         } else { // 群聊
             const groupInfo = store.getStore(`groupInfoMap/${this.props.rid}`,new GroupInfo());
+            this.props.official = groupInfo.gm_group;
             this.props.name = groupInfo.name;
             this.props.avatar = getGroupAvatar(this.props.rid) || '../../res/images/groups.png';
             hid = genGroupHid(this.props.rid);
@@ -125,4 +126,5 @@ interface Props {
     msgTop:boolean; // 置顶
     unReadCount:number;  // 未读消息数
     avatar:string; // 用户头像
+    official:boolean; // 是否是官方群组
 }

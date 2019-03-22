@@ -3,13 +3,14 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { Contact, GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
-import { bottomNotice, rippleShow } from '../../logic/logic';
+import { rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { applyFriend as applyUserFriend } from '../../net/rpc';
 
@@ -49,26 +50,26 @@ export class AddUser extends Widget {
     public applyFriend() {
         const sid = store.getStore('uid');
         if (!this.props.rid) {
-            bottomNotice('请输入好友ID');
+            popNewMessage('请输入好友ID');
 
             return;
         }
         if (this.props.rid === sid.toString()) {
-            bottomNotice('不能添加自己为好友');
+            popNewMessage('不能添加自己为好友');
 
             return;
         }
         applyUserFriend(this.props.rid, (r: Result) => {
             if (r.r === 0) {
-                bottomNotice(`你们已经是好友了`);
+                popNewMessage(`你们已经是好友了`);
 
                 return;
             } else if (r.r === -2) {
-                bottomNotice(`用户不存在`);
+                popNewMessage(`用户不存在`);
 
                 return;
             }
-            bottomNotice('发送成功');
+            popNewMessage('发送成功');
             this.paint();
         });
     }

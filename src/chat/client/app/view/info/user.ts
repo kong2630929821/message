@@ -2,12 +2,13 @@
  * 我的个人信息
  */
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
-import { bottomNotice, copyToClipboard, getUserAvatar } from '../../logic/logic';
+import { copyToClipboard, getUserAvatar } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 export class User extends Widget {
@@ -74,9 +75,9 @@ export class User extends Widget {
             clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
                 if (r && r.uid > 0) {
                     store.setStore(`userInfoMap/${this.props.sid}`,test);
-                    bottomNotice('修改个人信息成功');
+                    popNewMessage('修改个人信息成功');
                 } else {
-                    bottomNotice('修改个人信息失败');
+                    popNewMessage('修改个人信息失败');
                 }
             });
         });
@@ -116,9 +117,9 @@ export class User extends Widget {
             // todo
             if (r && r.uid > 0) {
                 store.setStore(`userInfoMap/${this.props.sid}`,test);
-                bottomNotice('修改个人信息成功');
+                popNewMessage('修改个人信息成功');
             } else {
-                bottomNotice('修改个人信息失败');
+                popNewMessage('修改个人信息失败');
             }
         });
     }
@@ -134,7 +135,7 @@ export class User extends Widget {
         } else {
             copyToClipboard(this.props.info.tel);
         }
-        bottomNotice('复制成功');
+        popNewMessage('复制成功');
     }
 }   
 

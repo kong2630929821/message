@@ -3,30 +3,24 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
-import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
-import { GroupHistory, MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
+import { UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
-import { sendGroupMessage, sendUserMessage } from '../../../../server/data/rpc/message.p';
-import { GroupSend, UserSend } from '../../../../server/data/rpc/message.s';
-import { Logger } from '../../../../utils/logger';
+import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genUuid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { bottomNotice, getFriendAlias, timestampFormat } from '../../logic/logic';
+import { getFriendAlias, INFLAG, timestampFormat } from '../../logic/logic';
 import { openNewActivity } from '../../logic/native';
-import { clientRpcFunc } from '../../net/init';
+import { applyFriend, getUsersBasicInfo, sendGroupMsg, sendUserMsg } from '../../net/rpc';
 import { parseMessage } from '../../widget/messageItem/messageItem';
 
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
 export const forelet = new Forelet();
 
 export class Chat extends Widget {
@@ -60,7 +54,19 @@ export class Chat extends Widget {
      * 好友聊天初始化
      */
     public initUser() {
-        this.props.name = getFriendAlias(this.props.id);
+        if (!this.props.temporary) { // 如果是临时聊天会传名字 不是临时聊天需要获取用户名
+            this.props.name = getFriendAlias(this.props.id);
+        } 
+        if (!this.props.name) {  // 如果获取不到用户名 临时聊天记录
+            this.props.temporary = true;
+            getUsersBasicInfo([this.props.id]).then((r: UserArray) => {
+                this.props.name = r.arr[0].name;
+                this.paint();
+            },(r) => {
+                console.error('获取用户信息失败', r);
+            });
+        }
+
         const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`, []);
         this.props.hincIdArray = hIncIdArr;
         // 第一次进入只加载最后20条记录
@@ -80,7 +86,7 @@ export class Chat extends Widget {
         const hIncIdArr = store.getStore(`groupChatMap/${this.props.hid}`,[]);
         const gInfo = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
         const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.GROUP });
-        this.props.name = `${gInfo.name}(${gInfo.memberids.length})`;
+        this.props.name = `${gInfo.name}(${gInfo.memberids ? gInfo.memberids.length :0})`;
         this.props.hincIdArray = hIncIdArr;
         // 第一次进入只加载最后20条记录
         this.props.showHincIdArray = hIncIdArr.length > 20 ? hIncIdArr.slice(-20) :hIncIdArr; 
@@ -98,11 +104,11 @@ export class Chat extends Widget {
 
         // 是否已被踢出群或群已经解散
         if (gInfo.state === GROUP_STATE.DISSOLVE) {
-            bottomNotice('该群已被解散');
-            this.ok();
-        } else if (gInfo.memberids.indexOf(this.props.sid) < 0) {
-            bottomNotice('您已离开该群');
-            this.ok();
+            popNewMessage('该群已被解散');
+            this.goBack();
+        } else if (gInfo.memberids && gInfo.memberids.indexOf(this.props.sid) < 0) {
+            popNewMessage('您已离开该群');            
+            this.goBack();
         }
     }
 
@@ -127,8 +133,8 @@ export class Chat extends Widget {
     public updateChat() {
         this.setProps(this.props);
         this.paint();
-        
     }
+
     /**
      * 发送图片消息之前,预览
      */
@@ -142,7 +148,7 @@ export class Chat extends Widget {
             hIncId:null,
             name:this.props.name,
             me:true,
-            msg:message,
+            message:message,
             time:timestampFormat(message.time,1),
             chatType:this.props.chatType
         };
@@ -154,71 +160,43 @@ export class Chat extends Widget {
      */
     public send(e:any) {
         this.props.inputMessage = e.value;
-        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            logger.debug('====群组聊天信息发送',e);
-            const message = new GroupSend();
-            message.gid = this.props.id;
-            message.msg = this.props.inputMessage;
-            message.mtype = e.msgType || MSG_TYPE.TXT;
-            message.time = (new Date()).getTime();
-            if (e.msgType < 5) {
-                this.props.newMsg = {
-                    hIncId:null,
-                    name:this.props.name,
-                    me:true,
-                    msg:parseMessage(depCopy(message)),
-                    time:timestampFormat(message.time,1),
-                    chatType:this.props.chatType
-                };
-            }
-            clientRpcFunc(sendGroupMessage, message, (r: GroupHistory) => {
-    
-                if (r.hIncId === DEFAULT_ERROR_STR) {
-                    bottomNotice('发送失败！');
-                    
-                    return;
-                } 
-            });
+        if (e.msgType < 5) {
+            this.props.newMsg = {
+                hIncId:null,
+                name:this.props.name,
+                me:true,
+                message:parseMessage(depCopy({
+                    mtype: e.msgType,
+                    msg: this.props.inputMessage
+                })),
+                time:timestampFormat(Date.now(),1),
+                chatType:this.props.chatType
+            };
+        }
 
-        } else {
+        // 群聊
+        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            console.log('====群组聊天信息发送',e);
             
-            logger.debug('=========单聊信息发送',e);
-            const info = new UserSend();
-            info.msg = this.props.inputMessage;
-            info.mtype = e.msgType || MSG_TYPE.TXT;
-            info.rid = this.props.id;
-            info.time = (new Date()).getTime();
-            if (e.msgType < 5) {
-                this.props.newMsg = {
-                    hIncId:null,
-                    name:this.props.name,
-                    me:true,
-                    msg:parseMessage(depCopy(info)),
-                    time:timestampFormat(info.time,1),
-                    chatType:this.props.chatType
-                };
-            }
-            clientRpcFunc(sendUserMessage, info, (r:UserHistory) => {
-                const nextside = this.props.id;
-    
-                if (r.hIncId === DEFAULT_ERROR_STR) {
-                    const item = document.createElement('div');
-                    item.setAttribute('style','font-size: 24px;text-align: center;color: #888;margin: 20px;');
-                    item.innerText = `对方不是你的好友，立即`;
-                    const innerItem = document.createElement('span');
-                    innerItem.setAttribute('style','color:#3FA2F7;border:10px solid transparent;');
-                    innerItem.innerText = '添加好友';
-                    innerItem.addEventListener('click', () => {
-                        popNew('chat-client-app-view-chat-addUser',{ rid:this.props.id });
-                        this.ok();
-                    });
-                    item.appendChild(innerItem);
-                    document.getElementById('chatMessageBox').appendChild(item);
-                    
-                    return;
-                } 
-                updateUserMessage(nextside, r);
+            sendGroupMsg(this.props.id,this.props.inputMessage,e.msgType).then(() => {
+                // 群聊发送成功
+            }, () => {
+                popNewMessage('发送失败');
             });
+            
+        // 临时单聊
+        } else if (this.props.temporary) {
+            console.log('=========临时单聊信息发送',e);
+
+        // 单聊
+        } else {
+            console.log('=========单聊信息发送',e);
+            sendUserMsg(this.props.id,this.props.inputMessage,e.msgType).then((r:UserHistory) => {
+                updateUserMessage(this.props.id, r);
+            },() => {
+                this.notMyFriend();
+            });
+           
         }
         this.props.inputMessage = '';
         this.paint();
@@ -226,6 +204,24 @@ export class Chat extends Widget {
         if (!store.getStore('flags',{}).firstChat) {
             store.setStore('flags/firstChat',true);
         }
+    }
+
+    /**
+     * 对方不是当前用户的好友
+     */
+    public notMyFriend() {
+        const item = document.createElement('div');
+        item.setAttribute('style','font-size: 24px;text-align: center;color: #888;margin: 20px;');
+        item.innerText = `对方不是你的好友，立即`;
+        const innerItem = document.createElement('span');
+        innerItem.setAttribute('style','color:#3FA2F7;border:10px solid transparent;');
+        innerItem.innerText = '添加好友';
+        innerItem.addEventListener('click', () => {
+            popNew('chat-client-app-view-chat-addUser',{ rid:this.props.id });
+            this.goBack();
+        });
+        item.appendChild(innerItem);
+        document.getElementById('chatMessageBox').appendChild(item);
     }
 
     /**
@@ -318,7 +314,7 @@ export class Chat extends Widget {
      * 查看群详细信息
      */
     public groupDetail() {
-        popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag:1 });
+        popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag:INFLAG.chat_group });
     }
 
     /**
@@ -348,6 +344,17 @@ export class Chat extends Widget {
         }
     }
 
+    /**
+     * 添加好友
+     */
+    public addUser() {
+        applyFriend(this.props.id.toString(), (r: Result) => {
+            if (r.r === 0) {
+                popNewMessage(`${this.props.id}已经是你的好友`);
+            }
+        });
+    }
+
     public destroy() {
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.unregister(`groupChatMap/${this.props.hid}`,this.bindCB);
@@ -358,8 +365,9 @@ export class Chat extends Widget {
 
         return super.destroy();
     }
+
     public goBack() {
-        this.ok();
+        this.ok && this.ok();
     }
 
 }
@@ -379,4 +387,5 @@ interface Props {
     newMsg:any; // 我发布的一条新消息
     isOnTools:boolean; // 是否打开更多功能
     onRadio:any; // 当前点击的语音消息ID
+    temporary:boolean;  // 是否是临时聊天
 }

@@ -7,12 +7,12 @@ import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupUserLink } from '../../../../server/data/db/group.s';
+import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { depCopy, genGuid, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getGroupUserAvatar, getUserAvatar, timestampFormat } from '../../logic/logic';
+import { getGroupUserAvatar, getUserAvatar, INFLAG, timestampFormat } from '../../logic/logic';
 import { EMOJIS_MAP } from '../emoji/emoji';
 // ================================================ 导出
 
@@ -23,7 +23,7 @@ export class MessageItem extends Widget {
         this.props = {
             hIncId:'',
             name:'',
-            msg:null,
+            message:null,
             me:true,
             time:'',
             chatType:GENERATOR_TYPE.USER,
@@ -38,17 +38,17 @@ export class MessageItem extends Widget {
         super.setProps(props);
         if (this.props.hIncId) {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
-                this.props.msg = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
-                this.props.avatar = getUserAvatar(this.props.msg.sid) || '../../res/images/user.png';
+                this.props.message = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
+                this.props.avatar = getUserAvatar(this.props.message.sid) || '../../res/images/user.png';
             } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-                this.props.msg = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
+                this.props.message = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
                 const gid = getGidFromHincid(this.props.hIncId);
-                this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.msg.sid)}`, new GroupUserLink()).userAlias;
-                this.props.avatar = getGroupUserAvatar(gid,this.props.msg.sid) || '../../res/images/user.png';
+                this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.message.sid)}`, new GroupUserLink()).userAlias;
+                this.props.avatar = getGroupUserAvatar(gid,this.props.message.sid) || '../../res/images/user.png';
             }
-            this.props.msg = parseMessage(depCopy(this.props.msg));
-            this.props.me = this.props.msg.sid === store.getStore('uid');
-            const time = depCopy(this.props.msg.time);
+            this.props.message = parseMessage(depCopy(this.props.message));
+            this.props.me = this.props.message.sid === store.getStore('uid');
+            const time = depCopy(this.props.message.time);
             this.props.time = timestampFormat(time,1);
         }
         
@@ -77,8 +77,13 @@ export class MessageItem extends Widget {
     }
 
     public userDetail() {
-        const fg = this.props.chatType === GENERATOR_TYPE.USER ? 1 :2;
-        popNew('chat-client-app-view-info-userDetail',{ uid:this.props.msg.sid, inFlag: fg });
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            popNew('chat-client-app-view-info-userDetail',{ uid:this.props.message.sid, inFlag: INFLAG.chat_user });
+        } else {
+            const gid = getGidFromHincid(this.props.hIncId);
+            const ownerid = store.getStore(`groupInfoMap/${gid}`,new GroupInfo()).ownerid;
+            popNew('chat-client-app-view-info-userDetail',{ uid:this.props.message.sid, inFlag: INFLAG.chat_group, groupOwner: store.getStore('uid') === ownerid });
+        }
     }
 
     // 长按打开消息撤回
@@ -95,16 +100,39 @@ export class MessageItem extends Widget {
 
     // 点击打开红包
     public openRedEnvelope() {
-        popNew('app-view-earn-exchange-openRedEnv', { 
-            inFlag: 'chat',
-            rid: this.props.msg.redEnvId,
-            message: this.props.msg.msg
-        });
+        if (this.props.message.redEnvDetail) {
+            popNew('app-view-earn-exchange-exchangeDetail',this.props.message.redEnvDetail);
+
+        } else {
+            popNew('app-view-earn-exchange-openRedEnv', { 
+                inFlag: 'chat',
+                rid: this.props.message.redEnvId,
+                message: this.props.message.msg
+            },(r) => {
+                console.log(r);
+                if (r) {
+                    this.props.message.redEnvDetail = JSON.parse(r);
+                    this.paint();
+
+                    if (this.props.chatType === GENERATOR_TYPE.USER) {    
+                        const history = store.getStore(`userHistoryMap/${this.props.hIncId}`,new UserMsg());
+                        history.msg = r;
+                        store.setStore(`userHistoryMap/${this.props.hIncId}`,history);  // 兑换成功记录保存
+
+                    } else {
+                        const history = store.getStore(`groupHistoryMap/${this.props.hIncId}`,new GroupMsg());
+                        history.msg = r;
+                        store.setStore(`groupHistoryMap/${this.props.hIncId}`,history);  // 兑换成功记录保存
+                    }
+                    
+                }
+            });
+        }
     }
 
     // 点击查看大图
     public openBigImage() {
-        const url = this.props.msg.msg.split('"')[1];
+        const url = this.props.message.msg.split('"')[1];
         popNew('chat-client-app-widget-bigImage-bigImage',{ img: url });
     }
 
@@ -148,7 +176,7 @@ export class MessageItem extends Widget {
 interface Props {
     hIncId:string; // 消息ID
     name:string; // 名称
-    msg:any; // 消息内容
+    message:any; // 消息内容
     me:boolean; // 是否是本人
     time:string;// 消息发送时间
     chatType:GENERATOR_TYPE;// 消息类型
@@ -194,6 +222,11 @@ const parseImg = (msg:any) => {
 // 转换红包
 const parseRedEnv = (msg:any) => {
     const value = JSON.parse(msg.msg);
+
+    // 如果记录中有inflag标记说明红包已经领取过
+    if (value.inFlag) {  
+        msg.redEnvDetail = value;
+    } 
     msg.msg = value.message || '恭喜发财，万事如意';
     msg.redEnvId = value.rid;
 

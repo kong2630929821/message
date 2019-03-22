@@ -7,13 +7,13 @@
 // ================================================ 导入
 import * as walletStore from '../../../../app/store/memstore';
 import { changeWalletName } from '../../../../app/utils/account';
+import { popNewMessage } from '../../../../app/utils/tools';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
 import { getFriendHistory } from '../data/initStore';
 import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
-import { bottomNotice } from '../logic/logic';
 import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
 
@@ -51,7 +51,7 @@ export const walletSignIn = (openid) => {
                 setUserInfo();
 
             } else {
-                bottomNotice('钱包登陆失败');
+                popNewMessage('钱包登陆失败');
             }
         });
     }
@@ -88,7 +88,7 @@ export const setUserInfo = () => {
                 setUserInfo(); // 重新注册一次聊天
             }
         } else {
-            bottomNotice('修改个人信息失败');
+            popNewMessage('修改个人信息失败');
             
         }
     });

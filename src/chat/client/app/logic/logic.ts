@@ -118,11 +118,6 @@ export const copyToClipboard = (copyText) => {
     document.body.removeChild(input);
 };
 
-// 底部提示
-export const bottomNotice = (content:string) => {
-    popNew('app-components1-message-message',{ content: content });
-};
-
 // 获取用户头像
 export const getUserAvatar = (rid:number) => {
     if (rid) {
@@ -189,3 +184,11 @@ export const getAllFriendIDs = () => {
 
     return store.getStore(`contactMap/${uid}`,{ friends:[] }).friends; 
 };
+
+// 从某个页面进入标记
+export const enum INFLAG  {
+    contactList = 0, // 联系人列表
+    chat_user,  // 单聊
+    chat_group,  // 群聊
+    newApply  // 新好友申请 或 新群组邀请
+}

@@ -5,6 +5,10 @@
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.img}},width:"80px;"}</widget>
         </div>
         <span w-class="text">{{it.text ? it.text : it.name}}</span>
+        {{if it.official}}
+        <span w-class="official">官方</span>
+        {{end}}
+
         {{if it.totalNew>0}}
         <div w-class="other">
             {{it.totalNew}}

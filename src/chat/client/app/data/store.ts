@@ -139,6 +139,10 @@ const registerDataChange = () => {
     register('userChatMap',() => {
         userChatChange();  // 新的聊天数据
     });
+
+    register('userHistoryMap',() => {
+        userChatChange();  // 新的聊天数据
+    });
     
     register('userInfoMap',() => {
         friendChange();  // 好友数据更新
@@ -152,6 +156,10 @@ const registerDataChange = () => {
         groupChatChange();  // 群组聊天数据更新
     });
 
+    register('groupHistoryMap',() => {
+        groupChatChange();  // 群组聊天数据更新
+    });
+
     register('groupUserLinkMap',() => {
         groupUserLinkChange();  // 群组用户数据更新
     });
@@ -162,7 +170,7 @@ const registerDataChange = () => {
         lastReadChange(); // 已读消息游标更新
     });
     register('setting',() => {
-        settingChange();
+        settingChange();  // 消息免打扰，消息置顶等设置
     });
     register('flags/noGroupRemind',(r) => { // 不再提醒加群
         flagsChange();
@@ -181,7 +189,7 @@ export interface Store {
     groupHistoryMap: Map<string, GroupMsg>;// hidinc
     announceHistoryMap: Map<string, AnnounceHistory>;// aidinc
     msgLockMap: Map<number, MsgLock>;// LOCK,前端暂时没用到
-    userInfoMap: Map<number, UserInfo>;// uid
+    userInfoMap: Map<string, UserInfo>;// uid number型不能作为map的key值
     userCredentialMap: Map<number, UserCredential>; // todo,前端暂时没用到
     accountGeneratorMap: Map<string, AccountGenerator>;// todo,前端暂时没用到
     friendLinkMap: Map<string, FriendLink>;// uuid

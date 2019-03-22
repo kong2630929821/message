@@ -13,7 +13,7 @@ import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as store from '../../data/store';
-import { rippleShow } from '../../logic/logic';
+import { INFLAG, rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -115,11 +115,11 @@ export class NewFriendApply extends Widget {
     // 点击查看用户或群组详情
     public goDetail() {
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            popNew('chat-client-app-view-info-userDetail',{ uid:this.props.id, inFlag: 3 });  // 陌生人，仅查看基础信息
+            popNew('chat-client-app-view-info-userDetail',{ uid:this.props.id, inFlag: INFLAG.newApply });  // 陌生人，仅查看基础信息
         } else if (this.props.activeToGGid) {
             popNew('chat-client-app-view-info-userDetail',{ uid:this.props.id }); 
         } else {
-            popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag: 2 });  // 未加入的群组
+            popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag: INFLAG.newApply });  // 未加入的群组
         }
     }
 }

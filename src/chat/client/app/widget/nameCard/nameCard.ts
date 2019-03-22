@@ -6,10 +6,11 @@
 import { Widget } from '../../../../../pi/widget/widget';
 
 interface Props {
-    avatorPath: string;// 头像
+    avatarPath: string;// 头像
     cardInfo: string; // 名片信息
     cardType: string;// 名片类型 user|group|redEnv
     cardTypeShow:string; // 名片类型展示
+    received:boolean; // 是否已领过
 }
 
 // ===========================导出
@@ -18,10 +19,11 @@ export class NameCard extends Widget {
     constructor() {
         super();
         this.props = {
-            avatorPath: '../../res/images/emoji.png',
+            avatarPath: '../../res/images/emoji.png',
             cardInfo: '群名或用户名或',
             cardType: 'redEnv',
-            cardTypeShow:'KuPay红包'
+            cardTypeShow:'KuPay红包',
+            received:false
         };
     }
 

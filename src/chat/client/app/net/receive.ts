@@ -3,10 +3,10 @@
  * 接受后端推送事件
  */
 
+import { popNewMessage } from '../../../../app/utils/tools';
 import { HandlerMap, HandlerResult } from '../../../../pi/util/event';
 import * as CONSTANT from '../../../server/data/constant';
 import { SendMsg } from '../../../utils/send.s';
-import { bottomNotice } from '../logic/logic';
 import { subscribe } from './init';
 
 /**
@@ -40,6 +40,6 @@ export const initPush = () => {
     // 拒绝好友添加
     addEvent(CONSTANT.SEND_REFUSED, (r) => {
         console.log('!!!!!!!!!!!!r:', r);
-        bottomNotice(r);
+        popNewMessage(r);
     });
 };

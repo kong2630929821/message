@@ -1,7 +1,7 @@
 <div w-class="new-page" on-tap="pageClick" class="new-page" on-scroll="scrollPage" id="groupInfo">
     <div w-class="top-main-wrap" ev-next-click="handleMoreGroup" ev-back-click="goBack">
         <div style="position:relative;min-height: 128px;">
-            {{if it.inFlag != 2}}
+            {{if it.inFlag != 3}}
             <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
             {{else}}
             <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
@@ -18,7 +18,10 @@
                 {{if it.editable}}
                     <input type="text" value="{{it.groupAlias}}" w-class="groupAliasInput" maxlength="20" on-blur="changeGroupAlias" on-tap="editGroupAlias" on-input="groupAliasChange"/>
                 {{else}}
-                    {{it.groupAlias || it.groupInfo.name}}
+                    <span>{{it.groupAlias || it.groupInfo.name}}</span>
+                    {{if it.groupInfo.gm_group}}
+                        <span w-class="official">官方</span>
+                    {{end}}
                 {{end}}
                 {{if it.isOwner}}
                 <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="editGroupAlias"/>
@@ -47,7 +50,7 @@
                 </div>
             </div>
             <div w-class="other-wrap">
-                {{if it.inFlag == 2}}
+                {{if it.inFlag == 3}}
                     <div style="margin: 0 60px 20px;">
                         <div w-class="liItem1" on-tap="applyGroup(e)" on-down="onShow">加入群</div>
                     </div>
@@ -76,7 +79,7 @@
 
         <div w-class="a-part">
             <div w-class="a">成员（{{it.members.length}}/500）</div>
-            {{if it.inFlag != 2}}
+            {{if it.inFlag != 3}}
             <div w-class="member-wrap" on-tap="openGroupMember">
                 <img w-class="grouperIcon" src="../../res/images/add_group_user.png" />
                 {{for i, v of it.members}}

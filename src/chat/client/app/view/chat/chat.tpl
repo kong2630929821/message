@@ -7,9 +7,19 @@
     </div>
     {{end}}
 
+    {{if it.temporary}}
+    <div w-class="temporaryBox">
+        <img src="../../res/images/user.png" w-class="avatar"/>
+        <div style="flex:1;">
+            <div>{{it.name}}</div>
+            <div style="font-size: 24px;color: #888888;">你们还不是好友</div>
+        </div>
+        <div w-class="addUser" on-tap="addUser">+好友</div>
+    </div>
+    {{end}}
+
     <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="stopRadio" id="chatMessageBox" on-scroll="scrollMessBox">
         {{for i,v of it.showHincIdArray}}
-           
             <chat-client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playRadio: {{it.onRadio && v == it.onRadio.hIncId ? it.onRadio.playRadio : false}} }</chat-client-app-widget-messageItem-messageItem>
         {{end}} 
 

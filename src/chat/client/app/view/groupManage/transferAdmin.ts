@@ -3,6 +3,7 @@
  */
 
  // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -11,7 +12,6 @@ import { setOwner } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import { genGuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -47,7 +47,7 @@ export class TransferGroupOwner extends Widget {
         popNew('chat-client-app-widget-modalBox-modalBox',modalObj,
         () => {
             clientRpcFunc(setOwner,guid,(r) => {
-                bottomNotice('转让群主成功');
+                popNewMessage('转让群主成功');
                 this.ok();
             });
         },

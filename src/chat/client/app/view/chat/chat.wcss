@@ -27,3 +27,26 @@
     margin-bottom: 10px;
     margin-right: 40px;
 }
+.temporaryBox{
+    height:120px;
+    background:rgba(255,255,255,1);
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    font-size: 28px;
+}
+.addUser{
+    width:160px;
+    height:60px;
+    background:rgba(42,86,198,1);
+    font-size: 28px;
+    line-height: 60px;
+    text-align: center;
+    color: #fff;
+    margin-right: 20px;
+}
+.avatar{
+    width: 80px;
+    height: 80px;
+    margin: 20px;
+}
