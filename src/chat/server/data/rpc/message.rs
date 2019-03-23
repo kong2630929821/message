@@ -42,4 +42,5 @@ struct SendMsg {
     code: u32, //返回状态
     rid: u32, //发送者ID
     last: u32, //最新消息ID
+    gid: Option<u32>, //临时聊天的群组id
 }

@@ -371,7 +371,7 @@ export const sendTempMessage = (message: TempSend): UserHistory => {
         return userHistory;
     }
     // 发送消息
-    sendMessage(message, userHistory);
+    sendMessage(message, userHistory, message.gid);
 
     return userHistory;
 };
@@ -404,7 +404,7 @@ export const isUserOnline = (uid: number): Result => {
 
 // ----------------- helpers ------------------
 
-export const sendMessage = (message: UserSend, userHistory: UserHistory): UserHistory => {
+export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: number): UserHistory => {
     const dbMgr = getEnv().getDbMgr();
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
@@ -468,6 +468,7 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory): UserHi
     sendMsg.code = 1;
     sendMsg.last = msgLock.current;
     sendMsg.rid = sid;
+    if (gid) sendMsg.gid = gid;
     const buf = new BonBuffer();
     sendMsg.bonEncode(buf);
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
