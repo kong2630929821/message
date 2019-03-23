@@ -37,7 +37,6 @@ struct GroupInfo {
     applyUser:&[u32],//主动申请加入群的用户id
     avatar:String,//群头像 
     need_agree:bool,// 入群是否需要被同意
-    gm_group: bool,  //是否是官方群
     level: u32 // 群等级
 }
 

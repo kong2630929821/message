@@ -331,6 +331,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const sContactInfo = contactBucket.get(message.rid)[0];
     // 判断当前用户是否在对方的好友列表中
     if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
+        console.log('not friend!!!!!!!!!!!');
         userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
 
         return userHistory;

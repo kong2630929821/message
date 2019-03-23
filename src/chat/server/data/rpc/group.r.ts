@@ -736,19 +736,15 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
             level = userLevel.level;
         }
         let groupLimit: number;
-        let gmGroupe: boolean;
         switch (level) {
             case VIP_LEVEL.VIP0:
                 groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
-                gmGroupe = false;
                 break;
             case VIP_LEVEL.VIP5:
                 groupLimit = CONSTANT.VIP5_GROUPS_LIMIT;
-                gmGroupe = true; // 官方账号创建的群标记为官方群
                 break;
             default:
                 groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
-                gmGroupe = false;
                 break;
         }
         const gInfo = new GroupInfo();
@@ -776,7 +772,6 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.avatar = groupInfo.avatar;
         gInfo.need_agree = groupInfo.need_agree;
         gInfo.adminids = [uid];
-        gInfo.gm_group = gmGroupe;
         gInfo.level = level; 
         // genAnnounceIncId(gInfo.gid, START_INDEX)
         gInfo.annoceids = [];

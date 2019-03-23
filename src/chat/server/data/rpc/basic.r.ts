@@ -66,6 +66,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     contact.applyGroup = [];
     contact.applyUser = [];
     contact.friends = [];
+    contact.myGroup = [];
     contact.group = [];
     contact.temp_chat = [];
     contact.blackList = [];
