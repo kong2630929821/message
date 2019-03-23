@@ -1,0 +1,10 @@
+
+.test-btn{
+    border-radius: 6px;
+    background-color: rgba(49, 141, 230, 1);
+    text-align:center;
+    color: rgba(255, 255, 255, 1);
+    font-size: 36px;
+    font-family: PingFangSC-Regular;
+
+}
