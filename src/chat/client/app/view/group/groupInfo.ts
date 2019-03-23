@@ -7,7 +7,7 @@ import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
+import { GROUP_STATE, GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
@@ -64,6 +64,10 @@ export class GroupInfos extends Widget {
         this.props.editable = false;
         gid = this.props.gid;
         const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
+        // 如果群已被解散退出该页面
+        if (isNaN(ginfo.state) || ginfo.state === GROUP_STATE.DISSOLVE) {
+            this.goBack(); 
+        }
         this.props.groupInfo = ginfo;
         this.props.groupAlias = depCopy(ginfo.name);
         this.props.avatar = getGroupAvatar(this.props.gid) || '../../res/images/img_avatar1.png';
@@ -92,7 +96,7 @@ export class GroupInfos extends Widget {
     }
     
     public goBack() {
-        this.ok();
+        this.ok && this.ok();
     }
 
     // 动画效果执行
@@ -158,7 +162,7 @@ export class GroupInfos extends Widget {
                         console.log('========deleteGroup',r);
                         if (r.r === 1) { // 退出成功关闭当前页面
                             popNewMessage('退出群组成功');
-                            this.ok();
+                            this.goBack();
                         } else {
                             popNewMessage('群主不能退出');
                         }

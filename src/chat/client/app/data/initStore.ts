@@ -303,13 +303,23 @@ export const lastChatChange = () => {
  */
 export const updateUnReadFg = () => {
     const sid = store.getStore('uid');
-    const readList = store.getStore('lastRead');
-    const chatlist = store.getStore('lastChat');
+    const readList = store.getStore('lastRead',new Map());
+    const chatlist = store.getStore('lastChat',[]);
     let unReadFg = false; // 是否有未读消息
+    if (chatlist.length > readList.size) {
+        unReadFg = true;
+        // 是否有未读消息 状态变化执行
+        if (store.getStore('flags').unReadFg !== unReadFg) {
+            store.setStore('flags/unReadFg',unReadFg);
+        }  
+
+        return;
+    }
+
     for (const v of chatlist) {
         if (v[2] === GENERATOR_TYPE.USER) {
             const hid = genUserHid(sid,v[0]);
-            const hIncIdArr = store.getStore(`userChatMap/${hid}`);
+            const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
             // 已读消息ID是否等于聊天记录的最后一条ID
             if (readList.get(hid) && readList.get(hid).msgId !== hIncIdArr[hIncIdArr.length - 1]) {
                 unReadFg = true;
@@ -318,7 +328,7 @@ export const updateUnReadFg = () => {
             }
         } else {
             const hid = genGroupHid(v[0]);
-            const hIncIdArr = store.getStore(`groupChatMap/${hid}`);
+            const hIncIdArr = store.getStore(`groupChatMap/${hid}`,[]);
             if (readList.get(hid) && readList.get(hid).msgId !== hIncIdArr[hIncIdArr.length - 1]) {
                 unReadFg = true;
 

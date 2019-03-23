@@ -6,6 +6,7 @@
 import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
+import { CUSTOMER_SERVICE } from '../../../../server/data/constant';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { Contact } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
@@ -37,7 +38,7 @@ export class SetGroupChat extends Widget {
             inviteUserName:[],
             isSelect:false,
             avatarHtml:'',
-            createNpg:true
+            serviceID:CUSTOMER_SERVICE
         };
         this.state = new Map();
     }
@@ -170,7 +171,7 @@ interface Props {
     inviteUserName:string[];// 被邀请的成员名字
     isSelect:boolean;// 是否被选择
     avatarHtml:string; // 群头像展示
-    createNpg:boolean; // 显示创建无需同意的群组按钮 测试
+    serviceID:number;  // 好嗨客服账号
 }
 let avatarUrl;  // 群头像链接
 store.register('contactMap', (r: Map<number, Contact>) => {

@@ -66,7 +66,7 @@
             {{% ========================红包=========================}}
             {{if it.message.mtype == 9}}
             <span w-class="leftDownTail" style="border-bottom:10px solid rgba(235,79,79,1)"></span>
-            <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.message.msg}},cardType:"redEnv"}</widget>
+            <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.message.msg}},cardType:"redEnv",received:{{!!it.message.redEnvDetail}} }</widget>
             
             {{% ========================图片=========================}}
             {{elseif it.message.mtype == 2}}

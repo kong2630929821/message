@@ -189,7 +189,7 @@ export interface Store {
     groupHistoryMap: Map<string, GroupMsg>;// hidinc
     announceHistoryMap: Map<string, AnnounceHistory>;// aidinc
     msgLockMap: Map<number, MsgLock>;// LOCK,前端暂时没用到
-    userInfoMap: Map<string, UserInfo>;// uid number型不能作为map的key值
+    userInfoMap: Map<string, UserInfo>;// uid
     userCredentialMap: Map<number, UserCredential>; // todo,前端暂时没用到
     accountGeneratorMap: Map<string, AccountGenerator>;// todo,前端暂时没用到
     friendLinkMap: Map<string, FriendLink>;// uuid

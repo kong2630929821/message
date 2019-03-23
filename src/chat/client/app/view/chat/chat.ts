@@ -103,11 +103,13 @@ export class Chat extends Widget {
         store.setStore(`lastRead/${this.props.hid}`,lastRead);
 
         // 是否已被踢出群或群已经解散
-        if (gInfo.state === GROUP_STATE.DISSOLVE) {
+        if (isNaN(gInfo.state) || gInfo.state === GROUP_STATE.DISSOLVE) {
             popNewMessage('该群已被解散');
+            this.deleteRecord();
             this.goBack();
         } else if (gInfo.memberids && gInfo.memberids.indexOf(this.props.sid) < 0) {
             popNewMessage('您已离开该群');            
+            this.deleteRecord();
             this.goBack();
         }
     }
@@ -125,6 +127,18 @@ export class Chat extends Widget {
             store.register(`userChatMap/${this.props.hid}`,this.bindCB);
         }
         
+    }
+
+    // 删除已解散或已退出的对话记录
+    public deleteRecord() {
+        const chatList = store.getStore('lastChat',[]);
+        const ind = chatList.findIndex(item => item[0] === this.props.id && item[2] === GENERATOR_TYPE.GROUP);
+        ind > -1 && chatList.splice(ind,1);
+        store.setStore('lastChat',chatList);
+
+        const readList = store.getStore('lastRead',new Map());
+        readList.delete(this.props.hid);
+        store.setStore('lastRead',readList);
     }
 
     /**

@@ -2,10 +2,10 @@
  * 随机获取名字组件
  */
 // ================================ 导入
+import { nameWare } from '../../../../../app/utils/nameWareHouse';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
-import { nameWare } from './nameWareHouse';
 
 // ================================ 导出
 
