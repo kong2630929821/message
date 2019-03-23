@@ -4,7 +4,7 @@
 // ================================================================= 导入
 import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
-import { GroupSend, HistoryCursor, SendMsg, UserSend } from './message.s';
+import { GroupSend, HistoryCursor, SendMsg, UserSend, TempSend } from './message.s';
 
 import { BonBuffer } from '../../../../pi/util/bon';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
@@ -19,6 +19,7 @@ import { OnlineUsers } from '../db/user.s';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GROUP_STATE, GroupInfo } from '../db/group.s';
 import { getUid } from './group.r';
+import { NOT_GROUP_OWNNER, NOTIN_SAME_GROUP } from '../errorNum';
 
 const logger = new Logger('MESSAGE');
 
@@ -26,7 +27,6 @@ const logger = new Logger('MESSAGE');
  * 用户确认读取了的最新消息id
  * @param uid user id
  */
-// #[rpc=rpcServer]
 // export const messageReadAck = (cursor: LastReadMessageId): Result => {
 //     const dbMgr = getEnv().getDbMgr();
 //     const lastReadMessageidBucket = new Bucket('file', CONSTANT.LAST_READ_MESSAGE_ID_TABLE, dbMgr);
@@ -320,12 +320,9 @@ export const moveGroupCursor = (gid: number, current: number) => {
  * @param message user send
  */
 // #[rpc=rpcServer]
-// tslint:disable-next-line:max-func-body-length
 export const sendUserMessage = (message: UserSend): UserHistory => {
     console.log('sendMsg!!!!!!!!!!!', message);
     const dbMgr = getEnv().getDbMgr();
-    const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
-    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
 
     const sid = getUid();
     const userHistory = new UserHistory();
@@ -333,7 +330,86 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     // 获取对方联系人列表
     const sContactInfo = contactBucket.get(message.rid)[0];
     // 判断当前用户是否在对方的好友列表中
+    if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
+        console.log('not friend!!!!!!!!!!!');
+        userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
 
+        return userHistory;
+    }
+    // 发送消息
+    sendMessage(message, userHistory);
+
+    return userHistory;
+};
+
+/**
+ * 发送临时聊天单聊消息
+ * @param message user send
+ */
+// #[rpc=rpcServer]
+export const sendTempMessage = (message: TempSend): UserHistory => {
+    console.log('sendMsg!!!!!!!!!!!', message);
+    const dbMgr = getEnv().getDbMgr();
+
+    const sid = getUid();
+    const userHistory = new UserHistory();
+    // 参数中有gid，则是群内临时聊天
+    const groupInfoBucket = new Bucket('file', GroupInfo._$info.name, dbMgr);
+    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(message.gid)[0];
+
+    // 判断双方是否在同一个群
+    if (!((gInfo.memberids.indexOf(sid) > -1) && (gInfo.memberids.indexOf(message.rid) > -1))) {
+        userHistory.hIncId = NOTIN_SAME_GROUP.toString();
+
+        return userHistory;
+    }
+
+    // 判断双方是否有一方是群主
+    if (!(gInfo.ownerid === sid || gInfo.ownerid === message.rid)) {
+        userHistory.hIncId = NOT_GROUP_OWNNER.toString();
+
+        return userHistory;
+    }
+    // 发送消息
+    sendMessage(message, userHistory);
+
+    return userHistory;
+};
+
+
+
+/**
+ * 判断用户是否在线
+ * @param uid 用户ID
+ */
+// #[rpc=rpcServer]
+export const isUserOnline = (uid: number): Result => {
+    const dbMgr = getEnv().getDbMgr();
+
+    const res = new Result();
+    const bucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
+    const onlineUser = bucket.get<number, [OnlineUsers]>(uid)[0];
+    if (onlineUser !== undefined && onlineUser.sessionId !== -1) {
+        logger.debug('User: ', uid, 'on line');
+        res.r = 1; // on line;
+
+        return res;
+    } else {
+        logger.debug('User: ', uid, 'off line');
+        res.r = 0; // off online
+
+        return res;
+    }
+};
+
+// ----------------- helpers ------------------
+
+export const sendMessage = (message: UserSend, userHistory: UserHistory): UserHistory => {
+    const dbMgr = getEnv().getDbMgr();
+    const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+
+    const sid = getUid();
     // 消息撤回
     if (message.mtype === MSG_TYPE.RECALL) {
         // 需要撤回的消息key
@@ -370,11 +446,6 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userMsg.time = Date.now();
     userHistory.msg = userMsg;
     // logger.debug(`friends is : ${JSON.stringify(sContactInfo.friends)}, sid is : ${sid}`);
-    if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
-        userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
-
-        return userHistory;
-    }
 
     const msgLock = new MsgLock();
     msgLock.hid = genUserHid(sid, message.rid);
@@ -408,31 +479,4 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     // userHistoryCursorBucket.put(genUuid(message.rid, sid), ridHistoryCursor);
     // logger.debug(`sendUserMessage ridHistoryCursor: ${JSON.stringify(ridHistoryCursor)}`);
 
-    return userHistory;
-};
-
-/**
- * 判断用户是否在线
- * @param uid 用户ID
- */
-// #[rpc=rpcServer]
-export const isUserOnline = (uid: number): Result => {
-    const dbMgr = getEnv().getDbMgr();
-
-    const res = new Result();
-    const bucket = new Bucket('memory', CONSTANT.ONLINE_USERS_TABLE, dbMgr);
-    const onlineUser = bucket.get<number, [OnlineUsers]>(uid)[0];
-    if (onlineUser !== undefined && onlineUser.sessionId !== -1) {
-        logger.debug('User: ', uid, 'on line');
-        res.r = 1; // on line;
-
-        return res;
-    } else {
-        logger.debug('User: ', uid, 'off line');
-        res.r = 0; // off online
-
-        return res;
-    }
-};
-
-// ----------------- helpers ------------------
+}

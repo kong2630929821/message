@@ -11,7 +11,7 @@ import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid }
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistory, GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo } from '../db/user.s';
+import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
 import { applyFriend } from './user.r';
@@ -28,6 +28,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE, dbMgr);
     const userCredentialBucket = new Bucket('file', CONSTANT.USER_CREDENTIAL_TABLE, dbMgr);
     const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE, dbMgr);
+    const userLevelBucket = new Bucket('file', UserLevel._$info.name, dbMgr);
 
     const userInfo = new UserInfo();
     const userCredential = new UserCredential();
@@ -51,6 +52,11 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     userCredential.passwdHash = registerInfo.passwdHash;
 
     userInfoBucket.put(userInfo.uid, userInfo);
+    // 新用户的等级都是VIP0
+    const level = new UserLevel();
+    level.uid = userInfo.uid;
+    level.level = VIP_LEVEL.VIP0;
+    userLevelBucket.put(userInfo.uid, level);
     console.log('sucessfully registered user', userInfo);
     userCredentialBucket.put(userInfo.uid, userCredential);
 
@@ -60,6 +66,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     contact.applyGroup = [];
     contact.applyUser = [];
     contact.friends = [];
+    contact.myGroup = [];
     contact.group = [];
     contact.temp_chat = [];
     contact.blackList = [];

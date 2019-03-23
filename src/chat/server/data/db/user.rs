@@ -14,6 +14,16 @@ enum GENERATOR_TYPE {
     USER = "user",   //个人
     GROUP = "group", //群组
 }
+
+enum VIP_LEVEL {
+    VIP0 = 0, // 普通用户
+    VIP1 = 1,
+    VIP2 = 2, 
+    VIP3 = 3,
+    VIP4 = 4,
+    VIP5 = 5, // 官方账号
+}
+
 /**
 *用户本人的基本信息
 */
@@ -83,6 +93,7 @@ struct Contact {
     friends: &[u32],       //好友id
     temp_chat: &[u32],     //临时用户id
     group: &[u32],         //群组id
+    myGroup: &[u32],       //用户创建的群组id
     applyUser: &[u32],     //其他用户申请添加当前用户为好友
     applyGroup: &[String], //guid 其他群组的某个成员邀请当前用户加入
     blackList: &[u32],
@@ -107,4 +118,10 @@ struct OnlineUsersReverseIndex {
 struct FrontStoreData {
     uid:u32,
     value:String,
+}
+
+#[primary=uid,db=file]
+struct UserLevel {
+    uid: u32,
+    level: u8 // 权限等级 用户好友上限和群上限
 }
