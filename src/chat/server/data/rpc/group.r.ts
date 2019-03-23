@@ -51,7 +51,8 @@ export const applyJoinGroup = (gid: number): Result => {
         return res;
     }
     // 群成员是否达到上限
-    if (gInfo.memberids.length >= gInfo.max_members) {
+    const max_members = getGroupMaxMembers(gInfo.level);
+    if (gInfo.memberids.length >= max_members) {
         res.r = GROUP_MEMBERS_OVERLIMIT;
 
         return res;
@@ -183,8 +184,8 @@ export const acceptUser = (agree: GroupAgree): Result => {
 
         return res;
     } 
-    // 群成员是否达到上限
-    if (gInfo.memberids.length >= gInfo.max_members) {
+    const max_members = getGroupMaxMembers(gInfo.level);
+    if (gInfo.memberids.length >= max_members) {
         res.r = GROUP_MEMBERS_OVERLIMIT;
 
         return res;
@@ -276,7 +277,8 @@ export const inviteUsers = (invites: InviteArray): Result => {
         return res;
     }
     // 群成员是否达到上限
-    if (gInfo.memberids.length >= gInfo.max_members) {
+    const max_members = getGroupMaxMembers(gInfo.level);
+    if (gInfo.memberids.length >= max_members) {
         res.r = GROUP_MEMBERS_OVERLIMIT;
 
         return res;
@@ -331,7 +333,8 @@ export const inviteUserToNPG = (gid:number) => {
         return res;
     }
     // 群成员是否达到上限
-    if (gInfo.memberids.length >= gInfo.max_members) {
+    const max_members = getGroupMaxMembers(gInfo.level);
+    if (gInfo.memberids.length >= max_members) {
         res.r = GROUP_MEMBERS_OVERLIMIT;
 
         return res;
@@ -368,7 +371,8 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
         return gInfo;
     }
     // 群成员是否达到上限
-    if (gInfo.memberids.length >= gInfo.max_members) {
+    const max_members = getGroupMaxMembers(gInfo.level);
+    if (gInfo.memberids.length >= max_members) {
         gInfo.gid = GROUP_MEMBERS_OVERLIMIT;
 
         return gInfo;
@@ -732,22 +736,18 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
             level = userLevel.level;
         }
         let groupLimit: number;
-        let groupMembersLimit: number;
         let gmGroupe: boolean;
         switch (level) {
             case VIP_LEVEL.VIP0:
                 groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
-                groupMembersLimit = CONSTANT.VIP0_GROUP_MEMBERS_LIMIT;
                 gmGroupe = false;
                 break;
             case VIP_LEVEL.VIP5:
                 groupLimit = CONSTANT.VIP5_GROUPS_LIMIT;
-                groupMembersLimit = CONSTANT.VIP5_GROUP_MEMBERS_LIMIT;
                 gmGroupe = true; // 官方账号创建的群标记为官方群
                 break;
             default:
                 groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
-                groupMembersLimit = CONSTANT.VIP0_GROUP_MEMBERS_LIMIT;
                 gmGroupe = false;
                 break;
         }
@@ -777,7 +777,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.need_agree = groupInfo.need_agree;
         gInfo.adminids = [uid];
         gInfo.gm_group = gmGroupe;
-        gInfo.max_members = groupMembersLimit;
+        gInfo.level = level; 
         // genAnnounceIncId(gInfo.gid, START_INDEX)
         gInfo.annoceids = [];
         gInfo.create_time = Date.now();
@@ -938,6 +938,24 @@ export const getUid = () => {
     return parseInt(uid, 10);
 };
 // ============ helpers =================
+
+// 获取群成员上限
+const getGroupMaxMembers = (groupLevel: number) => {
+    let maxMembers: number;
+    switch (groupLevel) {
+        case VIP_LEVEL.VIP0:
+            maxMembers = CONSTANT.VIP0_GROUP_MEMBERS_LIMIT;
+            break;
+        case VIP_LEVEL.VIP5:
+            maxMembers = CONSTANT.VIP5_GROUP_MEMBERS_LIMIT;
+            break;
+        default:
+            maxMembers = CONSTANT.VIP0_GROUP_MEMBERS_LIMIT;
+            break;
+    }
+
+    return maxMembers;
+}
 
 const getGroupUserLinkBucket = () => {
     const dbMgr = getEnv().getDbMgr();

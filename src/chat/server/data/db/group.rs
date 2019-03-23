@@ -38,7 +38,7 @@ struct GroupInfo {
     avatar:String,//群头像 
     need_agree:bool,// 入群是否需要被同意
     gm_group: bool,  //是否是官方群
-    max_members: u32 // 人数上限
+    level: u32 // 群等级
 }
 
 /**

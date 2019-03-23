@@ -5,6 +5,8 @@
 export const NOT_FRIEND_CANT_TALK = 1001;
 // 群内临时聊天时只有一方是群主才可以聊天
 export const NOT_GROUP_OWNNER = 1002;
+// 不在一个群无法发起临时聊天
+export const NOTIN_SAME_GROUP = 1003;
 
 // 用户创建群组到达上限
 export const USER_GREATE_GROUP_OVERLIMIT = 2001;
