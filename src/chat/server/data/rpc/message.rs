@@ -9,8 +9,16 @@ struct AnnounceSend {
 }
 
 struct UserSend {
-    rid: u32,//接受者id
-    mtype: MSG_TYPE,
+    rid: u32, //接受者id
+    mtype: MSG_TYPE, // 消息类型
+    msg: String,//内容
+    time: usize,//时间
+}
+
+struct TempSend {
+    rid: u32, //接受者id
+    gid: u32, //群组id
+    mtype: MSG_TYPE, // 消息类型
     msg: String,//内容
     time: usize,//时间
 }

@@ -49,3 +49,7 @@ struct NewGroup{
     note:String
 }
 
+struct NeedAgree {
+    gid: u32, // 群组id
+    need_agree: bool // 进群是否需要验证
+}
