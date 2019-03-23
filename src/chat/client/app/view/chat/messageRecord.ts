@@ -26,18 +26,9 @@ export class MessageRecord extends Widget {
         const sid = store.getStore(`uid`);
         let hid;
         let hincId;  // 最新一条消息的ID
-        if (props.chatType === GENERATOR_TYPE.USER) { // 单聊
-            this.props.name = getFriendAlias(this.props.rid);
-            this.props.avatar = getUserAvatar(this.props.rid) || '../../res/images/user.png';
-            hid = genUserHid(sid,this.props.rid);
-
-            const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
-            hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-            this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
-            
-        } else { // 群聊
+        if (props.chatType === GENERATOR_TYPE.GROUP)  { // 群聊
             const groupInfo = store.getStore(`groupInfoMap/${this.props.rid}`,new GroupInfo());
-            this.props.official = groupInfo.gm_group;
+            this.props.official = groupInfo.level === 5;
             this.props.name = groupInfo.name;
             this.props.avatar = getGroupAvatar(this.props.rid) || '../../res/images/groups.png';
             hid = genGroupHid(this.props.rid);
@@ -46,6 +37,14 @@ export class MessageRecord extends Widget {
             hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
             this.props.lastMessage = hincId ? store.getStore(`groupHistoryMap/${hincId}`,'') : new GroupMsg();
 
+        } else {// 单聊
+            this.props.name = getFriendAlias(this.props.rid).name;
+            this.props.avatar = getUserAvatar(this.props.rid) || '../../res/images/user.png';
+            hid = genUserHid(sid,this.props.rid);
+
+            const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
+            hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
+            this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
         }
 
         // 计算有多少条新消息记录

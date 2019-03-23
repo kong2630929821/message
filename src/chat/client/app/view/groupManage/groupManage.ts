@@ -49,7 +49,7 @@ export class ManageItem extends Widget {
         ];
 
         // 是否是官方群组
-        if (this.props.groupInfo.gm_group) {
+        if (this.props.groupInfo.level === 5) {
             this.props.manageList.pop();
             this.props.groupSets = [
                 { title:'无需进群审核',content:'进群不需要经过群主或管理员审核',showSwitch:false }

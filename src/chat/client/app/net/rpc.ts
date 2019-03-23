@@ -12,8 +12,8 @@ import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, U
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, inviteUserToNPG } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
-import { sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
-import { GroupSend, UserSend } from '../../../server/data/rpc/message.s';
+import { sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
+import { GroupSend, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
@@ -81,7 +81,6 @@ export const getUsersBasicInfo = (uids: number[]) => {
  * 单聊
  * @param rid reader id
  * @param msg message
- * @param cb callback
  */
 export const sendUserMsg = (rid: number, msg: string, msgType = MSG_TYPE.TXT) => {
     const info = new UserSend();
@@ -101,6 +100,29 @@ export const sendUserMsg = (rid: number, msg: string, msgType = MSG_TYPE.TXT) =>
         });
     });
     
+};
+
+/**
+ * 临时单聊
+ */
+export const sendTempMsg = (rid: number,gid:number, msg: string, msgType = MSG_TYPE.TXT) => {
+    const info = new TempSend();
+    info.msg = msg;
+    info.mtype = msgType;
+    info.rid = rid;
+    info.gid = gid;
+    info.time = (new Date()).getTime();
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(sendTempMessage, info, (r: UserHistory) => {
+            if (r.hIncId !== DEFAULT_ERROR_STR) {
+                resolve(r);
+
+            } else {
+                reject(r);
+            }
+        });
+    });
 };
 
 /**

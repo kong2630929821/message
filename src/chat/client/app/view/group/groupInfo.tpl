@@ -19,7 +19,7 @@
                     <input type="text" value="{{it.groupAlias}}" w-class="groupAliasInput" maxlength="20" on-blur="changeGroupAlias" on-tap="editGroupAlias" on-input="groupAliasChange"/>
                 {{else}}
                     <span>{{it.groupAlias || it.groupInfo.name}}</span>
-                    {{if it.groupInfo.gm_group}}
+                    {{if it.groupInfo.level == 5}}
                         <span w-class="official">官方</span>
                     {{end}}
                 {{end}}

@@ -133,6 +133,7 @@ export const login = (user: UserType): UserInfo => {
     userInfo = userInfoBucket.get(loginReq.uid)[0];
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
     setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
+    setMqttTopic(mqttServer, `${loginReq.uid}_sendMsg`, true, true);
     // 后端统一推送消息topic
     setMqttTopic(mqttServer, `send/${loginReq.uid.toString()}`, true, true);
     console.log('Set user topic: ', loginReq.uid.toString());

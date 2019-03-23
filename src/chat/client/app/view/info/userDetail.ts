@@ -43,7 +43,7 @@ export class UserDetail extends Widget {
             setting:null,
             msgAvoid:false,
             msgTop:false,
-            groupOwner:false
+            groupId:null
         };
     }
 
@@ -70,7 +70,8 @@ export class UserDetail extends Widget {
         this.props.isContactorOpVisible = false;
         this.props.isFriend = true;
         this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
-        this.props.alias = getFriendAlias(this.props.uid);
+        this.props.alias = getFriendAlias(this.props.uid).name;
+        this.props.isFriend = getFriendAlias(this.props.uid).isFriend;
         if (!this.props.alias) {
             this.getUserData(this.props.uid);
         }
@@ -87,9 +88,9 @@ export class UserDetail extends Widget {
 
     // 非好友获取信息
     public getUserData(uid: number) {
-        this.props.isFriend = false;
         getUsersBasicInfo([uid]).then((r: UserArray) => {
             this.props.userInfo = r.arr[0];
+            store.setStore(`userInfoMap/${uid}`,r.arr[0]);
             this.paint();
         },(r) => {
             console.error('获取用户信息失败', r);
@@ -106,12 +107,13 @@ export class UserDetail extends Widget {
     public startChat() {
         this.pageClick();
         // 不是好友但当前用户是群主可发起临时聊天
-        if (!this.props.isFriend && this.props.groupOwner) {
+        if (!this.props.isFriend && this.props.groupId) {
             popNew('chat-client-app-view-chat-chat', { 
                 id: this.props.uid, 
                 chatType: GENERATOR_TYPE.USER, 
                 temporary: true, 
-                name: this.props.userInfo.name
+                name: this.props.userInfo.name,
+                groupId:this.props.groupId
             }); 
         } else {
             popNew('chat-client-app-view-chat-chat', { 
@@ -330,5 +332,5 @@ interface Props {
     setting:any; // 额外设置，免打扰|置顶
     msgTop:boolean; // 置顶
     msgAvoid:boolean; // 免打扰
-    groupOwner:boolean; // 当前用户是否是群主（群聊进入，群主可以与成员临时私聊）
+    groupId:number; // 当前群聊ID 群主可与成员私聊
 }

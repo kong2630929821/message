@@ -26,7 +26,7 @@ export class SelectUser extends Widget {
         this.props.chatType = props.chatType;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             // 好友别名
-            this.props.name = getFriendAlias(this.props.id);
+            this.props.name = getFriendAlias(this.props.id).name;
         }
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             // 群名片

@@ -31,11 +31,11 @@
                 </div>
             </div>
         </div>
-        {{if it.inFlag == 3 || (!it.isFriend && !it.groupOwner)}}
+        {{if it.inFlag == 3 || (!it.isFriend && !it.groupId)}}
         <div style="margin: 40px 80px;">
             <div w-class="liItem1" on-tap="addUser" on-down="onShow">加为好友</div>
         </div>
-        {{elseif !it.isFriend && it.groupOwner}}
+        {{elseif !it.isFriend && it.groupId}}
         <div style="margin: 40px 80px;">
             <div w-class="liItem1" on-tap="startChat" on-down="onShow">开始对话</div>
         </div>

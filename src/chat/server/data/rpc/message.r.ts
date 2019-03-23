@@ -4,12 +4,12 @@
 // ================================================================= 导入
 import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
-import { GroupSend, HistoryCursor, SendMsg, UserSend, TempSend } from './message.s';
+import { GroupSend, HistoryCursor, SendMsg, TempSend, UserSend } from './message.s';
 
 import { BonBuffer } from '../../../../pi/util/bon';
 import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
-import { mqttPublish, QoS } from '../../../../pi_pt/rust/pi_serv/js_net';
+import { mqttPublish, QoS, setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
 
@@ -18,8 +18,8 @@ import { OnlineUsers } from '../db/user.s';
 
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GROUP_STATE, GroupInfo } from '../db/group.s';
-import { getUid } from './group.r';
 import { NOT_GROUP_OWNNER, NOTIN_SAME_GROUP } from '../errorNum';
+import { getUid } from './group.r';
 
 const logger = new Logger('MESSAGE');
 
@@ -376,8 +376,6 @@ export const sendTempMessage = (message: TempSend): UserHistory => {
     return userHistory;
 };
 
-
-
 /**
  * 判断用户是否在线
  * @param uid 用户ID
@@ -472,12 +470,12 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
     const buf = new BonBuffer();
     sendMsg.bonEncode(buf);
     const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-    mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
-    logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(sendMsg)}`, buf.getBuffer());
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, `${message.rid}_sendMsg`, buf.getBuffer());
+    logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(sendMsg)}`,`${message.rid}_sendMsg`);
     // ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
     // }
 
     // userHistoryCursorBucket.put(genUuid(message.rid, sid), ridHistoryCursor);
     // logger.debug(`sendUserMessage ridHistoryCursor: ${JSON.stringify(ridHistoryCursor)}`);
 
-}
+};

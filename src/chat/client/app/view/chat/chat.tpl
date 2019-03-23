@@ -7,7 +7,7 @@
     </div>
     {{end}}
 
-    {{if it.temporary}}
+    {{if it.temporary || it.groupId}}
     <div w-class="temporaryBox">
         <img src="../../res/images/user.png" w-class="avatar"/>
         <div style="flex:1;">

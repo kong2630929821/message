@@ -17,7 +17,7 @@ import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias, INFLAG, timestampFormat } from '../../logic/logic';
 import { openNewActivity } from '../../logic/native';
-import { applyFriend, getUsersBasicInfo, sendGroupMsg, sendUserMsg } from '../../net/rpc';
+import { applyFriend, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
 import { parseMessage } from '../../widget/messageItem/messageItem';
 
 // ================================================ 导出
@@ -55,12 +55,14 @@ export class Chat extends Widget {
      */
     public initUser() {
         if (!this.props.temporary) { // 如果是临时聊天会传名字 不是临时聊天需要获取用户名
-            this.props.name = getFriendAlias(this.props.id);
+            this.props.name = getFriendAlias(this.props.id).name;
+            this.props.temporary = !getFriendAlias(this.props.id).isFriend;  // 不是好友则是临时聊天
         } 
-        if (!this.props.name) {  // 如果获取不到用户名 临时聊天记录
+        if (!this.props.name) {  // 获取不到用户名
             this.props.temporary = true;
             getUsersBasicInfo([this.props.id]).then((r: UserArray) => {
                 this.props.name = r.arr[0].name;
+                store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
                 this.paint();
             },(r) => {
                 console.error('获取用户信息失败', r);
@@ -199,8 +201,11 @@ export class Chat extends Widget {
             });
             
         // 临时单聊
-        } else if (this.props.temporary) {
+        } else if (this.props.temporary || this.props.groupId) {
             console.log('=========临时单聊信息发送',e);
+            sendTempMsg(this.props.id,this.props.groupId,this.props.inputMessage,e.msgType).then((r:UserHistory) => {
+                updateUserMessage(this.props.id, r, this.props.groupId);
+            });
 
         // 单聊
         } else {
@@ -321,7 +326,12 @@ export class Chat extends Widget {
      * 获取滚动区元素
      */
     public getScrollElem() {
-        return getRealNode((<any>this.tree).children[1]);
+        if (this.props.temporary || this.props.groupId) { // 临时聊天会多一个div
+            return getRealNode((<any>this.tree).children[2]);
+
+        } else {
+            return getRealNode((<any>this.tree).children[1]);
+        }
     }
 
     /**
@@ -402,4 +412,5 @@ interface Props {
     isOnTools:boolean; // 是否打开更多功能
     onRadio:any; // 当前点击的语音消息ID
     temporary:boolean;  // 是否是临时聊天
+    groupId:number; // 当前群聊ID 群主可与成员私聊
 }

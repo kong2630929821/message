@@ -85,7 +85,7 @@ export const initAccount = () => {
 /**
  * 请求好友发的消息历史记录
  */
-export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
+export const getFriendHistory = (rid: number, gid?:number, upLastRead: boolean = false) => {
     const sid = store.getStore('uid');
     if (sid === rid) return;
 
@@ -118,7 +118,7 @@ export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
                     // console.error('uuid: ',hid,'initStore getFriendHistory',r);
                     if (r.newMess > 0) {
                         r.arr.forEach(element => {
-                            updateUserMessage(userflag.rid, element);
+                            updateUserMessage(userflag.rid, element, gid);
                         });
                     }
                 });

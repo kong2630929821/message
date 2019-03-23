@@ -8,7 +8,7 @@ import * as walletStore from '../../../../../app/store/memstore';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { Forelet } from '../../../../../pi/widget/forelet';
-import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
+import { UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
@@ -103,9 +103,11 @@ export class Contact extends SpecialWidget {
      * @param id 好友ID或群ID
      * @param chatType 群聊或单聊
      */
-    public chat(id: number, chatType: GENERATOR_TYPE) {
+    public chat(num:number) {
         this.closeMore();
-        popNew3('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
+        const value = this.state.lastChat[num];
+        const gid = value.length === 4 ? value[3] :null ;
+        popNew3('chat-client-app-view-chat-chat', { id: value[0], chatType: value[2], groupId:gid }) ;
     }
 
     // 动画效果执行

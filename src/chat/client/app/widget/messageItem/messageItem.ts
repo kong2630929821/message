@@ -82,7 +82,7 @@ export class MessageItem extends Widget {
         } else {
             const gid = getGidFromHincid(this.props.hIncId);
             const ownerid = store.getStore(`groupInfoMap/${gid}`,new GroupInfo()).ownerid;
-            popNew('chat-client-app-view-info-userDetail',{ uid:this.props.message.sid, inFlag: INFLAG.chat_group, groupOwner: store.getStore('uid') === ownerid });
+            popNew('chat-client-app-view-info-userDetail',{ uid:this.props.message.sid, inFlag: INFLAG.chat_group, groupId: store.getStore('uid') === ownerid ? gid :null });
         }
     }
 

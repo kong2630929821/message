@@ -43,9 +43,10 @@ export const walletSignIn = (openid) => {
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 store.setStore('isLogin',true);
                 init2.init(r.uid);
-                init2.subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
+
+                init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {
                     if (v.code === 1) {
-                        getFriendHistory(v.rid);
+                        getFriendHistory(v.rid, v.gid);
                     }
                 });
                 setUserInfo();

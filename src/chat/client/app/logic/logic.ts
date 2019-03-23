@@ -6,7 +6,7 @@ import { uploadFileUrlPrefix } from '../../../../app/config';
 import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
-import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { unSubscribe } from '../net/init';
@@ -70,8 +70,13 @@ export const getFriendAlias = (rid:number) => {
     const sid = store.getStore('uid');
     const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
     const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,new FriendLink());
+    const contact = store.getStore(`contactMap/${sid}`,new Contact());
+    const isFriend = contact.friends && contact.friends.findIndex(item => item === rid) > -1;
 
-    return friend.alias || user.name;
+    return {
+        name: friend.alias || user.name,
+        isFriend: isFriend
+    };
 };
 
 /**
