@@ -6,9 +6,9 @@ import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { UserInfo } from '../../../server/data/db/user.s';
-import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, registerUser } from '../../../server/data/rpc/basic.p';
+import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
-import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
+import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, inviteUserToNPG } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
@@ -62,9 +62,10 @@ export const walletLogin = (openid: string, sign: string, cb: (r: UserInfo) => v
  *
  * @param uid user id 
  */
-export const getUsersBasicInfo = (uids: number[]) => {
+export const getUsersBasicInfo = (uids: number[],accIds?:string[]) => {
     const info = new GetUserInfoReq();
     info.uids = uids;
+    info.acc_ids = accIds;
 
     return new Promise((resolve,reject) => {
         clientRpcFunc(getUsersInfo, info, (r: UserArray) => {

@@ -3,25 +3,21 @@
  */
 
 // ================================================ 导入
+import * as walletStore from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { Contact } from '../../../../server/data/db/user.s';
-import { Result } from '../../../../server/data/rpc/basic.s';
+import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { agreeJoinGroup } from '../../../../server/data/rpc/group.p';
 import { GroupAgree } from '../../../../server/data/rpc/group.s';
-import { Logger } from '../../../../utils/logger';
-import { acceptFriend } from '../../../app/net/rpc';
+import { acceptFriend, getUsersBasicInfo } from '../../../app/net/rpc';
 import * as  store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
 export const forelet = new Forelet();
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
 
 export class NewFriend extends Widget {
     public ok: () => void;
@@ -48,7 +44,6 @@ export class NewFriend extends Widget {
     // 同意入群邀请（被动）
     public agreeGroupApply(e: any) {
         const gid = parseInt(e.value, 10);
-        logger.debug('agreeGroupApply', gid);
         const agree = new GroupAgree();
         agree.agree = true;
         agree.gid = gid;
@@ -61,12 +56,39 @@ export class NewFriend extends Widget {
             store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
         });
     }
+    
 }
 
 // ================================================ 本地
-store.register('contactMap', (r: Map<number, Contact>) => {
-    // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
+const STATE = {
+    contact:{ // 联系人列表
+        applyUser:[],
+        applyGroup:[]
+    }, 
+    inviteUsers:[],  // 我邀请的好友注册进入
+    convertUser:{}  // 我兑换好友的邀请码
+};
+store.register('contactMap', (r) => {
     for (const value of r.values()) {
-        forelet.paint(value);
-    }
+        STATE.contact = value;
+        forelet.paint(STATE);
+    }  
+});
+
+// 邀请好友成功
+walletStore.register('flags/invite_success',(r) => {
+    getUsersBasicInfo([],[r]).then((user:UserArray) => {
+        STATE.inviteUsers = user.arr;
+        forelet.paint(STATE);
+        store.setStore('inviteUsers/invite',user.arr);
+    });
+});
+
+// 兑换好友邀请码成功
+walletStore.register('flags/convert_invite',(r) => {
+    getUsersBasicInfo([],[r]).then((user:UserArray) => {
+        STATE.convertUser = user.arr[0];
+        forelet.paint(STATE);
+        store.setStore('inviteUsers/convert',user.arr[0]);
+    });
 });

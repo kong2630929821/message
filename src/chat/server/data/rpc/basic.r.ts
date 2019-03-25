@@ -11,7 +11,7 @@ import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid }
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistory, GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
+import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserFind, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
 import { applyFriend } from './user.r';
@@ -191,6 +191,23 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
     const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE, dbMgr);
 
     const uids = getUserInfoReq.uids;
+    if (uids.length === 0) {
+        const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name, dbMgr);
+        const accIds = getUserInfoReq.acc_ids;
+        const users = [];
+        for (const v of accIds) {
+            users.push(`a:${v}`);
+        }
+        const rArr = userFindBucket.get<string[], UserFind[]>(users);
+        console.log('!!!!!!!!!!!!!!!applyFriend rArr:', rArr);
+    
+        rArr.forEach((r) => {
+            if (r) {
+                uids.push(r.uid);
+            }
+        });
+
+    }
     const values: any = userInfoBucket.get(uids);
     console.log('Read userinfo: ', uids, values);
 

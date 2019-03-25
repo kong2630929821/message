@@ -61,7 +61,8 @@ struct AnnounceHistoryArray{
 }
 
 struct GetUserInfoReq {
-    uids: &[usize]
+    uids: &[usize],
+    acc_ids: Option<&[String]>
 }
 
 struct GetGroupInfoReq {

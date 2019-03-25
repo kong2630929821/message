@@ -6,7 +6,6 @@
             <div w-class="nameText">
                 {{it.name}}
             </div>
-            <div on-tap="doCopy(0)" style="border-bottom: 40px solid transparent;">ID：{{it.info.uid}}</div>
         </div>
     </div>  
 
@@ -15,8 +14,8 @@
             <div w-class="adress-wrap" style="margin:60px 0 20px;" on-tap="doCopy(1)">
                 <img w-class="adressIcon" src="../../res/images/adress-book.png" />
                 <div w-class="adress-text-wrap">
-                    <span w-class="mainText">{{it.info.wallet_addr}}</span>
-                    <span w-class="flag">地址</span>
+                    <span w-class="mainText">{{it.info.acc_id}}</span>
+                    <span w-class="flag">好嗨号</span>
                 </div>
             </div>
             <div w-class="adress-wrap" on-tap="doCopy(2)">

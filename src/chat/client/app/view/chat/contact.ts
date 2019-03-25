@@ -69,8 +69,8 @@ export class Contact extends SpecialWidget {
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         this.props.avatar = getUserAvatar(uid);
         
-        // 钱包修改了姓名、头像等，或钱包退出登陆
-        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
+        // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
+        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
             if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                 setUserInfo();
                 this.props.avatar = `${uploadFileUrlPrefix}${wUser.avatar}`;

@@ -13,12 +13,12 @@ import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
 import { Contact, FriendLink, UserFind, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
+import { APPLY_FRIENDS_OVERLIMIT, FRIENDS_NUM_OVERLIMIT } from '../errorNum';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
 import { FriendAlias, UserAgree } from './user.s';
-import { FRIENDS_NUM_OVERLIMIT, APPLY_FRIENDS_OVERLIMIT } from '../errorNum';
 
 // ================================================================= 导出
 /**
@@ -42,7 +42,7 @@ export const applyFriend = (user: string): Result => {
     
     // 获取用户UID
     const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name, dbMgr);
-    const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`]);
+    const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`, `a:${user}`]);
     console.log('!!!!!!!!!!!!!!!applyFriend rArr:', rArr);
 
     let uid;
@@ -399,6 +399,14 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
         console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!232233', newUidFind);
         userFindBucket.put(newUidFind.user, newUidFind);
     }
+    // 添加钱包账户查找用户
+    if (!(oldUserinfo.acc_id === userinfo.acc_id) && !(userinfo.acc_id === '')) {
+        const acc_idFind = new UserFind();
+        acc_idFind.user = `a:${userinfo.acc_id}`;
+        acc_idFind.uid = sid;
+        console.log('!!!!!!!!!!!!!!!!!add phone!1212121', acc_idFind);
+        userFindBucket.put(acc_idFind.user, acc_idFind);
+    }
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!333333333333333333');
     let newUser = new UserInfo();
     if (userinfo.uid === sid) {
@@ -431,7 +439,7 @@ export const set_gmAccount = (uid: number): Result => {
     result.r = CONSTANT.RESULT_SUCCESS;
 
     return result;
-}
+};
 
 // ================================================================= 本地
 
@@ -451,8 +459,7 @@ export const get_friends_limit = (uid: number): number => {
             break;
         default:
             friendsNumLimit = CONSTANT.VIP0_FRIENDS_LIMIT;
-            break;
     }
 
     return friendsNumLimit;
-}
+};

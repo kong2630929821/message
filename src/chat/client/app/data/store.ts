@@ -124,7 +124,12 @@ export const initStore = () => {
         setting:null,
         isLogin:true,
         offLine:false,
-        flags:{}
+        flags:{},
+        inviteUsers:{
+            invite:[],  // 我邀请的好友上线
+            convert:{}  // 邀请我的好友
+        }
+        
     };
 };
 
@@ -204,6 +209,7 @@ export interface Store {
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
     flags:any; // 标记信息
+    inviteUsers:any;  // 邀请好友
 
 }
 

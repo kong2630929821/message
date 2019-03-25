@@ -71,6 +71,8 @@ export class User extends Widget {
             test.avatar = userinfo.avatar;
             test.sex = userinfo.sex;
             test.note = userinfo.note;
+            test.wallet_addr = userinfo.wallet_addr;
+            test.acc_id = userinfo.acc_id;
         
             clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
                 if (r && r.uid > 0) {
@@ -112,6 +114,8 @@ export class User extends Widget {
         test.avatar = userinfo.avatar;
         test.sex = userinfo.sex;
         test.note = userinfo.note;
+        test.wallet_addr = userinfo.wallet_addr;
+        test.acc_id = userinfo.acc_id;
         
         clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
             // todo

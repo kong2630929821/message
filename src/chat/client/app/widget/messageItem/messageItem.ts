@@ -104,10 +104,14 @@ export class MessageItem extends Widget {
             popNew('app-view-earn-exchange-exchangeDetail',this.props.message.redEnvDetail);
 
         } else {
+            const user = store.getStore(`userInfoMap/${this.props.message.sid}`,new Map());
             popNew('app-view-earn-exchange-openRedEnv', { 
                 inFlag: 'chat',
                 rid: this.props.message.redEnvId,
-                message: this.props.message.msg
+                message: this.props.message.msg,
+                acc_id: user.acc_id,
+                userName: user.name,   // 红包发送者的名字 头像
+                userHead: user.avatar
             },(r) => {
                 console.log(r);
                 if (r) {
@@ -127,6 +131,7 @@ export class MessageItem extends Widget {
                     
                 }
             });
+
         }
     }
 

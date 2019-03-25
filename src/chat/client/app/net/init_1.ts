@@ -73,6 +73,7 @@ export const setUserInfo = () => {
     r.avatar = user.avatar;
     r.tel = user.phoneNumber;
     r.wallet_addr = walletAddr;
+    r.acc_id = user.acc_id;
     if (!r.uid) {
         return;
     }
