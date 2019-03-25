@@ -1,13 +1,15 @@
+import { Env } from '../../../pi/lang/env';
+import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
+import { mqttPublish, QoS, setMqttTopic } from '../../../pi_pt/rust/pi_serv/js_net';
 import { userLogin as UserLoginRequest, userLoginResponse } from './user_login.s';
-import { setMqttTopic, mqttPublish, QoS } from "../../../pi_pt/rust/pi_serv/js_net";
-import { getEnv } from "../../../pi_pt/net/rpc_server";
-import { ServerNode } from "../../../pi_pt/rust/mqtt/server";
 
-//#[rpc=rpcServer]
+declare var env: Env;
+
+// #[rpc=rpcServer]
 export const userLogin = (userLoginRequest: UserLoginRequest): userLoginResponse => {
-    let mqttServer = getEnv().getNativeObject<ServerNode>("mqttServer");
+    const mqttServer = env.get('mqttServer');
 
-    let uid = userLoginRequest.uid;
+    const uid = userLoginRequest.uid;
 
     // TODO: how to delete topic when user offline ?
     setMqttTopic(mqttServer, uid, true, true);
@@ -17,8 +19,8 @@ export const userLogin = (userLoginRequest: UserLoginRequest): userLoginResponse
         setMqttTopic(mqttServer, 'gid-123', true, true);
     }
 
-    let response = new userLoginResponse();
+    const response = new userLoginResponse();
     response.ack = true;
 
     return response;
-}
+};

@@ -2,21 +2,24 @@
  * wrappers for db operations (CRUD)
  */
 
+import { Mgr, Tr } from '../../pi/db/mgr';
+import { Env } from '../../pi/lang/env';
 import { TabMeta } from '../../pi/struct/sinfo';
-import { alter, Handler, iterDb, modify, query, read, write } from '../../pi_pt/db';
-import { Mgr, Tr } from '../../pi_pt/rust/pi_db/mgr';
-
 import { Logger } from './logger';
+
+declare var env: Env;
+
 export type Handler = (tr: Tr) => any;
 type RWHandler<V> = (value: V) => V;
 const logger = new Logger('DB');
 
 type DbType = 'memory' | 'file';
 
-const createBucket = (dbType: DbType, bucketName: string, bucketMetaInfo: TabMeta, dbMgr: Mgr): Bucket => {
+const createBucket = (dbType: DbType, bucketName: string, bucketMetaInfo: TabMeta): Bucket => {
+    const dbMgr = env.dbMgr;
     try {
-        write(dbMgr, (tr: Tr) => {
-            alter(tr, dbType, bucketName, bucketMetaInfo);
+        dbMgr.write((tr: Tr) => {
+            tr.alter(dbType, bucketName, bucketMetaInfo);
         });
 
     } catch (e) {
@@ -24,24 +27,25 @@ const createBucket = (dbType: DbType, bucketName: string, bucketMetaInfo: TabMet
         throw new Error('Create bucket failed');
     }
 
-    return new Bucket(dbType, bucketName, dbMgr);
+    return new Bucket(dbType, bucketName);
 };
 
-export const createPersistBucket = (bucketName: string, bucketMetaInfo: TabMeta, dbMgr: Mgr): Bucket => {
-    return createBucket('file', bucketName, bucketMetaInfo, dbMgr);
+export const createPersistBucket = (bucketName: string, bucketMetaInfo: TabMeta): Bucket => {
+    return createBucket('file', bucketName, bucketMetaInfo);
 };
 
-export const createMemoryBucket = (bucketName: string, bucketMetaInfo: TabMeta, dbMgr: Mgr): Bucket => {
-    return createBucket('memory', bucketName, bucketMetaInfo, dbMgr);
+export const createMemoryBucket = (bucketName: string, bucketMetaInfo: TabMeta): Bucket => {
+    return createBucket('memory', bucketName, bucketMetaInfo);
 };
 
 export class Bucket {
 
     private bucketName: string;
     private dbType: DbType;
-    private dbManager: any;
+    private dbManager: Mgr;
 
-    constructor(dbType: DbType, bucketName: string, dbMgr: Mgr) {
+    constructor(dbType: DbType, bucketName: string) {
+        const dbMgr = env.dbMgr;
         this.bucketName = bucketName;
         this.dbType = dbType;
         this.dbManager = dbMgr;
@@ -51,6 +55,7 @@ export class Bucket {
     public get<K, V>(key: K, timeout: number = 1000): V {
         let value: any;
         const items = [];
+        const dbMgr = this.dbManager;
 
         try {
 
@@ -61,8 +66,8 @@ export class Bucket {
             } else {
                 items.push({ ware: this.dbType, tab: this.bucketName, key: key });
             }
-            read(this.dbManager, (tr: Tr) => {
-                value = query(tr, items, timeout, false);
+            dbMgr.read((tr: Tr) => {
+                value = tr.query(items, timeout, false);
             });
 
         } catch (e) {
@@ -78,7 +83,7 @@ export class Bucket {
 
     public put<K, V>(key: K, value: V, timeout: number = 1000): boolean {
         const items = [];
-
+        const dbMgr = this.dbManager;
         try {
             if (Array.isArray(key) && Array.isArray(value) && key.length === value.length) {
                 for (let i = 0; i < key.length; i++) {
@@ -87,8 +92,8 @@ export class Bucket {
             } else {
                 items.push({ ware: this.dbType, tab: this.bucketName, key: key, value: value });
             }
-            write(this.dbManager, (tr: Tr) => {                
-                modify(tr, items, timeout, false);
+            dbMgr.write((tr: Tr) => {                
+                tr.modify(items, timeout, false);
             });
 
             return true;
@@ -107,6 +112,7 @@ export class Bucket {
     public readAndWrite<K>(key: K, rwHandler:RWHandler<any>, timeout: number = 1000):boolean {
         const itemsRead = [];
         const itemsWrite = [];
+        const dbMgr = this.dbManager;
         try {
             if (Array.isArray(key)) {
                 for (let i = 0; i < key.length; i++) {
@@ -116,9 +122,9 @@ export class Bucket {
                 itemsRead.push({ ware: this.dbType, tab: this.bucketName, key: key });
             }
             logger.debug(`before write`);
-            write(this.dbManager, (tr: Tr) => {
+            dbMgr.write((tr: Tr) => {
                 logger.debug(`before query`);
-                let value = query(tr, itemsRead, timeout, false);
+                let value = tr.query(itemsRead, timeout, false);
                 if (Array.isArray(value)) {
                     value = value.map(v => v.value);
                 }
@@ -131,7 +137,7 @@ export class Bucket {
                     itemsWrite.push({ ware: this.dbType, tab: this.bucketName, key: key, value: value });
                 }
                 logger.debug(`before modify`);
-                modify(tr, itemsWrite, timeout, false);
+                tr.modify(itemsWrite, timeout, false);
                 logger.debug(`after modify`);
             });
 
@@ -153,12 +159,13 @@ export class Bucket {
 
     // tslint:disable-next-line:no-reserved-keywords
     public delete<K>(key: K, timeout: number = 1000): boolean {
+        const dbMgr = this.dbManager;
         if (this.get<K, any>(key) === undefined) {
             return false;
         }
         try {
-            write(this.dbManager, (tr: Tr) => {
-                modify(tr, [{ ware: this.dbType, tab: this.bucketName, key: key }], timeout, false);
+            dbMgr.write((tr: Tr) => {
+                tr.modify([{ ware: this.dbType, tab: this.bucketName, key: key }], timeout, false);
             });
 
             return true;
@@ -171,9 +178,10 @@ export class Bucket {
 
     public iter<K>(key: K, desc: boolean = false, filter: string = ''): any {
         let iter;
+        const dbMgr = this.dbManager;
         try {
-            read(this.dbManager, (tr: Tr) => {
-                iter = iterDb(tr, this.dbType, this.bucketName, key, desc, filter);
+            dbMgr.read((tr: Tr) => {
+                iter = tr.iter_raw(this.dbType, this.bucketName, key, desc, filter);
             });
         } catch (e) {
             logger.error('failed to iter db with error: ', e);

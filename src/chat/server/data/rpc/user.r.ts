@@ -2,9 +2,8 @@
  * 用户相关的rpc操作
  */
 // ================================================================= 导入
+import { Env } from '../../../../pi/lang/env';
 import { BonBuffer } from '../../../../pi/util/bon';
-import { getEnv } from '../../../../pi_pt/net/rpc_server';
-import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
 import { mqttPublish, QoS } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
@@ -13,12 +12,14 @@ import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
 import { Contact, FriendLink, UserFind, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
+import { APPLY_FRIENDS_OVERLIMIT, FRIENDS_NUM_OVERLIMIT } from '../errorNum';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
 import { FriendAlias, UserAgree } from './user.s';
-import { FRIENDS_NUM_OVERLIMIT, APPLY_FRIENDS_OVERLIMIT } from '../errorNum';
+
+declare var env: Env;
 
 // ================================================================= 导出
 /**
@@ -27,10 +28,9 @@ import { FRIENDS_NUM_OVERLIMIT, APPLY_FRIENDS_OVERLIMIT } from '../errorNum';
  */
 // #[rpc=rpcServer]
 export const applyFriend = (user: string): Result => {
-    const dbMgr = getEnv().getDbMgr();
     const sid = getUid();
     const result = new Result();
-    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
     const curUser = contactBucket.get<number, [Contact]>(sid)[0];
     const friendsNumLimit = get_friends_limit(sid); // 当前用户的好友上限
     // 当前用户好友数量达到上限，则申请失败
@@ -41,7 +41,7 @@ export const applyFriend = (user: string): Result => {
     }
     
     // 获取用户UID
-    const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name, dbMgr);
+    const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
     const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`]);
     console.log('!!!!!!!!!!!!!!!applyFriend rArr:', rArr);
 
@@ -63,7 +63,7 @@ export const applyFriend = (user: string): Result => {
         return result;
     }
     // 取出联系人表
-    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
+    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE);
     const friend1 = friendLinkBucket.get(genUuid(sid, uid))[0];
     const friend2 = friendLinkBucket.get(genUuid(uid, sid))[0];
     console.log('applyFriend friend1: ', friend1, 'friend2: ', friend2);
@@ -81,7 +81,7 @@ export const applyFriend = (user: string): Result => {
         return result;
     }
     // 判断对方是否是官方账号
-    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name, dbMgr);
+    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name);
     const userLevel1 = levelBucket.get<number, [UserLevel]>(uid)[0];
     const level1 = userLevel1.level;
     if (level1 === VIP_LEVEL.VIP5) { // 官方账号无需同意直接添加
@@ -119,9 +119,8 @@ export const applyFriend = (user: string): Result => {
  * 客服发送的第一条欢迎消息
  */
 const sendFirstWelcomeMessage = () => {
-    const dbMgr = getEnv().getDbMgr();
-    const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE, dbMgr);
-    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+    const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE);
 
     const SUID = CONSTANT.CUSTOMER_SERVICE;  // 客服账号
     const sid = getUid();
@@ -155,7 +154,7 @@ const sendFirstWelcomeMessage = () => {
     sendMsg.rid = SUID;
     const buf = new BonBuffer();
     sendMsg.bonEncode(buf);
-    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    const mqttServer = env.get('mqttServer');
     mqttPublish(mqttServer, true, QoS.AtMostOnce, sid.toString(), buf.getBuffer());
     console.log(`from ${SUID} to ${sid}, message is : ${JSON.stringify(sendMsg)}`);
 };
@@ -167,8 +166,7 @@ const sendFirstWelcomeMessage = () => {
 // #[rpc=rpcServer]
 export const acceptFriend = (agree: UserAgree): Result => {
     const _acceptFriend = (sid: number, rid: number, agree: boolean) => {
-        const dbMgr = getEnv().getDbMgr();
-        const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+        const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
         // 获取当前用户的联系人列表
         const sContactInfo = contactBucket.get(sid)[0];
         // 从申请列表中删除当前同意/拒绝的用户
@@ -199,7 +197,7 @@ export const acceptFriend = (agree: UserAgree): Result => {
             // 在当前用户列表中添加好友
             sContactInfo.friends.findIndex(item => item === rid) === -1 && sContactInfo.friends.push(rid);
             // 分别插入到friendLink中去
-            const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
+            const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE);
             const friendLink = new FriendLink();
             friendLink.uuid = genUuid(sid, rid);
             friendLink.alias = '';
@@ -240,15 +238,14 @@ export const acceptFriend = (agree: UserAgree): Result => {
 // #[rpc=rpcServer]
 export const delFriend = (uid: number): Result => {
     const _delFriend = (sid: number, rid: number) => {
-        const dbMgr = getEnv().getDbMgr();
-        const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+        const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
         // 获取当前用户的联系人列表
         const sContactInfo = contactBucket.get(sid)[0];
         // 从好友列表中删除当前用户
         sContactInfo.friends = delValueFromArray(rid, sContactInfo.friends);
         contactBucket.put(sid, sContactInfo);
         // 从friendLink中删除
-        const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
+        const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE);
         friendLinkBucket.delete(genUuid(sid, rid));
         console.log('delFriend friendLink ', genUuid(sid, rid));
     };
@@ -266,8 +263,7 @@ export const delFriend = (uid: number): Result => {
  * @param uid user id
  */
 export const addToBlackList = (peerUid: number): Result => {
-    const dbMgr = getEnv().getDbMgr();
-    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
     // const session = getEnv().getSession();
     // let uid;
     // read(dbMgr, (tr: Tr) => {
@@ -299,8 +295,7 @@ export const addToBlackList = (peerUid: number): Result => {
  */
 
 export const removeFromBlackList = (peerUid: number): Result => {
-    const dbMgr = getEnv().getDbMgr();
-    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
     // const session = getEnv().getSession();
     // let uid;
     // read(dbMgr, (tr: Tr) => {
@@ -332,9 +327,8 @@ export const removeFromBlackList = (peerUid: number): Result => {
  */
 // #[rpc=rpcServer]
 export const changeFriendAlias = (friendAlias: FriendAlias): Result => {
-    const dbMgr = getEnv().getDbMgr();
-    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE, dbMgr);
-    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE, dbMgr);
+    const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE);
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
     const sid = getUid();
     const uuid = genUuid(sid, friendAlias.rid);
     const result = new Result();
@@ -360,9 +354,8 @@ export const changeFriendAlias = (friendAlias: FriendAlias): Result => {
  */
 // #[rpc=rpcServer]
 export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
-    const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.USER_INFO_TABLE, dbMgr);
-    const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name, dbMgr);
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.USER_INFO_TABLE);
+    const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
     const sid = getUid();
     const oldUserinfo = userInfoBucket.get<number, UserInfo[]>(sid)[0];
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!oldUserinfo:', oldUserinfo);
@@ -418,9 +411,8 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
  */
 // #[rpc=rpcServer]
 export const set_gmAccount = (uid: number): Result => {
-    const dbMgr = getEnv().getDbMgr();
     const result = new Result();
-    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name, dbMgr); 
+    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
     let userLevel = levelBucket.get<number, [UserLevel]>(uid)[0];
     if (!userLevel) {
         userLevel = new UserLevel();
@@ -431,14 +423,13 @@ export const set_gmAccount = (uid: number): Result => {
     result.r = CONSTANT.RESULT_SUCCESS;
 
     return result;
-}
+};
 
 // ================================================================= 本地
 
 // 获取好友上限
 export const get_friends_limit = (uid: number): number => {
-    const dbMgr = getEnv().getDbMgr();
-    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name, dbMgr); 
+    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
     const userLevel = levelBucket.get<number, [UserLevel]>(uid)[0];
     const level = userLevel.level;
     let friendsNumLimit: number;
@@ -451,8 +442,7 @@ export const get_friends_limit = (uid: number): number => {
             break;
         default:
             friendsNumLimit = CONSTANT.VIP0_FRIENDS_LIMIT;
-            break;
     }
 
     return friendsNumLimit;
-}
+};

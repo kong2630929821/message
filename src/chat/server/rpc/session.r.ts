@@ -3,14 +3,16 @@
  */
 
 // ================================================================= 导入
+import { Tr } from '../../../pi/db/mgr';
+import { Env } from '../../../pi/lang/env';
+import { Session } from '../../../pi/net/session';
 import { randomInt } from '../../../pi/util/math';
-import { read, write } from '../../../pi_pt/db';
-import { getEnv } from '../../../pi_pt/net/rpc_server';
-import { Tr } from '../../../pi_pt/rust/pi_db/mgr';
 import { Bucket } from '../../utils/db';
 import { Logger } from '../../utils/logger';
-import { Session, SessionTab } from '../data/db/session.s';
+import { Session2, SessionTab } from '../data/db/session.s';
 import { AutoLogin, AutoLoginResult, GetToken, Token } from './session.s';
+
+declare var env: Env;
 
 const logger = new Logger('session');
 
@@ -57,9 +59,9 @@ export const getToken = (getToken: GetToken): Token => {
 
 // 设置会话属性
 export const setSession = (key: string, value: string, uid?: string) => {
-    const session = getEnv().getSession();
-    const dbMgr = getEnv().getDbMgr();
-    write(dbMgr, (tr: Tr) => {
+    const session: Session = env.get('session');
+    const dbMgr = env.dbMgr;
+    dbMgr.write((tr: Tr) => {
         session.set(tr, key, value);
         logger.info('set session key:', key, 'value:', value);
     });
@@ -67,10 +69,10 @@ export const setSession = (key: string, value: string, uid?: string) => {
         return;
     }
     // 写入会话缓存
-    const session2 = new Session();
+    const session2 = new Session2();
     session2.key = key;
     session2.value = value;
-    const sessionTab = new Bucket('memory', SessionTab._$info.name, dbMgr);
+    const sessionTab = new Bucket('memory', SessionTab._$info.name);
     let sessions = sessionTab.get<string, [SessionTab]>(uid)[0];
     if (sessions) {
         for (let i = 0; i < sessions.sessions.length; i++) {
@@ -93,10 +95,10 @@ export const setSession = (key: string, value: string, uid?: string) => {
 
 // 获取会话属性
 export const getSession = (key: string) => {
-    const dbMgr = getEnv().getDbMgr();
-    const session = getEnv().getSession();
+    const session: Session = env.get('session');
+    const dbMgr = env.dbMgr;
     let value;
-    read(dbMgr, (tr: Tr) => {
+    dbMgr.read((tr: Tr) => {
         value = session.get(tr, key);
     });
 
@@ -105,18 +107,18 @@ export const getSession = (key: string) => {
 
 // 替换会话
 export const replaceSession = (uid: string) => {
-    const dbMgr = getEnv().getDbMgr();
-    const session = getEnv().getSession();
+    const session: Session = env.get('session');
+    const dbMgr = env.dbMgr;
     const suid = get_cache_session(uid, 'uid')[0].value;
     // 验证uid
     if (uid !== suid) {
         throw new Error(`uid error uid:${uid}, suid:${suid}`);
     }
-    const sessionTab = new Bucket('memory', SessionTab._$info.name, dbMgr);
+    const sessionTab = new Bucket('memory', SessionTab._$info.name);
     const oldSessions = sessionTab.get(uid)[0];
     if (oldSessions) {
         for (const session2 of oldSessions.sessions) {
-            write(dbMgr, (tr: Tr) => {
+            dbMgr.write((tr: Tr) => {
                 session.set(tr, session2.key, session2.value);
             });
         }
@@ -125,9 +127,8 @@ export const replaceSession = (uid: string) => {
 };
 
 // 获取缓存中的会话
-export const get_cache_session = (uid: string, key?: string): Session[] => {
-    const dbMgr = getEnv().getDbMgr();
-    const sessionTab = new Bucket('memory', SessionTab._$info.name, dbMgr);
+export const get_cache_session = (uid: string, key?: string): Session2[] => {
+    const sessionTab = new Bucket('memory', SessionTab._$info.name);
     const sessions = sessionTab.get<string, [SessionTab]>(uid)[0];
     if (!sessions) {
         return [];
