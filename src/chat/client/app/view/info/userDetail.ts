@@ -3,21 +3,22 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { CUSTOMER_SERVICE } from '../../../../server/data/constant';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
-import { getUsersInfo, setData } from '../../../../server/data/rpc/basic.p';
-import { GetUserInfoReq, Result, UserArray } from '../../../../server/data/rpc/basic.s';
+import { setData } from '../../../../server/data/rpc/basic.p';
+import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { Logger } from '../../../../utils/logger';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice, copyToClipboard, getFriendAlias, getUserAvatar, rippleShow } from '../../logic/logic';
+import { copyToClipboard, getFriendAlias, getUserAvatar, INFLAG, rippleShow } from '../../logic/logic';
 import { clientRpcFunc, unSubscribe } from '../../net/init';
-import { applyFriend, delFriend as delUserFriend } from '../../net/rpc';
+import { applyFriend, delFriend as delUserFriend, getUsersBasicInfo } from '../../net/rpc';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -32,7 +33,7 @@ export class UserDetail extends Widget {
         super();
         this.props = {
             uid: null,
-            inFlag: 0,
+            inFlag: INFLAG.contactList,
             isContactorOpVisible: false,
             utilList: [],
             userInfo: {},
@@ -41,14 +42,15 @@ export class UserDetail extends Widget {
             avatar:'',
             setting:null,
             msgAvoid:false,
-            msgTop:false
+            msgTop:false,
+            groupId:null
         };
     }
 
     public setProps(props: Json) {
         super.setProps(props);
         this.props.userInfo = {};
-        if (props.inFlag === 3) {
+        if (props.inFlag === INFLAG.newApply) {
             this.props.utilList = [{ utilText: '加入黑名单' }];
         } else if (props.uid === CUSTOMER_SERVICE) {
             this.props.utilList = [
@@ -68,12 +70,13 @@ export class UserDetail extends Widget {
         this.props.isContactorOpVisible = false;
         this.props.isFriend = true;
         this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
-        this.props.alias = getFriendAlias(this.props.uid);
+        this.props.alias = getFriendAlias(this.props.uid).name;
+        this.props.isFriend = getFriendAlias(this.props.uid).isFriend;
         if (!this.props.alias) {
             this.getUserData(this.props.uid);
         }
         logger.debug(props);
-        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/img_avatar1.png';
+        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
         
         const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
         const sid = store.getStore('uid');
@@ -85,16 +88,12 @@ export class UserDetail extends Widget {
 
     // 非好友获取信息
     public getUserData(uid: number) {
-        const info = new GetUserInfoReq();
-        info.uids = [uid];
-        this.props.isFriend = false;
-        clientRpcFunc(getUsersInfo, info, (r: UserArray) => {
-            if (r && r.arr.length > 0) {
-                this.props.userInfo = r.arr[0];
-                this.paint();
-            } else {
-                console.error('获取用户信息失败', r);
-            }
+        getUsersBasicInfo([uid]).then((r: UserArray) => {
+            this.props.userInfo = r.arr[0];
+            store.setStore(`userInfoMap/${uid}`,r.arr[0]);
+            this.paint();
+        },(r) => {
+            console.error('获取用户信息失败', r);
         });
     }
 
@@ -107,7 +106,22 @@ export class UserDetail extends Widget {
     // 开始对话
     public startChat() {
         this.pageClick();
-        popNew('chat-client-app-view-chat-chat', { id: this.props.uid, chatType: GENERATOR_TYPE.USER });
+        // 不是好友但当前用户是群主可发起临时聊天
+        if (!this.props.isFriend && this.props.groupId) {
+            popNew('chat-client-app-view-chat-chat', { 
+                id: this.props.uid, 
+                chatType: GENERATOR_TYPE.USER, 
+                temporary: true, 
+                name: this.props.userInfo.name,
+                groupId:this.props.groupId
+            }); 
+        } else {
+            popNew('chat-client-app-view-chat-chat', { 
+                id: this.props.uid, 
+                chatType: GENERATOR_TYPE.USER 
+            }); 
+        }
+        
     }
 
     // 添加好友
@@ -115,7 +129,7 @@ export class UserDetail extends Widget {
         this.pageClick();
         applyFriend(this.props.uid.toString(), (r: Result) => {
             if (r.r === 0) {
-                bottomNotice(`${this.props.uid}已经是你的好友`);
+                popNewMessage(`${this.props.uid}已经是你的好友`);
             }
         });
     }
@@ -128,7 +142,7 @@ export class UserDetail extends Widget {
     public handleFatherTap(e: any) {
         this.props.isContactorOpVisible = false;
         this.paint();
-        if (this.props.inFlag === 3) {
+        if (this.props.inFlag === INFLAG.newApply) {
             popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
             
             return;
@@ -178,7 +192,7 @@ export class UserDetail extends Widget {
                 store.setStore('userChatMap', userChatMap);
 
                 const userInfoMap = store.getStore('userInfoMap', new Map());
-                userInfoMap.delete(uid);  // 删除用户信息
+                userInfoMap.delete(uid.toString());  // 删除用户信息
                 store.setStore('userInfoMap', userInfoMap);
 
                 const lastChat = store.getStore(`lastChat`, []);
@@ -188,7 +202,7 @@ export class UserDetail extends Widget {
                     store.setStore('lastChat', lastChat);
                 }
             } else {
-                bottomNotice('删除好友失败');
+                popNewMessage('删除好友失败');
             }
         });
     }
@@ -217,10 +231,10 @@ export class UserDetail extends Widget {
                     store.setStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, friendlink);
                     this.props.alias = friend.alias;
                     this.paint();
-                    bottomNotice('修改好友备注成功');
+                    popNewMessage('修改好友备注成功');
 
                 } else {
-                    bottomNotice('修改好友备注失败');
+                    popNewMessage('修改好友备注失败');
                 }
             });
         });
@@ -240,7 +254,7 @@ export class UserDetail extends Widget {
         }
         this.props.isContactorOpVisible = false;
         this.paint();
-        bottomNotice('复制成功');
+        popNewMessage('复制成功');
     }
 
     /**
@@ -307,7 +321,7 @@ export class UserDetail extends Widget {
 
 interface Props {
     uid: number;
-    inFlag: number; // 从某个页面进入，0 contactList进入, 1 chat 单聊进入，2 chat 群聊进入，3 newfriendapply 新朋友申请进入
+    inFlag: INFLAG; // 从某个页面进入
     isContactorOpVisible: boolean;
     utilList: any;
     userInfo: any;
@@ -318,4 +332,5 @@ interface Props {
     setting:any; // 额外设置，免打扰|置顶
     msgTop:boolean; // 置顶
     msgAvoid:boolean; // 免打扰
+    groupId:number; // 当前群聊ID 群主可与成员私聊
 }

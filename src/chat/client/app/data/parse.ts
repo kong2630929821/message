@@ -8,8 +8,9 @@ import * as store from './store';
 /**
  * 更新userHistoryMap/userChatMap,lastChat
  * @param msg UserHistory
+ * gid 临时聊天需要保存群ID
  */
-export const updateUserMessage = (nextside:number,msg:UserHistory) => {
+export const updateUserMessage = (nextside:number,msg:UserHistory,gid?:number) => {
     store.setStore(`userHistoryMap/${msg.hIncId}`,msg.msg);
     const chat = store.getStore(`userChatMap/${getHidFromhIncId(msg.hIncId)}`, []);
     // const index = chat.indexOf(msg.hIncId);
@@ -24,7 +25,7 @@ export const updateUserMessage = (nextside:number,msg:UserHistory) => {
         userhistory.cancel = true;
         store.setStore(`userHistoryMap/${reHincId}`,userhistory);
     }
-    pushLastChat([nextside, msg.msg.time, GENERATOR_TYPE.USER]);   
+    pushLastChat([nextside, msg.msg.time, GENERATOR_TYPE.USER],gid);   
 };
 
 export const updateGroupMessage = (gid:number,msg:GroupHistory) => {
@@ -56,7 +57,7 @@ export const updateGroupMessage = (gid:number,msg:GroupHistory) => {
  * 
  * @param value  chat 
  */
-const pushLastChat = (value:[number,number,GENERATOR_TYPE]) => {
+const pushLastChat = (value:[number,number,GENERATOR_TYPE],gid?:number) => {
     const lastChat = store.getStore(`lastChat`, []);
     const index = lastChat.findIndex(item => item[0] === value[0] && item[2] === value[2]);
     const setting = store.getStore('setting',{ msgTop:[] });
@@ -68,6 +69,9 @@ const pushLastChat = (value:[number,number,GENERATOR_TYPE]) => {
         const hid = genUserHid(sid,value[0]);
         topFg = setting.msgTop.findIndex(item => item === hid) > -1;
         topLen = setting.msgTop.length;
+        if (gid) { // 临时单聊
+            value.push(gid);
+        }
         
     } else {  // 群聊消息
         const hid = genGroupHid(value[0]);

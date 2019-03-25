@@ -125,6 +125,7 @@ export const initStore = () => {
         isLogin:true,
         offLine:false,
         flags:{}
+        
     };
 };
 
@@ -137,6 +138,10 @@ const registerDataChange = () => {
     });
 
     register('userChatMap',() => {
+        userChatChange();  // 新的聊天数据
+    });
+
+    register('userHistoryMap',() => {
         userChatChange();  // 新的聊天数据
     });
     
@@ -152,6 +157,10 @@ const registerDataChange = () => {
         groupChatChange();  // 群组聊天数据更新
     });
 
+    register('groupHistoryMap',() => {
+        groupChatChange();  // 群组聊天数据更新
+    });
+
     register('groupUserLinkMap',() => {
         groupUserLinkChange();  // 群组用户数据更新
     });
@@ -162,7 +171,7 @@ const registerDataChange = () => {
         lastReadChange(); // 已读消息游标更新
     });
     register('setting',() => {
-        settingChange();
+        settingChange();  // 消息免打扰，消息置顶等设置
     });
     register('flags/noGroupRemind',(r) => { // 不再提醒加群
         flagsChange();

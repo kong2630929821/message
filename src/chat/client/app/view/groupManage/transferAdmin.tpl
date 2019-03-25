@@ -9,7 +9,7 @@
         <div w-class="user-wrap" ev-transferAdmin="openConfirmTranBox">
             {{for index,item of membersButnoOwner}}
             <div on-tap="openConfirmTranBox({{item}})">
-                <chat-client-app-view-contactList-contactItem>{"id":{{item}},chatType:"user",img:"../../res/images/user.png"}</chat-client-app-view-contactList-contactItem>
+                <chat-client-app-view-contactList-contactItem>{"id":{{item}},chatType:"user",img:"../../res/images/user_avatar.png"}</chat-client-app-view-contactList-contactItem>
             </div>
             {{end}}
         </div>

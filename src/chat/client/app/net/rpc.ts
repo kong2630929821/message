@@ -2,17 +2,18 @@
  * 调用rpc接口
  */
 // ================================================ 导入
+import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { UserInfo } from '../../../server/data/db/user.s';
-import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser, registerUser } from '../../../server/data/rpc/basic.p';
+import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
-import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserRegister, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
+import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, inviteUserToNPG } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
-import { sendGroupMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
-import { GroupSend, UserSend } from '../../../server/data/rpc/message.s';
+import { sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
+import { GroupSend, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
 import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
@@ -61,28 +62,67 @@ export const walletLogin = (openid: string, sign: string, cb: (r: UserInfo) => v
  *
  * @param uid user id 
  */
-export const getUsersBasicInfo = (uids: number[], cb: (r: UserArray) => void) => {
+export const getUsersBasicInfo = (uids: number[],accIds?:string[]) => {
     const info = new GetUserInfoReq();
     info.uids = uids;
-    clientRpcFunc(getUsersInfo, info, (r: UserArray) => {
-        cb(r);
+    info.acc_ids = accIds;
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(getUsersInfo, info, (r: UserArray) => {
+            if (r && r.arr.length > 0) {
+                resolve(r);
+            } else {
+                reject(r);
+            }
+        });
     });
+    
 };
 /**
  * 单聊
  * @param rid reader id
  * @param msg message
- * @param cb callback
  */
-export const sendMessage = (rid: number, msg: string, cb: (r: UserHistory) => void, msgType = MSG_TYPE.TXT) => {
+export const sendUserMsg = (rid: number, msg: string, msgType = MSG_TYPE.TXT) => {
     const info = new UserSend();
     info.msg = msg;
     info.mtype = msgType;
     info.rid = rid;
     info.time = (new Date()).getTime();
 
-    clientRpcFunc(sendUserMessage, info, (r: UserHistory) => {
-        cb(r);
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(sendUserMessage, info, (r: UserHistory) => {
+            if (r.hIncId !== DEFAULT_ERROR_STR) {
+                resolve(r);
+
+            } else {
+                reject(r);
+            }
+        });
+    });
+    
+};
+
+/**
+ * 临时单聊
+ */
+export const sendTempMsg = (rid: number,gid:number, msg: string, msgType = MSG_TYPE.TXT) => {
+    const info = new TempSend();
+    info.msg = msg;
+    info.mtype = msgType;
+    info.rid = rid;
+    info.gid = gid;
+    info.time = (new Date()).getTime();
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(sendTempMessage, info, (r: UserHistory) => {
+            if (r.hIncId !== DEFAULT_ERROR_STR) {
+                resolve(r);
+
+            } else {
+                reject(r);
+            }
+        });
     });
 };
 
@@ -159,16 +199,23 @@ export const deleteGroup = () => {
     });
 };
 
-export const sendGroupMsg = () => {
+export const sendGroupMsg = (gid:number,message:string,mtype = MSG_TYPE.TXT) => {
     const msg = new GroupSend();
-    msg.gid = 11111;
-    msg.msg = 'hi group';
-    msg.mtype = 0;
+    msg.gid = gid;
+    msg.msg = message;
+    msg.mtype = mtype;
     msg.time = Date.now();
 
-    clientRpcFunc(sendGroupMessage, msg, (r) => {
-        console.log(r);
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(sendGroupMessage, msg, (r) => {
+            if (r.hIncId !== DEFAULT_ERROR_STR) {
+                resolve(r);
+            } else {
+                reject(r);
+            }
+        });
     });
+    
 };
 
 export const addAdministror = (uid: number) => {
@@ -246,7 +293,7 @@ export const friendLinks = (uuid: string) => {
 };
 
 (<any>self).sendMessage = (uid: number, msg: string) => {
-    sendMessage(uid, msg, (r) => {
+    sendUserMsg(uid, msg, (r) => {
         console.log(r);
     });
 };

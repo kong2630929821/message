@@ -3,7 +3,7 @@
  */
 
  // ================================================ 导入
-import { popNew } from '../../../../../pi/ui/root';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
@@ -23,7 +23,7 @@ export class ContactList extends Widget {
 
     public create() {
         super.create();
-        const sid = store.getStore('uid').toString();
+        const sid = store.getStore('uid','').toString();
         this.state = store.getStore('contactMap',new Contact()).get(sid);
     }
 
@@ -35,16 +35,16 @@ export class ContactList extends Widget {
     public goNext(i:number,uid:number) {
         switch (i) {
             case 0:
-                popNew('chat-client-app-view-contactList-newFriend'); // 新好友验证
+                popNew3('chat-client-app-view-contactList-newFriend'); // 新好友验证
                 break;
             case 1:
-                popNew(`chat-client-app-view-group-groupList`);  // 群聊列表
+                popNew3(`chat-client-app-view-group-groupList`);  // 群聊列表
                 break;
             case 2:
-                popNew('chat-client-app-view-info-user'); // 本人信息
+                popNew3('chat-client-app-view-info-user'); // 本人信息
                 break;
             case 3:
-                popNew('chat-client-app-view-info-userDetail',{ uid:uid });  // 好友详情
+                popNew3('chat-client-app-view-info-userDetail',{ uid:uid });  // 好友详情
                 break;
             default:
         }

@@ -8,7 +8,7 @@ import { GroupSend, HistoryCursor, SendMsg, TempSend, UserSend } from './message
 
 import { BonBuffer } from '../../../../pi/util/bon';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
-import { mqttPublish, QoS } from '../../../../pi_pt/rust/pi_serv/js_net';
+import { mqttPublish, QoS, setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
 
@@ -464,8 +464,8 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
     const buf = new BonBuffer();
     sendMsg.bonEncode(buf);
     const mqttServer = env.get('mqttServer');
-    mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
-    logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(sendMsg)}`, buf.getBuffer());
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, `${message.rid}_sendMsg`, buf.getBuffer());
+    logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(sendMsg)}`,`${message.rid}_sendMsg`);
     // ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
     // }
 

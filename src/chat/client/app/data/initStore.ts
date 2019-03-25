@@ -85,7 +85,7 @@ export const initAccount = () => {
 /**
  * 请求好友发的消息历史记录
  */
-export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
+export const getFriendHistory = (rid: number, gid?:number, upLastRead: boolean = false) => {
     const sid = store.getStore('uid');
     if (sid === rid) return;
 
@@ -118,7 +118,7 @@ export const getFriendHistory = (rid: number, upLastRead: boolean = false) => {
                     // console.error('uuid: ',hid,'initStore getFriendHistory',r);
                     if (r.newMess > 0) {
                         r.arr.forEach(element => {
-                            updateUserMessage(userflag.rid, element);
+                            updateUserMessage(userflag.rid, element, gid);
                         });
                     }
                 });
@@ -274,6 +274,8 @@ export const lastReadChange = () => {
     }, () => {
         console.log('read error');
     });
+
+    updateUnReadFg();
 };
 
 /**
@@ -292,6 +294,52 @@ export const lastChatChange = () => {
     }, () => {
         console.log('read error');
     });
+
+    updateUnReadFg();
+};
+
+/**
+ * 更新是否有未读消息
+ */
+export const updateUnReadFg = () => {
+    const sid = store.getStore('uid');
+    const readList = store.getStore('lastRead',new Map());
+    const chatlist = store.getStore('lastChat',[]);
+    let unReadFg = false; // 是否有未读消息
+    if (chatlist.length > readList.size) {
+        unReadFg = true;
+        // 是否有未读消息 状态变化执行
+        if (store.getStore('flags').unReadFg !== unReadFg) {
+            store.setStore('flags/unReadFg',unReadFg);
+        }  
+
+        return;
+    }
+
+    for (const v of chatlist) {
+        if (v[2] === GENERATOR_TYPE.USER) {
+            const hid = genUserHid(sid,v[0]);
+            const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
+            // 已读消息ID是否等于聊天记录的最后一条ID
+            if (readList.get(hid) && readList.get(hid).msgId !== hIncIdArr[hIncIdArr.length - 1]) {
+                unReadFg = true;
+
+                break;
+            }
+        } else {
+            const hid = genGroupHid(v[0]);
+            const hIncIdArr = store.getStore(`groupChatMap/${hid}`,[]);
+            if (readList.get(hid) && readList.get(hid).msgId !== hIncIdArr[hIncIdArr.length - 1]) {
+                unReadFg = true;
+
+                break;
+            }
+        }
+    }
+    // 是否有未读消息 状态变化执行
+    if (store.getStore('flags').unReadFg !== unReadFg) {
+        store.setStore('flags/unReadFg',unReadFg);
+    }  
 };
 
 /**

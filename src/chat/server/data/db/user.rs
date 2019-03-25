@@ -36,6 +36,7 @@ struct UserInfo {
     tel: String,         //电话
     note: String,        //用户自己的备注信息
     wallet_addr: String, //钱包地址
+    acc_id:String        // 钱包账户ID
 }
 
 /**

@@ -3,9 +3,10 @@
  */
 
 // ================================================ 导入
-import { popNew } from '../../../../../pi/ui/root';
+import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
+import { CUSTOMER_SERVICE } from '../../../../server/data/constant';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { Contact } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
@@ -14,7 +15,6 @@ import { GroupCreate, Invite, InviteArray } from '../../../../server/data/rpc/gr
 import { Logger } from '../../../../utils/logger';
 import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice } from '../../logic/logic';
 import { selectImage } from '../../logic/native';
 import { clientRpcFunc } from '../../net/init';
 import { createGroup as createNPGroup } from '../../net/rpc';
@@ -38,7 +38,7 @@ export class SetGroupChat extends Widget {
             inviteUserName:[],
             isSelect:false,
             avatarHtml:'',
-            createNpg:true
+            serviceID:CUSTOMER_SERVICE
         };
         this.state = new Map();
     }
@@ -63,12 +63,12 @@ export class SetGroupChat extends Widget {
             this.props.avatarHtml = `<div style="background-image: url(${url});width: 120px;height: 120px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
             this.paint();
 
-            const loading = popNew('app-components1-loading-loading', { text:'图片上传中' });
+            const loading = popNewLoading('图片上传中');
             imagePicker.getContent({
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
                         uploadFile(arrayBuffer2File(res.ab),(url) => {
-                            bottomNotice('图片上传成功');
+                            popNewMessage('图片上传成功');
                             avatarUrl = url;
                             loading.callback(loading.widget);
                         });
@@ -81,12 +81,12 @@ export class SetGroupChat extends Widget {
     // 点击完成
     public completeClick() {
         if (!this.props.name) {
-            bottomNotice('群名不能为空');
+            popNewMessage('群名不能为空');
 
             return;          
         } 
         if (this.props.inviteMembers.length === 0) {
-            bottomNotice('请至少选择一位好友');
+            popNewMessage('请至少选择一位好友');
 
             return;
         }
@@ -98,7 +98,7 @@ export class SetGroupChat extends Widget {
         groupInfo.need_agree = true; // 入群需要同意
         clientRpcFunc(createGroup, groupInfo, (r: GroupInfo) => {
             if (r.gid === -1) {
-                bottomNotice(`创建群组失败`);
+                popNewMessage(`创建群组失败`);
 
                 return;
             }
@@ -117,7 +117,7 @@ export class SetGroupChat extends Widget {
 
                 clientRpcFunc(inviteUsers, invites, (r: Result) => {
                     if (r.r !== 1) {
-                        bottomNotice(`邀请好友入群失败`);
+                        popNewMessage(`邀请好友入群失败`);
                     }
                 });
             }
@@ -134,7 +134,7 @@ export class SetGroupChat extends Widget {
             createNPGroup(this.props.name,'','',false);
             this.ok();
         } else {
-            bottomNotice('请输入群名');
+            popNewMessage('请输入群名');
         }
     }
 
@@ -155,7 +155,10 @@ export class SetGroupChat extends Widget {
             this.props.inviteUserName = delValueFromArray(e.name, this.props.inviteUserName);
         }
         logger.debug(`inviteMembers is : ${JSON.stringify(this.props.inviteMembers)}`);
-        this.props.name = this.props.inviteUserName.slice(0,3).join('，');
+        if (!this.props.name) {
+            // 如果没有输入群名字，则使用前三名被邀请的用户名作为群名
+            this.props.name = this.props.inviteUserName.slice(0,3).join('，');
+        }
         this.props.isSelect = e.value !== '' && this.props.inviteMembers.length > 0;
         this.paint();
     }
@@ -168,7 +171,7 @@ interface Props {
     inviteUserName:string[];// 被邀请的成员名字
     isSelect:boolean;// 是否被选择
     avatarHtml:string; // 群头像展示
-    createNpg:boolean; // 显示创建无需同意的群组按钮 测试
+    serviceID:number;  // 好嗨客服账号
 }
 let avatarUrl;  // 群头像链接
 store.register('contactMap', (r: Map<number, Contact>) => {

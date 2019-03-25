@@ -1,5 +1,5 @@
 <div w-class="home-info-wrap">
-    <img w-class="avatar" src="../../res/images/img_avatar1.png" />
+    <img w-class="avatar" src="../../res/images/user_avatar.png" />
     <span w-class="nameText">{{it.isUser && it.note ? it.note : it.name}}</span>
     {{if !it.isUser && it.note}}
         <span w-class="otherText">群号：{{it.note}}</span>

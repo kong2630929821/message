@@ -2,12 +2,13 @@
  * 我的个人信息
  */
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
-import { bottomNotice, copyToClipboard, getUserAvatar } from '../../logic/logic';
+import { copyToClipboard, getUserAvatar } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 export class User extends Widget {
@@ -31,7 +32,7 @@ export class User extends Widget {
         this.props.info = store.getStore(`userInfoMap/${this.props.sid}`,new UserInfo());
         this.props.tel = this.props.info.tel || '未知';
         this.props.name = this.props.info.name;
-        this.props.avatar = getUserAvatar(this.props.sid) || '../../res/images/img_avatar1.png';
+        this.props.avatar = getUserAvatar(this.props.sid) || '../../res/images/user_avatar.png';
     }
 
     public goBack() {
@@ -70,13 +71,15 @@ export class User extends Widget {
             test.avatar = userinfo.avatar;
             test.sex = userinfo.sex;
             test.note = userinfo.note;
+            test.wallet_addr = userinfo.wallet_addr;
+            test.acc_id = userinfo.acc_id;
         
             clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
                 if (r && r.uid > 0) {
                     store.setStore(`userInfoMap/${this.props.sid}`,test);
-                    bottomNotice('修改个人信息成功');
+                    popNewMessage('修改个人信息成功');
                 } else {
-                    bottomNotice('修改个人信息失败');
+                    popNewMessage('修改个人信息失败');
                 }
             });
         });
@@ -111,14 +114,16 @@ export class User extends Widget {
         test.avatar = userinfo.avatar;
         test.sex = userinfo.sex;
         test.note = userinfo.note;
+        test.wallet_addr = userinfo.wallet_addr;
+        test.acc_id = userinfo.acc_id;
         
         clientRpcFunc(changeUserInfo, test, (r: UserInfo) => {
             // todo
             if (r && r.uid > 0) {
                 store.setStore(`userInfoMap/${this.props.sid}`,test);
-                bottomNotice('修改个人信息成功');
+                popNewMessage('修改个人信息成功');
             } else {
-                bottomNotice('修改个人信息失败');
+                popNewMessage('修改个人信息失败');
             }
         });
     }
@@ -134,7 +139,7 @@ export class User extends Widget {
         } else {
             copyToClipboard(this.props.info.tel);
         }
-        bottomNotice('复制成功');
+        popNewMessage('复制成功');
     }
 }   
 

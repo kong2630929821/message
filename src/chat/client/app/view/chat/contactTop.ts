@@ -1,43 +1,21 @@
 /**
- * 首页头部导航栏
+ * 聊天首页头部导航栏
  */
 // ================================ 导入
-import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { rippleShow } from '../../logic/logic';
 
 interface Props {
-    avatar:string;
-    scrollHeight?:number;
-    refreshImg?:string;
-    refresh?:boolean;
-    text?:string;
-    nextImg?:string;
+    avatar:string;  // 用户头像
+    showSpot:boolean;  // 显示小红点
+    activeTab:string;  // 当前活跃的tab
 }
 
 // ================================ 导出
-export class TopBar1 extends Widget {
+export class ContactTop extends Widget {
     public props:Props;
-    
-    public setProps(oldProps:Json,props:Json) {
-        super.setProps(oldProps,props);
-        this.props.refresh = false;
-    }
-
-    /**
-     * 刷新当前页
-     */
-    public refreshPage(event:any) {
-        this.props.refresh = true;
-        this.paint();
-        notify(event.node,'ev-refresh-click',{});
-        setTimeout(() => {
-            this.props.refresh = false;
-            this.paint();
-        }, 1000);
-    }
 
     /**
      * 跳转到下一页
@@ -58,4 +36,11 @@ export class TopBar1 extends Widget {
         rippleShow(e);
     }
 
+    // 切换标签
+    public changeTab(e:any,tab:string) {
+        this.props.activeTab = tab;
+        notify(e.node,'ev-contactTop-tab',{ activeTab:tab });
+        this.paint();
+    }
+    
 }

@@ -3,10 +3,11 @@
  */
 
 // ================================================ 导入
+import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
+import { GROUP_STATE, GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
@@ -15,7 +16,7 @@ import { NewGroup } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice, getGroupAvatar, rippleShow } from '../../logic/logic';
+import { getGroupAvatar, INFLAG, rippleShow } from '../../logic/logic';
 import { selectImage } from '../../logic/native';
 import { clientRpcFunc } from '../../net/init';
 import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
@@ -46,7 +47,7 @@ export class GroupInfos extends Widget {
             setting:null,
             msgAvoid:false,
             msgTop:false,
-            inFlag:0,
+            inFlag:INFLAG.contactList,
             avatar:'',
             avatarHtml:''
         };
@@ -63,9 +64,13 @@ export class GroupInfos extends Widget {
         this.props.editable = false;
         gid = this.props.gid;
         const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
+        // 如果群已被解散退出该页面
+        if (isNaN(ginfo.state) || ginfo.state === GROUP_STATE.DISSOLVE) {
+            this.goBack(); 
+        }
         this.props.groupInfo = ginfo;
         this.props.groupAlias = depCopy(ginfo.name);
-        this.props.avatar = getGroupAvatar(this.props.gid) || '../../res/images/img_avatar1.png';
+        this.props.avatar = getGroupAvatar(this.props.gid) || '../../res/images/user_avatar.png';
         
         const uid = store.getStore('uid');
         this.props.members = this.props.groupInfo.memberids || [];
@@ -91,7 +96,7 @@ export class GroupInfos extends Widget {
     }
     
     public goBack() {
-        this.ok();
+        this.ok && this.ok();
     }
 
     // 动画效果执行
@@ -107,12 +112,12 @@ export class GroupInfos extends Widget {
             this.props.avatarHtml = `<div style="background-image: url(${url});width: 190px;height: 190px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
             this.paint();
 
-            const loading = popNew('app-components1-loading-loading', { text:'图片上传中' });
+            const loading = popNewLoading('图片上传中');
             imagePicker.getContent({
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
                         uploadFile(arrayBuffer2File(res.ab),(url) => {
-                            bottomNotice('图片上传成功');
+                            popNewMessage('图片上传成功');
                             loading.callback(loading.widget);
                             
                             const ginfo = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
@@ -156,10 +161,10 @@ export class GroupInfos extends Widget {
                     clientRpcFunc(userExitGroup,this.props.gid,(r) => {
                         console.log('========deleteGroup',r);
                         if (r.r === 1) { // 退出成功关闭当前页面
-                            bottomNotice('退出群组成功');
-                            this.ok();
+                            popNewMessage('退出群组成功');
+                            this.goBack();
                         } else {
-                            bottomNotice('群主不能退出');
+                            popNewMessage('群主不能退出');
                         }
                     });
                 });
@@ -221,7 +226,7 @@ export class GroupInfos extends Widget {
         if (ownerid === uid || adminids.indexOf(uid) > -1) {
             popNew('chat-client-app-view-groupManage-groupManage',{ gid : this.props.gid });
         } else {
-            bottomNotice('您没有权限执行此操作');
+            popNewMessage('您没有权限执行此操作');
         }
     }
     // 打开群聊天
@@ -322,9 +327,9 @@ export class GroupInfos extends Widget {
         clientRpcFunc(applyJoinGroup, this.props.gid, ((r) => {
             logger.debug('===========主动添加群聊返回',r);
             if (r.r === -2) {
-                bottomNotice('您申请的群不存在');
+                popNewMessage('您申请的群不存在');
             } else if (r.r === -1) {
-                bottomNotice('您已经是该群的成员');
+                popNewMessage('您已经是该群的成员');
             }
         }));
     }
@@ -349,7 +354,7 @@ interface Props {
     setting:any; // 额外设置，免打扰|置顶
     msgTop:boolean; // 置顶
     msgAvoid:boolean; // 免打扰
-    inFlag:number; // 从哪里进入 0 contactList进入，1 chat进入，2 newFriendApply进入，受邀加入群组
+    inFlag:INFLAG; // 从哪里进入
     avatar:string; // 群头像
     avatarHtml:string; // 新群头像展示
 }

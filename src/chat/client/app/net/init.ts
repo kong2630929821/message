@@ -8,6 +8,7 @@ declare var pi_modules;
 // ================================================ 导入
 import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
 import { setReconnectingState } from '../../../../app/net/reconnect';
+import { popNewMessage } from '../../../../app/utils/tools';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
@@ -21,7 +22,7 @@ import { genUuid, getGidFromGuid } from '../../../utils/util';
 import { getFriendHistory, getMyGroupHistory } from '../data/initStore';
 import * as store from '../data/store';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
-import { bottomNotice, exitGroup } from '../logic/logic';
+import { exitGroup } from '../logic/logic';
 import * as subscribedb from '../net/subscribedb';
 import { walletSignIn } from './init_1';
 import { initPush } from './receive';
@@ -69,13 +70,13 @@ export const clientRpcFunc = (name: string, req: any, callback: Function, timeou
         }
     }
     if (mqtt && !mqtt.getState()) {
-        bottomNotice(`网络连接中！！！！`);
+        popNewMessage(`网络连接中！！！！`);
 
         return;
     }
     clientRpc(name, req, (r: Struct) => {
         if (!r) {
-            bottomNotice(`${name} 失败了，返回结果 ${r}`);
+            popNewMessage(`${name} 失败了，返回结果 ${r}`);
         } else {
             return callback(r);
         }
@@ -173,7 +174,6 @@ export const init = (uid: number) => {
  */
 const updateGroup = (r: Contact, uid: number) => {
     // 判断群组是否发生了变化,需要重新订阅群组消息
-
     const oldGroup = (store.getStore(`contactMap/${uid}`) || { group: [] }).group;
     const addGroup = r.group.filter((gid) => {
         return oldGroup.findIndex(item => item === gid) === -1;

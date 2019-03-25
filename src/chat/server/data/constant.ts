@@ -50,7 +50,7 @@ export const VIP0_FRIENDS_LIMIT = 500; // 好友上限
 export const VIP0_GROUPS_LIMIT = 5; // 群上限
 export const VIP0_GROUP_MEMBERS_LIMIT = 500; // 普通群的成员上限
 // 官方账号 VIP5
-export const VIP5_FRIENDS_LIMIT = 2000 // 好友上限
+export const VIP5_FRIENDS_LIMIT = 2000; // 好友上限
 export const VIP5_GROUPS_LIMIT = 100; // 群上限
 export const VIP5_GROUP_MEMBERS_LIMIT = 1000; // 官方群的成员上限
 

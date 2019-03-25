@@ -1,12 +1,12 @@
 /**
  * 一些底层操作
  */
+import { popNewMessage } from '../../../../app/utils/tools';
 import { AudioRecorder } from '../../../../pi/browser/audio_recorder';
 import { CameraPicker } from '../../../../pi/browser/cameraPicker';
 import { ImagePicker } from '../../../../pi/browser/imagePicker';
 import { QRCode } from '../../../../pi/browser/qrcode';
 import { WebViewManager } from '../../../../pi/browser/webview';
-import { bottomNotice } from './logic';
 
 /**
  * 选择图片
@@ -88,7 +88,7 @@ export const startRadio = () => {
         if (success) {
             console.log('录音开始');
         } else {
-            bottomNotice('录音开始，录制失败');
+            popNewMessage('录音开始，录制失败');
         }
     });
 };
@@ -102,7 +102,7 @@ export const endRadio = (cb:any) => {
             cb(data);
             console.log('录音结束');
         } else {
-            bottomNotice('录音结束，传送失败');
+            popNewMessage('录音结束，传送失败');
         }
     });
 };
@@ -115,7 +115,7 @@ export const getPromise = (cb:any) => {
         if (success) {
             cb && cb();
         } else {
-            bottomNotice('未打开麦克风权限');
+            popNewMessage('未打开麦克风权限');
         }
     });
 };

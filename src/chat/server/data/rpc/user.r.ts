@@ -42,7 +42,7 @@ export const applyFriend = (user: string): Result => {
     
     // 获取用户UID
     const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
-    const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`]);
+    const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`, `a:${user}`]);
     console.log('!!!!!!!!!!!!!!!applyFriend rArr:', rArr);
 
     let uid;
@@ -391,6 +391,14 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
         newUidFind.uid = sid;
         console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!232233', newUidFind);
         userFindBucket.put(newUidFind.user, newUidFind);
+    }
+    // 添加钱包账户查找用户
+    if (!(oldUserinfo.acc_id === userinfo.acc_id) && !(userinfo.acc_id === '')) {
+        const acc_idFind = new UserFind();
+        acc_idFind.user = `a:${userinfo.acc_id}`;
+        acc_idFind.uid = sid;
+        console.log('!!!!!!!!!!!!!!!!!add phone!1212121', acc_idFind);
+        userFindBucket.put(acc_idFind.user, acc_idFind);
     }
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!333333333333333333');
     let newUser = new UserInfo();

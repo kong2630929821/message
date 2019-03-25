@@ -1,6 +1,7 @@
 
 import { uploadFileUrlPrefix } from '../../../../app/config';
 import { setStore } from '../../../../app/store/memstore';
+import { popNewMessage } from '../../../../app/utils/tools';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { loadDir } from '../../../../pi/widget/util';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
@@ -9,7 +10,7 @@ import { sendGroupMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../server/data/rpc/message.s';
 import { depCopy, genGroupHid, genGuid, getGidFromHincid } from '../../../utils/util';
 import * as store from '../data/store';
-import { bottomNotice, timestampFormat } from '../logic/logic';
+import { timestampFormat } from '../logic/logic';
 import { clientRpcFunc } from '../net/init';
 import { inviteUserToGroup } from '../net/rpc';
 import { EMOJIS } from '../widget/emoji/emoji';
@@ -29,7 +30,7 @@ export const sendMessage = (param,cb?) => {
     clientRpcFunc(sendGroupMessage, message, (r: GroupHistory) => {
         
         if (r.hIncId === DEFAULT_ERROR_STR) {
-            bottomNotice('发送失败！');
+            popNewMessage('发送失败！');
             cb(r);
                     
             return;

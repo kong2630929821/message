@@ -5,39 +5,61 @@
 // ================================================ 导入
 import { uploadFileUrlPrefix } from '../../../../../app/config';
 import * as walletStore from '../../../../../app/store/memstore';
+import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
-import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
-import { Widget } from '../../../../../pi/widget/widget';
-import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
+import { UserInfo } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
-import { bottomNotice, getUserAvatar, rippleShow } from '../../logic/logic';
+import { getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
+import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
 export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
+interface Props {
+    sid: number;
+    messageList: any[];
+    isUtilVisible: boolean;
+    utilList: any[];
+    netClose: boolean; // 网络链接是否断开
+    avatar:string; // 头像
+    isLogin:boolean; // 聊天是否已经登陆
+    hasWallet:boolean; // 本地是否已经创建钱包
+    activeTab:string;  // 当前活跃的tab
+}
+export const TAB = {
+    message:'message',
+    friend:'friend'
+};
 
-export class Contact extends Widget {
-    public props: Props;
+export class Contact extends SpecialWidget {
     public web3Promise: Promise<string>;
     public defaultInjectPromise: Promise<string>;
-
-    public setProps(props: Json) {
-        super.setProps(props);
-        this.props.messageList = [];
-        this.props.isUtilVisible = false;
-        this.props.utilList = [
-            { iconPath: 'adress-book.png', utilText: '通讯录' },
+    public props: Props = {
+        sid:0,
+        utilList:[
             { iconPath: 'add-blue.png', utilText: '添加好友' },
             { iconPath: 'group-chat.png', utilText: '创建群聊' },
             { iconPath: 'scan.png', utilText: '扫一扫' },
             { iconPath: 'add-friend.png', utilText: '我的信息' }
-        ];
+        ],
+        isUtilVisible:false,
+        messageList:[],
+        activeTab:TAB.message,
+        isLogin:false,
+        hasWallet:false,
+        avatar:'',
+        netClose:false
+    };
+
+    public setProps(props: Json) {
+        super.setProps(props);
         this.props.isLogin = !!store.getStore('uid');
+        this.props.activeTab = TAB.message;
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
@@ -47,8 +69,8 @@ export class Contact extends Widget {
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         this.props.avatar = getUserAvatar(uid);
         
-        // 钱包修改了姓名、头像等，或钱包退出登陆
-        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar) {
+        // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
+        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
             if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                 setUserInfo();
                 this.props.avatar = `${uploadFileUrlPrefix}${wUser.avatar}`;
@@ -81,9 +103,11 @@ export class Contact extends Widget {
      * @param id 好友ID或群ID
      * @param chatType 群聊或单聊
      */
-    public chat(id: number, chatType: GENERATOR_TYPE) {
+    public chat(num:number) {
         this.closeMore();
-        popNew('chat-client-app-view-chat-chat', { id: id, chatType: chatType });
+        const value = this.state.lastChat[num];
+        const gid = value.length === 4 ? value[3] :null ;
+        popNew3('chat-client-app-view-chat-chat', { id: value[0], chatType: value[2], groupId:gid }) ;
     }
 
     // 动画效果执行
@@ -97,7 +121,7 @@ export class Contact extends Widget {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
         } else {
-            bottomNotice('聊天未登陆');
+            popNewMessage('聊天未登陆');
         }
     }
 
@@ -109,26 +133,22 @@ export class Contact extends Widget {
     public handleFatherTap(e: any) {
         
         switch (e.index) {
-            case 0:// 点击通讯录
-                popNew('chat-client-app-view-contactList-contactList');
+            case 0:// 点击添加好友
+                popNew3('chat-client-app-view-chat-addUser');
                 break;
-            case 1:// 点击添加好友
-                popNew('chat-client-app-view-chat-addUser');
+            case 1:// 创建群聊 setGroupChat
+                popNew3('chat-client-app-view-group-setGroupChat');
                 break;
-            case 2:// 创建群聊 setGroupChat
-                popNew('chat-client-app-view-group-setGroupChat');
-                break;
-            case 3:// 扫一扫 
+            case 2:// 扫一扫 
                 doScanQrCode((res) => {  // 扫描二维码
-                    popNew('chat-client-app-view-chat-addUser',{ rid:res });
+                    popNew3('chat-client-app-view-chat-addUser',{ rid:res });
                     console.log(res);
                     this.paint();
                 });
-                   
                 // openTestWebview(10001);      
                 break;
-            case 4:
-                popNew('chat-client-app-view-info-user');
+            case 3:
+                popNew3('chat-client-app-view-info-user');
                 break;
 
             default:
@@ -137,19 +157,15 @@ export class Contact extends Widget {
         this.paint();
     }
 
+    // 切换tab
+    public changeTab(e:any) {
+        this.props.activeTab = e.activeTab;
+        this.paint();
+    }
+
 }
 
 // ================================================ 本地
-interface Props {
-    sid: number;
-    messageList: any[];
-    isUtilVisible: boolean;
-    utilList: any[];
-    netClose: boolean; // 网络链接是否断开
-    avatar:string; // 头像
-    isLogin:boolean; // 聊天是否已经登陆
-    hasWallet:boolean; // 本地是否已经创建钱包
-}
 const STATE = {
     lastChat:[],
     contactMap:''

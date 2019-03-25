@@ -3,9 +3,9 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
-import { bottomNotice } from '../../logic/logic';
 
 // ================================================ 导出
 
@@ -42,12 +42,12 @@ export class PageEdit extends Widget {
     // 完成编辑
     public completeEdit() {
         if (this.props.needTitle && !this.props.titleInput) {
-            bottomNotice('标题不能为空');
+            popNewMessage('标题不能为空');
 
             return;
         }
         if (!this.props.contentInput) {
-            bottomNotice('内容不能为空');
+            popNewMessage('内容不能为空');
 
             return;
         }

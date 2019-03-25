@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
@@ -11,7 +12,7 @@ import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { bottomNotice, timestampFormat } from '../../logic/logic';
+import { timestampFormat } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -59,7 +60,7 @@ export class GroupAnnounce extends Widget {
             message.mtype = MSG_TYPE.NOTICE;
             message.time = (new Date()).getTime();
             clientRpcFunc(sendGroupMessage, message, () => {
-                bottomNotice('发布群公告成功');
+                popNewMessage('发布群公告成功');
             });
         });
     }

@@ -8,7 +8,6 @@
             </div>
             {{if it.inFlag != 3}}
             <div on-tap="doCopy(0)" style="display:flex;flex-direction:column;text-align: center;">
-                <div>ID：{{it.uid}}</div>
                 <div>昵称：{{it.userInfo.name}}</div>
             </div>
             {{end}}
@@ -20,8 +19,8 @@
             <div w-class="adress-wrap" style="margin:60px 0 20px;" on-tap="doCopy(1)">
                 <img w-class="adressIcon" src="../../res/images/adress-book.png" />
                 <div w-class="adress-text-wrap">
-                    <span w-class="mainText">{{it.userInfo.wallet_addr}}</span>
-                    <span w-class="flag">地址</span>
+                    <span w-class="mainText">{{it.userInfo.acc_id}}</span>
+                    <span w-class="flag">好嗨号</span>
                 </div>
             </div>
             <div w-class="adress-wrap" on-tap="doCopy(2)">
@@ -32,11 +31,16 @@
                 </div>
             </div>
         </div>
-        {{if it.inFlag == 3 || !it.isFriend}}
+        {{if it.inFlag == 3 || (!it.isFriend && !it.groupId)}}
         <div style="margin: 40px 80px;">
-            <div w-class="liItem1" on-tap="addUser(e)" on-down="onShow">加为好友</div>
+            <div w-class="liItem1" on-tap="addUser" on-down="onShow">加为好友</div>
+        </div>
+        {{elseif !it.isFriend && it.groupId}}
+        <div style="margin: 40px 80px;">
+            <div w-class="liItem1" on-tap="startChat" on-down="onShow">开始对话</div>
         </div>
         {{else}}
+
         <div w-class="other-wrap">
             <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
             <ul w-class="ul-wrap">
@@ -51,7 +55,7 @@
                 </li>
 
                 {{if it.inFlag != 1}}
-                    <div w-class="liItem1" on-tap="startChat(e)" on-down="onShow">开始对话</div>
+                    <div w-class="liItem1" on-tap="startChat" on-down="onShow">开始对话</div>
                 {{end}}
             </ul>
         </div>

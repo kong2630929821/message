@@ -3,15 +3,17 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
+import { Result } from '../../../../server/data/rpc/basic.s';
 import { dissolveGroup } from '../../../../server/data/rpc/group.p';
 import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
-import { bottomNotice, rippleShow } from '../../logic/logic';
+import { rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -29,8 +31,7 @@ export class ManageItem extends Widget {
         adminNum:null,
         applyUserNum:null,
         manageList: [],
-        groupSetList:[],
-        destroyGroupModalObj:{}
+        groupSets:[]
     };
     public setProps(props:any) {
         super.setProps(props);
@@ -41,16 +42,25 @@ export class ManageItem extends Widget {
         this.props.manageList = [
             { title : '设置管理员', quantity : `${this.props.adminNum}/5` },
             { title : '转让群主',quantity : '' },
-            { title : '入群申请',quantity : `${this.props.applyUserNum}` }];
+            { title : '入群申请',quantity : `${this.props.applyUserNum}` }
+        ];
+        this.props.groupSets = [
+            { title:'开启进群审核',content:'关闭后，进群不需要经过群主或管理员审核',showSwitch:true }
+        ];
 
-        this.props.groupSetList = [
-            { title : '允许群成员邀请入群',content : '关闭后，群成员不能邀请好友加群' },
-            { title : '开启进群审核',content : '关闭后，进群不需要经过群主或管理员审核' }];
-        this.props.destroyGroupModalObj = { content:'解散后，所有成员将被清出，该群将不存在。',sureText:'确定',cancelText:'取消',style:'color:#F7931A' };
+        // 是否是官方群组
+        if (this.props.groupInfo.level === 5) {
+            this.props.manageList.pop();
+            this.props.groupSets = [
+                { title:'无需进群审核',content:'进群不需要经过群主或管理员审核',showSwitch:false }
+            ];
+        }
     }  
+
     public goBack() {
         this.ok();
     } 
+
     public firstPaint() {
         super.firstPaint();
         store.register(`groupInfoMap/${this.props.gid}`,(r:GroupInfo) => {
@@ -62,10 +72,12 @@ export class ManageItem extends Widget {
             this.paint();
         });
     }
+
     // 动画效果执行
     public onShow(e:any) {
         rippleShow(e);
     }
+
     // 获取群组信息
     public getGroupInfo(gid:number) {
         const ginfo = store.getStore(`groupInfoMap/${gid}`);
@@ -73,6 +85,7 @@ export class ManageItem extends Widget {
 
         return ginfo;
     }
+
     // 打开群管理项
     public openManageItem(e:any) {
         const ownerid = this.props.groupInfo.ownerid;
@@ -81,7 +94,7 @@ export class ManageItem extends Widget {
         if (e.value === 2) { // 入群申请
             popNew('chat-client-app-view-groupManage-groupApplyStatus',{ gid:this.props.gid });
         } else if (ownerid !== uid) {  // 是否是群主
-            bottomNotice('你没有权限执行此操作');
+            popNewMessage('你没有权限执行此操作');
 
             return;
         }
@@ -91,16 +104,17 @@ export class ManageItem extends Widget {
             popNew('chat-client-app-view-groupManage-transferAdmin',{ gid:this.props.gid });
         } 
     }
+
     // 解散群
     public destroyGroup() {
         const ownerid = this.props.groupInfo.ownerid;
         const uid = store.getStore('uid');
         if (ownerid === uid) {
-            popNew('chat-client-app-widget-modalBox-modalBox',this.props.destroyGroupModalObj,
+            popNew('chat-client-app-widget-modalBox-modalBox',{ content:'解散后，所有成员将被清出，该群将不存在。',style:'color:#F7931A' },
             () => {
                 logger.debug('dissolveGroup');
                 clientRpcFunc(dissolveGroup,this.props.gid,(r) => {
-                    logger.debug('========dissolveGroup',r);
+                    console.log('========dissolveGroup',r);
                     this.ok();
                 });
             },
@@ -109,25 +123,31 @@ export class ManageItem extends Widget {
             });
         }
     } 
+
+    // 入群是否需要管理员同意
+    public joinNeedAgree(e:any) {
+        // TODO 导入文件
+        const need = new NeedAgree();
+        need.gid = this.props.gid;
+        need.need_agree = e.value;
+        clientRpcFunc(updateNeedAgree, need, (r:Result) => {
+            if (r && r.r === 1) {
+                this.props.groupInfo.need_agree = e.value;
+                this.paint();
+
+            }
+        });
+
+    }
 }
 
 // ================================================ 本地
-interface Manage {
-    title:string;// 标题
-    quantity?:string;// 数量
-}
-
-interface GroupSet {
-    title:string;// 标题
-    content:string;// 说明内容
-}
 
 interface Props {
     gid:number;
     groupInfo:Json;
     adminNum:number;
-    applyUserNum:number;
-    manageList : Manage[];
-    groupSetList : GroupSet[];
-    destroyGroupModalObj:Json;
+    applyUserNum:number; 
+    manageList: any[];  // 群管理
+    groupSets:any[];  // 其他群设置
 }

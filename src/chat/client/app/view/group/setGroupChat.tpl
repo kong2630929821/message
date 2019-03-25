@@ -15,15 +15,13 @@
         </div>
     </div>
     
-    {{if it.createNpg}}
-    <div w-class="npgBtn" on-tap="createNPG">创建入群无需同意的群组</div>
-    {{end}}
-
     <div w-class="a-part" ev-changeSelect="changeSelect">
-        {{for index,item of it1.friends}}
-        <div ev-addMember="addMember" style="position:relative;">
-            <chat-client-app-widget-selectUser-selectUser>{id:{{item}}, chatType: "user"}</chat-client-app-widget-selectUser-selectUser>
-        </div>
+        {{for i,v of it1.friends}}
+            {{if v != it.serviceID}}
+            <div ev-addMember="addMember" style="position:relative;">
+                <chat-client-app-widget-selectUser-selectUser>{id:{{v}}, chatType: "user"}</chat-client-app-widget-selectUser-selectUser>
+            </div>
+            {{end}}
         {{end}}
     </div>
 </div>

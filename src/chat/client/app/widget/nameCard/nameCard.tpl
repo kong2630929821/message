@@ -1,9 +1,13 @@
 <div>
-    <div w-class="name-info-wrap {{it.cardType=='redEnv'?'redEnvTop':''}}">
+    <div w-class="name-info-wrap {{it.cardType=='redEnv'?'redEnvTop':''}}" style="background: {{it.cardType=='redEnv' && it.received ? '#FAA4A4':'#EB4F4F'}}">
         {{if it.cardType == "redEnv"}}
-        <img w-class="redEnvImg" src="../../res/images/redEnvelope.png" />
+            {{if it.received}}
+            <img w-class="redEnvImg" src="../../res/images/receivedRedEnv.png" />
+            {{else}}
+            <img w-class="redEnvImg" src="../../res/images/redEnvelope.png" />
+            {{end}}
         {{else}}
-        <img w-class="avatar-wrap" src="{{it.avatorPath}}" />
+        <img w-class="avatar-wrap" src="{{it.avatarPath}}" />
         {{end}}
         <span w-class="name-card-info" style="color:{{it.cardType=='redEnv'?'#fff':'#222'}}">{{it.cardInfo}}</span>
     </div>

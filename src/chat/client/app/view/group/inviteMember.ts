@@ -3,17 +3,17 @@
  */
 
  // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import { inviteUsers } from '../../../../server/data/rpc/group.p';
-import { Invite, INVITE_TYPE, InviteArray } from '../../../../server/data/rpc/group.s';
+import { Invite, InviteArray } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { bottomNotice } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
  
   // ================================================ 导出
@@ -62,7 +62,7 @@ export class InviteMember extends Widget {
      // 点击添加
     public completeAddGroupMember() {
         if (this.props.applyGroupMembers.length <= 0) {
-            bottomNotice('请至少选择一位邀请好友');
+            popNewMessage('请至少选择一位邀请好友');
 
             return ;
         }
@@ -76,9 +76,9 @@ export class InviteMember extends Widget {
         });
         clientRpcFunc(inviteUsers, invites, (r: Result) => {
             if (r.r !== 1) {
-                bottomNotice(`邀请好友入群失败`);
+                popNewMessage(`邀请好友入群失败`);
             }
-            bottomNotice('成功发送邀请好友信息');
+            popNewMessage('成功发送邀请好友信息');
             this.ok();
         });
     }

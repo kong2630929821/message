@@ -6,7 +6,7 @@ import { uploadFileUrlPrefix } from '../../../../app/config';
 import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
-import { FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { unSubscribe } from '../net/init';
@@ -70,8 +70,13 @@ export const getFriendAlias = (rid:number) => {
     const sid = store.getStore('uid');
     const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
     const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,new FriendLink());
+    const contact = store.getStore(`contactMap/${sid}`,new Contact());
+    const isFriend = contact.friends && contact.friends.findIndex(item => item === rid) > -1;
 
-    return friend.alias || user.name;
+    return {
+        name: friend.alias || user.name,
+        isFriend: isFriend
+    };
 };
 
 /**
@@ -116,11 +121,6 @@ export const copyToClipboard = (copyText) => {
         document.execCommand('copy');
     }
     document.body.removeChild(input);
-};
-
-// 底部提示
-export const bottomNotice = (content:string) => {
-    popNew('app-components1-message-message',{ content: content });
 };
 
 // 获取用户头像
@@ -189,3 +189,11 @@ export const getAllFriendIDs = () => {
 
     return store.getStore(`contactMap/${uid}`,{ friends:[] }).friends; 
 };
+
+// 从某个页面进入标记
+export const enum INFLAG  {
+    contactList = 0, // 联系人列表
+    chat_user,  // 单聊
+    chat_group,  // 群聊
+    newApply  // 新好友申请 或 新群组邀请
+}

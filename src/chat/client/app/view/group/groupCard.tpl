@@ -11,7 +11,7 @@
         </div>
     </div>
     <div w-class="avatar-wrap">
-        <img w-class="group-avatar" src="../../res/images/user.png"/>
+        <img w-class="group-avatar" src="../../res/images/user_avatar.png"/>
     </div>
 </div>
 

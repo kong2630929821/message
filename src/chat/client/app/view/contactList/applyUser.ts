@@ -7,10 +7,11 @@ import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
-import { Logger } from '../../../../utils/logger';import * as store from '../../data/store';
 import { getUsersInfo } from '../../../../server/data/rpc/basic.p';
 import { GetUserInfoReq, UserArray } from '../../../../server/data/rpc/basic.s';
+import { Logger } from '../../../../utils/logger';
 import { getGidFromGuid, getUidFromGuid } from '../../../../utils/util';
+import * as store from '../../data/store';
 import { rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
@@ -36,12 +37,11 @@ export class ApplyUser extends Widget {
         super.setProps(props);
         this.props.isagree = false;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            logger.debug('------------',store.getStore(`userInfoMap/${this.props.id}`));
-            const userInfo = store.getStore(`userInfoMap/${this.props.id}`);
+            const userInfo = store.getStore(`userInfoMap/${this.props.id}`,null);
             this.props.name = userInfo ? userInfo.name : '';
             this.props.applyInfo = '请求添加你为好友';
-        }
-        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+
+        } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             if (this.props.isActiveToGroup) { // 主动申请加群
                 const info = new GetUserInfoReq();
                 info.uids = [this.props.id];
