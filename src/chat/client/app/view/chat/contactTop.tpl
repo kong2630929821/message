@@ -4,7 +4,7 @@
    
     <div w-class="topBar-content">
         <div on-tap="showMine" on-down="onShow">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{it.avatar || "../../res/images/user.png"}}, width:"48px;"}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{it.avatar || "../../res/images/user_avatar.png"}}, width:"48px;"}</widget>
         </div>
         
         <div w-class="tabs">

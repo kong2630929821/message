@@ -42,7 +42,7 @@ export class ContactItem extends Widget {
                     this.props.name = depCopy(store.getStore(`userInfoMap/${this.props.id}`,new UserInfo()).name || '');
                     this.props.name += '(本人)';
                 }
-                this.props.img = getUserAvatar(this.props.id) || '../../res/images/user.png';
+                this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
 
             } else {
                 const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());

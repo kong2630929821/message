@@ -76,7 +76,7 @@ export class UserDetail extends Widget {
             this.getUserData(this.props.uid);
         }
         logger.debug(props);
-        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/img_avatar1.png';
+        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
         
         const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
         const sid = store.getStore('uid');

@@ -39,12 +39,12 @@ export class MessageItem extends Widget {
         if (this.props.hIncId) {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
                 this.props.message = store.getStore(`userHistoryMap/${this.props.hIncId}`, new UserMsg());
-                this.props.avatar = getUserAvatar(this.props.message.sid) || '../../res/images/user.png';
+                this.props.avatar = getUserAvatar(this.props.message.sid) || '../../res/images/user_avatar.png';
             } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
                 this.props.message = store.getStore(`groupHistoryMap/${this.props.hIncId}`, new GroupMsg());
                 const gid = getGidFromHincid(this.props.hIncId);
                 this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.message.sid)}`, new GroupUserLink()).userAlias;
-                this.props.avatar = getGroupUserAvatar(gid,this.props.message.sid) || '../../res/images/user.png';
+                this.props.avatar = getGroupUserAvatar(gid,this.props.message.sid) || '../../res/images/user_avatar.png';
             }
             this.props.message = parseMessage(depCopy(this.props.message));
             this.props.me = this.props.message.sid === store.getStore('uid');

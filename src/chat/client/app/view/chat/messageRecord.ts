@@ -39,7 +39,7 @@ export class MessageRecord extends Widget {
 
         } else {// 单聊
             this.props.name = getFriendAlias(this.props.rid).name;
-            this.props.avatar = getUserAvatar(this.props.rid) || '../../res/images/user.png';
+            this.props.avatar = getUserAvatar(this.props.rid) || '../../res/images/user_avatar.png';
             hid = genUserHid(sid,this.props.rid);
 
             const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);

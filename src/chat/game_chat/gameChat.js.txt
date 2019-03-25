@@ -887,7 +887,7 @@ function addMessage(mess,me){
             innerhtml += `<div style="overflow:hidden;">
             <div class="username">${mess.name}</div>
             <div style="display:flex;margin:10px 20px;">
-                <img src="${chatBaseUrl}/res/images/user.png" class="avatar"/>`;
+                <img src="${chatBaseUrl}/res/images/user_avatar.png" class="avatar"/>`;
         }
     }
     switch(mess.mtype){

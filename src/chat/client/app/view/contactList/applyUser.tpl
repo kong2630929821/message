@@ -1,6 +1,6 @@
 <div w-class="user-apply-wrap" on-tap="viewApplyDetail" on-down="onShow">
     <div w-class="avatar-wrap">
-        <img w-class="avatar" src="../../res/images/user.png" />
+        <img w-class="avatar" src="../../res/images/user_avatar.png" />
     </div>
      <div w-class="user-info-wrap">
         <span w-class="userName">{{it.name}}</span>

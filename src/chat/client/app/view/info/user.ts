@@ -32,7 +32,7 @@ export class User extends Widget {
         this.props.info = store.getStore(`userInfoMap/${this.props.sid}`,new UserInfo());
         this.props.tel = this.props.info.tel || '未知';
         this.props.name = this.props.info.name;
-        this.props.avatar = getUserAvatar(this.props.sid) || '../../res/images/img_avatar1.png';
+        this.props.avatar = getUserAvatar(this.props.sid) || '../../res/images/user_avatar.png';
     }
 
     public goBack() {

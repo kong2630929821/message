@@ -84,7 +84,7 @@
                 <img w-class="grouperIcon" src="../../res/images/add_group_user.png" />
                 {{for i, v of it.members}}
                     {{if i < 5 }}
-                    <img w-class="grouperIcon" src="../../res/images/user.png" />
+                    <img w-class="grouperIcon" src="../../res/images/user_avatar.png" />
                     {{end}}
                 {{end}}
                 <img w-class="more" src="../../res/images/more-gray.png" />

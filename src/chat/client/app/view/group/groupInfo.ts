@@ -70,7 +70,7 @@ export class GroupInfos extends Widget {
         }
         this.props.groupInfo = ginfo;
         this.props.groupAlias = depCopy(ginfo.name);
-        this.props.avatar = getGroupAvatar(this.props.gid) || '../../res/images/img_avatar1.png';
+        this.props.avatar = getGroupAvatar(this.props.gid) || '../../res/images/user_avatar.png';
         
         const uid = store.getStore('uid');
         this.props.members = this.props.groupInfo.memberids || [];
