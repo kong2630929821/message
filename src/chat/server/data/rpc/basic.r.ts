@@ -195,7 +195,7 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
 
     const uids = getUserInfoReq.uids;
     if (uids.length === 0) {
-        const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name, dbMgr);
+        const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
         const accIds = getUserInfoReq.acc_ids;
         const users = [];
         for (const v of accIds) {

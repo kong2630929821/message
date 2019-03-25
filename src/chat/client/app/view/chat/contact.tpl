@@ -4,10 +4,10 @@
         {{: show =  it1.contactMap && (it1.contactMap.applyUser.length + it1.contactMap.applyGroup.length) > 0}}
         <widget w-tag="chat-client-app-view-chat-contactTop">{avatar:{{it.avatar}},showSpot:{{show}},activeTab:{{it.activeTab}} }</widget>
     </div>
+    <app-components1-offlineTip-offlineTip></app-components1-offlineTip-offlineTip>
+    
     {{if it.activeTab == 'message'}}
     <div w-class="history-wrap">
-        <app-components1-offlineTip-offlineTip></app-components1-offlineTip-offlineTip>
-        
         {{if it1.lastChat && it1.lastChat.length == 0}}
         <div style="text-align: center;">
             <img src="../../res/images/chatEmpty.png" w-class="emptyImg"/>
@@ -24,6 +24,7 @@
         {{end}}
     </div>
     {{else}}
+    
     <widget w-tag="chat-client-app-view-contactList-contactList"></widget>
     {{end}}
     
