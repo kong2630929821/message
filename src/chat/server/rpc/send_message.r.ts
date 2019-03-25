@@ -1,14 +1,15 @@
 /**
  * 发送聊天消息
  */
+import { Env } from '../../../pi/lang/env';
 import { EnumType, TabMeta, Type } from '../../../pi/struct/sinfo';
 import { BonBuffer } from '../../../pi/util/bon';
-import { getEnv } from '../../../pi_pt/net/rpc_server';
-import { ServerNode } from '../../../pi_pt/rust/mqtt/server';
 import { mqttPublish, QoS } from '../../../pi_pt/rust/pi_serv/js_net';
 import { createMemoryBucket } from '../../utils/db';
 import { Logger } from '../../utils/logger';
 import { messageDeliveredAck as deliveredAck, messageReceivedAck, sendMessage as Message } from './send_message.s';
+
+declare var env: Env;
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -17,7 +18,7 @@ const logger = new Logger(WIDGET_NAME);
 
 // #[rpc]
 export const sendMessage = (message: Message): messageReceivedAck => {
-    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    const mqttServer = env.get('mqttServer');
 
     const dst = message.dst;
     const msgAck = new messageReceivedAck();
@@ -42,9 +43,8 @@ export const messageDeliveredAck = (): deliveredAck => {
 };
 
 const messgeHandler = (message: Message) => {
-    const dbMgr = getEnv().getDbMgr();
     const meta = new TabMeta(new EnumType(Type.Usize), new EnumType(Type.Struct, Message._$info));
-    const bkt = createMemoryBucket('wtf', meta, dbMgr);
+    const bkt = createMemoryBucket('wtf', meta);
 
     const key = message.msgId;
     const val = message;

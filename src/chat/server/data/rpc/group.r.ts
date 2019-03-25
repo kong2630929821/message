@@ -5,10 +5,10 @@
 import { GROUP_STATE, GroupInfo, GroupUserLink } from '../db/group.s';
 import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
-import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray, NewGroup, NeedAgree } from './group.s';
+import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray, NeedAgree, NewGroup } from './group.s';
 
+import { Env } from '../../../../pi/lang/env';
 import { BonBuffer } from '../../../../pi/util/bon';
-import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
 import { mqttPublish, QoS, setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
@@ -17,9 +17,11 @@ import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genHIncI
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock  } from '../db/message.s';
+import { GROUP_MEMBERS_OVERLIMIT, OPERAT_WITHOUT_AUOTH, USER_GREATE_GROUP_OVERLIMIT } from '../errorNum';
 import { sendGroupMessage } from './message.r';
 import { GroupSend, SendMsg } from './message.s';
-import { USER_GREATE_GROUP_OVERLIMIT, GROUP_MEMBERS_OVERLIMIT, OPERAT_WITHOUT_AUOTH } from '../errorNum';
+
+declare var env: Env;
 
 const logger = new Logger('GROUP');
 const START_INDEX = 0;
@@ -214,9 +216,8 @@ export const acceptUser = (agree: GroupAgree): Result => {
     logger.debug('Add user: ', agree.uid, 'to groupUserLinkBucket',gul);
    
     // 发布一条用户入群成功消息，发送者ID应该是入群者非当前用户
-    const dbMgr = getEnv().getDbMgr();
-    const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE, dbMgr);
-    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+    const groupHistoryBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_TABLE);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE);
     const gh = new GroupHistory();
     const gmsg = new GroupMsg();
     gmsg.msg = '用户加群成功';
@@ -237,7 +238,7 @@ export const acceptUser = (agree: GroupAgree): Result => {
     });
     gh.hIncId = genHIncId(msgLock.hid, msgLock.current);
     groupHistoryBucket.put(gh.hIncId, gh);
-    const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+    const mqttServer = env.get('mqttServer');
     const sendMsg = new SendMsg();
     sendMsg.code = 1;
     sendMsg.last = msgLock.current;
@@ -433,10 +434,9 @@ export const agreeJoinGroup = (agree: GroupAgree): GroupInfo => {
 const moveGroupCursor = (gid: number, rid: number) => {
     logger.debug('JoinGroup moveGroupCursor gid: ', gid, 'rid: ', rid);
 
-    const dbMgr = getEnv().getDbMgr();
     const guid = genGuid(gid, rid);
-    const groupHistoryCursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE, dbMgr);
-    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE, dbMgr);
+    const groupHistoryCursorBucket = new Bucket('file', CONSTANT.GROUP_HISTORY_CURSOR_TABLE);
+    const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE);
     const msglock = msgLockBucket.get<string, MsgLock>(genGroupHid(gid))[0];
 
     const ridGroupCursor = new GroupHistoryCursor();
@@ -663,7 +663,6 @@ export const delMember = (guid: string): Result => {
  * @param gid group id
  */
 export const getGroupMembers = (gid: number): GroupMembers => {
-    const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = getGroupInfoBucket();
 
     const gm = new GroupMembers();
@@ -679,10 +678,9 @@ export const getGroupMembers = (gid: number): GroupMembers => {
  */
 // #[rpc=rpcServer]
 export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
-    const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = getGroupInfoBucket();
-    const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
-    const userInfoBucket = new Bucket('file',CONSTANT.USER_INFO_TABLE,dbMgr);
+    const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE);
+    const userInfoBucket = new Bucket('file',CONSTANT.USER_INFO_TABLE);
 
     const gla = new GroupUserLinkArray();
     const m = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
@@ -720,11 +718,10 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
  */
 // #[rpc=rpcServer]
 export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
-    const dbMgr = getEnv().getDbMgr();
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
-    const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE, dbMgr);
-    const userLevelBucket = new Bucket('file', UserLevel._$info.name, dbMgr);
+    const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE);
+    const userLevelBucket = new Bucket('file', UserLevel._$info.name);
     
     if (uid !== undefined) {
         // 获取用户的权限等级和对应的群组限制
@@ -745,7 +742,6 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
                 break;
             default:
                 groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
-                break;
         }
         const gInfo = new GroupInfo();
         const contactBucket = getContactBucket();
@@ -797,11 +793,11 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
 
         // 发送一条当前群组创建成功的消息，其实不是必须的
         const groupTopic = `ims/group/msg/${gInfo.gid}`;
-        const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
+        const mqttServer = env.get('mqttServer');
         setMqttTopic(mqttServer, groupTopic, true, true);
         logger.debug('Set mqtt topic for group: ', gInfo.gid, 'with topic name: ', groupTopic);
         // 把创建群的用户加入groupUserLink
-        const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
+        const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE);
         const currentUser = getCurrentUserInfo(uid);
         const gulink = new GroupUserLink();
         gulink.groupAlias = '';
@@ -919,7 +915,7 @@ export const updateNeedAgree = (needAgree: NeedAgree): Result => {
     result.r = CONSTANT.RESULT_SUCCESS;
 
     return result;
-} 
+}; 
 
 export const getUid = () => {
     // const dbMgr = getEnv().getDbMgr();
@@ -946,34 +942,29 @@ const getGroupMaxMembers = (groupLevel: number) => {
             break;
         default:
             maxMembers = CONSTANT.VIP0_GROUP_MEMBERS_LIMIT;
-            break;
     }
 
     return maxMembers;
-}
+};
 
 const getGroupUserLinkBucket = () => {
-    const dbMgr = getEnv().getDbMgr();
 
-    return new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE, dbMgr);
+    return new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE);
 };
 
 const getGroupInfoBucket = () => {
-    const dbMgr = getEnv().getDbMgr();
 
-    return new Bucket('file', CONSTANT.GROUP_INFO_TABLE, dbMgr);
+    return new Bucket('file', CONSTANT.GROUP_INFO_TABLE);
 };
 
 const getContactBucket = () => {
-    const dbMgr = getEnv().getDbMgr();
 
-    return new Bucket('file', CONSTANT.CONTACT_TABLE, dbMgr);
+    return new Bucket('file', CONSTANT.CONTACT_TABLE);
 };
 
 const getCurrentUserInfo = (uid?: number): UserInfo => {
     const currentUid = uid || getUid();
-    const dbMgr = getEnv().getDbMgr();
-    const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE, dbMgr);
+    const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE);
 
     return userInfoBucket.get(currentUid)[0];
 };

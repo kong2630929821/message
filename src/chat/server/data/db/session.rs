@@ -1,4 +1,4 @@
-struct Session {
+struct Session2 {
     key: String,
     value: String,
 }
@@ -6,5 +6,5 @@ struct Session {
 #[primary=id,db=memory]
 struct SessionTab {
     id: String,
-    sessions: &[Session],
+    sessions: &[Session2],
 }

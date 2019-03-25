@@ -2,9 +2,9 @@
  * 前端主动监听后端数据库的变化
  */
 // ================================================================= 导入
+import { Env } from '../../../../pi/lang/env';
 import { BonBuffer } from '../../../../pi/util/bon';
 import { ab2hex } from '../../../../pi/util/util';
-import { getEnv } from '../../../../pi_pt/net/rpc_server';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
@@ -14,6 +14,7 @@ import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../db/messa
 import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../db/user.s';
 import { iterTable } from '../util';
 
+declare var env: Env;
 // ================================================================= 导出
      
 /** 
@@ -130,7 +131,7 @@ export const watchAddressInfo = (uid: number): AddressInfo => {
  * 获取mqttServer
  */
 const getMqttServer = () => {
-    return  getEnv().getNativeObject('mqttServer');
+    return env.get('mqttServer');
 };
 
 /**
@@ -146,10 +147,8 @@ export const watchInfo = (keyName:string, keyValue:any, tableStruct:any, keyDefa
     const bonKeyValue = ab2hex(new BonBuffer().write(keyValue).getBuffer());
     setMqttTopic(<any>mqttServer, `${CONSTANT.WARE_NAME}.${tableStruct._$info.name}.${bonKeyValue}`, true, true); 
     // 返回当前值
-    const dbMgr = getEnv().getDbMgr();
-    const infoBucket = new Bucket(CONSTANT.WARE_NAME, tableStruct._$info.name, dbMgr); 
-    console.log(`${tableStruct._$info.name} iter`);
-    iterTable(dbMgr,tableStruct);
+    const infoBucket = new Bucket(CONSTANT.WARE_NAME, tableStruct._$info.name); 
+    // iterTable(tableStruct);
     console.log(`keyName is : ${keyName}, keyValue is : ${keyValue}, info is : ${infoBucket.get(keyValue)[0]}`);  
     const info = infoBucket.get(keyValue)[0] || new tableStruct();
     console.log(tableStruct._$info.name);
