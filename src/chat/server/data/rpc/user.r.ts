@@ -433,6 +433,29 @@ export const set_gmAccount = (uid: number): Result => {
     return result;
 };
 
+/**
+ * 获取客服账号
+ * @param set_gmAccount uid
+ */
+// #[rpc=rpcServer]
+export const get_gmAccount = (uid:number): number[] => {
+    console.log('==========================get_gmAccount',uid);
+    if (uid !== getUid()) return;
+
+    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
+    const res = [];   
+    let iter = levelBucket.iter(null);
+    console.log('==========================get_gmAccount',iter);
+    do {
+        iter = iter.next();
+        console.log('==========================get_gmAccount',iter);
+        res.push(iter[0]);
+
+    }while (!iter);
+    
+    return res;
+};
+
 // ================================================================= 本地
 
 // 获取好友上限

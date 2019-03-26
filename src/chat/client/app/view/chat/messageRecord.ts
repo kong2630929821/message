@@ -45,6 +45,8 @@ export class MessageRecord extends Widget {
             const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
             hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
             this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
+            const officials = store.getStore('flags').officialUsers || [];
+            this.props.official = officials.indexOf(this.props.rid) > -1;
         }
 
         // 计算有多少条新消息记录
@@ -91,6 +93,7 @@ export class MessageRecord extends Widget {
             const hid = genUserHid(store.getStore('uid'), this.props.rid);
             store.register(`userChatMap/${hid}`, this.bindCB);
             store.register(`lastRead/${hid}`,this.bindCB);
+            store.register('flags/officialUsers',this.bindCB);
         } else {
             const hid = genGroupHid(this.props.rid);
             store.register(`groupChatMap/${hid}`, this.bindCB);

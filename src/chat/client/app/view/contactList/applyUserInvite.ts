@@ -26,9 +26,9 @@ export class ApplyUser extends Widget {
         super.setProps(props);
         this.props.isagree = false;
         getUsersBasicInfo([],[this.props.accId]).then((r:UserArray) => {
-            store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
             this.props.name = r.arr[0].name;
             this.props.id = r.arr[0].uid;
+            store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
             this.paint();
         });
       
@@ -38,20 +38,21 @@ export class ApplyUser extends Widget {
         popNew('chat-client-app-view-info-userDetail',{ uid:this.props.id, inFlag: INFLAG.newApply });
     }
 
+    // 加好友
     public agreenBtn(e:any) {
         this.props.isagree = true;
         applyUserFriend(this.props.accId,() => {
             // 我邀请的好友
-            const invite = walletStore.getStore('flags').invite_success;
+            const invite = walletStore.getStore('inviteUsers').invite_success;
             const index = invite.findIndex(item => item === this.props.accId);
             invite.splice(index,1);
-            walletStore.setStore('flags/invite_success',invite);
+            walletStore.setStore('inviteUsers/invite_success',invite);
 
             // 邀请我的好友
-            const convert = walletStore.getStore('flags').convert_invite;
+            const convert = walletStore.getStore('inviteUsers').convert_invite;
             const index1 = convert.findIndex(item => item === this.props.accId);
             convert.splice(index1,1);
-            walletStore.setStore('flags/convert_invite',convert);
+            walletStore.setStore('inviteUsers/convert_invite',convert);
         });
         this.paint();
     }

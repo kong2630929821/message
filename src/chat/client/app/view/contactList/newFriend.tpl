@@ -1,6 +1,6 @@
 <div class="new-page" ev-back-click="goBack">
     <chat-client-app-widget-topBar-topBar>{title:"新的朋友"}</chat-client-app-widget-topBar-topBar>
-    {{if it1.contact.applyUser.length>0 || it1.contact.applyGroup.length>0 || it1.inviteUsers.length>0 || it1.convertUser.length>0}}
+    {{if (it1.contact.applyUser.length + it1.contact.applyGroup.length + it1.inviteUsers.length + it1.convertUser.length) > 0}}
     <div w-class="apply-status-wrap">
         <div w-class="title-wrap">新的朋友</div>
         <div w-class="detail-wrap" ev-agree-friend="agreeClick">

@@ -17,7 +17,7 @@
     
     <div w-class="a-part" ev-changeSelect="changeSelect">
         {{for i,v of it1.friends}}
-            {{if v != it.serviceID}}
+            {{if it.serviceID.indexOf(v) > -1}}
             <div ev-addMember="addMember" style="position:relative;">
                 <chat-client-app-widget-selectUser-selectUser>{id:{{v}}, chatType: "user"}</chat-client-app-widget-selectUser-selectUser>
             </div>

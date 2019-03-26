@@ -3,10 +3,10 @@
  */
 
  // ================================================ 导入
+import * as walletStore from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { Contact } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
 import { rippleShow } from '../../logic/logic';
 // ================================================ 导出
@@ -23,8 +23,7 @@ export class ContactList extends Widget {
 
     public create() {
         super.create();
-        const sid = store.getStore('uid','').toString();
-        this.state = store.getStore('contactMap',new Contact()).get(sid);
+        this.state = STATE;
     }
 
      // 返回上一页
@@ -57,16 +56,36 @@ export class ContactList extends Widget {
 }
 
  // ================================================ 本地
-
-store.register('contactMap', (r: Map<number, Contact>) => {
-    // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
-    for (const value of r.values()) {
-        forelet.paint(value);
-    }    
-});
 store.register('friendLinkMap',() => {
     const w = forelet.getWidget(WIDGET_NAME);
     if (w) {
         w.paint(true);
     }
+});
+const STATE = {
+    contact:{ // 联系人列表
+        applyUser:[],
+        applyGroup:[],
+        friends:[]
+    }, 
+    inviteUsers:[],  // 我邀请的好友注册进入
+    convertUser:[]  // 我兑换好友的邀请码
+};
+store.register('contactMap', (r) => {
+    for (const value of r.values()) {
+        STATE.contact = value;
+        forelet.paint(STATE);
+    }  
+});
+
+// 邀请好友成功
+walletStore.register('inviteUsers/invite_success',(r) => {
+    STATE.inviteUsers = r;
+    forelet.paint(STATE);
+});
+
+// 兑换好友邀请码成功
+walletStore.register('inviteUsers/convert_invite',(r) => {
+    STATE.convertUser = r;
+    forelet.paint(STATE);
 });

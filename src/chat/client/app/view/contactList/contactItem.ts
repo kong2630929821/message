@@ -43,7 +43,9 @@ export class ContactItem extends Widget {
                     this.props.name += '(本人)';
                 }
                 this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
-
+                const officials = store.getStore('flags').officialUsers || [];
+                this.props.official = officials.indexOf(this.props.id) > -1;
+                
             } else {
                 const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
                 this.props.official = group.level === 5;

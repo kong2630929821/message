@@ -11,11 +11,11 @@ import { popNewMessage } from '../../../../app/utils/tools';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
-import { getFriendHistory } from '../data/initStore';
 import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
+import { getFriendHistory, getOfficialUser, getSetting } from './rpc';
 
 // ================================================ 导出
 
@@ -42,6 +42,8 @@ export const walletSignIn = (openid) => {
                 store.setStore(`uid`, r.uid);
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 store.setStore('isLogin',true);
+                getSetting();   // 获取设置信息
+                getOfficialUser(r.uid);  // 获取官方客服账号
                 init2.init(r.uid);
 
                 init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {

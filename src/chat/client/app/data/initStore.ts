@@ -1,15 +1,9 @@
 /**
  * 初始化store
  */
-import { FrontStoreData, GENERATOR_TYPE } from '../../../server/data/db/user.s';
-import { getData, getGroupHistory, getUserHistory } from '../../../server/data/rpc/basic.p';
-import { GroupHistoryArray, GroupHistoryFlag, UserHistoryArray, UserHistoryFlag } from '../../../server/data/rpc/basic.s';
-import { getGroupHistoryCursor, getUserHistoryCursor } from '../../../server/data/rpc/message.p';
-import { HistoryCursor } from '../../../server/data/rpc/message.s';
-import { genGroupHid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
-import { clientRpcFunc } from '../net/init';
+import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
+import { genGroupHid, genUserHid } from '../../../utils/util';
 import { getFile, getLocalStorage, initFileStore, setLocalStorage, writeFile } from './lcstore';
-import { updateGroupMessage, updateUserMessage } from './parse';
 import * as store from './store';
 
 /**
@@ -69,9 +63,6 @@ export const initAccount = () => {
         getFile(`${sid}-setting`, (value) => {
             if (!value) return;
             store.setStore('setting', value || null);
-            if (!value) {
-                getSetting(); // 获取设置，本地没有则从服务器获取
-            }
         }, () => {
             console.log('read setting error');
         });
@@ -79,97 +70,6 @@ export const initAccount = () => {
     getLocalStorage(`${sid}-flags`,(value) => {
         if (!value) return;
         store.setStore('flags/noGroupRemind',value.noGroupRemind);
-    });
-};
-
-/**
- * 请求好友发的消息历史记录
- */
-export const getFriendHistory = (rid: number, gid?:number, upLastRead: boolean = false) => {
-    const sid = store.getStore('uid');
-    if (sid === rid) return;
-
-    clientRpcFunc(getUserHistoryCursor, rid, (r: HistoryCursor) => {
-        const hid = genUserHid(sid, rid);
-        const lastRead = {
-            msgId: '',
-            msgType: GENERATOR_TYPE.USER
-        };
-        if (r && r.code === 1) {
-            const cursor = r.cursor;
-            lastRead.msgId = genHIncId(hid, cursor);
-            const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
-            const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
-            if (cursor > localCursor && (upLastRead || !lastHincId)) { // 本地没有记录时需要更新
-                store.setStore(`lastRead/${hid}`, lastRead);
-            }
-            // 服务器最新消息
-            const lastMsgId = r.last;
-            const userflag = new UserHistoryFlag();
-            userflag.rid = rid;
-            const hIncIdArr = store.getStore(`userChatMap/${hid}`, []);
-            
-            // 如果本地有记录从本地最后一条记录开始获取聊天消息
-            // 本地没有记录则从服务器游标开始获取聊天消息
-            userflag.start = hIncIdArr && hIncIdArr.length > 0 ? (getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1) : (cursor + 1);
-            userflag.end = lastMsgId;
-            if (userflag.end >= userflag.start) {
-                clientRpcFunc(getUserHistory, userflag, (r: UserHistoryArray) => {
-                    // console.error('uuid: ',hid,'initStore getFriendHistory',r);
-                    if (r.newMess > 0) {
-                        r.arr.forEach(element => {
-                            updateUserMessage(userflag.rid, element, gid);
-                        });
-                    }
-                });
-            }
-
-        }
-
-    });
-};
-
-/**
- * 请求群聊消息历史记录
- */
-export const getMyGroupHistory = (gid: number, upLastRead: boolean = false) => {
-    const hid = genGroupHid(gid);
-
-    // 获取最新消息和游标
-    clientRpcFunc(getGroupHistoryCursor, gid, (r: HistoryCursor) => {
-        const lastRead = {
-            msgId: '',
-            msgType: GENERATOR_TYPE.GROUP
-        };
-        if (r.code === 1) {
-            // 服务端游标
-            const cursor = r.cursor;
-            // 服务端最新消息ID
-            const lastMsgId = r.last;
-            lastRead.msgId = genHIncId(hid, r.cursor);
-            const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
-            const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
-            if (cursor > localCursor &&  (upLastRead || !lastHincId)) { // 本地没有记录时需要更新
-                store.setStore(`lastRead/${hid}`, lastRead);
-            }
-            const groupflag = new GroupHistoryFlag();
-            groupflag.gid = gid;
-            const hIncIdArr = store.getStore(`groupChatMap/${hid}`, []);
-            // 获取本地最新消息ID
-            groupflag.start = hIncIdArr && hIncIdArr.length > 0 ? (getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1) : (cursor + 1);
-            groupflag.end = lastMsgId;
-            if (groupflag.end >= groupflag.start) {
-                clientRpcFunc(getGroupHistory, groupflag, (r: GroupHistoryArray) => {
-                    if (r && r.newMess > 0) {
-                        r.arr.forEach(element => {
-                            updateGroupMessage(gid, element);
-                        });
-                    }
-                });
-            }
-
-        }
-
     });
 };
 
@@ -355,19 +255,6 @@ export const settingChange = () => {
         writeFile(`${id}-setting`, value);
     }, () => {
         console.log('read error');
-    });
-};
-
-/**
- * 获取额外设置
- */
-export const getSetting = () => {
-    const sid = store.getStore('uid');
-    clientRpcFunc(getData,sid,(r:FrontStoreData) => {
-        if (r && r.uid === sid) {
-            const setting = r.value ? JSON.parse(r.value) :{ msgAvoid:[],msgTop:[] };
-            store.setStore('setting',setting);
-        } 
     });
 };
 

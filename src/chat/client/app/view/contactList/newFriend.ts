@@ -21,9 +21,18 @@ export const forelet = new Forelet();
 export class NewFriend extends Widget {
     public ok: () => void;
 
+    public create() {
+        super.create();
+        const flags = walletStore.getStore('inviteUsers');
+        STATE.inviteUsers = flags.invite_success;
+        STATE.convertUser = flags.convert_invite;
+        this.state = STATE;
+    }
+
     public goBack() {
         this.ok();
     }
+    
     // 同意好友申请
     public agreeClick(e: any) {
         const v = parseInt(e.value, 10);
@@ -69,13 +78,13 @@ store.register('contactMap', (r) => {
 });
 
 // 邀请好友成功
-walletStore.register('flags/invite_success',(r) => {
+walletStore.register('inviteUsers/invite_success',(r) => {
     STATE.inviteUsers = r;
     forelet.paint(STATE);
 });
 
 // 兑换好友邀请码成功
-walletStore.register('flags/convert_invite',(r) => {
+walletStore.register('inviteUsers/convert_invite',(r) => {
     STATE.convertUser = r;
     forelet.paint(STATE);
 });
