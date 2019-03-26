@@ -2,7 +2,7 @@
     <div w-class="top-main-wrap" ev-next-click="handleMoreContactor" ev-back-click="goBack">
         <chat-client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap" style="{{it.inFlag == 3 ? 'margin-top: 50px;':''}}">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"190px;"}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="showBigImg">{imgURL:{{it.avatar}},width:"190px;"}</widget>
             <div w-class="nameText">
                 {{it.alias || it.userInfo.name}}
             </div>
@@ -42,9 +42,9 @@
         {{else}}
 
         <div w-class="other-wrap">
-            <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
+            {{% <!-- <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" /> -->}}
             <ul w-class="ul-wrap">
-                <li w-class="liItem" style="padding-top:0;">搜索聊天记录</li>
+               {{% <!-- <li w-class="liItem" style="padding-top:0;">搜索聊天记录</li> -->}}
                 <li w-class="liItem" ev-switch-click="msgTop">
                     <span>聊天置顶</span>
                     <chat-client-app-widget-switch-switch>{types:{{it.msgTop}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>

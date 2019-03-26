@@ -37,7 +37,7 @@ export class SetGroupChat extends Widget {
             inviteUserName:[],
             isSelect:false,
             avatarHtml:'',
-            serviceID:[]
+            serviceIDs:[]
         };
         this.state = new Map();
     }
@@ -45,7 +45,7 @@ export class SetGroupChat extends Widget {
         super.create();
         const sid = store.getStore('uid').toString();
         this.state = store.getStore('contactMap',new Contact()).get(sid);
-        this.props.serviceID = store.getStore('flags/officialUsers') || [];
+        this.props.serviceIDs = store.getStore('flags/officialUsers') || [];
     }
     
     // 返回上一页
@@ -171,7 +171,7 @@ interface Props {
     inviteUserName:string[];// 被邀请的成员名字
     isSelect:boolean;// 是否被选择
     avatarHtml:string; // 群头像展示
-    serviceID:number[];  // 好嗨客服账号
+    serviceIDs:number[];  // 客服账号
 }
 let avatarUrl;  // 群头像链接
 store.register('contactMap', (r: Map<number, Contact>) => {

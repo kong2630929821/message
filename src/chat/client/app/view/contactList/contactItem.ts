@@ -30,6 +30,7 @@ export class ContactItem extends Widget {
         totalNew: null,
         official:false  
     };
+
     public setProps(props: any) {
         super.setProps(props);
         this.props.show = true;
@@ -55,7 +56,24 @@ export class ContactItem extends Widget {
             }
         }
     }
-   
+
+    public firstPaint() {
+        super.firstPaint();
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            store.register(`userInfoMap/${this.props.id}`,(r:UserInfo) => {
+                this.props.name = r.name;
+                this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
+                this.paint();
+            });
+        } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+            store.register(`groupInfoMap/${this.props.id}`,(r:GroupInfo) => {
+                this.props.name = r.name;
+                this.props.img = getGroupAvatar(this.props.id) || '../../res/images/groups.png';
+                this.paint();
+            });
+        }
+    }
+
 }
 
 // ================================================ 本地

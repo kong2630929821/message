@@ -173,6 +173,11 @@ export class UserDetail extends Widget {
         }
     }
 
+    // 点击查看大图头像
+    public showBigImg() {
+        popNew('chat-client-app-widget-bigImage-bigImage',{ img: this.props.avatar });
+    }
+
     public goBack() {
         this.ok();
     }

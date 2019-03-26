@@ -79,7 +79,7 @@ export class Contact extends SpecialWidget {
         if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
             if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                 setUserInfo();
-                this.props.avatar = `${uploadFileUrlPrefix}${wUser.avatar}`;
+                this.props.avatar = wUser.avatar ? `${uploadFileUrlPrefix}${wUser.avatar}` :'' ;
                 this.paint();
             } else {
                 store.initStore();
@@ -123,14 +123,13 @@ export class Contact extends SpecialWidget {
 
     // 打开更多功能
     public getMore() {
-        
-        popNew3('earn-client-app-view-activity-myInviteUsers');
-        // if (this.props.isLogin) {
-        //     this.props.isUtilVisible = !this.props.isUtilVisible;
-        //     this.paint();
-        // } else {
-        //     popNewMessage('聊天未登陆');
-        // }
+        // popNew3('earn-client-app-view-activity-myInviteUsers');
+        if (this.props.isLogin) {
+            this.props.isUtilVisible = !this.props.isUtilVisible;
+            this.paint();
+        } else {
+            popNewMessage('聊天未登陆');
+        }
     }
 
     public closeMore() {
