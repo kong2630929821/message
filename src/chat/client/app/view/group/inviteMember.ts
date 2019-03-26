@@ -28,7 +28,8 @@ export class InviteMember extends Widget {
     public props:Props = {
         gid:null,
         ginfo:{},
-        applyGroupMembers:[]
+        applyGroupMembers:[],
+        serviceIDs:[]
     };
     public setProps(props:any) {
         super.setProps(props);
@@ -37,6 +38,7 @@ export class InviteMember extends Widget {
         this.props.applyGroupMembers = [];
         const sid = store.getStore('uid').toString();
         this.state = store.getStore('contactMap',new Contact()).get(sid);
+        this.props.serviceIDs = store.getStore('flags/officialUsers') || [];
     }
     
     public goBack() {
@@ -89,6 +91,7 @@ interface Props {
     gid:number;
     ginfo:Json;
     applyGroupMembers:number[];
+    serviceIDs:number[];  // 客服账号
 }
 
 store.register('contactMap', (r: Map<number, Contact>) => {

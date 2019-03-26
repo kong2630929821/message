@@ -5,18 +5,21 @@
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { GroupInfo } from '../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
-import { UserInfo } from '../../../server/data/db/user.s';
-import { getFriendLinks, getGroupsInfo, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
+import { FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
-import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, LoginReq, Result, UserArray, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
+import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, inviteUserToNPG } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
-import { sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
-import { GroupSend, TempSend, UserSend } from '../../../server/data/rpc/message.s';
+import { getGroupHistoryCursor, getUserHistoryCursor, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
+import { GroupSend, HistoryCursor, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
-import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend } from '../../../server/data/rpc/user.p';
+import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend, get_gmAccount } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
+import { genGroupHid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
+import { updateGroupMessage, updateUserMessage } from '../data/parse';
+import * as store from '../data/store';
 import { clientRpcFunc, subscribe } from './init';
 
 // ================================================ 导出
@@ -126,6 +129,120 @@ export const sendTempMsg = (rid: number,gid:number, msg: string, msgType = MSG_T
     });
 };
 
+/**
+ * 请求好友发的消息历史记录
+ */
+export const getFriendHistory = (rid: number, gid?:number, upLastRead: boolean = false) => {
+    const sid = store.getStore('uid');
+    if (sid === rid) return;
+
+    clientRpcFunc(getUserHistoryCursor, rid, (r: HistoryCursor) => {
+        const hid = genUserHid(sid, rid);
+        const lastRead = {
+            msgId: '',
+            msgType: GENERATOR_TYPE.USER
+        };
+        if (r && r.code === 1) {
+            const cursor = r.cursor;
+            lastRead.msgId = genHIncId(hid, cursor);
+            const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
+            const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
+            if (cursor > localCursor && (upLastRead || !lastHincId)) { // 本地没有记录时需要更新
+                store.setStore(`lastRead/${hid}`, lastRead);
+            }
+            // 服务器最新消息
+            const lastMsgId = r.last;
+            const userflag = new UserHistoryFlag();
+            userflag.rid = rid;
+            const hIncIdArr = store.getStore(`userChatMap/${hid}`, []);
+            
+            // 如果本地有记录从本地最后一条记录开始获取聊天消息
+            // 本地没有记录则从服务器游标开始获取聊天消息
+            userflag.start = hIncIdArr && hIncIdArr.length > 0 ? (getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1) : (cursor + 1);
+            userflag.end = lastMsgId;
+            if (userflag.end >= userflag.start) {
+                clientRpcFunc(getUserHistory, userflag, (r: UserHistoryArray) => {
+                    // console.error('uuid: ',hid,'initStore getFriendHistory',r);
+                    if (r.newMess > 0) {
+                        r.arr.forEach(element => {
+                            updateUserMessage(userflag.rid, element, gid);
+                        });
+                    }
+                });
+            }
+
+        }
+
+    });
+};
+
+/**
+ * 请求群聊消息历史记录
+ */
+export const getMyGroupHistory = (gid: number, upLastRead: boolean = false) => {
+    const hid = genGroupHid(gid);
+
+    // 获取最新消息和游标
+    clientRpcFunc(getGroupHistoryCursor, gid, (r: HistoryCursor) => {
+        const lastRead = {
+            msgId: '',
+            msgType: GENERATOR_TYPE.GROUP
+        };
+        if (r.code === 1) {
+            // 服务端游标
+            const cursor = r.cursor;
+            // 服务端最新消息ID
+            const lastMsgId = r.last;
+            lastRead.msgId = genHIncId(hid, r.cursor);
+            const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
+            const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
+            if (cursor > localCursor &&  (upLastRead || !lastHincId)) { // 本地没有记录时需要更新
+                store.setStore(`lastRead/${hid}`, lastRead);
+            }
+            const groupflag = new GroupHistoryFlag();
+            groupflag.gid = gid;
+            const hIncIdArr = store.getStore(`groupChatMap/${hid}`, []);
+            // 获取本地最新消息ID
+            groupflag.start = hIncIdArr && hIncIdArr.length > 0 ? (getIndexFromHIncId(hIncIdArr[hIncIdArr.length - 1]) + 1) : (cursor + 1);
+            groupflag.end = lastMsgId;
+            if (groupflag.end >= groupflag.start) {
+                clientRpcFunc(getGroupHistory, groupflag, (r: GroupHistoryArray) => {
+                    if (r && r.newMess > 0) {
+                        r.arr.forEach(element => {
+                            updateGroupMessage(gid, element);
+                        });
+                    }
+                });
+            }
+
+        }
+
+    });
+};
+
+/**
+ * 获取额外设置
+ */
+export const getSetting = () => {
+    const sid = store.getStore('uid');
+    clientRpcFunc(getData,sid,(r:FrontStoreData) => {
+        if (r && r.uid === sid) {
+            const setting = r.value ? JSON.parse(r.value) :{ msgAvoid:[],msgTop:[] };
+            store.setStore('setting',setting);
+        } 
+    });
+};
+
+/**
+ * 获取官方客服账号
+ */
+export const getOfficialUser = (uid:number) => {
+    clientRpcFunc(get_gmAccount,uid,(r) => {
+        if (r && r.length > 0) {
+            store.setStore('flags/officialUsers',r);
+        }
+    });
+};
 /**
  * 申请添加rid为好友
  * @param rid reader id

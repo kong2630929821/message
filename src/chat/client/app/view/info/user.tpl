@@ -28,14 +28,14 @@
         </div>
 
         <div w-class="other-wrap">
-            <div style="display:flex;align-items:center;">
+            {{% <!-- <div style="display:flex;align-items:center;">
                 <img w-class="moreChooseIcon" src="../../res/images/more-choose.png" />
                 <span style="font-size:32px;color:#222222">其他设置</span>
             </div>
-            {{% <div w-class="otherSet">
+            <div w-class="otherSet">
                 <span style="flex:1 0 0;">电话号码对别人可见</span>
                 <chat-client-app-widget-switch-switch>{types:true,activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
-           </div>}}
+           </div> -->}}
         </div>
     </div>
 

@@ -7,8 +7,7 @@ import { Result } from './basic.s';
 import { GroupSend, HistoryCursor, SendMsg, TempSend, UserSend } from './message.s';
 
 import { BonBuffer } from '../../../../pi/util/bon';
-import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
-import { mqttPublish, QoS, setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
+import { mqttPublish, QoS } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
 
@@ -240,6 +239,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         }
         // 公告数据存储
         const noticeBucket = new Bucket('file', CONSTANT.ANNOUNCE_HISTORY_TABLE);
+        const ah = new AnnounceHistory();
         const anmt = new Announcement();
         anmt.cancel = false;
         anmt.msg = message.msg;
@@ -247,11 +247,10 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
         anmt.send = true;
         anmt.time = Date.now();
         anmt.sid = getUid();
+        ah.announce = anmt;
 
-        const ah = new AnnounceHistory();
         // 公告key使用群聊消息key
         ah.aIncId = genHIncId(msgLock.hid, msgLock.current);
-        ah.announce = anmt;
         noticeBucket.put(ah.aIncId, ah);
         logger.debug('sendGroupMessage annoucement: ', ah, 'to group: ', message.gid);
         gInfo.annoceids.push(gh.hIncId);
@@ -320,16 +319,25 @@ export const moveGroupCursor = (gid: number, current: number) => {
 // #[rpc=rpcServer]
 export const sendUserMessage = (message: UserSend): UserHistory => {
     console.log('sendMsg!!!!!!!!!!!', message);
-
     const sid = getUid();
     const userHistory = new UserHistory();
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
     // 获取对方联系人列表
     const sContactInfo = contactBucket.get(message.rid)[0];
+    const userMsg = new UserMsg();
+    userMsg.cancel = false;
+    userMsg.msg = message.msg;
+    userMsg.mtype = message.mtype;
+    userMsg.read = false;
+    userMsg.send = false;
+    userMsg.sid = sid;
+    userMsg.time = Date.now();
+    userHistory.msg = userMsg;
     // 判断当前用户是否在对方的好友列表中
     if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
-        console.log('not friend!!!!!!!!!!!');
         userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+        
+        console.log('not friend!!!!!!!!!!!',userHistory);
 
         return userHistory;
     }
@@ -349,6 +357,15 @@ export const sendTempMessage = (message: TempSend): UserHistory => {
 
     const sid = getUid();
     const userHistory = new UserHistory();
+    const userMsg = new UserMsg();
+    userMsg.cancel = false;
+    userMsg.msg = message.msg;
+    userMsg.mtype = message.mtype;
+    userMsg.read = false;
+    userMsg.send = false;
+    userMsg.sid = sid;
+    userMsg.time = Date.now();
+    userHistory.msg = userMsg;
     // 参数中有gid，则是群内临时聊天
     const groupInfoBucket = new Bucket('file', GroupInfo._$info.name);
     const gInfo = groupInfoBucket.get<number, [GroupInfo]>(message.gid)[0];
@@ -414,31 +431,13 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
             // v.msg.mtype = MSG_TYPE.RECALL;
             userHistoryBucket.put(recallKey, v);
 
-            // const buf = new BonBuffer();
-            // v.bonEncode(buf);
-
-            // const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-            // mqttPublish(mqttServer, true, QoS.AtMostOnce, message.rid.toString(), buf.getBuffer());
-            // logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(v)}`);
-
-            // return v;        
         } else {  // 错误的撤回请求
             userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
 
             return userHistory;
         }
     }
-    const userMsg = new UserMsg();
-    userMsg.cancel = false;
-    userMsg.msg = message.msg;
-    userMsg.mtype = message.mtype;
-    userMsg.read = false;
-    userMsg.send = false;
-    userMsg.sid = sid;
-    userMsg.time = Date.now();
-    userHistory.msg = userMsg;
-    // logger.debug(`friends is : ${JSON.stringify(sContactInfo.friends)}, sid is : ${sid}`);
-
+    
     const msgLock = new MsgLock();
     msgLock.hid = genUserHid(sid, message.rid);
     // 这是一个事务

@@ -7,7 +7,6 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { CUSTOMER_SERVICE } from '../../../../server/data/constant';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
@@ -50,9 +49,10 @@ export class UserDetail extends Widget {
     public setProps(props: Json) {
         super.setProps(props);
         this.props.userInfo = {};
+        const officialUser = store.getStore('flags/officialUsers') || [];
         if (props.inFlag === INFLAG.newApply) {
             this.props.utilList = [{ utilText: '加入黑名单' }];
-        } else if (props.uid === CUSTOMER_SERVICE) {
+        } else if (officialUser.indexOf(props.uid) > -1) {  // 官方账号不允许删除
             this.props.utilList = [
             { utilText: '修改备注' },
             { utilText: '清空聊天记录' }
@@ -171,6 +171,11 @@ export class UserDetail extends Widget {
                 break;
             default:
         }
+    }
+
+    // 点击查看大图头像
+    public showBigImg() {
+        popNew('chat-client-app-widget-bigImage-bigImage',{ img: this.props.avatar });
     }
 
     public goBack() {

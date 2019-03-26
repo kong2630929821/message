@@ -9,7 +9,6 @@ import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteA
 
 import { Env } from '../../../../pi/lang/env';
 import { BonBuffer } from '../../../../pi/util/bon';
-import { ServerNode } from '../../../../pi_pt/rust/mqtt/server';
 import { mqttPublish, QoS, setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
@@ -67,14 +66,7 @@ export const applyJoinGroup = (gid: number): Result => {
     }
     // 加群是否需要管理员同意,不需要同意则直接进群
     if (!gInfo.need_agree) {
-        const contactBucket = getContactBucket();
-        const contact = contactBucket.get<number, [Contact]>(uid)[0];
-        gInfo.memberids.push(uid);
-        groupInfoBucket.put(gInfo.gid, gInfo);
-        contact.group.push(gid);
-        contactBucket.put(uid, contact);
-        logger.debug('acceptUser uid', uid, 'group ', contact.group,'applyGroup:',contact.applyGroup);
-        res.r = CONSTANT.RESULT_SUCCESS;
+        res.r = inviteUserToNPG(gid).r;
 
         return res;
     }
@@ -711,62 +703,38 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
 };
 
 /**
- * 创建群
- * @param uid user id
- * 
- * 
+ * 创建群之前的判断 群组等级 初始化群组基础信息
  */
-// #[rpc=rpcServer]
-export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
-    const groupInfoBucket = getGroupInfoBucket();
-    const uid = getUid();
-    const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE);
+const judgeCreateGroup = (uid:number,contact:Contact) => {
     const userLevelBucket = new Bucket('file', UserLevel._$info.name);
+    const gInfo = new GroupInfo();
+    // 获取用户的权限等级和对应的群组限制
+    let level: number;
+    const userLevel = userLevelBucket.get<number,[UserLevel]>(uid)[0];
+    if (!userLevel) {
+        level = VIP_LEVEL.VIP0;
+    } else {
+        level = userLevel.level;
+    }
+    let groupLimit: number;
+    switch (level) {
+        case VIP_LEVEL.VIP0:
+            groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
+            break;
+        case VIP_LEVEL.VIP5:
+            groupLimit = CONSTANT.VIP5_GROUPS_LIMIT;
+            break;
+        default:
+            groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
+    }
     
-    if (uid !== undefined) {
-        // 获取用户的权限等级和对应的群组限制
-        let level: number;
-        const userLevel = userLevelBucket.get<number,[UserLevel]>(uid)[0];
-        if (!userLevel) {
-            level = VIP_LEVEL.VIP0;
-        } else {
-            level = userLevel.level;
-        }
-        let groupLimit: number;
-        switch (level) {
-            case VIP_LEVEL.VIP0:
-                groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
-                break;
-            case VIP_LEVEL.VIP5:
-                groupLimit = CONSTANT.VIP5_GROUPS_LIMIT;
-                break;
-            default:
-                groupLimit = CONSTANT.VIP0_GROUPS_LIMIT;
-        }
-        const gInfo = new GroupInfo();
-        const contactBucket = getContactBucket();
-        const contact = contactBucket.get<number, [Contact]>(uid)[0];
-        // 判断用户创建的群聊是否超过上限
-        const groupCount = contact.myGroup.length;
-        if (groupCount >= groupLimit) {
-            gInfo.gid = USER_GREATE_GROUP_OVERLIMIT;
+    // 判断用户创建的群聊是否超过上限
+    const groupCount = contact.myGroup.length;
+    if (groupCount >= groupLimit) {
+        gInfo.gid = USER_GREATE_GROUP_OVERLIMIT;
 
-            return gInfo;
-        }
-        // 这是一个事务
-        accountGeneratorBucket.readAndWrite(GENERATOR_TYPE.GROUP, (items: any[]) => {
-            const accountGenerator = new AccountGenerator();
-            accountGenerator.index = GENERATOR_TYPE.GROUP;
-            accountGenerator.currentIndex = genNewIdFromOld(items[0].currentIndex);
-            gInfo.gid = accountGenerator.currentIndex;
-
-            return accountGenerator;
-        });
-        gInfo.name = groupInfo.name;
-        gInfo.hid = genGroupHid(gInfo.gid);
-        gInfo.note = groupInfo.note;
-        gInfo.avatar = groupInfo.avatar;
-        gInfo.need_agree = groupInfo.need_agree;
+        return gInfo;
+    } else {
         gInfo.adminids = [uid];
         gInfo.level = level; 
         // genAnnounceIncId(gInfo.gid, START_INDEX)
@@ -781,42 +749,77 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
         gInfo.state = 0;
         gInfo.applyUser = [];
 
-        logger.debug('create group: ', gInfo);
-
-        groupInfoBucket.put(gInfo.gid, gInfo);
-        logger.debug('read group info: ', groupInfoBucket.get(gInfo.gid));
-        // 修改创建群的人的联系人列表，把当前群组加进去
-        contact.group.push(gInfo.gid);
-        contactBucket.put(uid, contact);
-        moveGroupCursor(gInfo.gid, uid);
-        logger.debug('Add self: ', uid, 'to conatact group');
-
-        // 发送一条当前群组创建成功的消息，其实不是必须的
-        const groupTopic = `ims/group/msg/${gInfo.gid}`;
-        const mqttServer = env.get('mqttServer');
-        setMqttTopic(mqttServer, groupTopic, true, true);
-        logger.debug('Set mqtt topic for group: ', gInfo.gid, 'with topic name: ', groupTopic);
-        // 把创建群的用户加入groupUserLink
-        const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE);
-        const currentUser = getCurrentUserInfo(uid);
-        const gulink = new GroupUserLink();
-        gulink.groupAlias = '';
-        gulink.guid = genGuid(gInfo.gid, uid);
-        gulink.hid = '';
-        gulink.join_time = Date.now();
-        gulink.userAlias = '';
-        gulink.avatar = currentUser.avatar;
-
-        groupUserLinkBucket.put(gulink.guid, gulink);
-        const info = new GroupSend();
-        info.msg = `你已经成功创建群 \"${gInfo.name}\"`;
-        info.mtype = MSG_TYPE.CREATEGROUP;
-        info.gid = gInfo.gid;
-        info.time = Date.now();
-        sendGroupMessage(info);
-
         return gInfo;
     }
+};
+
+/**
+ * 创建群
+ * @param uid user id
+ * 
+ * 
+ */
+// #[rpc=rpcServer]
+export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
+    const groupInfoBucket = getGroupInfoBucket();
+    const uid = getUid();
+    const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE);
+    const contactBucket = getContactBucket();
+    const contact = contactBucket.get<number, [Contact]>(uid)[0];
+    const gInfo = judgeCreateGroup(uid,contact);
+    if (gInfo.gid) {  // 创建的群个数超出限制
+        return gInfo;
+    }
+
+    // 这是一个事务
+    accountGeneratorBucket.readAndWrite(GENERATOR_TYPE.GROUP, (items: any[]) => {
+        const accountGenerator = new AccountGenerator();
+        accountGenerator.index = GENERATOR_TYPE.GROUP;
+        accountGenerator.currentIndex = genNewIdFromOld(items[0].currentIndex);
+        gInfo.gid = accountGenerator.currentIndex;
+
+        return accountGenerator;
+    });
+    gInfo.name = groupInfo.name;
+    gInfo.hid = genGroupHid(gInfo.gid);
+    gInfo.note = groupInfo.note;
+    gInfo.avatar = groupInfo.avatar;
+    gInfo.need_agree = gInfo.level < VIP_LEVEL.VIP5 ? groupInfo.need_agree :false ;
+    logger.debug('createGroup ginfo: ', gInfo);
+
+    groupInfoBucket.put(gInfo.gid, gInfo);
+    logger.debug('read group info: ', groupInfoBucket.get(gInfo.gid));
+        // 修改创建群的人的联系人列表，把当前群组加进去
+    contact.group.push(gInfo.gid);
+    contactBucket.put(uid, contact);
+    moveGroupCursor(gInfo.gid, uid);
+    logger.debug('Add self: ', uid, 'to conatact group');
+
+        // 发送一条当前群组创建成功的消息，其实不是必须的
+    const groupTopic = `ims/group/msg/${gInfo.gid}`;
+    const mqttServer = env.get('mqttServer');
+    setMqttTopic(mqttServer, groupTopic, true, true);
+    logger.debug('Set mqtt topic for group: ', gInfo.gid, 'with topic name: ', groupTopic);
+        // 把创建群的用户加入groupUserLink
+    const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE);
+    const currentUser = getCurrentUserInfo(uid);
+    const gulink = new GroupUserLink();
+    gulink.groupAlias = '';
+    gulink.guid = genGuid(gInfo.gid, uid);
+    gulink.hid = '';
+    gulink.join_time = Date.now();
+    gulink.userAlias = '';
+    gulink.avatar = currentUser.avatar;
+
+    groupUserLinkBucket.put(gulink.guid, gulink);
+    const info = new GroupSend();
+    info.msg = `你已经成功创建群 \"${gInfo.name}\"`;
+    info.mtype = MSG_TYPE.CREATEGROUP;
+    info.gid = gInfo.gid;
+    info.time = Date.now();
+    sendGroupMessage(info);
+
+    return gInfo;
 };
 
 /**

@@ -5,16 +5,13 @@
     <div w-class="user-info-wrap">
         <div w-class="info-wrap">
             {{if it.chatType == "group"}}
-                <img w-class="resIcon" src="../../res/images/group-icon.png" />
-                <span w-class="userName">{{it.name}}</span>
-                {{if it.official}}
-                    <span w-class="official">官方</span>
-                {{end}}
-                
-            {{else}}
-                <span w-class="userName">{{it.name}}</span>            
+            <img w-class="resIcon" src="../../res/images/group-icon.png" />
             {{end}}
-            
+            <span w-class="userName">{{it.name}}</span>
+            {{if it.official}}
+                <span w-class="official">官方</span>
+            {{end}}
+        
             {{if it.msgAvoid}}
             <img w-class="notDisturbIcon" src="../../res/images/not-disturb.png" />
             {{end}}

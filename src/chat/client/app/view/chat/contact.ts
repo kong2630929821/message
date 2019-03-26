@@ -9,6 +9,7 @@ import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
@@ -56,6 +57,11 @@ export class Contact extends SpecialWidget {
         netClose:false
     };
 
+    public create() {
+        super.create();
+        this.state = STATE;
+    }
+
     public setProps(props: Json) {
         super.setProps(props);
         this.props.isLogin = !!store.getStore('uid');
@@ -73,15 +79,15 @@ export class Contact extends SpecialWidget {
         if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
             if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                 setUserInfo();
-                this.props.avatar = `${uploadFileUrlPrefix}${wUser.avatar}`;
+                this.props.avatar = wUser.avatar ? `${uploadFileUrlPrefix}${wUser.avatar}` :'' ;
                 this.paint();
             } else {
                 store.initStore();
-                this.state = []; // 清空记录 lastChat
+                this.state.lastChat = []; // 清空记录 lastChat
                 this.paint();
             }
         } 
-        
+
         // }
     }
 
@@ -117,6 +123,7 @@ export class Contact extends SpecialWidget {
 
     // 打开更多功能
     public getMore() {
+        // popNew3('earn-client-app-view-activity-myInviteUsers');
         if (this.props.isLogin) {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();
@@ -168,7 +175,12 @@ export class Contact extends SpecialWidget {
 // ================================================ 本地
 const STATE = {
     lastChat:[],
-    contactMap:''
+    contactMap:{
+        applyUser:[],
+        applyGroup:[]
+    },
+    inviteUsers:[],
+    convertUser:[]
 };
 store.register(`lastChat`, (r: [number, number][]) => {
     STATE.lastChat = r;
@@ -176,6 +188,19 @@ store.register(`lastChat`, (r: [number, number][]) => {
 });
 store.register('contactMap', (r) => {
     for (const value of r.values()) {
+        if (STATE.inviteUsers || STATE.convertUser) {
+            const userInfoMap = store.getStore('userInfoMap',new Map());
+            for (const v of userInfoMap) {
+                const index = STATE.inviteUsers.indexOf(v.acc_id); 
+                index > -1 && STATE.inviteUsers.splice(index,1);
+                walletStore.setStore('inviteUsers/invite_success',STATE.inviteUsers);
+                
+                const index1 = STATE.convertUser.indexOf(v.acc_id); 
+                index1 > -1 && STATE.convertUser.splice(index1,1);
+                walletStore.setStore('inviteUsers/convert_invite',STATE.convertUser);
+            }
+            
+        }
         STATE.contactMap = value;
         forelet.paint(STATE);
     }  
@@ -185,4 +210,39 @@ store.register('friendLinkMap', () => {
     if (w) {
         w.paint(true);
     }
+});
+// 邀请好友成功
+walletStore.register('inviteUsers/invite_success',(r) => {
+    const ans = depCopy(r);
+    const userInfoMap = store.getStore('userInfoMap',new Map());
+
+    if (userInfoMap.size > 0) {
+        for (const v of userInfoMap.values()) {
+            const index = ans.indexOf(v.acc_id); 
+            index > -1 && ans.splice(index,1);
+        }
+    }
+    if (ans.length < r.length) {
+        walletStore.setStore('inviteUsers/invite_success',ans);
+    }
+    STATE.inviteUsers = ans;
+    forelet.paint(STATE);
+});
+
+// 兑换好友邀请码成功
+walletStore.register('inviteUsers/convert_invite',(r) => {
+    const ans = depCopy(r);
+    const userInfoMap = store.getStore('userInfoMap',new Map());
+    if (userInfoMap.size > 0) { 
+        for (const v of userInfoMap.values()) {
+            const index = ans.indexOf(v.acc_id); 
+            index > -1 && ans.splice(index,1);
+        }
+    }
+
+    if (ans.length < r.length) {
+        walletStore.setStore('inviteUsers/convert_invite',ans);
+    }
+    STATE.convertUser = ans;
+    forelet.paint(STATE);
 });

@@ -19,13 +19,13 @@ import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GroupArray, GroupU
 import { getGroupUserLink } from '../../../server/data/rpc/group.p';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { genUuid, getGidFromGuid } from '../../../utils/util';
-import { getFriendHistory, getMyGroupHistory } from '../data/initStore';
 import * as store from '../data/store';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
 import { exitGroup } from '../logic/logic';
 import * as subscribedb from '../net/subscribedb';
 import { walletSignIn } from './init_1';
 import { initPush } from './receive';
+import { getFriendHistory, getMyGroupHistory } from './rpc';
 
 // ================================================ 导出
 
