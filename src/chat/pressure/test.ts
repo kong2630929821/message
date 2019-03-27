@@ -1,8 +1,7 @@
-import { getFriendHistory } from '../client/app/data/initStore';
 import * as store from '../client/app/data/store';
 import { UserType } from '../client/app/logic/autologin';
 import * as net_init from '../client/app/net/init';
-import { acceptFriend, applyFriend } from '../client/app/net/rpc';
+import { acceptFriend, applyUserFriend, getFriendHistory } from '../client/app/net/rpc';
 import { DEFAULT_ERROR_STR } from '../server/data/constant';
 import { GroupInfo } from '../server/data/db/group.s';
 import { GroupHistory, MSG_TYPE, UserHistory } from '../server/data/db/message.s';
@@ -10,7 +9,7 @@ import { Contact, UserInfo } from '../server/data/db/user.s';
 import { login } from '../server/data/rpc/basic.p';
 import { Result } from '../server/data/rpc/basic.s';
 import { agreeJoinGroup, createGroup, inviteUsers } from '../server/data/rpc/group.p';
-import { GroupAgree, GroupCreate, Invite, INVITE_TYPE, InviteArray } from '../server/data/rpc/group.s';
+import { GroupAgree, GroupCreate, Invite, InviteArray } from '../server/data/rpc/group.s';
 import { sendGroupMessage, sendUserMessage } from '../server/data/rpc/message.p';
 import { GroupSend, SendMsg, UserSend } from '../server/data/rpc/message.s';
 import { changeUserInfo } from '../server/data/rpc/user.p';
@@ -64,7 +63,7 @@ export class Test {
 
     // 添加好友
     public addFind(user: string) {
-        applyFriend(user, (r: Result) => {
+        applyUserFriend(user, (r: Result) => {
             if (r.r === 0) {
                 console.log('error!!!!!!!!!!!!已经是好友');
 

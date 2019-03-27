@@ -93,14 +93,22 @@ export const applyFriend = (user: string): Result => {
         friendLink.uuid = genUuid(uid, sid);
         friendLinkBucket.put(friendLink.uuid, friendLink);
     
-        curUser.friends.push(uid);
-        contactBucket.put(sid, curUser); // 添加好友到当前用户联系人表
+        curUser.friends.findIndex(item => item === uid) === -1 && curUser.friends.push(uid);
+        contactBucket.put(sid, curUser); // 添加官方账号到当前用户联系人表
+        const officialUsers = get_gmAccount(sid);
     
         const serUser = contactBucket.get(uid)[0];
-        serUser.friends.push(sid);
-        contactBucket.put(uid,serUser);  // 添加好友到官方账号联系人表
-        const SUID = CONSTANT.CUSTOMER_SERVICE;  // 好嗨客服账号
-        if (user === SUID.toString()) sendFirstWelcomeMessage(); // 好嗨客服发送第一条欢迎消息
+        serUser.friends.findIndex(item => item === sid) && serUser.friends.push(sid);
+        contactBucket.put(uid,serUser);  // 添加当前用户到官方账号联系人表
+        if (uid === CONSTANT.CUSTOMER_SERVICE) { // 好嗨客服发送第一条欢迎消息
+            sendFirstWelcomeMessage('我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^',CONSTANT.CUSTOMER_SERVICE); 
+
+        } else if (officialUsers.indexOf(uid) > -1) {
+            const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,UserInfo._$info.name);
+            const userinfo = userInfoBucket.get(uid)[0];  // 获取客服账号的信息
+            sendFirstWelcomeMessage(`您好，我是${userinfo.name}，很高兴为您服务`,uid); 
+        }
+
         result.r = 1;
 
         return result;
@@ -118,26 +126,25 @@ export const applyFriend = (user: string): Result => {
 /**
  * 客服发送的第一条欢迎消息
  */
-const sendFirstWelcomeMessage = () => {
+const sendFirstWelcomeMessage = (helloMsg:string,uid:number) => {
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE);
 
-    const SUID = CONSTANT.CUSTOMER_SERVICE;  // 客服账号
     const sid = getUid();
     const userHistory = new UserHistory();
     const userMsg = new UserMsg();
 
     userMsg.cancel = false;
-    userMsg.msg = '我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^';
+    userMsg.msg = helloMsg;
     userMsg.mtype = MSG_TYPE.TXT;
     userMsg.read = false;
     userMsg.send = false;
-    userMsg.sid = SUID;
+    userMsg.sid = uid;
     userMsg.time = Date.now();
     userHistory.msg = userMsg;
     
     const msgLock = new MsgLock();
-    msgLock.hid = genUserHid(sid, SUID);
+    msgLock.hid = genUserHid(sid, uid);
     // 这是一个事务
     msgLockBucket.readAndWrite(msgLock.hid, (mLock) => {
         mLock[0] === undefined ? (msgLock.current = 0) : (msgLock.current = genNextMessageIndex(mLock[0].current));
@@ -151,12 +158,12 @@ const sendFirstWelcomeMessage = () => {
     const sendMsg = new SendMsg();
     sendMsg.code = 1;
     sendMsg.last = msgLock.current;
-    sendMsg.rid = SUID;
+    sendMsg.rid = uid;
     const buf = new BonBuffer();
     sendMsg.bonEncode(buf);
     const mqttServer = env.get('mqttServer');
     mqttPublish(mqttServer, true, QoS.AtMostOnce, sid.toString(), buf.getBuffer());
-    console.log(`from ${SUID} to ${sid}, message is : ${JSON.stringify(sendMsg)}`);
+    console.log(`from ${uid} to ${sid}, message is : ${JSON.stringify(sendMsg)}`);
 };
 
 /**
@@ -444,15 +451,17 @@ export const get_gmAccount = (uid:number): number[] => {
 
     const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
     const res = [];   
-    let iter = levelBucket.iter(null);
-    console.log('==========================get_gmAccount',iter);
+    const iter = levelBucket.iter(5);
+    let item;
     do {
-        iter = iter.next();
-        console.log('==========================get_gmAccount',iter);
-        res.push(iter[0]);
+        item = iter.next();        
+        console.log('==========================get_gmAccount',item,res);
+        if (item && item[1].level === VIP_LEVEL.VIP5) {
+            res.push(item[0]);
+        }
 
-    }while (!iter);
-    
+    }while (item);
+   
     return res;
 };
 

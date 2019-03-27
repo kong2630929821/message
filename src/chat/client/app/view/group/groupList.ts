@@ -8,17 +8,11 @@ import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { Contact } from '../../../../server/data/db/user.s';
-import { applyJoinGroup } from '../../../../server/data/rpc/group.p';
-import { Logger } from '../../../../utils/logger';
 import * as store from '../../data/store';
 import { rippleShow } from '../../logic/logic';
-import { clientRpcFunc } from '../../net/init';
+import { applyToGroup } from '../../net/rpc';
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
 export const forelet = new Forelet();
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
 
 export class GroupListt extends Widget {
     public ok:() => void;
@@ -52,16 +46,15 @@ export class GroupListt extends Widget {
             popNewMessage('请输入群聊ID');
            
         } else {
-            clientRpcFunc(applyJoinGroup, this.props.inputGid, ((r) => {
-                logger.debug('===========主动添加群聊返回',r);
+            applyToGroup(this.props.inputGid).then(() => {
+                popNewMessage('发送成功');
+            },(r) => {
                 if (r.r === -2) {
                     popNewMessage('您申请的群不存在');
                 } else if (r.r === -1) {
                     popNewMessage('您已经是该群的成员');
-                } else {
-                    popNewMessage('发送成功');
                 }
-            }));
+            });
         }
 
     }

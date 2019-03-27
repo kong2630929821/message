@@ -11,7 +11,7 @@ import { GROUP_STATE, GroupInfo, GroupUserLink } from '../../../../server/data/d
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import {  GroupUserLinkArray, Result } from '../../../../server/data/rpc/basic.s';
-import { applyJoinGroup, getGroupUserLink, updateGroupInfo, userExitGroup } from '../../../../server/data/rpc/group.p';
+import { getGroupUserLink, updateGroupInfo, userExitGroup } from '../../../../server/data/rpc/group.p';
 import { NewGroup } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGroupHid } from '../../../../utils/util';
@@ -19,6 +19,7 @@ import * as store from '../../data/store';
 import { getGroupAvatar, INFLAG, rippleShow } from '../../logic/logic';
 import { selectImage } from '../../logic/native';
 import { clientRpcFunc } from '../../net/init';
+import { applyToGroup } from '../../net/rpc';
 import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ================================================ 导出
@@ -28,7 +29,7 @@ const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
 export class GroupInfos extends Widget {
-    public ok:() => void;
+    public ok:(fg:boolean) => void;
     public props:Props;
     public bindCB: any;
     constructor() {
@@ -63,16 +64,16 @@ export class GroupInfos extends Widget {
         this.props.isGroupOpVisible = false;
         this.props.editable = false;
         gid = this.props.gid;
+        const uid = store.getStore('uid');
         const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
-        // 如果群已被解散退出该页面
-        if (isNaN(ginfo.state) || ginfo.state === GROUP_STATE.DISSOLVE) {
-            this.goBack(); 
+        // 群已经解散或已被踢出群
+        if ((!isNaN(ginfo.state) && ginfo.state === GROUP_STATE.DISSOLVE) || (ginfo.memberids && ginfo.memberids.indexOf(uid) < 0)) {
+            this.goBack(true); 
         }
         this.props.groupInfo = ginfo;
         this.props.groupAlias = depCopy(ginfo.name);
         this.props.avatar = getGroupAvatar(this.props.gid) || '../../res/images/user_avatar.png';
         
-        const uid = store.getStore('uid');
         this.props.members = this.props.groupInfo.memberids || [];
         if (uid === this.props.groupInfo.ownerid) {
             this.props.isOwner = true;
@@ -95,8 +96,8 @@ export class GroupInfos extends Widget {
         store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
     }
     
-    public goBack() {
-        this.ok && this.ok();
+    public goBack(fg:boolean = false) {
+        this.ok && this.ok(fg);
     }
 
     // 动画效果执行
@@ -162,7 +163,7 @@ export class GroupInfos extends Widget {
                         console.log('========deleteGroup',r);
                         if (r.r === 1) { // 退出成功关闭当前页面
                             popNewMessage('退出群组成功');
-                            this.goBack();
+                            this.goBack(true);
                         } else {
                             popNewMessage('群主不能退出');
                         }
@@ -324,14 +325,11 @@ export class GroupInfos extends Widget {
      * 申请加入群组
      */
     public applyGroup() {
-        clientRpcFunc(applyJoinGroup, this.props.gid, ((r) => {
-            logger.debug('===========主动添加群聊返回',r);
-            if (r.r === -2) {
-                popNewMessage('您申请的群不存在');
-            } else if (r.r === -1) {
-                popNewMessage('您已经是该群的成员');
-            }
-        }));
+        applyToGroup(this.props.gid).then(() => {
+            popNewMessage('发送成功');
+        },(r) => {
+            popNewMessage('申请入群失败');
+        });
     }
 }
 

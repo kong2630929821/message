@@ -123,7 +123,6 @@ export class Contact extends SpecialWidget {
 
     // 打开更多功能
     public getMore() {
-        // popNew3('earn-client-app-view-activity-myInviteUsers');
         if (this.props.isLogin) {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();

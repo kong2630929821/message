@@ -9,7 +9,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
 import { INFLAG, rippleShow } from '../../logic/logic';
-import { applyFriend as applyUserFriend, getUsersBasicInfo } from '../../net/rpc';
+import { applyUserFriend, getUsersBasicInfo } from '../../net/rpc';
 
 // ================================================ 导出
 
@@ -41,7 +41,7 @@ export class ApplyUser extends Widget {
     // 加好友
     public agreenBtn(e:any) {
         this.props.isagree = true;
-        applyUserFriend(this.props.accId,() => {
+        applyUserFriend(this.props.accId).then(() => {
             // 我邀请的好友
             const invite = walletStore.getStore('inviteUsers').invite_success;
             const index = invite.findIndex(item => item === this.props.accId);

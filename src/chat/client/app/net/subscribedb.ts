@@ -12,7 +12,7 @@ import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../se
 import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 import { watchAccountGenerator, watchAddressInfo, watchAnnounceHistory, watchContact,watchFriendLink, watchGroupHistory, watchGroupInfo, watchGroupUserLink,watchMsgLock, watchUserCredential, watchUserHistory, watchUserInfo } from '../../../server/data/rpc/dbWatcher.p';
 import * as store from '../data/store';
-import { clientRpcFunc, subscribe } from './init';
+import { clientRpcFunc, subscribe, unSubscribe } from './init';
 
 // ================================================================= 导出
 
@@ -22,6 +22,13 @@ import { clientRpcFunc, subscribe } from './init';
  */
 export const subscribeGroupInfo = (gid: number,cb) => {
     subscribeTable(watchGroupInfo,'gid',gid,DEFAULT_ERROR_NUMBER,GroupInfo,'groupInfoMap',cb);
+};
+/**
+ * 取消订阅群组信息
+ * @param gid group id
+ */
+export const unSubscribeGroupInfo = (gid: number) => {
+    unSubscribeTable(gid,GroupInfo);
 };
 
 /**
@@ -70,6 +77,14 @@ export const subscribeMsgLock = (hid: string, cb) => {
  */
 export const subscribeUserInfo = (uid: number, cb) => {
     subscribeTable(watchUserInfo,'uid',uid,DEFAULT_ERROR_NUMBER,UserInfo,'userInfoMap',cb);        
+};
+
+/**
+ * 取消订阅用户本人的基本信息
+ * @param uid user id
+ */
+export const unSubscribeUserInfo = (uid: number) => {
+    unSubscribeTable(uid,UserInfo);        
 };
 
 /**
@@ -139,4 +154,15 @@ const subscribeTable = (method:string, keyName:string, keyValue:any, defaultKeyV
         store.setStore(`${mapName}/${keyValue}`,r);
         cb && cb(r);
     };
+};
+
+/**
+ * 一个通用的取消订阅数据结构
+ * @param keyValue value 
+ * @param struct struct 
+ */
+const unSubscribeTable = (keyValue:any, struct:any) => {
+    const bonKeyValue = ab2hex(new BonBuffer().write(keyValue).getBuffer());
+    const topic =  `file.${struct._$info.name}.${bonKeyValue}`;
+    unSubscribe(topic);
 };

@@ -12,7 +12,7 @@ import { depCopy, genGroupHid, genGuid, getGidFromHincid } from '../../../utils/
 import * as store from '../data/store';
 import { timestampFormat } from '../logic/logic';
 import { clientRpcFunc } from '../net/init';
-import { inviteUserToGroup } from '../net/rpc';
+import { applyToGroup } from '../net/rpc';
 import { EMOJIS } from '../widget/emoji/emoji';
 
 /**
@@ -92,9 +92,13 @@ export const getBaseInfo = (gid,cb) => {
 
 // 邀请用户加入群组
 export const invitePersonToGroup = (gid,cb) => {
-    inviteUserToGroup(gid,(r) => {
+    applyToGroup(gid).then(() => {
         cb(null,{
-            flag: r && r.r === 1 
+            flag: true 
+        });
+    },() => {
+        cb(null,{
+            flag: false
         });
     });
 };
