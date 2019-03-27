@@ -16,8 +16,9 @@ import { Logger } from '../../../../utils/logger';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { copyToClipboard, getFriendAlias, getUserAvatar, INFLAG, rippleShow } from '../../logic/logic';
-import { clientRpcFunc, unSubscribe } from '../../net/init';
-import { applyFriend, delFriend as delUserFriend, getUsersBasicInfo } from '../../net/rpc';
+import { clientRpcFunc } from '../../net/init';
+import { applyUserFriend, delFriend as delUserFriend, getUsersBasicInfo } from '../../net/rpc';
+import { unSubscribeUserInfo } from '../../net/subscribedb';
 
 // tslint:disable-next-line:no-reserved-keywords
 declare var module;
@@ -26,7 +27,7 @@ const logger = new Logger(WIDGET_NAME);
 
 // ================================================ 导出
 export class UserDetail extends Widget {
-    public ok: () => void;
+    public ok: (fg:boolean) => void;
     public props: Props;
     constructor() {
         super();
@@ -127,8 +128,8 @@ export class UserDetail extends Widget {
     // 添加好友
     public addUser() {
         this.pageClick();
-        applyFriend(this.props.uid.toString(), (r: Result) => {
-            if (r.r === 0) {
+        applyUserFriend(this.props.uid.toString()).then((r) => {
+            if (r === 0) {
                 popNewMessage(`${this.props.uid}已经是你的好友`);
             }
         });
@@ -166,7 +167,7 @@ export class UserDetail extends Widget {
             case 2: // 删除联系人
                 popNew('chat-client-app-widget-modalBox-modalBox', { title: '删除联系人', content: `将联系人${this.props.userInfo.name}删除，同时删除聊天记录`, sureText: '删除' }, () => {
                     this.delFriend(this.props.uid);
-                    this.goBack();
+                    this.goBack(true);
                 });
                 break;
             default:
@@ -178,8 +179,8 @@ export class UserDetail extends Widget {
         popNew('chat-client-app-widget-bigImage-bigImage',{ img: this.props.avatar });
     }
 
-    public goBack() {
-        this.ok();
+    public goBack(fg:boolean= false) {
+        this.ok && this.ok(fg);
     }
 
     /**
@@ -188,8 +189,9 @@ export class UserDetail extends Widget {
      */
     public delFriend(uid: number) {
         delUserFriend(uid, (r: Result) => {
-            if (r && r.r === 1) { // 删除成功取消订阅好友消息并清空本地数据
-                unSubscribe(uid.toString());
+            // 删除成功取消订阅好友消息并清空本地数据
+            if (r && r.r === 1) { 
+                unSubscribeUserInfo(uid);  // 取消订阅用户信息
 
                 const sid = store.getStore('uid');
                 const userChatMap = store.getStore('userChatMap', new Map());

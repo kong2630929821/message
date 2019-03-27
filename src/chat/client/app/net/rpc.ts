@@ -4,23 +4,23 @@
 // ================================================ 导入
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { GroupInfo } from '../../../server/data/db/group.s';
-import { GroupMsg, MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
-import { FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+import { MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
+import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
-import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
+import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 // tslint:disable-next-line:max-line-length
-import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, inviteUserToNPG } from '../../../server/data/rpc/group.p';
+import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
 import { getGroupHistoryCursor, getUserHistoryCursor, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, HistoryCursor, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
-import { acceptFriend as acceptUserFriend, applyFriend as applyUserFriend, delFriend as delUserFriend, get_gmAccount } from '../../../server/data/rpc/user.p';
+import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, get_gmAccount, set_gmAccount } from '../../../server/data/rpc/user.p';
 import { UserAgree } from '../../../server/data/rpc/user.s';
 import { genGroupHid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
-import { clientRpcFunc, subscribe } from './init';
+import { clientRpcFunc } from './init';
 
 // ================================================ 导出
 
@@ -243,15 +243,32 @@ export const getOfficialUser = (uid:number) => {
         }
     });
 };
+
+/**
+ * 设置某个账号为游戏客服
+ */
+export const setGameServer = (uid:number) => {
+    clientRpcFunc(set_gmAccount,uid,(r) => {
+        console.log('设置客服账号',uid,r);
+    });
+};
+
 /**
  * 申请添加rid为好友
  * @param rid reader id
  * @param cb callback
  */
-export const applyFriend = (user: string, cb: (r: Result) => void) => {
-    clientRpcFunc(applyUserFriend, user, (r: Result) => {
-        cb(r);
+export const applyUserFriend = (user: string) => {
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(applyFriend, user, (r: Result) => {
+            if (r && (r.r === 1 || r.r === 0)) {
+                resolve(r.r);
+            } else {
+                reject(r);
+            }
+        });
     });
+    
 };
 
 /**
@@ -293,12 +310,46 @@ export const createGroup = (name:string, avatar:string, note:string, needAgree:b
     });
 };
 
-// 邀请当前用户进入游戏群（无需同意）
-export const inviteUserToGroup = (gid:number, cb:(r:Result) => void) => {
-    
-    clientRpcFunc(inviteUserToNPG, gid, (r) => {
-        cb(r);
+// 用户申请入群
+export const applyToGroup = (gid:number) => {
+    const sid = store.getStore('uid');
+    const contact = store.getStore(`contactMap/${sid}`,new Contact());
+
+    return new Promise((resolve,reject) => {
+        if (contact.group.indexOf(gid) === -1) {
+            clientRpcFunc(applyJoinGroup, gid, ((r) => {
+                if (r && r.r === 1) {
+                    resolve();
+                } else {
+                    reject(r);
+                }
+                
+            }));
+        } else {
+            resolve();
+        }
     });
+    
+};
+
+/**
+ * 获取群组信息
+ */
+export const getGroupBasicInfo = (gids:number[]) => {
+    const groups = new GetGroupInfoReq();
+    groups.gids = gids;
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(getGroupsInfo, groups, (r: GroupArray) => {
+            console.log('获取群组信息成功',r);
+            if (r && r.arr.length > 0) {
+                resolve(r.arr);
+            } else {
+                reject(r);
+            }
+        });
+    });
+   
 };
 
 export const deleteGroupMember = () => {
@@ -342,12 +393,6 @@ export const addAdministror = (uid: number) => {
     });
 };
 
-export const applyGroup = (gid: number) => {
-    clientRpcFunc(applyJoinGroup, gid, (r) => {
-        console.log(r);
-    });
-};
-
 export const acceptUserJoin = (uid: number, accept: boolean) => {
     const ga = new GroupAgree();
     ga.agree = accept;
@@ -359,15 +404,6 @@ export const acceptUserJoin = (uid: number, accept: boolean) => {
     });
 };
 
-export const getGroupInfo = () => {
-    const groups = new GetGroupInfoReq();
-    groups.gids = [11111];
-
-    clientRpcFunc(getGroupsInfo, groups, (r) => {
-        console.log(r);
-    });
-};
-
 export const friendLinks = (uuid: string) => {
     const x = new GetFriendLinksReq();
     x.uuid = [uuid];
@@ -375,54 +411,4 @@ export const friendLinks = (uuid: string) => {
     clientRpcFunc(getFriendLinks, x, (r) => {
         console.log(r);
     });
-};
-
-(<any>self).friendLinks = (uuid: string) => {
-    friendLinks(uuid);
-};
-
-(<any>self).subscribeGroupMsg = (topicName: string) => {
-    subscribe(topicName, GroupMsg, (r) => {
-        // TODO:
-    });
-};
-
-(<any>self).getGroupInfo = () => {
-    getGroupInfo();
-};
-
-(<any>self).login = (uid: number, passwdHash: string) => {
-    login(uid, passwdHash, (r) => {
-        console.log(r);
-    });
-};
-
-(<any>self).deleteGroupMember = () => {
-    deleteGroupMember();
-};
-
-(<any>self).deleteGroup = () => {
-    deleteGroup();
-};
-
-(<any>self).sendGroupMsg = () => {
-    sendGroupMsg();
-};
-
-(<any>self).sendMessage = (uid: number, msg: string) => {
-    sendUserMsg(uid, msg, (r) => {
-        console.log(r);
-    });
-};
-
-(<any>self).addAdministror = (uid: number) => {
-    addAdministror(uid);
-};
-
-(<any>self).applyGroup = (gid: number) => {
-    applyGroup(gid);
-};
-
-(<any>self).acceptUserJoin = (uid: number, accept: boolean) => {
-    acceptUserJoin(uid, accept);
 };

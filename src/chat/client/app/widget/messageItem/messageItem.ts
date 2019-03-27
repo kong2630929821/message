@@ -76,9 +76,13 @@ export class MessageItem extends Widget {
         }
     }
 
-    public userDetail() {
+    public userDetail(e:any) {
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            popNew('chat-client-app-view-info-userDetail',{ uid:this.props.message.sid, inFlag: INFLAG.chat_user });
+            popNew('chat-client-app-view-info-userDetail',{ uid:this.props.message.sid, inFlag: INFLAG.chat_user },(r) => {
+                if (r) {
+                    notify(e.node,'ev-delelte-user',null);
+                }
+            });
         } else {
             const gid = getGidFromHincid(this.props.hIncId);
             const ownerid = store.getStore(`groupInfoMap/${gid}`,new GroupInfo()).ownerid;

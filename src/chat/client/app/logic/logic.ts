@@ -3,13 +3,11 @@
  */
 // =====================================导入
 import { uploadFileUrlPrefix } from '../../../../app/config';
-import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
-import { unSubscribe } from '../net/init';
 
 // =====================================导出
 
@@ -83,8 +81,6 @@ export const getFriendAlias = (rid:number) => {
  * 用户退出群组后取消订阅清空本地数据
  */
 export const exitGroup = (gid:number) => {
-    unSubscribe(`ims/group/msg/${gid}`);
-
     const groupChatMap = store.getStore('groupChatMap',new Map());
     groupChatMap.delete(genGroupHid(gid)); // 删除聊天记录
     store.setStore('groupChatMap',groupChatMap);
@@ -101,7 +97,7 @@ export const exitGroup = (gid:number) => {
     store.setStore(`lastRead`, lastRead);
 
     const gInfoMap = store.getStore(`groupInfoMap`,new Map());    
-    gInfoMap.delete(gid);  // 删除群组信息
+    gInfoMap.delete(gid.toString());  // 删除群组信息
     store.setStore(`groupInfoMap`, gInfoMap);
 };
 

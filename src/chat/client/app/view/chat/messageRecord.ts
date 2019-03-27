@@ -6,9 +6,11 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias, getGroupAvatar, getUserAvatar, timestampFormat } from '../../logic/logic';
+import { getUsersBasicInfo } from '../../net/rpc';
 // ================================================ 导出
 
 export class MessageRecord extends Widget {
@@ -39,6 +41,15 @@ export class MessageRecord extends Widget {
 
         } else {// 单聊
             this.props.name = getFriendAlias(this.props.rid).name;
+            if (!this.props.name) {  // 获取不到用户名
+                getUsersBasicInfo([this.props.rid]).then((r: UserArray) => {
+                    this.props.name = r.arr[0].name;
+                    store.setStore(`userInfoMap/${this.props.rid}`,r.arr[0]);
+                    this.paint();
+                },(r) => {
+                    console.error('获取用户信息失败', r);
+                });
+            }
             this.props.avatar = getUserAvatar(this.props.rid) || '../../res/images/user_avatar.png';
             hid = genUserHid(sid,this.props.rid);
 

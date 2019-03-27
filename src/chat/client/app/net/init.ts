@@ -184,15 +184,17 @@ const updateGroup = (r: Contact, uid: number) => {
 
     // 主动或被动退出的群组
     delGroup.forEach((gid: number) => {
+        unSubscribe(`ims/group/msg/${gid}`);  // 退订群聊消息
+        subscribedb.unSubscribeGroupInfo(gid); // 退订群信息
         exitGroup(gid);
     });
 
     // 订阅我已经加入的群组基础信息
     addGroup.forEach((gid) => {
-        getMyGroupHistory(gid); // 获取群组离线消息
+        // getMyGroupHistory(gid); 
         subscribe(`ims/group/msg/${gid}`, SendMsg, (r: SendMsg) => {
             if (r.code === 1) {
-                getMyGroupHistory(gid);
+                getMyGroupHistory(gid); // 获取群组离线消息
             }
         });
         subscribedb.subscribeGroupInfo(gid, () => {

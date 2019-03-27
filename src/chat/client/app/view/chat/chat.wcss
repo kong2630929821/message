@@ -30,7 +30,7 @@
 .temporaryBox{
     height:120px;
     background:rgba(255,255,255,1);
-    margin-top: 20px;
+    margin: 20px 0;
     display: flex;
     align-items: center;
     font-size: 28px;

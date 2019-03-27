@@ -12,7 +12,7 @@ import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
-import { depCopy, genUuid, getIndexFromHIncId } from '../../../../utils/util';
+import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias, INFLAG, timestampFormat } from '../../logic/logic';
@@ -40,10 +40,10 @@ export class Chat extends Widget {
         this.props.onRadio = null;
 
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            this.props.hid = store.getStore(`groupInfoMap/${this.props.id}`,{ hid:'' }).hid;
+            this.props.hid = genGroupHid(this.props.id);
             this.initGroup();
         } else {
-            this.props.hid = store.getStore(`friendLinkMap/${genUuid(this.props.sid, this.props.id)}`,{ hid:'' }).hid;
+            this.props.hid = genUserHid(this.props.sid, this.props.id);
             this.initUser();
         }
        
@@ -79,6 +79,7 @@ export class Chat extends Widget {
         const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.USER });
         lastRead.msgId = hincId;
         store.setStore(`lastRead/${this.props.hid}`,lastRead);
+
     }
 
     /**
@@ -104,16 +105,11 @@ export class Chat extends Widget {
         lastRead.msgId = hincId;
         store.setStore(`lastRead/${this.props.hid}`,lastRead);
 
-        // 是否已被踢出群或群已经解散
-        if (isNaN(gInfo.state) || gInfo.state === GROUP_STATE.DISSOLVE) {
-            popNewMessage('该群已被解散');
+        // 群不存在 群已经解散 已被踢出群
+        if (isNaN(gInfo.state) || (!isNaN(gInfo.state) && gInfo.state === GROUP_STATE.DISSOLVE) || (gInfo.memberids && gInfo.memberids.indexOf(this.props.sid) < 0)) {  
             this.deleteRecord();
             this.goBack();
-        } else if (gInfo.memberids && gInfo.memberids.indexOf(this.props.sid) < 0) {
-            popNewMessage('您已离开该群');            
-            this.deleteRecord();
-            this.goBack();
-        }
+        } 
     }
 
     public firstPaint() {
@@ -122,6 +118,7 @@ export class Chat extends Widget {
             this.getScrollElem().classList.add('scrollSmooth');   // 进入页面时需要快速定位，之后需要平滑滚动
             getRealNode(this.tree).style.visibility = 'visible';  // 滚动完成后才显示页面 
         }, 100);
+
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.register(`groupChatMap/${this.props.hid}`,this.bindCB);
             store.register(`groupInfoMap/${this.props.id}`,this.bindCB);
@@ -338,7 +335,11 @@ export class Chat extends Widget {
      * 查看群详细信息
      */
     public groupDetail() {
-        popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag:INFLAG.chat_group });
+        popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag:INFLAG.chat_group },(r) => {
+            if (r) {
+                this.goBack();
+            }
+        });
     }
 
     /**

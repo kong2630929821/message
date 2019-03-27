@@ -8,16 +8,10 @@ import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { SendMsg } from '../../../../server/data/rpc/message.s';
-import { Logger } from '../../../../utils/logger';
-import { getFriendHistory } from '../../data/initStore';
 import * as store from '../../data/store';
 import { init, subscribe as subscribeMsg } from '../../net/init';
-import { login as userLogin } from '../../net/rpc';
+import { getFriendHistory, login as userLogin } from '../../net/rpc';
 
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
 // ================================================ 导出
 export class Login extends Widget {
     constructor() {
@@ -61,11 +55,10 @@ export class Login extends Widget {
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 init(r.uid);
                 popNew('chat-client-app-view-chat-contact', { sid: this.props.uid });
-                subscribeMsg(this.props.uid.toString(), SendMsg, (v: SendMsg) => {
+                subscribeMsg(this.props.uid.toString(), SendMsg, (v: SendMsg) => {   // 订阅发送给我的消息
                     if (v.code === 1) {
                         getFriendHistory(v.rid);
                     }
-                    // updateUserMessage(v.msg.sid, v);
                 });
             }
         });
@@ -81,5 +74,3 @@ export class Login extends Widget {
     }
 
 }
-
-// ================================================ 本地

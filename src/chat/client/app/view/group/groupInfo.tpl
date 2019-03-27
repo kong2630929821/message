@@ -1,5 +1,5 @@
 <div w-class="new-page" on-tap="pageClick" class="new-page" on-scroll="scrollPage" id="groupInfo">
-    <div w-class="top-main-wrap" ev-next-click="handleMoreGroup" ev-back-click="goBack">
+    <div w-class="top-main-wrap" ev-next-click="handleMoreGroup" ev-back-click="goBack(false)">
         <div style="position:relative;min-height: 128px;">
             {{if it.inFlag != 3}}
             <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>

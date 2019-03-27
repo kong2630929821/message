@@ -12,7 +12,6 @@ import { AddressInfo } from '../db/extra.s';
 import { GroupInfo, GroupUserLink } from '../db/group.s';    
 import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../db/message.s';
 import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../db/user.s';
-import { iterTable } from '../util';
 
 declare var env: Env;
 // ================================================================= 导出

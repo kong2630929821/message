@@ -9,7 +9,7 @@ import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteA
 
 import { Env } from '../../../../pi/lang/env';
 import { BonBuffer } from '../../../../pi/util/bon';
-import { mqttPublish, QoS, setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
+import { mqttPublish, QoS, setMqttTopic, unsetMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { Logger } from '../../../utils/logger';
 import { delGidFromApplygroup, delValueFromArray, genGroupHid, genGuid, genHIncId, genNewIdFromOld, genNextMessageIndex, getGidFromGuid, getUidFromGuid } from '../../../utils/util';
@@ -51,22 +51,32 @@ export const applyJoinGroup = (gid: number): Result => {
 
         return res;
     }
-    // 群成员是否达到上限
-    const max_members = getGroupMaxMembers(gInfo.level);
-    if (gInfo.memberids.length >= max_members) {
-        res.r = GROUP_MEMBERS_OVERLIMIT;
-
-        return res;
-    }
+    // 当前用户是否已经在群里
     if (gInfo.memberids.indexOf(uid) > -1) {
         res.r = -1;
         logger.debug(`user: ${uid}, is exist in group: ${gInfo.name}`);
 
         return res;
     }
+    // 群成员是否达到上限  
+    const max_members = getGroupMaxMembers(gInfo.level);
+    if (gInfo.memberids.length >= max_members) {
+        res.r = GROUP_MEMBERS_OVERLIMIT;
+
+        return res;
+    }
+    
     // 加群是否需要管理员同意,不需要同意则直接进群
     if (!gInfo.need_agree) {
-        res.r = inviteUserToNPG(gid).r;
+        // 添加该用户的申请信息
+        gInfo.applyUser.findIndex(item => item === uid) === -1 && gInfo.applyUser.push(uid);
+        groupInfoBucket.put(gid,gInfo);
+        const agree = new GroupAgree();
+        agree.gid = gid;
+        agree.uid = uid;
+        agree.agree = true;
+        const r = acceptUser(agree);
+        res.r = r.r;
 
         return res;
     }
@@ -303,44 +313,6 @@ export const inviteUsers = (invites: InviteArray): Result => {
     }
         
     res.r = 1;
-
-    return res;
-};
-
-/**
- * 邀请当前用户进入无需同意的群组
- */
-// #[rpc=rpcServer]
-export const inviteUserToNPG = (gid:number) => {
-    const groupInfoBucket = getGroupInfoBucket();
-    const res = new Result();
-
-    const gInfo = groupInfoBucket.get<number, [GroupInfo]>(gid)[0];
-    console.log('inviteUserToNPG groupInfo: ',gInfo);
-    const rid = getUid();
-    // 判断用户是否已经在当前群中
-    if (gInfo.memberids.indexOf(rid) > -1) {
-        logger.debug('be invited user: ', rid, 'is exist in this group:', gid);
-        res.r = 0;
-        
-        return res;
-    }
-    // 群成员是否达到上限
-    const max_members = getGroupMaxMembers(gInfo.level);
-    if (gInfo.memberids.length >= max_members) {
-        res.r = GROUP_MEMBERS_OVERLIMIT;
-
-        return res;
-    }
-    // 添加该用户的申请信息
-    gInfo.applyUser.findIndex(item => item === rid) === -1 && gInfo.applyUser.push(rid);
-    groupInfoBucket.put(gid,gInfo);
-    const agree = new GroupAgree();
-    agree.gid = gid;
-    agree.uid = rid;
-    agree.agree = true;
-    const r = acceptUser(agree);
-    res.r = r.r;
 
     return res;
 };
@@ -851,11 +823,11 @@ export const dissolveGroup = (gid: number): Result => {
             logger.debug('dissolveGroup uid: ', uid, 'contact', contact);
         });
         // 删除群主题
-        // const mqttServer = getEnv().getNativeObject<ServerNode>('mqttServer');
-        // const groupTopic = `ims/group/msg/${gid}`;
-        // console.log('删除群主题！！！！！！！！！！！！！！', groupTopic);
-        // unsetMqttTopic(mqttServer, groupTopic);
-        // console.log('删除群主题！！！！！！！！！！！！！！ok');
+        const mqttServer = env.get('mqttServer');
+        const groupTopic = `ims/group/msg/${gid}`;
+        console.log('删除群主题！！！！！！！！！！！！！！', groupTopic);
+        unsetMqttTopic(mqttServer, groupTopic);
+        console.log('删除群主题！！！！！！！！！！！！！！ok');
         res.r = 1;
 
         return res;
