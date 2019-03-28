@@ -45,7 +45,7 @@ export class SetGroupChat extends Widget {
         super.create();
         const sid = store.getStore('uid').toString();
         this.state = store.getStore('contactMap',new Contact()).get(sid);
-        this.props.serviceIDs = store.getStore('flags/officialUsers') || [];
+        this.props.serviceIDs = store.getStore('flags').officialUsers || [];
     }
     
     // 返回上一页

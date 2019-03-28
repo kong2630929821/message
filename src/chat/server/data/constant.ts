@@ -43,6 +43,7 @@ export const OPENBOX_GROUP = 10002; // 开宝箱官方群
 export const LOLGUESS_GROUP = 10003; // LOL竞猜官方群
 export const FOMOSPORTS_GROUP = 10004; // fomosports官方群
 export const  CRYPTOFISHING_GROUP = 10005; // crypto fishing官方群
+export const HAOHAI_APPID = '101';  // 好嗨的appid
 
 // ---------------------- 权限等级 ---------------------
 // 普通用户 VIP0

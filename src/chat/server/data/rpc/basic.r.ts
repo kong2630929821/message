@@ -16,6 +16,7 @@ import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, 
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
 import { applyFriend, set_gmAccount } from './user.r';
+import { GmAccount } from './user.s';
 
 declare var env: Env;
 
@@ -180,7 +181,10 @@ export const login = (user: UserType): UserInfo => {
     if (loginReq.uid !== SUID) {
         applyFriend(SUID.toString());
     } else {
-        set_gmAccount(userInfo.uid);  // 设置为客服账号
+        const gmAcc = new GmAccount();
+        gmAcc.uid = userInfo.uid;
+        gmAcc.appId = CONSTANT.HAOHAI_APPID;
+        set_gmAccount(gmAcc);  // 设置为客服账号
     }
 
     return userInfo;

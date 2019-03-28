@@ -131,14 +131,32 @@ export const sendImage = (e:any) => {
         imagePicker.getContent({
             quality:70,
             success(buffer:ArrayBuffer) {
+                const value = {
+                    compressImg:'',
+                    originalImg:''
+                };
                 imgResize(buffer,(res) => {
                     uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
-                        console.log('选择的照片',imgUrlSuf);
-                        notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
+                        console.log('选择的照片压缩图',imgUrlSuf);
+                        value.compressImg = imgUrlSuf;
+
+                        // 再获取一次原图
+                        imagePicker.getContent({
+                            quality:100,
+                            success(buffer1:ArrayBuffer) {
+                                uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
+                                    console.log('选择的照片原图',imgUrlSuf1);
+                                    value.originalImg = imgUrlSuf1;
+                                    notify(e.node,'ev-send',{ value: JSON.stringify(value), msgType:MSG_TYPE.IMG });
+                                });
+                            }
+                        });
+
                     });
                 },600);
             }
         });
+        
     });
 };
 
@@ -152,10 +170,29 @@ export const sendPicture = (e:any) => {
         camera.getContent({
             quality:70,
             success(buffer:ArrayBuffer) {
-                uploadFile(arrayBuffer2File(buffer),(imgUrlSuf:string) => {
-                    console.log('拍摄的照片',imgUrlSuf);
-                    notify(e.node,'ev-send',{ value:`[${imgUrlSuf}]`, msgType:MSG_TYPE.IMG });
-                });
+                const value = {
+                    compressImg:'',
+                    originalImg:''
+                };
+                imgResize(buffer,(res) => {
+                    uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
+                        console.log('拍摄的照片压缩图',imgUrlSuf);
+                        value.compressImg = imgUrlSuf;
+
+                        // 再获取一次原图
+                        camera.getContent({
+                            quality:100,
+                            success(buffer1:ArrayBuffer) {
+                                uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
+                                    console.log('拍摄的照片原图',imgUrlSuf1);
+                                    value.originalImg = imgUrlSuf1;
+                                    notify(e.node,'ev-send',{ value: JSON.stringify(value), msgType:MSG_TYPE.IMG });
+                                });
+                            }
+                        });
+
+                    });
+                },600);
             }
         });
         

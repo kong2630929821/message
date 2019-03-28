@@ -11,7 +11,7 @@
             {{% ========================图片=========================}}
             {{elseif it.message.mtype == 2}}
             <div w-class="img-wrap" on-tap="openBigImage" on-longtap="openMessageRecall">
-                <widget w-tag="pi-ui-html" w-class="pi-html">{{it.message.msg}}</widget>
+                <widget w-tag="pi-ui-html" w-class="pi-html">{{it.message.msg.compressImg}}</widget>
                 <div w-class="imgCorner">
                     <span style="color:rgba(187, 229, 254, 1)">{{it.time}}</span>
                     {{if it.chatType == "user"}}
@@ -71,7 +71,7 @@
             {{% ========================图片=========================}}
             {{elseif it.message.mtype == 2}}
             <div w-class="img-wrap" on-tap="openBigImage">
-                <widget w-tag="pi-ui-html" w-class="pi-html">{{it.message.msg}}</widget>
+                <widget w-tag="pi-ui-html" w-class="pi-html">{{it.message.msg.compressImg}}</widget>
                 <div w-class="imgCorner">
                     <span style="color:rgba(187, 229, 254, 1)">{{it.time}}</span>
                 </div>

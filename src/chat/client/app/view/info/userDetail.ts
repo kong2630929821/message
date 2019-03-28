@@ -50,10 +50,10 @@ export class UserDetail extends Widget {
     public setProps(props: Json) {
         super.setProps(props);
         this.props.userInfo = {};
-        const officialUser = store.getStore('flags/officialUsers') || [];
+        const officialUser = store.getStore('flags').officialUsers || [];
         if (props.inFlag === INFLAG.newApply) {
             this.props.utilList = [{ utilText: '加入黑名单' }];
-        } else if (officialUser.indexOf(props.uid) > -1) {  // 官方账号不允许删除
+        } else if (officialUser.findIndex(item => item.uid === props.uid) > -1) {  // 官方账号不允许删除
             this.props.utilList = [
             { utilText: '修改备注' },
             { utilText: '清空聊天记录' }
@@ -255,9 +255,9 @@ export class UserDetail extends Widget {
         if (i === 0) {
             copyToClipboard(this.props.uid);
         } else if (i === 1) {
-            copyToClipboard(this.props.userInfo.wallet_addr);
+            copyToClipboard(this.props.userInfo.acc_id);
         } else {
-            copyToClipboard(this.props.userInfo.tel);
+            copyToClipboard(this.props.userInfo.tel || '未知');
         }
         this.props.isContactorOpVisible = false;
         this.paint();
