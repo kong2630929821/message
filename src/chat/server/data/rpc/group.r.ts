@@ -88,6 +88,36 @@ export const applyJoinGroup = (gid: number): Result => {
 };
 
 /**
+ * 用户申请加入游戏群组
+ * @param uid 游戏官方客服账号
+ */
+// #[rpc=rpcServer]
+export const applyJoinGameGroup = (uid:number):number => {
+    const contactBucket = new Bucket('file',Contact._$info.name);
+    const contact = contactBucket.get(uid)[0];
+    const gids = contact.myGroup;  // 游戏客服创建的游戏群组
+    if (gids && gids.length > 0) {
+        let fg = false; // 是否已经成功申请入群
+        let i = 0;
+        while (!fg || i < gids.length) {
+            const res = applyJoinGroup(gids[i]);  // 从第一个群开始加
+            if (res && res.r === 1) {
+                fg = true;
+            } else if (res && res.r === GROUP_MEMBERS_OVERLIMIT) {  // 如果群已经超过人数上限，则加入下一个群组
+                i++;
+            } else {  // 其他错误情况退出循环
+                break;
+            }
+        }
+        
+        return gids[i];
+
+    } else {
+        return 0;
+    }
+};
+
+/**
  * 用户主动退出群组
  * @param gid group number
  */

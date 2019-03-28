@@ -135,9 +135,9 @@ export class User extends Widget {
         if (i === 0) {
             copyToClipboard(this.props.sid);
         } else if (i === 1) {
-            copyToClipboard(this.props.info.wallet_addr);
+            copyToClipboard(this.props.info.acc_id);
         } else {
-            copyToClipboard(this.props.info.tel);
+            copyToClipboard(this.props.info.tel || '未知');
         }
         popNewMessage('复制成功');
     }

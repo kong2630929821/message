@@ -57,7 +57,7 @@ export class MessageRecord extends Widget {
             hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
             this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
             const officials = store.getStore('flags').officialUsers || [];
-            this.props.official = officials.indexOf(this.props.rid) > -1;
+            this.props.official = officials.findIndex(item => item.uid === this.props.rid) > -1;
         }
 
         // 计算有多少条新消息记录

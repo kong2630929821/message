@@ -38,7 +38,7 @@ export class InviteMember extends Widget {
         this.props.applyGroupMembers = [];
         const sid = store.getStore('uid').toString();
         this.state = store.getStore('contactMap',new Contact()).get(sid);
-        this.props.serviceIDs = store.getStore('flags/officialUsers') || [];
+        this.props.serviceIDs = store.getStore('flags').officialUsers || [];
     }
     
     public goBack() {

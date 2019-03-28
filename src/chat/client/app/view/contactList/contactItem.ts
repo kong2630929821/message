@@ -45,7 +45,7 @@ export class ContactItem extends Widget {
                 }
                 this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
                 const officials = store.getStore('flags').officialUsers || [];
-                this.props.official = officials.indexOf(this.props.id) > -1;
+                this.props.official = officials.findIndex(item => item.uid === this.props.id) > -1;
                 
             } else {
                 const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());

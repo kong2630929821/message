@@ -141,8 +141,8 @@ export class MessageItem extends Widget {
 
     // 点击查看大图
     public openBigImage() {
-        const url = this.props.message.msg.split('"')[1];
-        popNew('chat-client-app-widget-bigImage-bigImage',{ img: url });
+        const url = this.props.message.msg.compressImg.split('"')[1];
+        popNew('chat-client-app-widget-bigImage-bigImage',{ img: url,originalImg:this.props.message.msg.originalImg });
     }
 
     // 点击播放语音
@@ -221,9 +221,11 @@ const parseEmoji = (msg:any) => {
 
 // 转换图片;
 const parseImg = (msg:any) => {    
-    msg.msg = msg.msg.replace(/\[(\S+?)\]/ig, (match, url) => {
-        return `<img src="${uploadFileUrlPrefix}${url}" alt="img" class='imgMsg'></img>`;
-    });
+    const mess = JSON.parse(msg.msg);
+    msg.msg = {
+        compressImg: `<img src="${uploadFileUrlPrefix}${mess.compressImg}" alt="img" class='imgMsg'></img>`,
+        originalImg: uploadFileUrlPrefix + mess.originalImg
+    };
 
     return msg;
 };

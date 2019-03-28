@@ -5,7 +5,7 @@
 // ================================================ 导入
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
@@ -111,7 +111,7 @@ export class ManageItem extends Widget {
         const ownerid = this.props.groupInfo.ownerid;
         const uid = store.getStore('uid');
         if (ownerid === uid) {
-            popNew('chat-client-app-widget-modalBox-modalBox',{ content:'解散后，所有成员将被清出，该群将不存在。',style:'color:#F7931A' },
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox',{ content:'解散后，所有成员将被清出，该群将不存在。',style:'color:#F7931A' },
             () => {
                 logger.debug('dissolveGroup');
                 clientRpcFunc(dissolveGroup,this.props.gid,(r) => {

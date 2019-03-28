@@ -3,6 +3,7 @@
  */
 // =====================================导入
 import { uploadFileUrlPrefix } from '../../../../app/config';
+import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';

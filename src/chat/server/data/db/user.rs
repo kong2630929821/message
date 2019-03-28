@@ -124,5 +124,6 @@ struct FrontStoreData {
 #[primary=uid,db=file]
 struct UserLevel {
     uid: u32,
-    level: u8 // 权限等级 用户好友上限和群上限
+    level: u8, // 权限等级 用户好友上限和群上限
+    appId: Option<String>  // 每个游戏有一个唯一的ID 官方客服账号需要
 }

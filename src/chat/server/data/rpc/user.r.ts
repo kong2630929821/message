@@ -17,7 +17,7 @@ import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
-import { FriendAlias, UserAgree } from './user.s';
+import { FriendAlias, GmAccount, UserAgree } from './user.s';
 
 declare var env: Env;
 
@@ -103,7 +103,7 @@ export const applyFriend = (user: string): Result => {
         if (uid === CONSTANT.CUSTOMER_SERVICE) { // 好嗨客服发送第一条欢迎消息
             sendFirstWelcomeMessage('我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^',CONSTANT.CUSTOMER_SERVICE); 
 
-        } else if (officialUsers.indexOf(uid) > -1) {
+        } else if (officialUsers.findIndex(item => item.uid === uid) > -1) {
             const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,UserInfo._$info.name);
             const userinfo = userInfoBucket.get(uid)[0];  // 获取客服账号的信息
             sendFirstWelcomeMessage(`您好，我是${userinfo.name}，很高兴为您服务`,uid); 
@@ -425,16 +425,17 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
  * @param set_gmAccount uid
  */
 // #[rpc=rpcServer]
-export const set_gmAccount = (uid: number): Result => {
+export const set_gmAccount = (gmAcc:GmAccount): Result => {
     const result = new Result();
     const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
-    let userLevel = levelBucket.get<number, [UserLevel]>(uid)[0];
+    let userLevel = levelBucket.get<number, [UserLevel]>(gmAcc.uid)[0];
     if (!userLevel) {
         userLevel = new UserLevel();
-        userLevel.uid = uid;
+        userLevel.uid = gmAcc.uid;
     }
+    userLevel.appId = gmAcc.appId;  // 某个APP的客服
     userLevel.level = VIP_LEVEL.VIP5;
-    levelBucket.put(uid, userLevel);
+    levelBucket.put(gmAcc.uid, userLevel);
     result.r = CONSTANT.RESULT_SUCCESS;
 
     return result;
@@ -445,19 +446,20 @@ export const set_gmAccount = (uid: number): Result => {
  * @param set_gmAccount uid
  */
 // #[rpc=rpcServer]
-export const get_gmAccount = (uid:number): number[] => {
+export const get_gmAccount = (uid:number): UserLevel[] => {
     console.log('==========================get_gmAccount',uid);
     if (uid !== getUid()) return;
 
     const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
     const res = [];   
-    const iter = levelBucket.iter(5);
+    const iter = levelBucket.iter(null);
+    console.log('==========================get_gmAccount',iter);
     let item;
     do {
         item = iter.next();        
         console.log('==========================get_gmAccount',item,res);
         if (item && item[1].level === VIP_LEVEL.VIP5) {
-            res.push(item[0]);
+            res.push(item[1]);
         }
 
     }while (item);

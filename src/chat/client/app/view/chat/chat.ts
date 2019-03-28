@@ -17,7 +17,7 @@ import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias, INFLAG, timestampFormat } from '../../logic/logic';
 import { openNewActivity } from '../../logic/native';
-import { applyFriend, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
+import { applyUserFriend, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
 import { parseMessage } from '../../widget/messageItem/messageItem';
 
 // ================================================ 导出
@@ -373,7 +373,7 @@ export class Chat extends Widget {
      * 添加好友
      */
     public addUser() {
-        applyFriend(this.props.id.toString(), (r: Result) => {
+        applyUserFriend(this.props.id.toString()).then((r: Result) => {
             if (r.r === 0) {
                 popNewMessage(`${this.props.id}已经是你的好友`);
             }
