@@ -5,7 +5,7 @@
  // ================================================ 导入
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { setOwner } from '../../../../server/data/rpc/group.p';
@@ -44,7 +44,7 @@ export class TransferGroupOwner extends Widget {
     public openConfirmTranBox(uid:number) {
         const modalObj = { content:`"${uid}"将成为新群主，确认后您将你失去群主身份。`,sureText:'确定',cancelText:'取消',style:'color:#F7931A' };
         const guid = genGuid(this.props.gid,uid);
-        popNew('chat-client-app-widget-modalBox-modalBox',modalObj,
+        popModalBoxs('chat-client-app-widget-modalBox-modalBox',modalObj,
         () => {
             clientRpcFunc(setOwner,guid,(r) => {
                 popNewMessage('转让群主成功');

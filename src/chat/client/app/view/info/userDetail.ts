@@ -5,7 +5,7 @@
 // ================================================ 导入
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
@@ -144,7 +144,7 @@ export class UserDetail extends Widget {
         this.props.isContactorOpVisible = false;
         this.paint();
         if (this.props.inFlag === INFLAG.newApply) {
-            popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
             
             return;
         }
@@ -156,16 +156,16 @@ export class UserDetail extends Widget {
 
             //     break;
             case 1: // 清空聊天记录
-                popNew('chat-client-app-widget-modalBox-modalBox', { title: '清空聊天记录', content: `确定清空和${this.props.userInfo.name}的聊天记录吗` },() => {
+                popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title: '清空聊天记录', content: `确定清空和${this.props.userInfo.name}的聊天记录吗` },() => {
                     const sid = store.getStore('uid');
                     store.setStore(`userChatMap/${genUserHid(sid,this.props.uid)}`,[]);
                 });
                 break;
             // case 3: // 加入黑名单
-            //     popNew('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
+            //     popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
             //     break;
             case 2: // 删除联系人
-                popNew('chat-client-app-widget-modalBox-modalBox', { title: '删除联系人', content: `将联系人${this.props.userInfo.name}删除，同时删除聊天记录`, sureText: '删除' }, () => {
+                popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title: '删除联系人', content: `将联系人${this.props.userInfo.name}删除，同时删除聊天记录`, sureText: '删除' }, () => {
                     this.delFriend(this.props.uid);
                     this.goBack(true);
                 });
