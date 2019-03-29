@@ -205,23 +205,15 @@ export const updateUnReadFg = () => {
     const sid = store.getStore('uid');
     const readList = store.getStore('lastRead',new Map());
     const chatlist = store.getStore('lastChat',[]);
+    const msgAvoid = store.getStore('setting').msgAvoid || [];  // 消息免打扰
     let unReadFg = false; // 是否有未读消息
-    if (chatlist.length > readList.size) {
-        unReadFg = true;
-        // 是否有未读消息 状态变化执行
-        if (store.getStore('flags').unReadFg !== unReadFg) {
-            store.setStore('flags/unReadFg',unReadFg);
-        }  
-
-        return;
-    }
 
     for (const v of chatlist) {
         if (v[2] === GENERATOR_TYPE.USER) {
             const hid = genUserHid(sid,v[0]);
             const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
-            // 已读消息ID是否等于聊天记录的最后一条ID
-            if (readList.get(hid) && readList.get(hid).msgId !== hIncIdArr[hIncIdArr.length - 1]) {
+            // // 没有阅读记录或 阅读记录不是最新一条且未设置消息面打扰
+            if (!readList.get(hid) || (readList.get(hid).msgId !== hIncIdArr[hIncIdArr.length - 1] && msgAvoid.indexOf(hid) === -1)) {
                 unReadFg = true;
 
                 break;
@@ -229,11 +221,12 @@ export const updateUnReadFg = () => {
         } else {
             const hid = genGroupHid(v[0]);
             const hIncIdArr = store.getStore(`groupChatMap/${hid}`,[]);
-            if (readList.get(hid) && readList.get(hid).msgId !== hIncIdArr[hIncIdArr.length - 1]) {
+            // 没有阅读记录或 阅读记录不是最新一条且未设置消息面打扰
+            if (!readList.get(hid) || (readList.get(hid).msgId !== hIncIdArr[hIncIdArr.length - 1] && msgAvoid.indexOf(hid) === -1)) {
                 unReadFg = true;
 
                 break;
-            }
+            } 
         }
     }
     // 是否有未读消息 状态变化执行

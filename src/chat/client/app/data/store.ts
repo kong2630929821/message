@@ -121,7 +121,10 @@ export const initStore = () => {
         groupChatMap:new Map(),
         lastChat:[],
         lastRead:new Map(),
-        setting:null,
+        setting:{
+            msgTop:[],
+            msgAvoid:[]
+        },
         isLogin:true,
         offLine:false,
         flags:{}

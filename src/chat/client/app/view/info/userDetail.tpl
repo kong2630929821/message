@@ -26,7 +26,7 @@
             <div w-class="adress-wrap" on-tap="doCopy(2)">
                 <img w-class="adressIcon" src="../../res/images/phone.png" />
                 <div w-class="adress-text-wrap">
-                    <span w-class="mainText">{{it.userInfo.tel ? it.userInfo.tel : "未知"}}</span>
+                    <span w-class="mainText">未知</span>
                     <span w-class="flag">电话</span>
                 </div>
             </div>

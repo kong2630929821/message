@@ -137,7 +137,7 @@ export class User extends Widget {
         } else if (i === 1) {
             copyToClipboard(this.props.info.acc_id);
         } else {
-            copyToClipboard(this.props.info.tel || '未知');
+            copyToClipboard('未知');
         }
         popNewMessage('复制成功');
     }

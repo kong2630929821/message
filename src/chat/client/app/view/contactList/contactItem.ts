@@ -6,7 +6,7 @@
 import { Json } from '../../../../../pi/lang/type';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
-import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE, UserInfo, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias, getGroupAvatar, getUserAvatar } from '../../logic/logic';
@@ -44,8 +44,7 @@ export class ContactItem extends Widget {
                     this.props.name += '(本人)';
                 }
                 this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
-                const officials = store.getStore('flags').officialUsers || [];
-                this.props.official = officials.findIndex(item => item.uid === this.props.id) > -1;
+                this.props.official = store.getStore(`userInfoMap/${this.props.id}`,{ level:0 }).level === VIP_LEVEL.VIP5;
                 
             } else {
                 const group = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());

@@ -11,13 +11,13 @@ import { delValueFromArray, genHIncId, genNextMessageIndex, genUserHid, genUuid 
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
-import { Contact, FriendLink, UserFind, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
+import { Contact, FriendLink, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { APPLY_FRIENDS_OVERLIMIT, FRIENDS_NUM_OVERLIMIT } from '../errorNum';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
-import { FriendAlias, GmAccount, UserAgree } from './user.s';
+import { FriendAlias, UserAgree } from './user.s';
 
 declare var env: Env;
 
@@ -73,7 +73,7 @@ export const applyFriend = (user: string): Result => {
         return result;
     }
     const friendsNumLimit1 = get_friends_limit(uid); // 添加的好友的好友上限
-    const friendContact = contactBucket.get<number, [Contact]>(uid)[0];
+    const friendContact = contactBucket.get<number, [Contact]>(uid)[0]; // 对方的联系人列表
     // 对方的好友数量到达上限
     if (friendContact.friends.length >= friendsNumLimit1) {
         result.r = APPLY_FRIENDS_OVERLIMIT;
@@ -81,10 +81,11 @@ export const applyFriend = (user: string): Result => {
         return result;
     }
     // 判断对方是否是官方账号
-    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name);
-    const userLevel1 = levelBucket.get<number, [UserLevel]>(uid)[0];
-    const level1 = userLevel1.level;
-    if (level1 === VIP_LEVEL.VIP5) { // 官方账号无需同意直接添加
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,UserInfo._$info.name);
+    const userinfo = userInfoBucket.get(uid)[0];  // 对方的用户信息
+    console.log('========================applyFriend userinfo: ',userinfo);
+    if (userinfo.level === VIP_LEVEL.VIP5) { // 官方账号无需同意直接添加
+       
         const friendLink = new FriendLink();
         friendLink.uuid = genUuid(sid, uid);
         friendLink.alias = '';
@@ -95,17 +96,14 @@ export const applyFriend = (user: string): Result => {
     
         curUser.friends.findIndex(item => item === uid) === -1 && curUser.friends.push(uid);
         contactBucket.put(sid, curUser); // 添加官方账号到当前用户联系人表
-        const officialUsers = get_gmAccount(sid);
     
-        const serUser = contactBucket.get(uid)[0];
-        serUser.friends.findIndex(item => item === sid) && serUser.friends.push(sid);
-        contactBucket.put(uid,serUser);  // 添加当前用户到官方账号联系人表
-        if (uid === CONSTANT.CUSTOMER_SERVICE) { // 好嗨客服发送第一条欢迎消息
-            sendFirstWelcomeMessage('我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^',CONSTANT.CUSTOMER_SERVICE); 
+        friendContact.friends.findIndex(item => item === sid) && friendContact.friends.push(sid);
+        contactBucket.put(uid,friendContact);  // 添加当前用户到官方账号联系人表
 
-        } else if (officialUsers.findIndex(item => item.uid === uid) > -1) {
-            const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,UserInfo._$info.name);
-            const userinfo = userInfoBucket.get(uid)[0];  // 获取客服账号的信息
+        if (uid === CONSTANT.CUSTOMER_SERVICE) { // 好嗨客服发送第一条欢迎消息
+            sendFirstWelcomeMessage('我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^', uid); 
+
+        } else {  // 其他客服发送的第一条欢迎消息
             sendFirstWelcomeMessage(`您好，我是${userinfo.name}，很高兴为您服务`,uid); 
         }
 
@@ -408,10 +406,10 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
         userFindBucket.put(acc_idFind.user, acc_idFind);
     }
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!333333333333333333');
-    let newUser = new UserInfo();
+    userinfo.level = oldUserinfo.level;  // 用户权限等级不能在此处更改
+    const newUser = userinfo;
     if (userinfo.uid === sid) {
         userInfoBucket.put(sid, userinfo);
-        newUser = userinfo;
     } else {
         console.log('curUser: ', sid, ' changeUser: ', userinfo);
         newUser.uid = -1; // 不能修改其他的人的信息
@@ -425,17 +423,17 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
  * @param set_gmAccount uid
  */
 // #[rpc=rpcServer]
-export const set_gmAccount = (gmAcc:GmAccount): Result => {
+export const set_gmAccount = (uid:number): Result => {
     const result = new Result();
-    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
-    let userLevel = levelBucket.get<number, [UserLevel]>(gmAcc.uid)[0];
-    if (!userLevel) {
-        userLevel = new UserLevel();
-        userLevel.uid = gmAcc.uid;
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name); 
+    const userinfo = userInfoBucket.get<number, UserInfo>(uid)[0];
+    if (!userinfo) {
+        result.r = CONSTANT.DEFAULT_ERROR_NUMBER;
+
+        return result;
     }
-    userLevel.appId = gmAcc.appId;  // 某个APP的客服
-    userLevel.level = VIP_LEVEL.VIP5;
-    levelBucket.put(gmAcc.uid, userLevel);
+    userinfo.level = VIP_LEVEL.VIP5;
+    userInfoBucket.put(uid, userinfo);
     result.r = CONSTANT.RESULT_SUCCESS;
 
     return result;
@@ -445,37 +443,36 @@ export const set_gmAccount = (gmAcc:GmAccount): Result => {
  * 获取客服账号
  * @param set_gmAccount uid
  */
-// #[rpc=rpcServer]
-export const get_gmAccount = (uid:number): UserLevel[] => {
-    console.log('==========================get_gmAccount',uid);
-    if (uid !== getUid()) return;
+// // #[rpc=rpcServer]
+// export const get_gmAccount = (uid:number): UserLevel[] => {
+//     console.log('==========================get_gmAccount',uid);
+//     if (uid !== getUid()) return;
 
-    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
-    const res = [];   
-    const iter = levelBucket.iter(null);
-    console.log('==========================get_gmAccount',iter);
-    let item;
-    do {
-        item = iter.next();        
-        console.log('==========================get_gmAccount',item,res);
-        if (item && item[1].level === VIP_LEVEL.VIP5) {
-            res.push(item[1]);
-        }
+//     const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
+//     const res = [];   
+//     const iter = levelBucket.iter(null);
+//     console.log('==========================get_gmAccount',iter);
+//     let item;
+//     do {
+//         item = iter.next();        
+//         console.log('==========================get_gmAccount',item,res);
+//         if (item && item[1].level === VIP_LEVEL.VIP5) {
+//             res.push(item[1]);
+//         }
 
-    }while (item);
+//     }while (item);
    
-    return res;
-};
+//     return res;
+// };
 
 // ================================================================= 本地
 
 // 获取好友上限
 export const get_friends_limit = (uid: number): number => {
-    const levelBucket = new Bucket(CONSTANT.WARE_NAME, UserLevel._$info.name); 
-    const userLevel = levelBucket.get<number, [UserLevel]>(uid)[0];
-    const level = userLevel.level;
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name); 
+    const userinfo = userInfoBucket.get<number, [UserInfo]>(uid)[0];
     let friendsNumLimit: number;
-    switch (level) {
+    switch (userinfo.level) {
         case VIP_LEVEL.VIP0:
             friendsNumLimit = CONSTANT.VIP0_FRIENDS_LIMIT;
             break;

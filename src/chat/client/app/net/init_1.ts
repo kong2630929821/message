@@ -15,7 +15,7 @@ import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
-import { getFriendHistory, getOfficialUser, getSetting } from './rpc';
+import { getFriendHistory, getSetting } from './rpc';
 
 // ================================================ 导出
 
@@ -43,7 +43,6 @@ export const walletSignIn = (openid) => {
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 store.setStore('isLogin',true);
                 getSetting();   // 获取设置信息
-                getOfficialUser(r.uid);  // 获取官方客服账号
                 init2.init(r.uid);
 
                 init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {
@@ -65,23 +64,24 @@ export const walletSignIn = (openid) => {
  * 改变用户信息
  */
 export const setUserInfo = () => {
-    const user = walletStore.getStore('user/info');
-    const walletAddr = walletStore.getStore('user/id');
+    const user = walletStore.getStore('user',{ info:{}, id:'' });
     const r = new UserInfo();
     r.uid = store.getStore('uid');
     r.sex = 0;
     r.note = '';
-    r.name = user.nickName;
-    r.avatar = user.avatar;
-    r.tel = user.phoneNumber;
-    r.wallet_addr = walletAddr;
-    r.acc_id = user.acc_id;
+    r.level = 0;
+    r.name = user.info.nickName;
+    r.avatar = user.info.avatar;
+    r.tel = user.info.phoneNumber;
+    r.acc_id = user.info.acc_id;
+    r.wallet_addr = user.id;
+    
     if (!r.uid) {
         return;
     }
     init2.clientRpcFunc(changeUserInfo, r, (res) => {
         if (res && res.uid > 0) {
-            store.setStore(`userInfoMap/${r.uid}`, r);
+            store.setStore(`userInfoMap/${r.uid}`, res);
         } else if (res.uid === 0) {  // 普通用户 钱包名称中含有 “好嗨客服”
             const chatUser = store.getStore(`userInfoMap/${r.uid}`,{ name:'' });
             if (chatUser.name) {  // 有曾用名，直接改为曾用名

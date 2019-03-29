@@ -123,10 +123,10 @@ export class Contact extends SpecialWidget {
 
     // 打开更多功能
     public getMore() {
-        // setGameServer(10002,'102');
-        // setGameServer(10003,'103');
-        // gotoGameService('fomosports');
-        // gotoOfficialGroupChat('fomosports');
+        // setGameServer(10002);
+        // setGameServer(10003);
+        // gotoGameService('fairyChivalry');
+        // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
             this.props.isUtilVisible = !this.props.isUtilVisible;
             this.paint();

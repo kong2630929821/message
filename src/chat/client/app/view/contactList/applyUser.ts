@@ -45,6 +45,7 @@ export class ApplyUser extends Widget {
             if (this.props.isActiveToGroup) { // 主动申请加群
                 const info = new GetUserInfoReq();
                 info.uids = [this.props.id];
+                info.acc_ids = [];
                 clientRpcFunc(getUsersInfo,info,(r:UserArray) => {
                     if (r.arr.length > 0) {
                         this.props.name = r.arr[0].name; 

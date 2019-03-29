@@ -36,7 +36,8 @@ struct UserInfo {
     tel: String,         //电话
     note: String,        //用户自己的备注信息
     wallet_addr: String, //钱包地址
-    acc_id:String        // 钱包账户ID
+    acc_id:String,        // 钱包账户ID
+    level:VIP_LEVEL       // 用户权限等级
 }
 
 /**
@@ -119,11 +120,4 @@ struct OnlineUsersReverseIndex {
 struct FrontStoreData {
     uid:u32,
     value:String,
-}
-
-#[primary=uid,db=file]
-struct UserLevel {
-    uid: u32,
-    level: u8, // 权限等级 用户好友上限和群上限
-    appId: Option<String>  // 每个游戏有一个唯一的ID 官方客服账号需要
 }

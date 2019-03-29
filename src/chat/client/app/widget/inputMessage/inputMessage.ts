@@ -137,25 +137,26 @@ export const sendImage = (e:any) => {
                 imgResize(buffer,(res) => {
                     // 预览图片
                     notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG }); 
-                });
                     
-                uploadFile(arrayBuffer2File(buffer),(imgUrlSuf:string) => {
-                    console.log('选择的照片压缩图',imgUrlSuf);
-                    value.compressImg = imgUrlSuf;
-    
-                    // 压缩图上传成功后再获取一次原图
-                    imagePicker.getContent({
-                        quality:100,
-                        success(buffer1:ArrayBuffer) {
-                            uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
-                                console.log('选择的照片原图',imgUrlSuf1);
-                                value.originalImg = imgUrlSuf1;
-                                notify(e.node,'ev-send',{ value: JSON.stringify(value), msgType:MSG_TYPE.IMG });
-                            });
-                        }
+                    uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
+                        console.log('选择的照片压缩图',imgUrlSuf);
+                        value.compressImg = imgUrlSuf;
+        
+                        // 压缩图上传成功后再获取一次原图
+                        imagePicker.getContent({
+                            quality:100,
+                            success(buffer1:ArrayBuffer) {
+                                uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
+                                    console.log('选择的照片原图',imgUrlSuf1);
+                                    value.originalImg = imgUrlSuf1;
+                                    notify(e.node,'ev-send',{ value: JSON.stringify(value), msgType:MSG_TYPE.IMG });
+                                });
+                            }
+                        });
+        
                     });
-    
-                });
+                },400);
+                    
             }
         });
     });
@@ -178,25 +179,26 @@ export const sendPicture = (e:any) => {
                 imgResize(buffer,(res) => {
                     // 预览图片
                     notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG }); 
-                });
-                
-                uploadFile(arrayBuffer2File(buffer),(imgUrlSuf:string) => {
-                    console.log('拍摄的照片压缩图',imgUrlSuf);
-                    value.compressImg = imgUrlSuf;
-    
-                    // 压缩图上传成功后再获取一次原图
-                    camera.getContent({
-                        quality:100,
-                        success(buffer1:ArrayBuffer) {
-                            uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
-                                console.log('拍摄的照片原图',imgUrlSuf1);
-                                value.originalImg = imgUrlSuf1;
-                                notify(e.node,'ev-send',{ value: JSON.stringify(value), msgType:MSG_TYPE.IMG });
-                            });
-                        }
+                    
+                    uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
+                        console.log('拍摄的照片压缩图',imgUrlSuf);
+                        value.compressImg = imgUrlSuf;
+        
+                        // 压缩图上传成功后再获取一次原图
+                        camera.getContent({
+                            quality:100,
+                            success(buffer1:ArrayBuffer) {
+                                uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
+                                    console.log('拍摄的照片原图',imgUrlSuf1);
+                                    value.originalImg = imgUrlSuf1;
+                                    notify(e.node,'ev-send',{ value: JSON.stringify(value), msgType:MSG_TYPE.IMG });
+                                });
+                            }
+                        });
+        
                     });
-    
-                });
+                },400);
+                
             }
         });
     });

@@ -6,7 +6,3 @@ struct FriendAlias{
     rid:u32,
     alias:String
 }
-struct GmAccount{
-    uid:u32,
-    appId:String
-}

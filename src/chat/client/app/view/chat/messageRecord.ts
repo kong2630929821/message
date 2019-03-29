@@ -5,7 +5,7 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
-import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
@@ -56,8 +56,7 @@ export class MessageRecord extends Widget {
             const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
             hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
             this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
-            const officials = store.getStore('flags').officialUsers || [];
-            this.props.official = officials.findIndex(item => item.uid === this.props.rid) > -1;
+            this.props.official = store.getStore(`userInfoMap/${this.props.rid}`,{ level:0 }).level === VIP_LEVEL.VIP5;
         }
 
         // 计算有多少条新消息记录
@@ -104,7 +103,6 @@ export class MessageRecord extends Widget {
             const hid = genUserHid(store.getStore('uid'), this.props.rid);
             store.register(`userChatMap/${hid}`, this.bindCB);
             store.register(`lastRead/${hid}`,this.bindCB);
-            store.register('flags/officialUsers',this.bindCB);
         } else {
             const hid = genGroupHid(this.props.rid);
             store.register(`groupChatMap/${hid}`, this.bindCB);
