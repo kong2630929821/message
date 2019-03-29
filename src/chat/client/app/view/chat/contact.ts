@@ -3,12 +3,10 @@
  */
 
 // ================================================ 导入
-import { gotoGameService, gotoOfficialGroupChat } from '../../../../../app/api/thirdBase';
 import { uploadFileUrlPrefix } from '../../../../../app/config';
 import * as walletStore from '../../../../../app/store/memstore';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
-import { popModalBoxs } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
@@ -16,7 +14,6 @@ import * as store from '../../data/store';
 import { getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
-import { setGameServer } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出

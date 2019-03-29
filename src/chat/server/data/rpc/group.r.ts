@@ -791,18 +791,18 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
 
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('read group info: ', groupInfoBucket.get(gInfo.gid));
-        // 修改创建群的人的联系人列表，把当前群组加进去
+    // 修改创建群的人的联系人列表，把当前群组加进去
     contact.group.push(gInfo.gid);
     contactBucket.put(uid, contact);
     moveGroupCursor(gInfo.gid, uid);
     logger.debug('Add self: ', uid, 'to conatact group');
-
-        // 发送一条当前群组创建成功的消息，其实不是必须的
+    // 创建群聊主题
     const groupTopic = `ims/group/msg/${gInfo.gid}`;
     const mqttServer = env.get('mqttServer');
     setMqttTopic(mqttServer, groupTopic, true, true);
     logger.debug('Set mqtt topic for group: ', gInfo.gid, 'with topic name: ', groupTopic);
-        // 把创建群的用户加入groupUserLink
+    
+    // 把创建群的用户加入groupUserLink
     const groupUserLinkBucket = new Bucket('file', CONSTANT.GROUP_USER_LINK_TABLE);
     const currentUser = getCurrentUserInfo(uid);
     const gulink = new GroupUserLink();
@@ -812,8 +812,9 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
     gulink.join_time = Date.now();
     gulink.userAlias = '';
     gulink.avatar = currentUser.avatar;
-
     groupUserLinkBucket.put(gulink.guid, gulink);
+    
+    // 发送一条当前群组创建成功的消息
     const info = new GroupSend();
     info.msg = `你已经成功创建群 \"${gInfo.name}\"`;
     info.mtype = MSG_TYPE.CREATEGROUP;

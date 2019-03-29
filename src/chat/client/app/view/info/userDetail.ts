@@ -258,7 +258,7 @@ export class UserDetail extends Widget {
         } else if (i === 1) {
             copyToClipboard(this.props.userInfo.acc_id);
         } else {
-            copyToClipboard(this.props.userInfo.tel || '未知');
+            copyToClipboard('未知');
         }
         this.props.isContactorOpVisible = false;
         this.paint();
