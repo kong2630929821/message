@@ -6,7 +6,7 @@ import * as store from '../data/store';
 import { disconnect, initClient } from './init';
 
 // 登录
-loginWallet('101',(openId:number) => {
+loginWallet('10',(openId:number) => {
     console.log('获取到openId ====',openId);
     initClient(openId);
 });
