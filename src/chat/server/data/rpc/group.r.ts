@@ -3,7 +3,7 @@
  */
 // ================================================================= 导入
 import { GROUP_STATE, GroupInfo, GroupUserLink } from '../db/group.s';
-import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
+import { AccountGenerator, Contact, GENERATOR_TYPE, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { GroupUserLinkArray, Result } from './basic.s';
 import { GroupAgree, GroupCreate, GroupMembers, GuidsAdminArray, Invite, InviteArray, NeedAgree, NewGroup } from './group.s';
 
@@ -91,31 +91,31 @@ export const applyJoinGroup = (gid: number): Result => {
  * 用户申请加入游戏群组
  * @param uid 游戏官方客服账号
  */
-// #[rpc=rpcServer]
-export const applyJoinGameGroup = (uid:number):number => {
-    const contactBucket = new Bucket('file',Contact._$info.name);
-    const contact = contactBucket.get(uid)[0];
-    const gids = contact.myGroup;  // 游戏客服创建的游戏群组
-    if (gids && gids.length > 0) {
-        let fg = false; // 是否已经成功申请入群
-        let i = 0;
-        while (!fg || i < gids.length) {
-            const res = applyJoinGroup(gids[i]);  // 从第一个群开始加
-            if (res && res.r === 1) {
-                fg = true;
-            } else if (res && res.r === GROUP_MEMBERS_OVERLIMIT) {  // 如果群已经超过人数上限，则加入下一个群组
-                i++;
-            } else {  // 其他错误情况退出循环
-                break;
-            }
-        }
+// // #[rpc=rpcServer]
+// export const applyJoinGameGroup = (uid:number):number => {
+//     const contactBucket = new Bucket('file',Contact._$info.name);
+//     const contact = contactBucket.get(uid)[0];
+//     const gids = contact.myGroup;  // 游戏客服创建的游戏群组
+//     if (gids && gids.length > 0) {
+//         let fg = false; // 是否已经成功申请入群
+//         let i = 0;
+//         while (!fg || i < gids.length) {
+//             const res = applyJoinGroup(gids[i]);  // 从第一个群开始加
+//             if (res && res.r === 1) {
+//                 fg = true;
+//             } else if (res && res.r === GROUP_MEMBERS_OVERLIMIT) {  // 如果群已经超过人数上限，则加入下一个群组
+//                 i++;
+//             } else {  // 其他错误情况退出循环
+//                 break;
+//             }
+//         }
         
-        return gids[i];
+//         return gids[i];
 
-    } else {
-        return 0;
-    }
-};
+//     } else {
+//         return 0;
+//     }
+// };
 
 /**
  * 用户主动退出群组
@@ -708,15 +708,15 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
  * 创建群之前的判断 群组等级 初始化群组基础信息
  */
 const judgeCreateGroup = (uid:number,contact:Contact) => {
-    const userLevelBucket = new Bucket('file', UserLevel._$info.name);
+    const userInfoBucket = new Bucket('file', UserInfo._$info.name);
     const gInfo = new GroupInfo();
     // 获取用户的权限等级和对应的群组限制
     let level: number;
-    const userLevel = userLevelBucket.get<number,[UserLevel]>(uid)[0];
-    if (!userLevel) {
+    const userInfo = userInfoBucket.get<number,UserInfo>(uid)[0];
+    if (!userInfo) {
         level = VIP_LEVEL.VIP0;
     } else {
-        level = userLevel.level;
+        level = userInfo.level;
     }
     let groupLimit: number;
     switch (level) {

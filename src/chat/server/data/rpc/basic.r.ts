@@ -12,11 +12,10 @@ import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid }
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistory, GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserFind, UserInfo, UserLevel, VIP_LEVEL } from '../db/user.s';
+import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
-import { applyFriend, set_gmAccount } from './user.r';
-import { GmAccount } from './user.s';
+import { applyFriend } from './user.r';
 
 declare var env: Env;
 
@@ -31,7 +30,6 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE);
     const userCredentialBucket = new Bucket('file', CONSTANT.USER_CREDENTIAL_TABLE);
     const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE);
-    const userLevelBucket = new Bucket('file', UserLevel._$info.name);
 
     const userInfo = new UserInfo();
     const userCredential = new UserCredential();
@@ -39,6 +37,12 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     userInfo.name = registerInfo.name;
     userInfo.note = '';
     userInfo.tel = '';
+    userInfo.sex = 1;
+    userInfo.wallet_addr = '';
+    userInfo.acc_id = '';
+    userInfo.avatar = '';
+    userInfo.level = VIP_LEVEL.VIP0;
+
     // 这是一个事务
     accountGeneratorBucket.readAndWrite(GENERATOR_TYPE.USER, (items: any[]) => {
         const accountGenerator = new AccountGenerator();
@@ -49,17 +53,11 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
         return accountGenerator;
     });
 
-    userInfo.sex = 1;
-
     userCredential.uid = userInfo.uid;
     userCredential.passwdHash = registerInfo.passwdHash;
 
     userInfoBucket.put(userInfo.uid, userInfo);
-    // 新用户的等级都是VIP0
-    const level = new UserLevel();
-    level.uid = userInfo.uid;
-    level.level = VIP_LEVEL.VIP0;
-    userLevelBucket.put(userInfo.uid, level);
+    
     console.log('sucessfully registered user', userInfo);
     userCredentialBucket.put(userInfo.uid, userCredential);
 
@@ -113,7 +111,7 @@ export const login = (user: UserType): UserInfo => {
             const userAcc = new UserAccount();
             userAcc.user = openid;
             userAcc.uid = userinfo.uid;
-            const v = userAccountBucket.put(openid, userAcc);
+            userAccountBucket.put(openid, userAcc);
             loginReq.uid = userinfo.uid;
         } else {
             loginReq.uid = v.uid;
@@ -136,12 +134,11 @@ export const login = (user: UserType): UserInfo => {
     // FIXME: constant time equality check
     userInfo = userInfoBucket.get(loginReq.uid)[0];
     const mqttServer:ServerNode = env.get('mqttServer');
-    setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);
-    setMqttTopic(mqttServer, `${loginReq.uid}_sendMsg`, true, true);
+    setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);  // 用户信息变化的主题
+    setMqttTopic(mqttServer, `${loginReq.uid}_sendMsg`, true, true);  // 接收消息的主题
     // 后端统一推送消息topic
     setMqttTopic(mqttServer, `send/${loginReq.uid.toString()}`, true, true);
     console.log('4444444444444444444444444444444444');
-    console.log('Set user topic: ', loginReq.uid.toString());
 
     // save session
     // write(dbMgr, (tr: Tr) => {
@@ -178,13 +175,13 @@ export const login = (user: UserType): UserInfo => {
     console.log('Add user: ', loginReq.uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
     console.log('7777777777777777777777777');
     const SUID = CONSTANT.CUSTOMER_SERVICE; // 客服账号
-    if (loginReq.uid !== SUID) {
-        applyFriend(SUID.toString());
+    if (loginReq.uid === SUID) {
+        userInfo.level = VIP_LEVEL.VIP5;  // 客服账号等级为5
+        userInfoBucket.put(loginReq.uid,userInfo);
+        console.log('loginReq uid:',loginReq.uid,'userinfo:',userInfo);
+
     } else {
-        const gmAcc = new GmAccount();
-        gmAcc.uid = userInfo.uid;
-        gmAcc.appId = CONSTANT.HAOHAI_APPID;
-        set_gmAccount(gmAcc);  // 设置为客服账号
+        applyFriend(SUID.toString());   // 非客服添加客服为好友
     }
 
     return userInfo;
@@ -203,24 +200,20 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
     if (uids.length === 0) {
         const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
         const accIds = getUserInfoReq.acc_ids;
-        const users = [];
         for (const v of accIds) {
-            users.push(`a:${v}`);
-        }
-        const rArr = userFindBucket.get<string[], UserFind[]>(users);
-        console.log('!!!!!!!!!!!!!!!applyFriend rArr:', rArr);
-    
-        rArr.forEach((r) => {
-            if (r) {
-                uids.push(r.uid);
+            const userFind = userFindBucket.get<string, UserFind>(v)[0];
+            if (userFind) {
+                uids.push(userFind.uid);
             }
-        });
-
+        }
+        console.log('!!!!!!!!!!!!!!!getUsersInfo accIds: ', accIds,'uids: ',uids);
+        
     }
-    const values: any = userInfoBucket.get(uids);
-    console.log('Read userinfo: ', uids, values);
-
-    // FIXME: check if `values` have undefined element, or will crash
+    const values = [];
+    for (const v of uids) {
+        const user = userInfoBucket.get(v)[0];
+        user && values.push(user);
+    }
     const res = new UserArray();
     res.arr = values;
 
@@ -235,11 +228,14 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
 export const getGroupsInfo = (getGroupInfoReq: GetGroupInfoReq): GroupArray => {
     const groupInfoBucket = new Bucket('file', CONSTANT.GROUP_INFO_TABLE);
 
-    const gids = getGroupInfoReq.gids;
-    const values: any = groupInfoBucket.get(gids);
+    const groupList = [];
+    for (const v of getGroupInfoReq.gids) {
+        const ginfo = groupInfoBucket.get(v)[0];
+        ginfo && groupList.push(ginfo);
+    }
 
     const res = new GroupArray();
-    res.arr = values;
+    res.arr = groupList;
 
     return res;
 };
@@ -267,17 +263,15 @@ export const getFriendLinks = (getFriendLinksReq: GetFriendLinksReq): FriendLink
     const friendLinkBucket = new Bucket('file', CONSTANT.FRIEND_LINK_TABLE);
 
     const friendLinkArray = new FriendLinkArray();
-    // const friend = new FriendLink();
     console.log(`uuid is : ${JSON.stringify(getFriendLinksReq.uuid)}`);
-    const friends = friendLinkBucket.get<string[], FriendLink[]>(getFriendLinksReq.uuid);
-    // no friends found
-    // if (friends === undefined) {
-    //     friend.alias = '';
-    //     friend.hid = 0;
-    //     friend.uuid = '';
-    // }
-    console.log(`friendLinkArray is : ${JSON.stringify(friends)}`);
-    friendLinkArray.arr = friends || [];
+    const friendList = [];
+    for (const v of getFriendLinksReq.uuid) {
+        const friend = friendLinkBucket.get<string, FriendLink>(v)[0];
+        friend && friendList.push(friend);
+    }
+    
+    console.log(`friendLinkArray is : ${JSON.stringify(friendList)}`);
+    friendLinkArray.arr = friendList;
 
     return friendLinkArray;
 };

@@ -7,7 +7,7 @@ import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { Contact } from '../../../../server/data/db/user.s';
+import { Contact, UserInfo } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import { createGroup, inviteUsers } from '../../../../server/data/rpc/group.p';
 import { GroupCreate, Invite, InviteArray } from '../../../../server/data/rpc/group.s';
@@ -37,15 +37,15 @@ export class SetGroupChat extends Widget {
             inviteUserName:[],
             isSelect:false,
             avatarHtml:'',
-            serviceIDs:[]
+            userInfos:[]
         };
-        this.state = new Map();
+        this.state = new Contact();
     }
     public create() {
         super.create();
         const sid = store.getStore('uid').toString();
-        this.state = store.getStore('contactMap',new Contact()).get(sid);
-        this.props.serviceIDs = store.getStore('flags').officialUsers || [];
+        this.state = store.getStore(`contactMap/${sid}`,new Contact());
+        this.props.userInfos = store.getStore('userInfoMap', new Map());
     }
     
     // 返回上一页
@@ -171,7 +171,7 @@ interface Props {
     inviteUserName:string[];// 被邀请的成员名字
     isSelect:boolean;// 是否被选择
     avatarHtml:string; // 群头像展示
-    serviceIDs:number[];  // 客服账号
+    userInfos:UserInfo[];  // 客服账号
 }
 let avatarUrl;  // 群头像链接
 store.register('contactMap', (r: Map<number, Contact>) => {

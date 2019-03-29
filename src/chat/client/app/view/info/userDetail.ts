@@ -7,7 +7,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE, UserInfo, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
@@ -49,15 +49,19 @@ export class UserDetail extends Widget {
 
     public setProps(props: Json) {
         super.setProps(props);
-        this.props.userInfo = {};
-        const officialUser = store.getStore('flags').officialUsers || [];
+        this.props.isContactorOpVisible = false;
+        this.props.isFriend = true;
+        this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
+        
         if (props.inFlag === INFLAG.newApply) {
             this.props.utilList = [{ utilText: '加入黑名单' }];
-        } else if (officialUser.findIndex(item => item.uid === props.uid) > -1) {  // 官方账号不允许删除
+
+        } else if (this.props.userInfo.level === VIP_LEVEL.VIP5) {  // 官方账号不允许删除
             this.props.utilList = [
-            { utilText: '修改备注' },
-            { utilText: '清空聊天记录' }
+                { utilText: '修改备注' },
+                { utilText: '清空聊天记录' }
             ];
+
         } else {
             this.props.utilList = [
                 { utilText: '修改备注' },
@@ -68,9 +72,6 @@ export class UserDetail extends Widget {
             ];
         }
 
-        this.props.isContactorOpVisible = false;
-        this.props.isFriend = true;
-        this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
         this.props.alias = getFriendAlias(this.props.uid).name;
         this.props.isFriend = getFriendAlias(this.props.uid).isFriend;
         if (!this.props.alias) {

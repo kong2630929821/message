@@ -10,13 +10,13 @@ import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 // tslint:disable-next-line:max-line-length
-import { acceptUser, addAdmin, applyJoinGameGroup, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
+import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
 import { getGroupHistoryCursor, getUserHistoryCursor, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, HistoryCursor, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
-import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, get_gmAccount, set_gmAccount } from '../../../server/data/rpc/user.p';
-import { GmAccount, UserAgree } from '../../../server/data/rpc/user.s';
+import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, set_gmAccount } from '../../../server/data/rpc/user.p';
+import { UserAgree } from '../../../server/data/rpc/user.s';
 import { genGroupHid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
@@ -65,7 +65,7 @@ export const walletLogin = (openid: string, sign: string, cb: (r: UserInfo) => v
  *
  * @param uid user id 
  */
-export const getUsersBasicInfo = (uids: number[],accIds?:string[]) => {
+export const getUsersBasicInfo = (uids: number[], accIds:string[] = []) => {
     const info = new GetUserInfoReq();
     info.uids = uids;
     info.acc_ids = accIds;
@@ -234,25 +234,10 @@ export const getSetting = () => {
 };
 
 /**
- * 获取官方客服账号
- */
-export const getOfficialUser = (uid:number) => {
-    clientRpcFunc(get_gmAccount,uid,(r) => {
-        if (r && r.length > 0) {
-            store.setStore('flags/officialUsers',r);
-        }
-    });
-};
-
-/**
  * 设置某个账号为游戏客服
  */
-export const setGameServer = (uid:number,appId:string) => {
-    const gmAcc = new GmAccount();
-    gmAcc.uid = uid;
-    gmAcc.appId = appId;
-    
-    clientRpcFunc(set_gmAccount,gmAcc,(r) => {
+export const setGameServer = (uid:number) => {
+    clientRpcFunc(set_gmAccount,uid,(r) => {
         console.log('设置客服账号',uid,r);
     });
 };
@@ -280,13 +265,11 @@ export const applyUserFriend = (user: string) => {
  * @param rid reader id
  * @param cb callback
  */
-export const applyGameServer = (appId: string) => {
-    const official = store.getStore('flags').officialUsers;
-    const index = official.findIndex(item => item.appId === appId);
+export const applyGameServer = (uid: number) => {
 
     return new Promise((resolve,reject) => {
-        applyUserFriend(official[index].uid).then(() => {
-            resolve(official[index].uid);
+        applyUserFriend(uid.toString()).then(() => {
+            resolve(uid);
         },() => {
             reject();
         });
@@ -353,40 +336,6 @@ export const applyToGroup = (gid:number) => {
         }
     });
     
-};
-
-/**
- * 申请加入游戏官方群
- * @param rid reader id
- * @param cb callback
- */
-export const applyGameGroup = (appId: string) => {
-    const official = store.getStore('flags').officialUsers;
-    const index = official.findIndex(item => item.appId === appId);
-    const sid = store.getStore('uid');
-    const contact = store.getStore(`contactMap/${sid}`,new Contact());
-
-    return new Promise((resolve,reject) => {
-        const gid = official[index].gid;
-        if (index > -1 && gid && contact.group.indexOf(gid) > -1) {  // 判断本地是否存有gid以及我的联系人列表中是否有该群
-            resolve(gid);
-
-        } else if (index > -1) {
-            clientRpcFunc(applyJoinGameGroup, official[index].uid, (r:number) => {
-                console.log('申请加入游戏官方群',r);
-                if (r) {  // 返回群id
-                    resolve(r);
-                    official[index].gid = r;  // 成功加入群组后存在store中
-                    store.setStore('flags/officialUsers',official);
-                } else {
-                    reject(r);
-                }
-            });
-        } else {
-            reject(index);
-        }
-        
-    });
 };
 
 /**

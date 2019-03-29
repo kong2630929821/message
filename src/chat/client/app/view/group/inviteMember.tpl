@@ -9,7 +9,7 @@
     <div w-class="a-part" ev-changeSelect="changeSelect">
         <div w-class="a">a</div>
         {{for i,v of it1.friends}}
-            {{if it.serviceIDs.findIndex(item => item.uid == v) == -1}}
+            {{if it.userInfos.get(v.toString()).level != 5}}
             {{% =============不能邀请客服账号入群==========}}
             <div ev-addMember="addGroupMember">
                 <chat-client-app-widget-selectUser-selectUser>{id:{{v}}, chatType: "user"}</chat-client-app-widget-selectUser-selectUser>

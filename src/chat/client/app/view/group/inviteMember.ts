@@ -1,13 +1,12 @@
 /**
  * 邀请成员
  */
-
  // ================================================ 导入
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { Contact } from '../../../../server/data/db/user.s';
+import { Contact, UserInfo } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
 import { inviteUsers } from '../../../../server/data/rpc/group.p';
 import { Invite, InviteArray } from '../../../../server/data/rpc/group.s';
@@ -29,7 +28,7 @@ export class InviteMember extends Widget {
         gid:null,
         ginfo:{},
         applyGroupMembers:[],
-        serviceIDs:[]
+        userInfos:[]
     };
     public setProps(props:any) {
         super.setProps(props);
@@ -38,7 +37,7 @@ export class InviteMember extends Widget {
         this.props.applyGroupMembers = [];
         const sid = store.getStore('uid').toString();
         this.state = store.getStore('contactMap',new Contact()).get(sid);
-        this.props.serviceIDs = store.getStore('flags').officialUsers || [];
+        this.props.userInfos = store.getStore('userInfoMap', []);
     }
     
     public goBack() {
@@ -91,7 +90,7 @@ interface Props {
     gid:number;
     ginfo:Json;
     applyGroupMembers:number[];
-    serviceIDs:number[];  // 客服账号
+    userInfos:UserInfo[];  // 客服账号
 }
 
 store.register('contactMap', (r: Map<number, Contact>) => {
