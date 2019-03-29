@@ -191,7 +191,7 @@ const updateGroup = (r: Contact, uid: number) => {
 
     // 订阅我已经加入的群组基础信息
     addGroup.forEach((gid) => {
-        // getMyGroupHistory(gid); 
+        getMyGroupHistory(gid); 
         subscribe(`ims/group/msg/${gid}`, SendMsg, (r: SendMsg) => {
             if (r.code === 1) {
                 getMyGroupHistory(gid); // 获取群组离线消息

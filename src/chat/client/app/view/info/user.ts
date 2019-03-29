@@ -141,6 +141,11 @@ export class User extends Widget {
         }
         popNewMessage('复制成功');
     }
+
+    // 点击查看大图头像
+    public showBigImg() {
+        popNew('chat-client-app-widget-bigImage-bigImage',{ img: this.props.avatar });
+    }
 }   
 
 interface Props  {
