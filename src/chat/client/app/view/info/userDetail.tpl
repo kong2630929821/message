@@ -5,6 +5,10 @@
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="showBigImg">{imgURL:{{it.avatar}},width:"190px;"}</widget>
             <div w-class="nameText">
                 {{it.alias || it.userInfo.name}}
+
+                {{if it.userInfo.level === 5}}
+                    <span w-class="official">官方</span>
+                {{end}}
             </div>
             {{if it.inFlag != 3}}
             <div on-tap="doCopy(0)" style="display:flex;flex-direction:column;text-align: center;">

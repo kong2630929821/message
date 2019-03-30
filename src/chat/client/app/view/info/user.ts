@@ -22,8 +22,7 @@ export class User extends Widget {
             tel:'',
             name:'',
             phoneEdit:false,
-            avatar:'',
-            official:false
+            avatar:''
         };
     }
 
@@ -34,7 +33,6 @@ export class User extends Widget {
         this.props.tel = this.props.info.tel || '未知';
         this.props.name = this.props.info.name;
         this.props.avatar = getUserAvatar(this.props.sid) || '../../res/images/user_avatar.png';
-        this.props.official = this.props.info.level === VIP_LEVEL.VIP5;
     }
 
     public goBack() {
@@ -157,5 +155,4 @@ interface Props  {
     name:string;
     phoneEdit:boolean;
     avatar:string;
-    official:boolean;
 }

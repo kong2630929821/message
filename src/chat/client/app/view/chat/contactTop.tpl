@@ -17,7 +17,7 @@
         <div style="width:90px;"></div>
 
         <div style="position:absolute;right:0;" on-down="onShow">
-            <img on-tap="goNext" src="../../res/images/add-white.png" w-class="btn" />
+            <img on-tap="goNext" src="../../res/images/add_white.png" w-class="btn" />
         </div>
     </div>
 

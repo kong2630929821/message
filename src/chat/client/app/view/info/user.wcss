@@ -80,6 +80,8 @@
     font-weight: 600;
     display: flex;
     align-items: center;
+    height: 45px;
+    line-height: 45px;
 }
 .edit{
     width: 40px;
@@ -106,6 +108,7 @@
     color:rgba(49,91,200,1);
     line-height: 32px;
     font-size: 24px;
+    background: #fff;
     text-align: center;
     margin-left: 10px;
     font-weight: 300;

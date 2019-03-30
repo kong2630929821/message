@@ -6,7 +6,7 @@
             <div w-class="nameText">
                 {{it.name}}
 
-                {{if it.official}}
+                {{if it.info.level === 5}}
                     <span w-class="official">官方</span>
                 {{end}}
             </div>
