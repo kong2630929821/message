@@ -5,6 +5,10 @@
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="showBigImg">{imgURL:{{it.avatar}},width:"190px;"}</widget>
             <div w-class="nameText">
                 {{it.name}}
+
+                {{if it.official}}
+                    <span w-class="official">官方</span>
+                {{end}}
             </div>
         </div>
     </div>  

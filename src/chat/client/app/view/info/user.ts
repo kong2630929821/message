@@ -5,7 +5,7 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { UserInfo } from '../../../../server/data/db/user.s';
+import { UserInfo, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { changeUserInfo } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
 import { copyToClipboard, getUserAvatar } from '../../logic/logic';
@@ -22,7 +22,8 @@ export class User extends Widget {
             tel:'',
             name:'',
             phoneEdit:false,
-            avatar:''
+            avatar:'',
+            official:false
         };
     }
 
@@ -33,6 +34,7 @@ export class User extends Widget {
         this.props.tel = this.props.info.tel || '未知';
         this.props.name = this.props.info.name;
         this.props.avatar = getUserAvatar(this.props.sid) || '../../res/images/user_avatar.png';
+        this.props.official = this.props.info.level === VIP_LEVEL.VIP5;
     }
 
     public goBack() {
@@ -155,4 +157,5 @@ interface Props  {
     name:string;
     phoneEdit:boolean;
     avatar:string;
+    official:boolean;
 }
