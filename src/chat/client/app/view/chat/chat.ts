@@ -392,7 +392,15 @@ export class Chat extends Widget {
     }
 
     public goBack() {
-        this.ok && this.ok();
+        if (this.props.okCB) {
+            this.props.okCB && this.props.okCB();
+            setTimeout(() => {
+                this.ok && this.ok();
+            },500);
+        } else {
+            this.ok && this.ok();
+        }
+
     }
 
 }
@@ -414,4 +422,5 @@ interface Props {
     onRadio:any; // 当前点击的语音消息ID
     temporary:boolean;  // 是否是临时聊天
     groupId:number; // 当前群聊ID 群主可与成员私聊
+    okCB:any;  // 游戏中进入携带的参数
 }
