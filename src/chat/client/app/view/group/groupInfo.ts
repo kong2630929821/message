@@ -107,38 +107,43 @@ export class GroupInfos extends Widget {
 
     // 重新上传群头像
     public selectAvatar() {
-        const imagePicker = selectImage((width, height, url) => {
-            console.log('selectImage url = ',url);
+        if (this.props.isAdmin) {
+            
+            const imagePicker = selectImage((width, height, url) => {
+                console.log('selectImage url = ',url);
             // tslint:disable-next-line:max-line-length
-            this.props.avatarHtml = `<div style="background-image: url(${url});width: 190px;height: 190px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
-            this.paint();
+                this.props.avatarHtml = `<div style="background-image: url(${url});width: 190px;height: 190px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
+                this.paint();
 
-            const loading = popNewLoading('图片上传中');
-            imagePicker.getContent({
-                success(buffer:ArrayBuffer) {
-                    imgResize(buffer,(res) => {
-                        uploadFile(arrayBuffer2File(res.ab),(url) => {
-                            popNewMessage('图片上传成功');
-                            loading.callback(loading.widget);
+                const loading = popNewLoading('图片上传中');
+                imagePicker.getContent({
+                    success(buffer:ArrayBuffer) {
+                        imgResize(buffer,(res) => {
+                            uploadFile(arrayBuffer2File(res.ab),(url) => {
+                                popNewMessage('图片上传成功');
+                                loading.callback(loading.widget);
                             
-                            const ginfo = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
-                            const newGroup = new NewGroup();
-                            newGroup.gid = gid;
-                            newGroup.name = ginfo.name;
-                            newGroup.avatar = url;
-                            newGroup.note = '';
-                            clientRpcFunc(updateGroupInfo, newGroup, (r: Result) => {
-                                if (r.r === 1) {
-                                    this.props.groupInfo.avatar = url; 
-                                    store.setStore(`groupInfoMap/${this.props.gid}`,this.props.groupInfo);
-                                    logger.debug('==========修改群头像成功');
-                                }
+                                const ginfo = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
+                                const newGroup = new NewGroup();
+                                newGroup.gid = gid;
+                                newGroup.name = ginfo.name;
+                                newGroup.avatar = url;
+                                newGroup.note = '';
+                                clientRpcFunc(updateGroupInfo, newGroup, (r: Result) => {
+                                    if (r.r === 1) {
+                                        this.props.groupInfo.avatar = url; 
+                                        store.setStore(`groupInfoMap/${this.props.gid}`,this.props.groupInfo);
+                                        logger.debug('==========修改群头像成功');
+                                    }
+                                });
                             });
                         });
-                    });
-                }
+                    }
+                });
             });
-        });
+        } else {
+            this.showBigImg();
+        }
     }
 
     // 群信息更多 
@@ -330,6 +335,11 @@ export class GroupInfos extends Widget {
         },(r) => {
             popNewMessage('申请入群失败');
         });
+    }
+
+    // 点击查看大图头像
+    public showBigImg() {
+        popNew('chat-client-app-widget-bigImage-bigImage',{ img: this.props.avatar });
     }
 }
 

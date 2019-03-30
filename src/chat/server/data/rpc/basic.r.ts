@@ -175,7 +175,7 @@ export const login = (user: UserType): UserInfo => {
     console.log('Add user: ', loginReq.uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
     console.log('7777777777777777777777777');
     const SUID = CONSTANT.CUSTOMER_SERVICE; // 客服账号
-    if (loginReq.uid === SUID) {
+    if (loginReq.uid === SUID || loginReq.uid === CONSTANT.GAME_SERVEICE) {
         userInfo.level = VIP_LEVEL.VIP5;  // 客服账号等级为5
         userInfoBucket.put(loginReq.uid,userInfo);
         console.log('loginReq uid:',loginReq.uid,'userinfo:',userInfo);

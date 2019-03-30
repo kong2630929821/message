@@ -2,9 +2,13 @@
     <div w-class="top-main-wrap">
         <chat-client-app-widget-topBar-topBar>{title:"",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"190px;"}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="showBigImg">{imgURL:{{it.avatar}},width:"190px;"}</widget>
             <div w-class="nameText">
                 {{it.name}}
+
+                {{if it.official}}
+                    <span w-class="official">官方</span>
+                {{end}}
             </div>
         </div>
     </div>  

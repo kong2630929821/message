@@ -37,13 +37,8 @@ export const ADDRESS_INFO_TABLE = 'chat/server/data/db/extra.AddressInfo';
 export const DEFAULT_ERROR_STR = '-1';
 export const DEFAULT_ERROR_NUMBER = -1;
 export const RESULT_SUCCESS = 1;
-export const CUSTOMER_SERVICE = 10001;  // 客服账号
-export const TURNTABLE_GROUP = 10001; // 大转盘官方群
-export const OPENBOX_GROUP = 10002; // 开宝箱官方群
-export const LOLGUESS_GROUP = 10003; // LOL竞猜官方群
-export const FOMOSPORTS_GROUP = 10004; // fomosports官方群
-export const  CRYPTOFISHING_GROUP = 10005; // crypto fishing官方群
-export const HAOHAI_APPID = '101';  // 好嗨的appid
+export const CUSTOMER_SERVICE = 10001;  // 好嗨客服账号
+export const GAME_SERVEICE = 10002;  // 游戏客服账号
 
 // ---------------------- 权限等级 ---------------------
 // 普通用户 VIP0
