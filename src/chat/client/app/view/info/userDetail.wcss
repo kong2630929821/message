@@ -107,6 +107,8 @@
     font-size: 32px;
     margin: 20px 0px;
     font-weight: 600;
+    height: 45px;
+    line-height: 45px;
     display: flex;
     align-items: center;
 }
@@ -128,4 +130,17 @@
     -moz-appearance: none;
     -webkit-appearance: none;
     border-bottom: 1px solid #fff;
+}
+.official{
+    width:80px;
+    height:32px;
+    border-radius:16px;
+    border:1px solid rgba(49,91,200,1);
+    color:rgba(49,91,200,1);
+    line-height: 32px;
+    font-size: 24px;
+    background: #fff;
+    text-align: center;
+    margin-left: 10px;
+    font-weight: 300;
 }

@@ -43,8 +43,7 @@ export class UserDetail extends Widget {
             setting:null,
             msgAvoid:false,
             msgTop:false,
-            groupId:null,
-            official:false
+            groupId:null
         };
     }
 
@@ -53,7 +52,6 @@ export class UserDetail extends Widget {
         this.props.isContactorOpVisible = false;
         this.props.isFriend = true;
         this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
-        this.props.official = this.props.userInfo.level === VIP_LEVEL.VIP5;
         
         if (props.inFlag === INFLAG.newApply) {
             this.props.utilList = [{ utilText: '加入黑名单' }];
@@ -343,5 +341,4 @@ interface Props {
     msgTop:boolean; // 置顶
     msgAvoid:boolean; // 免打扰
     groupId:number; // 当前群聊ID 群主可与成员私聊
-    official:boolean;
 }
