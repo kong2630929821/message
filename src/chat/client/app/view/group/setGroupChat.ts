@@ -37,7 +37,8 @@ export class SetGroupChat extends Widget {
             inviteUserName:[],
             isSelect:false,
             avatarHtml:'',
-            userInfos:[]
+            userInfos:[],
+            inputName:''
         };
         this.state = new Contact();
     }
@@ -140,13 +141,13 @@ export class SetGroupChat extends Widget {
 
     public inputName(e:any) {
         this.props.name = e.value;
+        this.props.inputName = e.value;
         this.props.isSelect = e.value !== '' && this.props.inviteMembers.length > 0;
         this.paint();
     }
 
     public addMember(e:any) {
         const uid = e.value;
-        logger.debug('=========创建群聊',uid);
         if (this.props.inviteMembers.findIndex(item => item === uid) === -1) {
             this.props.inviteMembers.push(uid);
             this.props.inviteUserName.push(e.name);
@@ -154,8 +155,7 @@ export class SetGroupChat extends Widget {
             this.props.inviteMembers = delValueFromArray(uid, this.props.inviteMembers);
             this.props.inviteUserName = delValueFromArray(e.name, this.props.inviteUserName);
         }
-        logger.debug(`inviteMembers is : ${JSON.stringify(this.props.inviteMembers)}`);
-        if (!this.props.name) {
+        if (!this.props.inputName) {
             // 如果没有输入群名字，则使用前三名被邀请的用户名作为群名
             this.props.name = this.props.inviteUserName.slice(0,3).join('，');
         }
@@ -167,6 +167,7 @@ export class SetGroupChat extends Widget {
 // ================================================ 本地
 interface Props {
     name:string;// 群组名
+    inputName:string; // 输入的群名称
     inviteMembers:number[];// 被邀请的成员uid
     inviteUserName:string[];// 被邀请的成员名字
     isSelect:boolean;// 是否被选择

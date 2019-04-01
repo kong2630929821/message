@@ -3,7 +3,6 @@
  */
 // =====================================导入
 import { uploadFileUrlPrefix } from '../../../../app/config';
-import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
@@ -183,8 +182,16 @@ export const rippleShow = (e:any) => {
 // 获取当前用户的所有好友ID
 export const getAllFriendIDs = () => {
     const uid = store.getStore('uid');
+    const friends = store.getStore(`contactMap/${uid}`,{ friends:[] }).friends;
+    const accIds = [];
+    for (const v of friends) {
+        const acc_id = store.getStore(`userInfoMap/${v}`,new UserInfo());
+        accIds.push(acc_id);
+    }
 
-    return store.getStore(`contactMap/${uid}`,{ friends:[] }).friends; 
+    return accIds;
+
+    // return store.getStore(`contactMap/${uid}`,{ friends:[] }).friends; 
 };
 
 // 从某个页面进入标记

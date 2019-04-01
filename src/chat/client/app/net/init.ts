@@ -7,7 +7,6 @@ declare var pi_modules;
 
 // ================================================ 导入
 import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
-import { setReconnectingState } from '../../../../app/net/reconnect';
 import { popNewMessage } from '../../../../app/utils/tools';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
@@ -38,10 +37,8 @@ export const initClient = (openId) => {
         // mqtt = new AutoLoginMgr('192.168.9.29', port);
         rootClient = mqtt.connection(() => {
             walletSignIn(openId);
-            setReconnectingState('chat',false);
             store.setStore('offLine',false);
         },() => {
-            setReconnectingState('chat',false);
             store.setStore('offLine',true);
             store.setStore('isLogin',false);
         });
@@ -278,6 +275,7 @@ export const disconnect = () => {
  * 聊天手动重连
  */
 export const chatManualReconnect = () => {
+    console.log('chatManualReconnect called');
     mqtt && mqtt.reconnect();
 };
 

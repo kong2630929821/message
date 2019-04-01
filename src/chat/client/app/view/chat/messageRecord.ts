@@ -26,16 +26,15 @@ export class MessageRecord extends Widget {
     public setProps(props: any) {
         super.setProps(props);
         const sid = store.getStore(`uid`);
-        let hid;
         let hincId;  // 最新一条消息的ID
         if (props.chatType === GENERATOR_TYPE.GROUP)  { // 群聊
             const groupInfo = store.getStore(`groupInfoMap/${this.props.rid}`,new GroupInfo());
             this.props.official = groupInfo.level === 5;
             this.props.name = groupInfo.name;
             this.props.avatar = getGroupAvatar(this.props.rid) || '../../res/images/groups.png';
-            hid = genGroupHid(this.props.rid);
+            this.props.hid = genGroupHid(this.props.rid);
 
-            const hIncIdArr = store.getStore(`groupChatMap/${hid}`,[]);
+            const hIncIdArr = store.getStore(`groupChatMap/${this.props.hid}`,[]);
             hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
             this.props.lastMessage = hincId ? store.getStore(`groupHistoryMap/${hincId}`,'') : new GroupMsg();
 
@@ -51,24 +50,24 @@ export class MessageRecord extends Widget {
                 });
             }
             this.props.avatar = getUserAvatar(this.props.rid) || '../../res/images/user_avatar.png';
-            hid = genUserHid(sid,this.props.rid);
+            this.props.hid = genUserHid(sid,this.props.rid);
 
-            const hIncIdArr = store.getStore(`userChatMap/${hid}`,[]);
+            const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`,[]);
             hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
             this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
             this.props.official = store.getStore(`userInfoMap/${this.props.rid}`,{ level:0 }).level === VIP_LEVEL.VIP5;
         }
 
         // 计算有多少条新消息记录
-        const lastHincId = store.getStore(`lastRead/${hid}`,{ msgId:undefined }).msgId; // 最后阅读的一条消息ID
+        const lastHincId = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined }).msgId; // 最后阅读的一条消息ID
         const count1 = hincId ? getIndexFromHIncId(hincId) :-1; // 收到的最新消息ID
         const count2 = lastHincId ? getIndexFromHIncId(lastHincId) :-1; // 已读的最后一条消息ID
         this.props.unReadCount = count1 > count2 && (count1 - count2);
 
         // 消息额外设置，免打扰|置顶
         const setting = store.getStore('setting',{ msgTop:[],msgAvoid:[] });
-        this.props.msgTop = setting.msgTop && setting.msgTop.findIndex(item => item === hid) > -1;
-        this.props.msgAvoid = setting.msgAvoid && setting.msgAvoid.findIndex(item => item === hid) > -1;
+        this.props.msgTop = setting.msgTop && setting.msgTop.findIndex(item => item === this.props.hid) > -1;
+        this.props.msgAvoid = setting.msgAvoid && setting.msgAvoid.findIndex(item => item === this.props.hid) > -1;
         
         // 最新一条消息内容处理，空结构体等于true
         if (this.props.lastMessage.time) {
@@ -100,20 +99,19 @@ export class MessageRecord extends Widget {
     public firstPaint() {
         super.firstPaint();
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            const hid = genUserHid(store.getStore('uid'), this.props.rid);
-            store.register(`userChatMap/${hid}`, this.bindCB);
-            store.register(`lastRead/${hid}`,this.bindCB);
+            store.register(`userChatMap/${this.props.hid}`, this.bindCB);
         } else {
-            const hid = genGroupHid(this.props.rid);
-            store.register(`groupChatMap/${hid}`, this.bindCB);
-            store.register(`lastRead/${hid}`,this.bindCB);
+            store.register(`groupChatMap/${this.props.hid}`, this.bindCB);
         }
         store.register('setting',this.bindCB);
+        store.register(`lastRead/${this.props.hid}`,this.bindCB);
     }
+
     public updateMessage() {
         this.setProps(this.props);
         this.paint();
     }
+
     public destroy() {
         store.unregister(`userChatMap/${genUserHid(store.getStore('uid'), this.props.rid)}`, this.bindCB);
         store.unregister(`groupChatMap/${genGroupHid(this.props.rid)}`, this.bindCB);
@@ -128,6 +126,7 @@ export class MessageRecord extends Widget {
 
 interface Props {
     rid: number;  // uid|gid
+    hid:string;   // hid
     name:string;  // 好友名字|群名字
     time:string;  // 最新一条消息时间
     msg:string;   // 最新一条消息内容

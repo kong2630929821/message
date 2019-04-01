@@ -69,7 +69,9 @@
                         {{if it.isAdmin}}
                         <div w-class="liItem1" style="color: #222222;" on-tap="openGroupManage">群管理</div>
                         {{end}}
-                        {{if it.inFlag != 1}}
+                        
+                        {{% ============================群聊进入不显示去聊天按钮======================}}
+                        {{if it.inFlag != 2}}
                         <div w-class="liItem1" on-tap="openGroupChat(e)" on-down="onShow">开始聊天</div>
                         {{end}}
                     </ul>

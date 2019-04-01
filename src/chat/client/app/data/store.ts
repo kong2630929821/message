@@ -128,7 +128,6 @@ export const initStore = () => {
         isLogin:true,
         offLine:false,
         flags:{}
-        
     };
 };
 

@@ -53,7 +53,12 @@ export class UserDetail extends Widget {
         this.props.isFriend = true;
         this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
         
-        if (props.inFlag === INFLAG.newApply) {
+        this.props.alias = getFriendAlias(this.props.uid).name;
+        this.props.isFriend = getFriendAlias(this.props.uid).isFriend;
+        if (!this.props.alias) {
+            this.getUserData(this.props.uid);
+        }
+        if (props.inFlag === INFLAG.newApply || !this.props.isFriend) {
             this.props.utilList = [{ utilText: '加入黑名单' }];
 
         } else if (this.props.userInfo.level === VIP_LEVEL.VIP5) {  // 官方账号不允许删除
@@ -70,12 +75,6 @@ export class UserDetail extends Widget {
                 // { utilText: '加入黑名单' },
                 { utilText: '删除好友' }
             ];
-        }
-
-        this.props.alias = getFriendAlias(this.props.uid).name;
-        this.props.isFriend = getFriendAlias(this.props.uid).isFriend;
-        if (!this.props.alias) {
-            this.getUserData(this.props.uid);
         }
         logger.debug(props);
         this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';

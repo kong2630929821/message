@@ -37,7 +37,6 @@
     border-radius: 50%;
     right: 15px;
     bottom: 50px;
-    border: 1px solid #fff;
 }
 .tabs{
     width: 300px;

@@ -43,7 +43,7 @@ export const applyFriend = (user: string): Result => {
     // 获取用户UID
     const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
     const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`, `a:${user}`]);
-    console.log('!!!!!!!!!!!!!!!applyFriend rArr:', rArr);
+    console.log('!!!!!!!!!!!!!!!applyFriend user: ',user,' rArr:', rArr);
 
     let uid;
     rArr.forEach((r) => {

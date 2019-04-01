@@ -3,10 +3,12 @@
  */
 
 // ================================================ 导入
+import { gotoGameService, gotoOfficialGroupChat } from '../../../../../app/api/thirdBase';
 import { uploadFileUrlPrefix } from '../../../../../app/config';
 import * as walletStore from '../../../../../app/store/memstore';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
+import { popModalBoxs } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
@@ -14,7 +16,9 @@ import * as store from '../../data/store';
 import { getUserAvatar, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
+import { setGameServer } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
+import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -22,6 +26,7 @@ declare var module;
 export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 interface Props {
+    offlienType:OfflienType;
     sid: number;
     messageList: any[];
     isUtilVisible: boolean;
@@ -41,6 +46,7 @@ export class Contact extends SpecialWidget {
     public web3Promise: Promise<string>;
     public defaultInjectPromise: Promise<string>;
     public props: Props = {
+        offlienType:OfflienType.CHAT,
         sid:0,
         utilList:[
             { iconPath: 'add-blue.png', utilText: '添加好友' },

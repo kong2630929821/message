@@ -58,6 +58,7 @@
                     <chat-client-app-widget-switch-switch>{types:{{it.msgAvoid}},activeColor:"linear-gradient(to right,#318DE6,#38CFE7)",inactiveColor:"#dddddd"}</chat-client-app-widget-switch-switch>
                 </li>
 
+                {{% ============================单聊进入不显示去聊天按钮======================}}
                 {{if it.inFlag != 1}}
                     <div w-class="liItem1" on-tap="startChat" on-down="onShow">开始对话</div>
                 {{end}}
@@ -65,7 +66,7 @@
         </div>
         {{end}}
     </div>
-    {{if it.isContactorOpVisible && it.isFriend}}
+    {{if it.isContactorOpVisible}}
     <div w-class="contactorOpList" ev-handleFatherTap="handleFatherTap">
         <chat-client-app-widget-utilList-utilList>{utilList:{{it.utilList}} }</chat-client-app-widget-utilList-utilList>
     </div>

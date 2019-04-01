@@ -1,6 +1,5 @@
 <div w-class="topBar">
     <app-components1-blankDiv-topDiv></app-components1-blankDiv-topDiv>
-    <div w-class="backImg"></div>
    
     <div w-class="topBar-content">
         <div on-tap="showMine" on-down="onShow">

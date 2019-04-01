@@ -793,6 +793,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
     logger.debug('read group info: ', groupInfoBucket.get(gInfo.gid));
     // 修改创建群的人的联系人列表，把当前群组加进去
     contact.group.push(gInfo.gid);
+    contact.myGroup.push(gInfo.gid);
     contactBucket.put(uid, contact);
     moveGroupCursor(gInfo.gid, uid);
     logger.debug('Add self: ', uid, 'to conatact group');
