@@ -34,7 +34,7 @@ export class NameCard extends Widget {
         } else if (this.props.cardType === 'group') {
             this.props.cardTypeShow = '群名片';
         } else if (this.props.cardType === 'redEnv') {
-            this.props.cardTypeShow = 'KuPay红包';
+            this.props.cardTypeShow = '好嗨红包';
         }
     }
 }

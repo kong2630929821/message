@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
 import { uploadFileUrlPrefix } from '../../../../../app/config';
 import * as walletStore from '../../../../../app/store/memstore';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
@@ -22,6 +23,7 @@ declare var module;
 export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 interface Props {
+    offlienType:OfflienType;
     sid: number;
     messageList: any[];
     isUtilVisible: boolean;
@@ -41,6 +43,7 @@ export class Contact extends SpecialWidget {
     public web3Promise: Promise<string>;
     public defaultInjectPromise: Promise<string>;
     public props: Props = {
+        offlienType:OfflienType.CHAT,
         sid:0,
         utilList:[
             { iconPath: 'add-blue.png', utilText: '添加好友' },

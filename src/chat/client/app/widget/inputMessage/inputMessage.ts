@@ -3,7 +3,6 @@
  */
 // ===========================导入
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
-import { arrayBufferToBase64 } from '../../../../../pi/util/base64';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -18,7 +17,8 @@ export class InputMessage extends Widget {
         isOnEmoji:false,
         isOnTools:false,
         isOnRadio:false,
-        toolList:[]
+        toolList:[],
+        chatType:'user'
     };
     private radioTime:number;
 
@@ -104,7 +104,7 @@ export class InputMessage extends Widget {
                 sendImage(e);
                 break;
             case 2:
-                sendRedEnv(e);
+                sendRedEnv(e,this.props.chatType);
                 break;
             default:
         }
@@ -119,6 +119,7 @@ interface Props {
     isOnTools:boolean;  // 是否打开更多功能
     toolList:any[];  // 更多功能列表
     isOnRadio:boolean; // 是否正在录音
+    chatType:string;  // 聊天类型 user|group
 }
 
 /**
@@ -206,8 +207,8 @@ export const sendPicture = (e:any) => {
 };
 
 // 发送红包
-export const sendRedEnv = (e:any) => {
-    popNew('app-view-earn-redEnvelope-writeRedEnv',{ inFlag:'chat' },(res) => {
+export const sendRedEnv = (e:any,chatType:string) => {
+    popNew('app-view-earn-redEnvelope-writeRedEnv',{ inFlag:`chat_${chatType}` },(res) => {
         /**
          * res:{message,rid} 留言，红包ID
          */

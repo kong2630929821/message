@@ -262,8 +262,8 @@ export const applyUserFriend = (user: string) => {
 
 /**
  * 申请添加游戏客服
- * @param rid reader id
- * @param cb callback
+ * @param uid user id
+ * 返回值是uid
  */
 export const applyGameServer = (uid: number) => {
 
