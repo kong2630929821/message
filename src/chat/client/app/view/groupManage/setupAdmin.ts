@@ -27,7 +27,6 @@ export class SetupAdmin extends Widget {
     };
     public setProps(props:any) {
         super.setProps(props);
-        this.props.gid = props.gid;
         this.props.ginfo = this.getGroupInfo(this.props.gid);
     }
     public goBack() {

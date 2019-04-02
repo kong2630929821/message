@@ -37,8 +37,8 @@
                 <div w-class="adress-wrap" on-tap="openGroupAnnounce">
                     <img w-class="adressIcon" src="../../res/images/sound.png" />
                     <div w-class="adress-text-wrap">
-                        <span w-class="mainText">无</span>
-                        <span w-class="flag">群公告</span>
+                        <span w-class="mainText">{{it.lastAnnounce.title}}</span>
+                        <span w-class="flag">{{it.lastAnnounce.content}}</span>
                     </div>
                 </div>
                 <div w-class="adress-wrap" style="margin:0;">
@@ -86,7 +86,7 @@
                 <img w-class="grouperIcon" src="../../res/images/add_group_user.png" />
                 {{for i, v of it.members}}
                     {{if i < 5 }}
-                    <img w-class="grouperIcon" src="../../res/images/user_avatar.png" />
+                    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="grouperIcon">{imgURL:{{v || "../../res/images/user_avatar.png"}}, width:"88px"}</widget>
                     {{end}}
                 {{end}}
                 <img w-class="more" src="../../res/images/more-gray.png" />

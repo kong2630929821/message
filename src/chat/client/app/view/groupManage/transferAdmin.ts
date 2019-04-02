@@ -42,7 +42,8 @@ export class TransferGroupOwner extends Widget {
         return ginfo;
     }
     public openConfirmTranBox(uid:number) {
-        const modalObj = { content:`"${uid}"将成为新群主，确认后您将你失去群主身份。`,sureText:'确定',cancelText:'取消',style:'color:#F7931A' };
+        const groupUser = store.getStore(`groupUserLinkMap/${genGuid(this.props.gid, uid)}`,{ userAlias:'' });
+        const modalObj = { content:`"${groupUser.userAlias}"将成为新群主，确认后您将你失去群主身份。`,sureText:'确定',cancelText:'取消',style:'color:#F7931A' };
         const guid = genGuid(this.props.gid,uid);
         popModalBoxs('chat-client-app-widget-modalBox-modalBox',modalObj,
         () => {

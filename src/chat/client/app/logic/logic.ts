@@ -185,13 +185,11 @@ export const getAllFriendIDs = () => {
     const friends = store.getStore(`contactMap/${uid}`,{ friends:[] }).friends;
     const accIds = [];
     for (const v of friends) {
-        const acc_id = store.getStore(`userInfoMap/${v}`,new UserInfo());
+        const acc_id = store.getStore(`userInfoMap/${v}`,new UserInfo()).acc_id;
         accIds.push(acc_id);
     }
 
     return accIds;
-
-    // return store.getStore(`contactMap/${uid}`,{ friends:[] }).friends; 
 };
 
 // 从某个页面进入标记

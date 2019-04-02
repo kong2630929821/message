@@ -8,7 +8,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { genGuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias } from '../../logic/logic';
+import { getFriendAlias, getGroupUserAvatar, getUserAvatar } from '../../logic/logic';
 
 // ================================================ 导出
 export class SelectUser extends Widget {
@@ -17,7 +17,9 @@ export class SelectUser extends Widget {
         gid:null,
         name: '',
         chatType:GENERATOR_TYPE.USER,
-        isSelect: false
+        isSelect: false,
+        disabled:false,
+        avatar:''
     };
    
     public setProps(props: any) {
@@ -27,19 +29,24 @@ export class SelectUser extends Widget {
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             // 好友别名
             this.props.name = getFriendAlias(this.props.id).name;
+            this.props.avatar = getUserAvatar(this.props.id);
         }
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            // 群名片
+            // 群成员
             const groupUser = store.getStore(`groupUserLinkMap/${genGuid(this.props.gid, this.props.id)}`);
             this.props.name = groupUser ? groupUser.userAlias : '';
+            this.props.avatar = getGroupUserAvatar(this.props.gid,this.props.id);
         }
     }
 
     // 点击改变选中状态
     public changeSelect(event:any) {
-        this.props.isSelect = !this.props.isSelect;
-        notify(event.node,'ev-addMember',{ value :  this.props.id,name:this.props.name });
-        this.paint();
+        if (!this.props.disabled) {
+            this.props.isSelect = !this.props.isSelect;
+            notify(event.node,'ev-addMember',{ value :  this.props.id,name:this.props.name });
+            this.paint();
+        }
+        
     }
     
 }
@@ -47,8 +54,10 @@ export class SelectUser extends Widget {
 // ================================================ 本地
 interface Props {
     id:number; // 好友id 或者群成员id
+    avatar:string; // 用户头像
     gid:number; // 群ID
     name:string;// 好友名 或者 群中的用户名
     chatType:GENERATOR_TYPE;
     isSelect: boolean;// 是否选中
+    disabled:boolean; // 是否不允许选择
 }

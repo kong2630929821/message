@@ -8,6 +8,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { Logger } from '../../../../utils/logger';
 import { genGuid } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { getGroupUserAvatar } from '../../logic/logic';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
@@ -36,6 +37,7 @@ export class MemberItem extends Widget {
             this.props.groupInfo = store.getStore(`groupInfoMap/${this.props.gid}`);
             const groupUser = store.getStore(`groupUserLinkMap/${guid}`);
             this.props.name = groupUser ? groupUser.userAlias : '';
+            this.props.avatorPath = getGroupUserAvatar(this.props.gid,this.props.id) || '../../res/images/user_avatar.png';
         } 
     }
 }

@@ -13,17 +13,17 @@
         <widget w-tag="chat-client-app-widget-memberItem-memberItem" on-tap="deleteMember">{avatorPath:"../../res/images/del_group_user.png",text:"移除成员", isOperation:true}</widget>
         {{end}}
         
-        <widget w-tag="chat-client-app-widget-memberItem-memberItem">{id: {{it.groupInfo.ownerid}},gid: {{it.gid}}, avatorPath:"../../res/images/user_avatar.png", isOwner:true}</widget>
+        <widget w-tag="chat-client-app-widget-memberItem-memberItem">{id: {{it.groupInfo.ownerid}},gid: {{it.gid}}, isOwner:true}</widget>
         {{for index,item of it.groupInfo.adminids}}
             {{if item !== it.groupInfo.ownerid}}
-                <widget w-tag="chat-client-app-widget-memberItem-memberItem">{id: {{item}},gid: {{it.gid}}, avatorPath:"../../res/images/user_avatar.png", isAdmin:true}</widget>
+                <widget w-tag="chat-client-app-widget-memberItem-memberItem">{id: {{item}},gid: {{it.gid}}, isAdmin:true}</widget>
             {{end}}
         {{end}}
 
         {{for index,item of it.groupInfo.memberids}}
             {{if item !== it.groupInfo.ownerid && it.groupInfo.adminids.indexOf(item) === -1}}
-            <div style="position:relative;">
-                <widget w-tag="chat-client-app-widget-memberItem-memberItem">{id: {{item}},gid: {{it.gid}}, avatorPath:"../../res/images/user_avatar.png"}</widget>
+            <div style="position:relative;width: 160px;">
+                <widget w-tag="chat-client-app-widget-memberItem-memberItem">{id: {{item}},gid: {{it.gid}} }</widget>
                 {{if it.deleteBtn}}
                 <img on-tap="removeMember({{item}})" src="../../res/images/fail.png" style="position:absolute;top:16px;left:20px;"/>
                 {{end}}

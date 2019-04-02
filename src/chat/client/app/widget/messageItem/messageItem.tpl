@@ -3,6 +3,7 @@
     <div style="overflow: hidden;">
         {{if it.me}}
         <div style="position:relative;margin: 10px 40px 0;float: right;">
+
             {{% ========================红包=========================}}
             {{if it.message.mtype == 9}}
             <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.message.msg}},cardType:"redEnv",received:{{!!it.message.redEnvDetail}} }</widget>
@@ -106,8 +107,8 @@
     {{elseif it.message.mtype == 5}}
     <div w-class="recallMsg">{{it.me ? "你" : it.name}}撤回了一条消息</div>
 
-    {{% =================添加好友或创建群成功提示==================}}
-    {{elseif it.message.mtype == 8 || it.message.mtype == 10}}
+    {{% =================添加好友或创建群成功或群其他设置提示==================}}
+    {{elseif it.message.mtype == 8 || it.message.mtype == 10 || it.message.mtype == 12}}
     <div w-class="recallMsg" style="font-size:32px;">{{it.message.msg}}</div>
 
     {{% ========================加群成功提示=========================}}

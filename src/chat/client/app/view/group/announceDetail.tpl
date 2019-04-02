@@ -9,7 +9,7 @@
     <div w-class="content-wrap">
         {{it.content}}
     </div>
-    {{if it.aIncId}}
+    {{if it.isOwner}}
     <div w-class="delete" on-tap="deleteAnnounce">删除</div>
     {{end}}
 </div>

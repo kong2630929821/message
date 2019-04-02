@@ -32,8 +32,11 @@
 .userName{
     font-size: 32px;
     font-weight:bold;
-    font-family: PingFangSC-Medium;
     margin-bottom:5px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 350px;
+    white-space: nowrap;
 }
 .notDisturbIcon{
     width:32px;

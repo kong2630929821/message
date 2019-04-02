@@ -26,7 +26,7 @@ export class AnnounceItem extends Widget {
     public setProps(props:any) {
         super.setProps(props); 
         logger.debug(props.aIncId,'=============',this.props.aIncId);
-        const announce = store.getStore(`announceHistoryMap/${this.props.aIncId}`,new Announcement());
+        const announce = store.getStore(`announceHistoryMap/${this.props.aIncId}`,null);
         this.props.announce = announce;
         if (announce) {
             const notice = depCopy(announce.msg);

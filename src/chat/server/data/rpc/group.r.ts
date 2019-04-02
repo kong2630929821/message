@@ -154,7 +154,15 @@ export const userExitGroup = (gid: number): Result => {
         groupUserLinkBucket.delete(`${gid}:${uid}`);
         logger.debug('delete user: ', uid, 'from groupUserLinkBucket');
 
+        const userinfo = getCurrentUserInfo();
+        const info = new GroupSend();
+        info.msg = `${userinfo.name}退出了该群`;
+        info.mtype = MSG_TYPE.OTHERMSG;
+        info.gid = gid;
+        info.time = Date.now();
+        sendGroupMessage(info);
         res.r = 1;
+
     } else {
         res.r = 0;
     }
@@ -474,6 +482,14 @@ export const setOwner = (guid: string): Result => {
     gInfo.ownerid = newOwnerId;
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('change group: ', groupId, 'owner from: ', gInfo.ownerid, 'to: ', newOwnerId);
+
+    const userinfo = getCurrentUserInfo(newOwnerId);
+    const info = new GroupSend();
+    info.msg = `${userinfo.name}成为了新的群主`;
+    info.mtype = MSG_TYPE.OTHERMSG;
+    info.gid = groupId;
+    info.time = Date.now();
+    sendGroupMessage(info);
     res.r = 1;
 
     return res;
@@ -516,19 +532,31 @@ export const addAdmin = (guidsAdmin: GuidsAdminArray): Result => {
 
         return res;
     }
-    guids.forEach(item => {
-        const addAdminId = item.split(':')[1];
-        if (gInfo.adminids.indexOf(parseInt(addAdminId, 10)) > -1) {
+    const addAdminIds = [];
+    for (const v of guids) {
+        const uid = getUidFromGuid(v);
+        if (gInfo.adminids.indexOf(uid) > -1) {
             res.r = 0;
-            logger.debug('User: ', addAdminId, 'is already an admin');
+            logger.debug('User: ', uid, 'is already an admin');
 
             return res;
         }
-        logger.debug('user logged in with uid: ', uid, 'and you want to add an admin: ', addAdminId);
-        gInfo.adminids.push(parseInt(addAdminId, 10));
-    });
+        gInfo.adminids.push(uid);
+        addAdminIds.push(uid);
+    }
     groupInfoBucket.put(gInfo.gid, gInfo);
     logger.debug('After add admin: ', gInfo);
+
+    for (const v of addAdminIds) {
+        const userinfo = getCurrentUserInfo(v);
+        const info = new GroupSend();
+        info.msg = `群主添加了${userinfo.name}为管理员`;
+        info.mtype = MSG_TYPE.OTHERMSG;
+        info.gid = groupId;
+        info.time = Date.now();
+        sendGroupMessage(info);
+    }
+    
     res.r = 1;
 
     return res;

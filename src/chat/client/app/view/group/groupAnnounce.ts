@@ -11,6 +11,7 @@ import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { Logger } from '../../../../utils/logger';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { timestampFormat } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
@@ -32,7 +33,7 @@ export class GroupAnnounce extends Widget {
     public setProps(props:any) {
         super.setProps(props); 
         const gInfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
-        this.props.aIncIdArray = gInfo.annoceids;
+        this.props.aIncIdArray = depCopy(gInfo.annoceids);
         const uid = store.getStore('uid');
         const ownerid = gInfo.ownerid;
         if (uid === ownerid) {
@@ -68,9 +69,9 @@ export class GroupAnnounce extends Widget {
     // 查看公告详情
     public goDetail(aIncId:string) {
         if (aIncId) {
-            popNew('chat-client-app-view-group-announceDetail',{ aIncId:aIncId });
+            popNew('chat-client-app-view-group-announceDetail',{ aIncId:aIncId,isOwner:this.props.isOwner });
         } else {
-            popNew('chat-client-app-view-group-announceDetail',{ title: '本群须知',content:'欢迎大家入群' });
+            // popNew('chat-client-app-view-group-announceDetail',{ title: '本群须知',content:'欢迎大家入群' });
         }
     }
 }

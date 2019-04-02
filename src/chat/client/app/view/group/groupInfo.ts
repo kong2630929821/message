@@ -4,7 +4,6 @@
 
 // ================================================ 导入
 import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
-import { Json } from '../../../../../pi/lang/type';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
@@ -16,7 +15,7 @@ import { NewGroup } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getGroupAvatar, INFLAG, rippleShow } from '../../logic/logic';
+import { getGroupAvatar, getGroupUserAvatar, INFLAG, rippleShow } from '../../logic/logic';
 import { selectImage } from '../../logic/native';
 import { clientRpcFunc } from '../../net/init';
 import { applyToGroup } from '../../net/rpc';
@@ -50,7 +49,8 @@ export class GroupInfos extends Widget {
             msgTop:false,
             inFlag:INFLAG.contactList,
             avatar:'',
-            avatarHtml:''
+            avatarHtml:'',
+            lastAnnounce:''
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -66,6 +66,7 @@ export class GroupInfos extends Widget {
         gid = this.props.gid;
         const uid = store.getStore('uid');
         const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
+
         // 群已经解散或已被踢出群
         if ((!isNaN(ginfo.state) && ginfo.state === GROUP_STATE.DISSOLVE) || (ginfo.memberids && ginfo.memberids.indexOf(uid) < 0)) {
             this.goBack(true); 
@@ -74,7 +75,11 @@ export class GroupInfos extends Widget {
         this.props.groupAlias = depCopy(ginfo.name);
         this.props.avatar = getGroupAvatar(this.props.gid) || '../../res/images/user_avatar.png';
         
-        this.props.members = this.props.groupInfo.memberids || [];
+        this.props.members = [];
+        for (const v of ginfo.memberids) {
+            this.props.members.push(getGroupUserAvatar(this.props.gid,v));
+            
+        }
         if (uid === this.props.groupInfo.ownerid) {
             this.props.isOwner = true;
         }
@@ -84,10 +89,21 @@ export class GroupInfos extends Widget {
         }
 
         const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
-        
         this.props.setting = setting;
         this.props.msgTop = setting.msgTop.findIndex(item => item === genGroupHid(this.props.gid)) > -1;
         this.props.msgAvoid = setting.msgAvoid.findIndex(item => item === genGroupHid(this.props.gid)) > -1;
+        if (ginfo.annoceids) {
+            const announce = store.getStore(`announceHistoryMap/${ginfo.annoceids[ginfo.annoceids.length - 1]}`,null);
+            if (announce) {
+                this.props.lastAnnounce = JSON.parse(announce.msg);
+            } else {
+                this.props.lastAnnounce = {
+                    title:'无',
+                    content:'群公告'
+                };
+            }
+        }
+
     }
 
     public firstPaint() {
@@ -111,12 +127,13 @@ export class GroupInfos extends Widget {
             
             const imagePicker = selectImage((width, height, url) => {
                 console.log('selectImage url = ',url);
-            // tslint:disable-next-line:max-line-length
+                // tslint:disable-next-line:max-line-length
                 this.props.avatarHtml = `<div style="background-image: url(${url});width: 190px;height: 190px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
                 this.paint();
 
                 const loading = popNewLoading('图片上传中');
                 imagePicker.getContent({
+                    quality:70,
                     success(buffer:ArrayBuffer) {
                         imgResize(buffer,(res) => {
                             uploadFile(arrayBuffer2File(res.ab),(url) => {
@@ -350,8 +367,8 @@ interface Util {
 }
 interface Props {
     gid: number;
-    groupInfo:Json;// 群信息
-    members:Json; // 群成员数组
+    groupInfo:any;// 群信息
+    members:any[]; // 群成员数组
     utilList:Util[]; // 操作列表
     isGroupOpVisible:boolean;
     editable:boolean; // 是否可编辑
@@ -365,6 +382,7 @@ interface Props {
     inFlag:INFLAG; // 从哪里进入
     avatar:string; // 群头像
     avatarHtml:string; // 新群头像展示
+    lastAnnounce:any; // 最新一条群公告
 }
 
 const MAX_DURING = 600;
