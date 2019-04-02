@@ -39,6 +39,9 @@ export class ContactItem extends Widget {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
                 if (this.props.id !== store.getStore('uid')) {
                     this.props.name = getFriendAlias(this.props.id).name;
+                    if (!this.props.name) {
+                        const userinfo = store.getStore('groupUserLinkMap');
+                    }
                 } else {
                     this.props.name = depCopy(store.getStore(`userInfoMap/${this.props.id}`,new UserInfo()).name || '');
                     this.props.name += '(本人)';

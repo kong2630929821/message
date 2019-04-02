@@ -7,7 +7,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
-import { Announcement, GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
+import { GroupHistory, MSG_TYPE } from '../../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { depCopy, getGidFromHincid } from '../../../../utils/util';
@@ -21,8 +21,8 @@ export class AnnounceDetail extends Widget {
     public setProps(props:any) {
         super.setProps(props); 
         if (props.aIncId) {
-            const announce = store.getStore(`announceHistoryMap/${props.aIncId}`,new Announcement());
-            if (announce.msg) {
+            const announce = store.getStore(`announceHistoryMap/${props.aIncId}`,null);
+            if (announce) {
                 const notice = depCopy(announce.msg);
                 this.props.title = JSON.parse(notice).title;
                 this.props.content = JSON.parse(notice).content;  
@@ -42,11 +42,11 @@ export class AnnounceDetail extends Widget {
             clientRpcFunc(sendGroupMessage, message, (r:GroupHistory) => {
                 // TODO
                 if (r.hIncId === DEFAULT_ERROR_STR) {
-                    popNewMessage('撤回公告失败');
+                    popNewMessage('删除公告失败');
                         
                     return;
                 } else {
-                    popNewMessage('撤回公告成功');
+                    popNewMessage('删除公告成功');
                     this.ok();
                 }
             });

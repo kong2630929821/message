@@ -9,4 +9,6 @@
 .content-wrap{
     width: 564px;
     font-size: 28px;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }

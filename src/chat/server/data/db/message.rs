@@ -17,6 +17,7 @@ enum MSG_TYPE {
     REDENVELOPE = 9, // 红包
     CREATEGROUP = 10, // 创建群聊
     ADDGROUP = 11, // 加群成功
+    OTHERMSG = 12, // 其他群设置提醒
 }
 
 /**
