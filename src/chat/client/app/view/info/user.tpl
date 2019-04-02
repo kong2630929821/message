@@ -18,11 +18,14 @@
             <div w-class="adress-wrap" style="margin:60px 0 20px;" on-tap="doCopy(1)">
                 <img w-class="adressIcon" src="../../res/images/adress-book.png" />
                 <div w-class="adress-text-wrap">
-                    <span w-class="mainText">{{it.info.acc_id}}</span>
+                    <span w-class="mainText">
+                        {{it.info.acc_id}}
+                        <img src="../../res/images/copy_gray.png" style="width:30px;"/>
+                    </span>
                     <span w-class="flag">好嗨号</span>
                 </div>
             </div>
-            <div w-class="adress-wrap" on-tap="doCopy(2)">
+            <div w-class="adress-wrap">
                 <img w-class="adressIcon" src="../../res/images/phone.png" />
                 <div w-class="adress-text-wrap">
                     <span w-class="mainText">未知</span>

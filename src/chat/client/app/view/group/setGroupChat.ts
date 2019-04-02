@@ -66,6 +66,7 @@ export class SetGroupChat extends Widget {
 
             const loading = popNewLoading('图片上传中');
             imagePicker.getContent({
+                quality:70,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
                         uploadFile(arrayBuffer2File(res.ab),(url) => {

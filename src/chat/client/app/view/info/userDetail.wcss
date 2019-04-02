@@ -44,6 +44,8 @@
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
     word-break: break-all;
+    display: flex;
+    align-items: center;
 }
 .flag{
     color: rgba(136, 136, 136, 1);

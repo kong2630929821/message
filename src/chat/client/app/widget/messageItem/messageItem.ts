@@ -29,7 +29,8 @@ export class MessageItem extends Widget {
             chatType:GENERATOR_TYPE.USER,
             isMessageRecallVisible:false,
             avatar:'',  // 对方的头像
-            playRadio:false
+            playRadio:false,
+            myAvatar:''
         };
        
     }     
@@ -50,6 +51,7 @@ export class MessageItem extends Widget {
             this.props.me = this.props.message.sid === store.getStore('uid');
             const time = depCopy(this.props.message.time);
             this.props.time = timestampFormat(time,1);
+            this.props.myAvatar = getUserAvatar(store.getStore('uid')) || '../../res/images/user_avatar.png';
         }
         
     }
@@ -192,6 +194,7 @@ interface Props {
     isMessageRecallVisible:boolean;// 撤回按钮是否可见
     avatar:string;  // 对方的头像
     playRadio:boolean; // 是否正在播放语音
+    myAvatar:string;  // 自己的头像
 }
 
 // 转换文字中的链接

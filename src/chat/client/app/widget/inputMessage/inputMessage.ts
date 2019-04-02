@@ -126,7 +126,10 @@ interface Props {
  * 选择相册
  */
 export const sendImage = (e:any) => {
-    const imagePicker = selectImage(() => {
+    const imagePicker = selectImage((width, height, url) => {
+        console.log('选择的图片',width,height,url);
+        // 预览图片
+        notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${url}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG });
 
         imagePicker.getContent({
             quality:10,
@@ -136,8 +139,6 @@ export const sendImage = (e:any) => {
                     originalImg:''
                 };
                 imgResize(buffer,(res) => {
-                    // 预览图片
-                    notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG }); 
                     
                     uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
                         console.log('选择的照片压缩图',imgUrlSuf);
@@ -168,8 +169,11 @@ export const sendImage = (e:any) => {
  * 拍摄照片
  */
 export const sendPicture = (e:any) => {
-    const camera = openCamera(() => {
-
+    const camera = openCamera((res) => {
+        console.log('拍摄的图片',res);
+        // 预览图片
+        notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG }); 
+ 
         camera.getContent({
             quality:10,
             success(buffer:ArrayBuffer) {
@@ -178,9 +182,7 @@ export const sendPicture = (e:any) => {
                     originalImg:''
                 };
                 imgResize(buffer,(res) => {
-                    // 预览图片
-                    notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG }); 
-                    
+                   
                     uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
                         console.log('拍摄的照片压缩图',imgUrlSuf);
                         value.compressImg = imgUrlSuf;

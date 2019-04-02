@@ -6,11 +6,9 @@
    
     <div w-class="a-part" ev-changeSelect="changeSelect">
         <div w-class="a">a</div>
-        <div w-class="user-wrap" ev-transferAdmin="openConfirmTranBox">
+        <div w-class="user-wrap">
             {{for index,item of membersButnoOwner}}
-            <div on-tap="openConfirmTranBox({{item}})">
-                <chat-client-app-view-contactList-contactItem>{"id":{{item}},chatType:"user",img:"../../res/images/user_avatar.png"}</chat-client-app-view-contactList-contactItem>
-            </div>
+                <widget w-tag="chat-client-app-widget-selectUser-selectUser" on-tap="openConfirmTranBox({{item}})">{id:{{item}},chatType:"group",gid:{{it.gid}},disabled:true }</widget>
             {{end}}
         </div>
     </div>

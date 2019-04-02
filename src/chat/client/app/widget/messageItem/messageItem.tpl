@@ -3,6 +3,7 @@
     <div style="overflow: hidden;">
         {{if it.me}}
         <div style="position:relative;margin: 10px 40px 0;float: right;">
+
             {{% ========================红包=========================}}
             {{if it.message.mtype == 9}}
             <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.message.msg}},cardType:"redEnv",received:{{!!it.message.redEnvDetail}} }</widget>

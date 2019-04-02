@@ -127,12 +127,13 @@ export class GroupInfos extends Widget {
             
             const imagePicker = selectImage((width, height, url) => {
                 console.log('selectImage url = ',url);
-            // tslint:disable-next-line:max-line-length
+                // tslint:disable-next-line:max-line-length
                 this.props.avatarHtml = `<div style="background-image: url(${url});width: 190px;height: 190px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
                 this.paint();
 
                 const loading = popNewLoading('图片上传中');
                 imagePicker.getContent({
+                    quality:70,
                     success(buffer:ArrayBuffer) {
                         imgResize(buffer,(res) => {
                             uploadFile(arrayBuffer2File(res.ab),(url) => {
