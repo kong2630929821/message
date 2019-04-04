@@ -207,8 +207,8 @@ export const acceptFriend = (agree: UserAgree): Result => {
     // 在对方的列表中添加好友
     const rContactInfo = contactBucket.get(rid)[0];
     rContactInfo.applyUser = delValueFromArray(sid, rContactInfo.applyUser);
-    if (agree) {
-            
+    
+    if (agree.agree) {
         rContactInfo.friends.findIndex(item => item === sid) === -1 && rContactInfo.friends.push(sid);
         // 在当前用户列表中添加好友
         sContactInfo.friends.findIndex(item => item === rid) === -1 && sContactInfo.friends.push(rid);
