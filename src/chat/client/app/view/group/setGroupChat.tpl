@@ -1,4 +1,4 @@
-<div w-class="set-groupChat-wrap" class="new-page">
+<div w-class="newPage" class="new-page">
     <div w-class="top-main-wrap" ev-next-click="completeClick" ev-back-click="back">
         <chat-client-app-widget-topBar-topBar>{title:"创建群聊({{it.inviteMembers.length}}/500)",nextImg:"{{it.isSelect?'complete_blue.png':'complete_gray.png'}}"}</chat-client-app-widget-topBar-topBar>
     </div>
@@ -15,14 +15,16 @@
         </div>
     </div>
     
-    <div w-class="a-part" ev-changeSelect="changeSelect">
-        {{for i,v of it1.friends}}
-            {{if it.userInfos.get(v.toString()).level != 5}}
-            {{% =============不能邀请客服账号入群==========}}
-            <div ev-addMember="addMember" style="position:relative;">
-                <chat-client-app-widget-selectUser-selectUser>{id:{{v}}, chatType: "user"}</chat-client-app-widget-selectUser-selectUser>
-            </div>
+    <div w-class="userList" ev-changeSelect="changeSelect">
+        <div w-class="a">
+            {{for i,v of it1.friends}}
+                {{if it.userInfos.get(v.toString()).level != 5}}
+                {{% =============不能邀请客服账号入群==========}}
+                <div ev-addMember="addMember" style="position:relative;">
+                    <chat-client-app-widget-selectUser-selectUser>{id:{{v}}, chatType: "user"}</chat-client-app-widget-selectUser-selectUser>
+                </div>
+                {{end}}
             {{end}}
-        {{end}}
+        </div>
     </div>
 </div>

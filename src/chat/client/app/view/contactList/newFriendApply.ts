@@ -32,7 +32,8 @@ export class NewFriendApply extends Widget {
         chatType:GENERATOR_TYPE.USER,
         isSolve:'',
         title:'',
-        activeToGGid:null
+        activeToGGid:null,
+        avatar:''
     };
     public setProps(props:any) {
         super.setProps(props);
@@ -135,4 +136,5 @@ interface Props {
     isSolve:string;
     title:string; // topbar 标题
     activeToGGid:number; // 主动入群 群id
+    avatar:string;  // 头像
 }

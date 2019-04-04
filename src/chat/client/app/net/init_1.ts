@@ -5,17 +5,19 @@
  */
 
 // ================================================ 导入
+import { getOfficial } from '../../../../app/net/pull3';
 import * as walletStore from '../../../../app/store/memstore';
 import { changeWalletName } from '../../../../app/utils/account';
 import { popNewMessage } from '../../../../app/utils/tools';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
+import { setLocalStorage } from '../data/lcstore';
 import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
-import { getFriendHistory, getSetting } from './rpc';
+import { getChatUid, getFriendHistory, getSetting } from './rpc';
 
 // ================================================ 导出
 
@@ -44,7 +46,7 @@ export const walletSignIn = (openid) => {
                 store.setStore('isLogin',true);
                 getSetting();   // 获取设置信息
                 init2.init(r.uid);
-
+                
                 init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {
                     if (v.code === 1) {
                         getFriendHistory(v.rid, v.gid);
@@ -52,6 +54,18 @@ export const walletSignIn = (openid) => {
                 });
                 setUserInfo();
 
+                // 从json文件中获取
+                getOfficial().then(res => {
+                    console.log('!!!!!!!!!!!!!!!!!!!!getOfficial',res);
+                    setLocalStorage('officialService',res);  // 官方账号等配置信息
+                    getChatUid(res.HAOHAI_SERVANT).then((r:number) => {
+                        getFriendHistory(r);  // 获取好嗨客服发送的离线消息
+                        store.setStore('flags/HAOHAI_UID',r);  // 好嗨客服的uid
+                        
+                    });
+
+                });
+                
             } else {
                 popNewMessage('钱包登陆失败');
             }

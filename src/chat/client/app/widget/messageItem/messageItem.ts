@@ -51,8 +51,8 @@ export class MessageItem extends Widget {
             this.props.me = this.props.message.sid === store.getStore('uid');
             const time = depCopy(this.props.message.time);
             this.props.time = timestampFormat(time,1);
-            this.props.myAvatar = getUserAvatar(store.getStore('uid')) || '../../res/images/user_avatar.png';
         }
+        this.props.myAvatar = getUserAvatar(store.getStore('uid')) || '../../res/images/user_avatar.png';
         
     }
 
@@ -78,7 +78,12 @@ export class MessageItem extends Widget {
         }
     }
 
-    public userDetail(e:any) {
+    public userDetail(e:any,fg:boolean= false) {
+        if (fg) {
+            popNew('chat-client-app-view-info-user');
+            
+            return;
+        }
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             popNew('chat-client-app-view-info-userDetail',{ uid:this.props.message.sid, inFlag: INFLAG.chat_user },(r) => {
                 if (r) {

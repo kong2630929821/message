@@ -3,7 +3,11 @@
         <chat-client-app-widget-topBar-topBar>{title:{{it.title}} }</chat-client-app-widget-topBar-topBar>
     </div>
     <div w-class="newfriend-wrap" on-tap="goDetail">
-        <chat-client-app-widget-featureBar-featureBar>{iconPath:"user_avatar.png",text:{{it.name}} }</chat-client-app-widget-featureBar-featureBar>
+        <div w-class="user">
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
+            <span w-class="text">{{it.name}}</span>
+            <img w-class="more" src="../../res/images/more-gray.png"/>
+        </div>
     </div>
     <div w-class="attach-info-wrap">
         <div w-class="title-wrap">附加信息</div>

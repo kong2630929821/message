@@ -12,11 +12,10 @@ import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid }
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistory, GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
+import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OfficialUsers, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
-import { createGroup, getUid } from './group.r';
-import { GroupCreate } from './group.s';
-import { applyFriend } from './user.r';
+import { getUid } from './group.r';
+import { getSUID, sendFirstWelcomeMessage } from './user.r';
 
 declare var env: Env;
 
@@ -54,16 +53,10 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
         return accountGenerator;
     });
     console.log('registeruser userinfo: ',userInfo);
-
-    userCredential.uid = userInfo.uid;
-    userCredential.passwdHash = registerInfo.passwdHash;
-
-    const SUID = CONSTANT.CUSTOMER_SERVICE;
-    if (userInfo.uid === SUID || userInfo.uid === CONSTANT.GAME_SERVEICE) {
-        userInfo.level = VIP_LEVEL.VIP5;  // 客服账号等级为5
-    }
     userInfoBucket.put(userInfo.uid, userInfo);
     
+    userCredential.uid = userInfo.uid;
+    userCredential.passwdHash = registerInfo.passwdHash;
     console.log('sucessfully registered user', userInfo);
     userCredentialBucket.put(userInfo.uid, userCredential);
 
@@ -103,6 +96,7 @@ export const login = (user: UserType): UserInfo => {
     console.log('1111111111111111111111111');
     let loginReq = new LoginReq();
     let userInfo = new UserInfo();
+    let SUID = null; // 好嗨客服uid
     if (user.enum_type === UserType_Enum.WALLET) {
         const walletLoginReq = <WalletLoginReq>user.value;
         const openid = walletLoginReq.openid;
@@ -122,6 +116,8 @@ export const login = (user: UserType): UserInfo => {
             userAcc.uid = userinfo.uid;
             userAccountBucket.put(openid, userAcc);
             loginReq.uid = userinfo.uid;
+            SUID = getSUID();
+            
         } else {
             loginReq.uid = v.uid;
         }
@@ -181,35 +177,28 @@ export const login = (user: UserType): UserInfo => {
     onlineReverse.uid = loginReq.uid;
     onlineUsersReverseIndexBucket.put(onlineReverse.sessionId, onlineReverse);
 
-    console.log('Add user: ', loginReq.uid, 'to online users reverse index bucket with sessionId: ', online.sessionId);
-    console.log('7777777777777777777777777');
-    const SUID = CONSTANT.CUSTOMER_SERVICE; // 好嗨客服账号
-    if (loginReq.uid !== SUID) {
-        applyFriend(SUID.toString());   // 非客服添加客服为好友
-    }
-    if (userInfo.uid === CONSTANT.CUSTOMER_SERVICE || userInfo.uid === CONSTANT.GAME_SERVEICE) {
-        createServiceGroup(userInfo.uid);
+    if (SUID && userInfo.uid !== SUID) { // 好嗨客服发送第一条欢迎消息
+        sendFirstWelcomeMessage('我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^', SUID); 
     }
 
     return userInfo;
 };
 
-/**
- * 客服账号首次登陆创建一个官方群组
- */
-const createServiceGroup = (uid:number) => {
-    const contactBucket = new Bucket('file',Contact._$info.name);
-    const contact = contactBucket.get<number,Contact>(uid)[0];
-    if (contact && contact.myGroup.length === 0) {
-        const group = new GroupCreate();
-        group.name = '官方群组1';
-        group.avatar = '';
-        group.note = '';
-        group.need_agree = false;
-        createGroup(group);
-    }
-    
-};
+// /**
+//  * 客服账号首次登陆创建一个官方群组
+//  */
+// const createServiceGroup = (uid:number) => {
+//     const contactBucket = new Bucket('file',Contact._$info.name);
+//     const contact = contactBucket.get<number,Contact>(uid)[0];
+//     if (contact && contact.myGroup.length === 0) {
+//         const group = new GroupCreate();
+//         group.name = '官方群组1';
+//         group.avatar = '';
+//         group.note = '';
+//         group.need_agree = false;
+//         createGroup(group);
+//     }
+// };
 
 /**
  * 获取用户基本信息

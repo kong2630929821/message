@@ -37,8 +37,7 @@ export const ADDRESS_INFO_TABLE = 'chat/server/data/db/extra.AddressInfo';
 export const DEFAULT_ERROR_STR = '-1';
 export const DEFAULT_ERROR_NUMBER = -1;
 export const RESULT_SUCCESS = 1;
-export const CUSTOMER_SERVICE = 10001;  // 好嗨客服账号
-export const GAME_SERVEICE = 10002;  // 游戏客服账号
+export const CHAT_APPID = '10';  // 聊天的APP ID
 
 // ---------------------- 权限等级 ---------------------
 // 普通用户 VIP0

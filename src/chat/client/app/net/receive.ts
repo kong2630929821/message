@@ -39,7 +39,7 @@ export const notify = (cmd: string, msg: string) => {
 export const initPush = () => {
     // 拒绝好友添加
     addEvent(CONSTANT.SEND_REFUSED, (r) => {
-        console.log('!!!!!!!!!!!!r:', r);
-        popNewMessage(r);
+        console.log('refused user', r);
+        // popNewMessage(r);
     });
 };

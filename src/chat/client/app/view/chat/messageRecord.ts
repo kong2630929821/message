@@ -16,7 +16,6 @@ import { getUsersBasicInfo } from '../../net/rpc';
 export class MessageRecord extends Widget {
     public props: Props;
     public bindCB: any;
-
     constructor() {
         super();
         this.bindCB = this.updateMessage.bind(this);
@@ -63,6 +62,7 @@ export class MessageRecord extends Widget {
         const count1 = hincId ? getIndexFromHIncId(hincId) :-1; // 收到的最新消息ID
         const count2 = lastHincId ? getIndexFromHIncId(lastHincId) :-1; // 已读的最后一条消息ID
         this.props.unReadCount = count1 > count2 && (count1 - count2);
+        console.log(`count1 is: ${count1}, count2 is: ${count2}, hid is: ${this.props.hid}`);
 
         // 消息额外设置，免打扰|置顶
         const setting = store.getStore('setting',{ msgTop:[],msgAvoid:[] });
@@ -104,10 +104,11 @@ export class MessageRecord extends Widget {
             store.register(`groupChatMap/${this.props.hid}`, this.bindCB);
         }
         store.register('setting',this.bindCB);
-        store.register(`lastRead/${this.props.hid}`,this.bindCB);
+        store.register(`lastRead/${this.props.hid}`, this.bindCB);
     }
 
     public updateMessage() {
+        console.log('zzzzzzzzzzzzzzzzzzzzzzz',this);
         this.setProps(this.props);
         this.paint();
     }

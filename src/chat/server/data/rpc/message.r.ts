@@ -12,7 +12,7 @@ import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
 
 import { Logger } from '../../../utils/logger';
-import { OnlineUsers } from '../db/user.s';
+import { OnlineUsers, UserInfo, VIP_LEVEL } from '../db/user.s';
 
 import { Env } from '../../../../pi/lang/env';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
@@ -333,13 +333,19 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userMsg.sid = sid;
     userMsg.time = Date.now();
     userHistory.msg = userMsg;
-    // 判断当前用户是否在对方的好友列表中
-    if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
-        userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,UserInfo._$info.name);
+    const sUser = userInfoBucket.get<number,UserInfo>(sid)[0];  // 当前用户的userinfo
+    const rUser = userInfoBucket.get(message.rid)[0];  // 接收消息的用户的userinfo
+    
+    if (sUser.level !== VIP_LEVEL.VIP5 && rUser.level !== VIP_LEVEL.VIP5) {  // 消息双方都不是客服
+        // 判断当前用户是否在对方的好友列表中
+        if (sContactInfo.friends.findIndex(item => item === sid) === -1) {
+            userHistory.hIncId = CONSTANT.DEFAULT_ERROR_STR;
         
-        console.log('not friend!!!!!!!!!!!',userHistory);
+            console.log('not friend!!!!!!!!!!!',userHistory);
 
-        return userHistory;
+            return userHistory;
+        }
     }
     // 发送消息
     sendMessage(message, userHistory);
@@ -465,10 +471,5 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
     const mqttServer = env.get('mqttServer');
     mqttPublish(mqttServer, true, QoS.AtMostOnce, `${message.rid}_sendMsg`, buf.getBuffer());
     logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(sendMsg)}`,`${message.rid}_sendMsg`);
-    // ridHistoryCursor.cursor = msgLock.current; // 接收者在线则游标会变化，否则不变化
-    // }
-
-    // userHistoryCursorBucket.put(genUuid(message.rid, sid), ridHistoryCursor);
-    // logger.debug(`sendUserMessage ridHistoryCursor: ${JSON.stringify(ridHistoryCursor)}`);
 
 };

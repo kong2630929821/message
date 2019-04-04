@@ -12,7 +12,7 @@ import { GetUserInfoReq, UserArray } from '../../../../server/data/rpc/basic.s';
 import { Logger } from '../../../../utils/logger';
 import { getGidFromGuid, getUidFromGuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { rippleShow } from '../../logic/logic';
+import { getGroupAvatar, getUserAvatar, rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -30,7 +30,8 @@ export class ApplyUser extends Widget {
         applyInfo: '',
         isActiveToGroup:true,
         isagree:false,
-        activeToGGid:null
+        activeToGGid:null,
+        avatar:''
     };
 
     public setProps(props:any) {
@@ -40,6 +41,7 @@ export class ApplyUser extends Widget {
             const userInfo = store.getStore(`userInfoMap/${this.props.id}`,null);
             this.props.name = userInfo ? userInfo.name : '';
             this.props.applyInfo = '请求添加你为好友';
+            this.props.avatar = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
 
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             if (this.props.isActiveToGroup) { // 主动申请加群
@@ -62,6 +64,7 @@ export class ApplyUser extends Widget {
                 this.props.name = ginfo ? ginfo.name :'';
                 this.props.applyInfo = `${userInfo ? userInfo.name : ''}邀请你加入群`;
                 this.props.id = gid;
+                this.props.avatar = getGroupAvatar(gid) || '../../res/images/groups.png';
             }
             
         }
@@ -113,4 +116,5 @@ interface Props {
     isActiveToGroup: boolean; // 是否主动加群
     isagree:boolean;
     activeToGGid:number; // 主动入群 群id
+    avatar:string; // 头像
 }
