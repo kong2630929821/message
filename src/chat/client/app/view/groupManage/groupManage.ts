@@ -130,10 +130,10 @@ export class ManageItem extends Widget {
         // TODO 导入文件
         const need = new NeedAgree();
         need.gid = this.props.gid;
-        need.need_agree = e.value;
+        need.need_agree = e.newType;
         clientRpcFunc(updateNeedAgree, need, (r:Result) => {
             if (r && r.r === 1) {
-                this.props.groupInfo.need_agree = e.value;
+                this.props.groupInfo.need_agree = need.need_agree;
                 this.paint();
 
             }

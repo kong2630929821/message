@@ -58,14 +58,14 @@ export class UserDetail extends Widget {
         if (!this.props.alias) {
             this.getUserData(this.props.uid);
         }
-        if (props.inFlag === INFLAG.newApply || !this.props.isFriend) {
-            this.props.utilList = [{ utilText: '加入黑名单' }];
-
-        } else if (this.props.userInfo.level === VIP_LEVEL.VIP5) {  // 官方账号不允许删除
+        if (this.props.userInfo.level === VIP_LEVEL.VIP5) {  // 官方账号不允许删除
             this.props.utilList = [
                 { utilText: '修改备注' },
                 { utilText: '清空聊天记录' }
             ];
+
+        } else if (props.inFlag === INFLAG.newApply || !this.props.isFriend) {
+            this.props.utilList = [{ utilText: '加入黑名单' }];
 
         } else {
             this.props.utilList = [

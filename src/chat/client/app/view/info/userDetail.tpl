@@ -38,10 +38,12 @@
                 </div>
             </div>
         </div>
-        {{if it.inFlag == 3 || (!it.isFriend && !it.groupId)}}
+        {{%====================不是好友且不是群主私聊且用户不是官方账号====================}}
+        {{if !it.isFriend && !it.groupId && it.userInfo.level !== 5}}
         <div style="margin: 40px 80px;">
             <div w-class="liItem1" on-tap="addUser" on-down="onShow">加为好友</div>
         </div>
+        {{%====================群主临时私聊======================}}
         {{elseif !it.isFriend && it.groupId}}
         <div style="margin: 40px 80px;">
             <div w-class="liItem1" on-tap="startChat" on-down="onShow">开始对话</div>
