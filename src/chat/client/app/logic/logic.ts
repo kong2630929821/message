@@ -186,8 +186,9 @@ export const getAllFriendIDs = () => {
     const accIds = [];
     for (const v of friends) {
         const acc_id = store.getStore(`userInfoMap/${v}`,new UserInfo()).acc_id;
-        accIds.push(acc_id);
+        acc_id && accIds.push(acc_id);
     }
+    console.log('==========getAllFriendIDs',accIds);
 
     return accIds;
 };
