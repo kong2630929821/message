@@ -6,3 +6,7 @@ struct FriendAlias{
     rid:u32,
     alias:String
 }
+struct SetOfficial{
+    accId:String,
+    appId:String
+}

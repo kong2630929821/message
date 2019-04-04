@@ -23,20 +23,21 @@
 .userName{
     font-size: 32px;
     font-weight:bold;
-    font-family: PingFangSC-Medium;
     margin-bottom:5px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 350px;
+    white-space: nowrap;
 }
 .applyInfo{ 
     color: rgba(102, 102, 102, 1);
     font-size: 28px;
-    font-family: PingFangSC-Regular;
 }
 .agreeText{
     position:relative;
     bottom:18px;
     color: rgba(136, 136, 136, 1);
     font-size: 24px;
-    font-family: PingFangSC-Regular;
     margin-right:0px;
     margin-left:auto;
 }

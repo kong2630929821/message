@@ -39,6 +39,7 @@
 .adress-text-wrap{
     display:flex;
     flex-direction:column;
+    height: 70px;
 }
 .mainText{   
     color: rgba(34, 34, 34, 1);

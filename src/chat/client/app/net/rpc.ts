@@ -6,17 +6,19 @@ import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { GroupInfo } from '../../../server/data/db/group.s';
 import { MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+// tslint:disable-next-line:max-line-length
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
+// tslint:disable-next-line:max-line-length
 import { getGroupHistoryCursor, getUserHistoryCursor, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, HistoryCursor, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
-import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, set_gmAccount } from '../../../server/data/rpc/user.p';
-import { UserAgree } from '../../../server/data/rpc/user.s';
+import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, getRealUid, set_gmAccount } from '../../../server/data/rpc/user.p';
+import { SetOfficial, UserAgree } from '../../../server/data/rpc/user.s';
 import { genGroupHid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
@@ -130,6 +132,23 @@ export const sendTempMsg = (rid: number,gid:number, msg: string, msgType = MSG_T
 };
 
 /**
+ * 获取用户的真实聊天uid
+ * @param user accid wallet_address uid phone
+ */
+export const getChatUid = (user:string) => {
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(getRealUid,user,(r:number) => {
+            console.log('!!!!!!!!!!!!!!!!!!!!getChatUid',r);
+            if (r !== -1) {
+                resolve(r);
+            } else {
+                reject();
+            }
+        });
+    });
+};
+
+/**
  * 请求好友发的消息历史记录
  */
 export const getFriendHistory = (rid: number, gid?:number, upLastRead: boolean = false) => {
@@ -146,10 +165,11 @@ export const getFriendHistory = (rid: number, gid?:number, upLastRead: boolean =
             const cursor = r.cursor;
             lastRead.msgId = genHIncId(hid, cursor);
             const lastHincId = store.getStore(`lastRead/${hid}`, { msgId: undefined }).msgId;
-            const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;
-            if (cursor > localCursor && (upLastRead || !lastHincId)) { // 本地没有记录时需要更新
+            // const localCursor = lastHincId ? getIndexFromHIncId(lastHincId) : -1;  // 本地游标
+            if (upLastRead || !lastHincId) { // 强制更新 || 本地没有记录 
                 store.setStore(`lastRead/${hid}`, lastRead);
             }
+            console.log(`===============lastRead/${hid}`,store.getStore(`lastRead/${hid}`));
             // 服务器最新消息
             const lastMsgId = r.last;
             const userflag = new UserHistoryFlag();
@@ -236,9 +256,12 @@ export const getSetting = () => {
 /**
  * 设置某个账号为游戏客服
  */
-export const setGameServer = (uid:number) => {
-    clientRpcFunc(set_gmAccount,uid,(r) => {
-        console.log('设置客服账号',uid,r);
+export const setGameServer = (accId:string,appId:string) => {
+    const setuser = new SetOfficial();
+    setuser.accId = accId;
+    setuser.appId = appId;
+    clientRpcFunc(set_gmAccount,setuser,(r) => {
+        console.log('设置客服账号',setuser,r);
     });
 };
 
@@ -258,23 +281,6 @@ export const applyUserFriend = (user: string) => {
         });
     });
     
-};
-
-/**
- * 申请添加游戏客服
- * @param uid user id
- * 返回值是uid
- */
-export const applyGameServer = (uid: number) => {
-
-    return new Promise((resolve,reject) => {
-        applyUserFriend(uid.toString()).then(() => {
-            resolve(uid);
-        },() => {
-            reject();
-        });
-        
-    });
 };
 
 /**
@@ -325,14 +331,21 @@ export const applyToGroup = (gid:number) => {
         if (contact.group.indexOf(gid) === -1) {
             clientRpcFunc(applyJoinGroup, gid, ((r) => {
                 if (r && r.r === 1) {
-                    resolve();
+                    // if (!store.getStore(`groupInfoMap/${gid}`, null)) {
+                    //     getGroupBasicInfo([gid]).then((ginfo) => {
+                    //         store.setStore(`groupInfoMap/${gid}`,ginfo[0]);
+                    //     });
+                    //     resolve(gid);
+                    // } 
+                    resolve(gid);
+                    
                 } else {
                     reject(r);
                 }
                 
             }));
         } else {
-            resolve();
+            resolve(gid);
         }
     });
     

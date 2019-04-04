@@ -2,7 +2,7 @@
     {{if !it.message.cancel && it.message.mtype < 5 || it.message.mtype == 9}}
     <div style="overflow: hidden;">
         {{if it.me}}
-        <div style="position:relative;margin: 10px 40px 0;float: right;">
+        <div style="position:relative;margin: 10px 20px 0;float: right;display:flex;">
 
             {{% ========================红包=========================}}
             {{if it.message.mtype == 9}}
@@ -56,6 +56,8 @@
                 <div w-class="recallBtn" on-tap="recall">撤回</div>
             </div>
             {{end}}
+
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" style="margin-left:10px;" on-tap="userDetail(e,true)">{imgURL:{{it.myAvatar}},width:"80px;"}</widget>
         </div>
 
         {{% ========================对方发送的消息=========================}}

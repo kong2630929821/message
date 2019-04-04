@@ -126,8 +126,6 @@ export class Contact extends SpecialWidget {
 
     // 打开更多功能
     public getMore() {
-        // setGameServer(10002);
-        // setGameServer(10003);
         // gotoGameService('fairyChivalry');
         // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
@@ -161,7 +159,7 @@ export class Contact extends SpecialWidget {
                 // openTestWebview(10001);      
                 break;
             case 3:
-                popNew3('chat-client-app-view-info-user');
+                popNew3('app-view-mine-other-addFriend'); 
                 break;
 
             default:

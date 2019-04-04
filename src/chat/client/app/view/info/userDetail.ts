@@ -208,6 +208,10 @@ export class UserDetail extends Widget {
                     lastChat.splice(index, 1);
                     store.setStore('lastChat', lastChat);
                 }
+
+                const lastRead = store.getStore(`lastRead`, []);
+                lastRead.delete(genUserHid(sid,uid));  // 删除已读消息记录
+                store.setStore(`lastRead`, lastRead);
             } else {
                 popNewMessage('删除好友失败');
             }
@@ -253,7 +257,7 @@ export class UserDetail extends Widget {
      */
     public doCopy(i:number) {
         if (i === 0) {
-            copyToClipboard(this.props.uid);
+            copyToClipboard(this.props.userInfo.name);
         } else if (i === 1) {
             copyToClipboard(this.props.userInfo.acc_id);
         } else {

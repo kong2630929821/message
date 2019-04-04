@@ -4,7 +4,6 @@
 
 import { Env } from '../../pi/lang/env';
 import { BonBuffer } from '../../pi/util/bon';
-import { ServerNode } from '../../pi_pt/rust/mqtt/server';
 import { mqttPublish, QoS } from '../../pi_pt/rust/pi_serv/js_net';
 import { Logger } from '../utils/logger';
 import { SendMsg } from './send.s';

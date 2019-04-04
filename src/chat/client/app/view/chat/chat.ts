@@ -10,7 +10,7 @@ import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { UserHistory } from '../../../../server/data/db/message.s';
-import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
@@ -36,7 +36,7 @@ export class Chat extends Widget {
         super.setProps(props);
         this.props.sid = store.getStore('uid');
         this.props.inputMessage = '';
-        this.props.newMsg = undefined;
+        this.props.newMsg = null;
         this.props.onRadio = null;
 
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
@@ -54,20 +54,26 @@ export class Chat extends Widget {
      * 好友聊天初始化
      */
     public initUser() {
+        const level = store.getStore(`userInfoMap/${this.props.id}`,{ level:0 }).level;  // 对方的等级
+        const myLevel = store.getStore(`userInfoMap/${this.props.sid}`,{ level:0 }).level;  // 当前用户的等级
         if (!this.props.temporary) { // 如果是临时聊天会传名字 不是临时聊天需要获取用户名
             this.props.name = getFriendAlias(this.props.id).name;
-            this.props.temporary = !getFriendAlias(this.props.id).isFriend;  // 不是好友则是临时聊天
+            this.props.temporary = level !== VIP_LEVEL.VIP5 && !getFriendAlias(this.props.id).isFriend;  // 不是官方客服且不是好友则是临时聊天
         } 
         if (!this.props.name) {  // 获取不到用户名
-            this.props.temporary = true;
             getUsersBasicInfo([this.props.id]).then((r: UserArray) => {
                 this.props.name = r.arr[0].name;
                 store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
+                this.props.temporary = r.arr[0].level !== VIP_LEVEL.VIP5;
                 this.paint();
             },(r) => {
                 console.error('获取用户信息失败', r);
             });
         }
+        // 当前用户自己是客服 都不需要提示加好友
+        if (myLevel === VIP_LEVEL.VIP5) {
+            this.props.temporary = false;
+        } 
 
         const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`, []);
         this.props.hincIdArray = hIncIdArr;
@@ -105,8 +111,8 @@ export class Chat extends Widget {
         lastRead.msgId = hincId;
         store.setStore(`lastRead/${this.props.hid}`,lastRead);
 
-        // 群不存在 群已经解散 已被踢出群
-        if (isNaN(gInfo.state) || (!isNaN(gInfo.state) && gInfo.state === GROUP_STATE.DISSOLVE) || (gInfo.memberids && gInfo.memberids.indexOf(this.props.sid) < 0)) {  
+        // 群已经解散 已被踢出群
+        if ((!isNaN(gInfo.state) && gInfo.state === GROUP_STATE.DISSOLVE) || (gInfo.memberids && gInfo.memberids.indexOf(this.props.sid) < 0)) {  
             this.deleteRecord();
             this.goBack();
         } 
@@ -233,7 +239,10 @@ export class Chat extends Widget {
         innerItem.setAttribute('style','color:#3FA2F7;border:10px solid transparent;');
         innerItem.innerText = '添加好友';
         innerItem.addEventListener('click', () => {
-            popNew('chat-client-app-view-chat-addUser',{ rid:this.props.id });
+            const userinfo = store.getStore(`userInfoMap/${this.props.id}`,null);
+            if (userinfo) {
+                popNew('chat-client-app-view-chat-addUser',{ rid: userinfo.acc_id });
+            }
             this.goBack();
         });
         item.appendChild(innerItem);

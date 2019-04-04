@@ -121,3 +121,12 @@ struct FrontStoreData {
     uid:u32,
     value:String,
 }
+
+/**
+* 官方账号表
+*/
+#[primary=appId,db=file]
+struct OfficialUsers {
+    appId:String,  // 应用ID
+    uids:&[u32],   // 聊天ID
+}

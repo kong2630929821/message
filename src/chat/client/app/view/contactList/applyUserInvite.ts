@@ -8,7 +8,7 @@ import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
-import { INFLAG, rippleShow } from '../../logic/logic';
+import { getUserAvatar, INFLAG, rippleShow } from '../../logic/logic';
 import { applyUserFriend, getUsersBasicInfo } from '../../net/rpc';
 
 // ================================================ 导出
@@ -19,16 +19,18 @@ export class ApplyUser extends Widget {
         accId:'',
         name:'',
         applyInfo: '',
-        isagree:false
+        isagree:false,
+        avatar:''
     };
 
     public setProps(props:any) {
         super.setProps(props);
         this.props.isagree = false;
         getUsersBasicInfo([],[this.props.accId]).then((r:UserArray) => {
+            store.setStore(`userInfoMap/${r.arr[0].uid}`,r.arr[0]);
             this.props.name = r.arr[0].name;
             this.props.id = r.arr[0].uid;
-            store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
+            this.props.avatar = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
             this.paint();
         });
       
@@ -70,4 +72,5 @@ interface Props {
     name: string; // 用户名或群名
     applyInfo: string; // 验证信息
     isagree:boolean;
+    avatar:string;  // 头像
 }

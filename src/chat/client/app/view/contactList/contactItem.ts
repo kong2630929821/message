@@ -10,6 +10,7 @@ import { GENERATOR_TYPE, UserInfo, VIP_LEVEL } from '../../../../server/data/db/
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias, getGroupAvatar, getUserAvatar } from '../../logic/logic';
+import { getUsersBasicInfo } from '../../net/rpc';
 
 interface Props {
     uid?:number;
@@ -39,9 +40,15 @@ export class ContactItem extends Widget {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
                 if (this.props.id !== store.getStore('uid')) {
                     this.props.name = getFriendAlias(this.props.id).name;
-                    if (!this.props.name) {
-                        const userinfo = store.getStore('groupUserLinkMap');
+                    if (!this.props.name) { 
+                        getUsersBasicInfo([this.props.id]).then((r:any) => {
+                            store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
+                            this.props.name = r.arr[0].name;
+                            this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
+                            this.paint();
+                        });
                     }
+                    
                 } else {
                     this.props.name = depCopy(store.getStore(`userInfoMap/${this.props.id}`,new UserInfo()).name || '');
                     this.props.name += '(本人)';

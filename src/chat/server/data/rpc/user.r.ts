@@ -11,17 +11,34 @@ import { delValueFromArray, genHIncId, genNextMessageIndex, genUserHid, genUuid 
 import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
-import { Contact, FriendLink, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
+import { Contact, FriendLink, OfficialUsers, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { APPLY_FRIENDS_OVERLIMIT, FRIENDS_NUM_OVERLIMIT } from '../errorNum';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
-import { FriendAlias, UserAgree } from './user.s';
+import { FriendAlias, SetOfficial, UserAgree } from './user.s';
 
 declare var env: Env;
 
 // ================================================================= 导出
+/**
+ * 通过accid wallet_address uid phone匹配对应的uid
+ */
+// #[rpc=rpcServer]
+export const getRealUid = (user:String):number => {
+    const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
+    const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`, `a:${user}`]);
+    console.log('!!!!!!!!!!!!!!!getRealUid user: ',user,' rArr:', rArr);
+
+    let uid = -1;
+    for (const v of rArr) {
+        if (v) uid = v.uid;
+    }
+
+    return uid;
+};
+
 /**
  * 申请添加对方为好友
  * @param uid uid
@@ -41,16 +58,7 @@ export const applyFriend = (user: string): Result => {
     }
     
     // 获取用户UID
-    const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
-    const rArr = userFindBucket.get<string[], UserFind[]>([`u:${user}`, `w:${user}`, `p:${user}`, `a:${user}`]);
-    console.log('!!!!!!!!!!!!!!!applyFriend user: ',user,' rArr:', rArr);
-
-    let uid;
-    rArr.forEach((r) => {
-        if (r) {
-            return uid = r.uid;
-        }
-    });
+    const uid = getRealUid(user);
     if (!uid) {
         result.r = -2;  // 添加的好友不存在
 
@@ -100,13 +108,13 @@ export const applyFriend = (user: string): Result => {
         friendContact.friends.findIndex(item => item === sid) && friendContact.friends.push(sid);
         contactBucket.put(uid,friendContact);  // 添加当前用户到官方账号联系人表
 
-        if (uid === CONSTANT.CUSTOMER_SERVICE) { // 好嗨客服发送第一条欢迎消息
-            sendFirstWelcomeMessage('我是好嗨客服，欢迎您使用好嗨，如果您对产品有什么意见或建议可以直接提出，如果建议被采纳，还有奖励哦^_^', uid); 
-
-        } else {  // 其他客服发送的第一条欢迎消息
-            sendFirstWelcomeMessage(`您好，我是${userinfo.name}，很高兴为您服务`,uid); 
-        }
-
+        const officialBucket = new Bucket('file',OfficialUsers._$info.name);
+        const official = officialBucket.get<string,OfficialUsers>(CONSTANT.CHAT_APPID)[0]; // 好嗨客服账号
+        // 其他客服发送的第一条欢迎消息
+        if (official && official.uids && official.uids[0] !== uid) {
+            sendFirstWelcomeMessage(`您好，我是${userinfo.name}，很高兴为您服务`,uid);
+        } 
+        
         result.r = 1;
 
         return result;
@@ -124,7 +132,7 @@ export const applyFriend = (user: string): Result => {
 /**
  * 客服发送的第一条欢迎消息
  */
-const sendFirstWelcomeMessage = (helloMsg:string,uid:number) => {
+export const sendFirstWelcomeMessage = (helloMsg:string,uid:number) => {
     const userHistoryBucket = new Bucket('file', CONSTANT.USER_HISTORY_TABLE);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE);
 
@@ -140,6 +148,7 @@ const sendFirstWelcomeMessage = (helloMsg:string,uid:number) => {
     userMsg.sid = uid;
     userMsg.time = Date.now();
     userHistory.msg = userMsg;
+    console.log('===============================sendFirstWelcomeMessage userMsg: ',userMsg);
     
     const msgLock = new MsgLock();
     msgLock.hid = genUserHid(sid, uid);
@@ -160,8 +169,8 @@ const sendFirstWelcomeMessage = (helloMsg:string,uid:number) => {
     const buf = new BonBuffer();
     sendMsg.bonEncode(buf);
     const mqttServer = env.get('mqttServer');
-    mqttPublish(mqttServer, true, QoS.AtMostOnce, sid.toString(), buf.getBuffer());
-    console.log(`from ${uid} to ${sid}, message is : ${JSON.stringify(sendMsg)}`);
+    mqttPublish(mqttServer, true, QoS.AtMostOnce, `${sid}_sendMsg`, buf.getBuffer());
+    console.log(`from ${uid} to ${sid}, message is : ${JSON.stringify(sendMsg)}`,`${sid}_sendMsg`);
 };
 
 /**
@@ -170,67 +179,64 @@ const sendFirstWelcomeMessage = (helloMsg:string,uid:number) => {
  */
 // #[rpc=rpcServer]
 export const acceptFriend = (agree: UserAgree): Result => {
-    const _acceptFriend = (sid: number, rid: number, agree: boolean) => {
-        const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
-        // 获取当前用户的联系人列表
-        const sContactInfo = contactBucket.get(sid)[0];
-        // 从申请列表中删除当前同意/拒绝的用户
-        console.log(`sContactInfo.applyFriend is ${sContactInfo.applyUser}`);
-        // 判断当前用户的好友是否达到上限
-        const friendsNumLimit = get_friends_limit(sid); // 当前用户的好友上限
-        // 当前用户好友数量达到上限，则申请失败
-        if (sContactInfo.friends.length >= friendsNumLimit) {
-            result.r = FRIENDS_NUM_OVERLIMIT;
-            
-            return result;
-        }
-        // 判断对方是否邀请了该用户,如果没有邀请，则直接返回
-        if (sContactInfo.applyUser.findIndex(item => item === rid) === -1) {
-            const rlt = new Result();
-            rlt.r = -1;
-            
-            return rlt;
-        }
-        
-        sContactInfo.applyUser = delValueFromArray(rid, sContactInfo.applyUser);
-        // 在对方的列表中添加好友
-        const rContactInfo = contactBucket.get(rid)[0];
-        rContactInfo.applyUser = delValueFromArray(sid, rContactInfo.applyUser);
-        if (agree) {
-            
-            rContactInfo.friends.findIndex(item => item === sid) === -1 && rContactInfo.friends.push(sid);
-            // 在当前用户列表中添加好友
-            sContactInfo.friends.findIndex(item => item === rid) === -1 && sContactInfo.friends.push(rid);
-            // 分别插入到friendLink中去
-            const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE);
-            const friendLink = new FriendLink();
-            friendLink.uuid = genUuid(sid, rid);
-            friendLink.alias = '';
-            friendLink.hid = genUserHid(sid, rid);
-            friendLinkBucket.put(friendLink.uuid, friendLink);
-            friendLink.uuid = genUuid(rid, sid);
-            friendLinkBucket.put(friendLink.uuid, friendLink);
-            contactBucket.put(sid, sContactInfo);
-            contactBucket.put(rid, rContactInfo);
-            
-            // 发布一条添加成功的消息
-            const info = new UserSend();
-            info.msg = '你们已经成为好友，开始聊天吧';
-            info.mtype = MSG_TYPE.ADDUSER;
-            info.rid = rid;
-            info.time = Date.now();
-            sendUserMessage(info);
-   
-        } else {
-            // 拒绝好友
-            send(rid, CONSTANT.SEND_REFUSED, '');
-        }
-        
-    };
-
-    _acceptFriend(getUid(), agree.uid, agree.agree);
-
     const result = new Result();
+    const sid = getUid(); 
+    const rid = agree.uid;
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
+    
+    // 获取当前用户的联系人列表
+    const sContactInfo = contactBucket.get(sid)[0];
+    console.log(`sContactInfo.applyFriend is ${sContactInfo.applyUser}`);
+    // 判断当前用户的好友是否达到上限
+    const friendsNumLimit = get_friends_limit(sid); // 当前用户的好友上限
+    // 当前用户好友数量达到上限，则申请失败
+    if (sContactInfo.friends.length >= friendsNumLimit) {
+        result.r = FRIENDS_NUM_OVERLIMIT;
+            
+        return result;
+    }
+    // 判断对方是否邀请了该用户,如果没有邀请，则直接返回
+    if (sContactInfo.applyUser.findIndex(item => item === rid) === -1) {
+        result.r = -1;
+            
+        return result;
+    }
+
+    // 从申请列表中删除当前同意/拒绝的用户
+    sContactInfo.applyUser = delValueFromArray(rid, sContactInfo.applyUser);
+    // 在对方的列表中添加好友
+    const rContactInfo = contactBucket.get(rid)[0];
+    rContactInfo.applyUser = delValueFromArray(sid, rContactInfo.applyUser);
+    if (agree) {
+            
+        rContactInfo.friends.findIndex(item => item === sid) === -1 && rContactInfo.friends.push(sid);
+        // 在当前用户列表中添加好友
+        sContactInfo.friends.findIndex(item => item === rid) === -1 && sContactInfo.friends.push(rid);
+        // 分别插入到friendLink中去
+        const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE);
+        const friendLink = new FriendLink();
+        friendLink.uuid = genUuid(sid, rid);
+        friendLink.alias = '';
+        friendLink.hid = genUserHid(sid, rid);
+        friendLinkBucket.put(friendLink.uuid, friendLink);
+        friendLink.uuid = genUuid(rid, sid);
+        friendLinkBucket.put(friendLink.uuid, friendLink);
+        
+    } else {
+        // 拒绝好友
+        send(rid, CONSTANT.SEND_REFUSED, sid.toString());
+    }
+    contactBucket.put(sid, sContactInfo);
+    contactBucket.put(rid, rContactInfo);
+    if (agree) {
+        // 发布一条添加成功的消息
+        const info = new UserSend();
+        info.msg = '你们已经成为好友，开始聊天吧';
+        info.mtype = MSG_TYPE.ADDUSER;
+        info.rid = rid;
+        info.time = Date.now();
+        sendUserMessage(info);
+    }
     result.r = 1;
 
     return result;
@@ -364,7 +370,8 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
     const sid = getUid();
     const oldUserinfo = userInfoBucket.get<number, UserInfo[]>(sid)[0];
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!oldUserinfo:', oldUserinfo);
-    if (userinfo.uid !== CONSTANT.CUSTOMER_SERVICE && userinfo.name.indexOf('好嗨客服') > -1) {
+    const SUID = getSUID(); // 好嗨客服账号
+    if (userinfo.uid !== SUID && userinfo.name.indexOf('好嗨客服') > -1) {
         let res = new UserInfo();
         res = userinfo;
         res.uid = 0;  // 名字中不能含有 '好嗨客服'
@@ -419,19 +426,39 @@ export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
 };
 
 /**
- * 设置官方账号
- * @param set_gmAccount uid
+ * 设置官方账号 rpc
  */
 // #[rpc=rpcServer]
-export const set_gmAccount = (uid:number): Result => {
+export const set_gmAccount = (setUser:SetOfficial): Result => {
+    return setOfficialAccount(setUser.accId,setUser.appId);
+};
+
+/**
+ * 设置官方账号
+ */
+export const setOfficialAccount = (accId:string,appId:string): Result => {
     const result = new Result();
     const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name); 
+    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const uid = getRealUid(accId);  // 通过accid找到对应的uid
     const userinfo = userInfoBucket.get<number, UserInfo>(uid)[0];
+    let official = officialBucket.get(appId)[0];
+    console.log('==============================set_gmAccount appId:',appId,'uid: ',uid);
+    
     if (!userinfo) {
         result.r = CONSTANT.DEFAULT_ERROR_NUMBER;
 
         return result;
     }
+    if (official && official.uids) {
+        official.uids.push(uid);
+    } else {
+        official = new OfficialUsers();
+        official.appId = appId;
+        official.uids = [uid];
+    }
+    console.log('==============================set_gmAccount official:',official);
+    officialBucket.put(official.appId,official);
     userinfo.level = VIP_LEVEL.VIP5;
     userInfoBucket.put(uid, userinfo);
     result.r = CONSTANT.RESULT_SUCCESS;
@@ -440,9 +467,24 @@ export const set_gmAccount = (uid:number): Result => {
 };
 
 /**
- * 获取客服账号
- * @param set_gmAccount uid
+ * 获取好嗨客服uid
  */
+export const getSUID = () => {
+    const officialBucket = new Bucket('file',OfficialUsers._$info.name);
+    const official = officialBucket.get<string,OfficialUsers>(CONSTANT.CHAT_APPID)[0]; // 好嗨客服账号
+    console.log('=======================haohai official: ',official);
+    if (official && official.uids) {
+
+        return official.uids[0];
+    }
+
+    return null;
+};
+
+// /**
+//  * 获取客服账号
+//  * @param get_gmAccount uid
+//  */
 // // #[rpc=rpcServer]
 // export const get_gmAccount = (uid:number): UserLevel[] => {
 //     console.log('==========================get_gmAccount',uid);

@@ -15,7 +15,11 @@
 .text{
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
-    font-family: PingFangSC-Medium;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 350px;
+    white-space: nowrap;
 }
 .more{
     width:32px;

@@ -47,17 +47,12 @@ export class AddUser extends Widget {
      * 添加好友
      */
     public applyFriend() {
-        const sid = store.getStore('uid');
         if (!this.props.rid) {
             popNewMessage('请输入好友ID');
 
             return;
         }
-        if (this.props.rid === sid.toString()) {
-            popNewMessage('不能添加自己为好友');
-
-            return;
-        }
+        
         applyUserFriend(this.props.rid).then((r) => {
             if (r === 0) {
                 popNewMessage(`你们已经是好友了`);
@@ -66,8 +61,11 @@ export class AddUser extends Widget {
             }
 
         },(r) => {
-            if (r.r === -2) {
+            if (r.r === -1) {
+                popNewMessage('不能添加自己为好友');
+            } else {
                 popNewMessage(`用户不存在`);
+
             }
             
         });
