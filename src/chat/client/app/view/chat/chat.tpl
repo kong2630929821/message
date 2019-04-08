@@ -9,7 +9,7 @@
 
     {{if it.temporary || it.groupId}}
     <div w-class="temporaryBox">
-        <img src="../../res/images/user_avatar.png" w-class="avatar"/>
+        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"80px;"}</widget>
         <div style="flex:1;">
             <div>{{it.name}}</div>
             <div style="font-size: 24px;color: #888888;">你们还不是好友</div>
