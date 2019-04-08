@@ -15,7 +15,7 @@ import { GroupHistory, GroupHistoryCursor, UserHistory, UserHistoryCursor } from
 import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OfficialUsers, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
 import { getUid } from './group.r';
-import { getSUID, sendFirstWelcomeMessage } from './user.r';
+import { getRealUid, getSUID, sendFirstWelcomeMessage } from './user.r';
 
 declare var env: Env;
 
@@ -211,13 +211,10 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
 
     const uids = getUserInfoReq.uids;
     if (uids.length === 0) {
-        const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
         const accIds = getUserInfoReq.acc_ids;
         for (const v of accIds) {
-            const userFind = userFindBucket.get<string, UserFind>(v)[0];
-            if (userFind) {
-                uids.push(userFind.uid);
-            }
+            const uid = getRealUid(v);
+            uids.push(uid);
         }
         console.log('!!!!!!!!!!!!!!!getUsersInfo accIds: ', accIds,'uids: ',uids);
         

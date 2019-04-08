@@ -59,7 +59,7 @@ export const applyFriend = (user: string): Result => {
     
     // 获取用户UID
     const uid = getRealUid(user);
-    if (!uid) {
+    if (uid === CONSTANT.DEFAULT_ERROR_NUMBER) {
         result.r = -2;  // 添加的好友不存在
 
         return result;

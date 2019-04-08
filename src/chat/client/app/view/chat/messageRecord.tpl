@@ -1,4 +1,4 @@
-<div w-class="message-record-wrap" style="background-color:{{it.msgTop?'#f0f0f0;':'#fff'}}">
+<div w-class="message-record-wrap" style="background-color:{{it.msgTop?'#f0f0f0;':'#fff'}}" on-tap="clearUnread">
     <div w-class="avatar-wrap">
         <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
     </div>
