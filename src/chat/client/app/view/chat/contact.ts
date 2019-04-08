@@ -191,10 +191,10 @@ store.register(`lastChat`, (r: [number, number][]) => {
 store.register('contactMap', (r) => {
     for (const value of r.values()) {
         STATE.contactMap = value;
-        STATE.inviteUsers = updateInviteUsers(STATE.inviteUsers);
+        STATE.inviteUsers = updateInviteUsers(walletStore.getStore('inviteUsers/invite_success', []));
         walletStore.setStore('inviteUsers/invite_success',STATE.inviteUsers);
 
-        STATE.convertUser = updateInviteUsers(STATE.convertUser);
+        STATE.convertUser = updateInviteUsers(walletStore.getStore('inviteUsers/convert_invite', []));
         walletStore.setStore('inviteUsers/convert_invite',STATE.convertUser);
         forelet.paint(STATE);
     }  
