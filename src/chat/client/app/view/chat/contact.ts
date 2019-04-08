@@ -181,7 +181,8 @@ const STATE = {
     lastChat:[],
     contactMap:{
         applyUser:[],
-        applyGroup:[]
+        applyGroup:[],
+        friends:[]
     },
     inviteUsers:[],
     convertUser:[]
@@ -192,40 +193,20 @@ store.register(`lastChat`, (r: [number, number][]) => {
 });
 store.register('contactMap', (r) => {
     for (const value of r.values()) {
-        if (STATE.inviteUsers || STATE.convertUser) {
-            const userInfoMap = store.getStore('userInfoMap',new Map());
-            for (const v of userInfoMap) {
-                const index = STATE.inviteUsers.indexOf(v.acc_id); 
-                index > -1 && STATE.inviteUsers.splice(index,1);
-                walletStore.setStore('inviteUsers/invite_success',STATE.inviteUsers);
-                
-                const index1 = STATE.convertUser.indexOf(v.acc_id); 
-                index1 > -1 && STATE.convertUser.splice(index1,1);
-                walletStore.setStore('inviteUsers/convert_invite',STATE.convertUser);
-            }
-            
-        }
         STATE.contactMap = value;
+        STATE.inviteUsers = updateInviteUsers(STATE.inviteUsers);
+        walletStore.setStore('inviteUsers/invite_success',STATE.inviteUsers);
+
+        STATE.convertUser = updateInviteUsers(STATE.convertUser);
+        walletStore.setStore('inviteUsers/convert_invite',STATE.convertUser);
         forelet.paint(STATE);
     }  
 });
-store.register('friendLinkMap', () => {
-    const w = forelet.getWidget(WIDGET_NAME);
-    if (w) {
-        w.paint(true);
-    }
-});
+
 // 邀请好友成功
 walletStore.register('inviteUsers/invite_success',(r) => {
-    const ans = depCopy(r);
-    const userInfoMap = store.getStore('userInfoMap',new Map());
-
-    if (userInfoMap.size > 0) {
-        for (const v of userInfoMap.values()) {
-            const index = ans.indexOf(v.acc_id); 
-            index > -1 && ans.splice(index,1);
-        }
-    }
+    const ans = updateInviteUsers(depCopy(r));
+    
     if (ans.length < r.length) {
         walletStore.setStore('inviteUsers/invite_success',ans);
     }
@@ -235,18 +216,25 @@ walletStore.register('inviteUsers/invite_success',(r) => {
 
 // 兑换好友邀请码成功
 walletStore.register('inviteUsers/convert_invite',(r) => {
-    const ans = depCopy(r);
-    const userInfoMap = store.getStore('userInfoMap',new Map());
-    if (userInfoMap.size > 0) { 
-        for (const v of userInfoMap.values()) {
-            const index = ans.indexOf(v.acc_id); 
-            index > -1 && ans.splice(index,1);
-        }
-    }
-
+    const ans = updateInviteUsers(depCopy(r));
+    
     if (ans.length < r.length) {
         walletStore.setStore('inviteUsers/convert_invite',ans);
     }
     STATE.convertUser = ans;
     forelet.paint(STATE);
 });
+
+// 更新邀请好友记录
+const updateInviteUsers = (ans) => {
+    const userInfoMap = store.getStore('userInfoMap',new Map());
+    if (STATE.contactMap.friends.length > 0) {
+        for (const v of STATE.contactMap.friends) {
+            const user = userInfoMap.get(v.toString());
+            const index = ans.indexOf(user.acc_id); 
+            index > -1 && ans.splice(index,1);
+        }
+    }
+
+    return ans;
+};

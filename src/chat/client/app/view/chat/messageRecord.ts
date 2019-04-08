@@ -2,6 +2,7 @@
  * 最新会话列表项
  */
 // ================================================ 导入
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
@@ -98,28 +99,18 @@ export class MessageRecord extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        if (this.props.chatType === GENERATOR_TYPE.USER) {
-            store.register(`userChatMap/${this.props.hid}`, this.bindCB);
-        } else {
-            store.register(`groupChatMap/${this.props.hid}`, this.bindCB);
-        }
         store.register('setting',this.bindCB);
-        store.register(`lastRead/${this.props.hid}`, this.bindCB);
     }
 
     public updateMessage() {
-        console.log('zzzzzzzzzzzzzzzzzzzzzzz',this);
         this.setProps(this.props);
         this.paint();
     }
 
-    public destroy() {
-        store.unregister(`userChatMap/${genUserHid(store.getStore('uid'), this.props.rid)}`, this.bindCB);
-        store.unregister(`groupChatMap/${genGroupHid(this.props.rid)}`, this.bindCB);
-        store.unregister(`lastRead/${genUserHid(store.getStore('uid'), this.props.rid)}`,this.bindCB);
-        store.unregister(`lastRead/${genGroupHid(this.props.rid)}`,this.bindCB);
-
-        return super.destroy();
+    public clearUnread(e:any) {
+        notify(e.node,'ev-chat',null);
+        this.props.unReadCount = 0;
+        this.paint();
     }
 }
 
