@@ -19,9 +19,7 @@ import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
-declare var module;
 export const forelet = new Forelet();
-const WIDGET_NAME = module.id.replace(/\//g, '-');
 interface Props {
     offlienType:OfflienType;
     sid: number;
@@ -76,13 +74,12 @@ export class Contact extends SpecialWidget {
         const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
         const uid = store.getStore('uid', 0);
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
-        this.props.avatar = getUserAvatar(uid);
+        this.props.avatar = wUser.avatar ? `${uploadFileUrlPrefix}${wUser.avatar}` :'' ;
         
         // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
         if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
             if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                 setUserInfo();
-                this.props.avatar = wUser.avatar ? `${uploadFileUrlPrefix}${wUser.avatar}` :'' ;
                 this.paint();
             } else {
                 store.initStore();
@@ -231,8 +228,10 @@ const updateInviteUsers = (ans) => {
     if (STATE.contactMap.friends.length > 0) {
         for (const v of STATE.contactMap.friends) {
             const user = userInfoMap.get(v.toString());
-            const index = ans.indexOf(user.acc_id); 
-            index > -1 && ans.splice(index,1);
+            if (user) {
+                const index = ans.indexOf(user.acc_id); 
+                index > -1 && ans.splice(index,1);
+            }
         }
     }
 

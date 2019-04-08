@@ -15,7 +15,7 @@ import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { getFriendAlias, INFLAG, timestampFormat } from '../../logic/logic';
+import { getFriendAlias, getUserAvatar, INFLAG, timestampFormat } from '../../logic/logic';
 import { openNewActivity } from '../../logic/native';
 import { applyUserFriend, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
 import { parseMessage } from '../../widget/messageItem/messageItem';
@@ -58,11 +58,13 @@ export class Chat extends Widget {
         const myLevel = store.getStore(`userInfoMap/${this.props.sid}`,{ level:0 }).level;  // 当前用户的等级
         if (!this.props.temporary) { // 如果是临时聊天会传名字 不是临时聊天需要获取用户名
             this.props.name = getFriendAlias(this.props.id).name;
+            this.props.avatar = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
             this.props.temporary = level !== VIP_LEVEL.VIP5 && !getFriendAlias(this.props.id).isFriend;  // 不是官方客服且不是好友则是临时聊天
         } 
         if (!this.props.name) {  // 获取不到用户名
             getUsersBasicInfo([this.props.id]).then((r: UserArray) => {
                 this.props.name = r.arr[0].name;
+                this.props.avatar = r.arr[0].avatar || '../../res/images/user_avatar.png';
                 store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
                 this.props.temporary = r.arr[0].level !== VIP_LEVEL.VIP5;
                 this.paint();
@@ -385,6 +387,8 @@ export class Chat extends Widget {
         applyUserFriend(this.props.id.toString()).then((r: Result) => {
             if (r.r === 0) {
                 popNewMessage(`${this.props.id}已经是你的好友`);
+            } else {
+                popNewMessage('发送成功');
             }
         });
     }
@@ -432,4 +436,5 @@ interface Props {
     temporary:boolean;  // 是否是临时聊天
     groupId:number; // 当前群聊ID 群主可与成员私聊
     okCB:any;  // 游戏中进入携带的参数
+    avatar:string; // 头像
 }
