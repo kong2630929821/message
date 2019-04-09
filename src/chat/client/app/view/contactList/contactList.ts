@@ -3,7 +3,6 @@
  */
 
  // ================================================ 导入
-import * as walletStore from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -15,15 +14,17 @@ declare var module;
 export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 
+interface Props {
+    sid:number;  // uid
+    newApply:number;  // 新申请消息数
+}
 export class ContactList extends Widget {
     public ok:() => void;
-    public props:any = {
-        sid:store.getStore('uid')
-    };
+    public props:Props; 
 
-    public create() {
-        super.create();
-        this.state = STATE;
+    public setProps(props:any) {
+        super.setProps(props);
+        this.props.sid = store.getStore('uid');
     }
 
      // 返回上一页
@@ -62,30 +63,8 @@ store.register('friendLinkMap',() => {
         w.paint(true);
     }
 });
-const STATE = {
-    contact:{ // 联系人列表
-        applyUser:[],
-        applyGroup:[],
-        friends:[]
-    }, 
-    inviteUsers:[],  // 我邀请的好友注册进入
-    convertUser:[]  // 我兑换好友的邀请码
-};
 store.register('contactMap', (r) => {
     for (const value of r.values()) {
-        STATE.contact = value;
-        forelet.paint(STATE);
+        forelet.paint(value);
     }  
-});
-
-// 邀请好友成功
-walletStore.register('inviteUsers/invite_success',(r) => {
-    STATE.inviteUsers = r;
-    forelet.paint(STATE);
-});
-
-// 兑换好友邀请码成功
-walletStore.register('inviteUsers/convert_invite',(r) => {
-    STATE.convertUser = r;
-    forelet.paint(STATE);
 });
