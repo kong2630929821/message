@@ -12,14 +12,17 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getUserAvatar, rippleShow } from '../../logic/logic';
+import { rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
 import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出
 // tslint:disable-next-line:no-reserved-keywords
+declare var module;
 export const forelet = new Forelet();
+const WIDGET_NAME = module.id.replace(/\//g, '-');
+
 interface Props {
     offlienType:OfflienType;
     sid: number;
@@ -221,7 +224,12 @@ walletStore.register('inviteUsers/convert_invite',(r) => {
     STATE.convertUser = ans;
     forelet.paint(STATE);
 });
-
+store.register('friendLinkMap',() => {
+    const w = forelet.getWidget(WIDGET_NAME);
+    if (w) {
+        w.paint(true);
+    }
+});
 // 更新邀请好友记录
 const updateInviteUsers = (ans) => {
     const userInfoMap = store.getStore('userInfoMap',new Map());
