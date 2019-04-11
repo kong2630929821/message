@@ -30,7 +30,8 @@ export class GroupMember extends Widget {
             gid: null,
             groupInfo:{},
             deleteBtn:false,
-            isAdmin:false
+            isAdmin:false,
+            spaceLen:[]
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -49,6 +50,12 @@ export class GroupMember extends Widget {
         } else  if (this.props.groupInfo.state === GROUP_STATE.DISSOLVE) {
             popNewMessage('该群已被解散');
             this.ok();
+        }
+        this.props.spaceLen = [];
+        let len = this.props.groupInfo.adminids.length; 
+        len = this.props.isAdmin ? 4 - (len + 1) % 4 :4 - len % 4; // 管理员多一个元素
+        for (let i = 0;i < len;i++) {
+            this.props.spaceLen.push(i);
         }
         
     }
@@ -89,6 +96,10 @@ export class GroupMember extends Widget {
         this.paint();
     }
 
+    public goDetail(uid:number) {
+        popNew('chat-client-app-view-info-userDetail',{ uid:uid });
+    }
+
     public destroy() {
         store.unregister(`groupInfoMap/${this.props.gid}`,this.bindCB);
 
@@ -102,4 +113,5 @@ interface Props {
     groupInfo:Json; // 群信息
     deleteBtn:boolean; // 群成员是否处于移除状态
     isAdmin:boolean; // 是否是管理员
+    spaceLen:number[]; // 空白元素长度
 }

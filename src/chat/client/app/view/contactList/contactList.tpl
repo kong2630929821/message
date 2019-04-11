@@ -1,3 +1,4 @@
+{{: it1 = it1 || {friends:[]} }}
 <div w-class="contactList" >
     
     <div w-class="topic-wrap">

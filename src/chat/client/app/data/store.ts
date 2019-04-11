@@ -166,6 +166,11 @@ const registerDataChange = () => {
     register('groupUserLinkMap',() => {
         groupUserLinkChange();  // 群组用户数据更新
     });
+
+    register('groupInfoMap',() => {
+        groupUserLinkChange();  // 群组信息更新
+    });
+
     register('lastChat',() => {
         lastChatChange(); // 最近会话更新
     });
