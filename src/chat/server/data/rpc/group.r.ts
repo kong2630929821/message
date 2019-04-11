@@ -532,6 +532,13 @@ export const addAdmin = (guidsAdmin: GuidsAdminArray): Result => {
 
         return res;
     }
+    // 管理员人数超过5个
+    if (gInfo.adminids.length + guids.length > 5) {
+        logger.debug('admins count is: ',gInfo.adminids.length + guids.length);
+        res.r = -2;
+
+        return res;
+    }
     const addAdminIds = [];
     for (const v of guids) {
         const uid = getUidFromGuid(v);

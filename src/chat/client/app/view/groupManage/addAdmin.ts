@@ -3,14 +3,13 @@
  */
 
  // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { Widget } from '../../../../../pi/widget/widget';
-import { addAdmin } from '../../../../server/data/rpc/group.p';
-import { GuidsAdminArray } from '../../../../server/data/rpc/group.s';
 import { Logger } from '../../../../utils/logger';
-import { delValueFromArray, genGuid } from '../../../../utils/util';
+import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { clientRpcFunc } from '../../net/init';
+import { addAdministror } from '../../net/rpc';
 
  // ================================================ 导出
  // tslint:disable-next-line:no-reserved-keywords
@@ -32,7 +31,7 @@ export class AddAdmin extends Widget {
         this.props.applyAdminMembers = [];
     }
     public goBack() {
-        this.ok();
+        this.ok && this.ok();
     }
     public getGroupInfo(gid:number) {
         const ginfo = store.getStore(`groupInfoMap/${gid}`);
@@ -57,14 +56,15 @@ export class AddAdmin extends Widget {
         if (this.props.applyAdminMembers.length <= 0) {
             return ;
         }
-        const guidsAdmin = new GuidsAdminArray();
-        const guids = this.props.applyAdminMembers.map(item => genGuid(this.props.gid,item));
-        logger.debug('===============',guids,typeof guids);
-        guidsAdmin.guids = guids;
-        clientRpcFunc(addAdmin,guidsAdmin,(r) => {
-            logger.debug('=============completeAddAdmin',r);
-            this.ok();
+
+        addAdministror(this.props.gid,this.props.applyAdminMembers).then(() => {
+            this.goBack();
+        },(r) => {
+            if (r.r === -2) {
+                popNewMessage('最多可设置5个管理员');
+            }
         });
+        
     }
 }
 
