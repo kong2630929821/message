@@ -110,6 +110,7 @@ export class GroupInfos extends Widget {
         super.firstPaint();
         getGroupUserLinkInfo(this.props.gid);
         store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
+        store.register(`announceHistoryMap`,this.bindCB);
     }
     
     public goBack(fg:boolean = false) {
