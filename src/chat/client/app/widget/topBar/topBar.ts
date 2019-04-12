@@ -14,17 +14,18 @@ import { rippleShow } from '../../logic/logic';
 
 interface Props {
     title:string;
-    nextImg?:string;
-    centerTitle?:boolean;
-    background?:string;
+    nextImg:string;
+    centerTitle:boolean;
+    background:string;
+    text:string;
 }
 
 // ================================ 导出
 export class TopBar extends Widget {
     public props:Props;
     
-    public setProps(oldProps:Json,props:Json) {
-        super.setProps(oldProps,props);
+    public setProps(props:Json) {
+        super.setProps(props);
         this.state = {
             refresh:false
         };

@@ -1,5 +1,5 @@
 <div class="new-page" ev-back-click="goBack" w-class="new-page" ev-send="send" ev-next-click="groupDetail">
-    <chat-client-app-widget-topBar-topBar>{title:{{it.name}},nextImg:{{it.chatType=="group" ? "more-dot-blue.png":""}} }</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget-topBar-topBar>{title:{{it.name}},text:{{it.text}},nextImg:{{it.chatType=="group" ? "more-dot-blue.png":""}} }</chat-client-app-widget-topBar-topBar>
     
     {{if it.lastAnnounce}}
     <div style="height:128px;" ev-close-announce="closeAnnounce">

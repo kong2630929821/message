@@ -97,7 +97,8 @@ export class Chat extends Widget {
         const hIncIdArr = store.getStore(`groupChatMap/${this.props.hid}`,[]);
         const gInfo = store.getStore(`groupInfoMap/${this.props.id}`,new GroupInfo());
         const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.GROUP });
-        this.props.name = `${gInfo.name}(${gInfo.memberids ? gInfo.memberids.length :0})`;
+        this.props.name = gInfo.name;
+        this.props.text = `(${gInfo.memberids ? gInfo.memberids.length :0})`;  // 群成员个数展示
         this.props.hincIdArray = hIncIdArr;
         // 第一次进入只加载最后20条记录
         this.props.showHincIdArray = hIncIdArr.length > 20 ? hIncIdArr.slice(-20) :hIncIdArr; 
@@ -437,4 +438,5 @@ interface Props {
     groupId:number; // 当前群聊ID 群主可与成员私聊
     okCB:any;  // 游戏中进入携带的参数
     avatar:string; // 头像
+    text:string;  // 群成员个数展示
 }
