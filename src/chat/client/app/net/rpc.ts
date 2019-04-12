@@ -12,14 +12,14 @@ import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
-import { GroupAgree, GroupCreate } from '../../../server/data/rpc/group.s';
+import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
 // tslint:disable-next-line:max-line-length
 import { getGroupHistoryCursor, getUserHistoryCursor, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, HistoryCursor, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
 import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, getRealUid, set_gmAccount } from '../../../server/data/rpc/user.p';
 import { SetOfficial, UserAgree } from '../../../server/data/rpc/user.s';
-import { genGroupHid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
+import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
 import { clientRpcFunc } from './init';
@@ -405,11 +405,21 @@ export const sendGroupMsg = (gid:number,message:string,mtype = MSG_TYPE.TXT) => 
     
 };
 
-export const addAdministror = (uid: number) => {
-    const guid = `11111:${uid.toString()}`;
-    clientRpcFunc(addAdmin, guid, (r) => {
-        console.log(r);
+export const addAdministror = (gid:number,uids: number[]) => {
+    const guidsAdmin = new GuidsAdminArray();
+    const guids = uids.map(item => genGuid(gid, item));
+    guidsAdmin.guids = guids;
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(addAdmin,guidsAdmin,(r:Result) => {
+            if (r && r.r === 1) {
+                resolve();
+            } else {
+                reject(r);
+            }
+        });    
     });
+    
 };
 
 export const acceptUserJoin = (uid: number, accept: boolean) => {

@@ -41,7 +41,8 @@ export const initAccount = () => {
         // 群成员信息
         getFile(`${sid}-groupUserLinkMap`, (value) => {
             if (!value) return;
-            store.setStore('groupUserLinkMap', value || new Map(), false);
+            store.setStore('groupUserLinkMap', value.groupUserLinkMap || new Map(), false);
+            store.setStore('groupInfoMap', value.groupInfoMap || new Map(), false);
         },() => {
             console.log('read groupUserLinkMap error');
         });
@@ -151,7 +152,8 @@ export const groupUserLinkChange = () => {
         if (!value) {
             value = {};
         }
-        value = store.getStore('groupUserLinkMap'); // 群组用户
+        value.groupUserLinkMap = store.getStore('groupUserLinkMap'); // 群组用户
+        value.groupInfoMap = store.getStore('groupInfoMap'); // 群信息
         writeFile(`${id}-groupUserLinkMap`, value);
     }, () => {
         console.log('read error');
