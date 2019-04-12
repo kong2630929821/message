@@ -19,6 +19,10 @@
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
     font-weight:bold;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 400px;
+    white-space: nowrap;
 }
 .other{
     width:51px;
