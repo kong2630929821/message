@@ -213,11 +213,12 @@ export class GroupInfos extends Widget {
         this.paint();
     }
     
-    public groupAliasChange(e:any) {
-        this.props.groupAlias = e.target.value;
-        this.paint();
-    }
     // 修改群名
+    public groupAliasChange(e:any) {
+        this.props.groupAlias = e.value;
+    }
+
+    // 修改群名请求
     public changeGroupAlias() {
         const newGroup = new NewGroup();
         newGroup.gid = this.props.gid;
