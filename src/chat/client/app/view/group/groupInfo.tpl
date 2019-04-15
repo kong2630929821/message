@@ -16,7 +16,7 @@
 
             <div w-class="nameText">
                 {{if it.editable}}
-                <div ev-input-change="groupAliasChange" on-tap="editGroupAlias">
+                <div ev-input-change="groupAliasChange" on-tap="editGroupAlias" ev-input-blur="changeGroupAlias">
                     <widget w-tag="chat-client-app-widget-input-input" w-class="groupAliasInput">{input:{{it.groupAlias}},style:"background:transparent;padding:0;color: #fff;" }</widget>
                 </div>
                 {{else}}
