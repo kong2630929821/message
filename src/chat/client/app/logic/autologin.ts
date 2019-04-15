@@ -55,7 +55,7 @@ export class AutoLoginMgr {
             reconnect: true,
             timeout: 3,
             keepAliveInterval: 30,
-            cleanSession: false,
+            cleanSession: true,
             useSSL: false,
             mqttVersion: 3,
             onSuccess: () => {
@@ -81,8 +81,8 @@ export class AutoLoginMgr {
                 fail && fail(r);
             }
         };
-        // rootClient = new Client('127.0.0.1', 1234, 'clientId-wcd14PDgoZ', null, options);
-        const client = new Client(this.server, this.port, 'clientId-wcd14PDgoZ', null, options);
+        const clientId = `clientId-${((Date.now() + Math.floor(Math.random() * 1000000) * 10000000).toString(36))}`;
+        const client = new Client(this.server, this.port, clientId, null, options);
         this.rootClient = client;
         client.setOnConnectionLost((r) => {
             // 连接断开调用

@@ -19,6 +19,12 @@ export class BigImage extends Widget {
         this.props.showOrg = true;
         this.paint();
     }
+
+    // 下载图片
+    public download() {
+        (<any>window.frames).IframeReportImg.document.execCommand('SaveAs');
+    }
+
 }
 
 // ================================================ 本地
