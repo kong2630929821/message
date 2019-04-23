@@ -142,6 +142,18 @@ export const userExitGroup = (gid: number): Result => {
         return res;
     }
     if (uidIndex > -1) {
+        const userinfo = getCurrentUserInfo();
+        const info = new GroupSend();
+        info.msg = `${userinfo.name}已退出群组`;
+        info.mtype = MSG_TYPE.OTHERMSG;
+        info.gid = gid;
+        info.time = Date.now();
+        const gh = sendGroupMessage(info);
+        logger.debug('user exit group mess, gh: ',gh);
+        // 管理员数组也要清除
+        const index = gInfo.adminids.indexOf(uid);
+        index > -1 && gInfo.adminids.splice(index, 1);
+
         gInfo.memberids.splice(uidIndex, 1);
         groupInfoBucket.put(gid, gInfo);
         logger.debug('user: ', uid, 'exit group: ', gid);
@@ -153,16 +165,8 @@ export const userExitGroup = (gid: number): Result => {
         const groupUserLinkBucket = getGroupUserLinkBucket();
         groupUserLinkBucket.delete(`${gid}:${uid}`);
         logger.debug('delete user: ', uid, 'from groupUserLinkBucket');
-
-        const userinfo = getCurrentUserInfo();
-        const info = new GroupSend();
-        info.msg = `${userinfo.name}退出了该群`;
-        info.mtype = MSG_TYPE.OTHERMSG;
-        info.gid = gid;
-        info.time = Date.now();
-        sendGroupMessage(info);
         res.r = 1;
-
+        
     } else {
         res.r = 0;
     }
@@ -244,7 +248,7 @@ export const acceptUser = (agree: GroupAgree): Result => {
     const groupUserLinkBucket = getGroupUserLinkBucket();
     const currentUser = getCurrentUserInfo(agree.uid);
     const gul = new GroupUserLink();
-    gul.guid = `${agree.gid}:${agree.uid}`;
+    gul.guid = genGuid(agree.gid,agree.uid);
     gul.hid = '';
     gul.join_time = Date.now();
     gul.userAlias = '';
@@ -502,10 +506,6 @@ export const setOwner = (guid: string): Result => {
 // #[rpc=rpcServer]
 export const addAdmin = (guidsAdmin: GuidsAdminArray): Result => {
     const groupInfoBucket = getGroupInfoBucket();
-    // TODO:判断群是否已经销毁
-    // TODO:判断群是否存在
-    // TODO:先判断当前用户是否是管理员
-    // TODO:判断被添加的用户是否是群成员
     // 判断被添加的用户是否已经是管理员
     const uid = getUid();
 
@@ -577,10 +577,6 @@ export const addAdmin = (guidsAdmin: GuidsAdminArray): Result => {
 export const delAdmin = (guid: string): Result => {
     const groupInfoBucket = getGroupInfoBucket();
     const uid = getUid();
-    // TODO:判断群是否已经销毁
-    // TODO:判断群是否存在
-    // TODO:先判断当前用户是否是管理员
-    // TODO:判断是否是群主，群主必须是管理员,不能被删除
     // 判断被添加的用户是否是管理员成员
     const groupId = getGidFromGuid(guid);
     const delAdminId = getUidFromGuid(guid);
@@ -623,6 +619,15 @@ export const delAdmin = (guid: string): Result => {
         groupInfoBucket.put(gInfo.gid, gInfo);
         logger.debug('after delete admin memmber: ', groupInfoBucket.get(gInfo.gid));
 
+        const userinfo = getCurrentUserInfo(delAdminId);
+        const info = new GroupSend();
+        info.msg = `群主撤销了${userinfo.name}的管理员职位`;
+        info.mtype = MSG_TYPE.OTHERMSG;
+        info.gid = gInfo.gid;
+        info.time = Date.now();
+        const gh = sendGroupMessage(info);
+        logger.debug('user exit group mess, gh: ',gh);
+
         res.r = 1;
 
         return res;
@@ -661,17 +666,15 @@ export const delMember = (guid: string): Result => {
         return res;
     }
     logger.debug('user logged in with uid: ', uid, 'and you want to delete a member: ', delId);
-    const members = gInfo.memberids;
     logger.debug('before delete memeber: ', gInfo.memberids);
-    const index = members.indexOf(delId);
+    const index = gInfo.memberids.indexOf(delId);
     if (index > -1) {
-        members.splice(index, 1);
+        gInfo.memberids.splice(index, 1);
         const groupUserLinkBucket = getGroupUserLinkBucket();
         groupUserLinkBucket.delete(guid);
         logger.debug('delete user: ', delId, 'from groupUserLinkBucket');
     }
-
-    gInfo.memberids = members;
+    
     groupInfoBucket.put(gInfo.gid, gInfo);
     // 被踢出用户的群列表中将该群去掉
     const contactBucket = getContactBucket();
@@ -681,6 +684,15 @@ export const delMember = (guid: string): Result => {
     contactBucket.put(delId, contact);
     logger.debug('user:', delId, 'has exit group', groupId);
     logger.debug('after delete memmber: ', groupInfoBucket.get(gInfo.gid)[0]);
+
+    const userinfo = getCurrentUserInfo(delId);
+    const info = new GroupSend();
+    info.msg = `${userinfo.name}已被移出群组`;
+    info.mtype = MSG_TYPE.OTHERMSG;
+    info.gid = gInfo.gid;
+    info.time = Date.now();
+    const gh = sendGroupMessage(info);
+    logger.debug('user exit group mess, gh: ',gh);
 
     res.r = 1;
 
@@ -723,11 +735,16 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
     const guids = m.memberids.map(item => genGuid(gid, item));
     gla.arr = [];
     for (const i of guids) {
-        const userlink = groupUserLinkBucket.get<string,GroupUserLink>(i)[0];
+        let userlink = groupUserLinkBucket.get<string,GroupUserLink>(i)[0];
         const userInfo = userInfoBucket.get<number,UserInfo>(getUidFromGuid(i))[0];
-        if (!userlink.userAlias) {
-            userlink.userAlias = userInfo.name;
+        if (!userlink) {
+            userlink = new GroupUserLink();
+            userlink.guid = i;
+            userlink.hid = '';
+            userlink.join_time = Date.now();
+            userlink.groupAlias = '';
         }
+        userlink.userAlias = userInfo.name;
         userlink.avatar = userInfo.avatar; 
         gla.arr.push(userlink);
         console.log('getGroupUserLink userlink: ',userlink,'userinfo: ',userInfo);
