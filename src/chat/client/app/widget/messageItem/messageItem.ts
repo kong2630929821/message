@@ -69,15 +69,6 @@ export class MessageItem extends Widget {
         });  
     }
 
-    // 点击撤回
-    public recall(e:any) {
-        if (this.props.hIncId) {  // 真实发送成功的消息才可以撤回
-            notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
-            this.props.isMessageRecallVisible = false;
-            this.paint();
-        }
-    }
-
     public userDetail(e:any,fg:boolean= false) {
         if (fg) {
             popNew('chat-client-app-view-info-user');
@@ -97,11 +88,20 @@ export class MessageItem extends Widget {
         }
     }
 
-    // 长按打开消息撤回
-    public openMessageRecall() {
-        this.props.isMessageRecallVisible = true;
-        this.paint();
-    }
+    // // 长按打开消息撤回
+    // public openMessageRecall() {
+    //     this.props.isMessageRecallVisible = true;
+    //     this.paint();
+    // }
+
+    // // 点击撤回
+    // public recall(e:any) {
+    //     if (this.props.hIncId) {  // 真实发送成功的消息才可以撤回
+    //         notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
+    //         this.props.isMessageRecallVisible = false;
+    //         this.paint();
+    //     }
+    // }
 
     // 点击消息内容
     public msgDetailClick(e:any) {

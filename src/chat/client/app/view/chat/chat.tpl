@@ -20,13 +20,21 @@
 
     <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="stopRadio" ev-delelte-user="goBack" id="chatMessageBox" on-scroll="scrollMessBox">
         {{for i,v of it.showHincIdArray}}
+        <div on-longtap="openMessageRecall(e,'{{v}}')">
             <chat-client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playRadio: {{it.onRadio && v == it.onRadio.hIncId ? it.onRadio.playRadio : false}} }</chat-client-app-widget-messageItem-messageItem>
+        </div>
         {{end}} 
 
         {{if it.newMsg}}
         <div>
             <widget w-tag="chat-client-app-widget-messageItem-messageItem" style="float:right;">{{it.newMsg}}</widget>
             <img src="../../res/images/loading.gif" w-class="loading"/>
+        </div>
+        {{end}}
+
+        {{if it.activeMessId}}
+        <div style="position:absolute;{{it.recallBtn}}">
+            <div w-class="recallBtn" on-tap="recall">撤回</div>
         </div>
         {{end}}
 

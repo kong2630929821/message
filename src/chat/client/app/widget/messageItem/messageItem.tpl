@@ -52,9 +52,9 @@
 
             {{% ========================撤回按钮=========================}}
             {{if it.isMessageRecallVisible}}
-            <div style="position:absolute;bottom: 0;left:-150px;">
+            {{%<!-- <div style="position:absolute;bottom: 0;left:-150px;">
                 <div w-class="recallBtn" on-tap="recall">撤回</div>
-            </div>
+            </div> -->}}
             {{end}}
 
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" style="margin-left:10px;" on-tap="userDetail(e,true)">{imgURL:{{it.myAvatar}},width:"80px;"}</widget>

@@ -9,7 +9,7 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
-import { UserHistory } from '../../../../server/data/db/message.s';
+import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
@@ -266,6 +266,7 @@ export class Chat extends Widget {
     public pageClick() {
         this.props.isOnEmoji = false;
         this.props.isOnTools = false;
+        this.props.activeMessId = null;
         this.paint();
     }
 
@@ -275,6 +276,7 @@ export class Chat extends Widget {
     public openEmoji() {
         this.props.isOnEmoji = !this.props.isOnEmoji;
         this.props.isOnTools = false;
+        this.props.activeMessId = null;
         this.paint();
         this.latestMsg();
     }
@@ -285,6 +287,7 @@ export class Chat extends Widget {
     public openTools() {
         this.props.isOnTools = !this.props.isOnTools;
         this.props.isOnEmoji = false;
+        this.props.activeMessId = null;
         this.paint();
         this.latestMsg();
     }
@@ -295,6 +298,7 @@ export class Chat extends Widget {
     public inputFocus() {
         this.props.isOnEmoji = false;
         this.props.isOnTools = false;
+        this.props.activeMessId = null;
         this.paint();
         this.latestMsg();
     }
@@ -417,6 +421,38 @@ export class Chat extends Widget {
 
     }
 
+    // 长按显示撤回按钮
+    public openMessageRecall(e:any,messid:string) {
+        let message;
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            message = store.getStore(`userHistoryMap/${messid}`,{ sid:null });
+        } else {
+            message = store.getStore(`groupHistoryMap/${messid}`,{ sid:null });
+        }
+
+        if (message.sid === this.props.sid) {
+            const item = getRealNode(e.node);
+            let style = '';
+            if (item.offsetTop < 200) {
+                style = `top:${item.offsetTop + item.offsetHeight - 15}px;right:250px;`;
+            } else {
+                style = `top:${item.offsetTop - 55}px;right:250px;`;
+            }
+            this.props.recallBtn = style;
+        
+            this.props.activeMessId = messid;
+            this.paint();
+        }
+    }
+
+    // 点击撤回
+    public recall() {
+        if (this.props.activeMessId) {  // 真实发送成功的消息才可以撤回
+            this.send({ value:this.props.activeMessId,msgType:MSG_TYPE.RECALL });
+            this.props.activeMessId = null;
+            this.paint();
+        }
+    }
 }
 
 // ================================================ 本地
@@ -439,4 +475,6 @@ interface Props {
     okCB:any;  // 游戏中进入携带的参数
     avatar:string; // 头像
     text:string;  // 群成员个数展示
+    activeMessId:string;  // 当前选中要撤回的消息ID
+    recallBtn:string; // 撤回按钮位置
 }
