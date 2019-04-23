@@ -423,36 +423,9 @@ export class Chat extends Widget {
     }
 
     // 长按显示撤回按钮
-    public openMessageRecall(e:any,messid:string) {
-        let message;
-        if (this.props.chatType === GENERATOR_TYPE.USER) {
-            message = store.getStore(`userHistoryMap/${messid}`,{ sid:null });
-        } else {
-            message = store.getStore(`groupHistoryMap/${messid}`,{ sid:null });
-        }
-
-        if (message.sid === this.props.sid) {
-            const item = getRealNode(e.node);
-            let style = '';
-            if (item.offsetTop < 200) {
-                style = `top:${item.offsetTop + item.offsetHeight - 15}px;right:250px;`;
-            } else {
-                style = `top:${item.offsetTop - 55}px;right:250px;`;
-            }
-            this.props.recallBtn = style;
-        
-            this.props.activeMessId = messid;
-            this.paint();
-        }
-    }
-
-    // 点击撤回
-    public recall() {
-        if (this.props.activeMessId) {  // 真实发送成功的消息才可以撤回
-            this.send({ value:this.props.activeMessId,msgType:MSG_TYPE.RECALL });
-            this.props.activeMessId = null;
-            this.paint();
-        }
+    public openMessageRecall(e:any) {
+        this.props.activeMessId = e.value;
+        this.paint();
     }
 }
 

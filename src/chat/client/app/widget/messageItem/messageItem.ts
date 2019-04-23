@@ -27,7 +27,7 @@ export class MessageItem extends Widget {
             me:true,
             time:'',
             chatType:GENERATOR_TYPE.USER,
-            isMessageRecallVisible:false,
+            recallBtn:false,
             avatar:'',  // 对方的头像
             playRadio:false,
             myAvatar:''
@@ -88,24 +88,25 @@ export class MessageItem extends Widget {
         }
     }
 
-    // // 长按打开消息撤回
-    // public openMessageRecall() {
-    //     this.props.isMessageRecallVisible = true;
-    //     this.paint();
-    // }
+    // 长按打开消息撤回
+    public openMessageRecall(e:any) {
+        notify(e.node,'ev-recall',{ value:this.props.hIncId });
+        this.props.recallBtn = true;
+        this.paint();
+    }
 
-    // // 点击撤回
-    // public recall(e:any) {
-    //     if (this.props.hIncId) {  // 真实发送成功的消息才可以撤回
-    //         notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
-    //         this.props.isMessageRecallVisible = false;
-    //         this.paint();
-    //     }
-    // }
+    // 点击撤回
+    public recall(e:any) {
+        if (this.props.hIncId) {  // 真实发送成功的消息才可以撤回
+            notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
+            this.props.recallBtn = false;
+            this.paint();
+        }
+    }
 
     // 点击消息内容
     public msgDetailClick(e:any) {
-        this.props.isMessageRecallVisible = false;
+        this.props.recallBtn = false;
         this.paint();
     }
 
@@ -196,7 +197,7 @@ interface Props {
     me:boolean; // 是否是本人
     time:string;// 消息发送时间
     chatType:GENERATOR_TYPE;// 消息类型
-    isMessageRecallVisible:boolean;// 撤回按钮是否可见
+    recallBtn:boolean;// 撤回按钮是否可见
     avatar:string;  // 对方的头像
     playRadio:boolean; // 是否正在播放语音
     myAvatar:string;  // 自己的头像
