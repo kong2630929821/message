@@ -131,6 +131,7 @@ export class Chat extends Widget {
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.register(`groupChatMap/${this.props.hid}`,this.bindCB);
             store.register(`groupInfoMap/${this.props.id}`,this.bindCB);
+            store.register(`groupUserlinkMap`,this.bindCB);
         } else {
             store.register(`userChatMap/${this.props.hid}`,this.bindCB);
         }

@@ -20,7 +20,7 @@
                     <widget w-tag="chat-client-app-widget-input-input" w-class="groupAliasInput">{input:{{it.groupAlias}},style:"background:transparent;padding:0;color: #fff;" }</widget>
                 </div>
                 {{else}}
-                    <span>{{it.groupAlias || it.groupInfo.name}}</span>
+                    <span>{{it.groupAlias || it.groupInfo.name || "------"}}</span>
                     {{if it.groupInfo.level == 5}}
                         <span w-class="official">官方</span>
                     {{end}}
@@ -29,7 +29,7 @@
                 <img w-class="edit" src="../../res/images/edit_gray.png" on-tap="editGroupAlias"/>
                 {{end}}
             </div>
-            <div>群号：{{it.groupInfo.gid}}</div>
+            <div>群号：{{it.groupInfo.gid || "------"}}</div>
         </div>
     </div>
    
@@ -46,7 +46,7 @@
                 <div w-class="adress-wrap" style="margin:0;">
                     <img w-class="adressIcon" src="../../res/images/group-code.png" />
                     <div w-class="adress-text-wrap">
-                        <span w-class="mainText">{{it.groupInfo.gid}}</span>
+                        <span w-class="mainText">{{it.groupInfo.gid || "------"}}</span>
                         <span w-class="flag">群号</span>
                     </div>
                 </div>

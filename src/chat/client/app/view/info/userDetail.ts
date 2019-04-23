@@ -65,7 +65,7 @@ export class UserDetail extends Widget {
             ];
 
         } else if (props.inFlag === INFLAG.newApply || !this.props.isFriend) {
-            this.props.utilList = [{ utilText: '加入黑名单' }];
+            this.props.utilList = [];
 
         } else {
             this.props.utilList = [

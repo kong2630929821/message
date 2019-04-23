@@ -1,10 +1,10 @@
 <div w-class="new-page" class="new-page" on-tap="pageClick">
     <div w-class="top-main-wrap" ev-next-click="handleMoreContactor" ev-back-click="goBack(false)">
-        <chat-client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget-topBar-topBar>{title:"",nextImg:"{{it.utilList.length>0?'more-dot-white.png':''}}",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
         <div w-class="home-info-wrap" style="{{it.inFlag == 3 ? 'margin-top: 50px;':''}}">
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="showBigImg">{imgURL:{{it.avatar}},width:"190px;"}</widget>
             <div w-class="nameText">
-                {{it.alias || it.userInfo.name}}
+                {{it.alias || it.userInfo.name || "------"}}
 
                 {{if it.userInfo.level === 5}}
                     <span w-class="official">官方</span>
@@ -12,7 +12,7 @@
             </div>
             {{if it.inFlag != 3}}
             <div on-tap="doCopy(0)" style="display:flex;flex-direction:column;text-align: center;">
-                <div>昵称：{{it.userInfo.name}}</div>
+                <div>昵称：{{it.userInfo.name||"------"}}</div>
             </div>
             {{end}}
         </div>
@@ -24,7 +24,7 @@
                 <img w-class="adressIcon" src="../../res/images/adress-book.png" />
                 <div w-class="adress-text-wrap">
                     <span w-class="mainText">
-                        {{it.userInfo.acc_id}}
+                        {{it.userInfo.acc_id || "------"}}
                         <img src="../../res/images/copy_gray.png" style="width:30px;"/>
                     </span>
                     <span w-class="flag">好嗨号</span>
