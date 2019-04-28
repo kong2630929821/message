@@ -9,7 +9,7 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
-import { UserHistory } from '../../../../server/data/db/message.s';
+import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
@@ -131,6 +131,7 @@ export class Chat extends Widget {
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.register(`groupChatMap/${this.props.hid}`,this.bindCB);
             store.register(`groupInfoMap/${this.props.id}`,this.bindCB);
+            store.register(`groupUserlinkMap`,this.bindCB);
         } else {
             store.register(`userChatMap/${this.props.hid}`,this.bindCB);
         }
@@ -266,6 +267,7 @@ export class Chat extends Widget {
     public pageClick() {
         this.props.isOnEmoji = false;
         this.props.isOnTools = false;
+        this.props.activeMessId = null;
         this.paint();
     }
 
@@ -275,6 +277,7 @@ export class Chat extends Widget {
     public openEmoji() {
         this.props.isOnEmoji = !this.props.isOnEmoji;
         this.props.isOnTools = false;
+        this.props.activeMessId = null;
         this.paint();
         this.latestMsg();
     }
@@ -285,6 +288,7 @@ export class Chat extends Widget {
     public openTools() {
         this.props.isOnTools = !this.props.isOnTools;
         this.props.isOnEmoji = false;
+        this.props.activeMessId = null;
         this.paint();
         this.latestMsg();
     }
@@ -295,6 +299,7 @@ export class Chat extends Widget {
     public inputFocus() {
         this.props.isOnEmoji = false;
         this.props.isOnTools = false;
+        this.props.activeMessId = null;
         this.paint();
         this.latestMsg();
     }
@@ -417,6 +422,11 @@ export class Chat extends Widget {
 
     }
 
+    // 长按显示撤回按钮
+    public openMessageRecall(e:any) {
+        this.props.activeMessId = e.value;
+        this.paint();
+    }
 }
 
 // ================================================ 本地
@@ -439,4 +449,6 @@ interface Props {
     okCB:any;  // 游戏中进入携带的参数
     avatar:string; // 头像
     text:string;  // 群成员个数展示
+    activeMessId:string;  // 当前选中要撤回的消息ID
+    recallBtn:string; // 撤回按钮位置
 }

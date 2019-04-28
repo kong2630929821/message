@@ -4,7 +4,7 @@
         <div w-class="home-info-wrap">
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="showBigImg">{imgURL:{{it.avatar}},width:"190px;"}</widget>
             <div w-class="nameText">
-                {{it.name}}
+                {{it.name || "------"}}
 
                 {{if it.info.level === 5}}
                     <span w-class="official">官方</span>
@@ -19,7 +19,7 @@
                 <img w-class="adressIcon" src="../../res/images/adress-book.png" />
                 <div w-class="adress-text-wrap">
                     <div w-class="mainText">
-                        <span>{{it.info.acc_id}}</span>
+                        <span>{{it.info.acc_id || "------"}}</span>
                         <img src="../../res/images/copy_gray.png" style="width:30px;"/>
                     </div>
                     <div w-class="flag">好嗨号</div>

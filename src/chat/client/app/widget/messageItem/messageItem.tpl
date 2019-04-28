@@ -51,8 +51,8 @@
             {{end}}
 
             {{% ========================撤回按钮=========================}}
-            {{if it.isMessageRecallVisible}}
-            <div style="position:absolute;bottom: 0;left:-150px;">
+            {{if it.recallBtn}}
+            <div style="position:absolute;bottom: 5px;left:-30px;">
                 <div w-class="recallBtn" on-tap="recall">撤回</div>
             </div>
             {{end}}
@@ -62,7 +62,7 @@
 
         {{% ========================对方发送的消息=========================}}
         {{else}}
-        <div w-class="username">{{it.name}}</div>
+        <div w-class="username">{{it.name || "------"}}</div>
         <div style="display:flex;margin:10px 20px;">
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="userDetail">{imgURL:{{it.avatar}},width:"80px;"}</widget>
 
@@ -107,7 +107,7 @@
 
     {{% ========================撤回消息=========================}}
     {{elseif it.message.mtype == 5}}
-    <div w-class="recallMsg">{{it.me ? "你" : it.name}}撤回了一条消息</div>
+    <div w-class="recallMsg">{{it.me ? "你" : (it.name || "------") }}撤回了一条消息</div>
 
     {{% =================添加好友或创建群成功或群其他设置提示==================}}
     {{elseif it.message.mtype == 8 || it.message.mtype == 10 || it.message.mtype == 12}}
@@ -115,6 +115,6 @@
 
     {{% ========================加群成功提示=========================}}
     {{elseif it.message.mtype == 11}}
-    <div w-class="recallMsg" style="font-size:32px;">{{it.me ? "你" : it.name}}已成功加入群组</div>
+    <div w-class="recallMsg" style="font-size:32px;">{{it.me ? "你" : (it.name || "------") }}已成功加入群组</div>
     {{end}}
 </div>
