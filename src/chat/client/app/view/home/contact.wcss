@@ -12,6 +12,7 @@
     flex: 1;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    margin-bottom: 110px;
 }
 .inner-wrap{
     margin: 30px 20px 120px;

@@ -34,10 +34,13 @@ interface Props {
     isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
     activeTab:string;  // 当前活跃的tab
+    showTag:boolean; // 展示广场下拉
+    acTag:number;   // 标签下标
 }
 export const TAB = {
     message:'message',
-    friend:'friend'
+    friend:'friend',
+    square:'square'
 };
 
 export class Contact extends SpecialWidget {
@@ -54,11 +57,13 @@ export class Contact extends SpecialWidget {
         ],
         isUtilVisible:false,
         messageList:[],
-        activeTab:TAB.message,
+        activeTab:TAB.square,
         isLogin:false,
         hasWallet:false,
         avatar:'',
-        netClose:false
+        netClose:false,
+        showTag:false,
+        acTag:0
     };
 
     public create() {
@@ -69,7 +74,7 @@ export class Contact extends SpecialWidget {
     public setProps(props: Json) {
         super.setProps(props);
         this.props.isLogin = !!store.getStore('uid');
-        this.props.activeTab = TAB.message;
+        this.props.activeTab = TAB.square;
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
@@ -126,10 +131,12 @@ export class Contact extends SpecialWidget {
 
     // 打开更多功能
     public getMore() {
-        // gotoGameService('fairyChivalry');
-        // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
-            this.props.isUtilVisible = !this.props.isUtilVisible;
+            if (this.props.activeTab === TAB.square) {
+                // TODO 显示广场的操作
+            } else {
+                this.props.isUtilVisible = !this.props.isUtilVisible;
+            }
             this.paint();
         } else {
             popNewMessage('聊天未登陆');
@@ -171,6 +178,14 @@ export class Contact extends SpecialWidget {
     // 切换tab
     public changeTab(e:any) {
         this.props.activeTab = e.activeTab;
+        this.props.showTag = e.showTag;
+        this.paint();
+    }
+
+    // 切换标签
+    public changeTag(e:any) {
+        this.props.acTag = e.value;
+        this.props.showTag = false;
         this.paint();
     }
 

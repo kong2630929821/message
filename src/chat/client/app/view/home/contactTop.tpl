@@ -7,6 +7,10 @@
         </div>
         
         <div w-class="tabs">
+            <div w-class="tab {{it.activeTab=='square'?'activeTab':''}}" on-tap="changeTab(e,'square')">
+                {{it.showAcTag}}
+                <span w-class="arrow {{it.showTag?'':'arrow1'}}"></span>
+            </div>
             <div w-class="tab {{it.activeTab=='message'?'activeTab':''}}" on-tap="changeTab(e,'message')">消息</div>
             <div w-class="tab {{it.activeTab=='friend'?'activeTab':''}}" on-tap="changeTab(e,'friend')">好友</div>
             {{if it.showSpot}}
@@ -16,7 +20,7 @@
         <div style="width:90px;"></div>
 
         <div style="position:absolute;right:0;" on-down="onShow">
-            <img on-tap="goNext" src="../../res/images/add_white.png" w-class="btn" />
+            <img on-tap="goNext" src="../../res/images/{{it.activeTab=='square'?'squareEdit.png':'add_white.png'}}" w-class="btn" />
         </div>
     </div>
 

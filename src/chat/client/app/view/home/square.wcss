@@ -1,0 +1,52 @@
+.page{
+    background: #F9F9F9;
+}
+.title{
+    height:24px;
+    font-size:24px;
+    font-weight:300;
+    color:rgba(136,136,136,1);
+    line-height:25px;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+.tagList{
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10px;
+}
+.tag{
+    width:160px;
+    height:60px;
+    background:rgba(242,242,242,1);
+    margin: 10px;
+    text-align: center;
+    line-height: 60px;
+    font-size: 28px;
+    color: #222;
+}
+.setting{
+    height: 100px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    font-size: 28px;
+    color: #222;
+}
+.img{
+    width: 50px;
+    height: 50px;
+    margin: 20px;
+}
+.public{
+    font-size:24px;
+    font-weight:300;
+    color:rgba(49,91,200,1);
+    line-height:32px;
+    width:80px;
+    height:32px;
+    border-radius:16px;
+    border:1px solid rgba(49,91,200,1);
+    display: inline-block;
+    text-align: center;
+}

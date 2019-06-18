@@ -2,8 +2,8 @@
  * 项目入口
  */
 // ============================== 导入
-import { popNew } from '../../../../../pi/ui/root';
-import { addWidget } from '../../../../../pi/widget/util';
+import { popNew } from '../../../../pi/ui/root';
+import { addWidget } from '../../../../pi/widget/util';
 
 // ============================== 导出
 export const run = () => {
@@ -13,5 +13,5 @@ export const run = () => {
         // 或者return false;
         e.preventDefault();
     };
-    popNew('chat-client-app-view-login-login');
+    popNew('chat-client-app-view-register-login');
 };

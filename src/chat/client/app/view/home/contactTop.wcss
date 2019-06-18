@@ -39,7 +39,6 @@
     bottom: 50px;
 }
 .tabs{
-    width: 300px;
     display: flex;
     justify-content: space-between;
     font-size:32px;
@@ -50,10 +49,23 @@
     position: relative;
 }
 .tab{
-    width: 120px;
-    text-align: center;
+    width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .activeTab{
     color: #fff;
     border-bottom: 6px solid #fff;
+}
+.arrow{
+    height: 0;
+    border-bottom: 8px solid #fff;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    margin-left: 10px;
+}
+.arrow1{
+    border-top: 8px solid #fff;
+    border-bottom: none;
 }
