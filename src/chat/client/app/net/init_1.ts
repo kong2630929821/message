@@ -5,7 +5,7 @@
  */
 
 // ================================================ 导入
-import { getOfficial } from '../../../../app/net/pull3';
+import { getOfficial } from '../../../../app/publicLib/pull3';
 import * as walletStore from '../../../../app/store/memstore';
 import { changeWalletName } from '../../../../app/utils/account';
 import { popNewMessage } from '../../../../app/utils/tools';
