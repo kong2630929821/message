@@ -1,3 +1,4 @@
+import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 
 interface Props {
@@ -42,6 +43,20 @@ export class CommentItem extends Widget {
     public likeBtn() {
         this.props.likeActive = !this.props.likeActive;
         this.props.likeNum += this.props.likeActive ? 1 :-1;
+        this.paint();
+    }
+
+    /**
+     * 回复
+     */
+    public replay() {
+        this.closeUtils();
+        popNew('chat-client-app-view-info-editComment',{ title:'回复',showOrg:true });
+    }
+
+    // 关闭操作列表
+    public closeUtils() {
+        this.props.showUtils = false;
         this.paint();
     }
 }

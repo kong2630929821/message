@@ -1,7 +1,7 @@
 <div w-class="page">
     {{if !it.showTag}}
         {{if it.active==1 || it.active==3}}
-        <div w-class="setting">
+        <div w-class="setting" on-tap="goManage">
             <img src="../../res/images/setting.png" w-class="img"/>
             <span style="flex:1 0 0;">
                 我已关注 10人
@@ -10,7 +10,7 @@
             <img src="../../res/images/squareArrow.png" w-class="img" style="transform: rotate(270deg);"/>
         </div>
         {{end}}
-        
+
         {{for i,v of [1,2,3,4]}}
         <widget w-tag="chat-client-app-view-home-squareItem"></widget>
         {{end}}

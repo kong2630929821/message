@@ -9,6 +9,7 @@
         <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:{{it.placeholder}}, style:"max-height:300px;height:300px;font-size:28px;", input:{{it.contentInput}} }</widget>
     </div>
 
+    {{if it.showOrg}}
     <div w-class="orgComment">
         <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="img">{imgURL:{{it.img}}, width:"150px;",notRound:true}</widget>
         <div style="border-bottom: 1px solid #F2F2F2;">
@@ -23,6 +24,8 @@
             <div w-class="comment">{{it.comment}}</div>
         </div>
     </div>
+    {{end}}
+    
     <div w-class="btns">
         <img src="../../res/images/emoji.png" w-class="btn" on-tap="openEmoji"/>
         <img src="../../res/images/tool-camera.png" w-class="btn"/>

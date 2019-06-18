@@ -1,3 +1,4 @@
+import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 
@@ -30,5 +31,9 @@ export class Square extends Widget {
         this.props.active = ind;
         this.paint();
         notify(e.node,'ev-square-change',{ value:ind });
+    }
+
+    public goManage() {
+        popNew3('chat-client-app-view-info-manageFollow');
     }
 }

@@ -1,4 +1,4 @@
-<div w-class="item">
+<div w-class="item" on-tap="closeUtils">
     <div w-class="title">
         <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{it.avatar}}, width:"80px;"}</widget>
         <div w-class="titleCenter">
@@ -27,7 +27,7 @@
     <div w-class="comment">{{it.mess}}</div>
 
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
-        <div w-class="option">回复</div>
+        <div w-class="option" on-tap="replay">回复</div>
         <div w-class="option">删除</div>
         <div w-class="option">复制</div>
         <div w-class="option">举报</div>

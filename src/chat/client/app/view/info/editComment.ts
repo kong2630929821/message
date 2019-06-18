@@ -10,6 +10,7 @@ interface Props {
     img:string;
     username:string;
     comment:string;
+    showOrg:boolean;  // 显示原评论
 }
 
 /**
@@ -24,8 +25,17 @@ export class EditComment extends Widget {
         contentInput:'',
         img:'../../res/images/user_avatar.png',
         username:'用户2',
-        comment:'Cras quis nulla commodo, aliquam lectus sed, blandit augue. Cras ullamcorper bibendum. Duis ncidunt urna non pretium porta. Nam vitae ligula vel on pr Nam vitae ligula vel on pr'
+        comment:'Cras quis nulla commodo, aliquam lectus sed, blandit augue. Cras ullamcorper bibendum. Duis ncidunt urna non pretium porta. Nam vitae ligula vel on pr Nam vitae ligula vel on pr',
+        showOrg:false
     };
+
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+    }
 
     public close() {
         this.cancel && this.cancel();
