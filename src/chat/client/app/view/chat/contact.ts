@@ -4,8 +4,8 @@
 
 // ================================================ 导入
 import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
-import { uploadFileUrlPrefix } from '../../../../../app/config';
-import * as walletStore from '../../../../../app/store/memstore';
+import { getStoreData, registerStore } from '../../../../../app/middleLayer/wrap';
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { Json } from '../../../../../pi/lang/type';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -73,30 +73,31 @@ export class Contact extends SpecialWidget {
 
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        this.props.hasWallet = !!walletStore.getStore('wallet');
-        const wUser = walletStore.getStore('user/info', { nickName: '' });  // 钱包
-        const uid = store.getStore('uid', 0);
-        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
-        this.props.avatar = wUser.avatar ? `${uploadFileUrlPrefix}${wUser.avatar}` :'' ;
+        Promise.all([getStoreData('wallet'),getStoreData('user/info', { nickName: '' })]).then(([wallet,wUser]) => {
+            this.props.hasWallet = !!wallet;
+            const uid = store.getStore('uid', 0);
+            const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
+            this.props.avatar = wUser.avatar ? `${uploadFileUrlPrefix}${wUser.avatar}` :'' ;
+            
+            // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
+            if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
+                if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
+                    setUserInfo();
+                    this.paint();
+                } else {
+                    store.initStore();
+                    this.state.lastChat = []; // 清空记录 lastChat
+                    this.paint();
+                }
+            } 
+        });
         
-        // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
-        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
-            if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
-                setUserInfo();
-                this.paint();
-            } else {
-                store.initStore();
-                this.state.lastChat = []; // 清空记录 lastChat
-                this.paint();
-            }
-        } 
-
         // }
     }
 
     public firstPaint() {
         super.firstPaint();
-        walletStore.register('user/info',() => { // 钱包用户信息修改
+        registerStore('user/info',() => { // 钱包用户信息修改
             this.setProps(this.props);  
         });
         store.register('uid',() => {  // 聊天用户登陆成功
@@ -204,7 +205,7 @@ store.register('contactMap', (r) => {
 });
 
 // 邀请好友成功
-walletStore.register('inviteUsers/invite_success',(r) => {
+registerStore('inviteUsers/invite_success',(r) => {
     const ans = updateInviteUsers(depCopy(r));
     
     if (ans.length < r.length) {
@@ -215,7 +216,7 @@ walletStore.register('inviteUsers/invite_success',(r) => {
 });
 
 // 兑换好友邀请码成功
-walletStore.register('inviteUsers/convert_invite',(r) => {
+registerStore('inviteUsers/convert_invite',(r) => {
     const ans = updateInviteUsers(depCopy(r));
     
     if (ans.length < r.length) {

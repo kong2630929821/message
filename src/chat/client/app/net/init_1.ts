@@ -5,8 +5,8 @@
  */
 
 // ================================================ 导入
+import { getStoreData } from '../../../../app/middleLayer/wrap';
 import { getOfficial } from '../../../../app/publicLib/pull3';
-import * as walletStore from '../../../../app/store/memstore';
 import { changeWalletName } from '../../../../app/utils/account';
 import { popNewMessage } from '../../../../app/utils/tools';
 import { UserInfo } from '../../../server/data/db/user.s';
@@ -77,8 +77,8 @@ export const walletSignIn = (openid) => {
 /**
  * 改变用户信息
  */
-export const setUserInfo = () => {
-    const user = walletStore.getStore('user',{ info:{}, id:'' });
+export const  setUserInfo = async () => {
+    const user = await getStoreData('user',{ info:{}, id:'' });
     const r = new UserInfo();
     r.uid = store.getStore('uid');
     r.sex = 0;

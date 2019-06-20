@@ -3,7 +3,7 @@
  */
 
 // ================================================ 导入
-import * as walletStore from '../../../../../app/store/memstore';
+import { registerStore } from '../../../../../app/middleLayer/wrap';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -78,13 +78,13 @@ store.register('contactMap', (r) => {
 });
 
 // 邀请好友成功
-walletStore.register('inviteUsers/invite_success',(r) => {
+registerStore('inviteUsers/invite_success',(r) => {
     STATE.inviteUsers = r;
     forelet.paint(STATE);
 });
 
 // 兑换好友邀请码成功
-walletStore.register('inviteUsers/convert_invite',(r) => {
+registerStore('inviteUsers/convert_invite',(r) => {
     STATE.convertUser = r;
     forelet.paint(STATE);
 });

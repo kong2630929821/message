@@ -1,6 +1,6 @@
 
-import { uploadFileUrlPrefix } from '../../../../app/config';
-import { setStore } from '../../../../app/store/memstore';
+import { setStoreData } from '../../../../app/middleLayer/wrap';
+import { uploadFileUrlPrefix } from '../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../app/utils/tools';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { loadDir } from '../../../../pi/widget/util';
@@ -105,8 +105,10 @@ export const invitePersonToGroup = (gid,cb) => {
 
 // 设置游戏中加群提示
 export const setNoGroupRemind = (noRemind,cb) => {
-    setStore('flags/noGroupRemind',noRemind);
-    cb(null,noRemind);
+    setStoreData('flags/noGroupRemind',noRemind).then(() => {
+        cb(null,noRemind);
+    });
+    
 };
 
 // 第三方聊天注入资源 返回两个propmise
