@@ -1,7 +1,7 @@
 <div w-class="new-page" class="new-page" on-tap="closeMore">
     <div w-class="topBack" ev-next-click="getMore" ev-contactTop-tab="changeTab">
         {{: show = it1.contactMap.applyUser.length + it1.contactMap.applyGroup.length + it1.inviteUsers.length + it1.convertUser.length}}
-        <widget w-tag="chat-client-app-view-home-contactTop">{avatar:{{it.avatar}},showSpot:{{show}},activeTab:{{it.activeTab}},acTag:{{it.acTag}} }</widget>
+        <widget w-tag="chat-client-app-view-home-contactTop">{avatar:{{it.avatar}},showSpot:{{show}},activeTab:{{it.activeTab}},acTag:{{it.acTag}},showUtils:{{it.showSquareUtils}} }</widget>
     </div>
     <app-components1-offlineTip-offlineTip>{ offlienType:{{it.offlienType}} }</app-components1-offlineTip-offlineTip>
     

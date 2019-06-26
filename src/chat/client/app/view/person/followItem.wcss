@@ -1,18 +1,3 @@
-.page{
-    background: #fff;
-}
-.input{
-    padding: 15px;
-    height: 100px;
-    position: relative;
-}
-.searchIcon{
-    position: absolute;
-    left: 40px;
-    top: 38px;
-    width: 26px;
-    height: 26px;
-}
 .item{
     display: flex;
     align-items: center;

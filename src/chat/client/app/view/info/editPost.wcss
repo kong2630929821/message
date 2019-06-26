@@ -1,0 +1,80 @@
+.page{
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+.topBar{
+    display: flex;
+    justify-content: space-between;
+    height: 88px;
+}
+.topBarItem{
+    height:88px;
+    font-size:32px;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+    line-height:88px;
+    padding: 0 20px;
+}
+.content{
+    margin: 0 20px 20px;
+    padding: 10px 20px;
+}
+.img{
+    margin: 5px;
+    background-color:#F0F9FF;
+}
+.tools{
+    position: absolute;
+    bottom: 0;
+    border-top: 1px solid #f2f2f2;
+    background: #fff;
+    width: 100%;
+}
+.btn{
+    width: 50px;
+    height: 50px;
+    margin: 0 20px;
+    border: 20px solid transparent;
+}
+.upload{
+    width:230px;
+    height:230px;
+    margin: 5px;
+    background:rgba(242,242,242,1);
+    border-radius:4px;
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: url(../../res/images/add_black.png);
+}
+.imageList{
+    border-bottom:2px solid #F2F2F2;
+    padding-bottom: 20px;
+}
+.imgBox{
+    position: relative;
+    display: inline-block;
+}
+.close{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50px;
+    height: 50px;
+}
+.title{
+    border-bottom: 2px solid #CCCCCC;
+}
+.contain{
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex: 1 0 0;
+    margin-bottom: 90px;
+}
+.emojiMap{
+    height:420px;
+    overflow-x:hidden;
+    overflow-y:auto;
+    min-height: 420px;
+}

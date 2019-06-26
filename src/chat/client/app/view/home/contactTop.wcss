@@ -1,5 +1,6 @@
 .topBar{
     width: 100%;
+    position: relative;
 }
 .topBar-content{
     display: flex;
@@ -68,4 +69,34 @@
 .arrow1{
     border-top: 8px solid #fff;
     border-bottom: none;
+}
+.utilList{
+    width:280px;
+    height:200px;
+    background:rgba(88,85,85,1);
+    box-shadow:0px 0px 10px 0px rgba(34,34,34,0.2);
+    border-radius:6px;
+    position: absolute;
+    font-size:28px;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+    line-height:98px;
+    right: 20px;
+    text-align: center;
+    z-index: 1;
+}
+.util{
+    border-bottom: 2px solid #222;
+}
+.newMess{
+    background:rgba(247,147,26,1);
+    border-radius:50px;
+    font-size:24px;
+    font-family:Helvetica;
+    color:rgba(255,255,255,1);
+    line-height:40px;
+    position: absolute;
+    top: 0;
+    left: 52px;
+    padding: 0 10px;
 }

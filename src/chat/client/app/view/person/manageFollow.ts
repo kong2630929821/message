@@ -1,9 +1,11 @@
 import { Widget } from '../../../../../pi/widget/widget';
+
 interface Props {
     avatar:string;
     username:string;
     desc:string;  // 简介
 }
+
 /**
  * 管理关注
  */

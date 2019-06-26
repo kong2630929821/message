@@ -6,6 +6,7 @@ interface Props {
     showTag:boolean;  // 显示标签列表
     tagList:string[];  // 标签列表
     active:number;  // 当前显示的标签
+    postList:any[];  // 帖子列表
 }
 export const TagList = ['广场','关注','热门','公众号'];
 /**
@@ -15,7 +16,26 @@ export class Square extends Widget {
     public props:Props = {
         showTag:false,
         tagList:TagList,
-        active:0
+        active:0,
+        postList:[
+            {
+                followed:true,
+                imgList:['','',''],
+                gender:1,
+                isPublic:true
+            },
+            {
+                followed:false,
+                imgList:['','','',''],
+                gender:0
+            },
+            {
+                followed:false,
+                imgList:['',''],
+                gender:1,
+                offical:true
+            }
+        ]
     };
 
     public setProps(props:any) {
@@ -34,6 +54,6 @@ export class Square extends Widget {
     }
 
     public goManage() {
-        popNew3('chat-client-app-view-info-manageFollow');
+        popNew3('chat-client-app-view-person-manageFollow');
     }
 }

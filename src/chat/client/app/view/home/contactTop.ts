@@ -16,6 +16,7 @@ interface Props {
     showTag:boolean;  // 展示广场下拉
     showAcTag:string;  // 标签
     acTag:string;   // 标签
+    showUtils:boolean;  // 显示操作栏
 }
 
 // ================================ 导出
@@ -57,4 +58,9 @@ export class ContactTop extends Widget {
         this.paint();
     }
     
+    // 发布帖子  fg=true 发布公众号帖子
+    public editPost(e:any,fg:boolean) {
+        popNew3('chat-client-app-view-info-editPost',{ isPublic:fg });
+        notify(e.node,'ev-next-click',{});
+    }
 }

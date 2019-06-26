@@ -47,8 +47,9 @@
 .btns{
     position: absolute;
     bottom: 0;
-    widows: 100%;
     border-top: 1px solid #f2f2f2;
+    background: #fff;
+    width: 100%;
 }
 .btn{
     width: 50px;

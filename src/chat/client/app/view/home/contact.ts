@@ -36,6 +36,7 @@ interface Props {
     activeTab:string;  // 当前活跃的tab
     showTag:boolean; // 展示广场下拉
     acTag:number;   // 标签下标
+    showSquareUtils:boolean; // 显示
 }
 export const TAB = {
     message:'message',
@@ -63,7 +64,8 @@ export class Contact extends SpecialWidget {
         avatar:'',
         netClose:false,
         showTag:false,
-        acTag:0
+        acTag:0,
+        showSquareUtils:false
     };
 
     public create() {
@@ -131,11 +133,13 @@ export class Contact extends SpecialWidget {
 
     // 打开更多功能
     public getMore() {
-        if (this.props.isLogin) {
+        if (!this.props.isLogin) {
             if (this.props.activeTab === TAB.square) {
-                // TODO 显示广场的操作
+                this.props.showSquareUtils = !this.props.showSquareUtils;
+                this.props.isUtilVisible = false;
             } else {
                 this.props.isUtilVisible = !this.props.isUtilVisible;
+                this.props.showSquareUtils = false;
             }
             this.paint();
         } else {
@@ -145,6 +149,7 @@ export class Contact extends SpecialWidget {
 
     public closeMore() {
         this.props.isUtilVisible = false;
+        this.props.showSquareUtils = false;
         this.paint();
     }
 

@@ -2,8 +2,9 @@
     <app-components1-blankDiv-topDiv></app-components1-blankDiv-topDiv>
    
     <div w-class="topBar-content">
-        <div on-tap="showMine" on-down="onShow">
+        <div on-tap="showMine" on-down="onShow" style="position:relative;">
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{it.avatar || "../../res/images/user_avatar.png"}}, width:"48px;"}</widget>
+            <span w-class="newMess">99+</span>
         </div>
         
         <div w-class="tabs">
@@ -23,5 +24,12 @@
             <img on-tap="goNext" src="../../res/images/{{it.activeTab=='square'?'squareEdit.png':'add_white.png'}}" w-class="btn" />
         </div>
     </div>
+
+    {{if it.showUtils}}
+    <div w-class="utilList">
+        <div w-class="util" on-tap="editPost(e,false)">写动态</div>
+        <div on-tap="editPost(e,true)">发公众号消息</div>
+    </div>
+    {{end}}
 
 </div>
