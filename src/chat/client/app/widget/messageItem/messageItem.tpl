@@ -24,7 +24,7 @@
             {{% ========================语音=========================}}
             {{elseif it.message.mtype == 3}}
             <div w-class="radio-wrap" on-tap="playRadioMess" style="width:{{it.message.width * 4 + 250}}px;" on-longtap="openMessageRecall">
-                <img w-class="playBtn" src="../../res/images/{{it.playRadio?'stop-radio.png':'play-radio.png'}}"/>
+                <img w-class="playBtn" src="../../res/images/{{it.playAudio?'stop-radio.png':'play-radio.png'}}"/>
                 <widget w-tag="pi-ui-html" w-class="pi-html" style="flex:1 0 0;">{{it.message.msg}}</widget>
                 
                 <div w-class="corner">
@@ -84,7 +84,7 @@
             {{elseif it.message.mtype == 3}}
             <span w-class="leftDownTail"></span>
             <div w-class="radio-wrap" style="color:#222222;background:#fff;width:{{it.message.width * 4 + 250}}px;" on-tap="playRadioMess">
-                <img w-class="playBtn" src="../../res/images/{{it.playRadio?'stop-radio.png':'play-radio.png'}}" class="audioImage"/>
+                <img w-class="playBtn" src="../../res/images/{{it.playAudio?'stop-radio.png':'play-radio.png'}}" class="audioImage"/>
                 <widget w-tag="pi-ui-html" w-class="pi-html" style="flex:1 0 0;">{{it.message.msg}}</widget>
                 <div w-class="corner">
                     <span w-class="sendTime" style="color:#297FCA">{{it.time}}</span>

@@ -16,49 +16,108 @@ export class InputMessage extends Widget {
         message:'',
         isOnEmoji:false,
         isOnTools:false,
-        isOnRadio:false,
-        toolList:[],
-        chatType:'user'
-    };
-    private radioTime:number;
-
-    public setProps(props:any) {
-        super.setProps(props);
-        this.props.toolList = [
+        isOnAudio:false,
+        recordAudio:false,
+        toolList:[
             { name:'拍摄',img:'tool-camera.png' },
             { name:'相册',img:'tool-pictures.png' },
             { name:'红包',img:'tool-redEnv.png' }
-        ];
+        ],
+        chatType:'user',
+        istyle:[0,0],
+        audioText:'按住说话(30S)'
+    };
+    private audioTime:number;
+    private interval:any;
+
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
     }
 
     // 麦克风输入处理
-    public radioStart(e:any) {
+    public audioStart(e:any) {
+        console.log('点击开始录音');
+        this.props.recordAudio = true;
+        this.paint();
+        let count = 0;  // 计数到30
+        const list = getWidth(15,80);
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+        this.interval = setInterval(() => {
+            count++;
+            let r1 = 0;
+            let r2 = 0;
+            if (count < 15) {
+                r1 = list[count];
+            } else {
+                r1 = 160;
+                r2 = list[count - 15];
+            }
+            this.props.istyle = [r1,r2];
+            this.props.audioText = `上滑取消(${count}S)`;
+            this.paint();
+
+            if (count >= 30) clearInterval(this.interval);
+            console.log(count,r1,r2);
+        },1000);
+
+        // ======================正式代码===========================//
         getPromise(() => {
             console.log('点击开始录音');
-            this.props.isOnRadio = true;
-            this.radioTime = Date.now();
-            this.paint();
-            startRadio();
-                // 超过60秒自动停止录音
-            setTimeout(() => {
-                if (this.props.isOnRadio) {
-                    this.radioEnd(e);
-                }
-            }, 59000);
+            startRadio(() => {
+                this.props.recordAudio = true;
+                this.audioTime = Date.now();
+                this.paint();
+                let count = 0;  // 计数到30
+                const list = getWidth(15,80);
+                this.interval = setInterval(() => {
+                    count++;
+                    let r1 = 0;
+                    let r2 = 0;
+                    if (count < 15) {
+                        r1 = list[count];
+                    } else {
+                        r1 = 160;
+                        r2 = list[count - 15];
+                    }
+                    this.props.istyle = [r1,r2];
+                    this.props.audioText = `上滑取消(${count}S)`;
+                    this.paint();
+
+                    if (count >= 30) {  // 超过30秒自动停止录音
+                        clearInterval(this.interval);
+                        if (this.props.recordAudio) {
+                            this.audioEnd(e);
+                        }
+                    }
+                },1000);
+            });
+            
         });
     }
 
     // 语音录入完成
-    public radioEnd(e:any) {
+    public audioEnd(e:any) {
         console.log('释放结束录音');
-        this.props.isOnRadio = false;
+        this.props.recordAudio = false;
+        this.props.istyle = [0,0];
+        this.props.audioText = `按住说话(30S)`;
         this.paint();
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+
         endRadio((buffer) => {
-            uploadFile(arrayBuffer2File(buffer),(radioUrl:string) => {
-                console.log('录制的音频',radioUrl);
-                const t = Date.now() - this.radioTime;
+            uploadFile(arrayBuffer2File(buffer),(audioUrl:string) => {
+                console.log('录制的音频',audioUrl);
+                const t = Date.now() - this.audioTime;
                 const res = {
-                    message:radioUrl,
+                    message:audioUrl,
                     time:Math.ceil(t / 1000)
                 };
                 notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.VOICE });
@@ -67,7 +126,7 @@ export class InputMessage extends Widget {
     }
 
     // 打开表情包图库
-    public playEmoji(e:any) {
+    public openEmoji(e:any) {
         getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight()}px`;
         setTimeout(() => {
@@ -82,6 +141,15 @@ export class InputMessage extends Widget {
         document.getElementById('toolsMap').style.height = `${getKeyBoardHeight()}px`;
         setTimeout(() => {
             notify(e.node,'ev-open-Tools',{});
+        }, 100);
+    }
+
+    // 打开语音录入
+    public openAudio(e:any) {
+        getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
+        document.getElementById('audioWrap').style.height = `${getKeyBoardHeight()}px`;
+        setTimeout(() => {
+            notify(e.node,'ev-open-audio',{});
         }, 100);
     }
 
@@ -118,8 +186,11 @@ interface Props {
     message:string; // 消息内容
     isOnTools:boolean;  // 是否打开更多功能
     toolList:any[];  // 更多功能列表
-    isOnRadio:boolean; // 是否正在录音
+    isOnAudio:boolean; // 是否正在录音
     chatType:string;  // 聊天类型 user|group
+    recordAudio:boolean;  // 正在录入语音
+    istyle:number[];   // 语音录入进度条宽度
+    audioText:string;  // 语音录入提示语
 }
 
 /**
@@ -218,4 +289,18 @@ export const sendRedEnv = (e:any,chatType:string) => {
             notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.REDENVELOPE });
         }
     });
+};
+
+/**
+ * 半圆宽度等比分数组
+ * @param num 份数
+ * @param len 半径
+ */
+export const getWidth = (num:number,len:number) => {
+    const list = [];
+    for (let i = 0;i < num;i++) {
+        list[i] = i < num / 2 ? Math.ceil(len - Math.cos(i / num * 3.14) * len) :Math.ceil(len - Math.cos(i / num * 3.14) * len);
+    }
+
+    return list;
 };

@@ -29,7 +29,7 @@ export class MessageItem extends Widget {
             chatType:GENERATOR_TYPE.USER,
             recallBtn:false,
             avatar:'',  // 对方的头像
-            playRadio:false,
+            playAudio:false,
             myAvatar:''
         };
        
@@ -71,7 +71,7 @@ export class MessageItem extends Widget {
 
     public userDetail(e:any,fg:boolean= false) {
         if (fg) {
-            popNew('chat-client-app-view-info-user');
+            popNew('chat-client-app-view-info-userDetail');
             
             return;
         }
@@ -163,18 +163,18 @@ export class MessageItem extends Widget {
         }
         
         const elem = getRealNode(e.node).getElementsByTagName('audio')[0];
-        if (this.props.playRadio) {
-            this.props.playRadio = false;
+        if (this.props.playAudio) {
+            this.props.playAudio = false;
             console.log('暂停播放语音');
 
         } else {
-            this.props.playRadio = true;
+            this.props.playAudio = true;
             console.log('开始播放语音');
             elem.play();
             
             setTimeout(() => {
                 if (elem.currentTime === elem.duration) {
-                    this.props.playRadio = false;
+                    this.props.playAudio = false;
                     console.log('结束播放语音');
                     elem.pause();
                     elem.currentTime = 0;
@@ -184,7 +184,7 @@ export class MessageItem extends Widget {
             }, elem.duration * 1000 + 500); // 多加半秒，确保语音播完
         }
         this.paint();
-        notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playRadio:this.props.playRadio });
+        notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playAudio:this.props.playAudio });
 
     }
 }
@@ -199,7 +199,7 @@ interface Props {
     chatType:GENERATOR_TYPE;// 消息类型
     recallBtn:boolean;// 撤回按钮是否可见
     avatar:string;  // 对方的头像
-    playRadio:boolean; // 是否正在播放语音
+    playAudio:boolean; // 是否正在播放语音
     myAvatar:string;  // 自己的头像
 }
 

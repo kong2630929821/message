@@ -1,8 +1,8 @@
 <div w-class="outer" >
 	<div w-class="input-message-wrap">
-		<img w-class="audio" on-touchstart="radioStart" on-touchend="radioEnd" src="../../res/images/audio.png"/>
+		<img w-class="audio" on-tap="openAudio" src="../../res/images/audio.png"/>
 		<chat-client-app-widget-input-textarea w-class="inputMessage">{placeHolder:"输入消息",input:{{it.message}} }</chat-client-app-widget-input-textarea>
-		<img w-class="emoji" on-tap="playEmoji" src="../../res/images/emoji.png"/>
+		<img w-class="emoji" on-tap="openEmoji" src="../../res/images/emoji.png"/>
 		{{if it.message}}
 		<img w-class="unfold" on-tap="send" src="../../res/images/send.png"/>
 		{{else}}
@@ -23,9 +23,18 @@
 		</div>
 	</div>
 	
-	<div w-class="radioWrap" style="display:{{it.isOnRadio?'block':'none'}}">
-		<div w-class="radioWrite" style="animation: radio1 1s infinite;"></div>
-		<div w-class="radioWrite" style="animation: radio2 1s infinite;"></div>
-		<div w-class="radioWrite"></div>
+	<div id="audioWrap" w-class="audioWrap" style="display:{{it.isOnAudio?'flex':'none'}}">
+		{{%<!-- <div w-class="audioWrite" style="animation: audio1 1s infinite;"></div>
+		<div w-class="audioWrite" style="animation: audio2 1s infinite;"></div>
+		<div w-class="audioWrite"></div> -->}}
+		<div w-class="audioText">{{it.audioText}}</div>
+		<div on-touchstart="audioStart" on-touchend="audioEnd" w-class="audioBox {{it.recordAudio?'audioActive':''}}">
+			<img src="../../res/images/audioIcon.png" w-class="audioIcon"/>
+			<div w-class="circleRing" >
+				<div w-class="circle" style="clip: rect(0, {{it.istyle[0]}}px, 80px, 0);transform:rotate(90deg);"></div>
+				<div w-class="circle" style="clip: rect(0, {{it.istyle[1]}}px, 80px, 0);transform:rotate(-90deg);"></div>
+			</div>
+		</div>
+
 	</div>
 </div>

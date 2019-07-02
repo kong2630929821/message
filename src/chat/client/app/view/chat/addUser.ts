@@ -24,7 +24,13 @@ export class AddUser extends Widget {
         super();
         this.props = {
             sid: null,
-            rid: null
+            rid: null,
+            btns:[
+                ['search.png','搜索'],
+                ['search.png','通讯录好友'],
+                ['search.png','qq/微信好友'],
+                ['search.png','扫一扫']
+            ]
         };
     }
 
@@ -87,9 +93,6 @@ export class AddUser extends Widget {
             case 1:
                 popNew('app-view-mine-other-addFriend'); // 展示我的二维码
                 break;
-            case 2:
-                this.applyFriend();  // 添加好友
-                break;
             default:
         }
     }
@@ -105,6 +108,7 @@ export class AddUser extends Widget {
 interface Props {
     sid: number;
     rid: string;
+    btns:string[][];
 }
 
 store.register('contactMap', (r: Map<number, Contact>) => {

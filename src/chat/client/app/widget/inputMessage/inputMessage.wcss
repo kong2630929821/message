@@ -58,7 +58,7 @@
     border-radius:12px;
     border:1px solid rgba(204,204,204,1);
 }
-.radioWrap{
+.audioWrap{
     position: absolute;
     bottom: 200px;
     left: 50%;
@@ -78,4 +78,48 @@
     background: #fff;
     margin-top: 20px;
     margin-left: 75px;
+}
+.audioWrap{
+    height: 420px;
+    min-height: 420px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.audioBox{
+    width:150px;
+    height:150px;
+    background:rgba(255,255,255,1);
+    border:2px solid rgba(204,204,204,1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-sizing: content-box;
+}
+.audioActive{
+    background: #2A54C3;
+}
+.audioIcon{
+    height: 100px;
+    width: 100px;
+}
+.circleRing{
+    position: absolute;
+    width: 160px;
+    height: 160px;
+}
+.circle{
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 5px solid rgb(87, 255, 93);
+    box-sizing: content-box;
+    border-radius: 50%;
+}
+.audioText{
+    font-size:32px;
+    color: #222;
+    font-weight: 300;
+    margin-bottom: 60px;
 }
