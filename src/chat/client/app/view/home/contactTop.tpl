@@ -25,10 +25,21 @@
         </div>
     </div>
 
-    {{if it.showUtils}}
+    {{if it.showUtils && it.activeTab=="square"}}
     <div w-class="utilList">
-        <div w-class="util" on-tap="editPost(e,false)">写动态</div>
-        <div on-tap="editPost(e,true)">发公众号消息</div>
+        <div w-class="util" on-tap="editPost(e,false)" on-down="onShow">写动态</div>
+        <div on-tap="editPost(e,true)" on-down="onShow">发公众号消息</div>
+    </div>
+    {{elseif it.showUtils}}
+    <div w-class="utilList1" style="">
+        {{for i, v of it.utilList}}
+            <div w-class="liItem" on-tap="utilClick(e,{{i}})" on-down="onShow">
+                {{if v.iconPath}}
+                    <img style="margin-right:20px;" src="../../res/images/{{v.iconPath}}" />
+                {{end}}
+                <span>{{v.utilText}}</span>
+            </div>
+        {{end}}    
     </div>
     {{end}}
 

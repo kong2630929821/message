@@ -13,7 +13,6 @@ import { UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { rippleShow } from '../../logic/logic';
-import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
 import { SpecialWidget } from '../specialWidget';
 
@@ -27,8 +26,7 @@ interface Props {
     offlienType:OfflienType;
     sid: number;
     messageList: any[];
-    isUtilVisible: boolean;
-    utilList: any[];
+    showUtils: boolean;
     netClose: boolean; // 网络链接是否断开
     avatar:string; // 头像
     isLogin:boolean; // 聊天是否已经登陆
@@ -36,7 +34,6 @@ interface Props {
     activeTab:string;  // 当前活跃的tab
     showTag:boolean; // 展示广场下拉
     acTag:number;   // 标签下标
-    showSquareUtils:boolean; // 显示
 }
 export const TAB = {
     message:'message',
@@ -50,13 +47,7 @@ export class Contact extends SpecialWidget {
     public props: Props = {
         offlienType:OfflienType.CHAT,
         sid:0,
-        utilList:[
-            { iconPath: 'add-blue.png', utilText: '添加好友' },
-            { iconPath: 'group-chat.png', utilText: '创建群聊' },
-            { iconPath: 'scan.png', utilText: '扫一扫' },
-            { iconPath: 'add-friend.png', utilText: '我的信息' }
-        ],
-        isUtilVisible:false,
+        showUtils:false,
         messageList:[],
         activeTab:TAB.square,
         isLogin:false,
@@ -64,8 +55,7 @@ export class Contact extends SpecialWidget {
         avatar:'',
         netClose:false,
         showTag:false,
-        acTag:0,
-        showSquareUtils:false
+        acTag:0
     };
 
     public create() {
@@ -133,14 +123,8 @@ export class Contact extends SpecialWidget {
 
     // 打开更多功能
     public getMore() {
-        if (!this.props.isLogin) {
-            if (this.props.activeTab === TAB.square) {
-                this.props.showSquareUtils = !this.props.showSquareUtils;
-                this.props.isUtilVisible = false;
-            } else {
-                this.props.isUtilVisible = !this.props.isUtilVisible;
-                this.props.showSquareUtils = false;
-            }
+        if (this.props.isLogin) {
+            this.props.showUtils = !this.props.showUtils;
             this.paint();
         } else {
             popNewMessage('聊天未登陆');
@@ -148,35 +132,7 @@ export class Contact extends SpecialWidget {
     }
 
     public closeMore() {
-        this.props.isUtilVisible = false;
-        this.props.showSquareUtils = false;
-        this.paint();
-    }
-
-    public handleFatherTap(e: any) {
-        
-        switch (e.index) {
-            case 0:// 点击添加好友
-                popNew3('chat-client-app-view-chat-addUser');
-                break;
-            case 1:// 创建群聊 setGroupChat
-                popNew3('chat-client-app-view-group-setGroupChat');
-                break;
-            case 2:// 扫一扫 
-                doScanQrCode((res) => {  // 扫描二维码
-                    popNew3('chat-client-app-view-chat-addUser',{ rid:res });
-                    console.log(res);
-                    this.paint();
-                });
-                // openTestWebview(10001);      
-                break;
-            case 3:
-                popNew3('app-view-mine-other-addFriend'); 
-                break;
-
-            default:
-        }
-        this.closeMore();
+        this.props.showUtils = false;
         this.paint();
     }
 
@@ -184,6 +140,7 @@ export class Contact extends SpecialWidget {
     public changeTab(e:any) {
         this.props.activeTab = e.activeTab;
         this.props.showTag = e.showTag;
+        this.props.showUtils = false;
         this.paint();
     }
 

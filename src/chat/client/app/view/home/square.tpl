@@ -14,7 +14,11 @@
         {{end}}
 
         {{for i,v of it.postList}}
-        <widget w-tag="chat-client-app-view-home-pubPostItem" style="margin-top:20px;">{{v}}</widget>
+            {{if v.isPublic}}
+            <widget w-tag="chat-client-app-view-home-pubPostItem" style="margin-top:20px;">{{v}}</widget>
+            {{else}}
+            <widget w-tag="chat-client-app-view-home-squareItem" style="margin-top:20px;">{{v}}</widget>
+            {{end}}
         {{end}}
     {{else}}
     <div style="background:#fff;padding-bottom: 20px;">

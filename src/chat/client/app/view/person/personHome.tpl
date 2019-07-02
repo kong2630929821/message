@@ -1,7 +1,7 @@
 <div class="new-page" w-class="page">
     <app-components1-blankDiv-topDiv></app-components1-blankDiv-topDiv>
     <div w-class="topBar">
-        <img src="../../res/images/left_arrow_blue.png" w-class="back"/>
+        <img src="../../res/images/left_arrow_blue.png" w-class="back" on-tap="goBack"/>
         <div w-class="tabs">
             <span w-class="tab {{it.activeTab==0?'activeTab':''}}" on-tap="changeTab(0)">动态</span>
             <span w-class="tab {{it.activeTab==1?'activeTab':''}}" on-tap="changeTab(1)">关注</span>

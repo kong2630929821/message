@@ -17,22 +17,26 @@ interface Props {
 // ================================================ 导出
 export class UserDetail extends Widget {
     public ok: () => void;
-    public props: Props;
-    constructor() {
-        super();
-        this.props = {
-            uid: null,
-            userInfo: {},
-            alias: '',
-            avatar:'',
-            numList:[
-                [114,'动态'],
-                [302,'关注'],
-                [159,'粉丝']
-            ]
-        };
-    }
+    public props: Props = {
+        uid: null,
+        userInfo: {},
+        alias: '',
+        avatar:'',
+        numList:[
+            [114,'动态'],
+            [302,'关注'],
+            [159,'粉丝']
+        ]
+    };
 
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+    }
+   
     public goBack() {
         this.ok && this.ok();
     }

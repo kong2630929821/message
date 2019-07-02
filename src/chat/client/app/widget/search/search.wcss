@@ -1,6 +1,0 @@
-.line{
-    height: 2px;
-    background: #DBDBE5;
-    width: auto;
-    flex:1;
-}

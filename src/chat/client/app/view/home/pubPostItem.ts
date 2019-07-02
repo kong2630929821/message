@@ -98,7 +98,6 @@ export class SquareItem extends Widget {
      * 查看用户详情
      */
     public goUserDetail() {
-        // popNew3('chat-client-app-view-info-userDetail');
         popNew3('chat-client-app-view-person-publicHome');
     }
 }

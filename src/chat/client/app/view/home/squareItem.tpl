@@ -38,7 +38,7 @@
             {{if i==2 && it.imgList.length==4}}
             <div></div>
             {{end}}
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:"", width:"230px;",notRound:true}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:"", width:"{{it.imgList.length==1?'320px':'230px'}}",notRound:true}</widget>
         {{end}}
     </div>
 

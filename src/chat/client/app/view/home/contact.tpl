@@ -1,7 +1,7 @@
 <div w-class="new-page" class="new-page" on-tap="closeMore">
-    <div w-class="topBack" ev-next-click="getMore" ev-contactTop-tab="changeTab">
+    <div w-class="topBack" ev-next-click="getMore" ev-contactTop-tab="changeTab" ev-util-click="closeMore">
         {{: show = it1.contactMap.applyUser.length + it1.contactMap.applyGroup.length + it1.inviteUsers.length + it1.convertUser.length}}
-        <widget w-tag="chat-client-app-view-home-contactTop">{avatar:{{it.avatar}},showSpot:{{show}},activeTab:{{it.activeTab}},acTag:{{it.acTag}},showUtils:{{it.showSquareUtils}} }</widget>
+        <widget w-tag="chat-client-app-view-home-contactTop">{avatar:{{it.avatar}},showSpot:{{show}},activeTab:{{it.activeTab}},acTag:{{it.acTag}},showUtils:{{it.showUtils}} }</widget>
     </div>
     <app-components1-offlineTip-offlineTip>{ offlienType:{{it.offlienType}} }</app-components1-offlineTip-offlineTip>
     
@@ -30,15 +30,6 @@
     {{else}}
     
     <widget w-tag="chat-client-app-view-contactList-contactList">{newApply:{{show}} }</widget>
-    {{end}}
-    
-    {{if it.isUtilVisible}}
-    <div w-class="util-wrap" ev-handleFatherTap="handleFatherTap">
-        <chat-client-app-widget-utilList-utilList>{utilList:{{it.utilList}} }</chat-client-app-widget-utilList-utilList>
-        {{if show > 0 }}
-        <span w-class="redSpot" style="right: 145px;top:20px;"></span>
-        {{end}}
-    </div>
     {{end}}
     
 </div>

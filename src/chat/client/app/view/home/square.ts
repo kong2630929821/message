@@ -19,19 +19,24 @@ export class Square extends Widget {
         active:0,
         postList:[
             {
+                followed:false,
+                imgList:[''],
+                gender:0
+            },
+            {
                 followed:true,
-                imgList:['','',''],
+                imgList:['',''],
                 gender:1,
                 isPublic:true
             },
             {
                 followed:false,
-                imgList:['','','',''],
+                imgList:['','',''],
                 gender:0
             },
             {
                 followed:false,
-                imgList:['',''],
+                imgList:['','','',''],
                 gender:1,
                 offical:true
             }
