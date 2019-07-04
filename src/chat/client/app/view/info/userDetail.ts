@@ -42,7 +42,7 @@ export class UserDetail extends Widget {
     }
 
     public goSetting() {
-        popNew('chat-client-app-view-info-setting');
+        popNew('chat-client-app-view-info-setting',{ uid:this.props.uid });
     }
 
     public goPersonHome(i:number) {

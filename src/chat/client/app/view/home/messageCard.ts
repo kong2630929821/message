@@ -159,9 +159,6 @@ export class MessageCard extends Widget {
      */
     public msgAvoid(e:any) {
         this.props.msgAvoid = !this.props.msgAvoid;
-        this.props.showUtils = false;
-        this.paint();
-
         const sid = store.getStore('uid');
         const hid = genUserHid(sid,this.props.rid);
         const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
@@ -172,10 +169,11 @@ export class MessageCard extends Widget {
             setting.msgAvoid.splice(index,1);
         }
         store.setStore('setting',setting);
+        console.log('setting: ',setting);
         clientRpcFunc(setData,JSON.stringify(setting),(res) => {
-            // TODO
             console.log(res);
         });
+        notify(e.node,'ev-msgCard-utils',{ value:false });
     }
 
     /**
@@ -183,9 +181,6 @@ export class MessageCard extends Widget {
      */
     public msgTop(e:any) {
         this.props.msgTop = !this.props.msgTop;
-        this.props.showUtils = false;
-        this.paint();
-
         const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
         const sid = store.getStore('uid');
         const hid = genUserHid(sid,this.props.rid);
@@ -196,11 +191,12 @@ export class MessageCard extends Widget {
             setting.msgTop.splice(index,1);
         }
         store.setStore('setting',setting);
+        console.log('setting: ',setting);
         this.pushLastChat(this.props.msgTop,setting);
         clientRpcFunc(setData,JSON.stringify(setting),(res) => {
-            // TODO
             console.log(res);
         });
+        notify(e.node,'ev-msgCard-utils',{ value:false });
     }
 
     // 压入最近聊天列表
@@ -218,6 +214,12 @@ export class MessageCard extends Widget {
         }
         store.setStore(`lastChat`,lastChat);
 
+    }
+
+    // 停止冒泡
+    public stopDown(e:any) {
+        console.log(e);
+        e.native.stopPropagation();
     }
 }
 

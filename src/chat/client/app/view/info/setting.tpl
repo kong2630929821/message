@@ -7,7 +7,9 @@
     <div w-class="item" on-tap="itemClick({{i}})">
         <div w-class="itemName">{{v[0]}}</div>
         {{if v[1]}}
-        <widget w-tag="chat-client-app-widget-switch-switch">{types:false}</widget>
+        <div ev-switch-click="switchClick(e,{{i}})">
+            <widget w-tag="chat-client-app-widget-switch-switch">{types:false}</widget>
+        </div>
         {{else}}
             {{if v[2]}}
             <div w-class="itemDesc">{{v[2]}}</div>
