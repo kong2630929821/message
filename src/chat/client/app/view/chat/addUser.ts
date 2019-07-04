@@ -26,7 +26,7 @@ export class AddUser extends Widget {
             sid: null,
             rid: null,
             btns:[
-                ['search.png','搜索'],
+                ['search.png','搜群'],
                 ['search.png','通讯录好友'],
                 ['search.png','qq/微信好友'],
                 ['search.png','扫一扫']
@@ -100,6 +100,11 @@ export class AddUser extends Widget {
     // 动画效果执行
     public onShow(e:any) {
         rippleShow(e);
+    }
+
+    // 点击搜索
+    public goSearch() {
+        popNew('chat-client-app-view-chat-search');
     }
 
 }

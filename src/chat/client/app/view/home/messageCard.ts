@@ -3,18 +3,37 @@
  */
 // ================================================ 导入
 import { notify } from '../../../../../pi/widget/event';
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
+import { setData } from '../../../../server/data/rpc/basic.p';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias, getGroupAvatar, getUserAvatar, timestampFormat } from '../../logic/logic';
+import { clientRpcFunc } from '../../net/init';
 import { getUsersBasicInfo } from '../../net/rpc';
 // ================================================ 导出
 
-export class MessageRecord extends Widget {
+interface Props {
+    rid: number;  // uid|gid
+    hid:string;   // hid
+    name:string;  // 好友名字|群名字
+    time:string;  // 最新一条消息时间
+    msg:string;   // 最新一条消息内容
+    lastMessage: UserMsg;  // 最新一条消息记录
+    chatType:GENERATOR_TYPE; // 消息类型 user|group
+    msgAvoid:boolean; // 消息免打扰
+    msgTop:boolean; // 置顶
+    unReadCount:number;  // 未读消息数
+    avatar:string; // 用户头像
+    official:boolean; // 是否是官方群组
+    showUtils:boolean;  // 是否显示操作栏
+}
+
+export class MessageCard extends Widget {
     public props: Props;
     public bindCB: any;
     constructor() {
@@ -22,7 +41,6 @@ export class MessageRecord extends Widget {
         this.bindCB = this.updateMessage.bind(this);
     }
 
-    // tslint:disable-next-line:cyclomatic-complexity
     public setProps(props: any) {
         super.setProps(props);
         const sid = store.getStore(`uid`);
@@ -65,6 +83,10 @@ export class MessageRecord extends Widget {
         this.props.unReadCount = count1 > count2 && (count1 - count2);
         console.log(`count1 is: ${count1}, count2 is: ${count2}, hid is: ${this.props.hid}`);
 
+        this.initData();
+    }
+
+    public initData() {
         // 消息额外设置，免打扰|置顶
         const setting = store.getStore('setting',{ msgTop:[],msgAvoid:[] });
         this.props.msgTop = setting.msgTop && setting.msgTop.findIndex(item => item === this.props.hid) > -1;
@@ -94,7 +116,6 @@ export class MessageRecord extends Widget {
             this.props.time = index > -1 && timestampFormat(mess[index][1],1);
             this.props.msg = '';
         }
-
     }
 
     public firstPaint() {
@@ -102,31 +123,102 @@ export class MessageRecord extends Widget {
         store.register('setting',this.bindCB);
     }
 
+    // 更新消息
     public updateMessage() {
         this.setProps(this.props);
         this.paint();
     }
 
+    // 点击进入聊天页面清除未读消息数
     public clearUnread(e:any) {
         notify(e.node,'ev-chat',null);
         this.props.unReadCount = 0;
+        this.props.showUtils = false;
         this.paint();
+    }
+
+    // 操作栏显示隐藏
+    public changeUtils(e:any) {
+        this.props.showUtils = !this.props.showUtils;
+        this.paint(); 
+        notify(e.node,'ev-msgCard-utils',{ value:this.props.showUtils });
+    }
+    
+    // 动画效果执行
+    public onShow(e:any) {
+        getRealNode(e.node).classList.add('ripple');
+    }
+
+    // 移除动画效果
+    public onRemove(e:any) {
+        getRealNode(e.node).classList.remove('ripple');
+    }
+
+    /**
+     * 设置消息免打扰
+     */
+    public msgAvoid(e:any) {
+        this.props.msgAvoid = !this.props.msgAvoid;
+        this.props.showUtils = false;
+        this.paint();
+
+        const sid = store.getStore('uid');
+        const hid = genUserHid(sid,this.props.rid);
+        const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
+        const index = setting.msgAvoid.findIndex(item => item === hid);
+        if (this.props.msgAvoid) {
+            index === -1 && setting.msgAvoid.push(hid);
+        } else {
+            setting.msgAvoid.splice(index,1);
+        }
+        store.setStore('setting',setting);
+        clientRpcFunc(setData,JSON.stringify(setting),(res) => {
+            // TODO
+            console.log(res);
+        });
+    }
+
+    /**
+     * 设置消息置顶
+     */
+    public msgTop(e:any) {
+        this.props.msgTop = !this.props.msgTop;
+        this.props.showUtils = false;
+        this.paint();
+
+        const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
+        const sid = store.getStore('uid');
+        const hid = genUserHid(sid,this.props.rid);
+        const index = setting.msgTop.findIndex(item => item === hid);
+        if (this.props.msgTop) {
+            index === -1 && setting.msgTop.push(hid);
+        } else {
+            setting.msgTop.splice(index,1);
+        }
+        store.setStore('setting',setting);
+        this.pushLastChat(this.props.msgTop,setting);
+        clientRpcFunc(setData,JSON.stringify(setting),(res) => {
+            // TODO
+            console.log(res);
+        });
+    }
+
+    // 压入最近聊天列表
+    public pushLastChat(fg:boolean,setting:any) {
+        const lastChat = store.getStore(`lastChat`, []);
+        const ind = lastChat.findIndex(item => item[0] === this.props.rid && item[2] === GENERATOR_TYPE.USER);
+        ind > -1 && lastChat.splice(ind, 1); 
+        
+        if (fg) { // 置顶放到最前面
+            lastChat.unshift([this.props.rid, Date.now(), GENERATOR_TYPE.USER]); // 向前压入数组中
+
+        } else {  // 取消置顶放到置顶消息后
+            const len = setting.msgTop.length;
+            lastChat.splice(len, 0, [this.props.rid, Date.now(), GENERATOR_TYPE.USER]); // 压入到置顶消息后
+        }
+        store.setStore(`lastChat`,lastChat);
+
     }
 }
 
 // ================================================ 本地
-
-interface Props {
-    rid: number;  // uid|gid
-    hid:string;   // hid
-    name:string;  // 好友名字|群名字
-    time:string;  // 最新一条消息时间
-    msg:string;   // 最新一条消息内容
-    lastMessage: UserMsg;  // 最新一条消息记录
-    chatType:GENERATOR_TYPE; // 消息类型 user|group
-    msgAvoid:boolean; // 消息免打扰
-    msgTop:boolean; // 置顶
-    unReadCount:number;  // 未读消息数
-    avatar:string; // 用户头像
-    official:boolean; // 是否是官方群组
-}

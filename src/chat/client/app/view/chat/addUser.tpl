@@ -1,7 +1,7 @@
 <div class="new-page" ev-back-click="back" w-class="page">
     <chat-client-app-widget-topBar-topBar>{title:"搜索",background:"#fff"}</chat-client-app-widget-topBar-topBar>
-    <div w-class="input" ev-input-change="inputUid">
-        <widget w-tag="chat-client-app-widget-input-input">{placeHolder:"搜索",style:"border-radius:34px;background:#F9F9F9;font-size:28px;padding-left:65px"}</widget>
+    <div w-class="input" on-tap="goSearch">
+        <div w-class="searchBox">用户名/ID/手机号</div>
         <img w-class="searchIcon" src="../../res/images/search-gray.png" />
     </div>
     <div w-class="btns">

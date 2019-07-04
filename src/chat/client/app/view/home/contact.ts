@@ -12,7 +12,6 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { rippleShow } from '../../logic/logic';
 import { setUserInfo } from '../../net/init_1';
 import { SpecialWidget } from '../specialWidget';
 
@@ -27,13 +26,13 @@ interface Props {
     sid: number;
     messageList: any[];
     showUtils: boolean;
-    netClose: boolean; // 网络链接是否断开
     avatar:string; // 头像
     isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
     activeTab:string;  // 当前活跃的tab
     showTag:boolean; // 展示广场下拉
     acTag:number;   // 标签下标
+    showMsgUtils:number;  // 消息卡片当前显示操作框的下标
 }
 export const TAB = {
     message:'message',
@@ -53,9 +52,9 @@ export class Contact extends SpecialWidget {
         isLogin:false,
         hasWallet:false,
         avatar:'',
-        netClose:false,
         showTag:false,
-        acTag:0
+        acTag:0,
+        showMsgUtils:-1
     };
 
     public create() {
@@ -116,11 +115,6 @@ export class Contact extends SpecialWidget {
         popNew3('chat-client-app-view-chat-chat', { id: value[0], chatType: value[2], groupId:gid }) ;
     }
 
-    // 动画效果执行
-    public onShow(e:any) {
-        rippleShow(e);
-    }
-
     // 打开更多功能
     public getMore() {
         if (this.props.isLogin) {
@@ -133,6 +127,7 @@ export class Contact extends SpecialWidget {
 
     public closeMore() {
         this.props.showUtils = false;
+        this.props.showMsgUtils = -1;
         this.paint();
     }
 
@@ -151,6 +146,17 @@ export class Contact extends SpecialWidget {
         this.paint();
     }
 
+    // 点击搜索
+    public goSearch() {
+        popNew3('chat-client-app-view-chat-search');
+    }
+
+    // 操作栏显示隐藏
+    public changeUtils(e:any,ind:number) {
+        console.log(e,ind);
+        this.props.showMsgUtils = e.value ? ind :-1;
+        this.paint(); 
+    }
 }
 
 // ================================================ 本地

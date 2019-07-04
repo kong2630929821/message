@@ -13,9 +13,7 @@
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     margin-bottom: 110px;
-}
-.inner-wrap{
-    margin: 30px 20px 120px;
+    background: #fff;
 }
 .emptyImg{
     width: 200px;
@@ -53,4 +51,24 @@
     font-size: 32px;
     text-align: center;
     margin-top: 20px;
+}
+.input{
+    margin: 20px 15px 0px;
+    position: relative;
+}
+.searchBox{
+    border-radius:34px;
+    background:#F9F9F9;
+    font-size:28px;
+    padding-left:65px;
+    height: 68px;
+    line-height: 68px;
+    color: #888888;
+}
+.searchIcon{
+    position: absolute;
+    left: 25px;
+    top: 20px;
+    width: 26px;
+    height: 26px;
 }

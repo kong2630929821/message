@@ -55,7 +55,6 @@ export class ContactTop extends Widget {
 
     // 切换标签
     public changeTab(e:any,tab:string) {
-        popNew3('chat-client-app-view-chat-addUser');
         // 已经在广场
         if (this.props.activeTab === TAB.square) {
             this.props.showTag = !this.props.showTag;

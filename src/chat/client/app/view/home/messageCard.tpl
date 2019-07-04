@@ -1,4 +1,5 @@
-<div w-class="message-record-wrap" style="background-color:{{it.msgTop?'#f0f0f0;':'#fff'}}" on-tap="clearUnread">
+<div w-class="message-record-wrap" style="background-color:{{it.msgTop?'#F9F9F9;':'#fff'}}" on-tap="clearUnread" on-longtap="changeUtils" on-down="onShow" on-up="onRemove">
+    <div w-class="topFlag"></div>
     <div w-class="avatar-wrap">
         <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
     </div>
@@ -24,5 +25,13 @@
         <span w-class="unread" style="background:{{it.msgAvoid ? '#ccc' : '#F7931A'}}">{{it.unReadCount}}</span>
         {{end}}
     </div>
+
+    {{if it.showUtils}}
+    <div w-class="utils">
+        <div w-class="util" on-tap="msgTop">{{it.msgTop?"取消置顶":"置顶"}}</div>
+        <div w-class="util" on-tap="msgAvoid">{{it.msgAvoid?"打开消息提醒":"消息免打扰"}}</div>
+        <div w-class="util" on-tap="delete">删除</div>
+    </div>
+    {{end}}
 </div>
             
