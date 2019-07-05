@@ -1,16 +1,18 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
-import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
+import { addToBlackList, changeFriendAlias, removeFromBlackList } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUserHid, genUuid } from '../../../../utils/util';
+import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
-import { delFriend as delUserFriend, getUsersBasicInfo } from '../../net/rpc';
+import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
 
 interface Props {
@@ -51,6 +53,7 @@ export class Setting extends Widget {
         msgAvoid:false,
         msgTop:false
     };
+    private blackPerson:boolean;
 
     public setProps(props:any) {
         this.props = {
@@ -129,10 +132,10 @@ export class Setting extends Widget {
                 });
                 break;
             case 6: // 举报
-                
+                this.complaint();
                 break;
             case 7:  // 加入黑名单
-                popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' });
+                this.blackList();
                 break;
             case 8: // 删除好友
                 popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title: '删除联系人', content: `将联系人${this.props.userInfo.name}删除，同时删除聊天记录`, sureText: '删除' }, () => {
@@ -235,6 +238,7 @@ export class Setting extends Widget {
         });
     }
 
+    // 压入最近会话列表
     public pushLastChat(fg:boolean,setting:any) {
         const lastChat = store.getStore(`lastChat`, []);
         const ind = lastChat.findIndex(item => item[0] === this.props.uid && item[2] === GENERATOR_TYPE.USER);
@@ -247,5 +251,68 @@ export class Setting extends Widget {
         }
         store.setStore(`lastChat`,lastChat);
 
+    }
+
+    /**
+     * 举报用户
+     */
+    public complaint() {
+        const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
+        popNew('chat-client-app-widget-complaint-complaint'
+        ,{ title:'',content:content }
+        ,(selected) => {
+            if (selected.length === 0) {// 未选择举报类型不能举报
+                popNewMessage('您未选择举报类型');
+            }
+
+            let mess = `举报用户@${this.props.userInfo.name}`;
+            for (const i of selected) {
+                mess += `“${content[i]}”`; 
+            }
+            const SUID = store.getStore('flags/HAOHAI_UID');
+            sendUserMsg(SUID,mess,MSG_TYPE.COMPLAINT).then((r:UserHistory) => {
+                updateUserMessage(SUID, r);
+                popNewMessage('举报成功');
+            });
+            
+        });
+    }
+
+    /**
+     * 
+     * 加入或移除黑名单
+     */
+    public blackList() {
+        if (this.blackPerson) {
+            clientRpcFunc(removeFromBlackList, this.props.uid, (r) => {
+                if (r && r.r === 1) {
+                    this.blackPerson = false;
+                    popNewMessage('移出黑名单');
+                }
+            });
+        } else {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' },() => {
+                clientRpcFunc(addToBlackList, this.props.uid, (r) => {
+                    if (r && r.r === 1) {
+                        this.blackPerson = true;
+                        popNewMessage('加入黑名单成功');    
+
+                        const sid = store.getStore('uid');
+                        const uid = this.props.uid;
+                        const lastChat = store.getStore(`lastChat`, []);
+                        const index = lastChat.findIndex(item => item[0] === uid && item[2] === GENERATOR_TYPE.USER);
+                        if (index > -1) { // 删除最近对话记录
+                            lastChat.splice(index, 1);
+                            store.setStore('lastChat', lastChat);
+                        }
+
+                        const lastRead = store.getStore(`lastRead`, []);
+                        lastRead.delete(genUserHid(sid,uid));  // 删除已读消息记录
+                        store.setStore(`lastRead`, lastRead);
+                    }
+                    
+                });
+            });
+        }
     }
 }

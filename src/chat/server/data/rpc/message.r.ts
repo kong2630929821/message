@@ -12,13 +12,14 @@ import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
 
 import { Logger } from '../../../utils/logger';
-import { OnlineUsers, UserInfo, VIP_LEVEL } from '../db/user.s';
+import { Contact, OnlineUsers, UserInfo, VIP_LEVEL } from '../db/user.s';
 
 import { Env } from '../../../../pi/lang/env';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GROUP_STATE, GroupInfo } from '../db/group.s';
 import { NOT_GROUP_OWNNER, NOTIN_SAME_GROUP } from '../errorNum';
 import { getUid } from './group.r';
+import { sendFirstWelcomeMessage } from './user.r';
 
 declare var env: Env;
 
@@ -329,7 +330,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     userMsg.msg = message.msg;
     userMsg.mtype = message.mtype;
     userMsg.read = false;
-    userMsg.send = false;
+    userMsg.send = true;
     userMsg.sid = sid;
     userMsg.time = Date.now();
     userHistory.msg = userMsg;
@@ -368,7 +369,7 @@ export const sendTempMessage = (message: TempSend): UserHistory => {
     userMsg.msg = message.msg;
     userMsg.mtype = message.mtype;
     userMsg.read = false;
-    userMsg.send = false;
+    userMsg.send = true;
     userMsg.sid = sid;
     userMsg.time = Date.now();
     userHistory.msg = userMsg;
@@ -459,17 +460,32 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
 
     userHistoryBucket.put(userHistory.hIncId, userHistory);
     logger.debug('Persist user history message to DB: ', userHistory);
+    
+    // 判断是否在对方的黑名单，只保存不推送
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME,Contact._$info.name);
+    const sContactInfo = contactBucket.get(message.rid)[0];
+    if (sContactInfo.blackList.findIndex(item => item === sid) > -1) {
+        userHistory.msg.send = false;
+        console.log(`blacklist person!!!!!!!!!!!${JSON.stringify(userHistory)}`);
+    }
+    userHistoryBucket.put(userHistory.hIncId, userHistory);
+    logger.debug('Persist user history message to DB: ', userHistory);
 
-    // 推送消息ID
-    const sendMsg = new SendMsg();
-    sendMsg.code = 1;
-    sendMsg.last = msgLock.current;
-    sendMsg.rid = sid;
-    if (gid) sendMsg.gid = gid;
-    const buf = new BonBuffer();
-    sendMsg.bonEncode(buf);
-    const mqttServer = env.get('mqttServer');
-    mqttPublish(mqttServer, true, QoS.AtMostOnce, `${message.rid}_sendMsg`, buf.getBuffer());
-    logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(sendMsg)}`,`${message.rid}_sendMsg`);
+    if (userHistory.msg.send) {  // 消息未被阻止则推送，黑名单中不推送
+        // 推送消息ID
+        const sendMsg = new SendMsg();
+        sendMsg.code = 1;
+        sendMsg.last = msgLock.current;
+        sendMsg.rid = sid;
+        if (gid) sendMsg.gid = gid;
+        const buf = new BonBuffer();
+        sendMsg.bonEncode(buf);
+        const mqttServer = env.get('mqttServer');
+        mqttPublish(mqttServer, true, QoS.AtMostOnce, `${message.rid}_sendMsg`, buf.getBuffer());
+        logger.debug(`from ${sid} to ${message.rid}, message is : ${JSON.stringify(sendMsg)}`,`${message.rid}_sendMsg`);}
 
+    // 举报用户
+    if (message.mtype === MSG_TYPE.COMPLAINT) {
+        sendFirstWelcomeMessage('收到您的举报，好嗨将会尽快核实并给予处理',message.rid);
+    }
 };

@@ -30,6 +30,7 @@ export class MessageItem extends Widget {
             recallBtn:false,
             avatar:'',  // 对方的头像
             playAudio:false,
+            refusedMsg:false, 
             myAvatar:''
         };
        
@@ -47,6 +48,7 @@ export class MessageItem extends Widget {
                 this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.message.sid)}`, new GroupUserLink()).userAlias;
                 this.props.avatar = getGroupUserAvatar(gid,this.props.message.sid) || '../../res/images/user_avatar.png';
             }
+            this.props.refusedMsg = !this.props.message.send;
             this.props.message = parseMessage(depCopy(this.props.message));
             this.props.me = this.props.message.sid === store.getStore('uid');
             const time = depCopy(this.props.message.time);
@@ -200,6 +202,7 @@ interface Props {
     recallBtn:boolean;// 撤回按钮是否可见
     avatar:string;  // 对方的头像
     playAudio:boolean; // 是否正在播放语音
+    refusedMsg:boolean; // 信息是否被拒绝
     myAvatar:string;  // 自己的头像
 }
 

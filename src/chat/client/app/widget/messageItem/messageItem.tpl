@@ -60,6 +60,11 @@
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" style="margin-left:10px;" on-tap="userDetail(e,true)">{imgURL:{{it.myAvatar}},width:"80px;"}</widget>
         </div>
 
+        {{% ==========================被拒绝的消息标志=====================}}
+        {{if it.refusedMsg}}
+        <img src="../../res/images/refusedMsg.png" w-class="loading"/>
+        {{end}}
+
         {{% ========================对方发送的消息=========================}}
         {{else}}
         <div w-class="username">{{it.name || "------"}}</div>

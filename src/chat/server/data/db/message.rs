@@ -18,6 +18,7 @@ enum MSG_TYPE {
     CREATEGROUP = 10, // 创建群聊
     ADDGROUP = 11, // 加群成功
     OTHERMSG = 12, // 其他群设置提醒
+    COMPLAINT = 13, // 举报用户
 }
 
 /**
