@@ -4,9 +4,10 @@
 
 // ================================================ 导入
 import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
-import { getStoreData, registerStore } from '../../../../../app/middleLayer/wrap';
+import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { registerStoreData } from '../../../../../app/viewLogic/common';
 import { Json } from '../../../../../pi/lang/type';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
@@ -97,7 +98,7 @@ export class Contact extends SpecialWidget {
 
     public firstPaint() {
         super.firstPaint();
-        registerStore('user/info',() => { // 钱包用户信息修改
+        registerStoreData('user/info',() => { // 钱包用户信息修改
             this.setProps(this.props);  
         });
         store.register('uid',() => {  // 聊天用户登陆成功
@@ -192,37 +193,41 @@ store.register(`lastChat`, (r: [number, number][]) => {
     STATE.lastChat = r;
     forelet.paint(STATE);
 });
-store.register('contactMap', (r) => {
-    for (const value of r.values()) {
-        STATE.contactMap = value;
-        STATE.inviteUsers = updateInviteUsers(walletStore.getStore('inviteUsers/invite_success', []));
-        walletStore.setStore('inviteUsers/invite_success',STATE.inviteUsers);
 
-        STATE.convertUser = updateInviteUsers(walletStore.getStore('inviteUsers/convert_invite', []));
-        walletStore.setStore('inviteUsers/convert_invite',STATE.convertUser);
-        forelet.paint(STATE);
-    }  
+store.register('contactMap', (r) => {
+    getStoreData('inviteUsers').then(inviteUsers => {
+        for (const value of r.values()) {
+            STATE.contactMap = value;
+            STATE.inviteUsers = updateInviteUsers(inviteUsers.invite_success) || [];
+            STATE.convertUser = updateInviteUsers(inviteUsers.convert_invite) || [];
+            inviteUsers.invite_success = STATE.inviteUsers;
+            inviteUsers.convert_invite = STATE.convertUser;
+            setStoreData('inviteUsers',inviteUsers);
+            forelet.paint(STATE);
+        }  
+    });
+   
 });
 
 // 邀请好友成功
-registerStore('inviteUsers/invite_success',(r) => {
+registerStoreData('inviteUsers/invite_success',(r) => {
     const ans = updateInviteUsers(depCopy(r));
     
     if (ans.length < r.length) {
-        walletStore.setStore('inviteUsers/invite_success',ans);
+        setStoreData('inviteUsers/invite_success',ans);
     }
-    STATE.inviteUsers = ans;
+    STATE.inviteUsers = ans || [];
     forelet.paint(STATE);
 });
 
 // 兑换好友邀请码成功
-registerStore('inviteUsers/convert_invite',(r) => {
+registerStoreData('inviteUsers/convert_invite',(r) => {
     const ans = updateInviteUsers(depCopy(r));
     
     if (ans.length < r.length) {
-        walletStore.setStore('inviteUsers/convert_invite',ans);
+        setStoreData('inviteUsers/convert_invite',ans);
     }
-    STATE.convertUser = ans;
+    STATE.convertUser = ans || [];
     forelet.paint(STATE);
 });
 store.register('friendLinkMap',() => {
