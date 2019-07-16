@@ -9,7 +9,7 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
-import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
+import { UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
@@ -37,7 +37,7 @@ export class Chat extends Widget {
         this.props.sid = store.getStore('uid');
         this.props.inputMessage = '';
         this.props.newMsg = null;
-        this.props.onRadio = null;
+        this.props.activeAudio = null;
 
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.hid = genGroupHid(this.props.id);
@@ -267,6 +267,7 @@ export class Chat extends Widget {
     public pageClick() {
         this.props.isOnEmoji = false;
         this.props.isOnTools = false;
+        this.props.isOnAudio = false;
         this.props.activeMessId = null;
         this.paint();
     }
@@ -276,6 +277,19 @@ export class Chat extends Widget {
      */
     public openEmoji() {
         this.props.isOnEmoji = !this.props.isOnEmoji;
+        this.props.isOnTools = false;
+        this.props.isOnAudio = false;
+        this.props.activeMessId = null;
+        this.paint();
+        this.latestMsg();
+    }
+
+    /**
+     * 打开语音
+     */
+    public openAudio() {
+        this.props.isOnAudio = !this.props.isOnAudio;
+        this.props.isOnEmoji = false;
         this.props.isOnTools = false;
         this.props.activeMessId = null;
         this.paint();
@@ -288,6 +302,7 @@ export class Chat extends Widget {
     public openTools() {
         this.props.isOnTools = !this.props.isOnTools;
         this.props.isOnEmoji = false;
+        this.props.isOnAudio = false;
         this.props.activeMessId = null;
         this.paint();
         this.latestMsg();
@@ -297,10 +312,7 @@ export class Chat extends Widget {
      * 输入框聚焦
      */
     public inputFocus() {
-        this.props.isOnEmoji = false;
-        this.props.isOnTools = false;
-        this.props.activeMessId = null;
-        this.paint();
+        this.pageClick();
         this.latestMsg();
     }
 
@@ -363,7 +375,7 @@ export class Chat extends Widget {
      * 点击某个语音消息，关闭其他语言播放
      */
     public stopRadio(e:any) {
-        this.props.onRadio = e;
+        this.props.activeAudio = e;
         this.paint();
     }
 
@@ -443,7 +455,7 @@ interface Props {
     lastAnnounce:string; // 最新一条公告，群聊
     newMsg:any; // 我发布的一条新消息
     isOnTools:boolean; // 是否打开更多功能
-    onRadio:any; // 当前点击的语音消息ID
+    activeAudio:any; // 当前点击的语音消息
     temporary:boolean;  // 是否是临时聊天
     groupId:number; // 当前群聊ID 群主可与成员私聊
     okCB:any;  // 游戏中进入携带的参数
@@ -451,4 +463,5 @@ interface Props {
     text:string;  // 群成员个数展示
     activeMessId:string;  // 当前选中要撤回的消息ID
     recallBtn:string; // 撤回按钮位置
+    isOnAudio:boolean;  // 是否打开语音录入
 }

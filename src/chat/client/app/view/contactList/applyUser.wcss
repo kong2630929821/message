@@ -1,7 +1,6 @@
 .user-apply-wrap{
-    height: 180px;
+    height: 120px;
     padding: 0 20px;
-    border-bottom: solid #DBDBE5 1px;
     background-color: rgba(255, 255, 255, 1);
     display:flex;
     align-items:center;
@@ -13,44 +12,30 @@
     margin-left:0px;
     margin-right:20px;
 }
-.avatar{
-    width:80px;
-}
-.user-info-wrap{
-    display:flex;
-    flex-direction:column;
-}
 .userName{
     font-size: 32px;
-    font-weight:bold;
-    margin-bottom:5px;
+    font-weight:500;
     text-overflow: ellipsis;
     overflow: hidden;
     max-width: 350px;
     white-space: nowrap;
+    color: #222;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
 }
 .applyInfo{ 
-    color: rgba(102, 102, 102, 1);
+    color: #888888;
     font-size: 28px;
 }
-.agreeText{
-    position:relative;
-    bottom:18px;
-    color: rgba(136, 136, 136, 1);
-    font-size: 24px;
-    margin-right:0px;
-    margin-left:auto;
-}
 .seeText{
-    color: #222222;
-    font-size: 24px;
-    display: inline-block;
-    width: 90px;
-    height: 50px;
-    line-height: 50px;
-    border: 1px solid #CCCCCC;
-    border-radius: 6px;
+    width:160px;
+    height:60px;
+    background:rgba(42,86,198,1);
+    font-size:28px;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+    line-height:60px;
     text-align: center;
-    margin-right: 0px;
-    margin-left: auto;
+    border-radius: 6px;
 }

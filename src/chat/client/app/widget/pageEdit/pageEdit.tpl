@@ -8,7 +8,7 @@
     </div>
     {{end}}
     <div ev-input-change="textAreaChange" w-class="content-wrap" on-tap="focusContent">
-        <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:{{it.placeholder}}, style:"max-height:600px;height:auto;", input:{{it.contentInput}} }</widget>
+        <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:{{it.placeholder}}, style:"max-height:600px;height:600px;", input:{{it.contentInput}} }</widget>
     </div>
 </div>
 

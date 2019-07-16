@@ -24,8 +24,8 @@ export class NewFriend extends Widget {
     public create() {
         super.create();
         const flags = walletStore.getStore('inviteUsers');
-        STATE.inviteUsers = flags.invite_success;
-        STATE.convertUser = flags.convert_invite;
+        STATE.inviteUsers = flags.invite_success || [];
+        STATE.convertUser = flags.convert_invite || [];
         this.state = STATE;
     }
 

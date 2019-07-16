@@ -25,13 +25,13 @@ export class ApplyUser extends Widget {
     public props: Props = {
         id:null,
         guid:null,
-        name:'',
+        name:'哈哈哈',
         chatType:GENERATOR_TYPE.USER,
-        applyInfo: '',
+        applyInfo: '申请加为好友',
         isActiveToGroup:true,
         isagree:false,
         activeToGGid:null,
-        avatar:''
+        avatar:'../../res/images/user_avatar.png'
     };
 
     public setProps(props:any) {

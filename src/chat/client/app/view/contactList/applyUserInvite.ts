@@ -17,15 +17,15 @@ export class ApplyUser extends Widget {
     public props: Props = {
         id:null,
         accId:'',
-        name:'',
-        applyInfo: '',
-        isagree:false,
-        avatar:''
+        name:'哈哈哈',
+        applyInfo: '简介或其它',
+        isAddUser:false,
+        avatar:'../../res/images/user_avatar.png'
     };
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.isagree = false;
+        this.props.isAddUser = false;
         getUsersBasicInfo([],[this.props.accId]).then((r:UserArray) => {
             store.setStore(`userInfoMap/${r.arr[0].uid}`,r.arr[0]);
             this.props.name = r.arr[0].name;
@@ -42,7 +42,7 @@ export class ApplyUser extends Widget {
 
     // 加好友
     public agreenBtn(e:any) {
-        this.props.isagree = true;
+        this.props.isAddUser = true;
         applyUserFriend(this.props.accId).then(() => {
             // 我邀请的好友
             const invite = walletStore.getStore('inviteUsers').invite_success;
@@ -71,6 +71,6 @@ interface Props {
     accId:string; // 好嗨号
     name: string; // 用户名或群名
     applyInfo: string; // 验证信息
-    isagree:boolean;
+    isAddUser:boolean;
     avatar:string;  // 头像
 }

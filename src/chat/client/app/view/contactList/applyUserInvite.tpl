@@ -1,14 +1,17 @@
 <div w-class="user-apply-wrap" on-tap="viewApplyDetail" on-down="onShow">
-    <div w-class="avatar-wrap">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
+        <div w-class="avatar-wrap">
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
+        </div>
+         <div style="flex: 1 0 0;">
+            <div w-class="userName">
+                <span>{{it.name}}&nbsp;</span>
+                <img src="../../res/images/girl.png"/>
+            </div>
+            <div w-class="applyInfo">{{it.applyInfo}}</div>
+        </div>
+        {{if !it.isAddUser}}
+        <div w-class="seeText" on-tap="agreenBtn" on-down="onShow">加好友</div>
+        {{else}}
+        <div w-class="seeText" style="color: #222;background: #F2F2F2">已申请</div>
+        {{end}}
     </div>
-     <div w-class="user-info-wrap">
-        <span w-class="userName">{{it.name}}</span>
-        <span w-class="applyInfo">{{it.applyInfo}}</span>
-    </div>
-    {{if !it.isagree}}
-    <span w-class="seeText" on-tap="agreenBtn">加好友</span>
-    {{else}}
-    <span w-class="seeText" style="border:none;color: #888888;font-size: 28px;">已添加</span>
-    {{end}}
-</div>

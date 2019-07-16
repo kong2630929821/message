@@ -8,14 +8,13 @@ import { mqttPublish, QoS } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import { delValueFromArray, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
-import { getSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
+import { MSG_TYPE, MsgLock, UserHistory, UserHistoryCursor, UserMsg } from '../db/message.s';
 import { Contact, FriendLink, OfficialUsers, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { APPLY_FRIENDS_OVERLIMIT, FRIENDS_NUM_OVERLIMIT } from '../errorNum';
 import { Result } from './basic.s';
 import { getUid } from './group.r';
-import { sendUserMessage } from './message.r';
+import { getUserHistoryCursor, sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
 import { FriendAlias, SetOfficial, UserAgree } from './user.s';
 
@@ -273,14 +272,10 @@ export const delFriend = (uid: number): Result => {
  * 将用户添加到黑名单
  * @param uid user id
  */
+// #[rpc=rpcServer]
 export const addToBlackList = (peerUid: number): Result => {
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
-    // const session = getEnv().getSession();
-    // let uid;
-    // read(dbMgr, (tr: Tr) => {
-    //     uid = session.get(tr, 'uid');
-    // });
-    const uid = getSession('uid');
+    const uid = getUid();
     const result = new Result();
     const contactInfo = contactBucket.get<number, [Contact]>(uid)[0];
     const index = contactInfo.blackList.indexOf(peerUid);
@@ -304,15 +299,10 @@ export const addToBlackList = (peerUid: number): Result => {
  * 将用户移除黑名单
  * @param uid user id
  */
-
+// #[rpc=rpcServer]
 export const removeFromBlackList = (peerUid: number): Result => {
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
-    // const session = getEnv().getSession();
-    // let uid;
-    // read(dbMgr, (tr: Tr) => {
-    //     uid = session.get(tr, 'uid');
-    // });
-    const uid = getSession('uid');
+    const uid = getUid();
     const result = new Result();
     const contactInfo = contactBucket.get<number, [Contact]>(uid)[0];
     const index = contactInfo.blackList.indexOf(peerUid);
@@ -320,8 +310,20 @@ export const removeFromBlackList = (peerUid: number): Result => {
         contactInfo.blackList.splice(index, 1);
         contactBucket.put(uid, contactInfo);
         console.log('Remove user: ', peerUid, 'from blacklist of user: ', uid);
+        
+        const last = getUserHistoryCursor(peerUid).last;  // 最新一条消息
+        const userHistoryCursorBucket = new Bucket(CONSTANT.WARE_NAME,UserHistoryCursor._$info.name);
+        let userCursor  = userHistoryCursorBucket.get(genUuid(uid,peerUid))[0];
+        if (!userCursor) {
+            userCursor = new UserHistoryCursor();
+            userCursor.uuid = genUuid(uid, peerUid);
+            userCursor.cursor = -1;
+        } else {
+            userCursor.cursor = last;
+        }
+        userHistoryCursorBucket.put(userCursor.uuid,userCursor);  // 更新当前用户的游标到最新
         result.r = 1;
-
+        
         return result;
     } else {
         console.log('User: ', peerUid, 'is not banned by user: ', uid);

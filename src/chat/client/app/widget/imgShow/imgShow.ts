@@ -10,7 +10,7 @@ interface Props {
     heigth?: number;
     imgURL: string;
     inline?: boolean;
-    isRound?:boolean;
+    notRound?:boolean;
 }
 
 export class WalletImg extends Widget {

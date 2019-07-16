@@ -83,10 +83,11 @@ export const openNewActivity = (url:string,title:string= '') => {
  * 语音录制开始
  */ 
 const recorder = new AudioRecorder();
-export const startRadio = () => {
+export const startRadio = (cb?:any) => {
     recorder.start(success => {
         if (success) {
             console.log('录音开始');
+            cb && cb();
         } else {
             popNewMessage('录音开始，录制失败');
         }

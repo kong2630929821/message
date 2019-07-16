@@ -1,0 +1,37 @@
+.item{
+    display: flex;
+    align-items: center;
+    height: 120px;
+    font-size: 28px;
+    color: #222;
+}
+.avatar{
+    margin: 20px;
+    flex-shrink: 0;
+}
+.username{
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.desc{
+    font-size: 24px;
+    color: #888888;
+    width: 405px;
+    word-break: break-all;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.itemBtn{
+    width:160px;
+    height:60px;
+    background:rgba(42,86,198,1);
+    font-size:28px;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+    line-height:60px;
+    text-align: center;
+    margin: 20px;
+    border-radius: 6px;
+}

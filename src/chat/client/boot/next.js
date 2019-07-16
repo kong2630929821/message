@@ -79,7 +79,7 @@ winit.initNext = function () {
 				root.cfg.hscale = 0.25;
 				root.cfg.wscale = 0;
 
-				var index = pi_modules.commonjs.exports.relativeGet("chat/client/app/view/index/index").exports;
+				var index = pi_modules.commonjs.exports.relativeGet("chat/client/app/view/index").exports;
 				index.run();
 
 				document.body.removeChild(div);
