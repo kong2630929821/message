@@ -51,3 +51,15 @@ export const VIP5_GROUP_MEMBERS_LIMIT = 1000; // 官方群的成员上限
 
 // 推送cmd
 export const SEND_REFUSED = 'refused_add'; // 拒绝好友
+
+// --------------------------自增ID源----------------
+// 创建社区num
+export const COMMUNITY_INDEX = 'community_index';
+export const POST_INDEX = 'post_index';     // 帖子ID
+export const COMMENT_INDEX = 'comment_index';     // 评论ID
+
+// 社区类型
+export const COMMUNITY_TYPE_1 = 1;    // 公众号
+export const COMMUNITY_TYPE_2 = 2;    // 个人
+// 社区权限
+export const COMMUNITY_AUTH_DEF = 0;    // 默认权限

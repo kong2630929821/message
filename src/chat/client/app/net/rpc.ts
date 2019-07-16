@@ -3,6 +3,7 @@
  */
 // ================================================ 导入
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
+import { CommentKey, PostKey } from '../../../server/data/db/community.s';
 import { GroupInfo } from '../../../server/data/db/group.s';
 import { MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
@@ -10,6 +11,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, postLaudPost, showCommentPort, showPostPort, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CreateCommunity, IterCommentArg, IterPostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -439,5 +442,134 @@ export const friendLinks = (uuid: string) => {
 
     clientRpcFunc(getFriendLinks, x, (r) => {
         console.log(r);
+    });
+};
+
+/**
+ * 创建公众号
+ */
+export const addCommunityNum = (name: string, comm_type: number) => {
+    const arg = new CreateCommunity();
+    arg.comm_type = comm_type;
+    arg.name = name;
+    clientRpcFunc(createCommunityNum,arg,(r:string) => {
+        if (r) {
+            console.log(r);
+        } 
+    });
+};
+
+/**
+ * 关注公众号
+ */
+export const follow = (num: string) => {
+    clientRpcFunc(userFollow,num,(r:boolean) => {
+        if (r) {
+            console.log(r);
+        } 
+    });
+};
+
+/**
+ * 添加动态
+ */
+export const addPost = (num: string, title: string, body: string, post_type: number) => {
+    const arg = new AddPostArg();
+    arg.num = num;
+    arg.title = title;
+    arg.body = body;
+    arg.post_type = post_type;
+    clientRpcFunc(addPostPort,arg,(r:PostKey) => {
+        if (r) {
+            console.log(r);
+        } 
+    });
+};
+
+/**
+ * 帖子点赞或取消点赞
+ */
+export const postLaud = (num: string, id: number) => {
+    const arg = new PostKey();
+    arg.num = num;
+    arg.id = id;
+    clientRpcFunc(postLaudPost,arg,(r:boolean) => {
+        if (r) {
+            console.log(r);
+        } 
+    });
+};
+
+/**
+ * 评论
+ */
+export const addComment = (num: string, comment_type: number, msg:string, post_id: number, reply: number) => {
+    const arg = new AddCommentArg();
+    arg.num = num;
+    arg.comment_type = comment_type;
+    arg.msg = msg;
+    arg.post_id = post_id;
+    arg.reply = reply;
+    clientRpcFunc(addCommentPost,arg,(r:CommentKey) => {
+        if (r) {
+            console.log(r);
+        } 
+    });
+};
+
+/**
+ * 评论点赞
+ */
+export const commentLaud = (num: string, post_id: number, id: number) => {
+    const arg = new CommentKey();
+    arg.num = num;
+    arg.id = id;
+    arg.post_id = post_id;
+    clientRpcFunc(commentLaudPost,arg,(r:boolean) => {
+        if (r) {
+            console.log(r);
+        } 
+    });
+};
+
+/**
+ * 获取关注的公众号
+ */
+export const showUserFollow = () => {
+    clientRpcFunc(showUserFollowPort,1,(r:NumArr) => {
+        if (r) {
+            console.log(r);
+        } 
+    });
+};
+
+/**
+ * 获取最新的帖子
+ */
+export const showPost = () => {
+    const arg = new IterPostArg();
+    arg.count = 20;
+    arg.id = -1;
+    arg.num = '1';
+    clientRpcFunc(showPostPort,arg,(r:PostArr) => {
+        if (r) {
+            console.log(r);
+        } 
+    });
+};
+
+/**
+ * 获取最新的评论
+ */
+export const showComment = () => {
+    const arg = new IterCommentArg();
+    arg.count = 20;
+    arg.id = 0;
+    arg.num = '1';
+    arg.post_id = 1;
+    clientRpcFunc(showCommentPort,arg,(r:PostArr) => {
+        if (r) {
+            console.log(r);
+        } 
     });
 };
