@@ -534,9 +534,10 @@ export const commentLaud = (num: string, post_id: number, id: number) => {
 
 /**
  * 获取关注的公众号
+ * num_type暂时没什么用
  */
-export const showUserFollow = () => {
-    clientRpcFunc(showUserFollowPort,1,(r:NumArr) => {
+export const showUserFollow = (num_type:number = 1) => {
+    clientRpcFunc(showUserFollowPort, num_type, (r:NumArr) => {
         if (r) {
             console.log(r);
         } 
@@ -546,11 +547,11 @@ export const showUserFollow = () => {
 /**
  * 获取最新的帖子
  */
-export const showPost = () => {
+export const showPost = (num:string, id:number = 0, count:number = 20) => {
     const arg = new IterPostArg();
-    arg.count = 20;
-    arg.id = -1;
-    arg.num = '1';
+    arg.count = count;
+    arg.id = id;
+    arg.num = num;
     clientRpcFunc(showPostPort,arg,(r:PostArr) => {
         if (r) {
             console.log(r);
@@ -560,13 +561,14 @@ export const showPost = () => {
 
 /**
  * 获取最新的评论
+ * id=0表示从最新的一条数据获取count条数据
  */
-export const showComment = () => {
+export const showComment = (num:string, post_id:number, id:number = 0, count:number = 20) => {
     const arg = new IterCommentArg();
-    arg.count = 20;
-    arg.id = 0;
-    arg.num = '1';
-    arg.post_id = 1;
+    arg.count = count;
+    arg.id = id;
+    arg.num = num;
+    arg.post_id = post_id;
     clientRpcFunc(showCommentPort,arg,(r:PostArr) => {
         if (r) {
             console.log(r);
