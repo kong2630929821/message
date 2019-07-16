@@ -19,6 +19,7 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         const communityBase = new CommunityBase();
         communityBase.num = num;
         communityBase.name = arg.name;
+        communityBase.desc = arg.desc;
         communityBase.owner = uid;
         communityBase.property = '';
         communityBase.createtime = Date.now();

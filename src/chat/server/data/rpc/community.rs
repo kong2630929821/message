@@ -5,6 +5,7 @@ use community.s::{CommunityBase, Post, Comment, PostKey};
 struct CreateCommunity {
     name: String,           //社区名
     comm_type: u8,          //社区类型-公众号、个人、好嗨号
+    desc: String,           //简介
 }
 
 //发帖

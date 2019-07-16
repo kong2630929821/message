@@ -448,10 +448,11 @@ export const friendLinks = (uuid: string) => {
 /**
  * 创建公众号
  */
-export const addCommunityNum = (name: string, comm_type: number) => {
+export const addCommunityNum = (name: string, comm_type: number, desc: string) => {
     const arg = new CreateCommunity();
     arg.comm_type = comm_type;
     arg.name = name;
+    arg.desc = desc;
     clientRpcFunc(createCommunityNum,arg,(r:string) => {
         if (r) {
             console.log(r);

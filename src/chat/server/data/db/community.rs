@@ -5,6 +5,7 @@
 struct CommunityBase {
     num: String,            //社区编号
     name: String,           //社区名
+    desc: String,           //简介
     comm_type: u8,          //社区类型-公众号、个人、好嗨号
     property: String,       //属性 公共、登录即可访问、私有  
     owner: u32,             //所有者(创建者)
