@@ -1,12 +1,13 @@
-<div w-class="new-page" on-tap="pageClick" class="new-page" on-scroll="scrollPage" id="groupInfo">
-    <div w-class="top-main-wrap" ev-next-click="handleMoreGroup" ev-back-click="goBack(false)">
-        <div style="position:relative;min-height: 128px;">
-            {{if it.inFlag != 3}}
-            <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
-            {{else}}
-            <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
-            {{end}}
-        </div>
+<div w-class="new-page" on-tap="pageClick" class="new-page" >
+    <div style="position:relative;min-height: 128px; background: #318DE6;" ev-next-click="handleMoreGroup" ev-back-click="goBack(false)">
+        {{if it.inFlag != 3}}
+        <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
+        {{else}}
+        <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
+        {{end}}
+    </div>
+    <div w-class="scroll-container" on-scroll="scrollPage" id="groupInfo">
+    <div w-class="top-main-wrap" >
         <div w-class="home-info-wrap">
             {{if it.avatarHtml}}
             <widget w-tag="pi-ui-html" style="width:190px">{{it.avatarHtml}}</widget>
@@ -100,4 +101,5 @@
         <chat-client-app-widget-utilList-utilList>{utilList:{{it.utilList}}}</chat-client-app-widget-utilList-utilList>
     </div>
     {{end}}
+    </div>
 </div>

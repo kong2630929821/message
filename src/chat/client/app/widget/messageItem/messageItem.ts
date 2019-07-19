@@ -2,7 +2,7 @@
  * textMessage 组件相关处理
  */
 // ================================================ 导入
-import { uploadFileUrlPrefix } from '../../../../../app/config';
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';

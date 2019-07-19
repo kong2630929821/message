@@ -106,6 +106,17 @@ export class Contact extends SpecialWidget {
         });
         store.register('flags/logout',() => { // 退出钱包时刷新页面
             this.setProps(this.props);
+            this.state = {
+                lastChat:[],
+                contactMap:{
+                    applyUser:[],
+                    applyGroup:[],
+                    friends:[]
+                },
+                inviteUsers:[],
+                convertUser:[]
+            };
+            this.paint();
         });
     }
 
