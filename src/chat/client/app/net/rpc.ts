@@ -329,10 +329,15 @@ export const createGroup = (name:string, avatar:string, note:string, needAgree:b
 export const applyToGroup = (gid:number) => {
     const sid = store.getStore('uid');
     const contact = store.getStore(`contactMap/${sid}`,new Contact());
+    console.log('applyToGroup sid = ',sid);
+    console.log('applyToGroup contact = ',contact);
+    console.log('applyToGroup gid = ',gid);
 
     return new Promise((resolve,reject) => {
-        if (contact.group.indexOf(gid) === -1) {
+        if (contact.group && contact.group.indexOf(gid) === -1) {
+            console.log('applyToGroup indexOf === -1');
             clientRpcFunc(applyJoinGroup, gid, ((r) => {
+                console.log('applyToGroup r = ',r);
                 if (r && r.r === 1) {
                     // if (!store.getStore(`groupInfoMap/${gid}`, null)) {
                     //     getGroupBasicInfo([gid]).then((ginfo) => {

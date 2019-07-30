@@ -3,7 +3,7 @@
  */ 
 
 // ================================================ 导入
-import * as walletStore from '../../../../../app/store/memstore';
+import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
@@ -44,17 +44,20 @@ export class ApplyUser extends Widget {
     public agreenBtn(e:any) {
         this.props.isAddUser = true;
         applyUserFriend(this.props.accId).then(() => {
-            // 我邀请的好友
-            const invite = walletStore.getStore('inviteUsers').invite_success;
-            const index = invite.findIndex(item => item === this.props.accId);
-            invite.splice(index,1);
-            walletStore.setStore('inviteUsers/invite_success',invite);
+            getStoreData('inviteUsers').then(inviteUsers => {
+                // 我邀请的好友
+                const invite = inviteUsers.invite_success;
+                const index = invite.findIndex(item => item === this.props.accId);
+                invite.splice(index,1);
+                setStoreData('inviteUsers/invite_success',invite);
 
-            // 邀请我的好友
-            const convert = walletStore.getStore('inviteUsers').convert_invite;
-            const index1 = convert.findIndex(item => item === this.props.accId);
-            convert.splice(index1,1);
-            walletStore.setStore('inviteUsers/convert_invite',convert);
+                // 邀请我的好友
+                const convert = inviteUsers.convert_invite;
+                const index1 = convert.findIndex(item => item === this.props.accId);
+                convert.splice(index1,1);
+                setStoreData('inviteUsers/convert_invite',convert);
+            });
+            
         });
         this.paint();
     }

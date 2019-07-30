@@ -3,8 +3,8 @@
  */
 
 // ================================================ 导入
-import * as walletStore from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/tools';
+import { registerStoreData } from '../../../../../app/viewLogic/common';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
@@ -14,6 +14,7 @@ import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as  store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
+import { getStoreData } from '../../../../../app/middleLayer/wrap';
 
 // ================================================ 导出
 export const forelet = new Forelet();
@@ -23,10 +24,12 @@ export class NewFriend extends Widget {
 
     public create() {
         super.create();
-        const flags = walletStore.getStore('inviteUsers');
-        STATE.inviteUsers = flags.invite_success || [];
-        STATE.convertUser = flags.convert_invite || [];
         this.state = STATE;
+        getStoreData("inviteUsers").then(flags=>{
+            STATE.inviteUsers = flags.invite_success;
+            STATE.convertUser = flags.convert_invite;
+            this.paint();
+        })
     }
 
     public goBack() {
@@ -78,13 +81,13 @@ store.register('contactMap', (r) => {
 });
 
 // 邀请好友成功
-walletStore.register('inviteUsers/invite_success',(r) => {
+registerStoreData('inviteUsers/invite_success',(r) => {
     STATE.inviteUsers = r;
     forelet.paint(STATE);
 });
 
 // 兑换好友邀请码成功
-walletStore.register('inviteUsers/convert_invite',(r) => {
+registerStoreData('inviteUsers/convert_invite',(r) => {
     STATE.convertUser = r;
     forelet.paint(STATE);
 });

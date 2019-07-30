@@ -1,14 +1,21 @@
 .new-page{
+    display: flex;
+    flex-direction: column;
+}
+.scroll-container{
     overflow-x: hidden;
     overflow-y: auto;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
+    flex:1 0 0;
+    background: #318DE6;
 }
 .top-main-wrap{
     width:100%;
     height:550px;
     flex-shrink: 0;
     background: #318DE6;
+   
 }
 .utilList{
     position:absolute;

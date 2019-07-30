@@ -2,12 +2,12 @@
  * 一些全局方法
  */
 // =====================================导入
-import { uploadFileUrlPrefix } from '../../../../app/config';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
 import * as store from '../data/store';
+import { uploadFileUrlPrefix } from '../../../../app/publicLib/config';
 
 // =====================================导出
 
