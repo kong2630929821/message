@@ -17,7 +17,7 @@ import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getGroupAvatar, getGroupUserAvatar, INFLAG, rippleShow } from '../../logic/logic';
 import { selectImage } from '../../logic/native';
-import { clientRpcFunc } from '../../net/init';
+import { clientRpcFunc, unSubscribe } from '../../net/init';
 import { applyToGroup } from '../../net/rpc';
 import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
@@ -181,6 +181,8 @@ export class GroupInfos extends Widget {
                 break;
             case 1: // 退出群
                 popModalBoxs('chat-client-app-widget-modalBox-modalBox', { content:'退出后，将不再接收此群任何消息',style:'color:#F7931A' },() => {
+                    unSubscribe(`ims/group/msg/${this.props.gid}`);  // 退订群聊消息
+        
                     clientRpcFunc(userExitGroup,this.props.gid,(r) => {
                         console.log('========deleteGroup',r);
                         if (r.r === 1) { // 退出成功关闭当前页面
@@ -212,11 +214,12 @@ export class GroupInfos extends Widget {
         this.paint();
     }
     
-    public groupAliasChange(e:any) {
-        this.props.groupAlias = e.target.value;
-        this.paint();
-    }
     // 修改群名
+    public groupAliasChange(e:any) {
+        this.props.groupAlias = e.value;
+    }
+
+    // 修改群名请求
     public changeGroupAlias() {
         const newGroup = new NewGroup();
         newGroup.gid = this.props.gid;

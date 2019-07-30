@@ -11,7 +11,7 @@
  * maxLength?: 输入最大长度，仅对text和password类型输入有效
  * 外部可监听 ev-input-change，ev-input-blur，ev-input-focus，ev-input-clear事件
  */
-import { popNew } from '../../../../../pi/ui/root';
+import { filterEomoji } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode, paintCmd3, paintWidget } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -103,14 +103,13 @@ export class Input extends Widget {
         if (this.state.inputLock) {
             return;
         }
-        let currentValue = event.currentTarget.value;
+        let currentValue = filterEomoji(event.currentTarget.value);
         // 最大长度限制
         if (this.props.maxLength) {
             currentValue = String(currentValue).slice(0,this.props.maxLength);
         }
         // 密码输入时检验非法字符
         if (this.props.itype === 'password' && !this.availableJudge(currentValue) && currentValue.length > 0) {
-            popNew('app-components1-message-message',{ content:'非法字符' });
             currentValue = currentValue.slice(0,currentValue.length - 1); 
         }
         // 数字输入时检验输入格式

@@ -1,0 +1,56 @@
+.page{
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+.topBar{
+    display: flex;
+    align-items: center;
+}
+.input{
+    padding: 15px 0;
+    height: 100px;
+    position: relative;
+    flex: 1 0 0;
+}
+.searchIcon{
+    position: absolute;
+    left: 25px;
+    top: 38px;
+    width: 26px;
+    height: 26px;
+}
+.searchBtn{
+    height:36px;
+    font-size:36px;
+    font-weight:300;
+    color:rgba(49,91,200,1);
+    line-height:37px;
+    margin: 20px;
+}
+.title{
+    display: flex;
+    align-items: center;
+    height:50px;
+    font-size:28px;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+    line-height:50px;
+    margin: 20px;
+}
+.mark{
+    width:8px;
+    height:24px;
+    background:rgba(255,244,101,1);
+    margin-right: 20px;
+}
+.contain{
+    background: #F9F9F9;
+    flex: 1 0 0;
+}
+.back{
+    width: 48px;
+    height: 48px;
+    margin: 0 15px;
+    border: 15px solid transparent;
+}

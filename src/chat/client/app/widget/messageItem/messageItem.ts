@@ -27,9 +27,10 @@ export class MessageItem extends Widget {
             me:true,
             time:'',
             chatType:GENERATOR_TYPE.USER,
-            isMessageRecallVisible:false,
+            recallBtn:false,
             avatar:'',  // 对方的头像
-            playRadio:false,
+            playAudio:false,
+            refusedMsg:false, 
             myAvatar:''
         };
        
@@ -47,6 +48,7 @@ export class MessageItem extends Widget {
                 this.props.name = store.getStore(`groupUserLinkMap/${genGuid(gid,this.props.message.sid)}`, new GroupUserLink()).userAlias;
                 this.props.avatar = getGroupUserAvatar(gid,this.props.message.sid) || '../../res/images/user_avatar.png';
             }
+            this.props.refusedMsg = !this.props.message.send;
             this.props.message = parseMessage(depCopy(this.props.message));
             this.props.me = this.props.message.sid === store.getStore('uid');
             const time = depCopy(this.props.message.time);
@@ -69,18 +71,9 @@ export class MessageItem extends Widget {
         });  
     }
 
-    // 点击撤回
-    public recall(e:any) {
-        if (this.props.hIncId) {  // 真实发送成功的消息才可以撤回
-            notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
-            this.props.isMessageRecallVisible = false;
-            this.paint();
-        }
-    }
-
     public userDetail(e:any,fg:boolean= false) {
         if (fg) {
-            popNew('chat-client-app-view-info-user');
+            popNew('chat-client-app-view-info-userDetail');
             
             return;
         }
@@ -98,14 +91,24 @@ export class MessageItem extends Widget {
     }
 
     // 长按打开消息撤回
-    public openMessageRecall() {
-        this.props.isMessageRecallVisible = true;
+    public openMessageRecall(e:any) {
+        notify(e.node,'ev-recall',{ value:this.props.hIncId });
+        this.props.recallBtn = true;
         this.paint();
+    }
+
+    // 点击撤回
+    public recall(e:any) {
+        if (this.props.hIncId) {  // 真实发送成功的消息才可以撤回
+            notify(e.node,'ev-send',{ value:this.props.hIncId, msgType:MSG_TYPE.RECALL });
+            this.props.recallBtn = false;
+            this.paint();
+        }
     }
 
     // 点击消息内容
     public msgDetailClick(e:any) {
-        this.props.isMessageRecallVisible = false;
+        this.props.recallBtn = false;
         this.paint();
     }
 
@@ -162,18 +165,18 @@ export class MessageItem extends Widget {
         }
         
         const elem = getRealNode(e.node).getElementsByTagName('audio')[0];
-        if (this.props.playRadio) {
-            this.props.playRadio = false;
+        if (this.props.playAudio) {
+            this.props.playAudio = false;
             console.log('暂停播放语音');
 
         } else {
-            this.props.playRadio = true;
+            this.props.playAudio = true;
             console.log('开始播放语音');
             elem.play();
             
             setTimeout(() => {
                 if (elem.currentTime === elem.duration) {
-                    this.props.playRadio = false;
+                    this.props.playAudio = false;
                     console.log('结束播放语音');
                     elem.pause();
                     elem.currentTime = 0;
@@ -183,7 +186,7 @@ export class MessageItem extends Widget {
             }, elem.duration * 1000 + 500); // 多加半秒，确保语音播完
         }
         this.paint();
-        notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playRadio:this.props.playRadio });
+        notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playAudio:this.props.playAudio });
 
     }
 }
@@ -196,9 +199,10 @@ interface Props {
     me:boolean; // 是否是本人
     time:string;// 消息发送时间
     chatType:GENERATOR_TYPE;// 消息类型
-    isMessageRecallVisible:boolean;// 撤回按钮是否可见
+    recallBtn:boolean;// 撤回按钮是否可见
     avatar:string;  // 对方的头像
-    playRadio:boolean; // 是否正在播放语音
+    playAudio:boolean; // 是否正在播放语音
+    refusedMsg:boolean; // 信息是否被拒绝
     myAvatar:string;  // 自己的头像
 }
 

@@ -24,7 +24,7 @@
             {{% ========================语音=========================}}
             {{elseif it.message.mtype == 3}}
             <div w-class="radio-wrap" on-tap="playRadioMess" style="width:{{it.message.width * 4 + 250}}px;" on-longtap="openMessageRecall">
-                <img w-class="playBtn" src="../../res/images/{{it.playRadio?'stop-radio.png':'play-radio.png'}}"/>
+                <img w-class="playBtn" src="../../res/images/{{it.playAudio?'stop-radio.png':'play-radio.png'}}"/>
                 <widget w-tag="pi-ui-html" w-class="pi-html" style="flex:1 0 0;">{{it.message.msg}}</widget>
                 
                 <div w-class="corner">
@@ -51,8 +51,8 @@
             {{end}}
 
             {{% ========================撤回按钮=========================}}
-            {{if it.isMessageRecallVisible}}
-            <div style="position:absolute;bottom: 0;left:-150px;">
+            {{if it.recallBtn}}
+            <div style="position:absolute;bottom: 5px;left:-30px;">
                 <div w-class="recallBtn" on-tap="recall">撤回</div>
             </div>
             {{end}}
@@ -60,9 +60,14 @@
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" style="margin-left:10px;" on-tap="userDetail(e,true)">{imgURL:{{it.myAvatar}},width:"80px;"}</widget>
         </div>
 
+        {{% ==========================被拒绝的消息标志=====================}}
+        {{if it.refusedMsg}}
+        <img src="../../res/images/refusedMsg.png" w-class="loading"/>
+        {{end}}
+
         {{% ========================对方发送的消息=========================}}
         {{else}}
-        <div w-class="username">{{it.name}}</div>
+        <div w-class="username">{{it.name || "------"}}</div>
         <div style="display:flex;margin:10px 20px;">
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="userDetail">{imgURL:{{it.avatar}},width:"80px;"}</widget>
 
@@ -84,7 +89,7 @@
             {{elseif it.message.mtype == 3}}
             <span w-class="leftDownTail"></span>
             <div w-class="radio-wrap" style="color:#222222;background:#fff;width:{{it.message.width * 4 + 250}}px;" on-tap="playRadioMess">
-                <img w-class="playBtn" src="../../res/images/{{it.playRadio?'stop-radio.png':'play-radio.png'}}" class="audioImage"/>
+                <img w-class="playBtn" src="../../res/images/{{it.playAudio?'stop-radio.png':'play-radio.png'}}" class="audioImage"/>
                 <widget w-tag="pi-ui-html" w-class="pi-html" style="flex:1 0 0;">{{it.message.msg}}</widget>
                 <div w-class="corner">
                     <span w-class="sendTime" style="color:#297FCA">{{it.time}}</span>
@@ -107,7 +112,7 @@
 
     {{% ========================撤回消息=========================}}
     {{elseif it.message.mtype == 5}}
-    <div w-class="recallMsg">{{it.me ? "你" : it.name}}撤回了一条消息</div>
+    <div w-class="recallMsg">{{it.me ? "你" : (it.name || "------") }}撤回了一条消息</div>
 
     {{% =================添加好友或创建群成功或群其他设置提示==================}}
     {{elseif it.message.mtype == 8 || it.message.mtype == 10 || it.message.mtype == 12}}
@@ -115,6 +120,6 @@
 
     {{% ========================加群成功提示=========================}}
     {{elseif it.message.mtype == 11}}
-    <div w-class="recallMsg" style="font-size:32px;">{{it.me ? "你" : it.name}}已成功加入群组</div>
+    <div w-class="recallMsg" style="font-size:32px;">{{it.me ? "你" : (it.name || "------") }}已成功加入群组</div>
     {{end}}
 </div>

@@ -35,7 +35,7 @@ div{
 /* 水波纹点击效果 */
 @keyframes rippleVary{
     0% {transform: scale(0);opacity: .3;}
-    100% {transform: scale(10);opacity: 0;}
+    100% {transform: scale(10);opacity: 0.1;}
 }
 .ripple {
     position: relative;
@@ -55,7 +55,7 @@ div{
     background-position: 50%;
     transform: scale(10);
     opacity: 0;
-    animation: rippleVary 0.5s;
+    animation: rippleVary 0.5s forwards;
 }
 .scrollSmooth{
     scroll-behavior: smooth;

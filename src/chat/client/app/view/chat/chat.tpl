@@ -18,9 +18,9 @@
     </div>
     {{end}}
 
-    <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="stopRadio" ev-delelte-user="goBack" id="chatMessageBox" on-scroll="scrollMessBox">
+    <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="stopRadio" ev-delelte-user="goBack" id="chatMessageBox" on-scroll="scrollMessBox" ev-recall="openMessageRecall">
         {{for i,v of it.showHincIdArray}}
-            <chat-client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playRadio: {{it.onRadio && v == it.onRadio.hIncId ? it.onRadio.playRadio : false}} }</chat-client-app-widget-messageItem-messageItem>
+            <chat-client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playAudio: {{it.activeAudio && v == it.activeAudio.hIncId ? it.activeAudio.playAudio : false}}, recallBtn:{{it.activeMessId == v}} }</chat-client-app-widget-messageItem-messageItem>
         {{end}} 
 
         {{if it.newMsg}}
@@ -32,8 +32,8 @@
 
     </div>
 
-    <div ev-open-Emoji="openEmoji" ev-input-focus="inputFocus" ev-input-change="msgChange" ev-emoji-click="pickEmoji" ev-open-Tools="openTools" ev-send-before="sendImgBefore">
-        <widget w-tag="chat-client-app-widget-inputMessage-inputMessage">{isOnEmoji:{{it.isOnEmoji}},message:{{it.inputMessage}},isOnTools:{{it.isOnTools}},chatType:{{it.chatType}} }</widget>  
+    <div ev-open-Emoji="openEmoji" ev-input-focus="inputFocus" ev-input-change="msgChange" ev-emoji-click="pickEmoji" ev-open-Tools="openTools" ev-send-before="sendImgBefore" ev-open-audio="openAudio">
+        <widget w-tag="chat-client-app-widget-inputMessage-inputMessage">{isOnEmoji:{{it.isOnEmoji}},message:{{it.inputMessage}},isOnTools:{{it.isOnTools}},isOnAudio:{{it.isOnAudio}},chatType:{{it.chatType}} }</widget>  
     </div>
 </div>
 

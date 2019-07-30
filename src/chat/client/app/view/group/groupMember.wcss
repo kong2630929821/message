@@ -16,11 +16,17 @@
     height:32px;
 }
 .member-wrap{
-    margin: 30px 20px;
+    margin: 0 20px 30px;
     border-radius: 12px;
     background-color: rgba(255, 255, 255, 1);
     box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
     display:flex;
     flex-wrap: wrap;
     justify-content: space-between;
+}
+.content{
+    flex: 1 0 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin-top: 30px;
 }
