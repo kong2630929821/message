@@ -325,7 +325,9 @@ export class Chat extends Widget {
                     console.log(i.innerHTML);
                 });
             }
-            this.getScrollElem().scrollTop = this.getScrollElem().scrollHeight;
+            const $scrollElem = this.getScrollElem();
+            // console.log($scrollElem.scrollHeight);
+            $scrollElem.scrollTop = $scrollElem.scrollHeight;
             this.paint();
         }, 100);
         

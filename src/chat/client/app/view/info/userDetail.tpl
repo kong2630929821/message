@@ -1,6 +1,7 @@
-<div w-class="new-page" class="new-page" on-tap="pageClick">
-    <div w-class="top-main-wrap" ev-next-click="handleMoreContactor" ev-back-click="goBack(false)">
-        <chat-client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
+<div w-class="new-page" class="new-page" on-tap="pageClick"  ev-next-click="handleMoreContactor" ev-back-click="goBack(false)">
+    <chat-client-app-widget-topBar-topBar>{title:"",nextImg:"more-dot-white.png",background:"#318DE6"}</chat-client-app-widget-topBar-topBar>
+    <div w-class="scroll-conatiner">
+    <div w-class="top-main-wrap">
         <div w-class="home-info-wrap" style="{{it.inFlag == 3 ? 'margin-top: 50px;':''}}">
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="showBigImg">{imgURL:{{it.avatar}},width:"190px;"}</widget>
             <div w-class="nameText">
@@ -76,4 +77,5 @@
         <chat-client-app-widget-utilList-utilList>{utilList:{{it.utilList}} }</chat-client-app-widget-utilList-utilList>
     </div>
     {{end}}
+    </div>
 </div>

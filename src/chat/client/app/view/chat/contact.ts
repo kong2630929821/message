@@ -5,10 +5,8 @@
 // ================================================ 导入
 import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
 import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
-import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { registerStoreData } from '../../../../../app/viewLogic/common';
-import { Json } from '../../../../../pi/lang/type';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
@@ -31,10 +29,10 @@ interface Props {
     isUtilVisible: boolean;
     utilList: any[];
     netClose: boolean; // 网络链接是否断开
-    avatar:string; // 头像
     isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
     activeTab:string;  // 当前活跃的tab
+    userInfo:any; 
 }
 export const TAB = {
     message:'message',
@@ -44,7 +42,7 @@ export const TAB = {
 export class Contact extends SpecialWidget {
     public web3Promise: Promise<string>;
     public defaultInjectPromise: Promise<string>;
-    public props: Props = {
+    public props: any = {
         offlienType:OfflienType.CHAT,
         sid:0,
         utilList:[
@@ -58,42 +56,40 @@ export class Contact extends SpecialWidget {
         activeTab:TAB.message,
         isLogin:false,
         hasWallet:false,
-        avatar:'',
         netClose:false
     };
 
     public create() {
         super.create();
         this.state = STATE;
+        // 判断是否从钱包项目进入
+        // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
+        // getStoreData('wallet').then((wallet) => {
+        //     this.props.hasWallet = !!wallet;
+        // });
+            
+        // }
     }
 
-    public setProps(props: Json) {
+    public setProps(props: Props) {
         super.setProps(props);
         this.props.isLogin = !!store.getStore('uid');
         this.props.activeTab = TAB.message;
-
-        // 判断是否从钱包项目进入
-        // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        Promise.all([getStoreData('wallet'),getStoreData('user/info', { nickName: '' })]).then(([wallet,wUser]) => {
-            this.props.hasWallet = !!wallet;
-            const uid = store.getStore('uid', 0);
-            const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
-            this.props.avatar = wUser.avatar ? `${uploadFileUrlPrefix}${wUser.avatar}` :'' ;
-            
-            // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
-            if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
-                if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
-                    setUserInfo();
-                    this.paint();
-                } else {
-                    store.initStore();
-                    this.state.lastChat = []; // 清空记录 lastChat
-                    this.paint();
-                }
-            } 
-        });
+        const uid = store.getStore('uid', 0);
+        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         
-        // }
+        // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
+        const wUser = this.props.userInfo;
+        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
+            if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
+                setUserInfo();
+            } else {
+                store.initStore();
+                this.state.lastChat = []; // 清空记录 lastChat
+            }
+        } 
+
+        
     }
 
     public firstPaint() {
