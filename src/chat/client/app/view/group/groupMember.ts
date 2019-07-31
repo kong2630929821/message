@@ -97,7 +97,13 @@ export class GroupMember extends Widget {
     }
 
     public goDetail(uid:number) {
-        popNew('chat-client-app-view-info-userDetail',{ uid:uid });
+        const sid = store.getStore('uid');
+        const own = this.props.groupInfo.ownerid;
+        if (sid === uid) {
+            popNew('chat-client-app-view-info-user');
+        } else {
+            popNew('chat-client-app-view-info-userDetail',{ uid:uid, groupId:own ? this.props.gid :null });
+        }
     }
 
     public destroy() {

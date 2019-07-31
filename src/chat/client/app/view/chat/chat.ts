@@ -10,7 +10,7 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
-import { UserHistory } from '../../../../server/data/db/message.s';
+import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
@@ -49,7 +49,7 @@ export class Chat extends Widget {
             this.props.hid = genUserHid(this.props.sid, this.props.id);
             this.initUser();
         }
-       
+        
         this.latestMsg();
     }
 

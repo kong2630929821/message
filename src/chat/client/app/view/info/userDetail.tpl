@@ -72,7 +72,7 @@
         {{end}}
     </div>
     {{if it.showUtils}}
-    <div w-class="utilList1" style="">
+    <div w-class="utilList" style="">
         {{for i, v of it.utilList}}
             <div w-class="uitlItem" on-tap="utilClick({{i}})" on-down="onShow">
                 <span>{{v.utilText}}</span>

@@ -1,11 +1,9 @@
-<div w-class="new-page" on-tap="pageClick" class="new-page" >
-    <div style="position:relative;min-height: 128px; background: #318DE6;" ev-next-click="handleMoreGroup" ev-back-click="goBack(false)">
-        {{if it.inFlag != 3}}
-        <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
-        {{else}}
-        <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
-        {{end}}
-    </div>
+<div w-class="new-page" on-tap="pageClick" class="new-page" ev-next-click="getMore" ev-back-click="goBack(false)">
+    {{if it.inFlag != 3}}
+    <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
+    {{else}}
+    <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
+    {{end}}
     <div w-class="scroll-container" on-scroll="scrollPage" id="groupInfo">
     <div w-class="top-main-wrap" >
         <div w-class="home-info-wrap">
@@ -98,9 +96,13 @@
         </div>
     </div>
 
-    {{if it.isGroupOpVisible}}
-    <div w-class="utilList" ev-handleFatherTap="handleFatherTap">
-        <chat-client-app-widget-utilList-utilList>{utilList:{{it.utilList}}}</chat-client-app-widget-utilList-utilList>
+    {{if it.showUtils}}
+    <div w-class="utilList" style="">
+        {{for i, v of it.utilList}}
+            <div w-class="uitlItem" on-tap="utilClick({{i}})" on-down="onShow">
+                <span>{{v.utilText}}</span>
+            </div>
+        {{end}}    
     </div>
     {{end}}
     </div>

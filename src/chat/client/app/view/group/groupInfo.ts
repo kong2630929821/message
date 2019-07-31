@@ -37,7 +37,7 @@ export class GroupInfos extends Widget {
             gid:null,
             groupInfo:{},
             members:[],
-            isGroupOpVisible:false,
+            showUtils:false,
             utilList:[],
             editable:false,
             groupAlias:'',
@@ -58,10 +58,9 @@ export class GroupInfos extends Widget {
     public setProps(props:any) {
         super.setProps(props);
         this.props.utilList = [
-            // { utilText : '发送名片' },
             { utilText : '清空聊天记录' },
             { utilText : '退出该群' }];
-        this.props.isGroupOpVisible = false;
+        this.props.showUtils = false;
         this.props.editable = false;
         gid = this.props.gid;
         const uid = store.getStore('uid');
@@ -164,16 +163,16 @@ export class GroupInfos extends Widget {
     }
 
     // 群信息更多 
-    public handleMoreGroup() {
-        this.props.isGroupOpVisible = !this.props.isGroupOpVisible;
+    public getMore() {
+        this.props.showUtils = !this.props.showUtils;
         this.paint();
     }
+
     // 点击群信息更多操作列表项
-    public handleFatherTap(e:any) {
-        this.props.isGroupOpVisible = false;
-        switch (e.index) {
-            // case 0: // 发送名片
-            //     break;
+    public utilClick(ind:number) {
+        this.props.showUtils = false;
+        this.paint();
+        switch (ind) {
             case 0:  // 清空聊天记录
                 popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' },() => {
                     store.setStore(`groupChatMap/${genGroupHid(this.props.gid)}`,[]);
@@ -197,20 +196,19 @@ export class GroupInfos extends Widget {
             default:
         }
         
-        this.paint();
     }
 
     // 页面点击
     public pageClick() {
         this.props.editable = false;
-        this.props.isGroupOpVisible = false;
+        this.props.showUtils = false;
         this.paint();
     }
 
     // 点击后可编辑群别名
     public editGroupAlias() {
         this.props.editable = true;
-        this.props.isGroupOpVisible = false;
+        this.props.showUtils = false;
         this.paint();
     }
     
@@ -243,7 +241,7 @@ export class GroupInfos extends Widget {
     }
     // 打开群管理
     public openGroupManage() {
-        this.props.isGroupOpVisible = false;
+        this.props.showUtils = false;
         this.paint();
         const ownerid = this.props.groupInfo.ownerid;
         const adminids = this.props.groupInfo.adminids;
@@ -373,7 +371,7 @@ interface Props {
     groupInfo:any;// 群信息
     members:any[]; // 群成员数组
     utilList:Util[]; // 操作列表
-    isGroupOpVisible:boolean;
+    showUtils:boolean;
     editable:boolean; // 是否可编辑
     groupAlias:string; // 群别名
     isOwner:boolean; // 是否是群主

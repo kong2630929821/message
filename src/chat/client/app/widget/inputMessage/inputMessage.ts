@@ -27,7 +27,7 @@ export class InputMessage extends Widget {
         istyle:[0,0],
         audioText:'按住说话(30S)'
     };
-    private audioTime:number;
+    private audioCount:number;
     private interval:any;
 
     public setProps(props:any) {
@@ -50,25 +50,24 @@ export class InputMessage extends Widget {
             console.log('点击开始录音');
             startRadio(() => {
                 this.props.recordAudio = true;
-                this.audioTime = Date.now();
                 this.paint();
-                let count = 0;  // 计数到30
+                this.audioCount = 0;   // 计数到30
                 const list = getWidth(15,80);
                 this.interval = setInterval(() => {
-                    count++;
+                    this.audioCount++;
                     let r1 = 0;
                     let r2 = 0;
-                    if (count < 15) {
-                        r1 = list[count];
+                    if (this.audioCount < 15) {
+                        r1 = list[this.audioCount];
                     } else {
                         r1 = 160;
-                        r2 = list[count - 15];
+                        r2 = list[this.audioCount - 15];
                     }
                     this.props.istyle = [r1,r2];
-                    this.props.audioText = `上滑取消(${count}S)`;
+                    this.props.audioText = `上滑取消(${this.audioCount}S)`;
                     this.paint();
 
-                    if (count >= 30) {  // 超过30秒自动停止录音
+                    if (this.audioCount >= 30) {  // 超过30秒自动停止录音
                         clearInterval(this.interval);
                         if (this.props.recordAudio) {
                             this.audioEnd(e);
@@ -94,10 +93,9 @@ export class InputMessage extends Widget {
         endRadio((buffer) => {
             uploadFile(arrayBuffer2File(buffer),(audioUrl:string) => {
                 console.log('录制的音频',audioUrl);
-                const t = Date.now() - this.audioTime;
                 const res = {
                     message:audioUrl,
-                    time:Math.ceil(t / 1000)
+                    time:this.audioCount
                 };
                 notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.VOICE });
             });
@@ -178,8 +176,6 @@ interface Props {
 export const sendImage = (e:any) => {
     const imagePicker = selectImage((width, height, url) => {
         console.log('选择的图片',width,height,url);
-        // 预览图片
-        notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${url}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG });
 
         imagePicker.getContent({
             quality:10,
@@ -188,7 +184,10 @@ export const sendImage = (e:any) => {
                     compressImg:'',
                     originalImg:''
                 };
-                imgResize(buffer,(res) => {
+
+                imgResize(buffer,(res) => {  // 压缩图片
+                    // 预览图片
+                    notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG });
                     
                     uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
                         console.log('选择的照片压缩图',imgUrlSuf);
@@ -198,6 +197,7 @@ export const sendImage = (e:any) => {
                         imagePicker.getContent({
                             quality:100,
                             success(buffer1:ArrayBuffer) {
+                                
                                 uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
                                     console.log('选择的照片原图',imgUrlSuf1);
                                     value.originalImg = imgUrlSuf1;
