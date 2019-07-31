@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { inIOSApp } from '../../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -27,6 +28,8 @@ export class Chat extends Widget {
     public props:Props;
     public bindCB: any;
     public ok: () => void;
+    private audioContext:any = window.AudioContext ? new AudioContext() : new webkitAudioContext();
+    private audioSource:any;
     constructor() {
         super();
         this.bindCB = this.updateChat.bind(this);
@@ -376,9 +379,39 @@ export class Chat extends Widget {
     /**
      * 点击某个语音消息，关闭其他语言播放
      */
-    public stopRadio(e:any) {
+    public playRadio(e:any) {
+        if (this.audioSource) { // 关闭当前正在播放的语音
+            this.audioSource.stop();
+            this.audioSource.onended = null;
+        }
         this.props.activeAudio = e;
         this.paint();
+
+        if (e.playRadio && inIOSApp) {  // 播放当前选中的语音
+            const source = this.audioContext.createBufferSource(); 
+            const request = new XMLHttpRequest();
+            request.open('GET', e.elem.src, true);
+            request.responseType = 'arraybuffer';
+            request.onload = () => {
+                const audioData = request.response;
+                this.audioContext.decodeAudioData(audioData, (buffer) => {
+                    source.buffer = buffer;
+                    source.connect(this.audioContext.destination);
+                    source.start();
+                    source.onended = () => {
+                        source.stop();
+                        console.log('结束播放语音');
+                        this.props.activeAudio.playRadio = false;
+                        this.paint();
+                    };
+                    this.audioSource = source;
+                });
+
+            };
+
+            request.send();
+        }
+
     }
 
     /**

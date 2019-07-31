@@ -2,7 +2,7 @@
  * textMessage 组件相关处理
  */
 // ================================================ 导入
-import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
+import { inAndroidApp, uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
@@ -157,37 +157,35 @@ export class MessageItem extends Widget {
 
     // 点击播放语音
     public playRadioMess(e:any) {
-        // 关掉所有语音
-        const audios = document.getElementsByTagName('audio');
-        for (const i of audios) {
-            i.pause();
-            i.currentTime = 0;
-        }
-        
         const elem = getRealNode(e.node).getElementsByTagName('audio')[0];
-        if (this.props.playAudio) {
-            this.props.playAudio = false;
-            console.log('暂停播放语音');
-
-        } else {
-            this.props.playAudio = true;
-            console.log('开始播放语音');
-            elem.play();
-            
-            setTimeout(() => {
-                if (elem.currentTime === elem.duration) {
-                    this.props.playAudio = false;
-                    console.log('结束播放语音');
-                    elem.pause();
-                    elem.currentTime = 0;
-                    this.paint();
-                }
+        
+        if (inAndroidApp) {
+            // 关掉所有语音
+            const audios = document.getElementsByTagName('audio');
+            for (const i of audios) {
+                i.pause();
+                i.currentTime = 0;
+            }
+            // 没有正在播放的语音，播放当前点击的语音
+            if (!this.props.playAudio) {  
+                elem.play();
+                setTimeout(() => {
+                    if (elem.currentTime === elem.duration) {
+                        this.props.playAudio = false;
+                        console.log('结束播放语音');
+                        elem.pause();
+                        elem.currentTime = 0;
+                        this.paint();
+                    }
                 
-            }, elem.duration * 1000 + 500); // 多加半秒，确保语音播完
+                }, elem.duration * 1000 + 500); // 多加半秒，确保语音播完
+            }
         }
+        this.props.playAudio = !this.props.playAudio;
         this.paint();
-        notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playAudio:this.props.playAudio });
+        console.log(`${this.props.playAudio ? '播放语音' :'暂停语音'}`);
 
+        notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playAudio:this.props.playAudio,elem });
     }
 }
 

@@ -18,7 +18,7 @@
     </div>
     {{end}}
 
-    <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="stopRadio" ev-delelte-user="goBack" id="chatMessageBox" on-scroll="scrollMessBox" ev-recall="openMessageRecall">
+    <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="playRadio" ev-delelte-user="goBack" id="chatMessageBox" on-scroll="scrollMessBox" ev-recall="openMessageRecall">
         {{for i,v of it.showHincIdArray}}
             <chat-client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playAudio: {{it.activeAudio && v == it.activeAudio.hIncId ? it.activeAudio.playAudio : false}}, recallBtn:{{it.activeMessId == v}} }</chat-client-app-widget-messageItem-messageItem>
         {{end}} 
