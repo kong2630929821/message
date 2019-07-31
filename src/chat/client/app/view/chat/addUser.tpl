@@ -1,26 +1,24 @@
 <div class="new-page" ev-back-click="back" w-class="page">
     <chat-client-app-widget-topBar-topBar>{title:"搜索",background:"#fff"}</chat-client-app-widget-topBar-topBar>
-    <div w-class="input" on-tap="goSearch">
-        <div w-class="searchBox">用户名/ID/手机号</div>
+    <div w-class="search-input" ev-input-change="inputUid">
+        <chat-client-app-widget-input-input w-class="pi-input idInput">{placeHolder:"搜索用户ID",style:"font-size:32px;padding-left:82px;border-radius: 12px;",input:{{it.rid}} }</chat-client-app-widget-input-input>
         <img w-class="searchIcon" src="../../res/images/search-gray.png" />
     </div>
-    <div w-class="btns">
-        {{for i,v of it.btns}}
-        <div w-class="btn">
-            <img src="../../res/images/{{v[0]}}"/>
-            <div w-class="text">{{v[1]}}</div>
-        </div>
-        {{end}}
-    </div>
-    <div style="text-align:center;background: #F9F9F9;">
-        <div w-class="applyBtn" on-tap="applyFriend" on-down="onShow">去找人玩</div>
-    </div>
+    <div w-class="applyBtn" on-tap="goNext(e,2)" on-down="onShow">添加好友</div>
 
-    <div w-class="title">
-        <span w-class="mark"></span>
-        <span style="flex:1 0 0;">推荐同城玩家</span>
+    <div w-class="featureBar-scan-wrap" on-tap="goNext(e,0)" on-down="onShow">
+        <div w-class="featurebar">
+            <img w-class="icon" src="../../res/images/scan-circle.png" />
+            <span w-class="text">扫一扫</span>
+            <img w-class="more" src="../../res/images/more-gray.png" on-tap="more"/>
+        </div>
     </div>
-    {{for i,v of [1,2,3,4]}}
-    <widget w-tag="chat-client-app-view-contactList-applyUserInvite"></widget>
-    {{end}}
+    <div w-class="featureBar-code-wrap" on-tap="goNext(e,1)" on-down="onShow">
+        <div w-class="featurebar">
+            <img w-class="icon" src="../../res/images/two-code.png" />
+            <span w-class="text">我的二维码</span>
+            <img w-class="more" src="../../res/images/more-gray.png" on-tap="more"/>
+        </div>
+    </div>
+   
 </div>

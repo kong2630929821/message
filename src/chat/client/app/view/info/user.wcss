@@ -1,8 +1,6 @@
 .new-page{
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: auto;
 }
 .top-main-wrap{
     width:100%;
@@ -12,10 +10,10 @@
 }
 .detail-info-wrap{
     margin: -70px 20px 20px;
-    flex: 1 0 0;
     border-radius: 12px;
     background-color: rgba(255, 255, 255, 1);
     box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+    flex: 1 0 0;
 }
 .detail-info{
     padding-left:20px;
@@ -44,6 +42,7 @@
 .mainText{   
     color: rgba(34, 34, 34, 1);
     font-size: 32px;
+    flex: 1 0 0;
     word-break: break-all;
     display: flex;
     align-items: center;
@@ -53,34 +52,13 @@
     font-size: 24px;
 }
 .other-wrap{
-    margin-right:30px;
-    display:flex;
+    width:650px;
+    margin:30px;
 }
 .moreChooseIcon{
     width:48px;
     height: 48px;
-}
-.ul-wrap{
-    margin-left:50px;
-    flex: 1 0 0;
-}
-.liItem{
-    padding-top: 40px;
-    padding-left: 40px;
-    margin: 0;
-    color: rgba(34, 34, 34, 1);
-    font-size: 32px;
-    display:flex;
-    justify-content:space-between;
-    align-items: center;
-}
-.liItem1{
-    padding: 20px;
-    width: 280px;
-    margin-left: 20px;
-    margin-top: 20px;
-    font-size: 32px;
-    color: #318DE6;
+    margin-right:40px;
 }
 .home-info-wrap{
     width:100%;
@@ -101,12 +79,12 @@
 }
 .nameText{   
     font-size: 32px;
-    margin: 20px 0px;
+    margin:20px 0;
     font-weight: 600;
-    height: 45px;
-    line-height: 45px;
     display: flex;
     align-items: center;
+    height: 45px;
+    line-height: 45px;
 }
 .edit{
     width: 40px;
@@ -114,18 +92,16 @@
     margin-left: 15px;
 }
 .aliasInput{
-    font-size: 32px;
-    color: #fff;
-    background: transparent;
     width: 300px;
-    border: none;
-    box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    outline: none;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
     border-bottom: 1px solid #fff;
+}
+.otherSet{
+    display: flex;
+    align-items: center;
+    margin-left: 90px;
+    margin-top: 50px;
+    font-size: 32px;
+    color: #222222;
 }
 .official{
     width:80px;
@@ -139,24 +115,4 @@
     text-align: center;
     margin-left: 10px;
     font-weight: 300;
-}
-.utilList1{
-    width:250px;
-    background:#fff;
-    box-shadow:0px 0px 10px 0px rgba(34,34,34,0.2);
-    border-radius:6px;
-    position: absolute;
-    font-size:28px;
-    font-weight:500;
-    color:#222;
-    line-height:98px;
-    top: 88px;
-    right: 20px;
-    text-align: center;
-    z-index: 1;
-}
-.uitlItem{
-    display: flex;
-    align-items: center;
-    padding-left: 20px;
 }

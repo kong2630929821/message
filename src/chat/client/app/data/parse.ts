@@ -79,10 +79,13 @@ const pushLastChat = (value:[number,number,GENERATOR_TYPE],gid?:number) => {
         topLen = setting.msgTop.length;
         
     }
-    // 置顶消息不改变位置，不置顶消息放到置顶消息后
-    if (!topFg) { 
+    
+    if (topFg && index > -1) { // 置顶消息不改变位置
+        lastChat[index] = value;  
+   
+    } else { // 不置顶消息放到置顶消息后
         index > -1 && lastChat.splice(index, 1);  
         lastChat.splice(topLen, 0, value);
-    } 
+    }
     store.setStore(`lastChat`,lastChat);
 };

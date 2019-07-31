@@ -36,7 +36,8 @@ interface Props {
 }
 export const TAB = {
     message:'message',
-    friend:'friend'
+    friend:'friend',
+    square:'square'
 };
 
 export class Contact extends SpecialWidget {
@@ -89,7 +90,6 @@ export class Contact extends SpecialWidget {
             }
         } 
 
-        
     }
 
     public firstPaint() {
@@ -205,8 +205,8 @@ store.register('contactMap', (r) => {
     getStoreData('inviteUsers').then(inviteUsers => {
         for (const value of r.values()) {
             STATE.contactMap = value;
-            STATE.inviteUsers = updateInviteUsers(inviteUsers.invite_success) || [];
-            STATE.convertUser = updateInviteUsers(inviteUsers.convert_invite) || [];
+            STATE.inviteUsers = updateInviteUsers(inviteUsers.invite_success || []);
+            STATE.convertUser = updateInviteUsers(inviteUsers.convert_invite || []);
             inviteUsers.invite_success = STATE.inviteUsers;
             inviteUsers.convert_invite = STATE.convertUser;
             setStoreData('inviteUsers',inviteUsers);
@@ -218,23 +218,23 @@ store.register('contactMap', (r) => {
 
 // 邀请好友成功
 registerStoreData('inviteUsers/invite_success',(r) => {
-    const ans = updateInviteUsers(depCopy(r));
+    const ans = updateInviteUsers(depCopy(r) || []);
     
     if (ans.length < r.length) {
         setStoreData('inviteUsers/invite_success',ans);
     }
-    STATE.inviteUsers = ans || [];
+    STATE.inviteUsers = ans;
     forelet.paint(STATE);
 });
 
 // 兑换好友邀请码成功
 registerStoreData('inviteUsers/convert_invite',(r) => {
-    const ans = updateInviteUsers(depCopy(r));
+    const ans = updateInviteUsers(depCopy(r) || []);
     
     if (ans.length < r.length) {
         setStoreData('inviteUsers/convert_invite',ans);
     }
-    STATE.convertUser = ans || [];
+    STATE.convertUser = ans;
     forelet.paint(STATE);
 });
 store.register('friendLinkMap',() => {

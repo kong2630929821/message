@@ -69,6 +69,12 @@ export const applyFriend = (user: string): Result => {
 
         return result;
     }
+
+    // 当前用户的黑名单中是否有uid
+    if (curUser.blackList.findIndex(item => item === uid) > -1) {
+        removeFromBlackList(uid);  // 从黑名单中移出
+    }
+    
     // 取出联系人表
     const friendLinkBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.FRIEND_LINK_TABLE);
     const friend1 = friendLinkBucket.get(genUuid(sid, uid))[0];

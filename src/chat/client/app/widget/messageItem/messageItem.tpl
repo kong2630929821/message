@@ -1,5 +1,5 @@
 <div>
-    {{if !it.message.cancel && it.message.mtype < 5 || it.message.mtype == 9}}
+    {{if !it.message.cancel && it.message.mtype < 5 || it.message.mtype == 9 || it.message.mtype == 13}}
     <div style="overflow: hidden;">
         {{if it.me}}
         <div style="position:relative;margin: 10px 20px 0;float: right;display:flex;">

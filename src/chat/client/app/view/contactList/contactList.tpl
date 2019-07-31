@@ -14,9 +14,11 @@
             <chat-client-app-view-contactList-contactItem>{id: {{it.sid}}, chatType: "user"}</chat-client-app-view-contactList-contactItem>
         </div>
         {{for i,v of it1.friends}}
-        <div on-tap="goNext(3,{{v}})" on-down="onShow">
-            <chat-client-app-view-contactList-contactItem>{id: {{v}}, chatType: "user"}</chat-client-app-view-contactList-contactItem>
-        </div>
+            {{if it1.blackList.indexOf(v) == -1}}
+            <div on-tap="goNext(3,{{v}})" on-down="onShow">
+                <chat-client-app-view-contactList-contactItem>{id: {{v}}, chatType: "user"}</chat-client-app-view-contactList-contactItem>
+            </div>
+            {{end}}
         {{end}}
     </div>
 </div>

@@ -4,14 +4,18 @@
     <div w-class="topBar-content">
         <div on-tap="showMine" on-down="onShow" style="position:relative;">
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{it.avatar || "../../res/images/user_avatar.png"}}, width:"48px;"}</widget>
-            <span w-class="newMess">99+</span>
+            {{%<!-- <span w-class="newMess">99+</span> -->}}
         </div>
         
         <div w-class="tabs">
+            {{: fg=false}}
+            {{if fg}}
             <div w-class="tab {{it.activeTab=='square'?'activeTab':''}}" on-tap="changeTab(e,'square')">
                 {{it.showAcTag}}
                 <span w-class="arrow {{it.showTag?'':'arrow1'}}"></span>
             </div>
+            {{end}}
+
             <div w-class="tab {{it.activeTab=='message'?'activeTab':''}}" on-tap="changeTab(e,'message')">消息</div>
             <div w-class="tab {{it.activeTab=='friend'?'activeTab':''}}" on-tap="changeTab(e,'friend')">好友</div>
             {{if it.showSpot}}

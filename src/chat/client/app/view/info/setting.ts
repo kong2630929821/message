@@ -269,7 +269,7 @@ export class Setting extends Widget {
             for (const i of selected) {
                 mess += `“${content[i]}”`; 
             }
-            const SUID = store.getStore('flags/HAOHAI_UID');
+            const SUID = store.getStore('flags').HAOHAI_UID;
             sendUserMsg(SUID,mess,MSG_TYPE.COMPLAINT).then((r:UserHistory) => {
                 updateUserMessage(SUID, r);
                 popNewMessage('举报成功');

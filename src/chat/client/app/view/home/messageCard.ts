@@ -138,11 +138,11 @@ export class MessageCard extends Widget {
     }
 
     // 操作栏显示隐藏
-    public changeUtils(e:any) {
-        this.props.showUtils = !this.props.showUtils;
-        this.paint(); 
-        notify(e.node,'ev-msgCard-utils',{ value:this.props.showUtils });
-    }
+    // public changeUtils(e:any) {
+        // this.props.showUtils = !this.props.showUtils;
+        // this.paint(); 
+        // notify(e.node,'ev-msgCard-utils',{ value:this.props.showUtils });
+    // }
     
     // 动画效果执行
     public onShow(e:any) {

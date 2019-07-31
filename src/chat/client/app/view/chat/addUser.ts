@@ -93,6 +93,10 @@ export class AddUser extends Widget {
             case 1:
                 popNew('app-view-mine-other-addFriend'); // 展示我的二维码
                 break;
+            case 2:
+                this.applyFriend();  // 添加好友
+                break;
+
             default:
         }
     }

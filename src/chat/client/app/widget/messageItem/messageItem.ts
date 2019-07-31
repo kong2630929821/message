@@ -73,7 +73,7 @@ export class MessageItem extends Widget {
 
     public userDetail(e:any,fg:boolean= false) {
         if (fg) {
-            popNew('chat-client-app-view-info-userDetail');
+            popNew('chat-client-app-view-info-user');
             
             return;
         }

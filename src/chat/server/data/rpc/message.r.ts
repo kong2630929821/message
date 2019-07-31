@@ -18,6 +18,7 @@ import { Env } from '../../../../pi/lang/env';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GROUP_STATE, GroupInfo } from '../db/group.s';
 import { NOT_GROUP_OWNNER, NOTIN_SAME_GROUP } from '../errorNum';
+import * as http from '../http_client';
 import { getUid } from './group.r';
 import { sendFirstWelcomeMessage } from './user.r';
 
@@ -133,6 +134,10 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
 
     const gh = new GroupHistory();
     const gmsg = new GroupMsg();
+    // 过滤敏感词汇
+    if (message.mtype === MSG_TYPE.TXT) {
+        message.msg = filterWords(message.msg);
+    }
     gmsg.msg = message.msg;
     gmsg.mtype = message.mtype;
     gmsg.send = true;
@@ -323,6 +328,11 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     const sid = getUid();
     const userHistory = new UserHistory();
     const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
+    // 过滤敏感词汇
+    if (message.mtype === MSG_TYPE.TXT) {
+        message.msg = filterWords(message.msg);
+    }
+
     // 获取对方联系人列表
     const sContactInfo = contactBucket.get(message.rid)[0];
     const userMsg = new UserMsg();
@@ -361,6 +371,10 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
 // #[rpc=rpcServer]
 export const sendTempMessage = (message: TempSend): UserHistory => {
     console.log('sendMsg!!!!!!!!!!!', message);
+    // 过滤敏感词汇
+    if (message.mtype === MSG_TYPE.TXT) {
+        message.msg = filterWords(message.msg);
+    }
 
     const sid = getUid();
     const userHistory = new UserHistory();
@@ -394,6 +408,39 @@ export const sendTempMessage = (message: TempSend): UserHistory => {
     sendMessage(message, userHistory, message.gid);
 
     return userHistory;
+};
+
+/**
+ * 过滤敏感词
+ * access_token 有效期一个月
+ * @param mess 需要处理的文本
+ */
+const filterWords = (mess:string) => {
+    console.log('filterWords!!!!!!!!!!!! mess:', mess);
+    const url = `https://aip.baidubce.com/rest/2.0/antispam/v2/spam?access_token=24.3ec956c07be3a5c2612f543d66b6db42.2592000.1567081205.282335-15546570`;
+    const client = http.createClient();
+    http.addHeader(client, 'content-type', 'application/x-www-form-urlencoded');
+    const r = http.formPost(client, url, 'content', mess);
+    console.log('filterWords!!!!!!!!!!!! mess:', mess,' r:', r);
+    if (r.ok) {
+        const res = JSON.parse(r.ok);
+        if (res.result && res.result.spam > 0) {
+            console.log('filterWords!!!!!!!!!!!! res:', res.result);
+            const list = res.result.reject.concat(res.result.review);
+            for (const i of list) {
+                for (const j of i.hit) {
+                    while (mess.indexOf(j) > -1) {
+                        mess = mess.replace(j,'*');
+                    }
+                    console.log('filterWords j:', j,' mess:',mess);
+                }
+            }
+        } 
+    } 
+    console.log('!!!!!!!!!!!!!!!!!!filterWords!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',mess);
+
+    return mess;
+
 };
 
 /**
