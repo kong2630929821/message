@@ -41,30 +41,9 @@ export class InputMessage extends Widget {
     // 麦克风输入处理
     public audioStart(e:any) {
         console.log('点击开始录音');
-        this.props.recordAudio = true;
-        this.paint();
-        let count = 0;  // 计数到30
-        const list = getWidth(15,80);
         if (this.interval) {
             clearInterval(this.interval);
         }
-        this.interval = setInterval(() => {
-            count++;
-            let r1 = 0;
-            let r2 = 0;
-            if (count < 15) {
-                r1 = list[count];
-            } else {
-                r1 = 160;
-                r2 = list[count - 15];
-            }
-            this.props.istyle = [r1,r2];
-            this.props.audioText = `上滑取消(${count}S)`;
-            this.paint();
-
-            if (count >= 30) clearInterval(this.interval);
-            console.log(count,r1,r2);
-        },1000);
 
         // ======================正式代码===========================//
         getPromise(() => {
@@ -186,7 +165,7 @@ interface Props {
     message:string; // 消息内容
     isOnTools:boolean;  // 是否打开更多功能
     toolList:any[];  // 更多功能列表
-    isOnAudio:boolean; // 是否正在录音
+    isOnAudio:boolean; // 是否打开录音界面
     chatType:string;  // 聊天类型 user|group
     recordAudio:boolean;  // 正在录入语音
     istyle:number[];   // 语音录入进度条宽度
