@@ -178,6 +178,7 @@ export class Chat extends Widget {
             time:timestampFormat(message.time,1),
             chatType:this.props.chatType
         };
+        console.log('预览图片',this.props.newMsg);
         this.paint();
     }
 
@@ -387,7 +388,7 @@ export class Chat extends Widget {
         this.props.activeAudio = e;
         this.paint();
 
-        if (e.playRadio && inIOSApp) {  // 播放当前选中的语音
+        if (e.playAudio && inIOSApp) {  // 播放当前选中的语音
             const source = this.audioContext.createBufferSource(); 
             const request = new XMLHttpRequest();
             request.open('GET', e.elem.src, true);
@@ -401,12 +402,11 @@ export class Chat extends Widget {
                     source.onended = () => {
                         source.stop();
                         console.log('结束播放语音');
-                        this.props.activeAudio.playRadio = false;
+                        this.props.activeAudio.playAudio = false;
                         this.paint();
                     };
                     this.audioSource = source;
                 });
-
             };
 
             request.send();

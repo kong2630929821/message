@@ -197,7 +197,7 @@ export const sendImage = (e:any) => {
                         imagePicker.getContent({
                             quality:100,
                             success(buffer1:ArrayBuffer) {
-                                
+
                                 uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
                                     console.log('选择的照片原图',imgUrlSuf1);
                                     value.originalImg = imgUrlSuf1;
@@ -221,9 +221,7 @@ export const sendImage = (e:any) => {
 export const sendPicture = (e:any) => {
     const camera = openCamera((res) => {
         console.log('拍摄的图片',res);
-        // 预览图片
-        notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG }); 
- 
+       
         camera.getContent({
             quality:10,
             success(buffer:ArrayBuffer) {
@@ -232,7 +230,9 @@ export const sendPicture = (e:any) => {
                     originalImg:''
                 };
                 imgResize(buffer,(res) => {
-                   
+                    // 预览图片
+                    notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG }); 
+
                     uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
                         console.log('拍摄的照片压缩图',imgUrlSuf);
                         value.compressImg = imgUrlSuf;
