@@ -2,6 +2,7 @@
  * inputMessage 组件相关处理
  */
 // ===========================导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
@@ -91,14 +92,19 @@ export class InputMessage extends Widget {
         }
 
         endRadio((buffer) => {
-            uploadFile(arrayBuffer2File(buffer),(audioUrl:string) => {
-                console.log('录制的音频',audioUrl);
-                const res = {
-                    message:audioUrl,
-                    time:this.audioCount
-                };
-                notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.VOICE });
-            });
+            if (this.audioCount) {  // 录音大于1秒才上传
+                uploadFile(arrayBuffer2File(buffer),(audioUrl:string) => {
+                    console.log('录制的音频',audioUrl);
+                    const res = {
+                        message:audioUrl,
+                        time:this.audioCount
+                    };
+                    notify(e.node,'ev-send',{ value:JSON.stringify(res), msgType:MSG_TYPE.VOICE });
+
+                });
+            } else {
+                popNewMessage('录音太短');
+            }
         });
     }
 
@@ -219,8 +225,8 @@ export const sendImage = (e:any) => {
  * 拍摄照片
  */
 export const sendPicture = (e:any) => {
-    const camera = openCamera((res) => {
-        console.log('拍摄的图片',res);
+    const camera = openCamera((r) => {
+        console.log('拍摄的图片',r);
        
         camera.getContent({
             quality:10,

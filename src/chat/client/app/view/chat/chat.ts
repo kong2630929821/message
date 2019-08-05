@@ -10,7 +10,7 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
-import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
+import { UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
@@ -41,6 +41,7 @@ export class Chat extends Widget {
         this.props.inputMessage = '';
         this.props.newMsg = null;
         this.props.activeAudio = null;
+        this.audioSource = null;
 
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.hid = genGroupHid(this.props.id);
@@ -384,6 +385,7 @@ export class Chat extends Widget {
         if (this.audioSource) { // 关闭当前正在播放的语音
             this.audioSource.stop();
             this.audioSource.onended = null;
+            this.audioSource = null;
         }
         this.props.activeAudio = e;
         this.paint();
@@ -403,6 +405,7 @@ export class Chat extends Widget {
                         source.stop();
                         console.log('结束播放语音');
                         this.props.activeAudio.playAudio = false;
+                        this.audioSource = null;
                         this.paint();
                     };
                     this.audioSource = source;
