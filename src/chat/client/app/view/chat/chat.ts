@@ -41,6 +41,7 @@ export class Chat extends Widget {
         this.props.inputMessage = '';
         this.props.newMsg = null;
         this.props.activeAudio = null;
+        this.audioSource = null;
 
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.hid = genGroupHid(this.props.id);
@@ -384,6 +385,7 @@ export class Chat extends Widget {
         if (this.audioSource) { // 关闭当前正在播放的语音
             this.audioSource.stop();
             this.audioSource.onended = null;
+            this.audioSource = null;
         }
         this.props.activeAudio = e;
         this.paint();
@@ -403,6 +405,7 @@ export class Chat extends Widget {
                         source.stop();
                         console.log('结束播放语音');
                         this.props.activeAudio.playAudio = false;
+                        this.audioSource = null;
                         this.paint();
                     };
                     this.audioSource = source;

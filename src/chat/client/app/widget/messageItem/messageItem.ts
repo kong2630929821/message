@@ -114,11 +114,19 @@ export class MessageItem extends Widget {
 
     // 点击打开红包
     public openRedEnvelope() {
-        if (this.props.message.redEnvDetail) {
-            popNew('app-view-earn-exchange-exchangeDetail',this.props.message.redEnvDetail);
+        const redEnvDetail = this.props.message.redEnvDetail;
+        if (redEnvDetail) {
+            let redEnvDetailProps = {...redEnvDetail};
+            if(redEnvDetail.userHead && redEnvDetail.userHead.indexOf("http://") < 0){
+                 redEnvDetailProps.userHead = `${uploadFileUrlPrefix}${redEnvDetail.userHead}`;
+            }
+            popNew('app-view-earn-exchange-exchangeDetail',redEnvDetailProps);
 
         } else {
             const user = store.getStore(`userInfoMap/${this.props.message.sid}`,new Map());
+            if(user.avatar && user.avatar.indexOf("http://") < 0){
+                user.avatar = `${uploadFileUrlPrefix}${user.avatar}`;
+           }
             popNew('app-view-earn-exchange-openRedEnv', { 
                 inFlag: 'chat',
                 rid: this.props.message.redEnvId,
