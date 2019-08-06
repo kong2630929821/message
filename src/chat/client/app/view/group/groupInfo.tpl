@@ -1,8 +1,8 @@
 <div w-class="new-page" on-tap="pageClick" class="new-page" ev-next-click="getMore" ev-back-click="goBack(false)">
     {{if it.inFlag != 3}}
-    <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
+    <widget w-tag="chat-client-app-widget-topBar-topBar2" style="position:absolute;">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
     {{else}}
-    <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
+    <widget w-tag="chat-client-app-widget-topBar-topBar" style="position:absolute;">{title:"",background:"transparent"}</widget>
     {{end}}
     <div w-class="scroll-container" on-scroll="scrollPage" id="groupInfo">
     <div w-class="top-main-wrap" >

@@ -28,8 +28,11 @@ export class InputMessage extends Widget {
         istyle:[0,0],
         audioText:'按住说话(30S)'
     };
-    private audioCount:number;
-    private interval:any;
+    private audioCount:number;   // 录音倒计数
+    private interval:any;    // 录音倒计时循环事件
+    private touchStartY:number;   // 点击位置
+    private touchMoveY:number;   // 移动位置
+    private cancelRecord:boolean;  // 是否取消录音
 
     public setProps(props:any) {
         this.props = {
@@ -42,9 +45,37 @@ export class InputMessage extends Widget {
     // 麦克风输入处理
     public audioStart(e:any) {
         console.log('点击开始录音');
+        this.touchStartY = e.changedTouches[0].screenY;
         if (this.interval) {
             clearInterval(this.interval);
         }
+        this.props.recordAudio = true;
+        this.paint();
+
+        // ===================测试代码============================//
+        // this.audioCount = 0;   // 计数到30
+        // const list = getWidth(15,80);
+        // this.interval = setInterval(() => {
+        //     this.audioCount++;
+        //     let r1 = 0;
+        //     let r2 = 0;
+        //     if (this.audioCount < 15) {
+        //         r1 = list[this.audioCount];
+        //     } else {
+        //         r1 = 160;
+        //         r2 = list[this.audioCount - 15];
+        //     }
+        //     this.props.istyle = [r1,r2];
+        //     this.props.audioText = `上滑取消(${this.audioCount}S)`;
+        //     this.paint();
+
+        //     if (this.audioCount >= 30) {  // 超过30秒自动停止录音
+        //         clearInterval(this.interval);
+        //         if (this.props.recordAudio) {
+        //             this.audioEnd(e);
+        //         }
+        //     }
+        // },1000);
 
         // ======================正式代码===========================//
         getPromise(() => {
@@ -90,6 +121,12 @@ export class InputMessage extends Widget {
         if (this.interval) {
             clearInterval(this.interval);
         }
+        if (this.cancelRecord) {
+            popNewMessage('取消录音');
+            endRadio(null);
+
+            return;
+        }
 
         endRadio((buffer) => {
             if (this.audioCount) {  // 录音大于1秒才上传
@@ -106,6 +143,18 @@ export class InputMessage extends Widget {
                 popNewMessage('录音太短');
             }
         });
+    }
+
+    // 取消语音录音
+    public audioStop(e:any) {
+        this.touchMoveY = e.changedTouches[0].screenY;
+        if (this.touchStartY - this.touchMoveY > 80) {  // 上滑
+            this.cancelRecord = true;
+            console.log('取消录音');
+        } else {
+            this.cancelRecord = false;
+            console.log('继续录音');
+        }
     }
 
     // 打开表情包图库
@@ -192,8 +241,10 @@ export const sendImage = (e:any) => {
                 };
 
                 imgResize(buffer,(res) => {  // 压缩图片
+                    value.compressImg = res.base64;
+                    // { compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }
                     // 预览图片
-                    notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG });
+                    notify(e.node,'ev-send-before',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) });
                     
                     uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
                         console.log('选择的照片压缩图',imgUrlSuf);
@@ -207,7 +258,7 @@ export const sendImage = (e:any) => {
                                 uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
                                     console.log('选择的照片原图',imgUrlSuf1);
                                     value.originalImg = imgUrlSuf1;
-                                    notify(e.node,'ev-send',{ value: JSON.stringify(value), msgType:MSG_TYPE.IMG });
+                                    notify(e.node,'ev-send',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) });
                                 });
                             }
                         });
@@ -236,8 +287,10 @@ export const sendPicture = (e:any) => {
                     originalImg:''
                 };
                 imgResize(buffer,(res) => {
+                    value.compressImg = res.base64;
+                    // { compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }
                     // 预览图片
-                    notify(e.node,'ev-send-before',{ value:{ compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }, msgType:MSG_TYPE.IMG }); 
+                    notify(e.node,'ev-send-before',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) }); 
 
                     uploadFile(arrayBuffer2File(res.ab),(imgUrlSuf:string) => {
                         console.log('拍摄的照片压缩图',imgUrlSuf);
@@ -250,7 +303,7 @@ export const sendPicture = (e:any) => {
                                 uploadFile(arrayBuffer2File(buffer1),(imgUrlSuf1:string) => {
                                     console.log('拍摄的照片原图',imgUrlSuf1);
                                     value.originalImg = imgUrlSuf1;
-                                    notify(e.node,'ev-send',{ value: JSON.stringify(value), msgType:MSG_TYPE.IMG });
+                                    notify(e.node,'ev-send',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) });
                                 });
                             }
                         });

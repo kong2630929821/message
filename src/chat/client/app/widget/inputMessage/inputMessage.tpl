@@ -28,7 +28,7 @@
 		<div w-class="audioWrite" style="animation: audio2 1s infinite;"></div>
 		<div w-class="audioWrite"></div> -->}}
 		<div w-class="audioText">{{it.audioText}}</div>
-		<div on-touchstart="audioStart" on-touchend="audioEnd" w-class="audioBox {{it.recordAudio?'audioActive':''}}">
+		<div on-touchstart="audioStart" on-touchend="audioEnd" on-touchmove="audioStop" w-class="audioBox {{it.recordAudio?'audioActive':''}}">
 			<img src="../../res/images/audioIcon.png" w-class="audioIcon"/>
 			<div w-class="circleRing" >
 				<div w-class="circle" style="clip: rect(0, {{it.istyle[0]}}px, 80px, 0);transform:rotate(90deg);"></div>

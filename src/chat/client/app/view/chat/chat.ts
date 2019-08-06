@@ -166,17 +166,15 @@ export class Chat extends Widget {
      * 发送图片消息之前,预览
      */
     public sendImgBefore(e:any) {
-        const message = {
-            msg:e.value,
-            mtype:e.mtype,
-            time:Date.now()
-        };
         this.props.newMsg = {
             hIncId:null,
             name:this.props.name,
             me:true,
-            message:message,
-            time:timestampFormat(message.time,1),
+            message:parseMessage(depCopy({
+                mtype: e.msgType,
+                msg: e.value
+            })),
+            time:timestampFormat(Date.now(),1),
             chatType:this.props.chatType
         };
         console.log('预览图片',this.props.newMsg);

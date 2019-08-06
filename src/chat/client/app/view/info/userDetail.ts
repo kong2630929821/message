@@ -146,9 +146,12 @@ export class UserDetail extends Widget {
         applyUserFriend(this.props.uid.toString()).then((r) => {
             if (r === 0) {
                 popNewMessage(`${this.props.uid}已经是你的好友`);
+            } else {
+                popNewMessage('发送申请成功');
             }
         });
     }
+    
     // 动画效果执行
     public onShow(e:any) {
         rippleShow(e);
