@@ -54,6 +54,8 @@ export class InputMessage extends Widget {
 
         // ===================测试代码============================//
         // this.audioCount = 0;   // 计数到30
+        // this.props.audioText = `上滑取消(0S)`;
+        // this.paint();
         // const list = getWidth(15,80);
         // this.interval = setInterval(() => {
         //     this.audioCount++;
@@ -82,8 +84,10 @@ export class InputMessage extends Widget {
             console.log('点击开始录音');
             startRadio(() => {
                 this.props.recordAudio = true;
-                this.paint();
                 this.audioCount = 0;   // 计数到30
+                this.props.audioText = `上滑取消(0S)`;
+                this.paint();
+
                 const list = getWidth(15,80);
                 this.interval = setInterval(() => {
                     this.audioCount++;
@@ -106,6 +110,7 @@ export class InputMessage extends Widget {
                         }
                     }
                 },1000);
+
             });
             
         });
