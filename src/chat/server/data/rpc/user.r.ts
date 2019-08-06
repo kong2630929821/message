@@ -149,7 +149,7 @@ export const sendFirstWelcomeMessage = (helloMsg:string,uid:number) => {
     userMsg.msg = helloMsg;
     userMsg.mtype = MSG_TYPE.TXT;
     userMsg.read = false;
-    userMsg.send = false;
+    userMsg.send = true;
     userMsg.sid = uid;
     userMsg.time = Date.now();
     userHistory.msg = userMsg;

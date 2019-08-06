@@ -7,7 +7,7 @@
 // ================================================ 导入
 import { getStoreData } from '../../../../app/middleLayer/wrap';
 import { getOfficial } from '../../../../app/publicLib/pull3';
-import { popNewMessage, changeWalletName } from '../../../../app/utils/tools';
+import { changeWalletName, popNewMessage } from '../../../../app/utils/tools';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';

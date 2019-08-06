@@ -2,11 +2,11 @@
     <div w-class="scroll-container" on-scroll="scrollPage" id="groupInfo">
         <div w-class="top-main-wrap" >
             {{if it.inFlag != 3}}
-            <widget w-tag="chat-client-app-widget-topBar-topBar2">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
+            <widget w-tag="chat-client-app-widget-topBar-topBar2" style="transform:translateZ(10px)">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
             {{else}}
             <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
             {{end}}
-            
+
             <div w-class="home-info-wrap">
                 {{if it.avatarHtml}}
                 <widget w-tag="pi-ui-html" style="width:190px">{{it.avatarHtml}}</widget>
@@ -31,6 +31,7 @@
                 </div>
                 <div>群号：{{it.groupInfo.gid || "------"}}</div>
             </div>
+
         </div>
    
         <div w-class="outter">

@@ -1,6 +1,7 @@
 .outter{
     position: fixed;
     width: 100%;
+    top:0;
 }
 .ga-top-banner{
     width: 100%;
