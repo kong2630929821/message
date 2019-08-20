@@ -132,7 +132,9 @@ export const initStore = () => {
         flags:{},
         postList:[],
         followNumList:new Map(),
-        laudPostList:new Map()
+        laudPostList:new Map(),
+        postDraft:null,
+        pubPostDraft:null
     };
 };
 
@@ -238,6 +240,8 @@ export interface Store {
     postList:PostItem[];   // 广场帖子
     followNumList:Map<number,AttentionIndex>; // 关注的社区账号
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
+    postDraft:any;   // 普通帖子草稿
+    pubPostDraft:any;  // 公众号文章草稿
 }
 
 /**

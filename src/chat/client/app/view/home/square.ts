@@ -2,8 +2,7 @@ import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { CommType, PostArr } from '../../../../server/data/rpc/community.s';
-import { register, setStore } from '../../data/store';
+import { register } from '../../data/store';
 import { postLaud, showPost } from '../../net/rpc';
 import { EMOJIS_MAP } from '../../widget/emoji/emoji';
 
@@ -33,25 +32,7 @@ export class Square extends Widget {
         };
         super.setProps(this.props);
         this.state = State;
-
-        showPost('').then((r:PostArr) => {
-            console.log('获取广场帖子',r);
-            if (r && r.list) {
-                const data:any = r.list;
-                data.forEach((res,i) => {
-                    data[i].offcial = res.comm_type === CommType.official;
-                    data[i].isPublic = res.comm_type === CommType.publicAcc;
-                    const body = JSON.parse(res.body);
-                    data[i].content = parseEmoji(body.msg);
-                    data[i].imgs = body.imgs;
-                    data[i].followed = State.followList.indexOf(res.key.num) > -1;
-                    data[i].likeActive = State.likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
-                });
-                this.state.postList = data;
-                setStore('postList',data,false);
-                this.paint();
-            }
-        });
+        showPost();
     }
 
     // 切换tag

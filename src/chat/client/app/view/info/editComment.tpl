@@ -18,7 +18,7 @@
                 {{if it.offical}}
                 <div>官方</div>
                 {{else}}
-                <img src="../../res/images/{{it.sex?'girl.png':'boy.png'}}"/>
+                <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
                 {{end}}
             </div>
             <div w-class="comment">

@@ -2,12 +2,14 @@ import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { CommType } from '../../../../server/data/rpc/community.s';
 import { follow } from '../../net/rpc';
 
 interface Props {
     key:any;   // 帖子ID及社区编号
     username:string;
     avatar:string;
+    owner:number;  // 用户UID
     commentCount:number;  // 评论数量
     likeCount:number;   // 点赞数量
     createtime:string;      // 创建时间
@@ -32,6 +34,7 @@ export class SquareItem extends Widget {
         },
         username:'用户名',
         avatar:'',
+        owner:0,
         commentCount:0,
         likeCount:15,
         createtime:'',
@@ -108,7 +111,11 @@ export class SquareItem extends Widget {
      * 查看用户详情
      */
     public goUserDetail() {
-        popNew3('chat-client-app-view-info-userDetail');
+        if (this.props.comm_type === CommType.publicAcc) {
+            popNew3('chat-client-app-view-person-publicHome', { num:this.props.key.num });
+        } else {
+            popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num });
+        }
     }
 
     /**
@@ -116,7 +123,7 @@ export class SquareItem extends Widget {
      */
     public followUser() {
         follow(this.props.key.num).then(r => {
-            this.props.followed = true;
+            this.props.followed = !this.props.followed;
             this.paint();
         });
     }

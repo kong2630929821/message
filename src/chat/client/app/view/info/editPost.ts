@@ -1,6 +1,7 @@
 import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { getStore, setStore } from '../../data/store';
 import { selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
 import { base64ToFile, imgResize, uploadFile } from '../../net/upload';
@@ -35,9 +36,15 @@ export class EditPost extends Widget {
             ...props
         };
         super.setProps(this.props);
+        let data = null;
         if (props.isPublic) {
+            data = getStore('postDraft', null);
             this.props.title = '发布公众号消息';
+        } else {
+            data = getStore('pubPostDraft', null);
         }
+        if (data) this.props = data;
+        this.props.isOnEmoji = false;
     }
 
     public titleChange(e:any) {
@@ -70,11 +77,34 @@ export class EditPost extends Widget {
 
     // 关闭
     public close() {
-        popNew('chat-client-app-widget-modalBox-modalBox',{ content:'保留此次编辑' },() => {
+        // 有内容时提醒保存草稿
+        if (this.props.titleInput || this.props.contentInput || this.props.imgs.length > 0) {
+            popNew('chat-client-app-widget-modalBox-modalBox',{ content:'保留此次编辑' },() => {
+                if (this.props.isPublic) {
+                    setStore('postDraft',this.props);
+                } else {
+                    setStore('pubPostDraft',this.props);
+                }
+                this.cancel && this.cancel();
+
+            },() => {
+                if (this.props.isPublic) {
+                    setStore('postDraft',null);
+                } else {
+                    setStore('pubPostDraft',null);
+                }
+                this.cancel && this.cancel();
+            });
+
+        } else {
+            if (this.props.isPublic) {
+                setStore('postDraft',null);
+            } else {
+                setStore('pubPostDraft',null);
+            }
             this.cancel && this.cancel();
-        },() => {
-            this.cancel && this.cancel();
-        });
+        }
+
     }
     
     // 上传图片
@@ -85,7 +115,6 @@ export class EditPost extends Widget {
                 this.sendImage(i++);
                 console.log('上传图片',i,imgUrlSuf);
             });
-
         } 
     }
 

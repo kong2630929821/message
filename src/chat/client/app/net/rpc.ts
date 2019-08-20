@@ -12,7 +12,7 @@ import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getLaudPostList, postLaudPost, showCommentPort, showLaudLog, showPostPort, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
+import { AddCommentArg, AddPostArg, CommType, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -25,6 +25,7 @@ import { SetOfficial, UserAgree } from '../../../server/data/rpc/user.s';
 import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
+import { parseEmoji } from '../view/home/square';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
 
@@ -579,7 +580,7 @@ export const showUserFollow = (num_type:number = 1) => {
 /**
  * 获取最新的帖子
  */
-export const showPost = (num:string, id:number = 0, count:number = 20) => {
+export const showPost = (num:string = '', id:number = 0, count:number = 20) => {
     const arg = new IterPostArg();
     arg.count = count;
     arg.id = id;
@@ -588,8 +589,23 @@ export const showPost = (num:string, id:number = 0, count:number = 20) => {
     return new Promise((res,rej) => {
         clientRpcFunc(showPostPort,arg,(r:PostArr) => {
             console.log('showPost=============',r);
-            if (r) {
-                res(r);
+            if (r && r.list) {
+                const data:any = r.list;
+                const uid = store.getStore('uid');
+                const followList = store.getStore(`followNumList/${uid}`,{ list:[] }).list;
+                const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
+
+                data.forEach((res,i) => {
+                    data[i].offcial = res.comm_type === CommType.official;
+                    data[i].isPublic = res.comm_type === CommType.publicAcc;
+                    const body = JSON.parse(res.body);
+                    data[i].content = parseEmoji(body.msg);
+                    data[i].imgs = body.imgs;
+                    data[i].followed = followList.indexOf(res.key.num) > -1;
+                    data[i].likeActive = likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
+                });
+                store.setStore('postList',data);
+                res(data);
             } else {
                 rej();
             }
