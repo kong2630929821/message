@@ -84,6 +84,14 @@ struct IterPostArg {
     num: String,    // 社区编号
 }
 
+//迭代广场帖子参数
+struct IterSquarePostArg {
+    count: u32,     //获取数量
+    id: u32,       //指定key进行遍历
+    num: String,    // 社区编号
+    square_type: u32      //广场分类
+}
+
 //迭代评论参数
 struct IterCommentArg {
     count: u32,     //获取数量
@@ -112,4 +120,9 @@ struct LaudLogData {
 // 点赞记录
 struct LaudLogArr{
     list: &[LaudLogData]
+}
+
+// 评论id列表
+struct CommentIDList{
+    list: &[u32]
 }

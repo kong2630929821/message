@@ -6,8 +6,9 @@ import { UserInfo } from '../db/user.s';
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg, CommentArr, CommentData, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostData } from './community.s';
+import { AddCommentArg, AddPostArg, CommentArr, CommentData, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostData, CommentIDList, IterSquarePostArg } from './community.s';
 import { getUid } from './group.r';
+import { SQUARE_ALL, SQUARE_FOLLOW } from '../constant';
 
 declare var env: Env;
 /**
@@ -30,7 +31,7 @@ export const createCommNum = (uid:number,name:string,comm_type:number):string =>
         console.log('!!!!!!!!!!!!!!!!createCommNum CommunityBase',communityBase);
 
         communityBaseBucket.put(num, communityBase);
-        // userFollow(num);
+        userfollow(uid, num);
 
         return num;
     } 
@@ -160,10 +161,10 @@ export const addPostPort = (arg: AddPostArg): PostKey => {
             const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
             const postCount = new PostCount();
             postCount.key = key;
-            postCount.likeCount = 0;
-            postCount.collectCount = 0;
-            postCount.commentCount = 0;
-            postCount.forwardCount = 0;
+            postCount.likeList = [];
+            postCount.collectList = [];
+            postCount.commentList = [];
+            postCount.forwardList = [];
             if (postCountBucket.put(key, postCount)) {
 
                 return key;
@@ -194,8 +195,8 @@ export const postLaudPost = (postKey: PostKey): boolean => {
     console.log('!!!!!!!!!!!!!!!!postLaudPost logR',logR);
     if (!logR) {
         // 不存在则添加点赞记录
-        const postCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
-        postCount.likeCount += 1;
+        const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
+        postCount.likeList.push(uid);
         // 添加计数
         if (!postCountBucket.put(postKey, postCount)) {
             
@@ -210,10 +211,10 @@ export const postLaudPost = (postKey: PostKey): boolean => {
         return postLaudLogBucket.put(logKey, postLaudLog);
     } else {
         // 已经点赞则取消
-        const postCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
-        postCount.likeCount -= 1;
-        // 不能减到负数
-        postCount.likeCount = postCount.likeCount < 0 ? 0 :postCount.likeCount;
+        const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
+        // 从用户点赞列表中删除uid
+        const index = postCount.likeList.indexOf(uid);
+        if (index >= 0) postCount.likeList.splice(index, 1);
         // 添加计数
         if (!postCountBucket.put(postKey, postCount)) {
             
@@ -293,10 +294,7 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
-    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
-
-    const iter = postBucket.iter(key, true);
+    const iter = postBucket.iter(key, false);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     for (let i = 0; i < count; i++) {
@@ -306,29 +304,8 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
             break;
         }
         const post:Post = v[1];
-        const user = new GetUserInfoReq();
-        user.uids = [post.owner];
-        const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
-        const commBase:CommunityBase = communityBaseBucket.get(v[0].num)[0]; // 社区基础信息
-        console.log('!!!!!!!!!!!!!!!!!!!!!!showPostPort CommunityBase', commBase);
-
-        // 读取点赞等数据
-        const valueCount = postCountBucket.get<PostKey, PostCount[]>(v[0])[0];
-        const postData = new PostData();
-        postData.key = v[0];
-        postData.body = post.body;
-        postData.collectCount = valueCount.collectCount;
-        postData.createtime = post.createtime;
-        postData.forwardCount = valueCount.forwardCount;
-        postData.likeCount = valueCount.likeCount;
-        postData.commentCount = valueCount.commentCount;
-        postData.owner = post.owner;
-        postData.post_type = post.post_type;
-        postData.title = post.title;
-        postData.username = userinfo.name;
-        postData.avatar = userinfo.avatar;
-        postData.gender = userinfo.sex;
-        postData.comm_type = commBase.comm_type;
+        const postKey = v[0];
+        const postData = getPostInfo(postKey, post);
         arr.push(postData);
         console.log('!!!!!!!!!!!!!!!!!!!!!!showPostPort PostData', postData);
     }
@@ -341,10 +318,39 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
 };
 
 /**
+ * 获取广场指定类型的帖子
+ * @param arg 
+ */
+// export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
+//     const uid = getUid();
+//     let postArr: PostArr;
+//     switch(arg.square_type) {
+//         case SQUARE_ALL:
+//             const iterArg = new IterPostArg();
+//             iterArg.count = arg.count;
+//             iterArg.id = arg.id;
+//             iterArg.num = arg.num;
+//             postArr = showPostPort(iterArg);
+//             break;
+//         case SQUARE_FOLLOW:
+//             const indexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
+//             const attentionIndex = indexBucket.get<number, AttentionIndex[]>(uid)[0];
+//             for (let i = 0; i < attentionIndex.list.length; i++) {
+//                 const iterArg = new IterPostArg();
+//                 iterArg.count = arg.count;
+//                 iterArg.id = arg.id;
+//                 iterArg.num = arg.num;
+                
+//             }
+//     }
+// }
+
+/**
  * 评论
  */
 // #[rpc=rpcServer]
 export const addCommentPost = (arg: AddCommentArg): CommentKey => {
+    console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost', arg);
     const uid = getUid();
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
@@ -365,8 +371,9 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
         const postkey = new PostKey();
         postkey.id = arg.post_id;
         postkey.num = arg.num;
-        const postCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
-        postCount.commentCount += 1;
+        const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
+        postCount.commentList.push(key.id),
+        console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost', postCount);
         // 添加评论计数
         if (!postCountBucket.put(postkey, postCount)) {
             key.num = '';
@@ -404,10 +411,10 @@ export const delCommentPost = (arg: CommentKey): number => {
     const postkey = new PostKey();
     postkey.id = arg.post_id;
     postkey.num = arg.num;
-    const postCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
-    postCount.commentCount--;
-    // 不能减到负数
-    postCount.commentCount = postCount.commentCount < 0 ? 0 :postCount.commentCount;
+    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
+    // 从用户评论列表中删除uid
+    const index = postCount.commentList.indexOf(arg.id);
+    if (index >= 0) postCount.commentList.splice(index, 1);
     // 添加评论计数
     if (!postCountBucket.put(postkey, postCount)) {
         
@@ -428,47 +435,46 @@ export const delCommentPost = (arg: CommentKey): number => {
  */
 // #[rpc=rpcServer]
 export const showCommentPort = (arg: IterCommentArg) :CommentArr => {
-    const count = arg.count;
-    const id = arg.id;
-    let key:CommentKey;
-    if (id <= 0) {
-        key = undefined;
-    } else {
-        key = new CommentKey();
-        key.id = arg.id;
-        key.num = arg.num;
-        key.post_id = arg.post_id;
-    }
+    const postKey = new PostKey();
+    postKey.id = arg.post_id;
+    postKey.num = arg.num;
     console.log('!!!!!!!!!!!!!showCommentPort arg',arg);
     const list = new CommentArr();
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
-    const iter = commentBucket.iter(key, true);
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
     const arr:CommentData[] = [];
-    for (let i = 0; i < count; i++) {
-        const v = iter.next();
-        console.log('!!!!!!!!!!!!comment:', v);
-
-        if (!v) {
-            break;
+    let count = 0;
+    if (postCount) {
+        const commentList = postCount.commentList.reverse();
+        // 获取初始位置
+        let index = commentList.indexOf(arg.id) + 1;
+        if (index < 0) index = 0;
+        for (let i = index; i < commentList.length; i++) {
+            if (count >= arg.count) break;
+            const commentKey = new CommentKey();
+            commentKey.id = postCount.commentList[i];
+            commentKey.num = arg.num;
+            commentKey.post_id = arg.post_id;
+            const com = commentBucket.get<CommentKey, Comment>(commentKey)[0];
+            const user = new GetUserInfoReq();
+            user.uids = [com.owner];
+            const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
+            // 评论数据
+            const commentData = new CommentData();
+            commentData.key = commentKey;
+            commentData.msg = com.msg;
+            commentData.createtime = com.createtime;
+            commentData.likeCount = com.likeCount;
+            commentData.owner = com.owner;
+            commentData.reply = com.reply;
+            commentData.comment_type = com.comment_type;
+            commentData.username = userinfo.name;
+            commentData.avatar = userinfo.avatar;
+            commentData.gender = userinfo.sex;
+            arr.push(commentData);
+            count ++;
         }
-        const com:Comment = v[1];
-        const user = new GetUserInfoReq();
-        user.uids = [com.owner];
-        const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
-
-        // 评论数据
-        const commentData = new CommentData();
-        commentData.key = v[0];
-        commentData.msg = com.msg;
-        commentData.createtime = com.createtime;
-        commentData.likeCount = com.likeCount;
-        commentData.owner = com.owner;
-        commentData.reply = com.reply;
-        commentData.comment_type = com.comment_type;
-        commentData.username = userinfo.name;
-        commentData.avatar = userinfo.avatar;
-        commentData.gender = userinfo.sex;
-        arr.push(commentData);
     }
 
     list.list = arr;
@@ -524,6 +530,39 @@ export const commentLaudPost = (commentKey: CommentKey): boolean => {
     }
 
 };
+
+/**
+ * 获取指定帖子下已点赞的评论
+ * @param commentKey 评论的key
+ */
+// #[rpc=rpcServer]
+export const getCommentLaud = (postKey: PostKey): CommentIDList => {
+    console.log('!!!!!!!!!!!!getCommentLaud:', postKey);
+    const uid = getUid();
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
+    const commentIdList = new CommentIDList();
+    commentIdList.list = [];
+    // 点赞记录
+    const CommentLaudLogBucket = new Bucket(CONSTANT.WARE_NAME, CommentLaudLog._$info.name);
+    // 获取用户是否已经点赞
+    const logKey = new CommentLaudLogKey();
+    logKey.uid = uid;
+    logKey.num = postKey.num;
+    logKey.post_id = postKey.id;
+    if (postCount) {
+        console.log('!!!!!!!!!!!!postCount:', postCount);
+        for (let i = 0; i < postCount.commentList.length; i++) {
+            logKey.id = postCount.commentList[i];
+            const logR = CommentLaudLogBucket.get(logKey)[0];
+            if (logR) {
+                commentIdList.list.push(postCount.commentList[i])
+            }
+        }
+    }
+
+    return commentIdList;
+}
 
 // 添加公众号索引
 const addNumIndex = (uid: number, num: string, addFg:boolean):boolean => {
@@ -616,3 +655,65 @@ export const getLaudPostList = ():LaudPostIndex => {
 
     return list;
 };
+
+// ==============================Internal functions ==============================
+/**
+ * 关注 公众号
+ */
+export const userfollow = (uid: number, communityNum:string):boolean => {
+    console.log('!!!!!!!!!!!userFollow num',communityNum);
+    // 公众号用户表
+    const communityUserBucket = new Bucket(CONSTANT.WARE_NAME, CommunityUser._$info.name);
+    const key = new CommunityUserKey();
+    key.num = communityNum;
+    key.uid = uid;
+    const follow = communityUserBucket.get(key)[0];
+    console.log('!!!!!!!!!!!userFollow CommunityUser',follow);
+    if (follow) {
+        communityUserBucket.delete(key);
+
+        return addNumIndex(uid, communityNum, false);
+    }
+    const value = new CommunityUser();
+    value.key = key;
+    value.auth = CONSTANT.COMMUNITY_AUTH_DEF;
+    value.createtime = Date.now();
+    console.log('!!!!!!!!!!!userFollow CommunityUser',value);
+    if (communityUserBucket.put(key, value)) {
+        return addNumIndex(uid, communityNum, true);
+    }
+   
+    return false;   
+};
+
+/**
+ * 获取帖子信息
+ */
+export const getPostInfo = (postKey: PostKey, post: Post): PostData => {
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
+    const user = new GetUserInfoReq();
+    user.uids = [post.owner];
+    const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
+    const commBase:CommunityBase = communityBaseBucket.get(postKey.num)[0]; // 社区基础信息
+
+    // 读取点赞等数据
+    const valueCount = postCountBucket.get<PostKey, PostCount[]>(postKey)[0];
+    const postData = new PostData();
+    postData.key = postKey;
+    postData.body = post.body;
+    postData.collectCount = valueCount.collectList.length;
+    postData.createtime = post.createtime;
+    postData.forwardCount = valueCount.forwardList.length;
+    postData.likeCount = valueCount.likeList.length;
+    postData.commentCount = valueCount.commentList.length;
+    postData.owner = post.owner;
+    postData.post_type = post.post_type;
+    postData.title = post.title;
+    postData.username = userinfo.name;
+    postData.avatar = userinfo.avatar;
+    postData.gender = userinfo.sex;
+    postData.comm_type = commBase.comm_type;
+
+    return postData;
+}
