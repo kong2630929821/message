@@ -1,16 +1,18 @@
 import { popNew } from '../../../../../pi/ui/root';
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 
 interface Props {
     username:string;   // 评论用户
     avatar:string;
-    likeNum:number;
-    time:string;
-    mess:string;   // 评论内容
+    likeCount:number;
+    createtime:string;
+    msg:string;   // 评论内容
     orgName:string;  // 原评论用户
     orgMess:string;  // 原评论
     showUtils:boolean;  // 显示操作
     likeActive:boolean;  // 点赞
+    gender: number;  // 性别 0 男 1 女
 }
 
 /**
@@ -20,13 +22,14 @@ export class CommentItem extends Widget {
     public props:Props = {
         username:'用户名',
         avatar:'../../res/images/user_avatar.png',
-        likeNum:15,
-        time:'3-12 10:24',
-        mess:'Cras quis nulla commodo, aliquam lectus sed, blandit augue. Cras ullamcorper bibendum. Duis ncidunt urna non pretium porta. Nam vitae ligula vel on pr Nam vitae ligula vel on pr',
+        likeCount:15,
+        createtime:'3-12 10:24',
+        msg:'',
         orgName:'用户1',
-        orgMess:'Cras quis nulla commodo, aliquam lectus sed, blandit augue. Cras ullamcorper bibendum. Duis ncidunt urna non pretium porta. Nam vitae ligula vel on pr Nam vitae ligula vel on pr',
+        orgMess:'',
         showUtils:false,
-        likeActive:false
+        likeActive:false,
+        gender:0
     };
 
     /**
@@ -40,10 +43,9 @@ export class CommentItem extends Widget {
     /**
      * 点赞
      */
-    public likeBtn() {
-        this.props.likeActive = !this.props.likeActive;
-        this.props.likeNum += this.props.likeActive ? 1 :-1;
-        this.paint();
+    public likeBtn(e:any) {
+        notify(e.node,'ev-comment-likeBtn',null);
+       
     }
 
     /**

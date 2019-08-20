@@ -31,8 +31,9 @@
     color: #888888;
 }
 .content{
-    margin: 20px;
+    margin:40px 20px 20px;
     line-height: 37px;
+    min-height: 80px;
     position: relative;
     display: block;
     -webkit-box-orient: vertical;
@@ -113,4 +114,10 @@
     background: #fff;
     padding: 30px;
     padding-bottom: 20px;
+}
+.btnBox{
+    display:flex;
+    align-items: center;
+    flex:1 0 0;
+    justify-content: center;
 }

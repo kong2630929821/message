@@ -160,8 +160,7 @@ export const init = (uid: number) => {
             updateGroup(r, uid);
         }
     });
-
-    // TODO:
+    subscribedb.subscribeCommNum(uid,null);
 };
 
 /**

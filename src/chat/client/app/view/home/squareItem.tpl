@@ -10,10 +10,10 @@
                 <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
                 {{end}}
             </div>
-            <div w-class="time">{{it.time}}</div>
+            <div w-class="time">{{it.createtime}}</div>
         </div>
         {{if !it.followed}}
-        <div w-class="follow">+关注</div>
+        <div w-class="follow" on-tap="followUser">+关注</div>
         {{end}}
         <img src="../../res/images/squareArrow.png" w-class="btn" on-tap="showTools"/>
     </div>
@@ -21,24 +21,24 @@
     {{if it.showAll}}
     {{% =================帖子详情展示全部内容=======================}}
     <div w-class="content1">
-        {{it.mess}}
+        {{it.content}}
     </div>
 
     {{else}}
     {{% ======================广场展示部分内容===========================}}
     <div w-class="content" on-tap="goDetail" class="content">
-        {{it.mess}}
+        {{it.content}}
         <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
     </div>
     {{end}}
 
     {{% =====================图片区域========================}}
     <div style="margin:20px 15px;">
-        {{for i,v of it.imgList}}
-            {{if i==2 && it.imgList.length==4}}
+        {{for i,v of it.imgs}}
+            {{if i==2 && it.imgs.length==4}}
             <div></div>
             {{end}}
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:"", width:"{{it.imgList.length==1?'320px':'230px'}}",notRound:true}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:"", width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
         {{end}}
     </div>
 
@@ -53,13 +53,13 @@
     {{if !it.showAll}}
     {{% =====================广场展示评论点赞按钮======================}}
     <div w-class="btns">
-        <div style="display:flex;align-items: center" on-tap="doComment">
+        <div w-class="btnBox" on-tap="doComment">
             <img src="../../res/images/comment.png" w-class="btn"/>
-            <span w-class="time">{{it.commentNum>0?it.commentNum:"评论"}}</span>
+            <span w-class="time">{{it.commentCount>0?it.commentCount:"评论"}}</span>
         </div>
-        <div style="display:flex;align-items: center" on-tap="likeBtn">
+        <div w-class="btnBox" on-tap="likeBtn">
             <img src="../../res/images/{{it.likeActive?'like_active.png':'like.png'}}" w-class="btn" />
-            <span w-class="time">{{it.likeNum>0?it.likeNum:"点赞"}}</span>
+            <span w-class="time">{{it.likeCount>0?it.likeCount:"点赞"}}</span>
         </div>
     </div>
     {{end}}

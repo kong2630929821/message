@@ -8,7 +8,8 @@ import { resize } from '../../../../pi/widget/resize/resize';
 export const uploadFile = async (file, successCb?:(imgUrlSuf:string) => void,faileCb?:(err:any) => void) => {
     const formData = new FormData();
     formData.append('upload',file);
-    fetch(`${uploadFileUrl}?$forceServer=1`, {
+    
+    return fetch(`${uploadFileUrl}?$forceServer=1`, {
         body: formData, // must match 'Content-Type' header
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         mode: 'cors' // no-cors, cors, *same-origin
@@ -52,4 +53,31 @@ export const imgResize = (buffer:ArrayBuffer,callback:Function,wid:number= 200) 
         });
     };
     
+};
+
+/**
+ * 图片base64转file格式
+ */
+export const base64ToFile = (base64: string) => {
+    const blob = base64ToBlob(base64);
+    const newFile = new File([blob], 'avatar.jpeg', { type: blob.type });
+    console.log(newFile);
+
+    return newFile;
+};
+
+/**
+ * base64 to blob
+ */
+export const base64ToBlob = (base64: string) => {
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new Blob([u8arr], { type: mime });
 };

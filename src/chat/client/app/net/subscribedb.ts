@@ -6,11 +6,11 @@
 import { BonBuffer } from '../../../../pi/util/bon';
 import { ab2hex } from '../../../../pi/util/util';
 import { DEFAULT_ERROR_NUMBER, DEFAULT_ERROR_STR, WARE_NAME } from '../../../server/data/constant';
-import { AddressInfo } from '../../../server/data/db/extra.s';
+import { AttentionIndex, LaudPostIndex } from '../../../server/data/db/community.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { watchAccountGenerator, watchAddressInfo, watchAnnounceHistory, watchContact,watchFriendLink, watchGroupHistory, watchGroupInfo, watchGroupUserLink,watchMsgLock, watchUserCredential, watchUserHistory, watchUserInfo } from '../../../server/data/rpc/dbWatcher.p';
+import { watchAccountGenerator, watchAnnounceHistory, watchCommNum,watchContact, watchFriendLink, watchGroupHistory, watchGroupInfo,watchGroupUserLink, watchLaudPost, watchMsgLock, watchUserCredential, watchUserHistory, watchUserInfo } from '../../../server/data/rpc/dbWatcher.p';
 import * as store from '../data/store';
 import { clientRpcFunc, subscribe, unSubscribe } from './init';
 
@@ -120,11 +120,19 @@ export const subscribeContact = (uid: number, cb, diffcb) => {
 };
 
 /**
- * 地址信息
+ * 点赞帖子索引
  * @param uid uid
  */
-export const subscribeAddressInfo = (uid: number, cb) => {
-    subscribeTable(watchAddressInfo,'uid',uid,DEFAULT_ERROR_NUMBER,AddressInfo,'addressInfoMap',cb);    
+export const subscribeLaudPost = (uid: number, cb) => {
+    subscribeTable(watchLaudPost,'laudPost',uid,DEFAULT_ERROR_NUMBER,LaudPostIndex,'laudPostList',cb);    
+};
+
+/**
+ * 关注公众号索引
+ * @param uid uid
+ */
+export const subscribeCommNum = (uid: number,cb) => {
+    subscribeTable(watchCommNum,'commNum',uid,DEFAULT_ERROR_NUMBER,AttentionIndex,'followNumList',cb);    
 };
 
 // ================================================================= 本地

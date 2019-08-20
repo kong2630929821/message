@@ -17,7 +17,7 @@ interface Props {
  * 评论或回复
  */
 export class EditComment extends Widget {
-    public ok:() => void;
+    public ok:(msg:string) => void;
     public cancel:() => void;
     public props:Props = {
         title:'评论',
@@ -41,8 +41,16 @@ export class EditComment extends Widget {
         this.cancel && this.cancel();
     }
 
+    /**
+     * 输入评论
+     */
+    public contentChange(e:any) {
+        this.props.contentInput = e.value;
+        this.paint();
+    }
+
     public send() {
-        this.ok && this.ok();
+        this.ok && this.ok(this.props.contentInput);
     }
 
     // 打开表情包图库

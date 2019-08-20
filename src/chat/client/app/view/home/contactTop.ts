@@ -57,7 +57,7 @@ export class ContactTop extends Widget {
     // 切换标签
     public changeTab(e:any,tab:string) {
         // 已经在广场
-        if (this.props.activeTab === TAB.square) {
+        if (this.props.activeTab === TAB.square && tab === TAB.square) {
             this.props.showTag = !this.props.showTag;
         }
         this.props.activeTab = tab;

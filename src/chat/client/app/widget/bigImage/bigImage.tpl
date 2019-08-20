@@ -4,9 +4,9 @@
         {{if it.originalImg && !it.showOrg}}
         <div w-class="btn" on-tap="showOriginal">查看原图</div>
         {{end}}
-        {{:fg = false}}
+        {{:fg = true}}
         {{if it.originalImg && fg}}
-        <a w-class="btn" href="{{it.originalImg}}" download="download" style="right:50px;" on-tap="download">下载</a>
+        <div w-class="btn" style="right:50px;" on-tap="download">下载</div>
         {{end}}
     </div>
     

@@ -3,7 +3,9 @@
  */
 
 // ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
+import { saveImage } from '../../logic/native';
 
 // ================================================ 导出
 export class BigImage extends Widget {
@@ -22,7 +24,9 @@ export class BigImage extends Widget {
 
     // 下载图片
     public download() {
-        (<any>window.frames).IframeReportImg.document.execCommand('SaveAs');
+        saveImage(this.props.originalImg,() => {
+            popNewMessage('保存成功');
+        });
     }
 
 }

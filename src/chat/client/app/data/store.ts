@@ -4,6 +4,7 @@
 
 // ============================================ 导入
 import { HandlerMap } from '../../../../pi/util/event';
+import { AttentionIndex, LaudPostIndex } from '../../../server/data/db/community.s';
 import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
@@ -128,7 +129,9 @@ export const initStore = () => {
         },
         isLogin:true,
         offLine:false,
-        flags:{}
+        flags:{},
+        followNumList:new Map(),
+        laudPostList:new Map()
     };
 };
 
@@ -213,7 +216,8 @@ export interface Store {
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
     flags:any; // 标记信息
-
+    followNumList:Map<number,AttentionIndex>; // 关注的社区账号
+    laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
 }
 
 /**

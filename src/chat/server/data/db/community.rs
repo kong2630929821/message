@@ -39,8 +39,8 @@ struct CommunityUser {
 
 //帖子key
 struct PostKey {
-    num: String,
-    id: u32
+    id: u32,        //帖子ID
+    num: String,   //社区编号
 }
 
 /**
@@ -63,15 +63,16 @@ struct Post {
 struct PostCount {
     key: PostKey,       //key
     likeCount: u32,     //点赞数
+    commentCount: u32,  //评论数
     forwardCount: u32,  //转发数
     collectCount: u32,  //收藏数
 }
 
 //帖子点赞记录key
 struct PostLaudLogKey {
-    uid: u32,
     num: String,
-    id: u32
+    post_id: u32,
+    uid: u32,
 }
 
 /**
@@ -96,7 +97,7 @@ struct CommentKey {
 #[primary=key,db=file,dbMonitor=true]
 struct Comment {
     key: CommentKey,       //key
-    comment_type: u8,       //帖子类型图文、语言、视频
+    comment_type: u8,      //帖子类型图文、语言、视频
     msg: String,        //消息
     reply: u32,         //评论表中的ID，表示回复那一条评论，可以为空
     owner: u32,         //发送者
@@ -146,4 +147,11 @@ struct Collection {
 struct AttentionIndex {
     uid: u32,               //用户ID
     list: &[String]         //社区编号
+}
+
+// 点赞索引表
+#[primary=uid,db=file,dbMonitor=true]
+struct LaudPostIndex{
+    uid: u32,                 // 用户ID
+    list: &[PostKey]   // 点赞过的帖子key
 }

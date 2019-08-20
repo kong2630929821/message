@@ -1,40 +1,49 @@
 import { popNew3 } from '../../../../../app/utils/tools';
+import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { follow } from '../../net/rpc';
 
 interface Props {
+    key:any;   // 帖子ID及社区编号
     username:string;
     avatar:string;
-    commentNum:number;
-    likeNum:number;
-    time:string;
-    mess:string;
+    commentCount:number;  // 评论数量
+    likeCount:number;   // 点赞数量
+    createtime:string;      // 创建时间
+    content:string;     // 内容
     showAll:boolean;  // 详情页面
     showUtils:boolean;  // 显示操作
     likeActive:boolean;  // 点赞
     followed:boolean;  // 已关注
-    imgList:string[];  // 图片列表
+    imgs:string[];  // 图片列表
     offical:boolean;  // 官方
     gender:number;  // 性别 0 男 1 女
+    comm_type:number; // 社区类型
 }
 /**
  * 广场帖子
  */
 export class SquareItem extends Widget {
     public props:Props = {
+        key:{
+            id:0,
+            num:''
+        },
         username:'用户名',
-        avatar:'../../res/images/user_avatar.png',
-        commentNum:0,
-        likeNum:15,
-        time:'3-12 10:24',
-        mess:'哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈',
+        avatar:'',
+        commentCount:0,
+        likeCount:15,
+        createtime:'',
+        content:'',
         showAll:false,
         showUtils:false,
         likeActive:false,
         followed:false,
-        imgList:['','','',''],
+        imgs:[],
         offical:false,
-        gender:1   // 性别 0男 1女
+        gender:1,   // 性别 0男 1女
+        comm_type:0
     };
 
     public setProps(props:any) {
@@ -43,6 +52,7 @@ export class SquareItem extends Widget {
             ...props
         };
         super.setProps(this.props);
+        this.props.avatar = props.avatar || '../../res/images/user_avatar.png';
     }
 
     public attach() {
@@ -60,7 +70,7 @@ export class SquareItem extends Widget {
     public goDetail() {
         this.props.showUtils = false;
         this.paint();
-        popNew3('chat-client-app-view-info-postDetail');
+        popNew3('chat-client-app-view-info-postDetail',{ ...this.props,showAll:true });
     }
 
     /**
@@ -74,10 +84,8 @@ export class SquareItem extends Widget {
     /**
      * 点赞
      */
-    public likeBtn() {
-        this.props.likeActive = !this.props.likeActive;
-        this.props.likeNum += this.props.likeActive ? 1 :-1;
-        this.paint();
+    public likeBtn(e:any) {
+        notify(e.node,'ev-likeBtn',{ value:this.props.key });
     }
 
     /**
@@ -99,5 +107,15 @@ export class SquareItem extends Widget {
      */
     public goUserDetail() {
         popNew3('chat-client-app-view-info-userDetail');
+    }
+
+    /**
+     * 关注用户
+     */
+    public followUser() {
+        follow(this.props.key.num).then(r => {
+            this.props.followed = true;
+            this.paint();
+        });
     }
 }

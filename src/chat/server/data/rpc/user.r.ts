@@ -16,7 +16,7 @@ import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { getUserHistoryCursor, sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
-import { FriendAlias, SetOfficial, UserAgree } from './user.s';
+import { FriendAlias, SetOfficial, UserAgree, UserChangeInfo } from './user.s';
 
 declare var env: Env;
 
@@ -372,63 +372,67 @@ export const changeFriendAlias = (friendAlias: FriendAlias): Result => {
  * @param userinfo user info
  */
 // #[rpc=rpcServer]
-export const changeUserInfo = (userinfo: UserInfo): UserInfo => {
+export const changeUserInfo = (userChange: UserChangeInfo): UserInfo => {
     const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.USER_INFO_TABLE);
     const userFindBucket = new Bucket(CONSTANT.WARE_NAME, UserFind._$info.name);
     const sid = getUid();
     const oldUserinfo = userInfoBucket.get<number, UserInfo[]>(sid)[0];
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!oldUserinfo:', oldUserinfo);
     const SUID = getSUID(); // 好嗨客服账号
-    if (userinfo.uid !== SUID && userinfo.name.indexOf('好嗨客服') > -1) {
-        let res = new UserInfo();
-        res = userinfo;
+    if (sid !== SUID && userChange.name.indexOf('好嗨客服') > -1) {
+        const res = new UserInfo();
         res.uid = 0;  // 名字中不能含有 '好嗨客服'
 
         return res;
     }
     // 添加手机查找用户
-    if (!(oldUserinfo.tel === userinfo.tel) && !(userinfo.tel === '')) {
+    if (!(oldUserinfo.tel === userChange.tel) && !(userChange.tel === '')) {
         const phoneFind = new UserFind();
-        phoneFind.user = `p:${userinfo.tel}`;
+        phoneFind.user = `p:${userChange.tel}`;
         phoneFind.uid = sid;
-        console.log('!!!!!!!!!!!!!!!!!add phone!1212121', phoneFind);
         userFindBucket.put(phoneFind.user, phoneFind);
     }
-    console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!1111111111111');
     // 添加钱包地址查询用户
-    if (!(oldUserinfo.wallet_addr === userinfo.wallet_addr) && !(userinfo.wallet_addr === '')) {
+    if (!(oldUserinfo.wallet_addr === userChange.wallet_addr) && !(userChange.wallet_addr === '')) {
         const walletFind = new UserFind();
-        walletFind.user = `w:${userinfo.wallet_addr}`;
+        walletFind.user = `w:${userChange.wallet_addr}`;
         walletFind.uid = sid;
         userFindBucket.put(walletFind.user, walletFind);
     }
     const uidFind = userFindBucket.get<string, UserFind[]>(`u:${sid}`)[0];
-    console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!22222222222', uidFind);
+    console.log('!!!!!!!!!!!!!!!!!changeUserInfo uidFind', uidFind);
     // 添加用户ID查询用户
     if (!uidFind) {
         const newUidFind = new UserFind();
         newUidFind.user = `u:${sid}`;
         newUidFind.uid = sid;
-        console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!232233', newUidFind);
+        console.log('!!!!!!!!!!!!!!!!!changeUserInfo newUidFind', newUidFind);
         userFindBucket.put(newUidFind.user, newUidFind);
     }
     // 添加钱包账户查找用户
-    if (!(oldUserinfo.acc_id === userinfo.acc_id) && !(userinfo.acc_id === '')) {
+    if (!(oldUserinfo.acc_id === userChange.acc_id) && !(userChange.acc_id === '')) {
         const acc_idFind = new UserFind();
-        acc_idFind.user = `a:${userinfo.acc_id}`;
+        acc_idFind.user = `a:${userChange.acc_id}`;
         acc_idFind.uid = sid;
-        console.log('!!!!!!!!!!!!!!!!!add phone!1212121', acc_idFind);
+        console.log('!!!!!!!!!!!!!!!!!changeUserInfo acc_idFind', acc_idFind);
         userFindBucket.put(acc_idFind.user, acc_idFind);
     }
-    console.log('!!!!!!!!!!!!!!!!!changeUserInfo!!333333333333333333');
-    userinfo.level = oldUserinfo.level;  // 用户权限等级不能在此处更改
-    const newUser = userinfo;
-    if (userinfo.uid === sid) {
-        userInfoBucket.put(sid, userinfo);
-    } else {
-        console.log('curUser: ', sid, ' changeUser: ', userinfo);
-        newUser.uid = -1; // 不能修改其他的人的信息
+    const newUser = new UserInfo();
+    newUser.uid = sid;
+    newUser.name = userChange.name;
+    newUser.avatar = userChange.avatar;
+    newUser.sex = userChange.sex;
+    newUser.tel = userChange.tel;
+    newUser.note = userChange.note;
+    newUser.wallet_addr = userChange.wallet_addr;
+    newUser.acc_id = userChange.acc_id;
+    newUser.level = oldUserinfo.level;
+    newUser.comm_num = oldUserinfo.comm_num;
+    console.log('!!!!!!!!!!!!!!!!!changeUserInfo newUser',newUser);
+    if (userInfoBucket.put(sid, newUser)) {
+        return newUser;
     }
+    newUser.uid = 0;
 
     return newUser;
 };

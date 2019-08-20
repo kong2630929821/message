@@ -7,11 +7,11 @@
     </div>
     <div w-class="contain">
         {{if it.isPublic}}
-        <div w-class="title">
+        <div w-class="title" ev-input-change="titleChange">
             <widget w-tag="chat-client-app-widget-input-input">{placeHolder:"标题1-24个字",input:{{it.titleInput}} }</widget>
         </div>
         {{end}}
-        <div w-class="content">
+        <div w-class="content" ev-input-change="contentChange">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:300px;height:300px;font-size:28px;", input:{{it.contentInput}} }</widget>
         </div>
         
@@ -29,10 +29,10 @@
         </div>
     </div>
 
-    <div w-class="tools">
+    <div w-class="tools" ev-emoji-click="pickEmoji" >
         <div>
             <img src="../../res/images/emoji.png" w-class="btn" on-tap="openEmoji"/>
-            <img src="../../res/images/tool-camera.png" w-class="btn"/>
+            <img src="../../res/images/tool-camera.png" w-class="btn" on-tap="chooseImage"/>
             <img src="../../res/images/tool-camera.png" w-class="btn"/>
         </div>
 

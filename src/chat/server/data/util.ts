@@ -20,6 +20,7 @@ export const iterTable = (tableStruct:any) => {
 // 获取索引ID
 // 通用获取自增ID方法
 export const getIndexID = (src: string, add: number):number => {
+    console.log('!!!!!!!!!!!!!!!!!!getIndexID',src,add);
     const IndexIDBucket = new Bucket(CONSTANT.WARE_NAME, IndexID._$info.name);
     const indexID = new IndexID();
     indexID.key = src;
@@ -28,6 +29,7 @@ export const getIndexID = (src: string, add: number):number => {
 
         return indexID;
     });
+    console.log('!!!!!!!!!!!!!!!!!IndexID',indexID);
 
     return indexID.id;
 };

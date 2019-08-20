@@ -12,8 +12,10 @@ import { genGroupHid, genGuid, genHIncId, genNewIdFromOld, genUserHid, genUuid }
 import { getSession, setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { GroupHistory, GroupHistoryCursor, UserHistory, UserHistoryCursor } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OfficialUsers, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
+import { AccountGenerator, Contact, FriendLink, FrontStoreData, GENERATOR_TYPE, OnlineUsers, OnlineUsersReverseIndex, UserAccount, UserCredential, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, GetContactReq, GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, UserArray, UserHistoryArray, UserHistoryFlag, UserRegister, UserType, UserType_Enum, WalletLoginReq } from './basic.s';
+import { createCommNum } from './community.r';
+import { CommType } from './community.s';
 import { getUid } from './group.r';
 import { getRealUid, getSUID, sendFirstWelcomeMessage } from './user.r';
 
@@ -52,6 +54,8 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
 
         return accountGenerator;
     });
+    // 创建社区个人账号
+    userInfo.comm_num = createCommNum(userInfo.uid,userInfo.name,CommType.person);
     console.log('registeruser userinfo: ',userInfo);
     userInfoBucket.put(userInfo.uid, userInfo);
     
@@ -81,7 +85,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
             console.error('Create user contact failed');
         }
     }
-
+    
     return userInfo;
 };
 
@@ -111,6 +115,7 @@ export const login = (user: UserType): UserInfo => {
             reguser.passwdHash = openid;
             reguser.name = '';
             const userinfo = registerUser(reguser);
+            console.log('!!!!!!!!!!!!!!!registerUser',userinfo);
             const userAcc = new UserAccount();
             userAcc.user = openid;
             userAcc.uid = userinfo.uid;
@@ -141,6 +146,7 @@ export const login = (user: UserType): UserInfo => {
     const mqttServer:ServerNode = env.get('mqttServer');
     setMqttTopic(mqttServer, loginReq.uid.toString(), true, true);  // 用户信息变化的主题
     setMqttTopic(mqttServer, `${loginReq.uid}_sendMsg`, true, true);  // 接收消息的主题
+    
     // 后端统一推送消息topic
     setMqttTopic(mqttServer, `send/${loginReq.uid.toString()}`, true, true);
     console.log('4444444444444444444444444444444444');
@@ -226,6 +232,7 @@ export const getUsersInfo = (getUserInfoReq: GetUserInfoReq): UserArray => {
     }
     const res = new UserArray();
     res.arr = values;
+    console.log('!!!!!!!!!!!!!!getUsersInfo UserArray',res);
 
     return res;
 };

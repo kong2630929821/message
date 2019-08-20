@@ -2,10 +2,10 @@
     <app-components1-blankDiv-topDiv></app-components1-blankDiv-topDiv>
     <div w-class="topBar">
         <div w-class="topBarItem" on-tap="close">取消</div>
-        <div w-class="topBarItem">{{it.title}}</div>
+        <div w-class="topBarItem">"回复"</div>
         <div w-class="topBarItem" style="color:#888888" on-tap="send">发送</div>
     </div>
-    <div w-class="content">
+    <div w-class="content" ev-input-change="contentChange">
         <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:{{it.placeholder}}, style:"max-height:300px;height:300px;font-size:28px;", input:{{it.contentInput}} }</widget>
     </div>
 

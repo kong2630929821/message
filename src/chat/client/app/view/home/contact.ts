@@ -5,7 +5,7 @@
 // ================================================ 导入
 import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
 import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
-import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { getUserInfo, popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { registerStoreData } from '../../../../../app/viewLogic/common';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
@@ -28,11 +28,13 @@ interface Props {
     messageList: any[];
     isUtilVisible: boolean;
     utilList: any[];
+    userInfo:any; 
     netClose: boolean; // 网络链接是否断开
     isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
     activeTab:string;  // 当前活跃的tab
-    userInfo:any; 
+    acTag:number;   // 当前活跃的广场标签
+    showTag:boolean;  // 展示广场下拉
 }
 export const TAB = {
     message:'message',
@@ -43,7 +45,7 @@ export const TAB = {
 export class Contact extends SpecialWidget {
     public web3Promise: Promise<string>;
     public defaultInjectPromise: Promise<string>;
-    public props: any = {
+    public props: Props = {
         offlienType:OfflienType.CHAT,
         sid:0,
         utilList:[
@@ -57,7 +59,10 @@ export class Contact extends SpecialWidget {
         activeTab:TAB.message,
         isLogin:false,
         hasWallet:false,
-        netClose:false
+        netClose:false,
+        userInfo:{},
+        acTag:0,
+        showTag:false
     };
 
     public create() {
@@ -74,22 +79,25 @@ export class Contact extends SpecialWidget {
 
     public setProps(props: Props) {
         super.setProps(props);
-        this.props.isLogin = !!store.getStore('uid');
-        this.props.activeTab = TAB.message;
         const uid = store.getStore('uid', 0);
+        this.props.isLogin = !!uid;
+        this.props.activeTab = TAB.message;
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         
-        // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
-        const wUser = this.props.userInfo;
-        if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
-            if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
-                setUserInfo();
-            } else {
-                store.initStore();
-                this.state.lastChat = []; // 清空记录 lastChat
-            }
-        } 
-
+        if (this.props.isLogin) {   // 聊天已登录成功
+            getUserInfo().then(wUser => {
+                // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
+                if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
+                    if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
+                        setUserInfo();
+                    } else {
+                        store.initStore();
+                        this.state.lastChat = []; // 清空记录 lastChat
+                    }
+                } 
+            });
+        }
+        
     }
 
     public firstPaint() {
@@ -180,6 +188,14 @@ export class Contact extends SpecialWidget {
     // 切换tab
     public changeTab(e:any) {
         this.props.activeTab = e.activeTab;
+        this.props.showTag = e.showTag;
+        this.paint();
+    }
+
+    // 切换tag
+    public changeTag(e:any) {
+        this.props.showTag = false;
+        this.props.acTag = e.value;
         this.paint();
     }
 

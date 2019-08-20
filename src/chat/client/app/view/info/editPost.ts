@@ -1,11 +1,15 @@
+import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { selectImage } from '../../logic/native';
+import { addPost } from '../../net/rpc';
+import { base64ToFile, imgResize, uploadFile } from '../../net/upload';
 
 interface Props {
     title:string;
-    contentInput:string;
     imgs:string[];
     titleInput:string;  // 输入的标题
+    contentInput:string; // 输入的内容
     isPublic:boolean;  // 发布公众号帖子
     isOnEmoji:boolean;  // 展开表情选择
 }
@@ -18,9 +22,9 @@ export class EditPost extends Widget {
     public cancel:() => void;
     public props:Props = {
         title:'发布动态',
-        contentInput:'',
-        imgs:['../../res/images/home_bg.png'],
+        imgs:[],
         titleInput:'',
+        contentInput:'',
         isPublic:false,
         isOnEmoji:false
     };
@@ -36,6 +40,32 @@ export class EditPost extends Widget {
         }
     }
 
+    public titleChange(e:any) {
+        this.props.titleInput = e.value;
+    }
+
+    public contentChange(e:any) {
+        this.props.contentInput = e.value;
+    }
+
+    public chooseImage(e:any) {
+        const imagePicker = selectImage((width, height, url) => {
+            console.log('选择的图片',width,height,url);
+    
+            imagePicker.getContent({
+                quality:30,
+                success(buffer:ArrayBuffer) {
+
+                    imgResize(buffer,(res) => {
+                        this.props.imgs.push(res.base64);
+                    });
+                        
+                }
+            });
+        });
+    }
+
+    // 关闭
     public close() {
         popNew('chat-client-app-widget-modalBox-modalBox',{ content:'保留此次编辑' },() => {
             this.cancel && this.cancel();
@@ -43,15 +73,56 @@ export class EditPost extends Widget {
             this.cancel && this.cancel();
         });
     }
+    
+    // 上传图片
+    public async sendImage(i:number) {
+        if (i < this.props.imgs.length) {
+            await uploadFile(base64ToFile(this.props.imgs[i]),(imgUrlSuf:string) => {
+                this.props.imgs[i] = imgUrlSuf;
+                this.sendImage(i++);
+                console.log('上传图片',i,imgUrlSuf);
+            });
 
-    public send() {
-        this.ok && this.ok();
+        } 
+    }
+
+    // 发送
+    public async send() {
+        if (this.props.imgs.length) {
+            const loadding = popNewLoading('图片上传中');
+            try {
+                await this.sendImage(0);
+            } catch (err) {
+                popNewMessage('上传图片失败了');
+            }
+            loadding.callback(loadding.widget);
+        }
+        
+        const value = {
+            msg:this.props.contentInput,
+            imgs:this.props.imgs
+        };
+        addPost(this.props.titleInput,JSON.stringify(value)).then(r => {
+            popNewMessage('发布成功');
+            this.ok && this.ok();
+        }).catch(r => {
+            popNewMessage('发布失败');
+        });
+        
     }
 
     // 打开表情包图库
     public openEmoji() {
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight() + 90}px`;
         this.props.isOnEmoji = !this.props.isOnEmoji;
+        this.paint();
+    }
+
+    /**
+     * 选择表情
+     */
+    public pickEmoji(emoji:any) {
+        this.props.contentInput += `[${emoji}]`; // 只能在内容中加表情
         this.paint();
     }
 }

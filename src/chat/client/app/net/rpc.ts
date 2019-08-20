@@ -11,8 +11,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, postLaudPost, showCommentPort, showPostPort, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CreateCommunity, IterCommentArg, IterPostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getLaudPostList, postLaudPost, showCommentPort, showLaudLog, showPostPort, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -26,6 +26,7 @@ import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from 
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
 import { clientRpcFunc } from './init';
+import { subscribeLaudPost } from './subscribedb';
 
 // ================================================ 导出
 
@@ -469,40 +470,55 @@ export const addCommunityNum = (name: string, comm_type: number, desc: string) =
  * 关注公众号
  */
 export const follow = (num: string) => {
-    clientRpcFunc(userFollow,num,(r:boolean) => {
-        if (r) {
-            console.log(r);
-        } 
+    return new Promise((res,rej) => {
+        clientRpcFunc(userFollow,num,(r:boolean) => {
+            console.log('follow',r);
+            if (r) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
     });
+    
 };
 
 /**
  * 添加动态
  */
-export const addPost = (num: string, title: string, body: string, post_type: number) => {
+export const addPost = (title: string, body: string, post_type: number= 0) => {
     const arg = new AddPostArg();
-    arg.num = num;
+    const uid = store.getStore('uid',0);
+    arg.num = store.getStore(`userInfoMap/${uid}`,{}).comm_num;
     arg.title = title;
     arg.body = body;
     arg.post_type = post_type;
-    clientRpcFunc(addPostPort,arg,(r:PostKey) => {
-        if (r) {
-            console.log(r);
-        } 
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(addPostPort,arg,(r:PostKey) => {
+            if (r && r.num !== '') {
+                resolve();
+            } else {
+                reject();
+            }
+        });
     });
+    
 };
 
 /**
  * 帖子点赞或取消点赞
  */
-export const postLaud = (num: string, id: number) => {
+export const postLaud = (num: string, id: number, fail?:any) => {
     const arg = new PostKey();
     arg.num = num;
     arg.id = id;
     clientRpcFunc(postLaudPost,arg,(r:boolean) => {
         if (r) {
-            console.log(r);
-        } 
+            console.log('postLaudPost=======',r);
+        } else {
+            fail && fail();
+        }
     });
 };
 
@@ -516,11 +532,18 @@ export const addComment = (num: string, comment_type: number, msg:string, post_i
     arg.msg = msg;
     arg.post_id = post_id;
     arg.reply = reply;
-    clientRpcFunc(addCommentPost,arg,(r:CommentKey) => {
-        if (r) {
-            console.log(r);
-        } 
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(addCommentPost,arg,(r:CommentKey) => {
+            console.log('addCommentPost==========',r);
+            if (r && r.num) {
+                resolve(r);
+            } else {
+                reject();
+            }
+        });
     });
+    
 };
 
 /**
@@ -531,11 +554,18 @@ export const commentLaud = (num: string, post_id: number, id: number) => {
     arg.num = num;
     arg.id = id;
     arg.post_id = post_id;
-    clientRpcFunc(commentLaudPost,arg,(r:boolean) => {
-        if (r) {
-            console.log(r);
-        } 
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(commentLaudPost,arg,(r:boolean) => {
+            console.log('commentLaud============',r);
+            if (r) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
     });
+    
 };
 
 /**
@@ -558,26 +588,74 @@ export const showPost = (num:string, id:number = 0, count:number = 20) => {
     arg.count = count;
     arg.id = id;
     arg.num = num;
-    clientRpcFunc(showPostPort,arg,(r:PostArr) => {
-        if (r) {
-            console.log(r);
-        } 
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(showPostPort,arg,(r:PostArr) => {
+            console.log('showPost=============',r);
+            if (r) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
     });
+    
 };
 
 /**
  * 获取最新的评论
  * id=0表示从最新的一条数据获取count条数据
  */
-export const showComment = (num:string, post_id:number, id:number = 0, count:number = 20) => {
+export const showComment = (num:string, post_id:number, id:number = 0xffffffffff, count:number = 20) => {
     const arg = new IterCommentArg();
     arg.count = count;
     arg.id = id;
     arg.num = num;
     arg.post_id = post_id;
-    clientRpcFunc(showCommentPort,arg,(r:PostArr) => {
-        if (r) {
-            console.log(r);
-        } 
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(showCommentPort,arg,(r:PostArr) => {
+            console.log('showComment===========',r);
+            if (r) {
+                resolve(r);
+            } else {
+                reject();
+            }
+        });
+    });
+};
+
+/**
+ * 获取最新点赞记录
+ */
+export const showLikeList = (num:string,post_id:number,uid:number= 0,count:number= 20) => {
+    const arg = new IterLaudArg();
+    arg.num = num;
+    arg.post_id = post_id;
+    arg.uid = uid;
+    arg.count = count;
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(showLaudLog,arg,(r => {
+            console.log('showLikeList===========',r);
+            if (r) {
+                resolve(r);
+            } else {
+                reject();
+            }
+        }));
+    });
+};
+
+/**
+ * 获取当前用户所有点赞的帖子列表
+ */
+export const getLaudPost = () => {
+    clientRpcFunc(getLaudPostList,null,(r) => {
+        console.log('getLaudPost=============',r);
+        if (r && r.list) {
+            store.setStore(`laudPostList/${r.uid}`,r);
+            subscribeLaudPost(store.getStore('uid'),null);
+        }
     });
 };

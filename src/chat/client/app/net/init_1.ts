@@ -11,12 +11,13 @@ import { changeWalletName, popNewMessage } from '../../../../app/utils/tools';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
+import { UserChangeInfo } from '../../../server/data/rpc/user.s';
 import { setLocalStorage } from '../data/lcstore';
 import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
-import { getChatUid, getFriendHistory, getSetting } from './rpc';
+import { getChatUid, getFriendHistory, getLaudPost, getSetting, showUserFollow } from './rpc';
 
 // ================================================ 导出
 
@@ -44,6 +45,7 @@ export const walletSignIn = (openid) => {
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 store.setStore('isLogin',true);
                 getSetting();   // 获取设置信息
+                getLaudPost();  // 获取赞过帖子列表
                 init2.init(r.uid);
                 
                 init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {
@@ -76,27 +78,25 @@ export const walletSignIn = (openid) => {
 /**
  * 改变用户信息
  */
-export const  setUserInfo = async () => {
-    const user = await getStoreData('user',{ info:{}, id:'' });
-    const r = new UserInfo();
-    r.uid = store.getStore('uid');
-    r.sex = 0;
-    r.note = '';
-    r.level = 0;
+export const  setUserInfo = async (note:string = '') => {
+    const user = await getStoreData('user',{ info:{},id:'' });
+    const r = new UserChangeInfo();
+    r.note = note;
+    r.sex = user.info.sex;
     r.name = user.info.nickName;
     r.avatar = user.info.avatar;
     r.tel = user.info.phoneNumber;
     r.acc_id = user.info.acc_id;
     r.wallet_addr = user.id;
-    
-    if (!r.uid) {
+    const uid = store.getStore('uid');
+    if (!uid) {
         return;
     }
     init2.clientRpcFunc(changeUserInfo, r, (res) => {
         if (res && res.uid > 0) {
-            store.setStore(`userInfoMap/${r.uid}`, res);
+            store.setStore(`userInfoMap/${uid}`, res);
         } else if (res.uid === 0) {  // 普通用户 钱包名称中含有 “好嗨客服”
-            const chatUser = store.getStore(`userInfoMap/${r.uid}`,{ name:'' });
+            const chatUser = store.getStore(`userInfoMap/${uid}`,{ name:'' });
             if (chatUser.name) {  // 有曾用名，直接改为曾用名
                 changeWalletName(chatUser.name);
 

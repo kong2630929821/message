@@ -120,3 +120,18 @@ export const getPromise = (cb:any) => {
         }
     });
 };
+
+/**
+ * 下载图片到本地
+ */
+export const saveImage = (url:string, cb?:any) => {
+    const image = new ImagePicker();
+    image.init();
+    image.saveImageToAlbum({
+        success: () => {
+            cb && cb();
+        },
+        imgName: `${Date.now()}.png`,
+        saveImg: url
+    });
+};

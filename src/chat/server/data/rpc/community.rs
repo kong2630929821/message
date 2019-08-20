@@ -1,6 +1,11 @@
 #[path=../db/]
-use community.s::{CommunityBase, Post, Comment, PostKey};
+use community.s::{CommunityBase, Post, Comment, PostKey, CommentKey, PostLaudLogKey};
 
+enum CommType {
+    person = 0,  // 个人
+    official = 1,    // 官方
+    publicAcc = 2,    // 公众号
+}
 //创建社区
 struct CreateCommunity {
     name: String,           //社区名
@@ -37,10 +42,15 @@ struct PostData {
     title: String,      //标题
     body: String,       //正文
     owner: u32,         //发送者
+    comm_type: u32,     //社区类型
     createtime: u32,    //创建时间
     likeCount: u32,     //点赞数
+    commentCount: u32,  //评论总数
     forwardCount: u32,  //转发数
     collectCount: u32,  //收藏数
+    username: String,   //用户名
+    avatar: String,     //用户头像
+    gender: u8,         //性别
 }
 
 //帖子列表
@@ -48,16 +58,30 @@ struct PostArr {
     list: &[PostData],  //帖子
 }
 
+// 评论数据
+struct CommentData{
+    key: CommentKey,       //key
+    comment_type: u8,      //帖子类型图文、语言、视频
+    msg: String,        //消息
+    reply: u32,         //评论表中的ID，表示回复那一条评论，可以为空
+    owner: u32,         //发送者
+    likeCount: u32,     //点赞数
+    createtime: u32,     //创建时间
+    username: String,   //用户名
+    avatar: String,     //用户头像
+    gender: u8,         //性别
+}
+
 //评论列表
 struct CommentArr {
-    list: &[Comment],  //评论
+    list: &[CommentData],  //评论
 }
 
 //迭代帖子参数
 struct IterPostArg {
     count: u32,     //获取数量
     id: u32,       //指定key进行遍历
-    num: String,
+    num: String,    // 社区编号
 }
 
 //迭代评论参数
@@ -66,4 +90,26 @@ struct IterCommentArg {
     post_id: u32,    //帖子ID
     id: u32,       //评论ID
     num: String,    //社区编号
+}
+
+// 迭代点赞参数
+struct IterLaudArg{
+    count: u32,     //获取数量
+    post_id: u32,    //帖子ID
+    num: String,    //社区编号
+    uid: u32,       // 用户ID
+}
+
+// 点赞数据
+struct LaudLogData {
+    key: PostLaudLogKey, //key
+    createtime: u32,    //创建时间
+    username: String,   //用户名
+    avatar: String,     //用户头像
+    gender: u8,         //性别
+}
+
+// 点赞记录
+struct LaudLogArr{
+    list: &[LaudLogData]
 }

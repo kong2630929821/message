@@ -8,8 +8,7 @@
         </div>
         
         <div w-class="tabs">
-            {{: fg=false}}
-            {{if fg}}
+            {{if 1==1}}
             <div w-class="tab {{it.activeTab=='square'?'activeTab':''}}" on-tap="changeTab(e,'square')">
                 {{it.showAcTag}}
                 <span w-class="arrow {{it.showTag?'':'arrow1'}}"></span>
