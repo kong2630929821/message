@@ -57,15 +57,15 @@ struct Post {
 }
 
 /**
-*帖子和动态计数
+*帖子和动态
 */
 #[primary=key,db=file,dbMonitor=true]
 struct PostCount {
     key: PostKey,       //key
-    likeCount: u32,     //点赞数
-    commentCount: u32,  //评论数
-    forwardCount: u32,  //转发数
-    collectCount: u32,  //收藏数
+    likeList: &[u32],     //点赞用户id列表
+    commentList: &[u32],  //评论id列表
+    forwardList: &[u32],  //转发id列表
+    collectList: &[u32]  //收藏id列表
 }
 
 //帖子点赞记录key
