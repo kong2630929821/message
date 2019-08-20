@@ -3,8 +3,9 @@ import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { CommType, PostArr } from '../../../../server/data/rpc/community.s';
-import { register } from '../../data/store';
+import { register, setStore } from '../../data/store';
 import { postLaud, showPost } from '../../net/rpc';
+import { EMOJIS_MAP } from '../../widget/emoji/emoji';
 
 export const forelet = new Forelet();
 
@@ -41,12 +42,13 @@ export class Square extends Widget {
                     data[i].offcial = res.comm_type === CommType.official;
                     data[i].isPublic = res.comm_type === CommType.publicAcc;
                     const body = JSON.parse(res.body);
-                    data[i].content = body.msg;
+                    data[i].content = parseEmoji(body.msg);
                     data[i].imgs = body.imgs;
                     data[i].followed = State.followList.indexOf(res.key.num) > -1;
                     data[i].likeActive = State.likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
                 });
                 this.state.postList = data;
+                setStore('postList',data,false);
                 this.paint();
             }
         });
@@ -109,3 +111,33 @@ register('laudPostList',r => {
     
     forelet.paint(State);
 });
+// 帖子数据
+register('postList',r => {
+    State.postList = r;
+    forelet.paint(State);
+});
+
+// 转换文字中的链接
+const httpHtml = (str:string) => {
+    const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-|:|#)+)/g;
+    
+    return str.replace(reg, '<a href="javascript:;" class="linkMsg">$1$2</a>');
+};
+
+// 转换表情包
+export const parseEmoji = (msg:any) => {    
+    msg = httpHtml(msg);
+    msg = msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
+        const url = EMOJIS_MAP.get(capture) || undefined;
+        if (url) {
+            // FIXME: 不应该写死,应该动态获取
+            // url = url.replace('../../','/client/app/');
+
+            return `<img src="../../chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
+        } else {
+            return match;
+        }
+    });
+
+    return msg;
+};

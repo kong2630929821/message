@@ -93,7 +93,9 @@ export class SquareItem extends Widget {
      */
     public doComment() {
         this.closeUtils();
-        popNew3('chat-client-app-view-info-editComment');
+        popNew3('chat-client-app-view-info-editComment',{ key:this.props.key },() => {
+            popNew3('chat-client-app-view-info-postDetail',{ ...this.props,showAll:true });
+        });
     }
 
     // 关闭操作列表

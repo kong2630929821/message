@@ -1,7 +1,9 @@
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getStore } from '../../data/store';
-import { addComment, commentLaud, postLaud, showComment, showLikeList } from '../../net/rpc';
+import { getStore, setStore } from '../../data/store';
+import { postLaud, showComment, showLikeList } from '../../net/rpc';
+import { parseEmoji } from '../home/square';
 
 interface Props {
     key: any;
@@ -92,50 +94,60 @@ export class PostDetail extends Widget {
     /**
      * 点赞
      */
-    public likeBtn() {
+    public async likeBtn() {
         this.props.likeActive = !this.props.likeActive;
         this.props.likeCount += this.props.likeActive ? 1 : -1;
         this.paint();
-        postLaud(this.props.key.num, this.props.key.id, () => {
-            // 失败了则撤销点赞或取消点赞操作
-            this.props.likeActive = !this.props.likeActive;
-            this.props.likeCount += this.props.likeActive ? 1 : -1;
-            this.paint();
-        });
-    }
-
-    /**
-     * 评论点赞
-     */
-    public commentLikeBtn(i:number) {
-        const v = this.props.commentList[i];
-        commentLaud(v.key.num, v.key.id, v.id).then(r => {
-            v.likeActive = !v.likeActive;
-            v.likeCount += v.likeActive ? 1 : -1;
-            this.paint();
-        });
+        try {
+            await postLaud(this.props.key.num, this.props.key.id, () => {
+                // 失败了则撤销点赞或取消点赞操作
+                this.props.likeActive = !this.props.likeActive;
+                this.props.likeCount += this.props.likeActive ? 1 : -1;
+                this.paint();
+            });
+        } catch (r) {
+            popNewMessage('点赞失败了');
+        }
+        const postlist = getStore('postList',[]);
+        const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
+        postlist[ind].likeActive = this.props.likeActive;
+        postlist[ind].likeCount = this.props.likeCount;
+        setStore('postList',postlist);
     }
 
     /**
      * 评论
      */
     public doComment() {
-        popNew('chat-client-app-view-info-editComment', {}, (r) => {
-            if (r) {
-                addComment(this.props.key.num, 0, r, this.props.key.id, 0).then((res) => {
-                    this.props.commentList.unshift({
-                        key: res,
-                        msg: r,
-                        owner: getStore('uid'),
-                        createtime: Date.now(),
-                        likeCount: 0,
-                        username: this.props.username,
-                        avatar: this.props.avatar,
-                        gender: this.props.gender
-                    });
-                    this.paint();
-                });
-            }
+        popNew('chat-client-app-view-info-editComment', { key:this.props.key }, (r) => {
+            this.props.commentList.unshift({
+                key: r.key,
+                msg: parseEmoji(r.value),
+                createtime: Date.now(),
+                likeCount: 0,
+                username: this.props.username,
+                avatar: this.props.avatar,
+                gender: this.props.gender
+            });
+            this.paint();
         });
+    }
+
+    /**
+     * 回复评论
+     */
+    public replyComment(e:any) {
+        this.props.commentList.unshift({
+            key: e.key,
+            msg: parseEmoji(e.value),
+            createtime: Date.now(),
+            likeCount: 0,
+            username: this.props.username,
+            avatar: this.props.avatar,
+            gender: this.props.gender,
+            orgName: e.username,
+            orgMess: e.mess
+        });
+        this.paint();
     }
 }

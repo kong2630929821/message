@@ -4,9 +4,11 @@
         <div style="margin: 20px 0;">
             {{if it.isPublic}}
             <div w-class="title">{{it.title}}</div>
+            <widget w-tag="chat-client-app-view-home-pubPostItem">{{it}}</widget>
+            {{else}}
+            <widget w-tag="chat-client-app-view-home-squareItem">{{it}}</widget>
             {{end}}
 
-            <widget w-tag="chat-client-app-view-home-squareItem">{{it}}</widget>
 
             <div w-class="commentBox">
                 <div w-class="tabs">
@@ -16,7 +18,7 @@
                 {{if it.active == 'comment'}}
                 <div>
                     {{for i,v of it.commentList}}
-                    <div ev-comment-likeBtn="commentLikeBtn({{i}})">
+                    <div ev-comment-reply="replyComment">
                         <widget w-tag="chat-client-app-view-info-commentItem">{{v}}</widget>
                     </div>
                     {{end}}

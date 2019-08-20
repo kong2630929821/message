@@ -44,7 +44,7 @@
     margin-top: 15px;
     margin-bottom: 30px;
 }
-.btns{
+.tools{
     position: absolute;
     bottom: 0;
     border-top: 1px solid #f2f2f2;
@@ -56,4 +56,10 @@
     height: 50px;
     margin: 0 20px;
     border: 20px solid transparent;
+}
+.emojiMap{
+    height:420px;
+    overflow-x:hidden;
+    overflow-y:auto;
+    min-height: 420px;
 }

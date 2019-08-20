@@ -525,7 +525,7 @@ export const postLaud = (num: string, id: number, fail?:any) => {
 /**
  * 评论
  */
-export const addComment = (num: string, comment_type: number, msg:string, post_id: number, reply: number) => {
+export const addComment = (num: string, post_id: number,  msg:string,  reply: number, comment_type: number) => {
     const arg = new AddCommentArg();
     arg.num = num;
     arg.comment_type = comment_type;
@@ -549,21 +549,17 @@ export const addComment = (num: string, comment_type: number, msg:string, post_i
 /**
  * 评论点赞
  */
-export const commentLaud = (num: string, post_id: number, id: number) => {
+export const commentLaud = (num: string, post_id: number, id: number,fail?:any) => {
     const arg = new CommentKey();
     arg.num = num;
     arg.id = id;
     arg.post_id = post_id;
-
-    return new Promise((res,rej) => {
-        clientRpcFunc(commentLaudPost,arg,(r:boolean) => {
+    clientRpcFunc(commentLaudPost,arg,(r:boolean) => {
+        if (r) {
             console.log('commentLaud============',r);
-            if (r) {
-                res(r);
-            } else {
-                rej();
-            }
-        });
+        } else {
+            fail && fail();
+        }
     });
     
 };
@@ -606,7 +602,7 @@ export const showPost = (num:string, id:number = 0, count:number = 20) => {
  * 获取最新的评论
  * id=0表示从最新的一条数据获取count条数据
  */
-export const showComment = (num:string, post_id:number, id:number = 0xffffffffff, count:number = 20) => {
+export const showComment = (num:string, post_id:number, id:number = 0, count:number = 20) => {
     const arg = new IterCommentArg();
     arg.count = count;
     arg.id = id;

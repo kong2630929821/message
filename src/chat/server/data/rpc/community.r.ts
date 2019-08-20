@@ -30,7 +30,7 @@ export const createCommNum = (uid:number,name:string,comm_type:number):string =>
         console.log('!!!!!!!!!!!!!!!!createCommNum CommunityBase',communityBase);
 
         communityBaseBucket.put(num, communityBase);
-        userFollow(num);
+        // userFollow(num);
 
         return num;
     } 
@@ -448,7 +448,7 @@ export const showCommentPort = (arg: IterCommentArg) :CommentArr => {
         const v = iter.next();
         console.log('!!!!!!!!!!!!comment:', v);
 
-        if (!v || (v[0].num === key.num && v[0].post_id === key.post_id)) {
+        if (!v) {
             break;
         }
         const com:Comment = v[1];

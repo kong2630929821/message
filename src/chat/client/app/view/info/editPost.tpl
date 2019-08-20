@@ -8,11 +8,11 @@
     <div w-class="contain">
         {{if it.isPublic}}
         <div w-class="title" ev-input-change="titleChange">
-            <widget w-tag="chat-client-app-widget-input-input">{placeHolder:"标题1-24个字",input:{{it.titleInput}} }</widget>
+            <widget w-tag="chat-client-app-widget-input-input">{placeHolder:"标题1-24个字",input:{{it.titleInput}},maxLength:24 }</widget>
         </div>
         {{end}}
         <div w-class="content" ev-input-change="contentChange">
-            <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:300px;height:300px;font-size:28px;", input:{{it.contentInput}} }</widget>
+            <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:300px;height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:400 }</widget>
         </div>
         
         {{% ========================上传图片======================}}

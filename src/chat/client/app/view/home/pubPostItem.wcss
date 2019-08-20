@@ -3,6 +3,8 @@
     color: #222;
     background: #fff;
     position: relative;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 .top{
     display: flex;
@@ -33,8 +35,9 @@
     color: #888888;
 }
 .content{
-    margin: 20px;
+    margin:40px 20px 20px;
     line-height: 37px;
+    min-height: 80px;
     position: relative;
     display: block;
     -webkit-box-orient: vertical;

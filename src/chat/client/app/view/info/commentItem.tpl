@@ -22,16 +22,18 @@
     <div w-class="orgComment">
         <div w-class="content">
             <span style="font-weight: 600;">{{it.orgName}}:&nbsp;</span>
-            {{it.orgMess}}
+            <widget w-tag="pi-ui-html">{{it.orgMess}}</widget>
         </div>
     </div>
     {{end}}
-    <div w-class="comment">{{it.msg}}</div>
+    <div w-class="comment">
+        <widget w-tag="pi-ui-html">{{it.mess}}</widget>
+    </div>
 
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
         <div w-class="option" on-tap="replay">回复</div>
-        <div w-class="option">删除</div>
-        <div w-class="option">复制</div>
-        <div w-class="option">举报</div>
+        <div w-class="option" on-tap="delComment">删除</div>
+        <div w-class="option" on-tap="copyComment">复制</div>
+        <div w-class="option" on-tap="complaint">举报</div>
     </div>
 </div>

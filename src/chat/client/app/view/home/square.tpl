@@ -14,11 +14,11 @@
         {{end}}
 
         {{for i,v of it1.postList}}
-            {{if v.isPublic}}
-            <widget w-tag="chat-client-app-view-home-pubPostItem" style="margin-top:20px;">{{v}}</widget>
+            {{if !v.isPublic}}
+            <widget w-tag="chat-client-app-view-home-pubPostItem">{{v}}</widget>
             {{else}}
             <div ev-likeBtn="likeBtn({{i}})">
-                <widget w-tag="chat-client-app-view-home-squareItem" style="margin-top:20px;">{{v}}</widget>
+                <widget w-tag="chat-client-app-view-home-squareItem">{{v}}</widget>
             </div>
             {{end}}
         {{end}}

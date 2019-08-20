@@ -48,6 +48,9 @@ export class EditPost extends Widget {
         this.props.contentInput = e.value;
     }
 
+    /**
+     * 选择图片
+     */
     public chooseImage(e:any) {
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);

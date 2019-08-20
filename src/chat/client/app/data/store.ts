@@ -130,6 +130,7 @@ export const initStore = () => {
         isLogin:true,
         offLine:false,
         flags:{},
+        postList:[],
         followNumList:new Map(),
         laudPostList:new Map()
     };
@@ -189,6 +190,24 @@ const registerDataChange = () => {
     });
 };
 
+// 帖子内容
+export interface PostItem {
+    key:any;   // 帖子ID及社区编号
+    username:string; // 用户名
+    avatar:string; // 头像
+    commentCount:number;  // 评论数量
+    likeCount:number;   // 点赞数量
+    createtime:string;      // 创建时间
+    content:string;     // 内容
+    likeActive:boolean;  // 点赞
+    followed:boolean;  // 已关注
+    imgs:string[];  // 图片列表
+    offical:boolean;  // 官方
+    isPublic:boolean; // 公众号文章
+    gender:number;  // 性别 0 男 1 女
+    comm_type:number; // 社区类型
+}
+
 /**
  * Store的声明
  */
@@ -216,6 +235,7 @@ export interface Store {
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
     flags:any; // 标记信息
+    postList:PostItem[];   // 广场帖子
     followNumList:Map<number,AttentionIndex>; // 关注的社区账号
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
 }
