@@ -98,7 +98,7 @@ export class Setting extends Widget {
     public itemClick(i:number) {
         switch (i) {
             case 0:  // 修改备注
-                popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'修改备注', contentInput:this.props.userAlias },(res:any) => {
+                popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'修改备注', contentInput:this.props.userAlias,maxLength:10 },(res:any) => {
                     const friend = new FriendAlias();
                     friend.rid = this.props.uid;
                     friend.alias = res.content;
