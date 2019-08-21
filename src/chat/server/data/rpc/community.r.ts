@@ -6,7 +6,7 @@ import { UserInfo } from '../db/user.s';
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostData } from './community.s';
+import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData } from './community.s';
 import { getUid } from './group.r';
 
 declare var env: Env;
@@ -450,15 +450,18 @@ export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
  * 获取指定社区编号的帖子
  */
 // #[rpc=rpcServer]
-export const getUserPost = (arg: IterPostArg): PostArr => {
+export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
     // 获取的帖子id
-    const postArr = new PostArr();
-    postArr.list = [];
+    const postArrWithTotal = new PostArrWithTotal();
+    postArrWithTotal.list = [];
+    postArrWithTotal.total = 0;
     const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
     const communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
     if (!communityPost) {
-        return postArr;
+        return postArrWithTotal;
     }
+    // 帖子总数
+    postArrWithTotal.total = communityPost.id_list.length;
     const post_id_list: PostKey[] = [];
     for (let i = 0; i < communityPost.id_list.length; i++) {
         const postKey = new PostKey();
@@ -483,11 +486,11 @@ export const getUserPost = (arg: IterPostArg): PostArr => {
     for (let i = 0; i < post_id_list.length; i++) {
         if (count >= arg.count) break;
         const postData = getPostInfoById(post_id_list[i]);
-        postArr.list.push(postData);
+        postArrWithTotal.list.push(postData);
         count ++;
     }
 
-    return postArr;
+    return postArrWithTotal;
 };
 
 /**
