@@ -40,3 +40,15 @@
     font-family: monospace;
     line-height: 40px;
 }
+.surplus{
+    width:29px;
+    height:21px;
+    font-size:20px;
+    font-family:SourceSansPro-Regular;
+    font-weight:400;
+    color:rgba(197,208,222,1);
+    line-height:21px;
+    position:absolute;
+    bottom:0px;
+    right:4px;
+}

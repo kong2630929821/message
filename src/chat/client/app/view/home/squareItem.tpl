@@ -21,13 +21,13 @@
     {{if it.showAll}}
     {{% =================帖子详情展示全部内容=======================}}
     <div w-class="content1">
-        {{it.content}}
+        <widget w-tag="pi-ui-html">{{it.content}}</widget>
     </div>
 
     {{else}}
     {{% ======================广场展示部分内容===========================}}
     <div w-class="content" on-tap="goDetail" class="content">
-        {{it.content}}
+        <widget w-tag="pi-ui-html">{{it.content}}</widget>
         <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
     </div>
     {{end}}

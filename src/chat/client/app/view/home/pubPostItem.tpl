@@ -1,5 +1,5 @@
 <div w-class="item" on-tap="closeUtils">
-    <div w-class="title">公众号最新新闻帖子标题公众号最新新闻帖子标题</div>
+    <div w-class="title">{{it.title}}</div>
     <div w-class="top">
         <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.avatar}}, width:"40px;"}</widget>
         <div w-class="topCenter">
@@ -14,24 +14,24 @@
     {{if it.showAll}}
     {{% =================帖子详情展示全部内容=======================}}
     <div w-class="content1">
-        {{it.mess}}
+        <widget w-tag="pi-ui-html">{{it.content}}</widget>
     </div>
 
     {{else}}
     {{% ======================广场展示部分内容===========================}}
     <div w-class="content" on-tap="goDetail" class="content">
-        {{it.mess}}
+        <widget w-tag="pi-ui-html">{{it.content}}</widget>
         <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
     </div>
     {{end}}
 
     {{% =====================图片区域========================}}
     <div style="margin:20px 15px;">
-        {{for i,v of it.imgList}}
-            {{if i==2 && it.imgList.length==4}}
+        {{for i,v of it.imgs}}
+            {{if i==2 && it.imgs.length==4}}
             <div></div>
             {{end}}
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:"", width:"{{it.imgList.length==1?'320px':'230px'}}",notRound:true}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:"", width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
         {{end}}
     </div>
 

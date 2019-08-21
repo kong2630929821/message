@@ -11,7 +11,7 @@
             <div w-class="follow">
                 <span style="margin-right:200px;">公众id：00000000</span>
                 {{if it.isMine}}
-                <span>进入公众号</span>
+                <span>发公众号消息</span>
                 {{else}}
                 <span>取消关注</span>
                 {{end}}
@@ -24,12 +24,6 @@
             <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="itemImg">{imgURL:"",width:"150px;",notRound:true}</widget>
             <div w-class="itemTitle">公众号消息标题公众号公众号消息标题公众号公众号消</div>
         </div>
-        {{end}}
-
-        {{if it.isMine}}
-        <div w-class="btn">发动态</div>
-        {{else}}
-        <div w-class="more">更多消息</div>
         {{end}}
 
         {{if it.showTool}}

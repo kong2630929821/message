@@ -13,4 +13,7 @@
         on-focus="onFocus"
         on-compositionstart="compositionstart"
         on-compositionend="compositionend">{{it1.currentValue}}</textarea>
+        {{if it.maxLength}}
+        <div w-class="surplus">{{it.surplus}}</div>
+        {{end}}
 </div>

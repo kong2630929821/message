@@ -71,12 +71,7 @@ export class MessageItem extends Widget {
         });  
     }
 
-    public userDetail(e:any,fg:boolean= false) {
-        if (fg) {
-            popNew('chat-client-app-view-info-user');
-            
-            return;
-        }
+    public userDetail(e:any) {
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             popNew('chat-client-app-view-info-userDetail',{ uid:this.props.message.sid, inFlag: INFLAG.chat_user },(r) => {
                 if (r) {
@@ -116,17 +111,17 @@ export class MessageItem extends Widget {
     public openRedEnvelope() {
         const redEnvDetail = this.props.message.redEnvDetail;
         if (redEnvDetail) {
-            let redEnvDetailProps = {...redEnvDetail};
-            if(redEnvDetail.userHead && redEnvDetail.userHead.indexOf("http://") < 0){
-                 redEnvDetailProps.userHead = `${uploadFileUrlPrefix}${redEnvDetail.userHead}`;
+            const redEnvDetailProps = { ...redEnvDetail };
+            if (redEnvDetail.userHead && redEnvDetail.userHead.indexOf('http://') < 0) {
+                redEnvDetailProps.userHead = `${uploadFileUrlPrefix}${redEnvDetail.userHead}`;
             }
             popNew('app-view-earn-exchange-exchangeDetail',redEnvDetailProps);
 
         } else {
             const user = store.getStore(`userInfoMap/${this.props.message.sid}`,new Map());
-            if(user.avatar && user.avatar.indexOf("http://") < 0){
+            if (user.avatar && user.avatar.indexOf('http://') < 0) {
                 user.avatar = `${uploadFileUrlPrefix}${user.avatar}`;
-           }
+            }
             popNew('app-view-earn-exchange-openRedEnv', { 
                 inFlag: 'chat',
                 rid: this.props.message.redEnvId,

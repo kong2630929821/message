@@ -11,7 +11,7 @@ interface Props {
 export class PublicHome extends Widget {
     public ok:() => void;
     public props:Props = {
-        isMine:false,
+        isMine:true,
         showTool:false
     };
 

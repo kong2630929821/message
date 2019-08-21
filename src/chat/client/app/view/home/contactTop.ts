@@ -7,6 +7,7 @@ import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { rippleShow } from '../../logic/logic';
+import { showPost } from '../../net/rpc';
 import { TAB } from './contact';
 import { TagList } from './square';
 
@@ -67,7 +68,9 @@ export class ContactTop extends Widget {
     
     // 发布帖子  fg=true 发布公众号帖子
     public editPost(e:any,fg:boolean) {
-        popNew3('chat-client-app-view-info-editPost',{ isPublic:fg });
+        popNew3('chat-client-app-view-info-editPost',{ isPublic:fg },() => {
+            showPost();
+        });
         notify(e.node,'ev-next-click',{});
     }
 
