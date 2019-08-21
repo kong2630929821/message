@@ -64,6 +64,18 @@ export class Square extends Widget {
         });
     }
 
+    /**
+     * 评论
+     */
+    public commentBtn(i:number) {
+        const v = this.state.postList[i];
+        popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
+            v.commentCount ++;
+            this.paint();
+            popNew3('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
+        });
+    }
+
 }
 const State = {
     followList:[],

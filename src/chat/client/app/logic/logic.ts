@@ -3,11 +3,16 @@
  */
 // =====================================导入
 import { uploadFileUrlPrefix } from '../../../../app/publicLib/config';
+import { popNewMessage } from '../../../../app/utils/tools';
+import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
+import { MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
+import { updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
+import { sendUserMsg } from '../net/rpc';
 
 // =====================================导出
 
@@ -200,3 +205,26 @@ export const enum INFLAG  {
     chat_group,  // 群聊
     newApply  // 新好友申请 或 新群组邀请
 }
+
+// 举报用户
+export const complaintUser = (name:string) => {
+    const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
+    popNew('chat-client-app-widget-complaint-complaint'
+        ,{ title:'',content:content }
+        ,(selected) => {
+            if (selected.length === 0) {// 未选择举报类型不能举报
+                popNewMessage('您未选择举报类型');
+            }
+
+            let mess = `举报用户@${name}`;
+            for (const i of selected) {
+                mess += `“${content[i]}”`; 
+            }
+            const SUID = store.getStore('flags').HAOHAI_UID;
+            sendUserMsg(SUID,mess,MSG_TYPE.COMPLAINT).then((r:UserHistory) => {
+                updateUserMessage(SUID, r);
+                popNewMessage('举报成功');
+            });
+            
+        });
+};

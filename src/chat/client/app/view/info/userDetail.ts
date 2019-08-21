@@ -8,13 +8,15 @@ import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
+import { CommType } from '../../../../server/data/rpc/community.s';
 import { getStore, setStore } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
-import { applyUserFriend, follow, getUsersBasicInfo } from '../../net/rpc';
+import { addCommunityNum, applyUserFriend, follow, getUsersBasicInfo } from '../../net/rpc';
 
 interface Props {
     uid: number;
     num:string;  // 社区账号
+    pubNum:string; // 社区公众号
     userInfo: any;  // 用户信息
     alias: string; // 好友别名
     avatar:string; // 头像
@@ -30,6 +32,7 @@ export class UserDetail extends Widget {
     public props: Props = {
         uid: null,
         num:'',
+        pubNum:'3',
         userInfo: {},
         alias: '',
         avatar:'',
@@ -102,8 +105,12 @@ export class UserDetail extends Widget {
 
     // 申请公众号 去我的公众号
     public goPublic() {
-        // addCommunityNum('我的公众号',CommType.publicAcc,'');
-        popNew('chat-client-app-view-person-publicHome');
+        if (!this.props.pubNum) {
+            addCommunityNum('我的公众号',CommType.publicAcc,'');
+            
+        } else {
+            popNew('chat-client-app-view-person-publicHome',{ uid:this.props.uid,pubNum:this.props.pubNum });
+        }
     }
 
     // 添加好友

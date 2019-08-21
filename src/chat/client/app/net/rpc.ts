@@ -11,7 +11,7 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getLaudPostList, postLaudPost, showCommentPort, showLaudLog, showPostPort, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getLaudPostList, postLaudPost, showCommentPort, showLaudLog, showPostPort, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommType, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
@@ -487,10 +487,9 @@ export const follow = (num: string) => {
 /**
  * 添加动态
  */
-export const addPost = (title: string, body: string, post_type: number= 0) => {
+export const addPost = (title: string, body: string, num:string, post_type: number= 0) => {
     const arg = new AddPostArg();
-    const uid = store.getStore('uid',0);
-    arg.num = store.getStore(`userInfoMap/${uid}`,{}).comm_num;
+    arg.num = num;
     arg.title = title;
     arg.body = body;
     arg.post_type = post_type;
@@ -628,8 +627,8 @@ export const showComment = (num:string, post_id:number, id:number = 0, count:num
     return new Promise((resolve,reject) => {
         clientRpcFunc(showCommentPort,arg,(r:PostArr) => {
             console.log('showComment===========',r);
-            if (r) {
-                resolve(r);
+            if (r && r.list) {
+                resolve(r.list);
             } else {
                 reject();
             }
@@ -650,8 +649,8 @@ export const showLikeList = (num:string,post_id:number,uid:number= 0,count:numbe
     return new Promise((resolve,reject) => {
         clientRpcFunc(showLaudLog,arg,(r => {
             console.log('showLikeList===========',r);
-            if (r) {
-                resolve(r);
+            if (r && r.list) {
+                resolve(r.list);
             } else {
                 reject();
             }
@@ -669,5 +668,24 @@ export const getLaudPost = () => {
             store.setStore(`laudPostList/${r.uid}`,r);
             subscribeLaudPost(store.getStore('uid'),null);
         }
+    });
+};
+
+/**
+ * 获取某条帖子中评论点赞记录
+ */
+export const getCommentLaudList = (num:string,id:number) => {
+    const param = new PostKey();
+    param.id = id;
+    param.num = num;
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(getCommentLaud,param,r => {
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
     });
 };

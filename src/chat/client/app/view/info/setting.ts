@@ -1,18 +1,16 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { MSG_TYPE, UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { addToBlackList, changeFriendAlias, removeFromBlackList } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUserHid, genUuid } from '../../../../utils/util';
-import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { getFriendAlias, getUserAvatar } from '../../logic/logic';
+import { complaintUser, getFriendAlias, getUserAvatar } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
-import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
+import { delFriend as delUserFriend, getUsersBasicInfo } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
 
 interface Props {
@@ -257,25 +255,7 @@ export class Setting extends Widget {
      * 举报用户
      */
     public complaint() {
-        const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
-        popNew('chat-client-app-widget-complaint-complaint'
-        ,{ title:'',content:content }
-        ,(selected) => {
-            if (selected.length === 0) {// 未选择举报类型不能举报
-                popNewMessage('您未选择举报类型');
-            }
-
-            let mess = `举报用户@${this.props.userInfo.name}`;
-            for (const i of selected) {
-                mess += `“${content[i]}”`; 
-            }
-            const SUID = store.getStore('flags').HAOHAI_UID;
-            sendUserMsg(SUID,mess,MSG_TYPE.COMPLAINT).then((r:UserHistory) => {
-                updateUserMessage(SUID, r);
-                popNewMessage('举报成功');
-            });
-            
-        });
+        complaintUser(this.props.userInfo.name);
     }
 
     /**
