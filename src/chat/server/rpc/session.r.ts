@@ -22,6 +22,7 @@ export const auto_login = (login: AutoLogin): AutoLoginResult => {
     const session = get_cache_session(login.uid, 'token')[0];
     const token = session ? session.value : undefined;
     const result = new AutoLoginResult();
+
     // tslint:disable-next-line:possible-timing-attack
     if (login.token !== token) {
         result.code = -1;
