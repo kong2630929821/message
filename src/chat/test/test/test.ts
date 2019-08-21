@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, commentLaudPost, createCommunityNum, getCommentLaud, getSquarePost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, CommentArr, CreateCommunity, IterCommentArg, IterSquarePostArg } from '../../server/data/rpc/community.s';
+import { addCommentPost, commentLaudPost, createCommunityNum, getCommentLaud, getSquarePost, getUserPost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, CommentArr, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg } from '../../server/data/rpc/community.s';
 import { set_gmAccount } from '../../server/data/rpc/user.p';
 
 /**
@@ -136,6 +136,17 @@ export const getUserPublicAccTest = () => {
     });
 };
 
+// 获取指定社区账号的帖子信息
+export const getUserPostTest = () => {
+    const arg = new IterPostArg();
+    arg.count = 10;
+    arg.num = '58';
+    arg.id = 0;
+    clientRpcFunc(getUserPost, arg, (r: CommentArr) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
@@ -182,6 +193,10 @@ const props = {
         {
             name: '获取用户的公众号',
             func: () => { getUserPublicAccTest(); }
+        },
+        {
+            name: '获取用户帖子',
+            func: () => { getUserPostTest(); }
         }
     ] // 按钮数组
 };
