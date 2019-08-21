@@ -9,7 +9,7 @@ struct CommunityBase {
     comm_type: u8,          //社区类型-公众号、个人、好嗨号
     property: String,       //属性 公共、登录即可访问、私有  
     owner: u32,             //所有者(创建者)
-    createtime: u32         //创建时间
+    createtime: String         //创建时间
 }
 
 /**
@@ -34,7 +34,7 @@ struct CommunityUserKey {
 struct CommunityUser {
     key: CommunityUserKey,   //key
     auth: u32,               //权限编号
-    createtime: u32          //创建时间
+    createtime: String          //创建时间
 }
 
 //帖子key
@@ -53,7 +53,7 @@ struct Post {
     title: String,      //标题
     body: String,       //正文
     owner: u32,         //发送者
-    createtime: u32,    //创建时间
+    createtime: String,    //创建时间
 }
 
 /**
@@ -66,6 +66,15 @@ struct PostCount {
     commentList: &[u32],  //评论id列表
     forwardList: &[u32],  //转发id列表
     collectList: &[u32]  //收藏id列表
+}
+
+/**
+*社区的帖子
+*/
+#[primary=num,db=file,dbMonitor=true]
+struct CommunityPost {
+    num: String,   // 社区编号
+    id_list: &[u32] // 帖子id
 }
 
 //帖子点赞记录key
@@ -81,7 +90,7 @@ struct PostLaudLogKey {
 #[primary=key,db=file,dbMonitor=true]
 struct PostLaudLog {
     key: PostLaudLogKey,       //key
-    createtime: u32,    //创建时间
+    createtime: String,    //创建时间
 }
 
 //评论key
@@ -102,7 +111,7 @@ struct Comment {
     reply: u32,         //评论表中的ID，表示回复那一条评论，可以为空
     owner: u32,         //发送者
     likeCount: u32,     //点赞数
-    createtime: u32     //创建时间
+    createtime: String     //创建时间
 }
 
 //评论点赞记录key
@@ -137,7 +146,7 @@ struct Collection {
     key: CollectionKey,       //key
     collection_type:u8,       //帖子类型图文、语言、视频
     msg: String,              //消息
-    createtime: u32           //创建时间
+    createtime: String           //创建时间
 }
 
 /**
