@@ -17,7 +17,7 @@ interface Props {
     activeTab:string;  // 当前活跃的tab
     showTag:boolean;  // 展示广场下拉
     showAcTag:string;  // 标签
-    acTag:string;   // 标签
+    acTag:number;  // 当前活跃的广场标签下标
     showUtils:boolean;  // 显示操作栏
     utilList:any[]; // 操作列表
 }
@@ -69,7 +69,7 @@ export class ContactTop extends Widget {
     // 发布帖子  fg=true 发布公众号帖子
     public editPost(e:any,fg:boolean) {
         popNew3('chat-client-app-view-info-editPost',{ isPublic:fg },() => {
-            showPost();
+            showPost(this.props.acTag + 1);
         });
         notify(e.node,'ev-next-click',{});
     }

@@ -11,8 +11,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getLaudPostList, postLaudPost, showCommentPort, showLaudLog, showPostPort, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommType, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getLaudPostList, getSquarePost, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommType, CreateCommunity, IterCommentArg, IterLaudArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -579,14 +579,15 @@ export const showUserFollow = (num_type:number = 1) => {
 /**
  * 获取最新的帖子
  */
-export const showPost = (num:string = '', id:number = 0, count:number = 20) => {
-    const arg = new IterPostArg();
+export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 20) => {
+    const arg = new IterSquarePostArg();
     arg.count = count;
     arg.id = id;
     arg.num = num;
+    arg.square_type = square_type;
 
     return new Promise((res,rej) => {
-        clientRpcFunc(showPostPort,arg,(r:PostArr) => {
+        clientRpcFunc(getSquarePost,arg,(r:PostArr) => {
             console.log('showPost=============',r);
             if (r && r.list) {
                 const data:any = r.list;

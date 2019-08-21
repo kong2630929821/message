@@ -5,7 +5,7 @@
         <img w-class="searchIcon" src="../../res/images/search-gray.png" />
     </div>
 
-    {{for i,v of [1,2,3,4]}}
-    <widget w-tag="chat-client-app-view-person-followItem"></widget>
+    {{for i,v of it.followList}}
+    <widget w-tag="chat-client-app-view-person-followItem">{{v}}</widget>
     {{end}}
 </div>
