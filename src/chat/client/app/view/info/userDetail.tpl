@@ -14,7 +14,7 @@
                         {{end}}
                     </div>
                     {{if it.isOwner}}
-                    <div w-class="followBtn" on-tap="goPublic">{{it.num ? "我的公众号":"申请公众号"}}</div>
+                    <div w-class="followBtn" on-tap="goPublic">{{it.pubNum ? "我的公众号":"申请公众号"}}</div>
                     {{else}}
                     <div w-class="{{it.followed ? 'cancelBtn':'followBtn'}}" on-tap="followUser">{{it.followed ? "取消关注":"关注ta"}}</div>
                     {{end}}

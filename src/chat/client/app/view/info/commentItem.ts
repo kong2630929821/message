@@ -2,8 +2,10 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
-import { copyToClipboard } from '../../logic/logic';
+import { getStore } from '../../data/store';
+import { complaintUser, copyToClipboard } from '../../logic/logic';
 import { commentLaud } from '../../net/rpc';
+import { parseEmoji } from '../home/square';
 
 interface Props {
     key:any;  // 帖子评论的key
@@ -11,13 +13,16 @@ interface Props {
     avatar:string;
     likeCount:number;
     createtime:string;
-    mess:string;   // 评论内容
+    msg:string;   // 评论内容 文字加图片
+    mess:string;   // 评论文字
     img:string;   // 图片
     orgName:string;  // 原评论用户
     orgMess:string;  // 原评论
     showUtils:boolean;  // 显示操作
     likeActive:boolean;  // 点赞
     gender: number;  // 性别 0 男 1 女
+    owner:number; // 评论者的uid
+    isMine:boolean;  // 是否本人
 }
 
 /**
@@ -25,25 +30,33 @@ interface Props {
  */
 export class CommentItem extends Widget {
     public props:Props = {
-        key:{},
+        key:{
+            num:'',
+            post_id:0,
+            id:0
+        },
         username:'用户名',
         avatar:'../../res/images/user_avatar.png',
         likeCount:15,
         createtime:'3-12 10:24',
+        msg:'',
         mess:'',
         img:'',
         orgName:'用户1',
         orgMess:'',
         showUtils:false,
         likeActive:false,
-        gender:0
+        gender:0,
+        owner:0,
+        isMine:false
     };
 
     public setProps(props:any) {
         super.setProps(props);
         const val = props.msg ? JSON.parse(props.msg) :{ msg:'',img:'' };
-        this.props.mess = val.msg;
+        this.props.mess = parseEmoji(val.msg);
         this.props.img = val.img; 
+        this.props.isMine = this.props.owner === getStore('uid',0);
     }
 
     /**
@@ -89,7 +102,10 @@ export class CommentItem extends Widget {
      * 复制
      */
     public copyComment() {
-        copyToClipboard(this.props.mess);
+        this.closeUtils();
+        // 复制未解析的评论文字
+        const val = this.props.msg ? JSON.parse(this.props.msg) :{ msg:'',img:'' };  
+        copyToClipboard(val);
         popNewMessage('复制成功');
     }
 
@@ -97,7 +113,8 @@ export class CommentItem extends Widget {
      * 举报
      */
     public complaint() {
-        // TODO
+        this.closeUtils();
+        complaintUser(this.props.username);
     }
 
     // 关闭操作列表

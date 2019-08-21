@@ -9,11 +9,11 @@
                 <span>159 个粉丝</span>
             </div>
             <div w-class="follow">
-                <span style="margin-right:200px;">公众id：00000000</span>
+                <span style="flex:1 0 0;">公众id：{{it.pubNum}}</span>
                 {{if it.isMine}}
-                <span>发公众号消息</span>
+                <span style="flex:1 0 0;" on-tap="sendArticle">发公众号消息</span>
                 {{else}}
-                <span>取消关注</span>
+                <span style="flex:1 0 0;" on-tap="followBtn">{{it.followed ? "取消关注":"关注ta"}}</span>
                 {{end}}
             </div>
         </div>

@@ -13,6 +13,7 @@ interface Props {
     contentInput:string; // 输入的内容
     isPublic:boolean;  // 发布公众号帖子
     isOnEmoji:boolean;  // 展开表情选择
+    num:string; // 社区ID
 }
 
 /**
@@ -27,7 +28,8 @@ export class EditPost extends Widget {
         titleInput:'',
         contentInput:'',
         isPublic:false,
-        isOnEmoji:false
+        isOnEmoji:false,
+        num:''
     };
     
     public setProps(props:any) {
@@ -43,14 +45,20 @@ export class EditPost extends Widget {
         } else {
             data = getStore('pubPostDraft', null);
         }
+        // 有草稿则赋值
         if (data) this.props = data;
         this.props.isOnEmoji = false;
+
+        const uid = getStore('uid',0);
+        this.props.num = props.num || getStore(`userInfoMap/${uid}`,{}).comm_num ;
     }
 
+    // 标题
     public titleChange(e:any) {
         this.props.titleInput = e.value;
     }
 
+    // 内容
     public contentChange(e:any) {
         this.props.contentInput = e.value;
     }
@@ -130,11 +138,21 @@ export class EditPost extends Widget {
             loadding.callback(loadding.widget);
         }
         
+        if (this.props.isPublic && !this.props.titleInput) {
+            popNewMessage('标题不能为空');
+
+            return;
+        }
+        if (!this.props.contentInput) {
+            popNewMessage('内容不能为空');
+
+            return;
+        }
         const value = {
             msg:this.props.contentInput,
             imgs:this.props.imgs
         };
-        addPost(this.props.titleInput,JSON.stringify(value)).then(r => {
+        addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then(r => {
             popNewMessage('发布成功');
             this.ok && this.ok();
         }).catch(r => {

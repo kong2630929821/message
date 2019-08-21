@@ -10,7 +10,7 @@
         </div>
     </div>
     <div w-class="friendPart">
-        <div on-tap="goNext(2)"  on-down="onShow">
+        <div on-tap="goNext(2,{{it.sid}})"  on-down="onShow">
             <chat-client-app-view-contactList-contactItem>{id: {{it.sid}}, chatType: "user"}</chat-client-app-view-contactList-contactItem>
         </div>
         {{for i,v of it1.friends}}

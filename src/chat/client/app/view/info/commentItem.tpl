@@ -32,8 +32,12 @@
 
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
         <div w-class="option" on-tap="replay">回复</div>
+        {{if it.isMine}}
         <div w-class="option" on-tap="delComment">删除</div>
+        {{end}}
         <div w-class="option" on-tap="copyComment">复制</div>
+        {{if !it.isMine}}
         <div w-class="option" on-tap="complaint">举报</div>
+        {{end}}
     </div>
 </div>
