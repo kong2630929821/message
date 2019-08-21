@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, commentLaudPost, getCommentLaud, showCommentPort } from '../../server/data/rpc/community.p';
-import { AddCommentArg, CommentArr, IterCommentArg } from '../../server/data/rpc/community.s';
+import { addCommentPost, commentLaudPost, getCommentLaud, getSquarePost, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, CommentArr, IterCommentArg, IterSquarePostArg } from '../../server/data/rpc/community.s';
 import { set_gmAccount } from '../../server/data/rpc/user.p';
 
 /**
@@ -98,6 +98,26 @@ export const getcommentLaudtest = () => {
     });
 };
 
+// 关注用户
+export const userFollowTest = () => {
+    const num = '1';
+    clientRpcFunc(userFollow, num, (r: CommentArr) => {
+        console.log(r);
+    });
+};
+
+// 获取广场分类的帖子
+export const getSquarePostTest = () => {
+    const arg = new IterSquarePostArg();
+    arg.count = 10;
+    arg.num = '1';
+    arg.id = 0;
+    arg.square_type = 4;
+    clientRpcFunc(getSquarePost, arg, (r: CommentArr) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
@@ -128,6 +148,14 @@ const props = {
         {
             name: '获取评论点赞',
             func: () => { getcommentLaudtest(); }
+        },
+        {
+            name: '分类帖子',
+            func: () => { getSquarePostTest(); }
+        },
+        {
+            name: '关注用户',
+            func: () => { userFollowTest(); }
         }
     ] // 按钮数组
 };
