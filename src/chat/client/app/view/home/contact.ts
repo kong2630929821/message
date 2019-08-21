@@ -33,7 +33,7 @@ interface Props {
     isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
     activeTab:string;  // 当前活跃的tab
-    acTag:number;   // 当前活跃的广场标签
+    acTag:number;   // 当前活跃的广场标签下标
     showTag:boolean;  // 展示广场下拉
 }
 export const TAB = {

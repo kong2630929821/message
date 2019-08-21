@@ -44,9 +44,9 @@
                 <img src="../../res/images/arrowRight.png"/>
             </div>
             <div w-class="content">
-                {{for i,v of [1,2,3,4,5]}}
+                {{for i,v of it.medalList}}
                 <div w-class="imgBox">
-                    <img src="../../res/images/tool-pictures.png" />
+                    <img src="../../../../../earn/client/app/res/image/medals/{{v.img}}.png" class="{{v.isHave?'':'grayscale'}}" style="height:80px;" />
                 </div>
                 {{end}}
             </div>

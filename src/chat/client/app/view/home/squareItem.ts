@@ -125,6 +125,7 @@ export class SquareItem extends Widget {
      * 举报
      */
     public complaint() {
+        this.closeUtils();
         complaintUser(this.props.username);
     }
 
@@ -132,6 +133,7 @@ export class SquareItem extends Widget {
      * 删除帖子
      */
     public delPost() {
+        this.closeUtils();
         // 
     }
 
@@ -139,6 +141,7 @@ export class SquareItem extends Widget {
      * 关注用户
      */
     public followUser() {
+        this.closeUtils();
         follow(this.props.key.num).then(r => {
             this.props.followed = !this.props.followed;
             this.paint();

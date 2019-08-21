@@ -70,7 +70,7 @@
         {{if it.isMine}}
         <div w-class="option" on-tap="delPost">删除</div>
         {{else}}
-        <div w-class="option" on-tap="followUser">关注</div>
+        <div w-class="option" on-tap="followUser">{{it.followed ? "取消关注":"关注"}}</div>
         <div w-class="option" on-tap="complaint">举报</div>
         {{end}}
     </div>

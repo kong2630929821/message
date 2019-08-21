@@ -4,6 +4,9 @@
 
 // ================================================ 导入
 import { popNewMessage } from '../../../../../app/utils/tools';
+import { getStore as earnGetStore } from '../../../../../earn/client/app/store/memstore';
+import { getMedalList } from '../../../../../earn/client/app/utils/util';
+import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
@@ -24,6 +27,7 @@ interface Props {
     isOwner:boolean;  // 当前用户
     isFriend: boolean; // 是否是好友
     followed:boolean;  // 是否关注
+    medalList:any[];  // 勋章列表
 }
 
 // ================================================ 导出
@@ -43,7 +47,8 @@ export class UserDetail extends Widget {
         ],
         isOwner:false,
         isFriend:true,
-        followed:true
+        followed:true,
+        medalList:[]
     };
 
     public setProps(props:any) {
@@ -71,6 +76,18 @@ export class UserDetail extends Widget {
         }
 
         this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
+
+        const data = getMedalList(CoinType.KT, 'coinType');
+        const ktNum = earnGetStore('balance/KT');
+        data.forEach((element,i) => {
+            const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
+            if (element.coinNum <= ktNum) {
+                medal.isHave = true;
+                this.props.medalList.push(medal);
+            }
+        });
+        this.props.medalList.splice(-5);
+        console.log('getMedalList',data,ktNum);
         
     }
 
