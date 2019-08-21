@@ -59,8 +59,10 @@ export const POST_INDEX = 'post_index';     // 帖子ID
 export const COMMENT_INDEX = 'comment_index';     // 评论ID
 
 // 社区类型
-export const COMMUNITY_TYPE_1 = 1;    // 公众号
-export const COMMUNITY_TYPE_2 = 2;    // 个人
+export const COMMUNITY_TYPE_1 = 0;    // 个人
+export const COMMUNITY_TYPE_2 = 1;    // 官方账号
+export const COMMUNITY_TYPE_3 = 2;    // 公众号
+
 // 社区权限
 export const COMMUNITY_AUTH_DEF = 0;    // 默认权限
 
