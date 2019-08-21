@@ -154,8 +154,9 @@ struct Collection {
 */
 #[primary=uid,db=file,dbMonitor=true]
 struct AttentionIndex {
-    uid: u32,               //用户ID
-    list: &[String]         //社区编号
+    uid: u32,                // 用户ID
+    person_list: &[String],  // 个人用户社区编号
+    public_list: &[String]   // 公众号
 }
 
 // 点赞索引表
@@ -163,4 +164,11 @@ struct AttentionIndex {
 struct LaudPostIndex{
     uid: u32,                 // 用户ID
     list: &[PostKey]   // 点赞过的帖子key
+}
+
+// 公众号索引
+#[primary=uid,db=file,dbMonitor=true]
+struct PublicAccIndex{
+    uid: u32,                 // 用户ID
+    list: &[String]   // 社区公众号
 }

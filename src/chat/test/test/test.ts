@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, commentLaudPost, getCommentLaud, getSquarePost, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, CommentArr, IterCommentArg, IterSquarePostArg } from '../../server/data/rpc/community.s';
+import { addCommentPost, commentLaudPost, createCommunityNum, getCommentLaud, getSquarePost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, CommentArr, CreateCommunity, IterCommentArg, IterSquarePostArg } from '../../server/data/rpc/community.s';
 import { set_gmAccount } from '../../server/data/rpc/user.p';
 
 /**
@@ -100,7 +100,7 @@ export const getcommentLaudtest = () => {
 
 // 关注用户
 export const userFollowTest = () => {
-    const num = '1';
+    const num = '58';
     clientRpcFunc(userFollow, num, (r: CommentArr) => {
         console.log(r);
     });
@@ -112,8 +112,26 @@ export const getSquarePostTest = () => {
     arg.count = 10;
     arg.num = '1';
     arg.id = 0;
-    arg.square_type = 4;
+    arg.square_type = 1;
     clientRpcFunc(getSquarePost, arg, (r: CommentArr) => {
+        console.log(r);
+    });
+};
+
+// 创建公众号
+export const createCommunityNumTest = () => {
+    const arg = new CreateCommunity();
+    arg.name = 'brain storm';
+    arg.comm_type = 2;
+    arg.desc = 'lalalalala';
+    clientRpcFunc(createCommunityNum, arg, (r: CommentArr) => {
+        console.log(r);
+    });
+};
+
+// 获取用户的公众号
+export const getUserPublicAccTest = () => {
+    clientRpcFunc(getUserPublicAcc, null, (r: string) => {
         console.log(r);
     });
 };
@@ -156,6 +174,14 @@ const props = {
         {
             name: '关注用户',
             func: () => { userFollowTest(); }
+        },
+        {
+            name: '创建公众号',
+            func: () => { createCommunityNumTest(); }
+        },
+        {
+            name: '获取用户的公众号',
+            func: () => { getUserPublicAccTest(); }
         }
     ] // 按钮数组
 };

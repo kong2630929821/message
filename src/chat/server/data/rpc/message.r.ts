@@ -71,6 +71,7 @@ export const getUserHistoryCursor = (uid: number): HistoryCursor => {
     const userHistoryCursorBucket = new Bucket('file', CONSTANT.USER_HISTORY_CURSOR_TABLE);
     const msgLockBucket = new Bucket('file', CONSTANT.MSG_LOCK_TABLE);
     const lastID = msgLockBucket.get(genUserHid(sid, uid))[0];
+
     const userCursor = userHistoryCursorBucket.get(genUuid(sid, uid))[0];
     const historyCursor = new HistoryCursor();
     // if (!userCursor || !lastID) {
