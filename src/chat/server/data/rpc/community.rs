@@ -58,6 +58,12 @@ struct PostArr {
     list: &[PostData],  //帖子
 }
 
+//帖子列表
+struct PostArrWithTotal {
+    list: &[PostData],  //帖子
+    total: u32,     //帖子总数
+}
+
 // 评论数据
 struct CommentData{
     key: CommentKey,       //key
