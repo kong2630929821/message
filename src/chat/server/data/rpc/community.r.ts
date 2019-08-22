@@ -1,41 +1,15 @@
 import { Env } from '../../../../pi/lang/env';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
-import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey } from '../db/community.s';
+import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey } from '../db/community.s';
 import { UserInfo } from '../db/user.s';
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData } from './community.s';
+import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, UserInfoList } from './community.s';
 import { getUid } from './group.r';
 
 declare var env: Env;
-/**
- * 首次注册创建社区个人账号
- */
-export const createCommNum = (uid:number,name:string,comm_type:number):string => {
-    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
-    // 生成社区账号
-    const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
-    const r = communityBaseBucket.get(num)[0];
-    if (!r) {
-        const communityBase = new CommunityBase();
-        communityBase.num = num;
-        communityBase.name = name;
-        communityBase.desc = '';
-        communityBase.owner = uid;
-        communityBase.property = '';
-        communityBase.createtime = Date.now().toString();
-        communityBase.comm_type = comm_type;
-        console.log('!!!!!!!!!!!!!!!!createCommNum CommunityBase',communityBase);
-
-        communityBaseBucket.put(num, communityBase);
-        userfollow(uid, num);
-
-        return num;
-    } 
-};
-
 /**
  * 创建社区账号
  */
@@ -115,6 +89,9 @@ export const userFollow = (communityNum:string):boolean => {
     if (!communityBase) return false;
     if (follow) {
         communityUserBucket.delete(key);
+        // 删除粉丝索引
+        addFansIndex(communityNum, uid, false);
+        // 删除关注索引
 
         return addNumIndex(uid, communityNum, false, communityBase.comm_type);
     }
@@ -124,6 +101,10 @@ export const userFollow = (communityNum:string):boolean => {
     value.createtime = Date.now().toString();
     console.log('!!!!!!!!!!!userFollow CommunityUser',value);
     if (communityUserBucket.put(key, value)) {
+        // 添加粉丝索引
+        addFansIndex(communityNum, uid, true);
+        // 添加关注索引
+
         return addNumIndex(uid, communityNum, true, communityBase.comm_type);
     }
    
@@ -156,6 +137,70 @@ export const showUserFollowPort = (num_type:number):NumArr => {
     console.log('showUserFollowPort!!!!!', arr);
     
     return arr;
+};
+
+/**
+ * 批量获取指定社区号的信息
+ */
+// #[rpc=rpcServer]
+export const getUserInfoByComm = (arg: CommunityNumList): UserInfoList => {
+    const userinfoList = new UserInfoList();
+    userinfoList.list = [];
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name); 
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,UserInfo._$info.name);
+    for (let i = 0; i < arg.list.length; i++) {
+        const community = communityBaseBucket.get<string, CommunityBase[]>(arg.list[i])[0];
+        if (!community) continue;
+        const uid = community.owner;
+        const userinfo = userInfoBucket.get<number, UserInfo[]>(uid)[0];
+        if (!userinfo) continue;
+        userinfoList.list.push(userinfo);
+    }
+
+    return userinfoList;
+};
+
+/**
+ *  获取指定用户的关注
+ */
+// #[rpc=rpcServer]
+export const getFollowId = (uid: number): CommunityNumList => {
+    const communityNumList = new CommunityNumList();
+    communityNumList.list = [];
+    const indexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
+    const index = indexBucket.get<number, AttentionIndex[]>(uid)[0];
+    console.log('!!!!!!!!!!!!!!!!!!index',index);
+    if (!index) return communityNumList;
+    // 去掉关注自己的个人号和公众号
+    const communityAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
+    const communityAccIndex =  communityAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
+    console.log('!!!!!!!!!!!!!!!!!!communityAccIndex',communityAccIndex);
+    if (communityAccIndex) {
+        const personIndex = index.person_list.indexOf(communityAccIndex.num);
+        index.person_list.splice(personIndex, 1);
+        for (let i = 0; i < communityAccIndex.list.length; i++) {
+            const publicIndex = index.public_list.indexOf(communityAccIndex.list[i]);
+            index.public_list.slice(publicIndex, 1);
+        }
+    }
+    communityNumList.list = index.person_list.concat(index.public_list);
+
+    return communityNumList;
+};
+
+/**
+ * 获取指定社区的粉丝
+ */
+// #[rpc=rpcServer]
+export const getFansId = (num: string): CommunityNumList => {
+    const communityNumList = new CommunityNumList();
+    communityNumList.list = [];
+    const indexBucket = new Bucket(CONSTANT.WARE_NAME, FansIndex._$info.name);
+    const fansIndex = indexBucket.get<string, FansIndex[]>(num)[0];
+    if (!fansIndex) return communityNumList;
+    communityNumList.list = fansIndex.list;
+
+    return communityNumList;
 };
 
 /**
@@ -769,6 +814,32 @@ const addNumIndex = (uid: number, num: string, addFg:boolean, comm_type: number)
 
 };
 
+// 添加/删除粉丝索引
+const addFansIndex = (num: string, uid: number, addFg:boolean): boolean => {
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,UserInfo._$info.name);
+    const userinfo = userInfoBucket.get<number, UserInfo[]>(uid)[0];
+    if (!userinfo) return false;
+    const fansNum = userinfo.comm_num;
+    const indexBucket = new Bucket(CONSTANT.WARE_NAME, FansIndex._$info.name);
+    let fansIndex = indexBucket.get<string, FansIndex[]>(num)[0];
+    if (!fansIndex) {
+        fansIndex = new FansIndex();
+        fansIndex.num = num;
+        fansIndex.list = [];
+    }
+    // 添加
+    if (addFg) {
+        fansIndex.list.push(fansNum);
+    } else { // 删除
+        const index = fansIndex.list.indexOf(fansNum);
+        if (index > -1) {
+            fansIndex.list.splice(index, 1);
+        }
+    }
+
+    return indexBucket.put(fansIndex.num, fansIndex);
+};
+
 // 为点赞帖子添加索引
 const addLaudIndex = (uid:number,id:number,num:string,addFg:boolean):boolean => {
     // 点赞索引表
@@ -829,6 +900,45 @@ export const getLaudPostList = ():LaudPostIndex => {
 };
 
 // ==============================Internal functions ==============================
+
+/**
+ * 首次注册创建社区个人账号
+ */
+export const createCommNum = (uid:number,name:string,comm_type:number):string => {
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    // 生成社区账号
+    const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
+    const r = communityBaseBucket.get(num)[0];
+    if (!r) {
+        const communityBase = new CommunityBase();
+        communityBase.num = num;
+        communityBase.name = name;
+        communityBase.desc = '';
+        communityBase.owner = uid;
+        communityBase.property = '';
+        communityBase.createtime = Date.now().toString();
+        communityBase.comm_type = comm_type;
+        communityBaseBucket.put(num, communityBase);
+        // 添加用户社区账号索引
+        const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
+        let publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
+        if (!publicAccIndex) {
+            publicAccIndex = new CommunityAccIndex();
+            publicAccIndex.uid = uid;
+            publicAccIndex.list = [];
+        }
+        if (comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
+            publicAccIndex.num = num;
+        } else {
+            publicAccIndex.list.push(num);
+        }
+        publicAccIndexBucket.put(uid, publicAccIndex);
+        userfollow(uid, num);
+
+        return num;
+    } 
+};
+
 /**
  * 关注 公众号
  */
@@ -848,6 +958,9 @@ export const userfollow = (uid: number, communityNum:string):boolean => {
     if (!communityBase) return false;
     if (follow) {
         communityUserBucket.delete(key);
+        // 删除粉丝索引
+        addFansIndex(communityNum, uid, false);
+        // 删除关注索引
 
         return addNumIndex(uid, communityNum, false, communityBase.comm_type);
     }
@@ -857,6 +970,10 @@ export const userfollow = (uid: number, communityNum:string):boolean => {
     value.createtime = Date.now().toString();
     console.log('!!!!!!!!!!!userFollow CommunityUser',value);
     if (communityUserBucket.put(key, value)) {
+        // 添加粉丝索引
+        addFansIndex(communityNum, uid, true);
+        // 添加关注索引
+        
         return addNumIndex(uid, communityNum, true, communityBase.comm_type);
     }
    

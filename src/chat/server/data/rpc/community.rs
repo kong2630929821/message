@@ -1,5 +1,7 @@
 #[path=../db/]
 use community.s::{CommunityBase, Post, Comment, PostKey, CommentKey, PostLaudLogKey};
+#[path=../db/]
+use user.s::{UserInfo};
 
 enum CommType {
     person = 0,  // 个人
@@ -131,4 +133,14 @@ struct LaudLogArr{
 // 评论id列表
 struct CommentIDList{
     list: &[u32]
+}
+
+// 社区号列表
+struct CommunityNumList{
+    list: &[String]
+}
+
+// 用户信息列表
+struct UserInfoList{
+    list: &[UserInfo]
 }

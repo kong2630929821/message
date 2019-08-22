@@ -56,6 +56,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
     });
     // 创建社区个人账号
     userInfo.comm_num = createCommNum(userInfo.uid,userInfo.name,CommType.person);
+    console.log('CommType.person: ',CommType.person);
     console.log('registeruser userinfo: ',userInfo);
     userInfoBucket.put(userInfo.uid, userInfo);
     
