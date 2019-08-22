@@ -9,7 +9,7 @@ import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { CommType } from '../../../../server/data/rpc/community.s';
 import { getStore, setStore } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
-import { addCommunityNum, applyUserFriend, follow, getUsersBasicInfo } from '../../net/rpc';
+import { addCommunityNum, applyUserFriend, follow, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
 
 interface Props {
     uid: number;
@@ -23,6 +23,7 @@ interface Props {
     isFriend: boolean; // 是否是好友
     followed:boolean;  // 是否关注
     medalList:any[];  // 勋章列表
+    postList:any[];  // 发布的帖子列表
 }
 
 /**
@@ -45,7 +46,8 @@ export class UserDetail extends Widget {
         isOwner:false,
         isFriend:true,
         followed:true,
-        medalList:[]
+        medalList:[],
+        postList:[]
     };
 
     public setProps(props:any) {
@@ -85,7 +87,11 @@ export class UserDetail extends Widget {
         });
         this.props.medalList.splice(-5);
         console.log('getMedalList',data,ktNum);
-        
+        getUserPostList(this.props.num).then((r:any) => {
+            this.props.postList = r.list;
+            this.props.numList[0][0] = r.total;
+            this.paint();
+        });
     }
 
     // 非好友获取信息

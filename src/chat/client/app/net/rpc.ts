@@ -11,8 +11,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getLaudPostList, getSquarePost, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommType, CreateCommunity, IterCommentArg, IterLaudArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getLaudPostList, getSquarePost, getUserPost, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommType, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -685,6 +685,43 @@ export const getCommentLaudList = (num:string,id:number) => {
         clientRpcFunc(getCommentLaud,param,r => {
             if (r && r.list) {
                 res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 获取某个社区账号所发的帖子
+ * id 从某一条帖子ID开始
+ */
+export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
+    const param = new IterPostArg();
+    param.num = num;
+    param.id = id;
+    param.count = count;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserPost,param,(r) => {
+            console.log('getUserPostList=============',r);
+            if (r && r.list) {
+                const data:any = r.list;
+                const uid = store.getStore('uid');
+                const numlist = store.getStore(`followNumList/${uid}`,{ person_list:[],public_list:[] });
+                const followList = numlist.person_list.concat(numlist.public_list);
+                const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
+
+                data.forEach((res,i) => {
+                    data[i].offcial = res.comm_type === CommType.official;
+                    data[i].isPublic = res.comm_type === CommType.publicAcc;
+                    const body = JSON.parse(res.body);
+                    data[i].content = parseEmoji(body.msg);
+                    data[i].imgs = body.imgs;
+                    data[i].followed = followList.indexOf(res.key.num) > -1;
+                    data[i].likeActive = likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
+                });
+                res({ list:data, total: r.total });
             } else {
                 rej();
             }
