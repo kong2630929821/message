@@ -92,9 +92,9 @@ export const getCommentPort = () => {
 // 评论点赞
 export const commentLaud = () => {
     const arg = new CommentKey();
-    arg.num = '3';
-    arg.post_id = 1;
-    arg.id = 1;
+    arg.num = '2';
+    arg.post_id = 3;
+    arg.id = 7;
     clientRpcFunc(commentLaudPost, arg, (r: CommentArr) => {
         console.log(r);
     });
