@@ -1,8 +1,3 @@
-/**
- * 联系人详细信息
- */
-
-// ================================================ 导入
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { getStore as earnGetStore } from '../../../../../earn/client/app/store/memstore';
 import { getMedalList } from '../../../../../earn/client/app/utils/util';
@@ -30,7 +25,9 @@ interface Props {
     medalList:any[];  // 勋章列表
 }
 
-// ================================================ 导出
+/**
+ * 联系人详细信息
+ */
 export class UserDetail extends Widget {
     public ok: () => void;
     public props: Props = {
@@ -71,7 +68,7 @@ export class UserDetail extends Widget {
             if (!this.props.alias) {
                 this.getUserData(this.props.uid);
             }
-            const followList = getStore(`followNumList/${sid}`,{ list:[] }).list;
+            const followList = getStore(`followNumList/${sid}`,{ person_list:[] }).person_list;
             this.props.followed = followList.indexOf(this.props.num) > -1;
         }
 

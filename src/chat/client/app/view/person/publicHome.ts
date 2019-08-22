@@ -31,7 +31,7 @@ export class PublicHome extends Widget {
         };
         super.setProps(this.props);
         const sid = getStore('uid', 0);
-        const followList = getStore(`followNumList/${sid}`,{ list:[] }).list;
+        const followList = getStore(`followNumList/${sid}`,{ public_list:[] }).public_list;
         this.props.followed = followList.indexOf(this.props.pubNum) > -1;
         this.props.isMine = this.props.uid === sid;
     }

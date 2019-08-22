@@ -86,7 +86,7 @@ const State = {
 // 关注列表
 register('followNumList',r => {
     for (const value of r.values()) {
-        State.followList = value.list;
+        State.followList = value.person_list.concat(value.public_list);
         State.postList.forEach((v,i) => {
             State.postList[i].followed = State.followList.indexOf(v.key.num) > -1;
         });
