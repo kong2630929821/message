@@ -4,7 +4,9 @@
         <div w-class="topCenter">
             <div style="display:flex;align-items:center;">
                 <span>{{it.username}}&nbsp;</span>
-                {{if it.offical}}
+                {{if it.isPublic}}
+                <div w-class="offical">公众号</div>
+                {{elseif it.offical}}
                 <div w-class="offical">官方</div>
                 {{else}}
                 <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
@@ -65,8 +67,11 @@
     {{end}}
 
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
-        <div w-class="option">删除</div>
-        <div w-class="option">关注</div>
-        <div w-class="option">举报</div>
+        {{if it.isMine}}
+        <div w-class="option" on-tap="delPost">删除</div>
+        {{else}}
+        <div w-class="option" on-tap="followUser">{{it.followed ? "取消关注":"关注"}}</div>
+        <div w-class="option" on-tap="complaint">举报</div>
+        {{end}}
     </div>
 </div>

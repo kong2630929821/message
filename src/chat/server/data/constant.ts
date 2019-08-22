@@ -59,13 +59,15 @@ export const POST_INDEX = 'post_index';     // 帖子ID
 export const COMMENT_INDEX = 'comment_index';     // 评论ID
 
 // 社区类型
-export const COMMUNITY_TYPE_1 = 1;    // 公众号
-export const COMMUNITY_TYPE_2 = 2;    // 个人
+export const COMMUNITY_TYPE_PERSON = 0;    // 个人
+export const COMMUNITY_TYPE_OFFICIAL = 1;    // 官方账号
+export const COMMUNITY_TYPE_PUBLIC = 2;    // 公众号
+
 // 社区权限
 export const COMMUNITY_AUTH_DEF = 0;    // 默认权限
 
 // 广场分类
 export const SQUARE_ALL = 1; // 所有
-export const SQUARE_FOLLOW = 2; //关注
-export const SQUARE_PUBLIC = 3; //公众号
-export const SQUARE_HOT = 4; //热门
+export const SQUARE_FOLLOW = 2; // 关注
+export const SQUARE_PUBLIC = 3; // 公众号
+export const SQUARE_HOT = 4; // 热门

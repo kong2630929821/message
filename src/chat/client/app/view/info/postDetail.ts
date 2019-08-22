@@ -2,8 +2,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, setStore } from '../../data/store';
-import { postLaud, showComment, showLikeList } from '../../net/rpc';
-import { parseEmoji } from '../home/square';
+import { getCommentLaudList, postLaud, showComment, showLikeList } from '../../net/rpc';
 
 interface Props {
     key: any;
@@ -21,6 +20,7 @@ interface Props {
     commentList: any[];  // 评论列表
     likeList: any[]; // 点赞记录
     gender: number;  // 性别 0 男 1 女
+    commentLikeList:number[]; // 点赞的评论列表
 }
 const TAB = {
     comment: 'comment',
@@ -49,7 +49,8 @@ export class PostDetail extends Widget {
         showAll: true,
         commentList: [],
         likeList: [],
-        gender: 0
+        gender: 0,
+        commentLikeList:[]
     };
 
     public setProps(props: any) {
@@ -58,19 +59,33 @@ export class PostDetail extends Widget {
             ...props
         };
         super.setProps(this.props);
+        getCommentLaudList(this.props.key.num,this.props.key.id).then((r:number[]) => {
+            this.props.commentList = this.props.commentList.map(v => {
+                v.likeActive = r.indexOf(v.key.id) > -1;
+
+                return v;
+            });
+            this.props.commentLikeList = r;
+            this.paint();
+        });
         this.init(this.props.active);
     }
 
     public init(tab:string) {
         if (tab === TAB.comment) {
             showComment(this.props.key.num, this.props.key.id).then((r: any) => {
-                this.props.commentList = r.list;
+                r = r.map(v => {
+                    v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
+
+                    return v;
+                });
+                this.props.commentList = r;
                 this.paint();
             });
         } else {
             showLikeList(this.props.key.num,this.props.key.id).then((r: any) => {
-                this.props.likeList = r.list;
-                const ind = r.list.findIndex(v => {
+                this.props.likeList = r;
+                const ind = r.findIndex(v => {
                     return v.key.uid === getStore('uid');
                 });
                 if (ind > -1) {
@@ -122,13 +137,14 @@ export class PostDetail extends Widget {
         popNew('chat-client-app-view-info-editComment', { key:this.props.key }, (r) => {
             this.props.commentList.unshift({
                 key: r.key,
-                msg: parseEmoji(r.value),
+                msg: r.value,
                 createtime: Date.now(),
                 likeCount: 0,
                 username: this.props.username,
                 avatar: this.props.avatar,
                 gender: this.props.gender
             });
+            this.props.commentCount ++;
             this.paint();
         });
     }
@@ -139,7 +155,7 @@ export class PostDetail extends Widget {
     public replyComment(e:any) {
         this.props.commentList.unshift({
             key: e.key,
-            msg: parseEmoji(e.value),
+            msg: e.value,
             createtime: Date.now(),
             likeCount: 0,
             username: this.props.username,
@@ -148,6 +164,7 @@ export class PostDetail extends Widget {
             orgName: e.username,
             orgMess: e.mess
         });
+        this.props.commentCount ++;
         this.paint();
     }
 }

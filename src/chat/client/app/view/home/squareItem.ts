@@ -2,7 +2,8 @@ import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
-import { CommType } from '../../../../server/data/rpc/community.s';
+import { getStore } from '../../data/store';
+import { complaintUser } from '../../logic/logic';
 import { follow } from '../../net/rpc';
 
 interface Props {
@@ -20,8 +21,9 @@ interface Props {
     followed:boolean;  // 已关注
     imgs:string[];  // 图片列表
     offical:boolean;  // 官方
+    isPublic:boolean; // 公众号文章
     gender:number;  // 性别 0 男 1 女
-    comm_type:number; // 社区类型
+    isMine:boolean;  // 是否本人发的帖
 }
 /**
  * 广场帖子
@@ -43,10 +45,11 @@ export class SquareItem extends Widget {
         showUtils:false,
         likeActive:false,
         followed:false,
+        isPublic:false,
         imgs:[],
         offical:false,
         gender:1,   // 性别 0男 1女
-        comm_type:0
+        isMine:false
     };
 
     public setProps(props:any) {
@@ -56,6 +59,7 @@ export class SquareItem extends Widget {
         };
         super.setProps(this.props);
         this.props.avatar = props.avatar || '../../res/images/user_avatar.png';
+        this.props.isMine = this.props.owner === getStore('uid',0);
     }
 
     public attach() {
@@ -88,17 +92,16 @@ export class SquareItem extends Widget {
      * 点赞
      */
     public likeBtn(e:any) {
+        this.closeUtils();
         notify(e.node,'ev-likeBtn',{ value:this.props.key });
     }
 
     /**
      * 评论
      */
-    public doComment() {
+    public doComment(e:any) {
         this.closeUtils();
-        popNew3('chat-client-app-view-info-editComment',{ key:this.props.key },() => {
-            popNew3('chat-client-app-view-info-postDetail',{ ...this.props,showAll:true });
-        });
+        notify(e.node,'ev-commentBtn',{ value:this.props.key });
     }
 
     // 关闭操作列表
@@ -111,17 +114,34 @@ export class SquareItem extends Widget {
      * 查看用户详情
      */
     public goUserDetail() {
-        if (this.props.comm_type === CommType.publicAcc) {
-            popNew3('chat-client-app-view-person-publicHome', { num:this.props.key.num });
+        if (this.props.isPublic) {
+            popNew3('chat-client-app-view-person-publicHome', { uid: this.props.owner, pubNum: this.props.key.num });
         } else {
             popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num });
         }
     }
 
     /**
+     * 举报
+     */
+    public complaint() {
+        this.closeUtils();
+        complaintUser(this.props.username);
+    }
+
+    /**
+     * 删除帖子
+     */
+    public delPost() {
+        this.closeUtils();
+        // 
+    }
+
+    /**
      * 关注用户
      */
     public followUser() {
+        this.closeUtils();
         follow(this.props.key.num).then(r => {
             this.props.followed = !this.props.followed;
             this.paint();

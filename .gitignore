@@ -11,6 +11,7 @@ node_modules
 /src/.depend
 /src/pi_pt
 /src/pi
+/src/earn
 *.c.ts
 *.s.ts
 *.p.ts

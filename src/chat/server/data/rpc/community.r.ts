@@ -1,14 +1,13 @@
 import { Env } from '../../../../pi/lang/env';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
-import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityBase, CommunityUser, CommunityUserKey, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey } from '../db/community.s';
+import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicAccIndex } from '../db/community.s';
 import { UserInfo } from '../db/user.s';
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg, CommentArr, CommentData, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostData, CommentIDList, IterSquarePostArg } from './community.s';
+import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostData } from './community.s';
 import { getUid } from './group.r';
-import { SQUARE_ALL, SQUARE_FOLLOW } from '../constant';
 
 declare var env: Env;
 /**
@@ -26,7 +25,7 @@ export const createCommNum = (uid:number,name:string,comm_type:number):string =>
         communityBase.desc = '';
         communityBase.owner = uid;
         communityBase.property = '';
-        communityBase.createtime = Date.now();
+        communityBase.createtime = Date.now().toString();
         communityBase.comm_type = comm_type;
         console.log('!!!!!!!!!!!!!!!!createCommNum CommunityBase',communityBase);
 
@@ -55,17 +54,42 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         communityBase.desc = arg.desc;
         communityBase.owner = uid;
         communityBase.property = '';
-        communityBase.createtime = Date.now();
+        communityBase.createtime = Date.now().toString();
         communityBase.comm_type = arg.comm_type;
         console.log('!!!!!!!!!!!!!!!!CommunityBase',communityBase);
 
         communityBaseBucket.put(num, communityBase);
+        // 添加用户公众号索引
+        if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+            const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicAccIndex._$info.name);
+            let publicAccIndex = publicAccIndexBucket.get<number, PublicAccIndex[]>(uid)[0];
+            if (!publicAccIndex) {
+                publicAccIndex = new PublicAccIndex();
+                publicAccIndex.uid = uid;
+                publicAccIndex.list = [];
+            }
+            publicAccIndex.list.push(num);
+            publicAccIndexBucket.put(uid, publicAccIndex);
+        }
         // 创建成功自动关注公众号
         userFollow(num);
 
         return num;
     } 
 
+};
+
+/**
+ *  获取用户的公众号id
+ */
+// #[rpc=rpcServer]
+export const getUserPublicAcc = (): string => {
+    const uid = getUid();
+    const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicAccIndex._$info.name);
+    const publicAccIndex = publicAccIndexBucket.get<number, PublicAccIndex[]>(uid)[0];
+    if (!publicAccIndex) return '';
+
+    return publicAccIndex.list[0];
 };
 
 /**
@@ -82,18 +106,22 @@ export const userFollow = (communityNum:string):boolean => {
     key.uid = uid;
     const follow = communityUserBucket.get(key)[0];
     console.log('!!!!!!!!!!!userFollow CommunityUser',follow);
+    // 公众号信息
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const communityBase = communityBaseBucket.get<string, CommunityBase[]>(communityNum)[0];
+    if (!communityBase) return false;
     if (follow) {
         communityUserBucket.delete(key);
 
-        return addNumIndex(uid, communityNum, false);
+        return addNumIndex(uid, communityNum, false, communityBase.comm_type);
     }
     const value = new CommunityUser();
     value.key = key;
     value.auth = CONSTANT.COMMUNITY_AUTH_DEF;
-    value.createtime = Date.now();
+    value.createtime = Date.now().toString();
     console.log('!!!!!!!!!!!userFollow CommunityUser',value);
     if (communityUserBucket.put(key, value)) {
-        return addNumIndex(uid, communityNum, true);
+        return addNumIndex(uid, communityNum, true, communityBase.comm_type);
     }
    
     return false;   
@@ -112,7 +140,7 @@ export const showUserFollowPort = (num_type:number):NumArr => {
     const r = indexBucket.get<number, AttentionIndex[]>(uid)[0];
     console.log('!!!!!!!!', r);
     if (r) {
-        const list = r.list;
+        const list = r.public_list;
         for (let i = 0; i < list.length; i++) {
             const num = list[i];
             console.log('!!!!!!!!num:', num);
@@ -152,11 +180,22 @@ export const addPostPort = (arg: AddPostArg): PostKey => {
     value.body = arg.body;
     value.post_type = arg.post_type;
     value.owner = uid;
-    value.createtime = Date.now();
+    value.createtime = Date.now().toString().toString();
     // 检查帖子是否存在
     if (!PostBucket.get(key)[0]) {
         // 写入帖子
         if (PostBucket.put(key, value)) {
+            // 写入社区的帖子
+            const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
+            let communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
+            console.log('!!!!!!!!!!!!!!!!!!communityPost',communityPost);
+            if (!communityPost) {
+                communityPost = new CommunityPost();
+                communityPost.num = arg.num;
+                communityPost.id_list = [];
+            }
+            communityPost.id_list.push(key.id);
+            communityPostBucket.put(arg.num, communityPost);
             // 初始化计数表
             const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
             const postCount = new PostCount();
@@ -205,7 +244,7 @@ export const postLaudPost = (postKey: PostKey): boolean => {
         // 添加记录
         const postLaudLog = new PostLaudLog();
         postLaudLog.key = logKey;
-        postLaudLog.createtime = Date.now();
+        postLaudLog.createtime = Date.now().toString();
         addLaudIndex(uid,postKey.id,postKey.num,true);
 
         return postLaudLogBucket.put(logKey, postLaudLog);
@@ -263,7 +302,7 @@ export const showLaudLog = (arg:IterLaudArg):LaudLogArr => {
         // 评论数据
         const commentData = new LaudLogData();
         commentData.key = v[0];
-        commentData.createtime = com.createtime;
+        commentData.createtime = parseInt(com.createtime, 10);
         commentData.username = userinfo.name;
         commentData.avatar = userinfo.avatar;
         commentData.gender = userinfo.sex;
@@ -319,31 +358,90 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
 
 /**
  * 获取广场指定类型的帖子
- * @param arg 
+ * @ param arg 
  */
-// export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
-//     const uid = getUid();
-//     let postArr: PostArr;
-//     switch(arg.square_type) {
-//         case SQUARE_ALL:
-//             const iterArg = new IterPostArg();
-//             iterArg.count = arg.count;
-//             iterArg.id = arg.id;
-//             iterArg.num = arg.num;
-//             postArr = showPostPort(iterArg);
-//             break;
-//         case SQUARE_FOLLOW:
-//             const indexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
-//             const attentionIndex = indexBucket.get<number, AttentionIndex[]>(uid)[0];
-//             for (let i = 0; i < attentionIndex.list.length; i++) {
-//                 const iterArg = new IterPostArg();
-//                 iterArg.count = arg.count;
-//                 iterArg.id = arg.id;
-//                 iterArg.num = arg.num;
-                
-//             }
-//     }
-// }
+// #[rpc=rpcServer]
+export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
+    const uid = getUid();
+    let postArr: PostArr;
+    switch (arg.square_type) {
+        case CONSTANT.SQUARE_ALL: // 所有
+            const iterArg = new IterPostArg();
+            iterArg.count = arg.count;
+            iterArg.id = arg.id;
+            iterArg.num = arg.num;
+            postArr = showPostPort(iterArg);
+            break;
+        case CONSTANT.SQUARE_FOLLOW: // 关注
+            // 获取关注的用户
+            const indexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
+            const attentionIndex = indexBucket.get<number, AttentionIndex[]>(uid)[0];
+            console.log('!!!!!!!!!!!!!!!!!!!!!!attentionIndex', attentionIndex);
+            const post_id_list: PostKey[] = [];
+            for (let i = 0; i < attentionIndex.person_list.length; i++) {
+                // 获取关注社区账户的帖子
+                const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
+                let communityPost = communityPostBucket.get<string, CommunityPost[]>(attentionIndex.person_list[i])[0];
+                if (!communityPost) {
+                    communityPost = new CommunityPost();
+                    communityPost.num = attentionIndex.person_list[i];
+                    communityPost.id_list = [];
+                }
+                console.log('!!!!!!!!!!!!!!!!!!!!!!communityPost', communityPost);
+                const post_id_list1 = communityPost.id_list;
+                for (let j = 0; j < post_id_list1.length; j++) {
+                    const postKey = new PostKey();
+                    postKey.id = post_id_list1[j];
+                    postKey.num = communityPost.num;
+                    post_id_list.push(postKey);
+                }
+            }
+            console.log('!!!!!!!!!!!!!!!!!!!!!!post_id_list', post_id_list);
+            // 从所有关注的社区账户的帖子中获取最新的指定数量的帖子id
+            postIdSort(post_id_list, 0, post_id_list.length - 1);
+            let index = -1;
+            for (let i = 0; i < post_id_list.length; i++) {
+                if (post_id_list[i].id === arg.id && post_id_list[i].num === arg.num) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index >= 0) {
+                post_id_list.splice(index, post_id_list.length - index + 1);
+            }
+            post_id_list.reverse();
+            postArr = new PostArr();
+            postArr.list = [];
+            let count = 0;
+            // 获取帖子内容
+            for (let i = 0; i < post_id_list.length; i++) {
+                if (count >= arg.count) break;
+                const postData = getPostInfoById(post_id_list[i]);
+                postArr.list.push(postData);
+                count ++;
+            }
+            break;
+        case CONSTANT.SQUARE_PUBLIC: // 公众号
+            const iterArg2 = new IterPostArg();
+            iterArg2.count = arg.count;
+            iterArg2.id = arg.id;
+            iterArg2.num = arg.num;
+            postArr = getAllPublicPost(iterArg2);
+            break;
+        case CONSTANT.SQUARE_HOT: // 热门
+            const iterArg1 = new IterPostArg();
+            iterArg1.count = arg.count;
+            iterArg1.id = arg.id;
+            iterArg1.num = arg.num;
+            postArr = getHotPost(iterArg1);
+            break;
+        default:
+
+            return;
+    }
+
+    return postArr;
+};
 
 /**
  * 评论
@@ -365,14 +463,14 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
     value.likeCount = 0;
     value.reply = arg.reply;
     value.owner = uid;
-    value.createtime = Date.now();
+    value.createtime = Date.now().toString();
     // 检查评论是否存在
     if (!commentBucket.get(key)[0]) {
         const postkey = new PostKey();
         postkey.id = arg.post_id;
         postkey.num = arg.num;
         const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
-        postCount.commentList.push(key.id),
+        postCount.commentList.push(key.id);
         console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost', postCount);
         // 添加评论计数
         if (!postCountBucket.put(postkey, postCount)) {
@@ -442,7 +540,7 @@ export const showCommentPort = (arg: IterCommentArg) :CommentArr => {
     const list = new CommentArr();
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
-    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
+    const postCount:PostCount = postCountBucket.get<PostKey, PostCount[]>(postKey)[0];
     const arr:CommentData[] = [];
     let count = 0;
     if (postCount) {
@@ -456,7 +554,7 @@ export const showCommentPort = (arg: IterCommentArg) :CommentArr => {
             commentKey.id = postCount.commentList[i];
             commentKey.num = arg.num;
             commentKey.post_id = arg.post_id;
-            const com = commentBucket.get<CommentKey, Comment>(commentKey)[0];
+            const com = commentBucket.get<CommentKey, Comment[]>(commentKey)[0];
             const user = new GetUserInfoReq();
             user.uids = [com.owner];
             const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
@@ -464,7 +562,7 @@ export const showCommentPort = (arg: IterCommentArg) :CommentArr => {
             const commentData = new CommentData();
             commentData.key = commentKey;
             commentData.msg = com.msg;
-            commentData.createtime = com.createtime;
+            commentData.createtime = parseInt(com.createtime, 10);
             commentData.likeCount = com.likeCount;
             commentData.owner = com.owner;
             commentData.reply = com.reply;
@@ -556,16 +654,16 @@ export const getCommentLaud = (postKey: PostKey): CommentIDList => {
             logKey.id = postCount.commentList[i];
             const logR = CommentLaudLogBucket.get(logKey)[0];
             if (logR) {
-                commentIdList.list.push(postCount.commentList[i])
+                commentIdList.list.push(postCount.commentList[i]);
             }
         }
     }
 
     return commentIdList;
-}
+};
 
-// 添加公众号索引
-const addNumIndex = (uid: number, num: string, addFg:boolean):boolean => {
+// 添加关注索引
+const addNumIndex = (uid: number, num: string, addFg:boolean, comm_type: number):boolean => {
     // 关注索引表
     const indexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
     const r = indexBucket.get<number, AttentionIndex[]>(uid)[0];
@@ -573,22 +671,46 @@ const addNumIndex = (uid: number, num: string, addFg:boolean):boolean => {
     if (!r && addFg) {
         const index = new AttentionIndex();
         index.uid = uid;
-        index.list = [num];
+        // 不存在关注的用户或公众号时 根据类型添加到用户的关注列表
+        if (comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
+            index.person_list = [num];
+            index.public_list = [];
+        } else {
+            index.person_list = [];
+            index.public_list = [num];
+        }
         
         indexBucket.put(uid, index);
     } else if (r) {
-        const arr = r.list;
-        const ind = arr.indexOf(num);
-        if (addFg && ind === -1) {
-            arr.push(num);
-            r.list = arr;
-        
-            indexBucket.put(uid, r);
-        } else if (!addFg && ind > -1) {
-            arr.splice(ind,1);
-            r.list = arr;
-
-            indexBucket.put(uid,r);
+        // 不存在指定关注的用户或公众号时 根据类型和addFg从指定的关注列表中添加或删除id
+        if (comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
+            const arr = r.person_list;
+            const ind = arr.indexOf(num);
+            if (addFg && ind === -1) {
+                arr.push(num);
+                r.person_list = arr;
+            
+                indexBucket.put(uid, r);
+            } else if (!addFg && ind > -1) {
+                arr.splice(ind,1);
+                r.person_list = arr;
+    
+                indexBucket.put(uid,r);
+            }
+        } else {
+            const arr = r.public_list;
+            const ind = arr.indexOf(num);
+            if (addFg && ind === -1) {
+                arr.push(num);
+                r.public_list = arr;
+            
+                indexBucket.put(uid, r);
+            } else if (!addFg && ind > -1) {
+                arr.splice(ind,1);
+                r.public_list = arr;
+    
+                indexBucket.put(uid,r);
+            }
         }
     }
     console.log('!!!!!!!!!!!addNumIndex AttentionIndex',r);
@@ -669,21 +791,131 @@ export const userfollow = (uid: number, communityNum:string):boolean => {
     key.uid = uid;
     const follow = communityUserBucket.get(key)[0];
     console.log('!!!!!!!!!!!userFollow CommunityUser',follow);
+    // 公众号信息
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const communityBase = communityBaseBucket.get<string, CommunityBase[]>(communityNum)[0];
+    console.log('!!!!!!!!!!!communityBase',communityBase);
+    if (!communityBase) return false;
     if (follow) {
         communityUserBucket.delete(key);
 
-        return addNumIndex(uid, communityNum, false);
+        return addNumIndex(uid, communityNum, false, communityBase.comm_type);
     }
     const value = new CommunityUser();
     value.key = key;
     value.auth = CONSTANT.COMMUNITY_AUTH_DEF;
-    value.createtime = Date.now();
+    value.createtime = Date.now().toString();
     console.log('!!!!!!!!!!!userFollow CommunityUser',value);
     if (communityUserBucket.put(key, value)) {
-        return addNumIndex(uid, communityNum, true);
+        return addNumIndex(uid, communityNum, true, communityBase.comm_type);
     }
    
     return false;   
+};
+
+/**
+ * 获取热门帖子
+ * @ param arg 
+ */
+export const getHotPost = (arg: IterPostArg) :PostArr => {
+    const id = arg.id;
+    const num = arg.num;
+    let key:PostKey;
+    if (id <= 0) {
+        key = undefined;
+    } else {
+        key = new PostKey();
+        key.id = id;
+        key.num = num;
+    }
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const iter = postBucket.iter(key, false);
+    console.log('!!!!!!!!!!!!showPostPort iter:', iter);
+    const arr:PostData[] = [];
+    // 遍历一个月内的帖子
+    const timestamps = new Date().getTime();
+    const today = get_day(timestamps);
+    do {
+        const v = iter.next();
+        console.log('!!!!!!!!!!!!post:', v);
+        if (!v) {
+            break;
+        }
+        const post:Post = v[1];
+        const postKey = v[0];
+        const postData = getPostInfo(postKey, post);
+        if (today - get_day(postData.createtime) > 30) break;
+        arr.push(postData);
+    } while (iter);
+    // 按热度排序
+    postHotSort(arr, 0, arr.length - 1);
+    console.log('!!!!!!!!!!!!Sortedarr:', arr);
+    // 从请求参数中的帖子id获取之后的n条帖子
+    let index = false;
+    const postList = new PostArr();
+    postList.list = [];
+    let count = 0;
+    for (let i = 0; i < arr.length; i++) {
+        if (count >= arg.count) break;
+        if (arr[i].key.id === arg.id && arr[i].key.num === arg.num) {
+            index = true;
+        }
+        if (index || !key) {
+            postList.list.push(arr[i]);
+            count ++;
+        }
+    }
+
+    return postList;
+};
+
+/**
+ * 获取所有公众号帖子
+ * @ param arg 
+ */
+export const getAllPublicPost = (arg: IterPostArg) :PostArr => {
+    const id = arg.id;
+    const num = arg.num;
+    let key:PostKey;
+    if (id <= 0) {
+        key = undefined;
+    } else {
+        key = new PostKey();
+        key.id = id;
+        key.num = num;
+    }
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const iter = postBucket.iter(key, false);
+    console.log('!!!!!!!!!!!!showPostPort iter:', iter);
+    const arr:PostData[] = [];
+    // 遍历一个月内的帖子
+    const timestamps = new Date().getTime();
+    const today = get_day(timestamps);
+    let count = 0;
+    do {
+        const v = iter.next();
+        console.log('!!!!!!!!!!!!post:', v);
+        if (!v) {
+            break;
+        }
+        const post:Post = v[1];
+        const postKey = v[0];
+        const postData = getPostInfo(postKey, post);
+        if (today - get_day(postData.createtime) > 30) break;
+        // 获取社区账户类型
+        const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+        const communityBase = communityBaseBucket.get<string, CommunityBase[]>(postData.key.num)[0];
+        console.log('!!!!!!!!!!!!communityBase.comm_type:', communityBase.comm_type);
+        if (communityBase.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
+            arr.push(postData);
+            count ++;
+        }
+    } while (count < arg.count);
+    // 从请求参数中的帖子id获取之后的n条帖子
+    const postList = new PostArr();
+    postList.list = arr;
+
+    return postList;
 };
 
 /**
@@ -703,7 +935,7 @@ export const getPostInfo = (postKey: PostKey, post: Post): PostData => {
     postData.key = postKey;
     postData.body = post.body;
     postData.collectCount = valueCount.collectList.length;
-    postData.createtime = post.createtime;
+    postData.createtime = parseInt(post.createtime, 10);
     postData.forwardCount = valueCount.forwardList.length;
     postData.likeCount = valueCount.likeList.length;
     postData.commentCount = valueCount.commentList.length;
@@ -716,4 +948,90 @@ export const getPostInfo = (postKey: PostKey, post: Post): PostData => {
     postData.comm_type = commBase.comm_type;
 
     return postData;
-}
+};
+
+/**
+ * 获取指定社区账户帖子信息
+ * @ param postKey
+ */
+export const getPostInfoById = (postKey: PostKey): PostData => {
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
+    const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+    const user = new GetUserInfoReq();
+    user.uids = [post.owner];
+    const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
+    const commBase:CommunityBase = communityBaseBucket.get(postKey.num)[0]; // 社区基础信息
+    // 读取点赞等数据
+    const valueCount = postCountBucket.get<PostKey, PostCount[]>(postKey)[0];
+    const postData = new PostData();
+    postData.key = postKey;
+    postData.body = post.body;
+    postData.collectCount = valueCount.collectList.length;
+    postData.createtime = parseInt(post.createtime, 10);
+    postData.forwardCount = valueCount.forwardList.length;
+    postData.likeCount = valueCount.likeList.length;
+    postData.commentCount = valueCount.commentList.length;
+    postData.owner = post.owner;
+    postData.post_type = post.post_type;
+    postData.title = post.title;
+    postData.username = userinfo.name;
+    postData.avatar = userinfo.avatar;
+    postData.gender = userinfo.sex;
+    postData.comm_type = commBase.comm_type;
+
+    return postData;
+};
+
+// postKey根据帖子id快速排序
+const postIdSort = (list: any[], left: number, right: number) => {
+    console.log('sort in!!!!!!!!!!!!!!!!!', { left, right });
+    if (left > right) return;
+    let i = left;
+    let j = right;
+    const temp = list[i];
+    if (i < j) {
+        while (i < j && list[j].id > temp.id) {
+            j --;
+        }
+        list[i] = list[j];
+        while (i < j && list[i].id < temp.id) {
+            i ++;
+        }
+        list[j] = list[i];
+    }
+    list[i] = temp;
+    postIdSort(list, left, i - 1);
+    postIdSort(list, i + 1, right);
+};
+
+// postKey根据帖子热度快速排序
+const postHotSort = (list: any[], left: number, right: number) => {
+    if (left > right) return;
+    let i = left;
+    let j = right;
+    const temp = list[i];
+    console.log('likeCount!!!!!!!!!!!!!!!!!', temp.likeCount);
+    if (i < j) {
+        while (i < j && ((list[j].likeCount + list[j].commentCount) <= (temp.likeCount + temp.commentCount))) {
+            j --;
+        }
+        list[i] = list[j];
+        while (i < j && ((list[i].likeCount + list[i].commentCount) > (temp.likeCount + temp.commentCount))) {
+            i ++;
+        }
+        list[j] = list[i];
+    }
+    list[i] = temp;
+    postHotSort(list, left, i - 1);
+    postHotSort(list, i + 1, right);
+};
+
+// 获取1970年1月1日距今的时间(单位：天)
+export const get_day  = (timestamps: number):number => {
+    const time = timestamps + 28800000;
+    console.log('timestamps !!!!!!!!!!!!!!!', time);
+
+    return Math.floor(time / (1000 * 60 * 60 * 24));
+};

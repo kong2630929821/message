@@ -13,7 +13,7 @@ interface Props {
     tagList:string[];  // 标签列表
     active:number;  // 当前显示的标签
 }
-export const TagList = ['广场','关注','热门','公众号'];
+export const TagList = ['广场','关注','公众号','热门'];
 /**
  * 广场
  */
@@ -32,7 +32,7 @@ export class Square extends Widget {
         };
         super.setProps(this.props);
         this.state = State;
-        showPost();
+        showPost(this.props.active + 1);
     }
 
     // 切换tag
@@ -41,11 +41,12 @@ export class Square extends Widget {
         this.props.active = ind;
         this.paint();
         notify(e.node,'ev-square-change',{ value:ind });
+        showPost(ind + 1);
     }
 
     // 管理我关注的公众号 其他账号
     public goManage() {
-        popNew3('chat-client-app-view-person-manageFollow');
+        popNew3('chat-client-app-view-person-manageFollow',{ isPublic:this.props.active === 2 });
     }
 
     /**
@@ -61,6 +62,18 @@ export class Square extends Widget {
             v.likeActive = !v.likeActive;
             v.likeCount += v.likeActive ? 1 :-1;
             this.paint();
+        });
+    }
+
+    /**
+     * 评论
+     */
+    public commentBtn(i:number) {
+        const v = this.state.postList[i];
+        popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
+            v.commentCount ++;
+            this.paint();
+            popNew3('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
         });
     }
 

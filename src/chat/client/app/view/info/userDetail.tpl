@@ -14,7 +14,7 @@
                         {{end}}
                     </div>
                     {{if it.isOwner}}
-                    <div w-class="followBtn" on-tap="goPublic">{{it.num ? "我的公众号":"申请公众号"}}</div>
+                    <div w-class="followBtn" on-tap="goPublic">{{it.pubNum ? "我的公众号":"申请公众号"}}</div>
                     {{else}}
                     <div w-class="{{it.followed ? 'cancelBtn':'followBtn'}}" on-tap="followUser">{{it.followed ? "取消关注":"关注ta"}}</div>
                     {{end}}
@@ -44,9 +44,9 @@
                 <img src="../../res/images/arrowRight.png"/>
             </div>
             <div w-class="content">
-                {{for i,v of [1,2,3,4,5]}}
+                {{for i,v of it.medalList}}
                 <div w-class="imgBox">
-                    <img src="../../res/images/tool-pictures.png" />
+                    <img src="../../../../../earn/client/app/res/image/medals/{{v.img}}.png" class="{{v.isHave?'':'grayscale'}}" style="height:80px;" />
                 </div>
                 {{end}}
             </div>

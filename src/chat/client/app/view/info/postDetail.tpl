@@ -4,10 +4,8 @@
         <div style="margin: 20px 0;">
             {{if it.isPublic}}
             <div w-class="title">{{it.title}}</div>
-            <widget w-tag="chat-client-app-view-home-pubPostItem">{{it}}</widget>
-            {{else}}
-            <widget w-tag="chat-client-app-view-home-squareItem">{{it}}</widget>
             {{end}}
+            <widget w-tag="chat-client-app-view-home-squareItem">{{it}}</widget>
 
 
             <div w-class="commentBox">
