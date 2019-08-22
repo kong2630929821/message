@@ -1,7 +1,4 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
-import { getStore as earnGetStore } from '../../../../../earn/client/app/store/memstore';
-import { getMedalList } from '../../../../../earn/client/app/utils/util';
-import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserInfo } from '../../../../server/data/db/user.s';
@@ -9,7 +6,7 @@ import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { CommType } from '../../../../server/data/rpc/community.s';
 import { getStore, setStore } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
-import { addCommunityNum, applyUserFriend, follow, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
+import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getMyPublicNum, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
 
 interface Props {
     uid: number;
@@ -24,6 +21,8 @@ interface Props {
     followed:boolean;  // 是否关注
     medalList:any[];  // 勋章列表
     postList:any[];  // 发布的帖子列表
+    followList:string[];  // 关注列表
+    fansList:string[];  // 粉丝列表
 }
 
 /**
@@ -39,15 +38,17 @@ export class UserDetail extends Widget {
         alias: '',
         avatar:'',
         numList:[
-            [114,'动态'],
-            [302,'关注'],
-            [159,'粉丝']
+            [0,'动态'],
+            [0,'关注'],
+            [0,'粉丝']
         ],
         isOwner:false,
         isFriend:true,
         followed:true,
         medalList:[],
-        postList:[]
+        postList:[],
+        followList:[],
+        fansList:[]
     };
 
     public setProps(props:any) {
@@ -62,34 +63,58 @@ export class UserDetail extends Widget {
         if (!this.props.num) {  // 不传则默认查看个人社区账号
             this.props.num = this.props.userInfo.comm_num;
         }
+
+        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
+        this.init(sid);
+
+        // const data = getMedalList(CoinType.KT, 'coinType');
+        // const ktNum = earnGetStore('balance/KT');
+        // data.forEach((element,i) => {
+        //     const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
+        //     if (element.coinNum <= ktNum) {
+        //         medal.isHave = true;
+        //         this.props.medalList.push(medal);
+        //     }
+        // });
+        // this.props.medalList.splice(-5);
+        // console.log('getMedalList',data,ktNum);
         
-        if (!this.props.isOwner) {
+    }
+
+    public init(sid:number) {
+        const numsList = getStore(`followNumList/${sid}`,{ person_list:[],public_list:[]  });
+        const followList = numsList.person_list.concat(numsList.public_list);
+        if (this.props.isOwner) {
+            getMyPublicNum().then((r:string) => {
+                this.props.pubNum = r;
+                this.paint();
+            });
+            this.props.followList = followList;  // 关注
+            this.props.numList[1][0] = followList.length;
+        
+        } else {  
             const v = getFriendAlias(this.props.uid);
             this.props.alias = v.name;
             this.props.isFriend = v.isFriend;
             if (!this.props.alias) {
                 this.getUserData(this.props.uid);
             }
-            const followList = getStore(`followNumList/${sid}`,{ person_list:[] }).person_list;
+           
             this.props.followed = followList.indexOf(this.props.num) > -1;
+            getFollowList(this.props.uid).then((r:string[]) => {
+                this.props.followList = r;  // 关注
+                this.props.numList[1][0] = r.length;
+                this.paint();
+            });
         }
-
-        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
-
-        const data = getMedalList(CoinType.KT, 'coinType');
-        const ktNum = earnGetStore('balance/KT');
-        data.forEach((element,i) => {
-            const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
-            if (element.coinNum <= ktNum) {
-                medal.isHave = true;
-                this.props.medalList.push(medal);
-            }
-        });
-        this.props.medalList.splice(-5);
-        console.log('getMedalList',data,ktNum);
         getUserPostList(this.props.num).then((r:any) => {
-            this.props.postList = r.list;
+            this.props.postList = r.list;  // 动态
             this.props.numList[0][0] = r.total;
+            this.paint();
+        });
+        getFansList(this.props.num).then((r:string[]) => {
+            this.props.fansList = r;  // 粉丝
+            this.props.numList[2][0] = r.length;
             this.paint();
         });
     }
@@ -120,7 +145,7 @@ export class UserDetail extends Widget {
 
     // 动态 粉丝 关注列表
     public goPersonHome(i:number) {
-        popNew('chat-client-app-view-person-personHome',{ activeTab:i });
+        popNew('chat-client-app-view-person-personHome',{ activeTab:i,postList:this.props.postList,followList:this.props.followList,fansList:this.props.fansList });
     }
 
     // 申请公众号 去我的公众号

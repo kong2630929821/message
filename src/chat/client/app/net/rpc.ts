@@ -11,8 +11,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getLaudPostList, getSquarePost, getUserPost, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommType, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getFansId, getFollowId, getLaudPostList, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -722,6 +722,73 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
                     data[i].likeActive = likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
                 });
                 res({ list:data, total: r.total });
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 获取用户的关注列表
+ */
+export const getFollowList = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getFollowId,uid,r => {
+            console.log('getFollowList=============',r);
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 获取用户的粉丝列表
+ */
+export const getFansList = (num:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getFansId,num,r => {
+            console.log('getFansList=============',r);
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 获取当前用户的公众号ID
+ */
+export const getMyPublicNum = () => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserPublicAcc,null,r => {
+            console.log('getMyPublicNum=============',r);
+            if (r) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 通过社区ID批量获取用户信息
+ */
+export const getUserInfoByNum = (nums:string[]) => {
+    const param = new CommunityNumList();
+    param.list = nums;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserInfoByComm,param,(r) => {
+            console.log('getUserInfoByNum=============',r);
+            if (r && r.list) {
+                res(r.list);
             } else {
                 rej();
             }
