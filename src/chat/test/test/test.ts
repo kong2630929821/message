@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, commentLaudPost, createCommunityNum, getCommentLaud, getSquarePost, getUserPost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, CommentArr, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg } from '../../server/data/rpc/community.s';
+import { addCommentPost, commentLaudPost, createCommunityNum, getCommentLaud, getFansId, getFollowId, getSquarePost, getUserPost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, CommentArr, CommunityNumList, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg, PostArr, PostArrWithTotal } from '../../server/data/rpc/community.s';
 import { set_gmAccount } from '../../server/data/rpc/user.p';
 
 /**
@@ -100,8 +100,8 @@ export const getcommentLaudtest = () => {
 
 // 关注用户
 export const userFollowTest = () => {
-    const num = '58';
-    clientRpcFunc(userFollow, num, (r: CommentArr) => {
+    const num = '5';
+    clientRpcFunc(userFollow, num, (r: boolean) => {
         console.log(r);
     });
 };
@@ -110,10 +110,10 @@ export const userFollowTest = () => {
 export const getSquarePostTest = () => {
     const arg = new IterSquarePostArg();
     arg.count = 10;
-    arg.num = '1';
+    arg.num = '5';
     arg.id = 0;
     arg.square_type = 1;
-    clientRpcFunc(getSquarePost, arg, (r: CommentArr) => {
+    clientRpcFunc(getSquarePost, arg, (r: PostArr) => {
         console.log(r);
     });
 };
@@ -124,7 +124,7 @@ export const createCommunityNumTest = () => {
     arg.name = 'brain storm';
     arg.comm_type = 2;
     arg.desc = 'lalalalala';
-    clientRpcFunc(createCommunityNum, arg, (r: CommentArr) => {
+    clientRpcFunc(createCommunityNum, arg, (r: string) => {
         console.log(r);
     });
 };
@@ -140,9 +140,25 @@ export const getUserPublicAccTest = () => {
 export const getUserPostTest = () => {
     const arg = new IterPostArg();
     arg.count = 10;
-    arg.num = '58';
+    arg.num = '3';
     arg.id = 0;
-    clientRpcFunc(getUserPost, arg, (r: CommentArr) => {
+    clientRpcFunc(getUserPost, arg, (r: PostArrWithTotal) => {
+        console.log(r);
+    });
+};
+
+// 获取关注
+export const getFollowIdTest = () => {
+    const uid = 10004;
+    clientRpcFunc(getFollowId, uid, (r: CommunityNumList) => {
+        console.log(r);
+    });
+};
+
+// 获取粉丝
+export const getFansIdTest = () => {
+    const id = '5';
+    clientRpcFunc(getFansId, id, (r: CommunityNumList) => {
         console.log(r);
     });
 };
@@ -191,12 +207,20 @@ const props = {
             func: () => { createCommunityNumTest(); }
         },
         {
-            name: '获取用户的公众号',
+            name: '获取公众号',
             func: () => { getUserPublicAccTest(); }
         },
         {
             name: '获取用户帖子',
             func: () => { getUserPostTest(); }
+        },
+        {
+            name: '获取关注',
+            func: () => { getFollowIdTest(); }
+        },
+        {
+            name: '获取粉丝',
+            func: () => { getFansIdTest(); }
         }
     ] // 按钮数组
 };
