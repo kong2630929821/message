@@ -70,8 +70,8 @@
                 <span style="flex:1 0 0;">个人动态</span>
             </div>
             <div>
-                {{for i,v of [1,2,3]}}
-                <widget w-tag="chat-client-app-view-home-squareItem" style="margin-top:20px;"></widget>
+                {{for i,v of it.postList}}
+                <widget w-tag="chat-client-app-view-home-squareItem" style="margin-top:20px;">{{v}}</widget>
                 {{end}}
             </div>
         </div>
