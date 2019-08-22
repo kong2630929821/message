@@ -3,10 +3,11 @@ import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey } from '../db/community.s';
 import { UserInfo } from '../db/user.s';
+import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, UserInfoList } from './community.s';
+import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, ReplyData, UserInfoList } from './community.s';
 import { getUid } from './group.r';
 
 declare var env: Env;
@@ -229,6 +230,7 @@ export const addPostPort = (arg: AddPostArg): PostKey => {
     value.post_type = arg.post_type;
     value.owner = uid;
     value.createtime = Date.now().toString().toString();
+    value.state = CONSTANT.NORMAL_STATE;
     // 检查帖子是否存在
     if (!PostBucket.get(key)[0]) {
         // 写入帖子
@@ -392,6 +394,7 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
         }
         const post:Post = v[1];
         const postKey = v[0];
+        if (post.state === CONSTANT.DELETE_STATE) continue;
         const postData = getPostInfo(postKey, post);
         arr.push(postData);
         console.log('!!!!!!!!!!!!!!!!!!!!!!showPostPort PostData', postData);
@@ -465,6 +468,7 @@ export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
             for (let i = 0; i < post_id_list.length; i++) {
                 if (count >= arg.count) break;
                 const postData = getPostInfoById(post_id_list[i]);
+                if (!postData) continue;
                 postArr.list.push(postData);
                 count ++;
             }
@@ -539,6 +543,22 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
 };
 
 /**
+ * 删除帖子
+ */
+// #[rpc=rpcServer]
+export const deletePost = (postKey: PostKey): number => {
+    const uid = getUid();
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+    if (!post) return POST_NOT_EXIST;
+    if (uid !== post.owner) return CANT_DETETE_OTHERS_POST;
+    post.state = CONSTANT.DELETE_STATE;
+    if (!postBucket.put(postKey, post)) return DB_ERROR;
+
+    return CONSTANT.RESULT_SUCCESS;
+};
+
+/**
  * 评论
  */
 // #[rpc=rpcServer]
@@ -564,9 +584,9 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
         const postkey = new PostKey();
         postkey.id = arg.post_id;
         postkey.num = arg.num;
-        const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
+        const postCount = postCountBucket.get<PostKey, PostCount[]>(postkey)[0];
+        console.log('!!!!!!!!!!!!!!!!!!!!!!commentList', postCount);
         postCount.commentList.push(key.id);
-        console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost', postCount);
         // 添加评论计数
         if (!postCountBucket.put(postkey, postCount)) {
             key.num = '';
@@ -594,12 +614,12 @@ export const delCommentPost = (arg: CommentKey): number => {
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
     const comment = commentBucket.get(arg)[0];
     // 检查评论是否存在
-    if (comment) {
-        return 0;
+    if (!comment) {
+        return COMMENT_NOT_EXIST;
     }
     // 不能删除其他人发的评论
     if (uid !== comment.owner) { 
-        return -1;
+        return CANT_DETETE_OTHERS_COMMENT;
     }
     const postkey = new PostKey();
     postkey.id = arg.post_id;
@@ -611,15 +631,15 @@ export const delCommentPost = (arg: CommentKey): number => {
     // 添加评论计数
     if (!postCountBucket.put(postkey, postCount)) {
         
-        return 0;
+        return DB_ERROR;
     }
     // 删除评论记录
     if (!commentBucket.delete(arg)) {
        
-        return 0;
+        return DB_ERROR;
     }
     
-    return 1;
+    return CONSTANT.RESULT_SUCCESS;
 };
 
 /**
@@ -660,11 +680,34 @@ export const showCommentPort = (arg: IterCommentArg) :CommentArr => {
             commentData.createtime = parseInt(com.createtime, 10);
             commentData.likeCount = com.likeCount;
             commentData.owner = com.owner;
-            commentData.reply = com.reply;
             commentData.comment_type = com.comment_type;
             commentData.username = userinfo.name;
             commentData.avatar = userinfo.avatar;
             commentData.gender = userinfo.sex;
+            // commentData.reply = new ReplyData();
+            if (com.reply !== 0) { // 如果评论为其他评论的回复 获取原评论信息
+                const commentKey1 = new CommentKey();
+                commentKey1.id = com.reply;
+                commentKey1.num = arg.num;
+                commentKey1.post_id = arg.post_id;
+                const com1 = commentBucket.get<CommentKey, Comment[]>(commentKey1)[0];
+                // 原评论用户信息
+                const user1 = new GetUserInfoReq();
+                user1.uids = [com1.owner];
+                const userinfo1:UserInfo = getUsersInfo(user1).arr[0];  // 用户信息
+                const replyData = new ReplyData();
+                replyData.key = commentKey1;
+                replyData.msg = com1.msg;
+                replyData.createtime = parseInt(com1.createtime, 10);
+                replyData.likeCount = com1.likeCount;
+                replyData.owner = com1.owner;
+                replyData.comment_type = com1.comment_type;
+                replyData.username = userinfo1.name;
+                replyData.avatar = userinfo1.avatar;
+                replyData.gender = userinfo1.sex;
+                replyData.reply = com1.reply;
+                commentData.reply = replyData;
+            }
             arr.push(commentData);
             count ++;
         }
@@ -1009,6 +1052,7 @@ export const getHotPost = (arg: IterPostArg) :PostArr => {
             break;
         }
         const post:Post = v[1];
+        if (post.state === CONSTANT.DELETE_STATE) continue;
         const postKey = v[0];
         const postData = getPostInfo(postKey, post);
         if (today - get_day(postData.createtime) > 30) break;
@@ -1066,6 +1110,7 @@ export const getAllPublicPost = (arg: IterPostArg) :PostArr => {
             break;
         }
         const post:Post = v[1];
+        if (post.state === CONSTANT.DELETE_STATE) continue;
         const postKey = v[0];
         const postData = getPostInfo(postKey, post);
         if (today - get_day(postData.createtime) > 30) break;
@@ -1126,6 +1171,7 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
     const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+    if (post.state === CONSTANT.DELETE_STATE) return; // 帖子已删除
     const user = new GetUserInfoReq();
     user.uids = [post.owner];
     const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息

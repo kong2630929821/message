@@ -66,12 +66,26 @@ struct PostArrWithTotal {
     total: u32,     //帖子总数
 }
 
+// 评论回复数据
+struct ReplyData{
+    key: CommentKey,       //key
+    comment_type: u8,      //帖子类型图文、语言、视频
+    msg: String,        //消息
+    reply: u32, //评论表中的id，表示回复那一条评论，可以为空
+    owner: u32,         //发送者
+    likeCount: u32,     //点赞数
+    createtime: u32,     //创建时间
+    username: String,   //用户名
+    avatar: String,     //用户头像
+    gender: u8,         //性别
+}
+
 // 评论数据
 struct CommentData{
     key: CommentKey,       //key
     comment_type: u8,      //帖子类型图文、语言、视频
     msg: String,        //消息
-    reply: u32,         //评论表中的ID，表示回复那一条评论，可以为空
+    reply: Option<ReplyData>, //评论的评论信息，表示回复那一条评论，可以为空
     owner: u32,         //发送者
     likeCount: u32,     //点赞数
     createtime: u32,     //创建时间
