@@ -592,7 +592,8 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
             if (r && r.list) {
                 const data:any = r.list;
                 const uid = store.getStore('uid');
-                const followList = store.getStore(`followNumList/${uid}`,{ list:[] }).list;
+                const numlist = store.getStore(`followNumList/${uid}`,{ person_list:[],public_list:[] });
+                const followList = numlist.person_list.concat(numlist.public_list);
                 const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
 
                 data.forEach((res,i) => {
