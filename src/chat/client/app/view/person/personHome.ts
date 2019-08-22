@@ -1,7 +1,15 @@
 import { Widget } from '../../../../../pi/widget/widget';
+import { getUserInfoByNum, getUserPostList } from '../../net/rpc';
 
 interface Props {
+    uid:number;
+    num:string;
     activeTab:number;
+    postList:any[];  // 发布的帖子列表
+    followList:string[];  // 关注列表
+    fansList:string[];  // 粉丝列表
+    followData:any[];  // 关注用户信息
+    fansData:any[];   // 粉丝用户信息
 }
 
 /**
@@ -10,12 +18,43 @@ interface Props {
 export class PersonHome extends Widget {
     public ok:() => void;
     public props:Props = {
-        activeTab:0
+        uid:0,
+        num:'',
+        activeTab:0,
+        postList:[],
+        followList:[],
+        fansList:[],
+        followData:[],
+        fansData:[]
     };
+
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+        getUserInfoByNum(this.props.followList).then((r:string[]) => {
+            this.props.followData = r;  // 关注
+            this.paint();
+        });
+        getUserInfoByNum(this.props.fansList).then((r:string[]) => {
+            this.props.fansData = r;  // 粉丝
+            this.paint();
+        });
+    }
 
     public changeTab(i:number) {
         this.props.activeTab = i;
         this.paint();
+
+        if (i === 0) {
+            // getUserPostList(this.props.num).then((r:any) => {
+            //     this.props.postList = r.list;  // 动态
+            //     this.paint();
+            // });
+
+        }
     }
 
     public goBack() {

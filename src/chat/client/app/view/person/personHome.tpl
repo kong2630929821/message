@@ -12,22 +12,22 @@
     <div w-class="contain">
     {{if it.activeTab == 0}}
         {{% =================动态====================}}
-        {{for i,v of [1,2,3,4]}}
-        <widget w-tag="chat-client-app-view-home-squareItem"></widget>
+        {{for i,v of it.postList}}
+        <widget w-tag="chat-client-app-view-home-squareItem">{{v}}</widget>
         {{end}}
 
         <div w-class="btn">发动态</div>
 
     {{elseif it.activeTab == 1}}
         {{% =================关注====================}}
-        {{for i,v of [1,2,3,4]}}
-        <widget w-tag="chat-client-app-view-person-followItem"></widget>
+        {{for i,v of it.followData}}
+        <widget w-tag="chat-client-app-view-person-followItem">{{v}}</widget>
         {{end}}
 
     {{else}}
         {{% =================粉丝====================}}
-        {{for i,v of [1,2,3,4]}}
-        <widget w-tag="chat-client-app-view-person-followItem"></widget>
+        {{for i,v of it.fansData}}
+        <widget w-tag="chat-client-app-view-person-followItem">{{v}}</widget>
         {{end}}
     {{end}}
     </div>
