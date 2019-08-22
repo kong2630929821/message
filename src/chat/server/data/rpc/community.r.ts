@@ -1,5 +1,7 @@
 import { Env } from '../../../../pi/lang/env';
 import { Bucket } from '../../../utils/db';
+import { send } from '../../../utils/send';
+import { SEND_COMMENT, SEND_COMMENT_LAUD, SEND_COMMENT_TO_COMMENT, SEND_POST_LAUD } from '../constant';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey } from '../db/community.s';
 import { UserInfo } from '../db/user.s';
@@ -66,6 +68,7 @@ export const getUserPublicAcc = (): string => {
     const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
     const publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
     if (!publicAccIndex) return '';
+    if (!publicAccIndex.list) return '';
 
     return publicAccIndex.list[0];
 };
@@ -299,6 +302,12 @@ export const postLaudPost = (postKey: PostKey): boolean => {
         postLaudLog.key = logKey;
         postLaudLog.createtime = Date.now().toString();
         addLaudIndex(uid,postKey.id,postKey.num,true);
+        // 推送
+        const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+        const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+        if (!post) return false;
+        const fuid = post.owner;
+        send(fuid, SEND_POST_LAUD, JSON.stringify(postLaudLog));
 
         return postLaudLogBucket.put(logKey, postLaudLog);
     } else {
@@ -598,6 +607,23 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
         }
         // 添加评论记录
         if (commentBucket.put(key, value)) {
+            if (arg.reply === 0) {
+                // 评论帖子,推送给发帖人
+                const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+                const post = postBucket.get<PostKey, Post[]>(postkey)[0];
+                if (!post) return;
+                const fuid = post.owner;
+                send(fuid, SEND_COMMENT, JSON.stringify(value));
+            } else {
+                // 评论帖子的评论,推送给原评论者
+                const originCommentKey = new CommentKey();
+                originCommentKey.post_id = arg.post_id;
+                originCommentKey.num = arg.num;
+                originCommentKey.id = arg.reply;
+                const originComment = commentBucket.get<CommentKey, Comment[]>(originCommentKey)[0];
+                const fuid1 = originComment.owner;
+                send(fuid1, SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
+            }
            
             return key;
         }
@@ -752,6 +778,8 @@ export const commentLaudPost = (commentKey: CommentKey): boolean => {
         const commentLaudLog = new CommentLaudLog();
         commentLaudLog.key = logKey;
         commentLaudLog.createtime = Date.now();
+        const fuid = commentCount.owner;
+        send(fuid, SEND_COMMENT_LAUD, JSON.stringify(commentLaudLog));
 
         return CommentLaudLogBucket.put(logKey, commentLaudLog);
     } else {
