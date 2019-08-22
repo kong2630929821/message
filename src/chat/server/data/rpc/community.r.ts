@@ -7,7 +7,7 @@ import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST,
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, ReplyData, UserInfoList } from './community.s';
+import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, ReplyData } from './community.s';
 import { getUid } from './group.r';
 
 declare var env: Env;
@@ -144,9 +144,9 @@ export const showUserFollowPort = (num_type:number):NumArr => {
  * 批量获取指定社区号的信息
  */
 // #[rpc=rpcServer]
-export const getUserInfoByComm = (arg: CommunityNumList): UserInfoList => {
-    const userinfoList = new UserInfoList();
-    userinfoList.list = [];
+export const getUserInfoByComm = (arg: CommunityNumList): CommUserInfoList => {
+    const commUserInfoList = new CommUserInfoList();
+    commUserInfoList.list = [];
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name); 
     const userInfoBucket = new Bucket(CONSTANT.WARE_NAME,UserInfo._$info.name);
     for (let i = 0; i < arg.list.length; i++) {
@@ -155,10 +155,13 @@ export const getUserInfoByComm = (arg: CommunityNumList): UserInfoList => {
         const uid = community.owner;
         const userinfo = userInfoBucket.get<number, UserInfo[]>(uid)[0];
         if (!userinfo) continue;
-        userinfoList.list.push(userinfo);
+        const commUserInfo = new CommUserInfo();
+        commUserInfo.user_info = userinfo;
+        commUserInfo.comm_info = community;
+        commUserInfoList.list.push(commUserInfo);
     }
 
-    return userinfoList;
+    return commUserInfoList;
 };
 
 /**

@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getSquarePost, getUserPost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg, PostArr, PostArrWithTotal } from '../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg, PostArr, PostArrWithTotal } from '../../server/data/rpc/community.s';
 import { set_gmAccount } from '../../server/data/rpc/user.p';
 
 /**
@@ -196,6 +196,15 @@ export const delCommentPostTest = () => {
     });
 };
 
+// 批量获取指定社区号的信息
+export const getUserInfoByCommTest = () => {
+    const arg = new CommunityNumList();
+    arg.list = ['2'];
+    clientRpcFunc(getUserInfoByComm, arg, (r: CommUserInfoList) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
@@ -258,6 +267,10 @@ const props = {
         {
             name: '删除评论',
             func: () => { delCommentPostTest(); }
+        },
+        {
+            name: '社区信息',
+            func: () => { getUserInfoByCommTest(); }
         }
     ] // 按钮数组
 };

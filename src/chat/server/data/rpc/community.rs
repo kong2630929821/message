@@ -154,7 +154,13 @@ struct CommunityNumList{
     list: &[String]
 }
 
+// 社区和用户信息
+struct CommUserInfo{
+    comm_info: CommunityBase,     //社区信息
+    user_info: UserInfo,     //用户信息
+}
+
 // 用户信息列表
-struct UserInfoList{
-    list: &[UserInfo]
+struct CommUserInfoList{
+    list: &[CommUserInfo]
 }
