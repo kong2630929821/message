@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, commentLaudPost, createCommunityNum, getCommentLaud, getFansId, getFollowId, getSquarePost, getUserPost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, CommentArr, CommunityNumList, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg, PostArr, PostArrWithTotal } from '../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg, PostArr, PostArrWithTotal } from '../../server/data/rpc/community.s';
 import { set_gmAccount } from '../../server/data/rpc/user.p';
 
 /**
@@ -51,14 +51,26 @@ export const setGM = () => {
     });
 };
 
+// 写帖子
+export const addPostPortTest = () => {
+    const addPostArg = new AddPostArg();
+    addPostArg.num = '2';
+    addPostArg.post_type = 1;
+    addPostArg.title = 'test1';
+    addPostArg.body = 'test1';
+    clientRpcFunc(addPostPort, addPostArg, (r: PostKey) => {
+        console.log(r);
+    });
+};
+
 // 评论帖子
 export const addComment = () => {
     const addCommentArg = new AddCommentArg();
     addCommentArg.comment_type = 1;
-    addCommentArg.num = '3';
-    addCommentArg.post_id = 1;
-    addCommentArg.msg = 'test';
-    addCommentArg.reply = 0;
+    addCommentArg.num = '2';
+    addCommentArg.post_id = 3;
+    addCommentArg.msg = 'test222222';
+    addCommentArg.reply = 7;
     console.log('!!!!!!!!!!!!!!!!!!addCommentArg', addCommentArg);
     clientRpcFunc(addCommentPost, addCommentArg, (r: CommentKey) => {
         console.log(r);
@@ -68,8 +80,8 @@ export const addComment = () => {
 // 获取评论
 export const getCommentPort = () => {
     const arg = new IterCommentArg();
-    arg.num = '3';
-    arg.post_id = 1;
+    arg.num = '2';
+    arg.post_id = 3;
     arg.id = 99;
     arg.count = 10;
     clientRpcFunc(showCommentPort, arg, (r: CommentArr) => {
@@ -112,7 +124,7 @@ export const getSquarePostTest = () => {
     arg.count = 10;
     arg.num = '5';
     arg.id = 0;
-    arg.square_type = 1;
+    arg.square_type = 4;
     clientRpcFunc(getSquarePost, arg, (r: PostArr) => {
         console.log(r);
     });
@@ -163,6 +175,36 @@ export const getFansIdTest = () => {
     });
 };
 
+// 删除帖子
+export const deletePostTest = () => {
+    const arg = new PostKey();
+    arg.num = '2';
+    arg.id = 1;
+    clientRpcFunc(deletePost, arg, (r: number) => {
+        console.log(r);
+    });
+};
+
+// 删除评论
+export const delCommentPostTest = () => {
+    const arg = new CommentKey();
+    arg.num = '2';
+    arg.post_id = 1;
+    arg.id = 2;
+    clientRpcFunc(delCommentPost, arg, (r: number) => {
+        console.log(r);
+    });
+};
+
+// 批量获取指定社区号的信息
+export const getUserInfoByCommTest = () => {
+    const arg = new CommunityNumList();
+    arg.list = ['2'];
+    clientRpcFunc(getUserInfoByComm, arg, (r: CommUserInfoList) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
@@ -171,12 +213,8 @@ const props = {
             func: () => { chatLogin(); }
         },
         {
-            name: '创建群',
-            func: () => { cGroupe(); }
-        },
-        {
-            name: '设置官方账号',
-            func: () => { setGM(); }
+            name: '写帖子',
+            func: () => { addPostPortTest(); }
         },
         {
             name: '评论帖子',
@@ -221,6 +259,18 @@ const props = {
         {
             name: '获取粉丝',
             func: () => { getFansIdTest(); }
+        },
+        {
+            name: '删除帖子',
+            func: () => { deletePostTest(); }
+        },
+        {
+            name: '删除评论',
+            func: () => { delCommentPostTest(); }
+        },
+        {
+            name: '社区信息',
+            func: () => { getUserInfoByCommTest(); }
         }
     ] // 按钮数组
 };

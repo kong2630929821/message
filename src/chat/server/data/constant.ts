@@ -71,3 +71,7 @@ export const SQUARE_ALL = 1; // 所有
 export const SQUARE_FOLLOW = 2; // 关注
 export const SQUARE_PUBLIC = 3; // 公众号
 export const SQUARE_HOT = 4; // 热门
+
+// 帖子状态
+export const NORMAL_STATE = 1;  // 正常状态
+export const DELETE_STATE = 0; // 标记删除

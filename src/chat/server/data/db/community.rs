@@ -54,6 +54,7 @@ struct Post {
     body: String,       //正文
     owner: u32,         //发送者
     createtime: String,    //创建时间
+    state: u8,          //帖子状态
 }
 
 /**
