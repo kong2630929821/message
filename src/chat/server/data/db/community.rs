@@ -173,3 +173,10 @@ struct CommunityAccIndex{
     num: String,    //社区个人编号
     list: &[String]   // 社区公众号
 }
+
+// 粉丝索引表
+#[primary=num,db=file,dbMonitor=true]
+struct FansIndex{
+    num: String,              // 用户ID
+    list: &[String]           // 粉丝社区编号列表
+}
