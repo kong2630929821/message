@@ -16,7 +16,9 @@
         <widget w-tag="chat-client-app-view-home-squareItem">{{v}}</widget>
         {{end}}
 
-        <div w-class="btn">发动态</div>
+        {{if it.isMine}}
+        <div w-class="btn" on-tap="sendPost">发动态</div>
+        {{end}}
 
     {{elseif it.activeTab == 1}}
         {{% =================关注====================}}

@@ -16,7 +16,7 @@
                 {{if it.active == 'comment'}}
                 <div>
                     {{for i,v of it.commentList}}
-                    <div ev-comment-reply="replyComment">
+                    <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})">
                         <widget w-tag="chat-client-app-view-info-commentItem">{{v}}</widget>
                     </div>
                     {{end}}

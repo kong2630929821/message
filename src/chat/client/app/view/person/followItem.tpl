@@ -1,21 +1,17 @@
 <div w-class="item">
-    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
+    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.user_info.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
     <div style="flex:1 0 0;">
         <div w-class="username">
-            <span>{{it.name}}&nbsp;</span>
+            <span>{{it.user_info.name}}&nbsp;</span>
             {{if it.isPublic}}
             <div w-class="offical">公众号</div>
             {{elseif it.offical}}
             <div w-class="offical">官方</div>
             {{else}}
-            <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
+            <img src="../../res/images/{{it.sex?'girl.png':'boy.png'}}"/>
             {{end}}
         </div>
-        <div w-class="desc">{{it.note}}</div>
+        <div w-class="desc">{{it.user_info.note || "简介"}}</div>
     </div>
-    {{if it.followed}}
-    <div w-class="itemBtn">取消关注</div>
-    {{else}}
-    <div style="background:#CCCCCC" w-class="itemBtn">关注</div>
-    {{end}}
+    <div w-class="itemBtn {{it.followed ? '':'active'}}"  on-tap="followUser">{{it.followed ? "取消关注":"关注"}}</div>
 </div>

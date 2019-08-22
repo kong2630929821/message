@@ -17,7 +17,7 @@
             {{if v.isPublic}}
             <widget w-tag="chat-client-app-view-home-pubPostItem">{{v}}</widget>
             {{else}}
-            <div ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})">
+            <div ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})" ev-delBtn="delPost({{i}})">
                 <widget w-tag="chat-client-app-view-home-squareItem">{{v}}</widget>
             </div>
             {{end}}

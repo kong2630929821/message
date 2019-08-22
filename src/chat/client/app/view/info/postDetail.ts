@@ -135,17 +135,25 @@ export class PostDetail extends Widget {
      */
     public doComment() {
         popNew('chat-client-app-view-info-editComment', { key:this.props.key }, (r) => {
+            const uid = getStore('uid');
+            const userinfo = getStore(`userInfoMap/${uid}`,{});
             this.props.commentList.unshift({
                 key: r.key,
                 msg: r.value,
                 createtime: Date.now(),
                 likeCount: 0,
-                username: this.props.username,
-                avatar: this.props.avatar,
-                gender: this.props.gender
+                username: userinfo.name,
+                avatar: userinfo.avatar,
+                gender: userinfo.sex,
+                owner:uid
             });
-            this.props.commentCount ++;
+            this.props.commentCount++;
             this.paint();
+
+            const postlist = getStore('postList',[]);
+            const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
+            postlist[ind].commentCount = this.props.commentCount;
+            setStore('postList',postlist);
         });
     }
 
@@ -153,18 +161,35 @@ export class PostDetail extends Widget {
      * 回复评论
      */
     public replyComment(e:any) {
+        const uid = getStore('uid');
+        const userinfo = getStore(`userInfoMap/${uid}`,{});
         this.props.commentList.unshift({
             key: e.key,
             msg: e.value,
             createtime: Date.now(),
             likeCount: 0,
-            username: this.props.username,
-            avatar: this.props.avatar,
-            gender: this.props.gender,
+            username: userinfo.name,
+            avatar: userinfo.avatar,
+            gender: userinfo.sex,
+            owner: uid,
             orgName: e.username,
             orgMess: e.mess
         });
-        this.props.commentCount ++;
+        this.props.commentCount++;
+        this.paint();
+
+        const postlist = getStore('postList',[]);
+        const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
+        postlist[ind].commentCount = this.props.commentCount;
+        setStore('postList',postlist);
+    }
+
+    /**
+     * 删除评论
+     */
+    public deleteComment(i:number) {
+        this.props.commentList.splice(i,1);
+        this.props.commentCount--;
         this.paint();
     }
 }
