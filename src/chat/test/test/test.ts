@@ -54,7 +54,7 @@ export const setGM = () => {
 // 写帖子
 export const addPostPortTest = () => {
     const addPostArg = new AddPostArg();
-    addPostArg.num = '2';
+    addPostArg.num = '3';
     addPostArg.post_type = 1;
     addPostArg.title = 'test1';
     addPostArg.body = 'test1';
@@ -112,7 +112,7 @@ export const getcommentLaudtest = () => {
 
 // 关注用户
 export const userFollowTest = () => {
-    const num = '5';
+    const num = '3';
     clientRpcFunc(userFollow, num, (r: boolean) => {
         console.log(r);
     });
@@ -124,7 +124,7 @@ export const getSquarePostTest = () => {
     arg.count = 10;
     arg.num = '5';
     arg.id = 0;
-    arg.square_type = 4;
+    arg.square_type = 3;
     clientRpcFunc(getSquarePost, arg, (r: PostArr) => {
         console.log(r);
     });
@@ -161,7 +161,7 @@ export const getUserPostTest = () => {
 
 // 获取关注
 export const getFollowIdTest = () => {
-    const uid = 10004;
+    const uid = 10002;
     clientRpcFunc(getFollowId, uid, (r: CommunityNumList) => {
         console.log(r);
     });
@@ -169,7 +169,7 @@ export const getFollowIdTest = () => {
 
 // 获取粉丝
 export const getFansIdTest = () => {
-    const id = '5';
+    const id = '2';
     clientRpcFunc(getFansId, id, (r: CommunityNumList) => {
         console.log(r);
     });
