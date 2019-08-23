@@ -25,6 +25,7 @@ import { SetOfficial, UserAgree } from '../../../server/data/rpc/user.s';
 import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
+import { judgeFollowed } from '../logic/logic';
 import { parseEmoji } from '../view/home/square';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
@@ -460,11 +461,18 @@ export const addCommunityNum = (name: string, comm_type: number, desc: string) =
     arg.comm_type = comm_type;
     arg.name = name;
     arg.desc = desc;
-    clientRpcFunc(createCommunityNum,arg,(r:string) => {
-        if (r) {
-            console.log(r);
-        } 
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(createCommunityNum,arg,(r:string) => {
+            console.log('addCommunityNum============',r);
+            if (r) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
     });
+    
 };
 
 /**
@@ -592,8 +600,6 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
             if (r && r.list) {
                 const data:any = r.list;
                 const uid = store.getStore('uid');
-                const numlist = store.getStore(`followNumList/${uid}`,{ person_list:[],public_list:[] });
-                const followList = numlist.person_list.concat(numlist.public_list);
                 const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
 
                 data.forEach((res,i) => {
@@ -602,7 +608,7 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
                     const body = JSON.parse(res.body);
                     data[i].content = parseEmoji(body.msg);
                     data[i].imgs = body.imgs;
-                    data[i].followed = followList.indexOf(res.key.num) > -1;
+                    data[i].followed = judgeFollowed(res.key.num);
                     data[i].likeActive = likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
                 });
                 store.setStore('postList',data);
@@ -704,12 +710,10 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(getUserPost,param,(r) => {
-            console.log('getUserPostList=============',r);
+            console.log('getUserPost=============',r);
             if (r && r.list) {
                 const data:any = r.list;
                 const uid = store.getStore('uid');
-                const numlist = store.getStore(`followNumList/${uid}`,{ person_list:[],public_list:[] });
-                const followList = numlist.person_list.concat(numlist.public_list);
                 const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
 
                 data.forEach((res,i) => {
@@ -718,7 +722,7 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
                     const body = JSON.parse(res.body);
                     data[i].content = parseEmoji(body.msg);
                     data[i].imgs = body.imgs;
-                    data[i].followed = followList.indexOf(res.key.num) > -1;
+                    data[i].followed = judgeFollowed(res.key.num);
                     data[i].likeActive = likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
                 });
                 res({ list:data, total: r.total });
@@ -767,7 +771,7 @@ export const getFansList = (num:string) => {
 export const getMyPublicNum = () => {
     return new Promise((res,rej) => {
         clientRpcFunc(getUserPublicAcc,null,r => {
-            console.log('getMyPublicNum=============',r);
+            console.log('getUserPublicAcc=============',r);
             if (r) {
                 res(r);
             } else {
@@ -786,7 +790,7 @@ export const getUserInfoByNum = (nums:string[]) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(getUserInfoByComm,param,(r) => {
-            console.log('getUserInfoByNum=============',r);
+            console.log('getUserInfoByComm=============',r);
             if (r && r.list) {
                 res(r.list);
             } else {
@@ -806,7 +810,7 @@ export const delPost = (num:string,id:number) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(deletePost,arg,(r) => {
-            console.log('delPost=============',r);
+            console.log('deletePost=============',r);
             if (r === 1) {
                 res(r);
             } else {
@@ -828,7 +832,7 @@ export const delComment = (num:string,post_id:number,id:number) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(delCommentPost,arg,(r) => {
-            console.log('delComment=============',r);
+            console.log('delCommentPost=============',r);
             if (r === 1) {
                 res(r);
             } else {

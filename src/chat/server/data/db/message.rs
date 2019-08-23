@@ -19,6 +19,8 @@ enum MSG_TYPE {
     ADDGROUP = 11, // 加群成功
     OTHERMSG = 12, // 其他群设置提醒
     COMPLAINT = 13, // 举报用户
+    Article = 14,  // 分享文章
+    NameCard = 15,  // 分享名片
 }
 
 /**

@@ -1,5 +1,5 @@
 <div>
-    {{if !it.message.cancel && it.message.mtype < 5 || it.message.mtype == 9 || it.message.mtype == 13}}
+    {{if !it.message.cancel && it.message.mtype < 5 || it.message.mtype == 9 || it.message.mtype == 13 || it.message.mtype == 14 || it.message.mtype == 15}}
     <div style="overflow: hidden;">
         {{if it.me}}
         <div style="position:relative;margin: 10px 20px 0;float: right;display:flex;">
@@ -35,6 +35,20 @@
                 </div>
             </div>
             <span w-class="rightDownTail"></span>
+
+            {{% ========================文章=========================}}
+            {{elseif it.message.mtype == 14}}
+            <div w-class="text-wrap" style="color:#222222;background:#fff;" on-tap="openArticle">
+                <div style="font-weight:500;">{{it.message.msg.title}}</div>
+                <div style="display:flex;align-items: center;">
+                    <div style="font-size:28px;">{{it.message.msg.content}}</div>
+                    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{it.message.image}}, width:"100px",notRound:true}</widget>
+                </div>
+            </div>
+
+            {{% ========================名片=========================}}
+            {{elseif it.message.mtype == 15}}
+            <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="goDetail">{cardInfo:{{it.message.msg.name}},cardType:"namecard",cardTypeShow:{{it.message.msg.type}},avatarPath:{{it.message.image}} }</widget>
            
             {{% =====================其他消息类型======================}}
             {{else}}
@@ -95,7 +109,20 @@
                     <span w-class="sendTime" style="color:#297FCA">{{it.time}}</span>
                 </div>
             </div>
-            
+
+            {{elseif it.message.mtype == 14}}
+            <div w-class="text-wrap" style="color:#222222;background:#fff;" on-tap="openArticle">
+                <div style="font-weight:500;">{{it.message.msg.title}}</div>
+                <div style="display:flex;align-items: center;">
+                    <div style="font-size:28px;">{{it.message.msg.content}}</div>
+                    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{it.message.image}}, width:"100px",notRound:true}</widget>
+                </div>
+            </div>
+
+            {{% ========================名片=========================}}
+            {{elseif it.message.mtype == 15}}
+            <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="goDetail">{cardInfo:{{it.message.msg.name}},cardType:"namecard",cardTypeShow:{{it.message.msg.type}},avatarPath:{{it.message.image}} }</widget>
+
             {{% ========================其他消息类型=========================}}
             {{else}}
             <span w-class="leftDownTail"></span>
@@ -121,5 +148,9 @@
     {{% ========================加群成功提示=========================}}
     {{elseif it.message.mtype == 11}}
     <div w-class="recallMsg" style="font-size:32px;">{{it.me ? "你" : (it.name || "------") }}已成功加入群组</div>
+
+    {{% ========================分享文章卡片=========================}}
+    {{elseif it.message.mtype == 14}}
+    <div w-class="recallMsg" style="font-size:32px;">分享了一篇文章</div>
     {{end}}
 </div>

@@ -1,10 +1,13 @@
-import { popNew3 } from '../../../../../app/utils/tools';
+import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { MSG_TYPE } from '../../../../server/data/db/message.s';
+import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
-import { complaintUser } from '../../logic/logic';
-import { delPost, follow } from '../../net/rpc';
+import { buildupImgPath, complaintUser, judgeFollowed } from '../../logic/logic';
+import { delPost, follow, sendUserMsg } from '../../net/rpc';
 
 interface Props {
     key:any;   // 帖子ID及社区编号
@@ -58,8 +61,10 @@ export class SquareItem extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.props.avatar = props.avatar || '../../res/images/user_avatar.png';
-        this.props.isMine = this.props.owner === getStore('uid',0);
+        this.props.avatar = buildupImgPath(props.avatar) || '../../res/images/user_avatar.png';
+        const uid = getStore('uid',0);
+        this.props.isMine = this.props.owner === uid;
+        this.props.followed = judgeFollowed(this.props.key.num);
     }
 
     public attach() {
@@ -143,9 +148,21 @@ export class SquareItem extends Widget {
      */
     public followUser() {
         this.closeUtils();
-        follow(this.props.key.num).then(r => {
-            this.props.followed = !this.props.followed;
-            this.paint();
+        follow(this.props.key.num);
+    }
+
+    /**
+     * 分享文章
+     */
+    public shareArt() {
+        popNew('chat-client-app-view-person-friendList',null,(r) => {
+            console.log('11111111111111111111',r);
+            sendUserMsg(r,JSON.stringify(this.props),MSG_TYPE.Article).then((res:any) => {
+                updateUserMessage(r, res);
+                popNewMessage('分享成功');
+            },() => {
+                popNewMessage('分享失败');
+            });
         });
     }
 }

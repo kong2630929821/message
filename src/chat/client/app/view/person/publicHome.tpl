@@ -1,9 +1,9 @@
-<div class="new-page" w-class="page" ev-back-click="goBack" ev-next-click="showUtils">
+<div class="new-page" w-class="page" ev-back-click="goBack" ev-next-click="showUtils" on-tap="closeUtils">
     <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"#fff",nextImg:"more-dot-blue.png"}</widget>
     <div w-class="contain">
         <div w-class="topBox">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:"../../res/images/user_avatar.png",width:"190px;"}</widget>
-            <div w-class="nameText">好嗨休闲平台</div>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"190px;"}</widget>
+            <div w-class="nameText">{{it.name}}</div>
             <div w-class="numList">
                 <span style="margin-right:40px;">{{it.totalPost}}&nbsp;篇文章</span>
                 <span>{{it.totalFans}}&nbsp;个粉丝</span>
@@ -28,7 +28,7 @@
 
         {{if it.showTool}}
         <div w-class="utils">
-            <div w-class="util">推荐给朋友</div>
+            <div w-class="util" on-tap="recomment">推荐给朋友</div>
             {{if !it.isMine}}
             <div>举报</div>
             {{end}}

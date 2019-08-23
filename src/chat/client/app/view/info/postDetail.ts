@@ -59,6 +59,9 @@ export class PostDetail extends Widget {
             ...props
         };
         super.setProps(this.props);
+        const uid = getStore('uid');
+        const likeList = getStore(`laudPostList/${uid}`,{ list:[] }).list;
+        this.props.likeActive = likeList.findIndex(r => r.num === this.props.key.num && r.id === this.props.key.id) > -1;
         getCommentLaudList(this.props.key.num,this.props.key.id).then((r:number[]) => {
             this.props.commentList = this.props.commentList.map(v => {
                 v.likeActive = r.indexOf(v.key.id) > -1;

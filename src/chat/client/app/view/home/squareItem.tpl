@@ -44,9 +44,9 @@
         {{end}}
     </div>
 
-    {{if it.showAll}}
+    {{if it.showAll && it.isPublic}}
     {{% =================帖子详情页可分享=======================}}
-    <div w-class="shareBtn">
+    <div w-class="shareBtn" on-tap="shareArt">
         <img src="../../res/images/squareSahre.png" style="height:50px;margin-right: 10px;"/>
         分享给嗨友
     </div>

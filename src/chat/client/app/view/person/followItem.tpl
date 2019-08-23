@@ -1,5 +1,5 @@
 <div w-class="item">
-    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.user_info.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
+    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}}, width:"80px;"}</widget>
     <div style="flex:1 0 0;">
         <div w-class="username">
             <span>{{it.user_info.name}}&nbsp;</span>
@@ -13,5 +13,7 @@
         </div>
         <div w-class="desc">{{it.user_info.note || "简介"}}</div>
     </div>
+    {{if !it.isMine}}
     <div w-class="itemBtn {{it.followed ? '':'active'}}"  on-tap="followUser">{{it.followed ? "取消关注":"关注"}}</div>
+    {{end}}
 </div>

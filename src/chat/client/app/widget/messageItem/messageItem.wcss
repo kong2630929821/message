@@ -103,3 +103,8 @@
     display: inline;
     white-space: pre-wrap;
 }
+.image{
+    margin: 5px;
+    background-color:#F0F9FF;
+    flex-shrink: 0;
+}

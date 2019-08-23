@@ -124,7 +124,7 @@ export const copyToClipboard = (copyText) => {
     document.body.removeChild(input);
 };
 
-// 获取用户头像
+// 获取好友用户头像
 export const getUserAvatar = (rid:number) => {
     if (rid) {
         const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
@@ -227,4 +227,23 @@ export const complaintUser = (name:string) => {
             });
             
         });
+};
+
+// 判断是否关注
+export const judgeFollowed = (num:string) => {
+    const uid = store.getStore('uid');
+    const numsList = store.getStore(`followNumList/${uid}`,{ person_list:[],public_list:[]  });
+    const followList = numsList.person_list.concat(numsList.public_list);
+    
+    return followList.indexOf(num) > -1;
+};
+
+// 拼接图片路径
+export const buildupImgPath = (url:string) => {
+    if (url && !/data:image|http/.test(url)) {
+        
+        return `${uploadFileUrlPrefix}${url}`;
+    }
+
+    return '';
 };

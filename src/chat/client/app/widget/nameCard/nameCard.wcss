@@ -10,6 +10,7 @@
     width:80px;
     height:80px;
     border-radius:50%;
+    margin-left: 20px;
 }
 .name-card-info{
     color: rgba(34, 34, 34, 1);

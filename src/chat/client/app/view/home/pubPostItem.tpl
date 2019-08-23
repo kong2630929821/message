@@ -7,7 +7,7 @@
             <div w-class="offical">公众号</div>        
         </div>
         {{if !it.followed}}
-        <div w-class="follow">+关注</div>
+        <div w-class="follow" on-tap="followUser">+关注</div>
         {{end}}
     </div>
 

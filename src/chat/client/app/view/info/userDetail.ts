@@ -1,7 +1,6 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { UserInfo } from '../../../../server/data/db/user.s';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { CommType } from '../../../../server/data/rpc/community.s';
 import { getStore, setStore } from '../../data/store';
@@ -59,13 +58,28 @@ export class UserDetail extends Widget {
         super.setProps(this.props);
         const sid = getStore('uid');
         this.props.isOwner = this.props.uid === sid;
-        this.props.userInfo = getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
-        if (!this.props.num) {  // 不传则默认查看个人社区账号
-            this.props.num = this.props.userInfo.comm_num;
-        }
+        const userinfo = getStore(`userInfoMap/${this.props.uid}`, {});
+        this.props.userInfo = userinfo;
+        
+        if (userinfo.uid) { // 用户信息
+            this.props.num = userinfo.comm_num;
+            if (this.props.isOwner) {  // 本人
+                getMyPublicNum().then((r:string) => {
+                    this.props.pubNum = r;
+                    this.paint();
+                });
+            }
+            this.init(sid);
 
-        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
-        this.init(sid);
+        } else {
+            getUsersBasicInfo([this.props.uid]).then((r: UserArray) => {
+                this.props.userInfo = r.arr[0];
+                this.props.num = this.props.userInfo.comm_num;
+                this.init(sid);
+                this.paint();
+                setStore(`userInfoMap/${this.props.uid}`,r.arr[0]);
+            });
+        }
 
         // const data = getMedalList(CoinType.KT, 'coinType');
         // const ktNum = earnGetStore('balance/KT');
@@ -84,28 +98,21 @@ export class UserDetail extends Widget {
     public init(sid:number) {
         const numsList = getStore(`followNumList/${sid}`,{ person_list:[],public_list:[]  });
         const followList = numsList.person_list.concat(numsList.public_list);
-        if (this.props.isOwner) {
-            getMyPublicNum().then((r:string) => {
-                this.props.pubNum = r;
-                this.paint();
-            });
-            this.props.followList = followList;  // 关注
-            this.props.numList[1][0] = followList.length;
+        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
+        this.props.followed = followList.indexOf(this.props.num) > -1;
         
-        } else {  
+        if (!this.props.isOwner) {
             const v = getFriendAlias(this.props.uid);
             this.props.alias = v.name;
             this.props.isFriend = v.isFriend;
-            if (!this.props.alias) {
-                this.getUserData(this.props.uid);
-            }
-           
-            this.props.followed = followList.indexOf(this.props.num) > -1;
             getFollowList(this.props.uid).then((r:string[]) => {
                 this.props.followList = r;  // 关注
                 this.props.numList[1][0] = r.length;
                 this.paint();
             });
+        } else {
+            this.props.followList = followList;  // 关注
+            this.props.numList[1][0] = followList.length;
         }
         getUserPostList(this.props.num).then((r:any) => {
             this.props.postList = r.list;  // 动态
@@ -119,17 +126,6 @@ export class UserDetail extends Widget {
         });
     }
 
-    // 非好友获取信息
-    public getUserData(uid: number) {
-        getUsersBasicInfo([uid]).then((r: UserArray) => {
-            this.props.userInfo = r.arr[0];
-            setStore(`userInfoMap/${uid}`,r.arr[0]);
-            this.paint();
-        },(r) => {
-            console.error('获取用户信息失败', r);
-        });
-    }
-   
     public goBack() {
         this.ok && this.ok();
     }
@@ -151,7 +147,10 @@ export class UserDetail extends Widget {
     // 申请公众号 去我的公众号
     public goPublic() {
         if (!this.props.pubNum) {
-            addCommunityNum('我的公众号',CommType.publicAcc,'');
+            addCommunityNum('我的公众号',CommType.publicAcc,'').then((r:string) => {
+                this.props.pubNum = r;
+                this.paint();
+            });
             
         } else {
             popNew('chat-client-app-view-person-publicHome',{ uid:this.props.uid,pubNum:this.props.pubNum });

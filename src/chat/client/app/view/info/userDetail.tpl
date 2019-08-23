@@ -28,8 +28,8 @@
             </div>
             <div w-class="userId">
                 <div>好嗨ID：{{it.userInfo.acc_id || "------"}}</div>
-                {{if it.alias}}
-                <div>备注：{{it.alias || "------"}}</div>
+                {{if !it.isOwner}}
+                <div>备注：{{it.alias}}</div>
                 {{end}}
             </div>
             

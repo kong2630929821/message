@@ -1,16 +1,18 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { addToBlackList, changeFriendAlias, removeFromBlackList } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUserHid, genUuid } from '../../../../utils/util';
+import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { complaintUser, getFriendAlias, getUserAvatar } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
-import { delFriend as delUserFriend, getUsersBasicInfo } from '../../net/rpc';
+import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
 
 interface Props {
@@ -118,7 +120,7 @@ export class Setting extends Widget {
                 break;
 
             case 1:  // 发送名片
-
+                this.recomment();
                 break;
             case 2:  // 查找聊天记录
                 
@@ -294,5 +296,27 @@ export class Setting extends Widget {
                 });
             });
         }
+    }
+
+    /**
+     * 推荐给好友
+     */
+    public recomment() {
+        popNew('chat-client-app-view-person-friendList',null,(r) => {
+            console.log('11111111111111111111',r);
+            const val = {
+                name:this.props.userInfo.name,
+                type:'个人名片',
+                avatar:this.props.avatar,
+                uid:this.props.uid,
+                num:this.props.userInfo.comm_num
+            };
+            sendUserMsg(r,JSON.stringify(val),MSG_TYPE.NameCard).then((res:any) => {
+                updateUserMessage(r, res);
+                popNewMessage('推荐成功');
+            },() => {
+                popNewMessage('推荐失败');
+            });
+        });
     }
 }
