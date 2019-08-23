@@ -22,7 +22,7 @@
     <div w-class="orgComment">
         <div w-class="content">
             <span style="font-weight: 600;">{{it.orgName}}:&nbsp;</span>
-            <widget w-tag="pi-ui-html">{{it.orgMess}}</widget>
+            <widget w-tag="pi-ui-html" style="display: inline-block;">{{it.orgMess}}</widget>
         </div>
     </div>
     {{end}}
@@ -31,7 +31,7 @@
     </div>
 
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
-        <div w-class="option" on-tap="replay">回复</div>
+        <div w-class="option" on-tap="replyComment">回复</div>
         {{if it.isMine}}
         <div w-class="option" on-tap="delComment">删除</div>
         {{end}}

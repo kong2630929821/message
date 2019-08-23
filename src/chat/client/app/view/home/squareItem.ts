@@ -4,7 +4,7 @@ import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
 import { complaintUser } from '../../logic/logic';
-import { follow } from '../../net/rpc';
+import { delPost, follow } from '../../net/rpc';
 
 interface Props {
     key:any;   // 帖子ID及社区编号
@@ -75,8 +75,7 @@ export class SquareItem extends Widget {
      * 查看详情
      */
     public goDetail() {
-        this.props.showUtils = false;
-        this.paint();
+        this.closeUtils();
         popNew3('chat-client-app-view-info-postDetail',{ ...this.props,showAll:true });
     }
 
@@ -132,9 +131,11 @@ export class SquareItem extends Widget {
     /**
      * 删除帖子
      */
-    public delPost() {
+    public delPost(e:any) {
         this.closeUtils();
-        // 
+        delPost(this.props.key.num,this.props.key.id).then(r => {
+            notify(e.node,'ev-delBtn',{ value:this.props.key });
+        });
     }
 
     /**

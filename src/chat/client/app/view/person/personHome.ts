@@ -1,4 +1,6 @@
+import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { getStore } from '../../data/store';
 import { getUserInfoByNum, getUserPostList } from '../../net/rpc';
 
 interface Props {
@@ -10,6 +12,7 @@ interface Props {
     fansList:string[];  // 粉丝列表
     followData:any[];  // 关注用户信息
     fansData:any[];   // 粉丝用户信息
+    isMine:boolean;  // 是否本人
 }
 
 /**
@@ -25,7 +28,8 @@ export class PersonHome extends Widget {
         followList:[],
         fansList:[],
         followData:[],
-        fansData:[]
+        fansData:[],
+        isMine:false
     };
 
     public setProps(props:any) {
@@ -34,6 +38,7 @@ export class PersonHome extends Widget {
             ...props
         };
         super.setProps(this.props);
+        this.props.isMine = this.props.uid === getStore('uid');
         getUserInfoByNum(this.props.followList).then((r:string[]) => {
             this.props.followData = r;  // 关注
             this.paint();
@@ -59,5 +64,17 @@ export class PersonHome extends Widget {
 
     public goBack() {
         this.ok && this.ok();
+    }
+
+    /**
+     * 发动态
+     */
+    public sendPost() {
+        popNew('chat-client-app-view-info-editPost',null,() => {
+            getUserPostList(this.props.num).then((r:any) => {
+                this.props.postList = r.list;  // 动态
+                this.paint();
+            });
+        });
     }
 }

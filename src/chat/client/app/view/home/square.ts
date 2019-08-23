@@ -77,6 +77,13 @@ export class Square extends Widget {
         });
     }
 
+    /**
+     * 删除
+     */
+    public delPost(i:number) {
+        this.state.postList.splice(i,1);
+        this.paint();
+    }
 }
 const State = {
     followList:[],

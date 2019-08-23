@@ -4,7 +4,7 @@ import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
 import { complaintUser, copyToClipboard } from '../../logic/logic';
-import { commentLaud } from '../../net/rpc';
+import { commentLaud, delComment } from '../../net/rpc';
 import { parseEmoji } from '../home/square';
 
 interface Props {
@@ -57,6 +57,12 @@ export class CommentItem extends Widget {
         this.props.mess = parseEmoji(val.msg);
         this.props.img = val.img; 
         this.props.isMine = this.props.owner === getStore('uid',0);
+
+        if (props.reply) {  // 回复的原评论
+            this.props.orgName = props.reply.username;
+            const val = props.reply.msg ? JSON.parse(props.reply.msg) :{ msg:'',img:'' };
+            this.props.orgMess = parseEmoji(val.msg);
+        }
     }
 
     /**
@@ -84,7 +90,7 @@ export class CommentItem extends Widget {
     /**
      * 回复
      */
-    public replay(e:any) {
+    public replyComment(e:any) {
         this.closeUtils();
         popNew('chat-client-app-view-info-editComment',{ ...this.props,title:'回复',orgId:true },(r) => {
             notify(e.node,'ev-comment-reply',{ ...this.props,key:r.key, value:r.value });
@@ -94,8 +100,11 @@ export class CommentItem extends Widget {
     /**
      * 删除评论
      */
-    public delComment() {
+    public delComment(e:any) {
         this.closeUtils();
+        delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
+            notify(e.node,'ev-comment-delete',{ key:this.props.key });
+        });
     }
 
     /**

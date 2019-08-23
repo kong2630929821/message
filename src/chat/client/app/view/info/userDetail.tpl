@@ -84,5 +84,8 @@
         {{if !it.followed}}
         <div w-class="btn" on-tap="followUser">关注</div>
         {{end}}
+        {{if it.isMine}}
+        <div w-class="btn" on-tap="sendPost">+好友</div>
+        {{end}}
     </div>
 </div>

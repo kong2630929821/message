@@ -11,7 +11,7 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getFansId, getFollowId, getLaudPostList, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
@@ -794,4 +794,47 @@ export const getUserInfoByNum = (nums:string[]) => {
             }
         });
     });
+};
+
+/**
+ * 删除帖子
+ */
+export const delPost = (num:string,id:number) => {
+    const arg = new PostKey();
+    arg.num = num;
+    arg.id = id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(deletePost,arg,(r) => {
+            console.log('delPost=============',r);
+            if (r === 1) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
+    });
+    
+};
+
+/**
+ *  删除评论
+ */
+export const delComment = (num:string,post_id:number,id:number) => {
+    const arg = new CommentKey();
+    arg.num = num;
+    arg.post_id = post_id;
+    arg.id = id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(delCommentPost,arg,(r) => {
+            console.log('delComment=============',r);
+            if (r === 1) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
+    });
+   
 };

@@ -33,7 +33,7 @@ export class UserDetail extends Widget {
     public props: Props = {
         uid: null,
         num:'',
-        pubNum:'3',
+        pubNum:'',
         userInfo: {},
         alias: '',
         avatar:'',
@@ -176,6 +176,19 @@ export class UserDetail extends Widget {
         follow(this.props.num).then(r => {
             this.props.followed = !this.props.followed;
             this.paint();
+        });
+    }
+
+    /**
+     * 发动态
+     */
+    public sendPost() {
+        popNew('chat-client-app-view-info-editPost',null,() => {
+            getUserPostList(this.props.num).then((r:any) => {
+                this.props.postList = r.list;  // 动态
+                this.props.numList[0][0] = r.total;
+                this.paint();
+            });
         });
     }
 }
