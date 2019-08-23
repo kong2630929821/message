@@ -1,7 +1,6 @@
 import { Env } from '../../../../pi/lang/env';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
-import { SEND_COMMENT, SEND_COMMENT_LAUD, SEND_COMMENT_TO_COMMENT, SEND_POST_LAUD } from '../constant';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey } from '../db/community.s';
 import { UserInfo } from '../db/user.s';
@@ -90,6 +89,7 @@ export const userFollow = (communityNum:string):boolean => {
     // 公众号信息
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
     const communityBase = communityBaseBucket.get<string, CommunityBase[]>(communityNum)[0];
+    console.log('!!!!!!!!!!!communityBase',communityBase);
     if (!communityBase) return false;
     if (follow) {
         communityUserBucket.delete(key);
@@ -178,7 +178,7 @@ export const getFollowId = (uid: number): CommunityNumList => {
     const index = indexBucket.get<number, AttentionIndex[]>(uid)[0];
     console.log('!!!!!!!!!!!!!!!!!!index',index);
     if (!index) return communityNumList;
-    // 去掉关注自己的个人号和公众号
+    // 去掉社区号是自己的个人号和公众号
     const communityAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
     const communityAccIndex =  communityAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
     console.log('!!!!!!!!!!!!!!!!!!communityAccIndex',communityAccIndex);
@@ -204,7 +204,11 @@ export const getFansId = (num: string): CommunityNumList => {
     communityNumList.list = [];
     const indexBucket = new Bucket(CONSTANT.WARE_NAME, FansIndex._$info.name);
     const fansIndex = indexBucket.get<string, FansIndex[]>(num)[0];
+    console.log('!!!!!!!!!!!!!!!!!!fansIndex',fansIndex);
     if (!fansIndex) return communityNumList;
+    // 去掉粉丝为自己的社区号
+    const index = fansIndex.list.indexOf(num);
+    fansIndex.list.splice(index, 1);
     communityNumList.list = fansIndex.list;
 
     return communityNumList;
@@ -307,7 +311,7 @@ export const postLaudPost = (postKey: PostKey): boolean => {
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
         if (!post) return false;
         const fuid = post.owner;
-        send(fuid, SEND_POST_LAUD, JSON.stringify(postLaudLog));
+        send(fuid, CONSTANT.SEND_POST_LAUD, JSON.stringify(postLaudLog));
 
         return postLaudLogBucket.put(logKey, postLaudLog);
     } else {
@@ -613,7 +617,7 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
                 const post = postBucket.get<PostKey, Post[]>(postkey)[0];
                 if (!post) return;
                 const fuid = post.owner;
-                send(fuid, SEND_COMMENT, JSON.stringify(value));
+                send(fuid, CONSTANT.SEND_COMMENT, JSON.stringify(value));
             } else {
                 // 评论帖子的评论,推送给原评论者
                 const originCommentKey = new CommentKey();
@@ -622,7 +626,7 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
                 originCommentKey.id = arg.reply;
                 const originComment = commentBucket.get<CommentKey, Comment[]>(originCommentKey)[0];
                 const fuid1 = originComment.owner;
-                send(fuid1, SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
+                send(fuid1, CONSTANT.SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
             }
            
             return key;
@@ -779,7 +783,7 @@ export const commentLaudPost = (commentKey: CommentKey): boolean => {
         commentLaudLog.key = logKey;
         commentLaudLog.createtime = Date.now();
         const fuid = commentCount.owner;
-        send(fuid, SEND_COMMENT_LAUD, JSON.stringify(commentLaudLog));
+        send(fuid, CONSTANT.SEND_COMMENT_LAUD, JSON.stringify(commentLaudLog));
 
         return CommentLaudLogBucket.put(logKey, commentLaudLog);
     } else {

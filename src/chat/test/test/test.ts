@@ -112,7 +112,7 @@ export const getcommentLaudtest = () => {
 
 // 关注用户
 export const userFollowTest = () => {
-    const num = '5';
+    const num = '2';
     clientRpcFunc(userFollow, num, (r: boolean) => {
         console.log(r);
     });
@@ -161,7 +161,7 @@ export const getUserPostTest = () => {
 
 // 获取关注
 export const getFollowIdTest = () => {
-    const uid = 10004;
+    const uid = 10002;
     clientRpcFunc(getFollowId, uid, (r: CommunityNumList) => {
         console.log(r);
     });
@@ -169,7 +169,7 @@ export const getFollowIdTest = () => {
 
 // 获取粉丝
 export const getFansIdTest = () => {
-    const id = '5';
+    const id = '2';
     clientRpcFunc(getFansId, id, (r: CommunityNumList) => {
         console.log(r);
     });
