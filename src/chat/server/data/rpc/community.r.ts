@@ -187,9 +187,11 @@ export const getFollowId = (uid: number): CommunityNumList => {
         index.person_list.splice(personIndex, 1);
         for (let i = 0; i < communityAccIndex.list.length; i++) {
             const publicIndex = index.public_list.indexOf(communityAccIndex.list[i]);
-            index.public_list.slice(publicIndex, 1);
+            console.log('!!!!!!!!!!!!!!!!!!publicIndex',publicIndex);
+            if (publicIndex >= 0) index.public_list.splice(publicIndex, 1);
         }
     }
+    console.log('!!!!!!!!!!!!!!!!!!index1',index);
     communityNumList.list = index.person_list.concat(index.public_list);
 
     return communityNumList;
@@ -208,7 +210,7 @@ export const getFansId = (num: string): CommunityNumList => {
     if (!fansIndex) return communityNumList;
     // 去掉粉丝为自己的社区号
     const index = fansIndex.list.indexOf(num);
-    fansIndex.list.splice(index, 1);
+    if (index >= 0) fansIndex.list.splice(index, 1);
     communityNumList.list = fansIndex.list;
 
     return communityNumList;
@@ -431,77 +433,22 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
 export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
     const uid = getUid();
     let postArr: PostArr;
+    const iterArg = new IterPostArg();
+    iterArg.count = arg.count;
+    iterArg.id = arg.id;
+    iterArg.num = arg.num;
     switch (arg.square_type) {
         case CONSTANT.SQUARE_ALL: // 所有
-            const iterArg = new IterPostArg();
-            iterArg.count = arg.count;
-            iterArg.id = arg.id;
-            iterArg.num = arg.num;
             postArr = showPostPort(iterArg);
             break;
-        case CONSTANT.SQUARE_FOLLOW: // 关注
-            // 获取关注的用户
-            const indexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
-            const attentionIndex = indexBucket.get<number, AttentionIndex[]>(uid)[0];
-            console.log('!!!!!!!!!!!!!!!!!!!!!!attentionIndex', attentionIndex);
-            const post_id_list: PostKey[] = [];
-            for (let i = 0; i < attentionIndex.person_list.length; i++) {
-                // 获取关注社区账户的帖子
-                const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
-                let communityPost = communityPostBucket.get<string, CommunityPost[]>(attentionIndex.person_list[i])[0];
-                if (!communityPost) {
-                    communityPost = new CommunityPost();
-                    communityPost.num = attentionIndex.person_list[i];
-                    communityPost.id_list = [];
-                }
-                console.log('!!!!!!!!!!!!!!!!!!!!!!communityPost', communityPost);
-                const post_id_list1 = communityPost.id_list;
-                for (let j = 0; j < post_id_list1.length; j++) {
-                    const postKey = new PostKey();
-                    postKey.id = post_id_list1[j];
-                    postKey.num = communityPost.num;
-                    post_id_list.push(postKey);
-                }
-            }
-            console.log('!!!!!!!!!!!!!!!!!!!!!!post_id_list', post_id_list);
-            // 从所有关注的社区账户的帖子中获取最新的指定数量的帖子id
-            postIdSort(post_id_list, 0, post_id_list.length - 1);
-            let index = -1;
-            for (let i = 0; i < post_id_list.length; i++) {
-                if (post_id_list[i].id === arg.id && post_id_list[i].num === arg.num) {
-                    index = i;
-                    break;
-                }
-            }
-            if (index >= 0) {
-                post_id_list.splice(index, post_id_list.length - index + 1);
-            }
-            post_id_list.reverse();
-            postArr = new PostArr();
-            postArr.list = [];
-            let count = 0;
-            // 获取帖子内容
-            for (let i = 0; i < post_id_list.length; i++) {
-                if (count >= arg.count) break;
-                const postData = getPostInfoById(post_id_list[i]);
-                if (!postData) continue;
-                postArr.list.push(postData);
-                count ++;
-            }
+        case CONSTANT.SQUARE_FOLLOW: // 关注用户
+            postArr = getFollowUserPost(iterArg);
             break;
-        case CONSTANT.SQUARE_PUBLIC: // 公众号
-            const iterArg2 = new IterPostArg();
-            iterArg2.count = arg.count;
-            iterArg2.id = arg.id;
-            iterArg2.num = arg.num;
-            postArr = getAllPublicPost(iterArg2);
+        case CONSTANT.SQUARE_PUBLIC: // 关注公众号
+            postArr = getFollowPublicPost(iterArg);
             break;
         case CONSTANT.SQUARE_HOT: // 热门
-            const iterArg1 = new IterPostArg();
-            iterArg1.count = arg.count;
-            iterArg1.id = arg.id;
-            iterArg1.num = arg.num;
-            postArr = getHotPost(iterArg1);
+            postArr = getHotPost(iterArg);
             break;
         default:
 
@@ -1059,6 +1006,120 @@ export const userfollow = (uid: number, communityNum:string):boolean => {
 };
 
 /**
+ *  获取关注用户的帖子
+ */
+export const getFollowUserPost = (arg: IterPostArg) :PostArr => {
+    const uid = getUid();
+    // 获取关注的用户
+    const indexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
+    const attentionIndex = indexBucket.get<number, AttentionIndex[]>(uid)[0];
+    console.log('!!!!!!!!!!!!!!!!!!!!!!attentionIndex', attentionIndex);
+    const post_id_list: PostKey[] = [];
+    for (let i = 0; i < attentionIndex.person_list.length; i++) {
+        // 获取关注社区账户的帖子
+        const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
+        let communityPost = communityPostBucket.get<string, CommunityPost[]>(attentionIndex.person_list[i])[0];
+        if (!communityPost) {
+            communityPost = new CommunityPost();
+            communityPost.num = attentionIndex.person_list[i];
+            communityPost.id_list = [];
+        }
+        console.log('!!!!!!!!!!!!!!!!!!!!!!communityPost', communityPost);
+        const post_id_list1 = communityPost.id_list;
+        for (let j = 0; j < post_id_list1.length; j++) {
+            const postKey = new PostKey();
+            postKey.id = post_id_list1[j];
+            postKey.num = communityPost.num;
+            post_id_list.push(postKey);
+        }
+    }
+    console.log('!!!!!!!!!!!!!!!!!!!!!!post_id_list', post_id_list);
+    // 从所有关注的社区账户的帖子中获取最新的指定数量的帖子id
+    postIdSort(post_id_list, 0, post_id_list.length - 1);
+    let index = -1;
+    for (let i = 0; i < post_id_list.length; i++) {
+        if (post_id_list[i].id === arg.id && post_id_list[i].num === arg.num) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        post_id_list.splice(index, post_id_list.length - index + 1);
+    }
+    post_id_list.reverse();
+    const postArr = new PostArr();
+    postArr.list = [];
+    let count = 0;
+    // 获取帖子内容
+    for (let i = 0; i < post_id_list.length; i++) {
+        if (count >= arg.count) break;
+        const postData = getPostInfoById(post_id_list[i]);
+        if (!postData) continue;
+        postArr.list.push(postData);
+        count ++;
+    }
+
+    return postArr;
+};
+
+/**
+ *  获取关注公众号的帖子
+ */
+export const getFollowPublicPost = (arg: IterPostArg) :PostArr => {
+    const uid = getUid();
+    // 获取关注的公众号
+    const indexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
+    const attentionIndex = indexBucket.get<number, AttentionIndex[]>(uid)[0];
+    console.log('!!!!!!!!!!!!!!!!!!!!!!attentionIndex', attentionIndex);
+    const post_id_list: PostKey[] = [];
+    for (let i = 0; i < attentionIndex.public_list.length; i++) {
+        // 获取关注社区账户的帖子
+        const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
+        let communityPost = communityPostBucket.get<string, CommunityPost[]>(attentionIndex.public_list[i])[0];
+        if (!communityPost) {
+            communityPost = new CommunityPost();
+            communityPost.num = attentionIndex.public_list[i];
+            communityPost.id_list = [];
+        }
+        console.log('!!!!!!!!!!!!!!!!!!!!!!communityPost', communityPost);
+        const post_id_list1 = communityPost.id_list;
+        for (let j = 0; j < post_id_list1.length; j++) {
+            const postKey = new PostKey();
+            postKey.id = post_id_list1[j];
+            postKey.num = communityPost.num;
+            post_id_list.push(postKey);
+        }
+    }
+    console.log('!!!!!!!!!!!!!!!!!!!!!!post_id_list', post_id_list);
+    // 从所有关注的公众号的帖子中获取最新的指定数量的帖子id
+    postIdSort(post_id_list, 0, post_id_list.length - 1);
+    let index = -1;
+    for (let i = 0; i < post_id_list.length; i++) {
+        if (post_id_list[i].id === arg.id && post_id_list[i].num === arg.num) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        post_id_list.splice(index, post_id_list.length - index + 1);
+    }
+    post_id_list.reverse();
+    const postArr = new PostArr();
+    postArr.list = [];
+    let count = 0;
+    // 获取帖子内容
+    for (let i = 0; i < post_id_list.length; i++) {
+        if (count >= arg.count) break;
+        const postData = getPostInfoById(post_id_list[i]);
+        if (!postData) continue;
+        postArr.list.push(postData);
+        count ++;
+    }
+
+    return postArr;
+};
+
+/**
  * 获取热门帖子
  * @ param arg 
  */
@@ -1153,7 +1214,7 @@ export const getAllPublicPost = (arg: IterPostArg) :PostArr => {
         const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
         const communityBase = communityBaseBucket.get<string, CommunityBase[]>(postData.key.num)[0];
         console.log('!!!!!!!!!!!!communityBase.comm_type:', communityBase.comm_type);
-        if (communityBase.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
+        if (communityBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
             arr.push(postData);
             count ++;
         }
