@@ -121,8 +121,8 @@ export const initStore = () => {
         addressInfoMap: new Map(),
         userChatMap:new Map(),
         groupChatMap:new Map(),
-        lastChat:[],
         lastRead:new Map(),
+        lastChat:[],
         setting:{
             msgTop:[],
             msgAvoid:[]
@@ -134,7 +134,8 @@ export const initStore = () => {
         followNumList:new Map(),
         laudPostList:new Map(),
         postDraft:null,
-        pubPostDraft:null
+        pubPostDraft:null,
+        pubNum:0
     };
 };
 
@@ -242,6 +243,7 @@ export interface Store {
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
     postDraft:any;   // 普通帖子草稿
     pubPostDraft:any;  // 公众号文章草稿
+    pubNum:number;  // 公众号ID
 }
 
 /**

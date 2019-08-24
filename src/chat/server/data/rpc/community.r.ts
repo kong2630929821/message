@@ -66,6 +66,7 @@ export const getUserPublicAcc = (): string => {
     const uid = getUid();
     const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
     const publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
+    console.log('!!!!!!!!!!getUserPublicAcc',publicAccIndex);
     if (!publicAccIndex) return '';
     if (!publicAccIndex.list) return '';
 
@@ -912,6 +913,7 @@ export const getLaudPostList = ():LaudPostIndex => {
     // 点赞索引表
     const indexBucket = new Bucket(CONSTANT.WARE_NAME, LaudPostIndex._$info.name);
     const list = indexBucket.get<number, LaudPostIndex[]>(uid)[0];
+    console.log('!!!!!!!!!!!!getLaudPostList',list);
     if (!list) {
         const r = new LaudPostIndex();
         r.uid = uid;
@@ -930,6 +932,7 @@ export const getLaudPostList = ():LaudPostIndex => {
  * 首次注册创建社区个人账号
  */
 export const createCommNum = (uid:number,name:string,comm_type:number):string => {
+    console.log('!!!!!!!!!!!createCommNum',uid,name,comm_type);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
     // 生成社区账号
     const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
@@ -957,11 +960,12 @@ export const createCommNum = (uid:number,name:string,comm_type:number):string =>
         } else {
             publicAccIndex.list.push(num);
         }
+        console.log('!!!!!!!!!!!createCommNum publicAccIndex',publicAccIndex);
         publicAccIndexBucket.put(uid, publicAccIndex);
         userfollow(uid, num);
-
-        return num;
     } 
+
+    return num;
 };
 
 /**

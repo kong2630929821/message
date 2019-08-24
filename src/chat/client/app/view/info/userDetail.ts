@@ -1,11 +1,15 @@
+import { getUserRecentGame } from '../../../../../app/net/pull';
 import { popNewMessage } from '../../../../../app/utils/tools';
+import { getMedalest } from '../../../../../earn/client/app/net/rpc';
+import { getMedalList } from '../../../../../earn/client/app/utils/util';
+import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { CommType } from '../../../../server/data/rpc/community.s';
 import { getStore, setStore } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
-import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getMyPublicNum, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
+import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
 
 interface Props {
     uid: number;
@@ -22,6 +26,7 @@ interface Props {
     postList:any[];  // 发布的帖子列表
     followList:string[];  // 关注列表
     fansList:string[];  // 粉丝列表
+    gameList:string[]; // 最近玩过的游戏列表
 }
 
 /**
@@ -47,7 +52,8 @@ export class UserDetail extends Widget {
         medalList:[],
         postList:[],
         followList:[],
-        fansList:[]
+        fansList:[],
+        gameList:[]
     };
 
     public setProps(props:any) {
@@ -64,10 +70,7 @@ export class UserDetail extends Widget {
         if (userinfo.uid) { // 用户信息
             this.props.num = userinfo.comm_num;
             if (this.props.isOwner) {  // 本人
-                getMyPublicNum().then((r:string) => {
-                    this.props.pubNum = r;
-                    this.paint();
-                });
+                this.props.pubNum = getStore('pubNum');
             }
             this.init(sid);
 
@@ -81,18 +84,6 @@ export class UserDetail extends Widget {
             });
         }
 
-        // const data = getMedalList(CoinType.KT, 'coinType');
-        // const ktNum = earnGetStore('balance/KT');
-        // data.forEach((element,i) => {
-        //     const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
-        //     if (element.coinNum <= ktNum) {
-        //         medal.isHave = true;
-        //         this.props.medalList.push(medal);
-        //     }
-        // });
-        // this.props.medalList.splice(-5);
-        // console.log('getMedalList',data,ktNum);
-        
     }
 
     public init(sid:number) {
@@ -122,6 +113,24 @@ export class UserDetail extends Widget {
         getFansList(this.props.num).then((r:string[]) => {
             this.props.fansList = r;  // 粉丝
             this.props.numList[2][0] = r.length;
+            this.paint();
+        });
+        getMedalest([this.props.userInfo.acc_id]).then((r:any) => {
+            const ktNum = r.arr[0].resultNum;  // 勋章
+            const data = getMedalList(CoinType.KT, 'coinType');
+            const list = [];
+            data.forEach((element,i) => {
+                const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
+                if (element.coinNum <= ktNum) {
+                    medal.isHave = true;
+                    list.push(medal);
+                }
+            });
+            this.props.medalList = list.splice(-5);
+            this.paint();
+        });
+        getUserRecentGame(this.props.userInfo.acc_id,5).then(r => {
+            this.props.gameList = r;   // 游戏
             this.paint();
         });
     }

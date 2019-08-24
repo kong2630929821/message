@@ -57,7 +57,7 @@
                 <span style="flex:1 0 0;">最近玩的游戏</span>
             </div>
             <div w-class="content">
-                {{for i,v of [1,2,3,4,5]}}
+                {{for i,v of it.gameList}}
                 <div w-class="imgBox">
                     <img src="../../res/images/tool-pictures.png" />
                 </div>

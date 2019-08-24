@@ -34,6 +34,7 @@ export const getRealUid = (user:String):number => {
     for (const v of rArr) {
         if (v) uid = v.uid;
     }
+    console.log('!!!!!!!!!!!!!!!getRealUid uid: ',uid);
 
     return uid;
 };
@@ -385,20 +386,6 @@ export const changeUserInfo = (userChange: UserChangeInfo): UserInfo => {
 
         return res;
     }
-    // 添加手机查找用户
-    if (!(oldUserinfo.tel === userChange.tel) && !(userChange.tel === '')) {
-        const phoneFind = new UserFind();
-        phoneFind.user = `p:${userChange.tel}`;
-        phoneFind.uid = sid;
-        userFindBucket.put(phoneFind.user, phoneFind);
-    }
-    // 添加钱包地址查询用户
-    if (!(oldUserinfo.wallet_addr === userChange.wallet_addr) && !(userChange.wallet_addr === '')) {
-        const walletFind = new UserFind();
-        walletFind.user = `w:${userChange.wallet_addr}`;
-        walletFind.uid = sid;
-        userFindBucket.put(walletFind.user, walletFind);
-    }
     const uidFind = userFindBucket.get<string, UserFind[]>(`u:${sid}`)[0];
     console.log('!!!!!!!!!!!!!!!!!changeUserInfo uidFind', uidFind);
     // 添加用户ID查询用户
@@ -409,8 +396,22 @@ export const changeUserInfo = (userChange: UserChangeInfo): UserInfo => {
         console.log('!!!!!!!!!!!!!!!!!changeUserInfo newUidFind', newUidFind);
         userFindBucket.put(newUidFind.user, newUidFind);
     }
-    // 添加钱包账户查找用户
-    if (!(oldUserinfo.acc_id === userChange.acc_id) && !(userChange.acc_id === '')) {
+    // 添加手机查找用户
+    if (userChange.tel && oldUserinfo.tel !== userChange.tel) {
+        const phoneFind = new UserFind();
+        phoneFind.user = `p:${userChange.tel}`;
+        phoneFind.uid = sid;
+        userFindBucket.put(phoneFind.user, phoneFind);
+    }
+    // 添加钱包地址查询用户
+    if (userChange.wallet_addr && oldUserinfo.wallet_addr !== userChange.wallet_addr) {
+        const walletFind = new UserFind();
+        walletFind.user = `w:${userChange.wallet_addr}`;
+        walletFind.uid = sid;
+        userFindBucket.put(walletFind.user, walletFind);
+    }
+    // 添加acc_id查找用户
+    if (userChange.acc_id && oldUserinfo.acc_id !== userChange.acc_id) {
         const acc_idFind = new UserFind();
         acc_idFind.user = `a:${userChange.acc_id}`;
         acc_idFind.uid = sid;

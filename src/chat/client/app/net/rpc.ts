@@ -142,6 +142,8 @@ export const sendTempMsg = (rid: number,gid:number, msg: string, msgType = MSG_T
  * @param user accid wallet_address uid phone
  */
 export const getChatUid = (user:string) => {
+    if (!user) return;
+    
     return new Promise((resolve,reject) => {
         clientRpcFunc(getRealUid,user,(r:number) => {
             console.log('!!!!!!!!!!!!!!!!!!!!getChatUid',r);
@@ -674,7 +676,7 @@ export const getLaudPost = () => {
         console.log('getLaudPost=============',r);
         if (r && r.list) {
             store.setStore(`laudPostList/${r.uid}`,r);
-            subscribeLaudPost(store.getStore('uid'),null);
+            // subscribeLaudPost(r.uid,null);
         }
     });
 };

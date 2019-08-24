@@ -17,7 +17,7 @@ import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
-import { getChatUid, getFriendHistory, getLaudPost, getSetting, showUserFollow } from './rpc';
+import { getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting } from './rpc';
 
 // ================================================ 导出
 
@@ -45,7 +45,7 @@ export const walletSignIn = (openid) => {
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 store.setStore('isLogin',true);
                 getSetting();   // 获取设置信息
-                getLaudPost();  // 获取赞过帖子列表
+                // getLaudPost();  // 获取赞过帖子列表
                 init2.init(r.uid);
                 
                 init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {
@@ -53,7 +53,10 @@ export const walletSignIn = (openid) => {
                         getFriendHistory(v.rid, v.gid);
                     }
                 });
-                setUserInfo();
+                getMyPublicNum().then((r:string) => {
+                    store.setStore('pubNum',r);
+                });
+                // setUserInfo();
 
                 // 从json文件中获取
                 getOfficial().then(res => {

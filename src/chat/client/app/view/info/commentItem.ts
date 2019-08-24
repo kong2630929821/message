@@ -3,7 +3,7 @@ import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
-import { complaintUser, copyToClipboard } from '../../logic/logic';
+import { buildupImgPath, complaintUser, copyToClipboard } from '../../logic/logic';
 import { commentLaud, delComment } from '../../net/rpc';
 import { parseEmoji } from '../home/square';
 
@@ -57,6 +57,7 @@ export class CommentItem extends Widget {
         this.props.mess = parseEmoji(val.msg);
         this.props.img = val.img; 
         this.props.isMine = this.props.owner === getStore('uid',0);
+        this.props.avatar = buildupImgPath(props.avatar) || '../../res/images/user_avatar.png';
 
         if (props.reply) {  // 回复的原评论
             this.props.orgName = props.reply.username;

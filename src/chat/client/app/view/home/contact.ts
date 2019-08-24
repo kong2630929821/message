@@ -5,7 +5,7 @@
 // ================================================ 导入
 import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
 import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
-import { getUserInfo, popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { registerStoreData } from '../../../../../app/viewLogic/common';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
@@ -85,9 +85,9 @@ export class Contact extends SpecialWidget {
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         
         if (this.props.isLogin) {   // 聊天已登录成功
-            getUserInfo().then(wUser => {
+            getStoreData('user',{ info:{},id:'' }).then(wUser => {
                 // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
-                if (wUser.nickName !== cUser.name || wUser.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id) {
+                if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.info.acc_id !== cUser.acc_id) {
                     if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                         setUserInfo();
                     } else {

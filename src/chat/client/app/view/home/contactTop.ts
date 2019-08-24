@@ -3,9 +3,10 @@
  */
 
 // ================================ 导入
-import { popNew3 } from '../../../../../app/utils/tools';
+import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { getStore } from '../../data/store';
 import { rippleShow } from '../../logic/logic';
 import { showPost } from '../../net/rpc';
 import { TAB } from './contact';
@@ -68,9 +69,13 @@ export class ContactTop extends Widget {
     
     // 发布帖子  fg=true 发布公众号帖子
     public editPost(e:any,fg:boolean) {
-        popNew3('chat-client-app-view-info-editPost',{ isPublic:fg },() => {
-            showPost(this.props.acTag + 1);
-        });
+        if (fg && !getStore('pubNum',0)) {
+            popNewMessage('没有公众号，不能发文章');
+        } else {
+            popNew3('chat-client-app-view-info-editPost',{ isPublic:fg },() => {
+                showPost(this.props.acTag + 1);
+            });
+        }
         notify(e.node,'ev-next-click',{});
     }
 

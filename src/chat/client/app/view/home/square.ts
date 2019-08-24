@@ -35,6 +35,11 @@ export class Square extends Widget {
         super.setProps(this.props);
         this.state = State;
         showPost(this.props.active + 1);
+        if (this.props.active === 2) {
+            this.props.follows = this.state.followList.public_list; 
+        } else {
+            this.props.follows = this.state.followList.person_list;
+        } 
     }
 
     // 切换tag
@@ -142,9 +147,6 @@ export const parseEmoji = (msg:any) => {
     msg = msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
         const url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
-            // FIXME: 不应该写死,应该动态获取
-            // url = url.replace('../../','/client/app/');
-
             return `<img src="../../chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;

@@ -50,7 +50,11 @@ export class EditPost extends Widget {
         this.props.isOnEmoji = false;
 
         const uid = getStore('uid',0);
-        this.props.num = props.num || getStore(`userInfoMap/${uid}`,{}).comm_num ;
+        if (props.isPublic) {
+            this.props.num = getStore('pubNum',0);
+        } else {
+            this.props.num = props.num || getStore(`userInfoMap/${uid}`,{}).comm_num ;
+        }
     }
 
     // 标题
@@ -112,7 +116,6 @@ export class EditPost extends Widget {
             }
             this.cancel && this.cancel();
         }
-
     }
     
     // 上传图片
