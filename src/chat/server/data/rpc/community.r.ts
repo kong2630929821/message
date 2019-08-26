@@ -502,6 +502,7 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
     for (let i = 0; i < post_id_list.length; i++) {
         if (count >= arg.count) break;
         const postData = getPostInfoById(post_id_list[i]);
+        if (!postData) continue;
         postArrWithTotal.list.push(postData);
         count ++;
     }
