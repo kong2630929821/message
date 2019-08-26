@@ -62,7 +62,7 @@ export class PostDetail extends Widget {
             ...props
         };
         super.setProps(this.props);
-        // this.props.likeActive = judgeLiked(this.props.key.num,this.props.key.id);
+        this.props.likeActive = judgeLiked(this.props.key.num,this.props.key.id);
         getCommentLaudList(this.props.key.num,this.props.key.id).then((r:number[]) => {
             this.props.commentList = this.props.commentList.map(v => {
                 v.likeActive = r.indexOf(v.key.id) > -1;

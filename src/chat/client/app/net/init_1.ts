@@ -44,8 +44,8 @@ export const walletSignIn = (openid) => {
                 store.setStore(`uid`, r.uid);
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 store.setStore('isLogin',true);
-                // getSetting();   // 获取设置信息
-                // getLaudPost();  // 获取赞过帖子列表
+                getSetting();   // 获取设置信息
+                getLaudPost();  // 获取赞过帖子列表
                 init2.init(r.uid);
                 
                 init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {
