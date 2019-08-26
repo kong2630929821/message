@@ -1,3 +1,4 @@
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
@@ -6,7 +7,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
-import { buildupImgPath, complaintUser, judgeFollowed } from '../../logic/logic';
+import { buildupImgPath, complaintUser, judgeFollowed, timestampFormat } from '../../logic/logic';
 import { delPost, follow, sendUserMsg } from '../../net/rpc';
 
 interface Props {
@@ -27,6 +28,8 @@ interface Props {
     isPublic:boolean; // 公众号文章
     gender:number;  // 性别 0 男 1 女
     isMine:boolean;  // 是否本人发的帖
+    urlPath:string;  // 图片路径前
+    timeFormat:any;  // 时间处理
 }
 /**
  * 广场帖子
@@ -52,7 +55,9 @@ export class SquareItem extends Widget {
         imgs:[],
         offical:false,
         gender:1,   // 性别 0男 1女
-        isMine:false
+        isMine:false,
+        urlPath:uploadFileUrlPrefix,
+        timeFormat:timestampFormat
     };
 
     public setProps(props:any) {
@@ -61,7 +66,7 @@ export class SquareItem extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.props.avatar = buildupImgPath(props.avatar) || '../../res/images/user_avatar.png';
+        this.props.avatar = buildupImgPath(props.avatar);
         const uid = getStore('uid',0);
         this.props.isMine = this.props.owner === uid;
         this.props.followed = judgeFollowed(this.props.key.num);

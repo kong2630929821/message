@@ -4,7 +4,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
-import { judgeFollowed } from '../../logic/logic';
+import { buildupImgPath, judgeFollowed } from '../../logic/logic';
 import { follow, getFansList, getUserInfoByNum, getUserPostList, sendUserMsg } from '../../net/rpc';
 
 interface Props {
@@ -50,7 +50,7 @@ export class PublicHome extends Widget {
 
         getUserInfoByNum([this.props.pubNum]).then(r => {
             this.props.name = r[0].comm_info.name;
-            this.props.avatar = r[0].comm_info.avatar || '../../res/images/user_avatar.png';
+            this.props.avatar = buildupImgPath(r[0].comm_info.avatar);
         });
         getUserPostList(this.props.pubNum).then((r:any) => {
             this.props.postList = r.list.map(r => { // 动态

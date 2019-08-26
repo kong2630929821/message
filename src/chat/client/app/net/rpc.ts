@@ -25,7 +25,7 @@ import { SetOfficial, UserAgree } from '../../../server/data/rpc/user.s';
 import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
-import { judgeFollowed } from '../logic/logic';
+import { judgeFollowed, judgeLiked } from '../logic/logic';
 import { parseEmoji } from '../view/home/square';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
@@ -601,8 +601,6 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
             console.log('showPost=============',r);
             if (r && r.list) {
                 const data:any = r.list;
-                const uid = store.getStore('uid');
-                const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
 
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;
@@ -611,7 +609,7 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
                     data[i].content = parseEmoji(body.msg);
                     data[i].imgs = body.imgs;
                     data[i].followed = judgeFollowed(res.key.num);
-                    data[i].likeActive = likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
+                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
                 });
                 store.setStore('postList',data);
                 res(data);
@@ -676,7 +674,7 @@ export const getLaudPost = () => {
         console.log('getLaudPost=============',r);
         if (r && r.list) {
             store.setStore(`laudPostList/${r.uid}`,r);
-            // subscribeLaudPost(r.uid,null);
+            subscribeLaudPost(r.uid,null);
         }
     });
 };
@@ -715,9 +713,7 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
             console.log('getUserPost=============',r);
             if (r && r.list) {
                 const data:any = r.list;
-                const uid = store.getStore('uid');
-                const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
-
+                
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;
                     data[i].isPublic = res.comm_type === CommType.publicAcc;
@@ -725,7 +721,7 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
                     data[i].content = parseEmoji(body.msg);
                     data[i].imgs = body.imgs;
                     data[i].followed = judgeFollowed(res.key.num);
-                    data[i].likeActive = likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
+                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
                 });
                 res({ list:data, total: r.total });
             } else {
@@ -774,7 +770,7 @@ export const getMyPublicNum = () => {
     return new Promise((res,rej) => {
         clientRpcFunc(getUserPublicAcc,null,r => {
             console.log('getUserPublicAcc=============',r);
-            if (r) {
+            if (r !== 'false') {
                 res(r);
             } else {
                 rej();

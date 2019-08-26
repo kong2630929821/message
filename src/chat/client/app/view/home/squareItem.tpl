@@ -1,6 +1,6 @@
 <div w-class="item" on-tap="closeUtils">
     <div w-class="top">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.avatar}}, width:"80px;"}</widget>
+        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
         <div w-class="topCenter">
             <div style="display:flex;align-items:center;">
                 <span>{{it.username}}&nbsp;</span>
@@ -12,7 +12,7 @@
                 <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
                 {{end}}
             </div>
-            <div w-class="time">{{it.createtime}}</div>
+            <div w-class="time">{{it.timeFormat(it.createtime,3)}}</div>
         </div>
         {{if !it.followed}}
         <div w-class="follow" on-tap="followUser">+关注</div>
@@ -35,12 +35,12 @@
     {{end}}
 
     {{% =====================图片区域========================}}
-    <div style="margin:20px 15px;">
+    <div style="margin:20px 15px;" on-tap="goDetail">
         {{for i,v of it.imgs}}
             {{if i==2 && it.imgs.length==4}}
             <div></div>
             {{end}}
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:"", width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{it.urlPath + v}}, width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
         {{end}}
     </div>
 

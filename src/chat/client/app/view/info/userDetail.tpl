@@ -3,7 +3,7 @@
     <div w-class="contain">
         <div w-class="topBox">
             <div style="display:flex;align-items: center;">
-                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"160px;"}</widget>
+                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"160px;"}</widget>
                 <div>
                     <div w-class="numList">
                         {{for i,v of it.numList}}

@@ -2,7 +2,7 @@
     <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"#fff",nextImg:"more-dot-blue.png"}</widget>
     <div w-class="contain">
         <div w-class="topBox">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"190px;"}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"190px;"}</widget>
             <div w-class="nameText">{{it.name}}</div>
             <div w-class="numList">
                 <span style="margin-right:40px;">{{it.totalPost}}&nbsp;篇文章</span>

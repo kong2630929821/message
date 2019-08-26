@@ -2,6 +2,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, setStore } from '../../data/store';
+import { buildupImgPath, judgeLiked, timestampFormat } from '../../logic/logic';
 import { getCommentLaudList, postLaud, showComment, showLikeList } from '../../net/rpc';
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
     likeList: any[]; // 点赞记录
     gender: number;  // 性别 0 男 1 女
     commentLikeList:number[]; // 点赞的评论列表
+    timeFormat:any;  // 时间处理
 }
 const TAB = {
     comment: 'comment',
@@ -50,7 +52,8 @@ export class PostDetail extends Widget {
         commentList: [],
         likeList: [],
         gender: 0,
-        commentLikeList:[]
+        commentLikeList:[],
+        timeFormat:timestampFormat
     };
 
     public setProps(props: any) {
@@ -59,9 +62,7 @@ export class PostDetail extends Widget {
             ...props
         };
         super.setProps(this.props);
-        const uid = getStore('uid');
-        const likeList = getStore(`laudPostList/${uid}`,{ list:[] }).list;
-        this.props.likeActive = likeList.findIndex(r => r.num === this.props.key.num && r.id === this.props.key.id) > -1;
+        // this.props.likeActive = judgeLiked(this.props.key.num,this.props.key.id);
         getCommentLaudList(this.props.key.num,this.props.key.id).then((r:number[]) => {
             this.props.commentList = this.props.commentList.map(v => {
                 v.likeActive = r.indexOf(v.key.id) > -1;
@@ -121,6 +122,14 @@ export class PostDetail extends Widget {
                 // 失败了则撤销点赞或取消点赞操作
                 this.props.likeActive = !this.props.likeActive;
                 this.props.likeCount += this.props.likeActive ? 1 : -1;
+                const uid = getStore('uid');
+                const userinfo = getStore(`userInfoMap/${uid}`,{});
+                this.props.likeList.unshift({
+                    username: userinfo.name,
+                    avatar: buildupImgPath(userinfo.avatar),
+                    gender: userinfo.sex,
+                    createtime:Date.now()
+                });
                 this.paint();
             });
         } catch (r) {
@@ -146,7 +155,7 @@ export class PostDetail extends Widget {
                 createtime: Date.now(),
                 likeCount: 0,
                 username: userinfo.name,
-                avatar: userinfo.avatar,
+                avatar: buildupImgPath(userinfo.avatar),
                 gender: userinfo.sex,
                 owner:uid
             });
@@ -172,7 +181,7 @@ export class PostDetail extends Widget {
             createtime: Date.now(),
             likeCount: 0,
             username: userinfo.name,
-            avatar: userinfo.avatar,
+            avatar: buildupImgPath(userinfo.avatar),
             gender: userinfo.sex,
             owner: uid,
             orgName: e.username,

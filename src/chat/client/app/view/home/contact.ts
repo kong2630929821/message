@@ -90,7 +90,7 @@ export class Contact extends SpecialWidget {
                 if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.info.acc_id !== cUser.acc_id) {
                     if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
                         setUserInfo();
-                    } else {
+                    } else if (cUser.uid) {  // 聊天已登录
                         store.initStore();
                         this.state.lastChat = []; // 清空记录 lastChat
                     }

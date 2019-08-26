@@ -3,7 +3,7 @@ import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
-import { buildupImgPath, complaintUser, copyToClipboard } from '../../logic/logic';
+import { buildupImgPath, complaintUser, copyToClipboard, timestampFormat } from '../../logic/logic';
 import { commentLaud, delComment } from '../../net/rpc';
 import { parseEmoji } from '../home/square';
 
@@ -23,6 +23,7 @@ interface Props {
     gender: number;  // 性别 0 男 1 女
     owner:number; // 评论者的uid
     isMine:boolean;  // 是否本人
+    timeFormat:any; // 时间处理
 }
 
 /**
@@ -48,16 +49,21 @@ export class CommentItem extends Widget {
         likeActive:false,
         gender:0,
         owner:0,
-        isMine:false
+        isMine:false,
+        timeFormat:timestampFormat
     };
 
     public setProps(props:any) {
-        super.setProps(props);
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
         const val = props.msg ? JSON.parse(props.msg) :{ msg:'',img:'' };
         this.props.mess = parseEmoji(val.msg);
         this.props.img = val.img; 
         this.props.isMine = this.props.owner === getStore('uid',0);
-        this.props.avatar = buildupImgPath(props.avatar) || '../../res/images/user_avatar.png';
+        this.props.avatar = buildupImgPath(props.avatar);
 
         if (props.reply) {  // 回复的原评论
             this.props.orgName = props.reply.username;

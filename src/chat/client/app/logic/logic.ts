@@ -238,6 +238,14 @@ export const judgeFollowed = (num:string) => {
     return followList.indexOf(num) > -1;
 };
 
+// 判断是否点赞
+export const judgeLiked = (num:string, id:number) => {
+    const uid = store.getStore('uid');
+    const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
+
+    return likeList.findIndex(r => r.num === num && r.id === id) > -1;
+};
+
 // 拼接图片路径
 export const buildupImgPath = (url:string) => {
     if (url && !/data:image|http/.test(url)) {
@@ -245,5 +253,5 @@ export const buildupImgPath = (url:string) => {
         return `${uploadFileUrlPrefix}${url}`;
     }
 
-    return '';
+    return url;
 };

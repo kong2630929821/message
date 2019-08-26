@@ -60,3 +60,9 @@ div{
 .scrollSmooth{
     scroll-behavior: smooth;
 }
+/* 预览图片 */
+.previewImg{
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}

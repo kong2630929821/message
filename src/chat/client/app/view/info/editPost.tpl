@@ -19,12 +19,12 @@
         <div w-class="imageList">
             {{for i,v of it.imgs}}
             <div w-class="imgBox">
-                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="img">{imgURL:{{v}}, width:"230px;",notRound:true}</widget>
+                <pi-ui-html style="display:inline-block;margin: 5px;">{{v}}</pi-ui-html>                
                 <img src="../../res/images/close_blue.png" w-class="close"/>
             </div>
             {{end}}
             {{if it.imgs.length < 9 }}
-            <div w-class="upload" on-tap="upload"></div>
+            <div w-class="upload" on-tap="chooseImage"></div>
             {{end}}
         </div>
     </div>

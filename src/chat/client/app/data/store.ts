@@ -38,6 +38,8 @@ export const getStore = (path: string, defaultValue = undefined) => {
  * 更新store并通知
  */
 export const setStore = (path: string, data: any, notified = true) => {
+    console.log('!!!!!!!!!!!!!!!!!!!!setstore',path,store);
+
     const path2value = (...args) => {
         let returnValue = <any>store;
         for (let i = 0; i < args[0].length; i++) {
@@ -105,7 +107,7 @@ export const unregister = (keyName: string, cb: Function): void => {
 export const initStore = () => {
     registerDataChange();
     store = {
-        uid:null,
+        uid:0,
         readGroupTimeMap: new Map(),
         groupInfoMap: new Map(),
         groupUserLinkMap: new Map(),
@@ -255,7 +257,7 @@ export interface LastReadMsgId {
 }
 // ============================================ 本地
 
-export let store:Store;
+let store:Store;
 // ============================================ 可执行
 const handlerMap: HandlerMap = new HandlerMap();
 initStore();

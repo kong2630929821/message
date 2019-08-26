@@ -74,14 +74,16 @@ export class EditPost extends Widget {
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);
     
+            // tslint:disable-next-line:no-this-assignment
+            const this1 = this;
             imagePicker.getContent({
                 quality:30,
                 success(buffer:ArrayBuffer) {
-
                     imgResize(buffer,(res) => {
-                        this.props.imgs.push(res.base64);
+                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        this1.props.imgs.push(url);
+                        this1.paint();
                     });
-                        
                 }
             });
         });
@@ -119,14 +121,17 @@ export class EditPost extends Widget {
     }
     
     // 上传图片
-    public async sendImage(i:number) {
-        if (i < this.props.imgs.length) {
-            await uploadFile(base64ToFile(this.props.imgs[i]),(imgUrlSuf:string) => {
-                this.props.imgs[i] = imgUrlSuf;
-                this.sendImage(i++);
-                console.log('上传图片',i,imgUrlSuf);
-            });
-        } 
+    public async sendImage() {
+        for (const i in this.props.imgs) {
+            const val = /url\((.*)\)/.exec(this.props.imgs[i]);
+            if (val) {
+                await uploadFile(base64ToFile(val[1]),(imgUrlSuf:string) => {
+                    this.props.imgs[i] = imgUrlSuf;
+                    console.log('上传图片',i,imgUrlSuf);
+                });
+            }
+        }
+       
     }
 
     // 发送
@@ -134,7 +139,7 @@ export class EditPost extends Widget {
         if (this.props.imgs.length) {
             const loadding = popNewLoading('图片上传中');
             try {
-                await this.sendImage(0);
+                await this.sendImage();
             } catch (err) {
                 popNewMessage('上传图片失败了');
             }

@@ -10,7 +10,7 @@
                 <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
                 {{end}}
             </div>
-            <div w-class="time">{{it.createtime}}</div>
+            <div w-class="time">{{it.timeFormat(it.createtime,3)}}</div>
         </div>
         <img src="../../res/images/comment.png" w-class="btn" style="margin-right:20px;" on-tap="showTools"/>
         <div on-tap="likeBtn" style="display:flex;align-items:center;">

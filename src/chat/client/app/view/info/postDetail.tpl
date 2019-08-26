@@ -25,7 +25,7 @@
                 <div>
                     {{for i,v of it.likeList}}
                     <div w-class="likeItem">
-                        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar||"../../res/images/user_avatar.png"}}, width:"80px;"}</widget>
+                        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
                         <div w-class="titleCenter">
                             <div w-class="username">
                                 <span>{{v.username}}&nbsp;</span>
@@ -35,7 +35,7 @@
                                 <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
                                 {{end}}
                             </div>
-                            <div w-class="time">{{v.createtime}} 赞了动态</div>
+                            <div w-class="time">{{it.timeFormat(v.createtime,3)}} 赞了动态</div>
                         </div>
                     </div>
                     {{end}}

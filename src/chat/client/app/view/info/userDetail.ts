@@ -89,7 +89,7 @@ export class UserDetail extends Widget {
     public init(sid:number) {
         const numsList = getStore(`followNumList/${sid}`,{ person_list:[],public_list:[]  });
         const followList = numsList.person_list.concat(numsList.public_list);
-        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
+        this.props.avatar = getUserAvatar(this.props.uid);
         this.props.followed = followList.indexOf(this.props.num) > -1;
         
         if (!this.props.isOwner) {

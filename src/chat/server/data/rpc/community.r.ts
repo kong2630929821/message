@@ -67,10 +67,13 @@ export const getUserPublicAcc = (): string => {
     const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
     const publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
     console.log('!!!!!!!!!!getUserPublicAcc',publicAccIndex);
-    if (!publicAccIndex) return '';
-    if (!publicAccIndex.list) return '';
+    let num = 'false';
+    if (publicAccIndex && publicAccIndex.list.length > 0) {
+        num = publicAccIndex.list[0];
+    }
+    console.log('!!!!!!!!!!getUserPublicAcc',num);
 
-    return publicAccIndex.list[0];
+    return num;
 };
 
 /**
