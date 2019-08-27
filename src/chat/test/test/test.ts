@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
 import { set_gmAccount } from '../../server/data/rpc/user.p';
 
 /**
@@ -63,10 +63,11 @@ export const addPostPortTest = () => {
     });
 };
 
+// 帖子点赞
 export const postLaudPostTest = () => {
     const arg = new PostKey();
     arg.num = '2';
-    arg.id = 2;
+    arg.id = 1;
     clientRpcFunc(postLaudPost, arg, (r: PostKey) => {
         console.log(r);
     });
@@ -109,11 +110,23 @@ export const commentLaud = () => {
     });
 };
 
+// 获取帖子点赞
+export const showLaudLogTest = () => {
+    const arg = new IterLaudArg();
+    arg.num = '2';
+    arg.uid = 0;
+    arg.post_id = 1;
+    arg.count = 10;
+    clientRpcFunc(showLaudLog, arg, (r: LaudLogArr) => {
+        console.log(r);
+    });
+};
+
 // 获取评论点赞
 export const getcommentLaudtest = () => {
     const arg = new PostKey();
-    arg.num = '3';
-    arg.id = 1;
+    arg.num = '2';
+    arg.id = 2;
     clientRpcFunc(getCommentLaud, arg, (r: CommentArr) => {
         console.log(r);
     });
@@ -263,6 +276,10 @@ const props = {
         {
             name: '获取评论点赞',
             func: () => { getcommentLaudtest(); }
+        },
+        {
+            name: '获取帖子点赞',
+            func: () => { showLaudLogTest(); }
         },
         {
             name: '分类帖子',
