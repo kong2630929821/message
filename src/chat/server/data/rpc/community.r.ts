@@ -8,7 +8,7 @@ import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST,
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, ReplyData } from './community.s';
+import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
 import { getUid } from './group.r';
 
 declare var env: Env;
@@ -279,6 +279,22 @@ export const addPostPort = (arg: AddPostArg): PostKey => {
     key.num = '';
 
     return key;
+};
+
+/**
+ * 根据帖子id批量获取帖子信息
+ */
+// #[rpc=rpcServer]
+export const getPostInfoByIds = (postKeyList: PostKeyList): PostArr => {
+    const postArr = new PostArr();
+    postArr.list = [];
+    for (let i = 0; i < postKeyList.list.length; i++) {
+        const post = getPostInfoById(postKeyList.list[i]);
+        if (!post) continue;
+        postArr.list.push(post);
+    }
+
+    return postArr;
 };
 
 /**
