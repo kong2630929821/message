@@ -6,7 +6,7 @@
 declare var pi_modules;
 
 // ================================================ 导入
-import { chatLogicIp, chatLogicPort } from '../../../../app/ipConfig';
+import { chatLogicIp, chatLogicPort } from '../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../app/utils/tools';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';

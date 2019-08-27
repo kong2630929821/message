@@ -2,7 +2,7 @@ import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { register } from '../../data/store';
+import { getStore, register } from '../../data/store';
 import { postLaud, showPost } from '../../net/rpc';
 import { EMOJIS_MAP } from '../../widget/emoji/emoji';
 
@@ -33,27 +33,34 @@ export class Square extends Widget {
             ...props
         };
         super.setProps(this.props);
+        State.postList = [];
         this.state = State;
+        this.init(this.props.active);
         showPost(this.props.active + 1);
-        if (this.props.active === 2) {
-            this.props.follows = this.state.followList.public_list; 
+    }
+
+    public init(ind:number) {
+        if (ind === 2) {
+            const pubNum = getStore('pubNum', 0);
+            this.props.follows = this.state.followList.public_list.filter(v => {
+
+                return v !== pubNum;
+            }); 
         } else {
-            this.props.follows = this.state.followList.person_list;
+            const user = getStore(`userInfoMap/${getStore('uid')}`, {});
+            this.props.follows = this.state.followList.person_list.filter(v => {
+                return v !== user.comm_num;
+            });
         } 
     }
 
     // 切换tag
-    public changeTag(e:any,ind:number) {
+    public changeTag(ind:number,e:any) {
         this.props.showTag = false;
         this.props.active = ind;
-        if (ind === 2) {
-            this.props.follows = this.state.followList.public_list; 
-        } else {
-            this.props.follows = this.state.followList.person_list;
-        } 
+        this.init(ind);
         this.paint();
         notify(e.node,'ev-square-change',{ value:ind });
-        showPost(ind + 1);
     }
 
     // 管理我关注的公众号 其他账号

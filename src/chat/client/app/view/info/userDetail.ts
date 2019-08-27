@@ -78,9 +78,8 @@ export class UserDetail extends Widget {
             getUsersBasicInfo([this.props.uid]).then((r: UserArray) => {
                 this.props.userInfo = r.arr[0];
                 this.props.num = this.props.userInfo.comm_num;
-                this.init(sid);
-                this.paint();
                 setStore(`userInfoMap/${this.props.uid}`,r.arr[0]);
+                this.init(sid);
             });
         }
 
@@ -102,9 +101,13 @@ export class UserDetail extends Widget {
                 this.paint();
             });
         } else {
-            this.props.followList = followList;  // 关注
-            this.props.numList[1][0] = followList.length;
+            this.props.followList = followList.filter(v => { // 关注除去自己
+                return v !== this.props.num && v !== this.props.pubNum;
+            });
+            this.props.numList[1][0] = this.props.followList.length;
         }
+        this.paint();
+
         getUserPostList(this.props.num).then((r:any) => {
             this.props.postList = r.list;  // 动态
             this.props.numList[0][0] = r.total;
@@ -158,6 +161,7 @@ export class UserDetail extends Widget {
         if (!this.props.pubNum) {
             addCommunityNum('我的公众号',CommType.publicAcc,'').then((r:string) => {
                 this.props.pubNum = r;
+                setStore('pubNum',r);
                 this.paint();
             });
             
