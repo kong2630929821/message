@@ -33,7 +33,7 @@
                 {{end}}
             </div>
             
-            <div w-class="userDesc">个性签名：{{it.userInfo.note}}</div>
+            <div w-class="userDesc">个性签名：{{it.userInfo.note || "------"}}</div>
         </div>
 
         <div w-class="bottomBox">

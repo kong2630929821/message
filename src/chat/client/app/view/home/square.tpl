@@ -27,7 +27,7 @@
         <div w-class="title">标签分类</div>
         <dv w-class="tagList">
             {{for i,v of it.tagList}}
-            <div w-class="tag" on-tap="changeTag(e,{{i}})">{{v}}</div>
+            <div w-class="tag" on-tap="changeTag({{i}},e)">{{v}}</div>
             {{end}}
         </dv>
     </div>

@@ -38,8 +38,6 @@ export const getStore = (path: string, defaultValue = undefined) => {
  * 更新store并通知
  */
 export const setStore = (path: string, data: any, notified = true) => {
-    console.log('!!!!!!!!!!!!!!!!!!!!setstore',path,store);
-
     const path2value = (...args) => {
         let returnValue = <any>store;
         for (let i = 0; i < args[0].length; i++) {

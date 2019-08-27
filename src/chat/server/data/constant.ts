@@ -51,8 +51,8 @@ export const VIP5_GROUP_MEMBERS_LIMIT = 1000; // 官方群的成员上限
 
 // 推送cmd
 export const SEND_REFUSED = 'refused_add'; // 拒绝好友
-export const SEND_POST_LAUD = 'post_laud'; // 帖子点赞或取消点赞
-export const SEND_COMMENT_LAUD = 'comment_laud'; // 评论点赞或取消点赞
+export const SEND_POST_LAUD = 'post_laud'; // 帖子点赞
+export const SEND_COMMENT_LAUD = 'comment_laud'; // 评论点赞
 export const SEND_COMMENT = 'comment'; // 评论推送
 export const SEND_COMMENT_TO_COMMENT = 'comment_to_comment'; // 评论帖子的评论
 

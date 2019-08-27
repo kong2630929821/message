@@ -11,7 +11,7 @@ enum CommType {
 //创建社区
 struct CreateCommunity {
     name: String,           //社区名
-    comm_type: u8,          //社区类型-公众号、个人、好嗨号
+    comm_type: CommType,    //社区类型-公众号、个人、好嗨号
     desc: String,           //简介
 }
 
@@ -163,4 +163,8 @@ struct CommUserInfo{
 // 用户信息列表
 struct CommUserInfoList{
     list: &[CommUserInfo]
+}
+// PostKey列表
+struct PostKeyList{
+    list: &[PostKey]
 }
