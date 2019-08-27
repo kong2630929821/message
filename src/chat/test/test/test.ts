@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg, PostArr, PostArrWithTotal } from '../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterPostArg, IterSquarePostArg, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
 import { set_gmAccount } from '../../server/data/rpc/user.p';
 
 /**
@@ -54,11 +54,20 @@ export const setGM = () => {
 // 写帖子
 export const addPostPortTest = () => {
     const addPostArg = new AddPostArg();
-    addPostArg.num = '3';
+    addPostArg.num = '2';
     addPostArg.post_type = 1;
     addPostArg.title = 'test1';
     addPostArg.body = 'test1';
     clientRpcFunc(addPostPort, addPostArg, (r: PostKey) => {
+        console.log(r);
+    });
+};
+
+export const postLaudPostTest = () => {
+    const arg = new PostKey();
+    arg.num = '2';
+    arg.id = 2;
+    clientRpcFunc(postLaudPost, arg, (r: PostKey) => {
         console.log(r);
     });
 };
@@ -205,6 +214,21 @@ export const getUserInfoByCommTest = () => {
     });
 };
 
+// 批量获取帖子
+export const getPostInfoByIdsTest = () => {
+    const arg = new PostKeyList();
+    const postKey1 = new PostKey();
+    postKey1.num = '2';
+    postKey1.id = 1;
+    const postKey2 = new PostKey();
+    postKey2.num = '2';
+    postKey2.id = 2;
+    arg.list = [postKey1, postKey2];
+    clientRpcFunc(getPostInfoByIds, arg, (r: CommUserInfoList) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
@@ -215,6 +239,14 @@ const props = {
         {
             name: '写帖子',
             func: () => { addPostPortTest(); }
+        },
+        {
+            name: '帖子点赞',
+            func: () => { postLaudPostTest(); }
+        },
+        {
+            name: '批量获取帖子',
+            func: () => { getPostInfoByIdsTest(); }
         },
         {
             name: '评论帖子',
