@@ -75,6 +75,7 @@ export const walletSignIn = (openid) => {
                 const beInvited = await getStoreData('inviteUsers/convert_invite',[]);
                 deelNotice(invite,GENERATOR_TYPE.NOTICE_1);
                 deelNotice([beInvited],GENERATOR_TYPE.NOTICE_2);
+                
             } else {
                 popNewMessage('钱包登陆失败');
             }

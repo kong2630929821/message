@@ -11,11 +11,11 @@
                             <p w-class="msgName">ID</p>
                             <p w-class="uId">
                                 <div>{{v[3]}}</div>
-                                <div style="color:#315BC8;">加好友</div>
+                                <div style="color:#315BC8;" on-tap="addFriend({{v[3]}})">{{it.isAddUser}}</div>
                             </p>
                         </div>
                     {{else}}
-                        <div w-class="messageNotice">
+                        <div w-class="messageNotice" on-tap="gotoPostDetail({{i}})">
                             <div w-class="noticeTitle">{{v[1]}}</div>
                             <img src="../../res/images/add-blue.png" alt="" w-class="noticeImg"/>
                         </div>

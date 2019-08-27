@@ -49,7 +49,6 @@ export class ApplyUser extends Widget {
 
                 const invite = inviteUsers.invite_success;
                 let index = null;
-                let index1 = null;
                 invite.forEach((v,i) => {
                     if (v[0] === this.props.accId) {
                         index = i;
@@ -59,15 +58,7 @@ export class ApplyUser extends Widget {
                 setStoreData('inviteUsers/invite_success',invite);
 
                 // 邀请我的好友
-                const convert = inviteUsers.convert_invite;
-                convert.forEach((t,j) => {
-                    if (t[0] === this.props.accId) {
-                        index1 = j;
-                    }
-                });
-                // const index1 = convert.findIndex(item => item === this.props.accId);
-                convert.splice(index1,1);
-                setStoreData('inviteUsers/convert_invite',convert);
+                setStoreData('inviteUsers/convert_invite',[]);
             });
             
         });

@@ -118,7 +118,8 @@ export class Contact extends SpecialWidget {
                     friends:[]
                 },
                 inviteUsers:[],
-                convertUser:[]
+                convertUser:[],
+                notice:[]
             };
             this.paint();
         });
@@ -255,7 +256,7 @@ registerStoreData('inviteUsers/convert_invite',(r) => {
     if (ans.length < r.length) {
         setStoreData('inviteUsers/convert_invite',ans);
     }
-    deelNotice(r,GENERATOR_TYPE.NOTICE_2);
+    deelNotice([r],GENERATOR_TYPE.NOTICE_2);
     STATE.convertUser = ans;
     forelet.paint(STATE);
 });
@@ -288,6 +289,9 @@ const updateInviteUsers = (ans) => {
     return ans;
 };
 store.register(`noticeList`, (r:any) => {
+    if (r.length === 0) {
+        return ;
+    }
     STATE.notice = r[r.length - 1];
     forelet.paint(STATE);
 });

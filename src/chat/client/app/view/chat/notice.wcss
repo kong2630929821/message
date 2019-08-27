@@ -66,8 +66,10 @@
     font-family:STHeitiSC;
     font-weight:300;
     color:rgba(34,34,34,1);
+    margin-left: 20px;
 }
 .noticeImg{
     width: 80px;
     height: 80px;
+    margin-right: 20px;
 }

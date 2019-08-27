@@ -18,25 +18,28 @@
             <div w-class="searchBox">用户名/ID/手机号</div>
             <img w-class="searchIcon" src="../../res/images/search-gray.png" />
         </div> -->}}
-        {{if it1.lastChat && it1.lastChat.length == 0 && it1.notice.length==0}}
+        {{if it1.lastChat && it1.lastChat.length == 0 && it1.notice.length&&it1.notice[0]}}
         <div style="text-align: center;">
             <img src="../../res/images/chatEmpty.png" w-class="emptyImg"/>
             <div w-class="emptyText">快开始聊天吧~</div>
         </div>
-        {{elseif it1.notice}}
-        <div style="margin:20px 0 120px;">
-            <div ev-chat="notice" ev-msgCard-utils="changeUtils(e,0)" >
-                <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{it1.notice[0]}},time:{{it1.notice[1]}},chatType:{{it1.notice[2]}},messageFlag:true,messageTime:{{it1.notice[1]}} }</widget>
+        {{else}}
+            {{if it1.notice.length&&it1.notice[0]}}
+            <div style="margin:20px 0 120px;">
+                <div ev-chat="notice" ev-msgCard-utils="changeUtils(e,0)" >
+                    <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{it1.notice[0]}},time:{{it1.notice[1]}},chatType:{{it1.notice[2]}},messageFlag:true,messageTime:{{it1.notice[1]}} }</widget>
+                </div>
             </div>
-        </div>
-        {{elseif it1.lastChat}}
-        <div style="margin:20px 0 120px;">
-            {{for i,v of it1.lastChat}}
-            <div ev-chat="chat({{i}})" ev-msgCard-utils="changeUtils(e,{{i}})" >
-                <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{v[0]}},time:{{v[1]}},chatType:{{v[2]}},showUtils:{{it.showMsgUtils == i}},messageFlag:false }</widget>
+            {{end}}
+            {{if it1.lastChat}}
+            <div style="margin:20px 0 120px;">
+                {{for i,v of it1.lastChat}}
+                <div ev-chat="chat({{i}})" ev-msgCard-utils="changeUtils(e,{{i}})" >
+                    <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{v[0]}},time:{{v[1]}},chatType:{{v[2]}},showUtils:{{it.showMsgUtils == i}},messageFlag:false }</widget>
+                </div>
+                {{end}} 
             </div>
-            {{end}} 
-        </div>
+            {{end}}
         {{end}}
     </div>
 

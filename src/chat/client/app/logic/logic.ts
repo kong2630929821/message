@@ -257,22 +257,28 @@ export const buildupImgPath = (url:string) => {
     return url;
 };
 
-const messageData = [];
+const messageData = [[],[],[],[]];
 // 处理消息通知
 export const deelNotice = (arr:any,fg:string) => {
     if (fg === GENERATOR_TYPE.NOTICE_1) {
         messageData[0] = arr;
-    } else if (GENERATOR_TYPE.NOTICE_2) {
+    } else if (fg === GENERATOR_TYPE.NOTICE_2) {
         messageData[1] = arr;
-    } else if (GENERATOR_TYPE.NOTICE_3) {
-        messageData[2] = arr;
+    } else if (fg === GENERATOR_TYPE.NOTICE_3) {
+        let flags = -1;
+        messageData[2].forEach((v,i) => {
+            if (v[0] === arr[0] && v[2] === arr[2] && v[3] === arr[3] && v[4] === arr[4]) {
+                flags = i;
+            }
+        });
+        messageData[2].splice(flags !== -1 ? messageData[2].length - 1 :flags,flags !== -1 ? 1 :0,arr);
     } else {
-        messageData[3] = arr;
+        messageData[3].push(arr);
     }
 
     const dataList = [];
     messageData.forEach(v => {
-        if (v.length) {
+        if (v[0] && v[0].length) {
             dataList.push(...v);
         }
     });
@@ -295,11 +301,4 @@ export const getMessageIndex = (arr:any) => {
     });
 
     return index;
-};
-
-// 获取用户名
-export const getUserInfoName = (accId:any) => {
-    getUsersBasicInfo([],accId).then((r:UserArray) => {
-        return r.arr[0].name;
-    });
 };
