@@ -18,7 +18,7 @@ import { UserType } from '../logic/autologin';
 import { deelNotice } from '../logic/logic';
 import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
-import { getChatUid, getFriendHistory, getLaudPost, getSetting, showUserFollow } from './rpc';
+import { getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting } from './rpc';
 
 // ================================================ 导出
 
@@ -53,6 +53,9 @@ export const walletSignIn = (openid) => {
                     if (v.code === 1) {
                         getFriendHistory(v.rid, v.gid);
                     }
+                });
+                getMyPublicNum().then((r:string) => {
+                    store.setStore('pubNum',r);
                 });
                 setUserInfo();
 

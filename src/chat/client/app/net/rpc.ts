@@ -11,8 +11,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, getCommentLaud, getLaudPostList, getSquarePost, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommType, CreateCommunity, IterCommentArg, IterLaudArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -25,6 +25,7 @@ import { SetOfficial, UserAgree } from '../../../server/data/rpc/user.s';
 import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
+import { judgeFollowed, judgeLiked } from '../logic/logic';
 import { parseEmoji } from '../view/home/square';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
@@ -141,6 +142,8 @@ export const sendTempMsg = (rid: number,gid:number, msg: string, msgType = MSG_T
  * @param user accid wallet_address uid phone
  */
 export const getChatUid = (user:string) => {
+    if (!user) return;
+    
     return new Promise((resolve,reject) => {
         clientRpcFunc(getRealUid,user,(r:number) => {
             console.log('!!!!!!!!!!!!!!!!!!!!getChatUid',r);
@@ -460,11 +463,18 @@ export const addCommunityNum = (name: string, comm_type: number, desc: string) =
     arg.comm_type = comm_type;
     arg.name = name;
     arg.desc = desc;
-    clientRpcFunc(createCommunityNum,arg,(r:string) => {
-        if (r) {
-            console.log(r);
-        } 
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(createCommunityNum,arg,(r:string) => {
+            console.log('addCommunityNum============',r);
+            if (r) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
     });
+    
 };
 
 /**
@@ -591,9 +601,6 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
             console.log('showPost=============',r);
             if (r && r.list) {
                 const data:any = r.list;
-                const uid = store.getStore('uid');
-                const followList = store.getStore(`followNumList/${uid}`,{ list:[] }).list;
-                const likeList = store.getStore(`laudPostList/${uid}`,{ list:[] }).list;
 
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;
@@ -601,8 +608,8 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
                     const body = JSON.parse(res.body);
                     data[i].content = parseEmoji(body.msg);
                     data[i].imgs = body.imgs;
-                    data[i].followed = followList.indexOf(res.key.num) > -1;
-                    data[i].likeActive = likeList.findIndex(r => r.num === res.key.num && r.id === res.key.id) > -1;
+                    data[i].followed = judgeFollowed(res.key.num);
+                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
                 });
                 store.setStore('postList',data);
                 res(data);
@@ -667,7 +674,7 @@ export const getLaudPost = () => {
         console.log('getLaudPost=============',r);
         if (r && r.list) {
             store.setStore(`laudPostList/${r.uid}`,r);
-            subscribeLaudPost(store.getStore('uid'),null);
+            subscribeLaudPost(r.uid,null);
         }
     });
 };
@@ -689,4 +696,147 @@ export const getCommentLaudList = (num:string,id:number) => {
             }
         });
     });
+};
+
+/**
+ * 获取某个社区账号所发的帖子
+ * id 从某一条帖子ID开始
+ */
+export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
+    const param = new IterPostArg();
+    param.num = num;
+    param.id = id;
+    param.count = count;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserPost,param,(r) => {
+            console.log('getUserPost=============',r);
+            if (r && r.list) {
+                const data:any = r.list;
+                
+                data.forEach((res,i) => {
+                    data[i].offcial = res.comm_type === CommType.official;
+                    data[i].isPublic = res.comm_type === CommType.publicAcc;
+                    const body = JSON.parse(res.body);
+                    data[i].content = parseEmoji(body.msg);
+                    data[i].imgs = body.imgs;
+                    data[i].followed = judgeFollowed(res.key.num);
+                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
+                });
+                res({ list:data, total: r.total });
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 获取用户的关注列表
+ */
+export const getFollowList = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getFollowId,uid,r => {
+            console.log('getFollowList=============',r);
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 获取用户的粉丝列表
+ */
+export const getFansList = (num:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getFansId,num,r => {
+            console.log('getFansList=============',r);
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 获取当前用户的公众号ID
+ */
+export const getMyPublicNum = () => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserPublicAcc,null,r => {
+            console.log('getUserPublicAcc=============',r);
+            if (r !== 'false') {
+                res(r);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 通过社区ID批量获取用户信息
+ */
+export const getUserInfoByNum = (nums:string[]) => {
+    const param = new CommunityNumList();
+    param.list = nums;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserInfoByComm,param,(r) => {
+            console.log('getUserInfoByComm=============',r);
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 删除帖子
+ */
+export const delPost = (num:string,id:number) => {
+    const arg = new PostKey();
+    arg.num = num;
+    arg.id = id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(deletePost,arg,(r) => {
+            console.log('deletePost=============',r);
+            if (r === 1) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
+    });
+    
+};
+
+/**
+ *  删除评论
+ */
+export const delComment = (num:string,post_id:number,id:number) => {
+    const arg = new CommentKey();
+    arg.num = num;
+    arg.post_id = post_id;
+    arg.id = id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(delCommentPost,arg,(r) => {
+            console.log('delCommentPost=============',r);
+            if (r === 1) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
+    });
+   
 };

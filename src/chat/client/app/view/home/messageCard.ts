@@ -136,6 +136,10 @@ export class MessageCard extends Widget {
                 this.props.msg = '[快抢红包]';
             } else if (this.props.lastMessage.mtype === MSG_TYPE.VOICE) {
                 this.props.msg = '[语音]';
+            } else if (this.props.lastMessage.mtype === MSG_TYPE.Article) {
+                this.props.msg = '[分享文章]';
+            } else if (this.props.lastMessage.mtype === MSG_TYPE.NameCard) {
+                this.props.msg = '[推荐名片]';
             }
         } else {
             const mess = store.getStore('lastChat',[]);

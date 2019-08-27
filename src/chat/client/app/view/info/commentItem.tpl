@@ -10,7 +10,7 @@
                 <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
                 {{end}}
             </div>
-            <div w-class="time">{{it.createtime}}</div>
+            <div w-class="time">{{it.timeFormat(it.createtime,3)}}</div>
         </div>
         <img src="../../res/images/comment.png" w-class="btn" style="margin-right:20px;" on-tap="showTools"/>
         <div on-tap="likeBtn" style="display:flex;align-items:center;">
@@ -22,7 +22,7 @@
     <div w-class="orgComment">
         <div w-class="content">
             <span style="font-weight: 600;">{{it.orgName}}:&nbsp;</span>
-            <widget w-tag="pi-ui-html">{{it.orgMess}}</widget>
+            <widget w-tag="pi-ui-html" style="display: inline-block;">{{it.orgMess}}</widget>
         </div>
     </div>
     {{end}}
@@ -31,7 +31,7 @@
     </div>
 
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
-        <div w-class="option" on-tap="replay">回复</div>
+        <div w-class="option" on-tap="replyComment">回复</div>
         {{if it.isMine}}
         <div w-class="option" on-tap="delComment">删除</div>
         {{end}}

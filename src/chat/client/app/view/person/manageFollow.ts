@@ -1,8 +1,9 @@
 import { Widget } from '../../../../../pi/widget/widget';
+import { getUserInfoByNum } from '../../net/rpc';
 
 interface Props {
-    isPublic:boolean;  // 公众号列表
-    followList:any[];  // 关注列表
+    followList:string[];  // 关注列表
+    followData:any[];  // 关注用户信息
 }
 
 /**
@@ -11,13 +12,17 @@ interface Props {
 export class ManageFollow extends Widget {
     public ok:() => void;
     public props:Props = {
-        isPublic:false,
-        followList:[]
+        followList:[],
+        followData:[]
     };
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.followList = [];
+        this.props.followData = [];
+        getUserInfoByNum(this.props.followList).then((r:string[]) => {
+            this.props.followData = r;  // 关注
+            this.paint();
+        });
     }
 
     public goBack() {

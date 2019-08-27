@@ -3,7 +3,7 @@
     <div w-class="contain">
         <div w-class="topBox">
             <div style="display:flex;align-items: center;">
-                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"160px;"}</widget>
+                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"160px;"}</widget>
                 <div>
                     <div w-class="numList">
                         {{for i,v of it.numList}}
@@ -28,8 +28,8 @@
             </div>
             <div w-class="userId">
                 <div>好嗨ID：{{it.userInfo.acc_id || "------"}}</div>
-                {{if it.alias}}
-                <div>备注：{{it.alias || "------"}}</div>
+                {{if !it.isOwner}}
+                <div>备注：{{it.alias}}</div>
                 {{end}}
             </div>
             
@@ -57,7 +57,7 @@
                 <span style="flex:1 0 0;">最近玩的游戏</span>
             </div>
             <div w-class="content">
-                {{for i,v of [1,2,3,4,5]}}
+                {{for i,v of it.gameList}}
                 <div w-class="imgBox">
                     <img src="../../res/images/tool-pictures.png" />
                 </div>
@@ -70,8 +70,8 @@
                 <span style="flex:1 0 0;">个人动态</span>
             </div>
             <div>
-                {{for i,v of [1,2,3]}}
-                <widget w-tag="chat-client-app-view-home-squareItem" style="margin-top:20px;"></widget>
+                {{for i,v of it.postList}}
+                <widget w-tag="chat-client-app-view-home-squareItem" style="margin-top:20px;">{{v}}</widget>
                 {{end}}
             </div>
         </div>
@@ -83,6 +83,9 @@
         {{end}}
         {{if !it.followed}}
         <div w-class="btn" on-tap="followUser">关注</div>
+        {{end}}
+        {{if it.isMine}}
+        <div w-class="btn" on-tap="sendPost">+好友</div>
         {{end}}
     </div>
 </div>

@@ -1,5 +1,7 @@
 #[path=../db/]
 use community.s::{CommunityBase, Post, Comment, PostKey, CommentKey, PostLaudLogKey};
+#[path=../db/]
+use user.s::{UserInfo};
 
 enum CommType {
     person = 0,  // 个人
@@ -58,12 +60,32 @@ struct PostArr {
     list: &[PostData],  //帖子
 }
 
+//帖子列表
+struct PostArrWithTotal {
+    list: &[PostData],  //帖子
+    total: u32,     //帖子总数
+}
+
+// 评论回复数据
+struct ReplyData{
+    key: CommentKey,       //key
+    comment_type: u8,      //帖子类型图文、语言、视频
+    msg: String,        //消息
+    reply: u32, //评论表中的id，表示回复那一条评论，可以为空
+    owner: u32,         //发送者
+    likeCount: u32,     //点赞数
+    createtime: u32,     //创建时间
+    username: String,   //用户名
+    avatar: String,     //用户头像
+    gender: u8,         //性别
+}
+
 // 评论数据
 struct CommentData{
     key: CommentKey,       //key
     comment_type: u8,      //帖子类型图文、语言、视频
     msg: String,        //消息
-    reply: u32,         //评论表中的ID，表示回复那一条评论，可以为空
+    reply: Option<ReplyData>, //评论的评论信息，表示回复那一条评论，可以为空
     owner: u32,         //发送者
     likeCount: u32,     //点赞数
     createtime: u32,     //创建时间
@@ -125,4 +147,20 @@ struct LaudLogArr{
 // 评论id列表
 struct CommentIDList{
     list: &[u32]
+}
+
+// 社区号列表
+struct CommunityNumList{
+    list: &[String]
+}
+
+// 社区和用户信息
+struct CommUserInfo{
+    comm_info: CommunityBase,     //社区信息
+    user_info: UserInfo,     //用户信息
+}
+
+// 用户信息列表
+struct CommUserInfoList{
+    list: &[CommUserInfo]
 }

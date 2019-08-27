@@ -12,6 +12,7 @@ interface Props {
     showTag:boolean;  // 显示标签列表
     tagList:string[];  // 标签列表
     active:number;  // 当前显示的标签
+    follows:number;  // 关注人数
 }
 export const TagList = ['广场','关注','公众号','热门'];
 /**
@@ -22,7 +23,8 @@ export class Square extends Widget {
     public props:Props = {
         showTag:false,
         tagList:TagList,
-        active:0
+        active:0,
+        follows:0
     };
 
     public setProps(props:any) {
@@ -33,12 +35,22 @@ export class Square extends Widget {
         super.setProps(this.props);
         this.state = State;
         showPost(this.props.active + 1);
+        if (this.props.active === 2) {
+            this.props.follows = this.state.followList.public_list; 
+        } else {
+            this.props.follows = this.state.followList.person_list;
+        } 
     }
 
     // 切换tag
     public changeTag(e:any,ind:number) {
         this.props.showTag = false;
         this.props.active = ind;
+        if (ind === 2) {
+            this.props.follows = this.state.followList.public_list; 
+        } else {
+            this.props.follows = this.state.followList.person_list;
+        } 
         this.paint();
         notify(e.node,'ev-square-change',{ value:ind });
         showPost(ind + 1);
@@ -46,7 +58,7 @@ export class Square extends Widget {
 
     // 管理我关注的公众号 其他账号
     public goManage() {
-        popNew3('chat-client-app-view-person-manageFollow',{ isPublic:this.props.active === 2 });
+        popNew3('chat-client-app-view-person-manageFollow',{ followList:this.props.follows });
     }
 
     /**
@@ -77,18 +89,29 @@ export class Square extends Widget {
         });
     }
 
+    /**
+     * 删除
+     */
+    public delPost(i:number) {
+        this.state.postList.splice(i,1);
+        this.paint();
+    }
 }
 const State = {
-    followList:[],
+    followList:{
+        person_list:[],
+        public_list:[]
+    },
     likeList:[],
     postList:[]  // 帖子列表
 };
 // 关注列表
 register('followNumList',r => {
     for (const value of r.values()) {
-        State.followList = value.list;
+        State.followList = value;
+        const list = value.person_list.concat(value.public_list);
         State.postList.forEach((v,i) => {
-            State.postList[i].followed = State.followList.indexOf(v.key.num) > -1;
+            State.postList[i].followed = list.indexOf(v.key.num) > -1;
         });
     }
    
@@ -124,9 +147,6 @@ export const parseEmoji = (msg:any) => {
     msg = msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
         const url = EMOJIS_MAP.get(capture) || undefined;
         if (url) {
-            // FIXME: 不应该写死,应该动态获取
-            // url = url.replace('../../','/client/app/');
-
             return `<img src="../../chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
         } else {
             return match;

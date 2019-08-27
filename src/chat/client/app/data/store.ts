@@ -10,7 +10,7 @@ import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 // tslint:disable-next-line:max-line-length
-import { flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, settingChange, userChatChange, lastReadNotice } from './initStore';
+import { flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, lastReadNotice, settingChange, userChatChange } from './initStore';
 
 // ============================================ 导出
 
@@ -38,6 +38,8 @@ export const getStore = (path: string, defaultValue = undefined) => {
  * 更新store并通知
  */
 export const setStore = (path: string, data: any, notified = true) => {
+    console.log('!!!!!!!!!!!!!!!!!!!!setstore',path,store);
+
     const path2value = (...args) => {
         let returnValue = <any>store;
         for (let i = 0; i < args[0].length; i++) {
@@ -105,7 +107,7 @@ export const unregister = (keyName: string, cb: Function): void => {
 export const initStore = () => {
     registerDataChange();
     store = {
-        uid:null,
+        uid:0,
         readGroupTimeMap: new Map(),
         groupInfoMap: new Map(),
         groupUserLinkMap: new Map(),
@@ -121,8 +123,8 @@ export const initStore = () => {
         addressInfoMap: new Map(),
         userChatMap:new Map(),
         groupChatMap:new Map(),
-        lastChat:[],
         lastRead:new Map(),
+        lastChat:[],
         setting:{
             msgTop:[],
             msgAvoid:[]
@@ -135,6 +137,7 @@ export const initStore = () => {
         laudPostList:new Map(),
         postDraft:null,
         pubPostDraft:null,
+        pubNum:0,
         noticeList:[],
         lastReadNotice:[]
     };
@@ -249,6 +252,7 @@ export interface Store {
     pubPostDraft:any;  // 公众号文章草稿
     noticeList:any;// 消息列表
     lastReadNotice:any;// 已读消息
+    pubNum:number;  // 公众号ID
 }
 
 /**
@@ -260,7 +264,7 @@ export interface LastReadMsgId {
 }
 // ============================================ 本地
 
-export let store:Store;
+let store:Store;
 // ============================================ 可执行
 const handlerMap: HandlerMap = new HandlerMap();
 initStore();

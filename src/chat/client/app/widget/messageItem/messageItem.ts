@@ -190,6 +190,24 @@ export class MessageItem extends Widget {
 
         notify(e.node,'ev-messItem-radio',{ hIncId:this.props.hIncId,playAudio:this.props.playAudio,elem });
     }
+
+    /**
+     * 查看文章
+     */
+    public openArticle() {
+        popNew('chat-client-app-view-info-postDetail',{ ...this.props.message.msg,showAll:true });
+    }
+
+    /**
+     * 查看详情
+     */
+    public goDetail() {
+        if (this.props.message.msg.type === '公众号') {
+            popNew('chat-client-app-view-person-publicHome', { uid: this.props.message.msg.uid, pubNum: this.props.message.msg.num });
+        } else {
+            popNew('chat-client-app-view-info-userDetail', { uid: this.props.message.msg.uid, num:this.props.message.msg.num });
+        }
+    }
 }
 
 // ================================================ 本地
@@ -278,11 +296,20 @@ export const parseMessage = (msg:any):any => {
 
             return parseImg(msg);
         case MSG_TYPE.VOICE:  // 语音
-        // TODO:
+
             return parseRadio(msg);
         case MSG_TYPE.VIDEO: // 视频
-        // TODO:
+           
             return msg;
+        case MSG_TYPE.Article:case MSG_TYPE.NameCard: // 分享文章  // 名片
+            const mess = JSON.parse(msg.msg);
+            console.log(mess);
+        
+            return {
+                ...msg,
+                msg: mess,
+                image: mess.imgs && mess.imgs[0] ? uploadFileUrlPrefix + mess.imgs[0] :mess.avatar
+            };
         default:
 
             return msg;

@@ -167,7 +167,7 @@ export const watchInfo = (keyName:string, keyValue:any, tableStruct:any, keyDefa
     // 返回当前值
     const infoBucket = new Bucket(CONSTANT.WARE_NAME, tableStruct._$info.name); 
     // iterTable(tableStruct);
-    console.log(`keyName is : ${keyName}, keyValue is : ${keyValue}, info is : ${infoBucket.get(keyValue)[0]}`);  
+    console.log(`keyName is : ${keyName}, keyValue is : ${keyValue}, info is : ${JSON.stringify(infoBucket.get(keyValue)[0])}`);  
     const info = infoBucket.get(keyValue)[0] || new tableStruct();
     console.log(tableStruct._$info.name);
     info[keyName] = info[keyName] || keyDefaultValue;

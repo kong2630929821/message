@@ -54,6 +54,7 @@ struct Post {
     body: String,       //正文
     owner: u32,         //发送者
     createtime: String,    //创建时间
+    state: u8,          //帖子状态
 }
 
 /**
@@ -166,9 +167,17 @@ struct LaudPostIndex{
     list: &[PostKey]   // 点赞过的帖子key
 }
 
-// 公众号索引
+// 社区号索引
 #[primary=uid,db=file,dbMonitor=true]
-struct PublicAccIndex{
+struct CommunityAccIndex{
     uid: u32,                 // 用户ID
+    num: String,    //社区个人编号
     list: &[String]   // 社区公众号
+}
+
+// 粉丝索引表
+#[primary=num,db=file,dbMonitor=true]
+struct FansIndex{
+    num: String,              // 用户ID
+    list: &[String]           // 粉丝社区编号列表
 }

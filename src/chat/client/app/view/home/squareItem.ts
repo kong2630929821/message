@@ -1,10 +1,14 @@
-import { popNew3 } from '../../../../../app/utils/tools';
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
+import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { MSG_TYPE } from '../../../../server/data/db/message.s';
+import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
-import { complaintUser } from '../../logic/logic';
-import { follow } from '../../net/rpc';
+import { buildupImgPath, complaintUser, judgeFollowed, timestampFormat } from '../../logic/logic';
+import { delPost, follow, sendUserMsg } from '../../net/rpc';
 
 interface Props {
     key:any;   // 帖子ID及社区编号
@@ -24,6 +28,8 @@ interface Props {
     isPublic:boolean; // 公众号文章
     gender:number;  // 性别 0 男 1 女
     isMine:boolean;  // 是否本人发的帖
+    urlPath:string;  // 图片路径前
+    timeFormat:any;  // 时间处理
 }
 /**
  * 广场帖子
@@ -49,7 +55,9 @@ export class SquareItem extends Widget {
         imgs:[],
         offical:false,
         gender:1,   // 性别 0男 1女
-        isMine:false
+        isMine:false,
+        urlPath:uploadFileUrlPrefix,
+        timeFormat:timestampFormat
     };
 
     public setProps(props:any) {
@@ -58,8 +66,10 @@ export class SquareItem extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.props.avatar = props.avatar || '../../res/images/user_avatar.png';
-        this.props.isMine = this.props.owner === getStore('uid',0);
+        this.props.avatar = buildupImgPath(props.avatar);
+        const uid = getStore('uid',0);
+        this.props.isMine = this.props.owner === uid;
+        this.props.followed = judgeFollowed(this.props.key.num);
     }
 
     public attach() {
@@ -75,8 +85,7 @@ export class SquareItem extends Widget {
      * 查看详情
      */
     public goDetail() {
-        this.props.showUtils = false;
-        this.paint();
+        this.closeUtils();
         popNew3('chat-client-app-view-info-postDetail',{ ...this.props,showAll:true });
     }
 
@@ -132,9 +141,11 @@ export class SquareItem extends Widget {
     /**
      * 删除帖子
      */
-    public delPost() {
+    public delPost(e:any) {
         this.closeUtils();
-        // 
+        delPost(this.props.key.num,this.props.key.id).then(r => {
+            notify(e.node,'ev-delBtn',{ value:this.props.key });
+        });
     }
 
     /**
@@ -142,9 +153,21 @@ export class SquareItem extends Widget {
      */
     public followUser() {
         this.closeUtils();
-        follow(this.props.key.num).then(r => {
-            this.props.followed = !this.props.followed;
-            this.paint();
+        follow(this.props.key.num);
+    }
+
+    /**
+     * 分享文章
+     */
+    public shareArt() {
+        popNew('chat-client-app-view-person-friendList',null,(r) => {
+            console.log('11111111111111111111',r);
+            sendUserMsg(r,JSON.stringify(this.props),MSG_TYPE.Article).then((res:any) => {
+                updateUserMessage(r, res);
+                popNewMessage('分享成功');
+            },() => {
+                popNewMessage('分享失败');
+            });
         });
     }
 }

@@ -4,7 +4,7 @@
         {{if it.active==1 || it.active==2}}
         <div w-class="setting" on-tap="goManage">
             <img src="../../res/images/setting.png" w-class="img"/>
-            <span style="flex:1 0 0;">我已关注 {{it1.followList.length}}人
+            <span style="flex:1 0 0;">我已关注 {{it.follows.length}}人
                 {{if it.active==2}}
                 <span w-class="public">公众号</span>
                 {{end}}
@@ -17,7 +17,7 @@
             {{if v.isPublic}}
             <widget w-tag="chat-client-app-view-home-pubPostItem">{{v}}</widget>
             {{else}}
-            <div ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})">
+            <div ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})" ev-delBtn="delPost({{i}})">
                 <widget w-tag="chat-client-app-view-home-squareItem">{{v}}</widget>
             </div>
             {{end}}
