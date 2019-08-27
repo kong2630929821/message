@@ -16,6 +16,7 @@ const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
 export const send = (uid: number, cmd: string, msg: string) => {
+    console.log('!!!!!!!!!!!!!!!!send',cmd);
     const topic = `send/${uid}`;
     const mqttServer = env.get('mqttServer');
     const sendMsg = new SendMsg();
