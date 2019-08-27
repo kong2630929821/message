@@ -12,7 +12,7 @@ import { setData } from '../../../../server/data/rpc/basic.p';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias, getGroupAvatar, getUserAvatar, timestampFormat } from '../../logic/logic';
+import { getFriendAlias, getGroupAvatar, getUserAvatar, timestampFormat, getMessageIndex } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { getUsersBasicInfo } from '../../net/rpc';
 // ================================================ 导出
@@ -31,8 +31,10 @@ interface Props {
     avatar:string; // 用户头像
     official:boolean; // 是否是官方群组
     showUtils:boolean;  // 是否显示操作栏
+    messageFlag:boolean;// 消息通知
+    messageTime:number;// 消息通知时间
 }
-
+const STATE = [];
 export class MessageCard extends Widget {
     public props: Props;
     public bindCB: any;
@@ -43,47 +45,72 @@ export class MessageCard extends Widget {
 
     public setProps(props: any) {
         super.setProps(props);
+        this.state = STATE;
         const sid = store.getStore(`uid`);
         let hincId;  // 最新一条消息的ID
-        if (props.chatType === GENERATOR_TYPE.GROUP)  { // 群聊
-            const groupInfo = store.getStore(`groupInfoMap/${this.props.rid}`,new GroupInfo());
-            this.props.official = groupInfo.level === 5;
-            this.props.name = groupInfo.name;
-            this.props.avatar = getGroupAvatar(this.props.rid) || '../../res/images/groups.png';
-            this.props.hid = genGroupHid(this.props.rid);
-
-            const hIncIdArr = store.getStore(`groupChatMap/${this.props.hid}`,[]);
-            hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-            this.props.lastMessage = hincId ? store.getStore(`groupHistoryMap/${hincId}`,'') : new GroupMsg();
-
-        } else {// 单聊
-            this.props.name = getFriendAlias(this.props.rid).name;
-            if (!this.props.name) {  // 获取不到用户名
-                getUsersBasicInfo([this.props.rid]).then((r: UserArray) => {
-                    this.props.name = r.arr[0].name;
-                    store.setStore(`userInfoMap/${this.props.rid}`,r.arr[0]);
-                    this.paint();
-                },(r) => {
-                    console.error('获取用户信息失败', r);
-                });
+        if (props.messageFlag) {
+            const time = depCopy(this.props.messageTime);
+            this.props.name = '消息通知';
+            this.props.avatar = '../../res/images/user_avatar.png';
+            this.props.official = true;
+            this.props.time = timestampFormat(time,1);
+            if (props.chatType === GENERATOR_TYPE.NOTICE_1) {
+                this.props.msg = '你邀请的好友上线了';
+            } else if (props.chatType === GENERATOR_TYPE.NOTICE_2) {
+                this.props.msg = '邀请你的好友上线了';
+            } else if (props.chatType === GENERATOR_TYPE.NOTICE_3) {
+                this.props.msg = '有人赞了你的动态';
+            } else if (props.chatType === GENERATOR_TYPE.NOTICE_4) {
+                this.props.msg = '有人@了你';
             }
-            this.props.avatar = getUserAvatar(this.props.rid) || '../../res/images/user_avatar.png';
-            this.props.hid = genUserHid(sid,this.props.rid);
-
-            const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`,[]);
-            hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
-            this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
-            this.props.official = store.getStore(`userInfoMap/${this.props.rid}`,{ level:0 }).level === VIP_LEVEL.VIP5;
+       
+            const arr = store.getStore('lastReadNotice',[]);
+         
+            const count1  = getMessageIndex([props.rid,time,props.chatType]) ;
+            const count2  =  getMessageIndex(arr);
+            this.props.unReadCount = count1 > count2 && (count1 - count2);
+        } else {
+            if (props.chatType === GENERATOR_TYPE.GROUP)  { // 群聊
+                const groupInfo = store.getStore(`groupInfoMap/${this.props.rid}`,new GroupInfo());
+                this.props.official = groupInfo.level === 5;
+                this.props.name = groupInfo.name;
+                this.props.avatar = getGroupAvatar(this.props.rid) || '../../res/images/groups.png';
+                this.props.hid = genGroupHid(this.props.rid);
+    
+                const hIncIdArr = store.getStore(`groupChatMap/${this.props.hid}`,[]);
+                hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
+                this.props.lastMessage = hincId ? store.getStore(`groupHistoryMap/${hincId}`,'') : new GroupMsg();
+    
+            } else {// 单聊
+                this.props.name = getFriendAlias(this.props.rid).name;
+                if (!this.props.name) {  // 获取不到用户名
+                    getUsersBasicInfo([this.props.rid]).then((r: UserArray) => {
+                        this.props.name = r.arr[0].name;
+                        store.setStore(`userInfoMap/${this.props.rid}`,r.arr[0]);
+                        this.paint();
+                    },(r) => {
+                        console.error('获取用户信息失败', r);
+                    });
+                }
+                this.props.avatar = getUserAvatar(this.props.rid) || '../../res/images/user_avatar.png';
+                this.props.hid = genUserHid(sid,this.props.rid);
+    
+                const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`,[]);
+                hincId = hIncIdArr.length > 0 ? hIncIdArr[hIncIdArr.length - 1] : undefined;
+                this.props.lastMessage = hincId ? store.getStore(`userHistoryMap/${hincId}`,'') : new UserMsg();
+                this.props.official = store.getStore(`userInfoMap/${this.props.rid}`,{ level:0 }).level === VIP_LEVEL.VIP5;
+            }
+    
+            // 计算有多少条新消息记录
+            const lastHincId = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined }).msgId; // 最后阅读的一条消息ID
+            const count1 = hincId ? getIndexFromHIncId(hincId) :-1; // 收到的最新消息ID
+            const count2 = lastHincId ? getIndexFromHIncId(lastHincId) :-1; // 已读的最后一条消息ID
+            this.props.unReadCount = count1 > count2 && (count1 - count2);
+            console.log(`count1 is: ${count1}, count2 is: ${count2}, hid is: ${this.props.hid}`);
+    
+            this.initData();
         }
-
-        // 计算有多少条新消息记录
-        const lastHincId = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined }).msgId; // 最后阅读的一条消息ID
-        const count1 = hincId ? getIndexFromHIncId(hincId) :-1; // 收到的最新消息ID
-        const count2 = lastHincId ? getIndexFromHIncId(lastHincId) :-1; // 已读的最后一条消息ID
-        this.props.unReadCount = count1 > count2 && (count1 - count2);
-        console.log(`count1 is: ${count1}, count2 is: ${count2}, hid is: ${this.props.hid}`);
-
-        this.initData();
+        
     }
 
     public initData() {
@@ -121,8 +148,11 @@ export class MessageCard extends Widget {
     public firstPaint() {
         super.firstPaint();
         store.register('setting',this.bindCB);
+        store.register('lastReadNotice',(r:any) => {
+            this.setProps(this.props);
+        });
     }
-
+    
     // 更新消息
     public updateMessage() {
         this.setProps(this.props);

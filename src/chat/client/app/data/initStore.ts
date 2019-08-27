@@ -67,6 +67,13 @@ export const initAccount = () => {
         },() => {
             console.log('read groupUserLinkMap error');
         });
+        // 已读消息通知
+        getFile(`${sid}-lastReadNotice`, (value) => {
+            if (!value) return;
+            store.setStore('lastReadNotice', value);
+        },() => {
+            console.log('read lastReadNotice error');
+        });
         
     });
     getLocalStorage(`${sid}-flags`,(value) => {
@@ -260,4 +267,19 @@ export const settingChange = () => {
 export const flagsChange = () => {
     const sid = store.getStore('uid');
     setLocalStorage(`${sid}-flags`,store.getStore('flags'));
+};
+
+export const lastReadNotice = () => {
+    const id = store.getStore('uid');
+    getFile(`${id}-lastReadNotice`, (value) => {
+        if (!value) {
+            value = {};
+        }
+        setTimeout(() => {
+            value = store.getStore('lastReadNotice');// 当前已读
+            writeFile(`${id}-lastReadNotice`, value);
+        }, 0);
+    }, () => {
+        console.log('read error');
+    });
 };

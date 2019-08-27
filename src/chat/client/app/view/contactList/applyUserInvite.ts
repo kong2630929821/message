@@ -46,14 +46,26 @@ export class ApplyUser extends Widget {
         applyUserFriend(this.props.accId).then(() => {
             getStoreData('inviteUsers').then(inviteUsers => {
                 // 我邀请的好友
+
                 const invite = inviteUsers.invite_success;
-                const index = invite.findIndex(item => item === this.props.accId);
+                let index = null;
+                let index1 = null;
+                invite.forEach((v,i) => {
+                    if (v[0] === this.props.accId) {
+                        index = i;
+                    }
+                });
                 invite.splice(index,1);
                 setStoreData('inviteUsers/invite_success',invite);
 
                 // 邀请我的好友
                 const convert = inviteUsers.convert_invite;
-                const index1 = convert.findIndex(item => item === this.props.accId);
+                convert.forEach((t,j) => {
+                    if (t[0] === this.props.accId) {
+                        index1 = j;
+                    }
+                });
+                // const index1 = convert.findIndex(item => item === this.props.accId);
                 convert.splice(index1,1);
                 setStoreData('inviteUsers/convert_invite',convert);
             });

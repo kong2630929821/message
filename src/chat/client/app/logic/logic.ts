@@ -9,10 +9,11 @@ import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+import { UserArray } from '../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
 import { updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
-import { sendUserMsg } from '../net/rpc';
+import { getUsersBasicInfo, sendUserMsg } from '../net/rpc';
 
 // =====================================导出
 
@@ -227,4 +228,50 @@ export const complaintUser = (name:string) => {
             });
             
         });
+};
+const messageData = [];
+// 处理消息通知
+export const deelNotice = (arr:any,fg:string) => {
+    if (fg === GENERATOR_TYPE.NOTICE_1) {
+        messageData[0] = arr;
+    } else if (GENERATOR_TYPE.NOTICE_2) {
+        messageData[1] = arr;
+    } else if (GENERATOR_TYPE.NOTICE_3) {
+        messageData[2] = arr;
+    } else {
+        messageData[3] = arr;
+    }
+
+    const dataList = [];
+    messageData.forEach(v => {
+        if (v.length) {
+            dataList.push(...v);
+        }
+    });
+    dataList.sort((v,t) => {
+        return v[1] - t[1];
+    });
+    store.setStore('noticeList',dataList);
+
+    return dataList;
+};
+
+// 获取已读消息下标
+export const getMessageIndex = (arr:any) => {
+    const data = store.getStore('noticeList',[]);
+    let index = -1;
+    data.forEach((v,i) => {
+        if (arr[0] === v[0] && arr[1] === v[1] && arr[2] === v[2]) {
+            index = i;
+        }
+    });
+
+    return index;
+};
+
+// 获取用户名
+export const getUserInfoName = (accId:any) => {
+    getUsersBasicInfo([],accId).then((r:UserArray) => {
+        return r.arr[0].name;
+    });
 };

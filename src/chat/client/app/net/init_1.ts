@@ -8,13 +8,14 @@
 import { getStoreData } from '../../../../app/middleLayer/wrap';
 import { getOfficial } from '../../../../app/publicLib/pull3';
 import { changeWalletName, popNewMessage } from '../../../../app/utils/tools';
-import { UserInfo } from '../../../server/data/db/user.s';
+import { GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
 import { UserChangeInfo } from '../../../server/data/rpc/user.s';
 import { setLocalStorage } from '../data/lcstore';
 import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
+import { deelNotice } from '../logic/logic';
 import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
 import { getChatUid, getFriendHistory, getLaudPost, getSetting, showUserFollow } from './rpc';
@@ -37,7 +38,7 @@ export const registerRpcStruct = (fileMap) => {
 export const walletSignIn = (openid) => {
     const openId = String(openid);
     if (openId) {
-        init2.login(UserType.WALLET, openId, 'sign', (r: UserInfo) => {
+        init2.login(UserType.WALLET, openId, 'sign', async (r: UserInfo) => {
 
             if (r && r.uid > 0) {
                 console.log('聊天登陆成功！！！！！！！！！！！！！！');
@@ -66,7 +67,11 @@ export const walletSignIn = (openid) => {
                     });
 
                 });
-                
+                // 获取邀请人数 被邀请
+                const invite = await getStoreData('inviteUsers/invite_success',[]);
+                const beInvited = await getStoreData('inviteUsers/convert_invite',[]);
+                deelNotice(invite,GENERATOR_TYPE.NOTICE_1);
+                deelNotice([beInvited],GENERATOR_TYPE.NOTICE_2);
             } else {
                 popNewMessage('钱包登陆失败');
             }

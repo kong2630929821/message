@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { getStoreData } from '../../../../../app/middleLayer/wrap';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { registerStoreData } from '../../../../../app/viewLogic/common';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -14,7 +15,6 @@ import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as  store from '../../data/store';
 import { clientRpcFunc } from '../../net/init';
-import { getStoreData } from '../../../../../app/middleLayer/wrap';
 
 // ================================================ 导出
 export const forelet = new Forelet();
@@ -25,11 +25,11 @@ export class NewFriend extends Widget {
     public create() {
         super.create();
         this.state = STATE;
-        getStoreData("inviteUsers").then(flags=>{
+        getStoreData('inviteUsers').then(flags => {
             STATE.inviteUsers = flags.invite_success;
             STATE.convertUser = flags.convert_invite;
             this.paint();
-        })
+        });
     }
 
     public goBack() {

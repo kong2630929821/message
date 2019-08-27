@@ -10,7 +10,7 @@ import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 // tslint:disable-next-line:max-line-length
-import { flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, settingChange, userChatChange } from './initStore';
+import { flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, settingChange, userChatChange, lastReadNotice } from './initStore';
 
 // ============================================ 导出
 
@@ -134,7 +134,9 @@ export const initStore = () => {
         followNumList:new Map(),
         laudPostList:new Map(),
         postDraft:null,
-        pubPostDraft:null
+        pubPostDraft:null,
+        noticeList:[],
+        lastReadNotice:[]
     };
 };
 
@@ -190,6 +192,9 @@ const registerDataChange = () => {
     register('flags/noGroupRemind',(r) => { // 不再提醒加群
         flagsChange();
     });
+    register('lastReadNotice',() => {
+        lastReadNotice();// 已读通知游标更新
+    });
 };
 
 // 帖子内容
@@ -242,6 +247,8 @@ export interface Store {
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
     postDraft:any;   // 普通帖子草稿
     pubPostDraft:any;  // 公众号文章草稿
+    noticeList:any;// 消息列表
+    lastReadNotice:any;// 已读消息
 }
 
 /**
