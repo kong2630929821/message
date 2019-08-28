@@ -174,7 +174,7 @@ export const getUserPublicAccTest = () => {
 export const getUserPostTest = () => {
     const arg = new IterPostArg();
     arg.count = 10;
-    arg.num = '3';
+    arg.num = '2';
     arg.id = 0;
     clientRpcFunc(getUserPost, arg, (r: PostArrWithTotal) => {
         console.log(r);

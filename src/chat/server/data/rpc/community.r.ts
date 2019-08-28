@@ -488,18 +488,21 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
     postArrWithTotal.list = [];
     postArrWithTotal.total = 0;
     const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
     if (!communityPost) {
         return postArrWithTotal;
     }
-    // 帖子总数
-    postArrWithTotal.total = communityPost.id_list.length;
+    // 帖子总数(减去标记删除的帖子)
     const post_id_list: PostKey[] = [];
     for (let i = 0; i < communityPost.id_list.length; i++) {
         const postKey = new PostKey();
         postKey.id = communityPost.id_list[i];
         postKey.num = communityPost.num;
+        const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+        if (post.state === CONSTANT.DELETE_STATE) continue; // 帖子已删除
         post_id_list.push(postKey);
+        postArrWithTotal.total ++;
     }
     postIdSort(post_id_list, 0, post_id_list.length - 1);
     let index = -1;
