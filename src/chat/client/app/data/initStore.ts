@@ -74,6 +74,20 @@ export const initAccount = () => {
         },() => {
             console.log('read lastReadNotice error');
         });
+        // 评论消息列表
+        getFile(`${sid}-conmentList`, (value) => {
+            if (!value) return;
+            store.setStore('conmentList', value);
+        },() => {
+            console.log('read conmentList error');
+        });
+          // 点赞消息列表
+        getFile(`${sid}-fabulousList`, (value) => {
+            if (!value) return;
+            store.setStore('fabulousList', value);
+        },() => {
+            console.log('read fabulousList error');
+        });
         
     });
     getLocalStorage(`${sid}-flags`,(value) => {
@@ -269,6 +283,9 @@ export const flagsChange = () => {
     setLocalStorage(`${sid}-flags`,store.getStore('flags'));
 };
 
+/**
+ * 已读通知
+ */
 export const lastReadNotice = () => {
     const id = store.getStore('uid');
     getFile(`${id}-lastReadNotice`, (value) => {
@@ -278,6 +295,38 @@ export const lastReadNotice = () => {
         setTimeout(() => {
             value = store.getStore('lastReadNotice');// 当前已读
             writeFile(`${id}-lastReadNotice`, value);
+        }, 0);
+    }, () => {
+        console.log('read error');
+    });
+};
+
+// 评论消息列表
+export const conmentListChange = () => {
+    const id = store.getStore('uid');
+    getFile(`${id}-conmentList`, (value) => {
+        if (!value) {
+            value = {};
+        }
+        setTimeout(() => {
+            value = store.getStore('conmentList');
+            writeFile(`${id}-conmentList`, value);
+        }, 0);
+    }, () => {
+        console.log('read error');
+    });
+};
+
+// 点赞消息列表
+export const fabulousListChange = () => {
+    const id = store.getStore('uid');
+    getFile(`${id}-conmentList`, (value) => {
+        if (!value) {
+            value = {};
+        }
+        setTimeout(() => {
+            value = store.getStore('fabulousList');
+            writeFile(`${id}-fabulousList`, value);
         }, 0);
     }, () => {
         console.log('read error');

@@ -12,7 +12,7 @@ import { setData } from '../../../../server/data/rpc/basic.p';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias, getGroupAvatar, getUserAvatar, timestampFormat, getMessageIndex } from '../../logic/logic';
+import { getFriendAlias, getGroupAvatar, getMessageIndex, getUserAvatar, timestampFormat } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { getUsersBasicInfo } from '../../net/rpc';
 // ================================================ 导出
@@ -54,13 +54,13 @@ export class MessageCard extends Widget {
             this.props.avatar = '../../res/images/user_avatar.png';
             this.props.official = true;
             this.props.time = timestampFormat(time,1);
-            if (props.chatType === GENERATOR_TYPE.NOTICE_1) {
+            if (props.chatType === store.GENERATORTYPE.NOTICE_1) {
                 this.props.msg = '你邀请的好友上线了';
-            } else if (props.chatType === GENERATOR_TYPE.NOTICE_2) {
+            } else if (props.chatType === store.GENERATORTYPE.NOTICE_2) {
                 this.props.msg = '邀请你的好友上线了';
-            } else if (props.chatType === GENERATOR_TYPE.NOTICE_3) {
+            } else if (props.chatType === store.GENERATORTYPE.NOTICE_3) {
                 this.props.msg = '有人赞了你的动态';
-            } else if (props.chatType === GENERATOR_TYPE.NOTICE_4) {
+            } else if (props.chatType === store.GENERATORTYPE.NOTICE_4) {
                 this.props.msg = '有人@了你';
             }
        

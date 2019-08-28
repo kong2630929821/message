@@ -5,9 +5,9 @@
 
 import { HandlerMap, HandlerResult } from '../../../../pi/util/event';
 import * as CONSTANT from '../../../server/data/constant';
-import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../utils/send.s';
-import { deelNotice } from '../logic/logic';
+import { GENERATORTYPE } from '../data/store';
+import { setNoticeList } from '../logic/logic';
 import { subscribe } from './init';
 
 /**
@@ -51,8 +51,8 @@ export const initPush = () => {
         // popNewMessage(r);
         const arr = JSON.parse(r).key;
         const time = JSON.parse(JSON.parse(r).createtime);
-        const data = [arr.uid,time,GENERATOR_TYPE.NOTICE_3,arr.post_id,arr.num];
-        deelNotice(data,GENERATOR_TYPE.NOTICE_3);
+        const data = [arr.uid,time,GENERATORTYPE.NOTICE_3,arr.post_id,arr.num];
+        setNoticeList(GENERATORTYPE.NOTICE_3,'fabulousList',data);
     });
 
     // 监听评论点赞
@@ -61,8 +61,8 @@ export const initPush = () => {
         // popNewMessage(r);
         const arr = JSON.parse(r).key;
         const time = JSON.parse(JSON.parse(r).createtime);
-        const data = [arr.uid,time,GENERATOR_TYPE.NOTICE_3,arr.post_id,arr.num];
-        deelNotice(data,GENERATOR_TYPE.NOTICE_3);
+        const data = [arr.uid,time,GENERATORTYPE.NOTICE_3,arr.post_id,arr.num];
+        setNoticeList(GENERATORTYPE.NOTICE_3,'fabulousList',data);
     });
 
     // 监听评论
@@ -71,8 +71,8 @@ export const initPush = () => {
         // popNewMessage(r);
         const arr = JSON.parse(r).key;
         const time = JSON.parse(JSON.parse(r).createtime);
-        const data = [JSON.parse(r).owner,time,GENERATOR_TYPE.NOTICE_4,arr.post_id,arr.num];
-        deelNotice(data,GENERATOR_TYPE.NOTICE_4);
+        const data = [JSON.parse(r).owner,time,GENERATORTYPE.NOTICE_4,arr.post_id,arr.num];
+        setNoticeList(GENERATORTYPE.NOTICE_4,'conmentList',data);
     });
 
     // 监听评论的评论
@@ -81,8 +81,8 @@ export const initPush = () => {
         // popNewMessage(r);
         const arr = JSON.parse(r).key;
         const time = JSON.parse(JSON.parse(r).createtime);
-        const data = [JSON.parse(r).owner,time,GENERATOR_TYPE.NOTICE_4,arr.post_id,arr.num];
-        deelNotice(data,GENERATOR_TYPE.NOTICE_4);
+        const data = [JSON.parse(r).owner,time,GENERATORTYPE.NOTICE_4,arr.post_id,arr.num];
+        setNoticeList(GENERATORTYPE.NOTICE_4,'conmentList',data);
     });
 
 };

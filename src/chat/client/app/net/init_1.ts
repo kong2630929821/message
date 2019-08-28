@@ -8,7 +8,7 @@
 import { getStoreData } from '../../../../app/middleLayer/wrap';
 import { getOfficial } from '../../../../app/publicLib/pull3';
 import { changeWalletName, popNewMessage } from '../../../../app/utils/tools';
-import { GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
+import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
 import { UserChangeInfo } from '../../../server/data/rpc/user.s';
@@ -73,8 +73,9 @@ export const walletSignIn = (openid) => {
                 // 获取邀请人数 被邀请
                 const invite = await getStoreData('inviteUsers/invite_success',[]);
                 const beInvited = await getStoreData('inviteUsers/convert_invite',[]);
-                deelNotice(invite,GENERATOR_TYPE.NOTICE_1);
-                deelNotice([beInvited],GENERATOR_TYPE.NOTICE_2);
+                invite.length && deelNotice(invite,store.GENERATORTYPE.NOTICE_1);
+                beInvited.length && deelNotice([beInvited],store.GENERATORTYPE.NOTICE_2);
+                
                 
             } else {
                 popNewMessage('钱包登陆失败');

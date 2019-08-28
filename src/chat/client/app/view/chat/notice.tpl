@@ -4,6 +4,7 @@
             {{if it1.length}}
                 {{for i,v of it1}}
                     {{if v[0]==0}}
+                    <div style="position:relative" on-longtap="openMessageRecall({{i}})" >
                         <div w-class="messageItem">
                             <p w-class="msgTitle">{{v[1]}}</p>
                             <p w-class="msgName">昵称</p>
@@ -14,11 +15,29 @@
                                 <div style="color:#315BC8;" on-tap="addFriend({{v[3]}})">{{it.isAddUser}}</div>
                             </p>
                         </div>
+                        {{% ========================删除按钮=========================}}
+                        {{if it.currentIndex==i}}
+                        <div style="position: absolute;top: 50%;left: 50%;">
+                            <div w-class="recallBtn" on-tap="recall({{i}})">删除</div>
+                        </div>
+                        {{end}}
+                    </div>
                     {{else}}
+                    <div style="position:relative" on-longtap="openMessageRecall({{i}})">
                         <div w-class="messageNotice" on-tap="gotoPostDetail({{i}})">
                             <div w-class="noticeTitle">{{v[1]}}</div>
-                            <img src="../../res/images/add-blue.png" alt="" w-class="noticeImg"/>
+                            <div w-class="noticeImg">
+                                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{v[6]}}, width:"{{it.imgs.length==1?'80px':'80px'}}",notRound:true}</widget>
+                            </div>
+                         
                         </div>
+                        {{% ========================删除按钮=========================}}
+                        {{if it.currentIndex==i}}
+                        <div style="position: absolute;top: 50px;left: 50%;">
+                            <div w-class="recallBtn" on-tap="recall({{i}})">删除</div>
+                        </div>
+                        {{end}}
+                    </div>   
                     {{end}}
                 {{end}}
             {{else}}

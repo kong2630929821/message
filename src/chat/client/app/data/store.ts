@@ -4,13 +4,13 @@
 
 // ============================================ 导入
 import { HandlerMap } from '../../../../pi/util/event';
-import { AttentionIndex, LaudPostIndex } from '../../../server/data/db/community.s';
+import { AttentionIndex, CommunityBase, LaudPostIndex } from '../../../server/data/db/community.s';
 import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 // tslint:disable-next-line:max-line-length
-import { flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, lastReadNotice, settingChange, userChatChange } from './initStore';
+import { conmentListChange, flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, lastReadNotice, settingChange, userChatChange, fabulousListChange } from './initStore';
 
 // ============================================ 导出
 
@@ -137,7 +137,9 @@ export const initStore = () => {
         pubPostDraft:null,
         pubNum:0,
         noticeList:[],
-        lastReadNotice:[]
+        lastReadNotice:[],
+        conmentList:[],
+        fabulousList:[]
     };
 };
 
@@ -196,6 +198,13 @@ const registerDataChange = () => {
     register('lastReadNotice',() => {
         lastReadNotice();// 已读通知游标更新
     });
+    register('conmentList',() => {
+        conmentListChange();// 评论消息更新
+    });
+    register('fabulousList',() => {
+        fabulousListChange();// 点赞消息更新
+    });
+    
 };
 
 // 帖子内容
@@ -240,6 +249,7 @@ export interface Store {
     // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
     lastRead:Map<string,LastReadMsgId>;// hid
     setting:any; // 额外设置，免打扰|置顶
+    communityBaseMap:Map<string,CommunityBase>;  // num 公众号信息表
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
     flags:any; // 标记信息
@@ -251,6 +261,8 @@ export interface Store {
     noticeList:any;// 消息列表
     lastReadNotice:any;// 已读消息
     pubNum:number;  // 公众号ID
+    conmentList:any;// 评论消息列表
+    fabulousList:any;// 点赞消息列表
 }
 
 /**
@@ -266,3 +278,10 @@ let store:Store;
 // ============================================ 可执行
 const handlerMap: HandlerMap = new HandlerMap();
 initStore();
+
+export enum GENERATORTYPE {
+    NOTICE_1= 'invite',
+    NOTICE_2= 'beInvited',
+    NOTICE_3= 'fabulous',
+    NOTICE_4= 'comment'
+}

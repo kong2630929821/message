@@ -8,7 +8,7 @@ import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap'
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { registerStoreData } from '../../../../../app/viewLogic/common';
 import { Forelet } from '../../../../../pi/widget/forelet';
-import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
+import { UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { deelNotice, rippleShow } from '../../logic/logic';
@@ -246,7 +246,7 @@ registerStoreData('inviteUsers/invite_success',(r) => {
         setStoreData('inviteUsers/invite_success',ans);
     }
     STATE.inviteUsers = ans;
-    deelNotice(r,GENERATOR_TYPE.NOTICE_1);
+    deelNotice(r,store.GENERATORTYPE.NOTICE_1);
     forelet.paint(STATE);
 });
 
@@ -256,7 +256,7 @@ registerStoreData('inviteUsers/convert_invite',(r) => {
     if (ans.length < r.length) {
         setStoreData('inviteUsers/convert_invite',ans);
     }
-    deelNotice([r],GENERATOR_TYPE.NOTICE_2);
+    deelNotice([r],store.GENERATORTYPE.NOTICE_2);
     STATE.convertUser = ans;
     forelet.paint(STATE);
 });
@@ -294,4 +294,20 @@ store.register(`noticeList`, (r:any) => {
     }
     STATE.notice = r[r.length - 1];
     forelet.paint(STATE);
+});
+
+// 监听点赞列表变化
+store.register(`fabulousList`, (r:any) => {
+    if (r.length === 0) {
+        return ;
+    }
+    deelNotice(r,store.GENERATORTYPE.NOTICE_3);
+});
+
+// 监听评论列表变化
+store.register(`conmentList`, (r:any) => {
+    if (r.length === 0) {
+        return ;
+    }
+    deelNotice(r,store.GENERATORTYPE.NOTICE_4);
 });

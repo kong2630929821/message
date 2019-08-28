@@ -9,12 +9,10 @@ import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
 import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
-import { UserArray } from '../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
 import { updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
-import { getUsersBasicInfo, sendUserMsg } from '../net/rpc';
-
+import { sendUserMsg } from '../net/rpc';
 // =====================================导出
 
 /**
@@ -257,23 +255,17 @@ export const buildupImgPath = (url:string) => {
     return url;
 };
 
-const messageData = [[],[],[],[]];
+export const messageData = [[],[],[],[]];
 // 处理消息通知
 export const deelNotice = (arr:any,fg:string) => {
-    if (fg === GENERATOR_TYPE.NOTICE_1) {
+    if (fg === store.GENERATORTYPE.NOTICE_1) {
         messageData[0] = arr;
-    } else if (fg === GENERATOR_TYPE.NOTICE_2) {
+    } else if (fg === store.GENERATORTYPE.NOTICE_2) {
         messageData[1] = arr;
-    } else if (fg === GENERATOR_TYPE.NOTICE_3) {
-        let flags = -1;
-        messageData[2].forEach((v,i) => {
-            if (v[0] === arr[0] && v[2] === arr[2] && v[3] === arr[3] && v[4] === arr[4]) {
-                flags = i;
-            }
-        });
-        messageData[2].splice(flags !== -1 ? messageData[2].length - 1 :flags,flags !== -1 ? 1 :0,arr);
+    } else if (fg === store.GENERATORTYPE.NOTICE_3) {
+        messageData[2] = arr;
     } else {
-        messageData[3].push(arr);
+        messageData[3] = arr;
     }
 
     const dataList = [];
@@ -301,4 +293,51 @@ export const getMessageIndex = (arr:any) => {
     });
 
     return index;
+};
+
+// 处理监听通知信息列表
+export const setNoticeList = (itype:string,storeStr:string,arr:any) => {
+    const list = store.getStore(storeStr,[]);
+    if (itype === store.GENERATORTYPE.NOTICE_3) {
+        let flags = -1;
+        list.forEach((v,i) => {
+            if (v[0] === arr[0] && v[2] === arr[2] && v[3] === arr[3] && v[4] === arr[4]) {
+                flags = i;
+            }
+        });
+        if (list.length) {
+            list.splice(flags !== -1 ? list.length - 1 :flags,flags !== -1 ? 1 :0,arr);
+        } else {
+            list.push(arr);
+        }
+    } else {
+        list.push(arr);
+    }
+    
+    store.setStore(storeStr,list);
+};
+
+// 删除评论点赞通知
+export const delNotice = (itype:string,data:any) => {
+    const noticeList = store.getStore('noticeList',[]); // 通知列表
+    let indexDbNotice =   store.getStore('lastReadNotice',[]);// 当前游标停留的通知
+    const list = store.getStore(itype,[]); // 评论或点赞的消息列表
+    let index = -1;
+    noticeList.forEach((v,i) => {
+        if (JSON.stringify(v) === JSON.stringify(indexDbNotice)) {
+            index = i;
+        }
+    });
+    list.forEach((v,i) => {
+        if (JSON.stringify(v) === JSON.stringify(data)) {
+            if (JSON.stringify(data) === JSON.stringify(indexDbNotice)) {
+                indexDbNotice = noticeList[index - 1];
+            }
+            list.splice(i,1);
+            noticeList.splice(i,1);
+        }
+    });
+    store.setStore(itype,list);
+    store.setStore('noticeList',noticeList);
+    store.setStore('lastReadNotice',indexDbNotice);
 };
