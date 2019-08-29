@@ -1,3 +1,6 @@
+#[path=../db/]
+use group.s::{GroupInfo};
+
 struct MemberIdArray{
     arr:&[u32]//用户id数组
 }
@@ -52,4 +55,9 @@ struct NewGroup{
 struct NeedAgree {
     gid: u32, // 群组id
     need_agree: bool // 进群是否需要验证
+}
+
+// 群信息列表
+struct GroupInfoList {
+    list: &[GroupInfo]
 }

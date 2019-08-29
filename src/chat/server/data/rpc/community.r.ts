@@ -417,7 +417,7 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
         key = undefined;
     } else {
         key = new PostKey();
-        key.id = id;
+        key.id = id - 1;
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
@@ -1158,7 +1158,7 @@ export const getHotPost = (arg: IterPostArg) :PostArr => {
         key = undefined;
     } else {
         key = new PostKey();
-        key.id = id;
+        key.id = id - 1;
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
@@ -1294,6 +1294,7 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
     const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+    if (!post) return;
     if (post.state === CONSTANT.DELETE_STATE) return; // 帖子已删除
     const user = new GetUserInfoReq();
     user.uids = [post.owner];

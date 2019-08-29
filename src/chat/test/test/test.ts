@@ -1,6 +1,6 @@
 import { GroupInfo } from '../../../chat/server/data/db/group.s';
-import { createGroup } from '../../../chat/server/data/rpc/group.p';
-import { GroupCreate } from '../../../chat/server/data/rpc/group.s';
+import { createGroup, searchGroup } from '../../../chat/server/data/rpc/group.p';
+import { GroupCreate, GroupInfoList } from '../../../chat/server/data/rpc/group.s';
 import { popNew } from '../../../pi/ui/root';
 import { Widget } from '../../../pi/widget/widget';
 import { clientRpcFunc } from '../../client/app/net/init';
@@ -10,7 +10,8 @@ import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
-import { set_gmAccount } from '../../server/data/rpc/user.p';
+import { changeUserInfo, searchFriend, set_gmAccount } from '../../server/data/rpc/user.p';
+import { UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
 
 /**
  * 登录
@@ -29,6 +30,17 @@ export const chatLogin = () => {
     clientRpcFunc(login, userType, (r: UserInfo) => {
         console.log(r);
     });
+    const userChange = new UserChangeInfo();
+    userChange.acc_id = '123123';
+    userChange.avatar = 'aaa';
+    userChange.name = 'Stark';
+    userChange.note = '...';
+    userChange.sex = 1;
+    userChange.tel = '13333333333';
+    userChange.wallet_addr = 'asdasdasd';
+    clientRpcFunc(changeUserInfo, userChange, (r: UserInfo) => {
+        console.log(r);
+    });
 };
 
 // 创建群
@@ -38,7 +50,7 @@ export const cGroupe = () => {
     group.avatar = 'BigHead';
     group.note = 'peace';
     group.need_agree = false;
-    clientRpcFunc(set_gmAccount, group, (r: GroupInfo) => {
+    clientRpcFunc(createGroup, group, (r: GroupInfo) => {
         console.log(r);
     });
 };
@@ -242,12 +254,40 @@ export const getPostInfoByIdsTest = () => {
     });
 };
 
+// 搜索用户
+export const searchFriendTest = () => {
+    const arg = 'Stark';
+    clientRpcFunc(searchFriend, arg, (r: UserInfoList) => {
+        console.log(r);
+    });
+};
+
+// 搜索群
+export const searchGroupTest = () => {
+    const arg = '10001';
+    clientRpcFunc(searchGroup, arg, (r: GroupInfoList) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
         {
             name: '用户登陆',
             func: () => { chatLogin(); }
+        },
+        {
+            name: '搜索用户',
+            func: () => { searchFriendTest(); }
+        },
+        {
+            name: '搜索群',
+            func: () => { searchGroupTest(); }
+        },
+        {
+            name: '创建群',
+            func: () => { cGroupe(); }
         },
         {
             name: '写帖子',
