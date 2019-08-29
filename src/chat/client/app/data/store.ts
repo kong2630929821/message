@@ -10,7 +10,7 @@ import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 // tslint:disable-next-line:max-line-length
-import { flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, settingChange, userChatChange } from './initStore';
+import { conmentListChange, fabulousListChange, flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, lastReadNotice, settingChange, userChatChange } from './initStore';
 
 // ============================================ 导出
 
@@ -136,7 +136,11 @@ export const initStore = () => {
         laudPostList:new Map(),
         postDraft:null,
         pubPostDraft:null,
-        pubNum:0
+        pubNum:0,
+        noticeList:[],
+        lastReadNotice:[],
+        conmentList:[],
+        fabulousList:[]
     };
 };
 
@@ -192,6 +196,16 @@ const registerDataChange = () => {
     register('flags/noGroupRemind',(r) => { // 不再提醒加群
         flagsChange();
     });
+    register('lastReadNotice',() => {
+        lastReadNotice();// 已读通知游标更新
+    });
+    register('conmentList',() => {
+        conmentListChange();// 评论消息更新
+    });
+    register('fabulousList',() => {
+        fabulousListChange();// 点赞消息更新
+    });
+    
 };
 
 // 帖子内容
@@ -245,7 +259,11 @@ export interface Store {
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
     postDraft:any;   // 普通帖子草稿
     pubPostDraft:any;  // 公众号文章草稿
+    noticeList:any;// 消息列表
+    lastReadNotice:any;// 已读消息
     pubNum:number;  // 公众号ID
+    conmentList:any;// 评论消息列表
+    fabulousList:any;// 点赞消息列表
 }
 
 /**
@@ -261,3 +279,10 @@ let store:Store;
 // ============================================ 可执行
 const handlerMap: HandlerMap = new HandlerMap();
 initStore();
+
+export enum GENERATORTYPE {
+    NOTICE_1= 'invite',
+    NOTICE_2= 'beInvited',
+    NOTICE_3= 'fabulous',
+    NOTICE_4= 'comment'
+}

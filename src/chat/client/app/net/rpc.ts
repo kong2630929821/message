@@ -11,8 +11,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, NumArr, PostArr } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -839,4 +839,38 @@ export const delComment = (num:string,post_id:number,id:number) => {
         });
     });
    
+};
+
+/** 
+ * 获取帖子详情
+ */
+export const getPostDetile = (num:string,id:number) => {
+    const arg = new PostKeyList();
+    const postKey1 = new PostKey();
+    postKey1.num = num;
+    postKey1.id = id;
+    arg.list = [postKey1];
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getPostInfoByIds,arg,(r:PostArr) => {
+            console.log('getPostInfoByIds=============',r);
+            if (r && r.list) {
+                const data:any = r.list;
+
+                data.forEach((res,i) => {
+                    data[i].offcial = res.comm_type === CommType.official;
+                    data[i].isPublic = res.comm_type === CommType.publicAcc;
+                    const body = JSON.parse(res.body);
+                    data[i].content = parseEmoji(body.msg);
+                    data[i].imgs = body.imgs;
+                    data[i].followed = judgeFollowed(res.key.num);
+                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
+                });
+                res(data);
+            } else {
+                rej();
+            }
+        });
+    });
+    
 };

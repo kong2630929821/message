@@ -54,7 +54,7 @@ export class GroupAnnounce extends Widget {
 
     // 编辑群公告
     public editGroupAnnounce() {
-        popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'编辑群公告',needTitle:true },(r:any) => {
+        popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'编辑群公告',needTitle:true,maxLength:150 },(r:any) => {
             const message = new GroupSend();
             message.gid = this.props.gid;
             message.msg = JSON.stringify(r);

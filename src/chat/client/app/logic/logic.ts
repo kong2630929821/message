@@ -13,7 +13,6 @@ import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
 import { updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
 import { sendUserMsg } from '../net/rpc';
-
 // =====================================导出
 
 /**
@@ -254,4 +253,91 @@ export const buildupImgPath = (url:string) => {
     }
 
     return url;
+};
+
+export const messageData = [[],[],[],[]];
+// 处理消息通知
+export const deelNotice = (arr:any,fg:string) => {
+    if (fg === store.GENERATORTYPE.NOTICE_1) {
+        messageData[0] = arr;
+    } else if (fg === store.GENERATORTYPE.NOTICE_2) {
+        messageData[1] = arr;
+    } else if (fg === store.GENERATORTYPE.NOTICE_3) {
+        messageData[2] = arr;
+    } else {
+        messageData[3] = arr;
+    }
+
+    const dataList = [];
+    messageData.forEach(v => {
+        if (v[0] && v[0].length) {
+            dataList.push(...v);
+        }
+    });
+    dataList.sort((v,t) => {
+        return v[1] - t[1];
+    });
+    store.setStore('noticeList',dataList);
+
+    return dataList;
+};
+
+// 获取已读消息下标
+export const getMessageIndex = (arr:any) => {
+    const data = store.getStore('noticeList',[]);
+    let index = -1;
+    data.forEach((v,i) => {
+        if (arr[0] === v[0] && arr[1] === v[1] && arr[2] === v[2]) {
+            index = i;
+        }
+    });
+
+    return index;
+};
+
+// 处理监听通知信息列表
+export const setNoticeList = (itype:string,storeStr:string,arr:any) => {
+    const list = store.getStore(storeStr,[]);
+    if (itype === store.GENERATORTYPE.NOTICE_3) {
+        let flags = -1;
+        list.forEach((v,i) => {
+            if (v[0] === arr[0] && v[2] === arr[2] && v[3] === arr[3] && v[4] === arr[4]) {
+                flags = i;
+            }
+        });
+        if (list.length) {
+            list.splice(flags !== -1 ? list.length - 1 :flags,flags !== -1 ? 1 :0,arr);
+        } else {
+            list.push(arr);
+        }
+    } else {
+        list.push(arr);
+    }
+    
+    store.setStore(storeStr,list);
+};
+
+// 删除评论点赞通知
+export const delNotice = (itype:string,data:any) => {
+    const noticeList = store.getStore('noticeList',[]); // 通知列表
+    let indexDbNotice =   store.getStore('lastReadNotice',[]);// 当前游标停留的通知
+    const list = store.getStore(itype,[]); // 评论或点赞的消息列表
+    let index = -1;
+    noticeList.forEach((v,i) => {
+        if (JSON.stringify(v) === JSON.stringify(indexDbNotice)) {
+            index = i;
+        }
+    });
+    list.forEach((v,i) => {
+        if (JSON.stringify(v) === JSON.stringify(data)) {
+            if (JSON.stringify(data) === JSON.stringify(indexDbNotice)) {
+                indexDbNotice = noticeList[index - 1];
+            }
+            list.splice(i,1);
+            noticeList.splice(i,1);
+        }
+    });
+    store.setStore(itype,list);
+    store.setStore('noticeList',noticeList);
+    store.setStore('lastReadNotice',indexDbNotice);
 };
