@@ -156,6 +156,12 @@ export class EditPost extends Widget {
        
     }
 
+    // 删除图片
+    public delImage(ind:number) {
+        this.props.imgs.splice(ind,1);
+        this.paint();
+    }
+
     // 发送
     public async send() {
         if (this.props.imgs.length) {
