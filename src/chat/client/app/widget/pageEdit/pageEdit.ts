@@ -9,6 +9,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 
 // ================================================ 导出
 
+// tslint:disable-next-line:completed-docs
 export class PageEdit extends Widget {
     public ok:(res:any) => void;
     public cancel:() => void;
@@ -18,7 +19,8 @@ export class PageEdit extends Widget {
         titleInput:'',
         contentInput:'',
         count:0,
-        placeholder:''
+        placeholder:'',
+        maxLength:0
     };
 
     public setProps(props:any) {
@@ -70,4 +72,5 @@ interface Props {
     contentInput:string; // 内容
     count:number; // 内容字数
     placeholder:string; // 内容的提示语
+    maxLength:number;
 }

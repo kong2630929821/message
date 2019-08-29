@@ -13,6 +13,8 @@ interface Props {
     tagList:string[];  // 标签列表
     active:number;  // 当前显示的标签
     follows:number;  // 关注人数
+    expandItem:number;  // 当前展开工具栏的帖子下标
+    dealData:any;  // 组装数据
 }
 export const TagList = ['广场','关注','公众号','热门'];
 /**
@@ -24,7 +26,9 @@ export class Square extends Widget {
         showTag:false,
         tagList:TagList,
         active:0,
-        follows:0
+        follows:0,
+        expandItem:-1,
+        dealData:this.dealData
     };
 
     public setProps(props:any) {
@@ -35,8 +39,16 @@ export class Square extends Widget {
         super.setProps(this.props);
         State.postList = [];
         this.state = State;
+        
         this.init(this.props.active);
         showPost(this.props.active + 1);
+    }
+
+    public firstPaint() {
+        super.firstPaint();
+        register('uid',() => {  // 聊天用户登陆成功
+            this.setProps(this.props);
+        });
     }
 
     public init(ind:number) {
@@ -102,6 +114,36 @@ export class Square extends Widget {
     public delPost(i:number) {
         this.state.postList.splice(i,1);
         this.paint();
+    }
+
+    /**
+     * 查看详情
+     */
+    public goDetail(i:number) {
+        popNew3('chat-client-app-view-info-postDetail',{ ...this.state.postList[i],showAll:true });
+    }
+
+    /**
+     * 展示操作
+     */
+    public expandTools(e:any,i:number) {
+        this.props.expandItem = e.value ? i :-1;
+        this.paint();
+    }
+
+    public pageClick() {
+        this.props.expandItem = -1;
+        this.paint();
+    }
+
+    /**
+     * 组装squareItem的数据
+     */
+    public dealData(v:any,r:boolean) {
+        return { 
+            ...v,
+            showUtils: r 
+        };
     }
 }
 const State = {

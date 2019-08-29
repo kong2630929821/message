@@ -13,7 +13,7 @@ import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
-import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
+import { depCopy, genGroupHid, genUserHid, genUuid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias, getUserAvatar, INFLAG, timestampFormat } from '../../logic/logic';
@@ -138,6 +138,10 @@ export class Chat extends Widget {
             store.register(`groupUserlinkMap`,this.bindCB);
         } else {
             store.register(`userChatMap/${this.props.hid}`,this.bindCB);
+            store.register(`friendLinkMap/${genUuid(this.props.sid,this.props.id)}`,(r) => {
+                this.props.name = r.alias;
+                this.paint();
+            });
         }
         
     }

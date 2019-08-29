@@ -11,7 +11,7 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { rippleShow } from '../../logic/logic';
+import { deelNotice, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
 import { SpecialWidget } from '../specialWidget';
@@ -81,18 +81,19 @@ export class Contact extends SpecialWidget {
         super.setProps(props);
         const uid = store.getStore('uid', 0);
         this.props.isLogin = !!uid;
-        this.props.activeTab = TAB.message;
+        this.props.activeTab = TAB.square;
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         
         if (this.props.isLogin) {   // 聊天已登录成功
             getStoreData('user',{ info:{},id:'' }).then(wUser => {
                 // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
                 if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.info.acc_id !== cUser.acc_id) {
-                    if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
+                    if (this.props.isLogin && wUser.info.nickName) { // 钱包和聊天都已登陆
                         setUserInfo();
                     } else if (cUser.uid) {  // 聊天已登录
                         store.initStore();
                         this.state.lastChat = []; // 清空记录 lastChat
+                        this.paint();
                     }
                 } 
             });
@@ -118,7 +119,8 @@ export class Contact extends SpecialWidget {
                     friends:[]
                 },
                 inviteUsers:[],
-                convertUser:[]
+                convertUser:[],
+                notice:[]
             };
             this.paint();
         });
@@ -199,6 +201,11 @@ export class Contact extends SpecialWidget {
         this.paint();
     }
 
+    // 消息通知
+    public notice() {
+        popNew3('chat-client-app-view-chat-notice', { name:'消息通知' }) ;
+    }
+
 }
 
 // ================================================ 本地
@@ -210,7 +217,8 @@ const STATE = {
         friends:[]
     },
     inviteUsers:[],
-    convertUser:[]
+    convertUser:[],
+    notice:[]
 };
 store.register(`lastChat`, (r: [number, number][]) => {
     STATE.lastChat = r;
@@ -235,30 +243,25 @@ store.register('contactMap', (r) => {
 // 邀请好友成功
 registerStoreData('inviteUsers/invite_success',(r) => {
     const ans = updateInviteUsers(depCopy(r) || []);
-    
     if (ans.length < r.length) {
         setStoreData('inviteUsers/invite_success',ans);
     }
     STATE.inviteUsers = ans;
+    deelNotice(r,store.GENERATORTYPE.NOTICE_1);
     forelet.paint(STATE);
 });
 
 // 兑换好友邀请码成功
 registerStoreData('inviteUsers/convert_invite',(r) => {
     const ans = updateInviteUsers(depCopy(r) || []);
-    
     if (ans.length < r.length) {
         setStoreData('inviteUsers/convert_invite',ans);
     }
+    deelNotice([r],store.GENERATORTYPE.NOTICE_2);
     STATE.convertUser = ans;
     forelet.paint(STATE);
 });
-store.register('friendLinkMap',() => {
-    const w = forelet.getWidget(WIDGET_NAME);
-    if (w) {
-        w.paint(true);
-    }
-});
+
 // 更新邀请好友记录
 const updateInviteUsers = (ans) => {
     const userInfoMap = store.getStore('userInfoMap',new Map());
@@ -266,7 +269,14 @@ const updateInviteUsers = (ans) => {
         for (const v of STATE.contactMap.friends) {
             const user = userInfoMap.get(v.toString());
             if (user) {
-                const index = ans.indexOf(user.acc_id); 
+                // const index = ans.indexOf(user.acc_id); 
+                // index > -1 && ans.splice(index,1);
+                let index = null;
+                ans.forEach((v,i) => {
+                    if (v[0] === user.acc_id) {
+                        index = i;
+                    }
+                });
                 index > -1 && ans.splice(index,1);
             }
         }
@@ -274,3 +284,26 @@ const updateInviteUsers = (ans) => {
 
     return ans;
 };
+store.register(`noticeList`, (r:any) => {
+    if (r.length === 0) {
+        return ;
+    }
+    STATE.notice = r[r.length - 1];
+    forelet.paint(STATE);
+});
+
+// 监听点赞列表变化
+store.register(`fabulousList`, (r:any) => {
+    if (r.length === 0) {
+        return ;
+    }
+    deelNotice(r,store.GENERATORTYPE.NOTICE_3);
+});
+
+// 监听评论列表变化
+store.register(`conmentList`, (r:any) => {
+    if (r.length === 0) {
+        return ;
+    }
+    deelNotice(r,store.GENERATORTYPE.NOTICE_4);
+});

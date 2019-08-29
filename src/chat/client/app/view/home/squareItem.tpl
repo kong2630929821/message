@@ -1,4 +1,4 @@
-<div w-class="item" on-tap="closeUtils">
+<div w-class="item">
     <div w-class="top">
         <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
         <div w-class="topCenter">
@@ -35,7 +35,7 @@
     {{end}}
 
     {{% =====================图片区域========================}}
-    <div style="margin:20px 15px;" on-tap="goDetail">
+    <div style="margin:20px 15px;width: 100%;" on-tap="goDetail">
         {{for i,v of it.imgs}}
             {{if i==2 && it.imgs.length==4}}
             <div></div>

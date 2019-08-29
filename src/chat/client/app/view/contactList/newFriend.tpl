@@ -10,12 +10,12 @@
 
             {{%==================我邀请的好友上线================}}
             {{for i,v of it1.inviteUsers}}
-            <widget w-tag="chat-client-app-view-contactList-applyUserInvite">{accId: {{v}}, chatType: "user", applyInfo:"你邀请的好友上线了"}</widget>
+            <widget w-tag="chat-client-app-view-contactList-applyUserInvite">{accId: {{v[0]}}, chatType: "user", applyInfo:"你邀请的好友上线了"}</widget>
             {{end}}
 
             {{%==================邀请我的好友上线================}}
             {{for i,v of it1.convertUser}}
-            <widget w-tag="chat-client-app-view-contactList-applyUserInvite">{accId: {{v}}, chatType: "user", applyInfo:"添加邀请你的玩家为好友吧"}</widget>
+            <widget w-tag="chat-client-app-view-contactList-applyUserInvite">{accId: {{v[0]}}, chatType: "user", applyInfo:"添加邀请你的玩家为好友吧"}</widget>
             {{end}}
 
             {{for i,v of it1.contact.applyGroup}}
