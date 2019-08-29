@@ -1,3 +1,4 @@
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -18,6 +19,7 @@ interface Props {
     totalPost:number;  // 总文章数
     name:string;   // 公众号名
     avatar:string;
+    urlPath:string;  // 图片路径前
 }
 
 /**
@@ -35,7 +37,8 @@ export class PublicHome extends Widget {
         totalFans:0,
         totalPost:0,
         name:'',
-        avatar:''
+        avatar:'',
+        urlPath:uploadFileUrlPrefix
     };
 
     public setProps(props:any) {
@@ -49,8 +52,8 @@ export class PublicHome extends Widget {
         this.props.isMine = this.props.uid === sid;
 
         getUserInfoByNum([this.props.pubNum]).then(r => {
-            this.props.name = r[0].comm_info.name;
-            this.props.avatar = buildupImgPath(r[0].comm_info.avatar);
+            this.props.name = r[0].user_info.name;
+            this.props.avatar = buildupImgPath(r[0].user_info.avatar);
         });
         getUserPostList(this.props.pubNum).then((r:any) => {
             this.props.postList = r.list.map(r => { // 动态

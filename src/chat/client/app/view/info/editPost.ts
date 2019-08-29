@@ -2,7 +2,7 @@ import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, setStore } from '../../data/store';
-import { selectImage } from '../../logic/native';
+import { openCamera, selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
 import { base64ToFile, imgResize, uploadFile } from '../../net/upload';
 
@@ -77,6 +77,28 @@ export class EditPost extends Widget {
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             imagePicker.getContent({
+                quality:30,
+                success(buffer:ArrayBuffer) {
+                    imgResize(buffer,(res) => {
+                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        this1.props.imgs.push(url);
+                        this1.paint();
+                    });
+                }
+            });
+        });
+    }
+
+    /**
+     * 打开照相机
+     */
+    public takePhoto(e:any) {
+        const camera = openCamera((url) => {
+            console.log('拍摄的图片',url);
+    
+            // tslint:disable-next-line:no-this-assignment
+            const this1 = this;
+            camera.getContent({
                 quality:30,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {

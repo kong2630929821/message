@@ -21,7 +21,7 @@
 
         {{for i,v of it.postList}}
         <div w-class="item" on-tap="goDetail({{i}})">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="itemImg">{imgURL:{{v.img}},width:"150px;",notRound:true}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="itemImg">{imgURL:{{it.urlPath + v.img}},width:"150px;",notRound:true}</widget>
             <div w-class="itemTitle">{{v.title}}</div>
         </div>
         {{end}}

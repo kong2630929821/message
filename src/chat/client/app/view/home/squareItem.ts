@@ -84,24 +84,25 @@ export class SquareItem extends Widget {
     /**
      * 查看详情
      */
-    public goDetail() {
-        this.closeUtils();
-        popNew3('chat-client-app-view-info-postDetail',{ ...this.props,showAll:true });
+    public goDetail(e:any) {
+        this.closeUtils(e);
+        notify(e.node,'ev-goDetail',null);
     }
 
     /**
      * 展示操作
      */
-    public showTools() {
+    public showTools(e:any) {
         this.props.showUtils = !this.props.showUtils;
         this.paint();
+        notify(e.node,'ev-tools-expand',{ value:this.props.showUtils });
     }
 
     /**
      * 点赞
      */
     public likeBtn(e:any) {
-        this.closeUtils();
+        this.closeUtils(e);
         notify(e.node,'ev-likeBtn',{ value:this.props.key });
     }
 
@@ -109,20 +110,22 @@ export class SquareItem extends Widget {
      * 评论
      */
     public doComment(e:any) {
-        this.closeUtils();
+        this.closeUtils(e);
         notify(e.node,'ev-commentBtn',{ value:this.props.key });
     }
 
     // 关闭操作列表
-    public closeUtils() {
+    public closeUtils(e:any) {
         this.props.showUtils = false;
         this.paint();
+        notify(e.node,'ev-closeTools',null);
     }
 
     /**
      * 查看用户详情
      */
-    public goUserDetail() {
+    public goUserDetail(e:any) {
+        this.closeUtils(e);
         if (this.props.isPublic) {
             popNew3('chat-client-app-view-person-publicHome', { uid: this.props.owner, pubNum: this.props.key.num });
         } else {
@@ -133,8 +136,8 @@ export class SquareItem extends Widget {
     /**
      * 举报
      */
-    public complaint() {
-        this.closeUtils();
+    public complaint(e:any) {
+        this.closeUtils(e);
         complaintUser(this.props.username);
     }
 
@@ -142,7 +145,7 @@ export class SquareItem extends Widget {
      * 删除帖子
      */
     public delPost(e:any) {
-        this.closeUtils();
+        this.closeUtils(e);
         delPost(this.props.key.num,this.props.key.id).then(r => {
             notify(e.node,'ev-delBtn',{ value:this.props.key });
         });
@@ -151,8 +154,8 @@ export class SquareItem extends Widget {
     /**
      * 关注用户
      */
-    public followUser() {
-        this.closeUtils();
+    public followUser(e:any) {
+        this.closeUtils(e);
         follow(this.props.key.num);
     }
 

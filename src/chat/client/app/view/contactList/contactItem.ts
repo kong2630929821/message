@@ -7,7 +7,7 @@ import { Json } from '../../../../../pi/lang/type';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE, UserInfo, VIP_LEVEL } from '../../../../server/data/db/user.s';
-import { depCopy } from '../../../../utils/util';
+import { depCopy, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias, getGroupAvatar, getUserAvatar } from '../../logic/logic';
 import { getUsersBasicInfo } from '../../net/rpc';
@@ -69,20 +69,47 @@ export class ContactItem extends Widget {
     public firstPaint() {
         super.firstPaint();
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            store.register(`userInfoMap/${this.props.id}`,(r:UserInfo) => {
-                this.props.name = r.name;
-                this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
-                this.paint();
-            });
+            store.register(`userInfoMap/${this.props.id}`,this.updateUserinfo);
+            const sid = store.getStore(`uid`);
+            if (sid !== this.props.id) {
+                store.register(`friendLinkMap/${genUuid(sid,this.props.id)}`,this.updateAlias);
+            }
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            store.register(`groupInfoMap/${this.props.id}`,(r:GroupInfo) => {
-                this.props.name = r.name;
-                this.props.img = getGroupAvatar(this.props.id) || '../../res/images/groups.png';
-                this.paint();
-            });
+            store.register(`groupInfoMap/${this.props.id}`,this.updateGroupinfo);
         }
     }
 
+    // 更新别名
+    public updateAlias(r:any) {
+        this.props.name = r.alias;
+        this.paint();
+    }
+
+    // 更新用户信息
+    public updateUserinfo(r:UserInfo) {
+        this.props.name = r.name;
+        this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
+        this.paint();
+    }
+
+    // 更新群组信息
+    public updateGroupinfo(r:GroupInfo) {
+        this.props.name = r.name;
+        this.props.img = getGroupAvatar(this.props.id) || '../../res/images/groups.png';
+        this.paint();
+    }
+
+    public destroy() {
+        super.destroy();
+        const sid = store.getStore(`uid`);
+        if (sid !== this.props.uid) {
+            store.unregister(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.updateAlias);
+        }
+        store.unregister(`groupInfoMap/${this.props.id}`,this.updateGroupinfo);
+        store.unregister(`userInfoMap/${this.props.id}`,this.updateUserinfo);
+
+        return true;
+    }
 }
 
 // ================================================ 本地

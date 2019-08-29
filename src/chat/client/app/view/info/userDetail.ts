@@ -7,7 +7,8 @@ import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { CommType } from '../../../../server/data/rpc/community.s';
-import { getStore, setStore } from '../../data/store';
+import { genUuid } from '../../../../utils/util';
+import { getStore, register, setStore, unregister } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
 import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
 
@@ -63,6 +64,9 @@ export class UserDetail extends Widget {
         };
         super.setProps(this.props);
         const sid = getStore('uid');
+        if (!props.uid) {  // 查看自己的信息
+            this.props.uid = sid;
+        }
         this.props.isOwner = this.props.uid === sid;
         const userinfo = getStore(`userInfoMap/${this.props.uid}`, {});
         this.props.userInfo = userinfo;
@@ -138,6 +142,22 @@ export class UserDetail extends Widget {
         });
     }
 
+    public firstPaint() {
+        super.firstPaint();
+        const sid = getStore(`uid`);
+        if (sid !== this.props.uid) {
+            register(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.updateAlias);
+        }
+    }
+
+    /**
+     * 更新别名
+     */
+    public updateAlias(r:any) {
+        this.props.alias = r.alias;
+        this.paint();
+    }
+
     public goBack() {
         this.ok && this.ok();
     }
@@ -202,6 +222,16 @@ export class UserDetail extends Widget {
                 this.paint();
             });
         });
+    }
+
+    public destroy() {
+        super.destroy();
+        const sid = getStore(`uid`);
+        if (sid !== this.props.uid) {
+            unregister(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.updateAlias);
+        }
+
+        return true;
     }
 }
 

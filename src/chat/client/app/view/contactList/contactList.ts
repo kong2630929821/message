@@ -54,12 +54,6 @@ export class ContactList extends Widget {
 }
 
  // ================================================ 本地
-store.register('friendLinkMap',() => {
-    const w = forelet.getWidget(WIDGET_NAME);
-    if (w) {
-        w.paint(true);
-    }
-});
 store.register('contactMap', (r) => {
     for (const value of r.values()) {
         forelet.paint(value);
