@@ -23,6 +23,7 @@ interface Props {
     gender: number;  // 性别 0 男 1 女
     commentLikeList:number[]; // 点赞的评论列表
     timeFormat:any;  // 时间处理
+    refresh:boolean; // 是否可以请求更多数据
 }
 const TAB = {
     comment: 'comment',
@@ -53,7 +54,8 @@ export class PostDetail extends Widget {
         likeList: [],
         gender: 0,
         commentLikeList:[],
-        timeFormat:timestampFormat
+        timeFormat:timestampFormat,
+        refresh:true
     };
 
     public setProps(props: any) {
@@ -78,14 +80,14 @@ export class PostDetail extends Widget {
     public init(tab:string) {
         if (tab === TAB.comment) {
             showComment(this.props.key.num, this.props.key.id).then((r: any) => {
-                r = r.map(v => {
+                this.props.commentList = r.map(v => {
                     v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
 
                     return v;
                 });
-                this.props.commentList = r;
                 this.paint();
             });
+            
         } else {
             showLikeList(this.props.key.num,this.props.key.id).then((r: any) => {
                 this.props.likeList = r.map(v => {
@@ -93,13 +95,6 @@ export class PostDetail extends Widget {
                     
                     return v;
                 });
-                const uid = getStore('uid');
-                const ind = r.findIndex(v => {
-                    return v.key.uid === uid;
-                });
-                if (ind > -1) {
-                    this.props.likeActive = true;
-                }
                 this.paint();
             });
         }
@@ -208,5 +203,49 @@ export class PostDetail extends Widget {
         this.props.commentList.splice(i,1);
         this.props.commentCount--;
         this.paint();
+    }
+
+    /**
+     * 滚动加载更多评论或点赞
+     */
+    public scrollPage() {
+        const page = document.getElementById('postPage');
+        const contain = document.getElementById('postContain');
+        if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150) {
+            console.log('1111111111111111111111111');
+            this.props.refresh = false;
+            
+            if (this.props.active === TAB.comment) {
+                let list = this.props.commentList;
+                showComment(this.props.key.num, this.props.key.id,list[list.length - 1].key.id).then((r: any) => {
+                    if (list[list.length - 1].key.id !== r[0].key.id) {
+                        r = r.map(v => {
+                            v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
+    
+                            return v;
+                        });
+                        list = list.concat(r);
+                    }
+                    this.props.commentList = list;
+                    this.paint();
+                });
+
+            } else {
+                let list = this.props.likeList;
+                showLikeList(this.props.key.num, this.props.key.id,list[list.length - 1].key.uid).then((r: any) => {
+                    if (list[list.length - 1].key.uid !== r[0].key.uid) {
+                        r = r.map(v => {
+                            v.avatar = buildupImgPath(v.avatar);
+                            
+                            return v;
+                        });
+                        list = list.concat(r);
+                    }
+                    this.props.likeList = list;
+                    this.paint();
+                });
+            }
+            
+        }
     }
 }

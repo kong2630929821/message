@@ -9,7 +9,7 @@
     flex: 1 0 0;
     margin-bottom: 80px;
 }
-.commentBox{
+.postBottom{
     background: #fff;
 }
 .tabs{

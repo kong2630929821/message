@@ -1,20 +1,20 @@
 <div class="new-page" w-class="page" ev-back-click="goBack">
     <chat-client-app-widget-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget-topBar-topBar>
-    <div w-class="contain">
-        <div style="margin: 20px 0;">
+    <div w-class="contain" id="postPage" on-scroll="scrollPage">
+        <div style="margin: 20px 0;" id="postContain">
             {{if it.isPublic}}
             <div w-class="title">{{it.title}}</div>
             {{end}}
             <widget w-tag="chat-client-app-view-home-squareItem">{{it}}</widget>
 
 
-            <div w-class="commentBox">
+            <div w-class="postBottom">
                 <div w-class="tabs">
                     <div w-class="tab {{it.active=='comment'? 'activeTab':''}}" on-tap="changeTab('comment')">评论&nbsp;{{it.commentCount}}</div>
                     <div w-class="tab {{it.active=='like'? 'activeTab':''}}" on-tap="changeTab('like')">赞&nbsp;{{it.likeCount}}</div>
                 </div>
                 {{if it.active == 'comment'}}
-                <div>
+                <div id="commentBox">
                     {{for i,v of it.commentList}}
                     <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})">
                         <widget w-tag="chat-client-app-view-info-commentItem">{{v}}</widget>

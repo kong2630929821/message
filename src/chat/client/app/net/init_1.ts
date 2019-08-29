@@ -76,7 +76,6 @@ export const walletSignIn = (openid) => {
                 invite.length && deelNotice(invite,store.GENERATORTYPE.NOTICE_1);
                 beInvited.length && deelNotice([beInvited],store.GENERATORTYPE.NOTICE_2);
                 
-                
             } else {
                 popNewMessage('钱包登陆失败');
             }
@@ -88,10 +87,10 @@ export const walletSignIn = (openid) => {
 /**
  * 改变用户信息
  */
-export const  setUserInfo = async (note:string = '') => {
+export const  setUserInfo = async () => {
     const user = await getStoreData('user',{ info:{},id:'' });
     const r = new UserChangeInfo();
-    r.note = note;
+    r.note = user.info.note;
     r.sex = user.info.sex;
     r.name = user.info.nickName;
     r.avatar = user.info.avatar;
