@@ -12,7 +12,7 @@ import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
+import { AddCommentArg, AddPostArg, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -599,7 +599,8 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
     return new Promise((res,rej) => {
         clientRpcFunc(getSquarePost,arg,(r:PostArr) => {
             console.log('showPost=============',r);
-            if (r && r.list) {
+            let postList = store.getStore('postList',[]);
+            if (r && r.list && r.list.length) {
                 const data:any = r.list;
 
                 data.forEach((res,i) => {
@@ -611,8 +612,15 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
                     data[i].followed = judgeFollowed(res.key.num);
                     data[i].likeActive = judgeLiked(res.key.num,res.key.id);
                 });
-                store.setStore('postList',data);
-                res(data);
+
+                // 最后一条帖子ID作为查询条件，并且返回了新一页的帖子
+                if (postList.length && id && postList[postList.length - 1].key.id !== data[0].key.id) {
+                    postList = postList.concat(data); // 拼接下一页的数据
+                } else {
+                    postList = data;
+                }
+                store.setStore('postList',postList);
+                res(postList);
             } else {
                 rej();
             }
@@ -633,9 +641,9 @@ export const showComment = (num:string, post_id:number, id:number = 0, count:num
     arg.post_id = post_id;
 
     return new Promise((resolve,reject) => {
-        clientRpcFunc(showCommentPort,arg,(r:PostArr) => {
+        clientRpcFunc(showCommentPort,arg,(r:CommentArr) => {
             console.log('showComment===========',r);
-            if (r && r.list) {
+            if (r && r.list && r.list.length) {
                 resolve(r.list);
             } else {
                 reject();
@@ -655,7 +663,7 @@ export const showLikeList = (num:string,post_id:number,uid:number= 0,count:numbe
     arg.count = count;
 
     return new Promise((resolve,reject) => {
-        clientRpcFunc(showLaudLog,arg,(r => {
+        clientRpcFunc(showLaudLog,arg,((r:LaudLogArr) => {
             console.log('showLikeList===========',r);
             if (r && r.list) {
                 resolve(r.list);

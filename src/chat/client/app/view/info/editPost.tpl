@@ -19,8 +19,8 @@
         <div w-class="imageList">
             {{for i,v of it.imgs}}
             <div w-class="imgBox">
-                <pi-ui-html style="display:inline-block;margin: 5px;">{{v}}</pi-ui-html>                
-                <img src="../../res/images/close_blue.png" w-class="close"/>
+                <pi-ui-html style="display:inline-block;margin: 5px;">{{v}}</pi-ui-html>
+                <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
             </div>
             {{end}}
             {{if it.imgs.length < 9 }}

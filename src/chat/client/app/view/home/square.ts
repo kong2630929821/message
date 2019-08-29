@@ -15,6 +15,7 @@ interface Props {
     follows:number;  // 关注人数
     expandItem:number;  // 当前展开工具栏的帖子下标
     dealData:any;  // 组装数据
+    refresh:boolean; // 是否可以请求更多数据
 }
 export const TagList = ['广场','关注','公众号','热门'];
 /**
@@ -28,7 +29,8 @@ export class Square extends Widget {
         active:0,
         follows:0,
         expandItem:-1,
-        dealData:this.dealData
+        dealData:this.dealData,
+        refresh:true
     };
 
     public setProps(props:any) {
@@ -144,6 +146,21 @@ export class Square extends Widget {
             ...v,
             showUtils: r 
         };
+    }
+
+    /**
+     * 滚动加载更多帖子
+     */
+    public scrollPage() {
+        const page = document.getElementById('squarePage');
+        const contain = document.getElementById('squareContain');
+        if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.state.postList.length % 20 === 0) {
+            this.props.refresh = false;
+            const list = this.state.postList;
+            showPost(this.props.active + 1,list[list.length - 1].key.num,list[list.length - 1].key.id).then(r => {
+                this.props.refresh = true;
+            });
+        }
     }
 }
 const State = {

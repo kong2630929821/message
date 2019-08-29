@@ -1,4 +1,5 @@
-<div w-class="page" on-tap="pageClick">
+<div w-class="page" on-tap="pageClick" id="squarePage" on-scroll="scrollPage">
+    <div id="squareContain">
     {{if !it.showTag}}
         {{%=============1:关注  2:公众号===================}}
         {{if it.active==1 || it.active==2}}
@@ -25,13 +26,14 @@
         </div>
         {{end}}
     {{else}}
-    <div style="background:#fff;padding-bottom: 20px;">
-        <div w-class="title">标签分类</div>
-        <dv w-class="tagList">
-            {{for i,v of it.tagList}}
-            <div w-class="tag" on-tap="changeTag({{i}},e)">{{v}}</div>
-            {{end}}
-        </dv>
-    </div>
+        <div style="background:#fff;padding-bottom: 20px;">
+            <div w-class="title">标签分类</div>
+            <dv w-class="tagList">
+                {{for i,v of it.tagList}}
+                <div w-class="tag" on-tap="changeTag({{i}},e)">{{v}}</div>
+                {{end}}
+            </dv>
+        </div>
     {{end}}
+    </div>
 </div>

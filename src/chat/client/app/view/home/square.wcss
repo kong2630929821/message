@@ -1,5 +1,11 @@
 .page{
     background: #F9F9F9;
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 110px;
 }
 .title{
     height:24px;

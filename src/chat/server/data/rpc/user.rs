@@ -1,3 +1,6 @@
+#[path=../db/]
+use user.s::{UserInfo};
+
 struct UserAgree{
     uid:u32,//被同意方
     agree:bool//是否同意
@@ -20,4 +23,9 @@ struct UserChangeInfo{
     note: String,        //用户自己的备注信息
     wallet_addr: String, //钱包地址
     acc_id:String,        // 钱包账户ID
+}
+
+// 用户信息列表
+struct UserInfoList{
+    list: &[UserInfo]
 }

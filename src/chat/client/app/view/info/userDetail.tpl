@@ -24,7 +24,7 @@
             {{%===================个人信息============================}}
             <div w-class="username">
                 <span>{{it.userInfo.name || "------"}}&nbsp;</span>
-                <img src="../../res/images/{{it.userInfo.gender ? 'girl.png':'boy.png'}}"/>
+                <img src="../../res/images/{{it.userInfo.sex ? 'girl.png':'boy.png'}}"/>
             </div>
             <div w-class="userId">
                 <div>好嗨ID：{{it.userInfo.acc_id || "------"}}</div>
