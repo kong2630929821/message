@@ -360,47 +360,47 @@ export const postLaudPost = (postKey: PostKey): boolean => {
  */
 // #[rpc=rpcServer]
 export const showLaudLog = (arg:IterLaudArg):LaudLogArr => {
-    const count = arg.count;
-    const uid = arg.uid;
-    let key:PostLaudLogKey;
-    if (uid <= 0) {
-        key = undefined;
-    } else {
-        key = new PostLaudLogKey();
-        key.post_id = arg.post_id;
-        key.num = arg.num;
-        key.uid = arg.uid;
-    }
-    console.log('!!!!!!!!!!!!!showLaudLog arg',arg);
-    const list = new LaudLogArr();
-    const laudLogBucket = new Bucket(CONSTANT.WARE_NAME, PostLaudLog._$info.name);
-    const iter = laudLogBucket.iter(key, true);
-    const arr:LaudLogData[] = [];
-    for (let i = 0; i < count; i++) {
-        const v = iter.next();
-        console.log('!!!!!!!!!!!!showLaudLog PostLaudLog:', v);
-        if (!v) {
-            break;
+    const postKey = new PostKey();
+    postKey.id = arg.post_id;
+    postKey.num = arg.num;
+    console.log('!!!!!!!!!!!!!showCommentPort arg',arg);
+    const laudLogArr = new LaudLogArr();
+    laudLogArr.list = [];
+    const postLaudLogBucket = new Bucket(CONSTANT.WARE_NAME, PostLaudLog._$info.name);
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const postCount:PostCount = postCountBucket.get<PostKey, PostCount[]>(postKey)[0];
+    if (postCount) {
+        console.log('!!!!!!!!!!!!!postCount',postCount);
+        const likeList = postCount.likeList.reverse();
+        // 获取初始位置
+        let index = likeList.indexOf(arg.uid) + 1;
+        if (index < 0) index = 0;
+        let count = 0;
+        for (let i = index; i < likeList.length; i++) {
+            if (count >= arg.count) break;
+            const user = new GetUserInfoReq();
+            user.uids = [likeList[i]];
+            const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
+            const postLaudLogKey = new PostLaudLogKey();
+            postLaudLogKey.num = arg.num;
+            postLaudLogKey.post_id = arg.post_id;
+            postLaudLogKey.uid = likeList[i];
+            console.log('!!!!!!!!!!!!!postLaudLogKey',postLaudLogKey);
+            const postLaudLog = postLaudLogBucket.get<PostLaudLogKey, PostLaudLog[]>(postLaudLogKey)[0];
+            if (!postLaudLog) continue;
+            console.log('!!!!!!!!!!!!!postLaudLog',postLaudLog);
+            const laudLogData = new LaudLogData();
+            laudLogData.key = postLaudLogKey;
+            laudLogData.createtime = parseInt(postLaudLog.createtime, 10);
+            laudLogData.username = userinfo.name;
+            laudLogData.avatar = userinfo.avatar;
+            laudLogData.gender = userinfo.sex;
+            laudLogArr.list.push(laudLogData);
+            count ++;
         }
-        const com:PostLaudLog = v[1];
-        const user = new GetUserInfoReq();
-        user.uids = [v[0].uid];
-        const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
-
-        // 评论数据
-        const commentData = new LaudLogData();
-        commentData.key = v[0];
-        commentData.createtime = parseInt(com.createtime, 10);
-        commentData.username = userinfo.name;
-        commentData.avatar = userinfo.avatar;
-        commentData.gender = userinfo.sex;
-        arr.push(commentData);
     }
 
-    list.list = arr;
-    console.log('!!!!!!!!!!!!showLaudLog LaudLogList:', list);    
-
-    return list;
+    return laudLogArr;
 };
 
 /**
@@ -488,18 +488,21 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
     postArrWithTotal.list = [];
     postArrWithTotal.total = 0;
     const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
     if (!communityPost) {
         return postArrWithTotal;
     }
-    // 帖子总数
-    postArrWithTotal.total = communityPost.id_list.length;
+    // 帖子总数(减去标记删除的帖子)
     const post_id_list: PostKey[] = [];
     for (let i = 0; i < communityPost.id_list.length; i++) {
         const postKey = new PostKey();
         postKey.id = communityPost.id_list[i];
         postKey.num = communityPost.num;
+        const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+        if (post.state === CONSTANT.DELETE_STATE) continue; // 帖子已删除
         post_id_list.push(postKey);
+        postArrWithTotal.total ++;
     }
     postIdSort(post_id_list, 0, post_id_list.length - 1);
     let index = -1;
