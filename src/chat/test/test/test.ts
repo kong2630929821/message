@@ -264,7 +264,7 @@ export const searchFriendTest = () => {
 
 // 搜索群
 export const searchGroupTest = () => {
-    const arg = '10001';
+    const arg = 'aasdads';
     clientRpcFunc(searchGroup, arg, (r: GroupInfoList) => {
         console.log(r);
     });
