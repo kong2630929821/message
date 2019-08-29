@@ -81,18 +81,19 @@ export class Contact extends SpecialWidget {
         super.setProps(props);
         const uid = store.getStore('uid', 0);
         this.props.isLogin = !!uid;
-        this.props.activeTab = TAB.message;
+        this.props.activeTab = TAB.square;
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         
         if (this.props.isLogin) {   // 聊天已登录成功
             getStoreData('user',{ info:{},id:'' }).then(wUser => {
                 // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
                 if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.info.acc_id !== cUser.acc_id) {
-                    if (this.props.isLogin && wUser.nickName) { // 钱包和聊天都已登陆
+                    if (this.props.isLogin && wUser.info.nickName) { // 钱包和聊天都已登陆
                         setUserInfo();
                     } else if (cUser.uid) {  // 聊天已登录
                         store.initStore();
                         this.state.lastChat = []; // 清空记录 lastChat
+                        this.paint();
                     }
                 } 
             });
@@ -260,12 +261,7 @@ registerStoreData('inviteUsers/convert_invite',(r) => {
     STATE.convertUser = ans;
     forelet.paint(STATE);
 });
-store.register('friendLinkMap',() => {
-    const w = forelet.getWidget(WIDGET_NAME);
-    if (w) {
-        w.paint(true);
-    }
-});
+
 // 更新邀请好友记录
 const updateInviteUsers = (ans) => {
     const userInfoMap = store.getStore('userInfoMap',new Map());

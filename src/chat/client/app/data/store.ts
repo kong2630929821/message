@@ -122,6 +122,7 @@ export const initStore = () => {
         userChatMap:new Map(),
         groupChatMap:new Map(),
         lastRead:new Map(),
+        communityInfoMap:new Map(),
         lastChat:[],
         setting:{
             msgTop:[],
@@ -245,6 +246,7 @@ export interface Store {
     addressInfoMap: Map<number, AddressInfo>;// uid,暂时没用到
     userChatMap:Map<string, string[]>;// hid,hidinc,递增存储
     groupChatMap:Map<string, string[]>;// hid,hidinc
+    communityInfoMap:Map<string,CommunityBase>; // num 公众号信息
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
     // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
     lastRead:Map<string,LastReadMsgId>;// hid

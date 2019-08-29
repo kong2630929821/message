@@ -1,6 +1,4 @@
-/**
- * 最新会话列表项
- */
+
 // ================================================ 导入
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
@@ -10,7 +8,7 @@ import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
-import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId  } from '../../../../utils/util';
+import { depCopy, genGroupHid, genUserHid, genUuid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias, getGroupAvatar, getMessageIndex, getUserAvatar, timestampFormat } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
@@ -34,18 +32,14 @@ interface Props {
     messageFlag:boolean;// 消息通知
     messageTime:number;// 消息通知时间
 }
-const STATE = [];
+
+/**
+ * 最新会话列表项
+ */
 export class MessageCard extends Widget {
     public props: Props;
-    public bindCB: any;
-    constructor() {
-        super();
-        this.bindCB = this.updateMessage.bind(this);
-    }
-
-    public setProps(props: any) {
+    public setProps(props:any) {
         super.setProps(props);
-        this.state = STATE;
         const sid = store.getStore(`uid`);
         let hincId;  // 最新一条消息的ID
         if (props.messageFlag) {
@@ -110,7 +104,6 @@ export class MessageCard extends Widget {
     
             this.initData();
         }
-        
     }
 
     public initData() {
@@ -144,23 +137,28 @@ export class MessageCard extends Widget {
         } else {
             const mess = store.getStore('lastChat',[]);
             const index = mess.findIndex(item => item[0] === this.props.rid && item[2] === this.props.chatType);
-            this.props.time = index > -1 && timestampFormat(mess[index][1],1);
+            this.props.time = index > -1 ? timestampFormat(mess[index][1],1) :'';
             this.props.msg = '';
         }
     }
 
     public firstPaint() {
         super.firstPaint();
-        store.register('setting',this.bindCB);
+        store.register('setting',(r) => {
+            this.props.msgTop = r && r.msgTop && r.msgTop.findIndex(item => item === this.props.hid) > -1;
+            this.props.msgAvoid = r && r.msgAvoid && r.msgAvoid.findIndex(item => item === this.props.hid) > -1;
+            this.paint();
+        });
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            const sid = store.getStore(`uid`);
+            store.register(`friendLinkMap/${genUuid(sid,this.props.rid)}`,(r) => {
+                this.props.name = r.alias;
+                this.paint();
+            });
+        }
         store.register('lastReadNotice',(r:any) => {
             this.setProps(this.props);
         });
-    }
-    
-    // 更新消息
-    public updateMessage() {
-        this.setProps(this.props);
-        this.paint();
     }
 
     // 点击进入聊天页面清除未读消息数

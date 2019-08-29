@@ -1,4 +1,4 @@
-<div w-class="page">
+<div w-class="page" on-tap="pageClick">
     {{if !it.showTag}}
         {{%=============1:关注  2:公众号===================}}
         {{if it.active==1 || it.active==2}}
@@ -14,13 +14,15 @@
         {{end}}
 
         {{for i,v of it1.postList}}
+        <div ev-goDetail="goDetail({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-closeTools="pageClick">
             {{if v.isPublic}}
             <widget w-tag="chat-client-app-view-home-pubPostItem">{{v}}</widget>
             {{else}}
             <div ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})" ev-delBtn="delPost({{i}})">
-                <widget w-tag="chat-client-app-view-home-squareItem">{{v}}</widget>
+                <widget w-tag="chat-client-app-view-home-squareItem">{{it.dealData(v,it.expandItem == i)}}</widget>
             </div>
             {{end}}
+        </div>
         {{end}}
     {{else}}
     <div style="background:#fff;padding-bottom: 20px;">

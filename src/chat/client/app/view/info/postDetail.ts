@@ -88,9 +88,14 @@ export class PostDetail extends Widget {
             });
         } else {
             showLikeList(this.props.key.num,this.props.key.id).then((r: any) => {
-                this.props.likeList = r;
+                this.props.likeList = r.map(v => {
+                    v.avatar = buildupImgPath(v.avatar);
+                    
+                    return v;
+                });
+                const uid = getStore('uid');
                 const ind = r.findIndex(v => {
-                    return v.key.uid === getStore('uid');
+                    return v.key.uid === uid;
                 });
                 if (ind > -1) {
                     this.props.likeActive = true;

@@ -11,6 +11,7 @@ import { popNewMessage } from '../../../../app/utils/tools';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
+import { AttentionIndex } from '../../../server/data/db/community.s';
 import { GroupUserLink } from '../../../server/data/db/group.s';
 import { Contact, FriendLink, UserInfo } from '../../../server/data/db/user.s';
 import { getFriendLinks, getGroupsInfo } from '../../../server/data/rpc/basic.p';
@@ -24,7 +25,7 @@ import { exitGroup } from '../logic/logic';
 import * as subscribedb from '../net/subscribedb';
 import { walletSignIn } from './init_1';
 import { initPush } from './receive';
-import { getFriendHistory, getMyGroupHistory } from './rpc';
+import { getFriendHistory, getMyGroupHistory, getUserInfoByNum } from './rpc';
 
 // ================================================ 导出
 
@@ -160,7 +161,11 @@ export const init = (uid: number) => {
             updateGroup(r, uid);
         }
     });
-    subscribedb.subscribeCommNum(uid,null);
+    subscribedb.subscribeCommNum(uid,(r:AttentionIndex) => {
+        if (r && r.uid === uid) {
+            updatePubNum(r,uid);
+        }
+    });
 };
 
 /**
@@ -252,12 +257,23 @@ const updateUsers = (r: Contact, uid: number) => {
     const uids = r.friends.concat(r.temp_chat, r.blackList, r.applyUser);
     if (uids.length > 0) {
         uids.forEach(elem => {
-            subscribedb.subscribeUserInfo(elem, (r: UserInfo) => {
-                // TODO
-            });
+            subscribedb.subscribeUserInfo(elem, null);
         });
 
     }
+};
+
+/**
+ * 更新公众号信息
+ */
+const updatePubNum = (r:AttentionIndex) => {
+    getUserInfoByNum(r.public_list).then((res:any) => {
+        const val = store.getStore('communityInfoMap',new Map());
+        res.forEach(v => {
+            val.set(v.comm_info.num, v);
+        });
+        store.setStore('communityInfoMap',val);
+    });
 };
 
 /**
