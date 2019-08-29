@@ -333,7 +333,7 @@ export const postLaudPost = (postKey: PostKey): boolean => {
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
         if (!post) return false;
         const fuid = post.owner;
-        send(fuid, CONSTANT.SEND_POST_LAUD, JSON.stringify(postLaudLog));
+        if (uid !== fuid) send(fuid, CONSTANT.SEND_POST_LAUD, JSON.stringify(postLaudLog));
 
         return postLaudLogBucket.put(logKey, postLaudLog);
     } else {
@@ -588,7 +588,7 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
                 const post = postBucket.get<PostKey, Post[]>(postkey)[0];
                 if (!post) return;
                 const fuid = post.owner;
-                send(fuid, CONSTANT.SEND_COMMENT, JSON.stringify(value));
+                if (uid !== fuid) send(fuid, CONSTANT.SEND_COMMENT, JSON.stringify(value));
             } else {
                 // 评论帖子的评论,推送给原评论者
                 const originCommentKey = new CommentKey();
@@ -597,7 +597,7 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
                 originCommentKey.id = arg.reply;
                 const originComment = commentBucket.get<CommentKey, Comment[]>(originCommentKey)[0];
                 const fuid1 = originComment.owner;
-                send(fuid1, CONSTANT.SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
+                if (uid !== fuid1) send(fuid1, CONSTANT.SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
             }
            
             return key;
@@ -754,7 +754,7 @@ export const commentLaudPost = (commentKey: CommentKey): boolean => {
         commentLaudLog.key = logKey;
         commentLaudLog.createtime = Date.now();
         const fuid = commentCount.owner;
-        send(fuid, CONSTANT.SEND_COMMENT_LAUD, JSON.stringify(commentLaudLog));
+        if (uid !== fuid) send(fuid, CONSTANT.SEND_COMMENT_LAUD, JSON.stringify(commentLaudLog));
 
         return CommentLaudLogBucket.put(logKey, commentLaudLog);
     } else {
@@ -947,6 +947,67 @@ export const getLaudPostList = ():LaudPostIndex => {
     }
 
     return list;
+};
+
+/**
+ * 根据社区id和名称搜索公众号
+ */
+// #[rpc=rpcServer]
+export const searchPublic = (comm: string): NumArr => {
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const numArr = new NumArr();
+    numArr.arr = [];
+    const communityBase = communityBaseBucket.get<string, CommunityBase[]>(comm)[0];
+    if (communityBase && communityBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+        // 公众号id匹配
+        numArr.arr.push(communityBase);
+    } else { // 公众号id不匹配, 根据名称模糊查找
+        const iter = communityBaseBucket.iter(null, false);
+        do {
+            const v = iter.next();
+            if (!v) break;
+            const communityBase: CommunityBase = v[1];
+            if (communityBase.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) continue;
+            if (communityBase.name.split(comm).length > 1) {
+                // 名称部分匹配
+                numArr.arr.push(communityBase);
+                continue;
+            }
+        } while (iter);
+    }
+
+    return numArr;
+};
+
+/**
+ * 根据文章名搜索公众号文章
+ */
+// #[rpc=rpcServer]
+export const searchPost = (str: string): PostArr => {
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const iter = postBucket.iter(null, false);
+    console.log('!!!!!!!!!!!!showPostPort iter:', iter);
+    const arr:PostData[] = [];
+    do {
+        const v = iter.next();
+        console.log('!!!!!!!!!!!!post:', v);
+        if (!v) {
+            break;
+        }
+        const post:Post = v[1];
+        const postKey = v[0];
+        if (post.state === CONSTANT.DELETE_STATE) continue;
+        const postData = getPostInfo(postKey, post);
+        if (postData.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC && postData.title.split(str).length > 1) {
+            arr.push(postData);
+            continue;
+        }
+    } while (iter);
+    const postList = new PostArr();
+    postList.list = arr;
+    console.log('!!!!!!!!!!!!!!!!!!!!!!showPostPort PostArr', postList);
+
+    return postList;
 };
 
 // ==============================Internal functions ==============================

@@ -50,14 +50,14 @@ export const searchFriend = (user: string): UserInfoList => {
     // 精确查找
     const uid = getRealUid(user);
     if (uid === -1) {
-        // 精确查找未找到,通过用户名查找
+        // 精确查找未找到,通过用户名模糊查找
         const iter = userInfoBucket.iter(null, false);
         do {
             const v = iter.next();
             console.log('!!!!!!!!!!!!v:', v);
             if (!v) break;
             const userInfo: UserInfo = v[1];
-            if (user === userInfo.name) {
+            if (userInfo.name.split(user).length > 1) {
                 userInfoList.list.push(userInfo);
                 continue;
             }
