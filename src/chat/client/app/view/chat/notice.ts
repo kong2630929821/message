@@ -4,7 +4,7 @@ import { popNew3 } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
-import { delNotice } from '../../logic/logic';
+import { delNotice, rippleShow } from '../../logic/logic';
 import { applyUserFriend, getChatUid, getPostDetile, getUsersBasicInfo } from '../../net/rpc';
 // tslint:disable-next-line:missing-jsdoc
 interface Props {
@@ -168,6 +168,17 @@ export class Notice extends Widget {
         this.state.splice(index,1);
         this.props.currentIndex = -1;
         this.paint(); 
+    }
+
+    // 页面点击
+    public close() {
+        this.props.currentIndex = -1;
+        this.paint(); 
+    }
+
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 }
 

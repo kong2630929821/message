@@ -54,3 +54,26 @@
     margin: 0 15px;
     border: 15px solid transparent;
 }
+.searchTab{
+    display: flex;
+    justify-content: space-around;
+}
+.tabItem{
+    font-size:28px;
+    font-family:STHeitiSC;
+    font-weight:300;
+    height: 80px;
+    line-height: 80px;
+    color:rgba(204,204,204,1);
+    cursor: pointer;
+}
+.activeTab{
+    font-size:28px;
+    font-family:STHeitiSC;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+    height: 80px;
+    line-height: 80px;
+    border-bottom: 6px solid #2A56C6;
+    cursor: pointer;
+}

@@ -10,7 +10,7 @@ import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
 import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 // tslint:disable-next-line:max-line-length
-import { conmentListChange, flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, lastReadNotice, settingChange, userChatChange, fabulousListChange } from './initStore';
+import { conmentListChange, fabulousListChange, flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, lastReadNotice, settingChange, userChatChange } from './initStore';
 
 // ============================================ 导出
 
@@ -249,7 +249,6 @@ export interface Store {
     // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
     lastRead:Map<string,LastReadMsgId>;// hid
     setting:any; // 额外设置，免打扰|置顶
-    communityBaseMap:Map<string,CommunityBase>;  // num 公众号信息表
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
     flags:any; // 标记信息
