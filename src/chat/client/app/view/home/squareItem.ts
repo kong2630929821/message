@@ -1,6 +1,6 @@
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -156,7 +156,14 @@ export class SquareItem extends Widget {
      */
     public followUser(e:any) {
         this.closeUtils(e);
-        follow(this.props.key.num);
+        if (this.props.followed) {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
+                follow(this.props.key.num);
+            });
+        } else {
+            follow(this.props.key.num);
+        }
+        
     }
 
     /**
