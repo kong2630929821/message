@@ -333,7 +333,7 @@ export const postLaudPost = (postKey: PostKey): boolean => {
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
         if (!post) return false;
         const fuid = post.owner;
-        send(fuid, CONSTANT.SEND_POST_LAUD, JSON.stringify(postLaudLog));
+        if (uid !== fuid) send(fuid, CONSTANT.SEND_POST_LAUD, JSON.stringify(postLaudLog));
 
         return postLaudLogBucket.put(logKey, postLaudLog);
     } else {
@@ -588,7 +588,7 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
                 const post = postBucket.get<PostKey, Post[]>(postkey)[0];
                 if (!post) return;
                 const fuid = post.owner;
-                send(fuid, CONSTANT.SEND_COMMENT, JSON.stringify(value));
+                if (uid !== fuid) send(fuid, CONSTANT.SEND_COMMENT, JSON.stringify(value));
             } else {
                 // 评论帖子的评论,推送给原评论者
                 const originCommentKey = new CommentKey();
@@ -597,7 +597,7 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
                 originCommentKey.id = arg.reply;
                 const originComment = commentBucket.get<CommentKey, Comment[]>(originCommentKey)[0];
                 const fuid1 = originComment.owner;
-                send(fuid1, CONSTANT.SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
+                if (uid !== fuid1) send(fuid1, CONSTANT.SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
             }
            
             return key;
@@ -754,7 +754,7 @@ export const commentLaudPost = (commentKey: CommentKey): boolean => {
         commentLaudLog.key = logKey;
         commentLaudLog.createtime = Date.now();
         const fuid = commentCount.owner;
-        send(fuid, CONSTANT.SEND_COMMENT_LAUD, JSON.stringify(commentLaudLog));
+        if (uid !== fuid) send(fuid, CONSTANT.SEND_COMMENT_LAUD, JSON.stringify(commentLaudLog));
 
         return CommentLaudLogBucket.put(logKey, commentLaudLog);
     } else {
