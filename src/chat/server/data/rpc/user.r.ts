@@ -16,7 +16,7 @@ import { Result } from './basic.s';
 import { getUid } from './group.r';
 import { getUserHistoryCursor, sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
-import { FriendAlias, SetOfficial, UserAgree, UserChangeInfo } from './user.s';
+import { FriendAlias, SetOfficial, UserAgree, UserChangeInfo, UserInfoList } from './user.s';
 
 declare var env: Env;
 
@@ -37,6 +37,37 @@ export const getRealUid = (user:String):number => {
     console.log('!!!!!!!!!!!!!!!getRealUid uid: ',uid);
 
     return uid;
+};
+
+/**
+ * 搜索用户
+ */
+// #[rpc=rpcServer]
+export const searchFriend = (user: string): UserInfoList => {
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name);
+    const userInfoList = new UserInfoList();
+    userInfoList.list = [];
+    // 精确查找
+    const uid = getRealUid(user);
+    if (uid === -1) {
+        // 精确查找未找到,通过用户名查找
+        const iter = userInfoBucket.iter(null, false);
+        do {
+            const v = iter.next();
+            console.log('!!!!!!!!!!!!v:', v);
+            if (!v) break;
+            const userInfo: UserInfo = v[1];
+            if (user === userInfo.name) {
+                userInfoList.list.push(userInfo);
+                continue;
+            }
+        } while (iter);
+    } else {
+        const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
+        userInfoList.list.push(userInfo);
+    }
+
+    return userInfoList;
 };
 
 /**
