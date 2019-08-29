@@ -1,8 +1,10 @@
 
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
+import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { getFriendAlias, getUserAvatar, rippleShow } from '../../logic/logic';
+import { applyToGroup, applyUserFriend, searchAllGroup, searchAllUserInfo } from '../../net/rpc';
 
 interface Props {
     sreachTab:any;// 搜索选项卡
@@ -15,6 +17,8 @@ interface Props {
     search:string;// 搜索值
     urlPath:string;  // 图片路径前
     searchAll:boolean;// 是否搜索全部
+    friendAdd:any;// 搜索到的好友状态
+    groupAdd:any;// 搜索到的群里状态
 }
 /**
  * 搜索
@@ -31,7 +35,9 @@ export class Search extends Widget {
         articleList:[],
         search:'',
         urlPath:uploadFileUrlPrefix,
-        searchAll:false
+        searchAll:false,
+        friendAdd:[],
+        groupAdd:[]
     };
 
     // 初始化
@@ -84,13 +90,33 @@ export class Search extends Widget {
     public searchFriend() {
         const friends = store.getStore('userInfoMap',[]);
         const searchItem = this.props.search;
+        const uid = store.getStore('uid');
         this.props.friendList = [];
-        let fg = true; // 是否要搜索后端
-        for (const [key,value] of friends) {
-            if (JSON.stringify(value.uid) === searchItem || value.name === searchItem || value.acc_id === searchItem) {
-                const avatar = value.avatar ? this.props.urlPath + value.avatar :'../../res/images/user_avatar.png';
-                this.props.friendList.push({ text:value.name,uid:value.uid,img:avatar });
-                fg = false;
+        this.props.friendAdd = [];
+        // 是否支持搜索全部用户
+        if (this.props.searchAll) {
+            searchAllUserInfo(searchItem).then((r:any) => {
+                r.forEach(v => {
+                    const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
+                    let status = false;
+                    // 判断是否是好友
+                    for (const [key,value] of friends) {
+                        if (value.uid === v.uid) {
+                            status = true;
+                        }
+                    }
+                    this.props.friendList.push({ text:v.name,uid:v.uid,img:avatar,myself:uid === v.uid,friend:status });  
+                    this.props. friendAdd.push(true);  
+                });
+                this.paint();
+            });
+        } else {
+            // 本地搜索
+            for (const [key,value] of friends) {
+                if (JSON.stringify(value.uid) === searchItem || value.name === searchItem || value.acc_id === searchItem) {
+                    const avatar = value.avatar ? this.props.urlPath + value.avatar :'../../res/images/user_avatar.png';
+                    this.props.friendList.push({ text:value.name,uid:value.uid,img:avatar,friend:true });
+                }
             }
         }
     }
@@ -99,15 +125,35 @@ export class Search extends Widget {
     public searchGroup() {
         const group = store.getStore('groupInfoMap',[]);
         const searchItem = this.props.search;
+        const uid = store.getStore('uid');
         this.props.groupList = [];
-        let fg = true;
-        for (const[key,value] of group) {
-            if (JSON.stringify(value.gid) === searchItem || value.name === searchItem) {
-                const avatar = value.avatar ? this.props.urlPath + value.avatar :'../../res/images/groups.png';
-                this.props.groupList.push({ text:value.name,gid:value.gid,img:avatar });
-                fg = false;
+        this.props.groupAdd = [];
+        // 是否支持全局搜索
+        if (this.props.searchAll) {
+            searchAllGroup(searchItem).then((r:any) => {
+                r.forEach(v => {
+                    const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
+                    let status = false;
+                     // 判断是否加入过群聊
+                    for (const[key,value] of group) {
+                        if (value.gid === v.gid) {
+                            status = true;
+                        }
+                    }
+                    this.props.groupList.push({ text:v.name,gid:v.gid,img:avatar,myself:uid === v.ownerid,friend:status });  
+                    this.props.groupAdd.push(true);  
+                });
+                this.paint();
+            });
+        } else {
+            for (const[key,value] of group) {
+                if (JSON.stringify(value.gid) === searchItem || value.name === searchItem) {
+                    const avatar = value.avatar ? this.props.urlPath + value.avatar :'../../res/images/groups.png';
+                    this.props.groupList.push({ text:value.name,gid:value.gid,img:avatar });
+                }
             }
         }
+        
     }
 
     // 搜索公众号
@@ -115,12 +161,10 @@ export class Search extends Widget {
         const post = store.getStore('communityInfoMap',[]);
         const searchItem = this.props.search;
         this.props.postList = [];
-        let fg = true;
         for (const [key ,value] of post) {
             if (value.comm_info.num === searchItem || value.user_info.name === searchItem) {
                 const avatar = value.user_info.avatar ? this.props.urlPath + value.user_info.avatar :'../../res/images/user_avatar.png';
                 this.props.postList = [{ text:value.user_info.name,num:value.comm_info.num,img:avatar }];
-                fg = false;
             }
         }
     }
@@ -148,9 +192,31 @@ export class Search extends Widget {
         }
         this.paint();
     }
-    // 添加
-    public addType(index:number) {
-        console.log(index);
+
+    // 添加好友
+    public addFriend(index:number) {
+        const data = this.props.friendList[index];
+        applyUserFriend(data.uid).then(() => {
+            popNewMessage('已申请');
+            this.props.friendAdd[index] = false;
+            this.paint();
+        });
+    }
+
+    // 添加群聊
+    public addGroup(index:number) {
+        const data = this.props.groupList[index];   
+        applyToGroup(data.gid).then(() => {
+            popNewMessage('发送成功');
+            this.props.groupAdd[index] = false;
+            this.paint();
+        },(r) => {
+            if (r.r === -2) {
+                popNewMessage('您申请的群不存在');
+            } else if (r.r === -1) {
+                popNewMessage('您已经是该群的成员');
+            }
+        });     
     }
     // 动画效果执行
     public onShow(e:any) {

@@ -14,14 +14,14 @@ import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHi
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
-import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup } from '../../../server/data/rpc/group.p';
-import { GroupAgree, GroupCreate, GuidsAdminArray } from '../../../server/data/rpc/group.s';
+import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
+import { GroupAgree, GroupCreate, GroupInfoList, GuidsAdminArray } from '../../../server/data/rpc/group.s';
 // tslint:disable-next-line:max-line-length
 import { getGroupHistoryCursor, getUserHistoryCursor, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
 import { GroupSend, HistoryCursor, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
-import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, getRealUid, set_gmAccount } from '../../../server/data/rpc/user.p';
-import { SetOfficial, UserAgree } from '../../../server/data/rpc/user.s';
+import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, getRealUid, searchFriend, set_gmAccount } from '../../../server/data/rpc/user.p';
+import { SetOfficial, UserAgree, UserInfoList } from '../../../server/data/rpc/user.s';
 import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
@@ -881,4 +881,36 @@ export const getPostDetile = (num:string,id:number) => {
         });
     });
     
+};
+
+/** 
+ * 搜索全部用户
+ */
+export const searchAllUserInfo = (user:string) => {
+    const arg = user;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(searchFriend,arg,(r:UserInfoList) => {
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+// 搜索群聊
+export const searchAllGroup = (group:string) => {
+    const arg = group;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(searchGroup,arg,(r:GroupInfoList) => {
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
 };

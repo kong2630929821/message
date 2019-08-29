@@ -30,7 +30,7 @@
                     <img src="../../res/images/arrowRight.png"/>
                 </div>
                 {{for i,v of it.chatHistory}}
-                    <div w-class="content" ev-addType="addType({{i}})">
+                    <div w-class="content">
                         <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},msg:{{v.msg}},addType:"加好友" }</widget>
                     </div>
                 {{end}}
@@ -45,8 +45,8 @@
                     <img src="../../res/images/arrowRight.png"/>
                 </div>
                 {{for i,v of it.friendList}}
-                    <div w-class="content">
-                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}} }</widget>
+                    <div w-class="content" ev-addType="addFriend({{i}})">
+                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.friendAdd[i]?'加好友':'已申请'))}} }</widget>
                     </div>
                 {{end}}
             </div>
@@ -60,8 +60,8 @@
                     <img src="../../res/images/arrowRight.png"/>
                 </div> 
                 {{for i,v of it.groupList}}
-                    <div w-class="content">
-                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}} }</widget>
+                    <div w-class="content" ev-addType="addGroup({{i}})">
+                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.groupAdd[i]?'加群聊':'已申请'))}}  }</widget>
                     </div>
                 {{end}}    
             </div>
