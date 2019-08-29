@@ -457,7 +457,7 @@ export const searchGroup = (group: string): GroupInfoList => {
             console.log('!!!!!!!!!!!!v:', v);
             if (!v) break;
             const groupInfo: GroupInfo = v[1];
-            if (group === groupInfo.name) {
+            if (groupInfo.name.split(group).length > 1) {
                 groupInfoList.list.push(groupInfo);
                 continue;
             }
