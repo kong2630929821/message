@@ -3,6 +3,7 @@ import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { rippleShow } from '../../logic/logic';
+
 interface Props {
     sreachTab:any;// 搜索选项卡
     tabIndex:number;// 默认tab
@@ -42,7 +43,8 @@ export class Search extends Widget {
     }
     // 确认搜索
     public searchBtn() {
-        this.searchFriend();
+        // this.searchFriend();
+        this.searchGroup();
         this.paint();
     }
 
@@ -50,10 +52,30 @@ export class Search extends Widget {
     public searchFriend() {
         const friends = store.getStore('userInfoMap',[]);
         const searchItem = this.props.search;
+        let fg = true; // 是否要搜索后端
         for (const [key,value] of friends) {
             if (JSON.stringify(value.uid) === searchItem || value.name === searchItem || value.acc_id === searchItem) {
                 const avatar = value.avatar ? this.props.urlPath + value.avatar :'../../res/images/user_avatar.png';
-                this.props.friendList.push({ text:value.name,uid:value.uid,img:avatar });
+                this.props.friendList = [{ text:value.name,uid:value.uid,img:avatar }];
+                fg = false;
+            } else {
+                this.props.friendList = [];
+            }
+        }
+    }
+
+    // 搜索群聊
+    public searchGroup() {
+        const group = store.getStore('groupInfoMap',[]);
+        const searchItem = this.props.search;
+        let fg = true;
+        for (const[key,value] of group) {
+            if (JSON.stringify(value.gid) === searchItem || value.name === searchItem) {
+                const avatar = value.avatar ? this.props.urlPath + value.avatar :'../../res/images/groups.png';
+                this.props.groupList = [{ text:value.name,gid:value.gid,img:avatar }];
+                fg = false;
+            } else {
+                this.props.groupList = [];
             }
         }
     }
