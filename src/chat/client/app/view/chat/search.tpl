@@ -75,8 +75,8 @@
                     <img src="../../res/images/arrowRight.png"/>
                 </div>
                 {{for i,v of it.postList}}
-                    <div w-class="content">
-                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}} }</widget>  
+                    <div w-class="content" ev-addType="addPost({{i}})">
+                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.postAdd[i]?'+关注':''))}}  }</widget>
                     </div>
                 {{end}}
             </div>

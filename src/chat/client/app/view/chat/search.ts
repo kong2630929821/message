@@ -4,7 +4,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { getFriendAlias, getUserAvatar, rippleShow } from '../../logic/logic';
-import { applyToGroup, applyUserFriend, searchAllGroup, searchAllUserInfo } from '../../net/rpc';
+import { applyToGroup, applyUserFriend, follow, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
 
 interface Props {
     sreachTab:any;// 搜索选项卡
@@ -19,6 +19,7 @@ interface Props {
     searchAll:boolean;// 是否搜索全部
     friendAdd:any;// 搜索到的好友状态
     groupAdd:any;// 搜索到的群里状态
+    postAdd:any;// 搜索到的公众号状态
 }
 /**
  * 搜索
@@ -37,7 +38,8 @@ export class Search extends Widget {
         urlPath:uploadFileUrlPrefix,
         searchAll:false,
         friendAdd:[],
-        groupAdd:[]
+        groupAdd:[],
+        postAdd:[]
     };
 
     // 初始化
@@ -47,6 +49,7 @@ export class Search extends Widget {
         this.props.postList = [];
         this.props.chatHistory = [];
         this.props.articleList = [];
+        this.paint();
     }
     // 切换tab
     public checkTab(index:number) {
@@ -160,13 +163,35 @@ export class Search extends Widget {
     public searchPost() {
         const post = store.getStore('communityInfoMap',[]);
         const searchItem = this.props.search;
+        const uid = store.getStore('uid');
         this.props.postList = [];
-        for (const [key ,value] of post) {
-            if (value.comm_info.num === searchItem || value.user_info.name === searchItem) {
-                const avatar = value.user_info.avatar ? this.props.urlPath + value.user_info.avatar :'../../res/images/user_avatar.png';
-                this.props.postList = [{ text:value.user_info.name,num:value.comm_info.num,img:avatar }];
+        this.props.postAdd = [];
+        // 是否支持全局搜索
+        if (this.props.searchAll) {
+            searchAllPost(searchItem).then((r:any) => {
+                r.forEach(v => {
+                    const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
+                    let status = false;
+                    // 判断是否关注过公众号
+                    for (const [key ,value] of post) {
+                        if (value.num === v.num) {
+                            status = true;
+                        }
+                    }
+                    this.props.postList.push({ text:v.name,num:v.num,img:avatar,myself:uid === v.owner,friend:status });  
+                    this.props.postAdd.push(true);  
+                });
+                this.paint();
+            });
+        } else {
+            for (const [key ,value] of post) {
+                if (value.comm_info.num === searchItem || value.user_info.name === searchItem) {
+                    const avatar = value.user_info.avatar ? this.props.urlPath + value.user_info.avatar :'../../res/images/user_avatar.png';
+                    this.props.postList = [{ text:value.user_info.name,num:value.comm_info.num,img:avatar }];
+                }
             }
         }
+        
     }
 
     // 搜索聊天记录
@@ -218,6 +243,17 @@ export class Search extends Widget {
             }
         });     
     }
+
+    // 关注公众号
+    public addPost(index:number) {
+        const data = this.props.postList[index];
+        follow(data.num).then(() => {
+            popNewMessage('关注成功');
+            this.props.postAdd[index] = false;
+            this.paint();
+        });
+    }
+
     // 动画效果执行
     public onShow(e:any) {
         rippleShow(e);

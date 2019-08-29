@@ -11,7 +11,7 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
@@ -906,6 +906,37 @@ export const searchAllGroup = (group:string) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(searchGroup,arg,(r:GroupInfoList) => {
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+// 搜索公众号
+export const searchAllPost = (post:string) => {
+    const arg = post;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(searchPublic,arg,(r:NumArr) => {
+            console.log(r);
+            if (r && r.arr) {
+                res(r.arr);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+// 搜索文章
+export const searchAllArticle = (article:string) => {
+    const arg = article;
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(searchPost,arg,(r:PostArr) => {
             if (r && r.list) {
                 res(r.list);
             } else {
