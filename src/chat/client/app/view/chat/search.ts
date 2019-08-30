@@ -68,6 +68,7 @@ export class Search extends Widget {
     public searchBtn() {
         if (!this.props.search) {
             popNewMessage('请输入搜索条件');
+            this.init();
             
             return;
         }
