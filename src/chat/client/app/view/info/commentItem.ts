@@ -133,7 +133,7 @@ export class CommentItem extends Widget {
      */
     public complaint() {
         this.closeUtils();
-        complaintUser(this.props.username);
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,this.props.avatar,this.props.msg);
     }
 
     // 关闭操作列表

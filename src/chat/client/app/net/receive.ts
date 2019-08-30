@@ -9,6 +9,7 @@ import { SendMsg } from '../../../utils/send.s';
 import { GENERATORTYPE } from '../data/store';
 import { setNoticeList } from '../logic/logic';
 import { subscribe } from './init';
+import { getPostDetile } from './rpc';
 
 /**
  * 消息处理列表
@@ -51,8 +52,10 @@ export const initPush = () => {
         // popNewMessage(r);
         const arr = JSON.parse(r).key;
         const time = JSON.parse(JSON.parse(r).createtime);
-        const data = [arr.uid,time,GENERATORTYPE.NOTICE_3,arr.post_id,arr.num];
-        setNoticeList(GENERATORTYPE.NOTICE_3,'fabulousList',data);
+        getPostDetile(arr.num,arr.post_id).then((res:any) => {
+            const data = [arr.uid,time,GENERATORTYPE.NOTICE_3,arr.post_id,arr.num,res[0]];
+            setNoticeList(GENERATORTYPE.NOTICE_3,'fabulousList',data);
+        });  
     });
 
     // 监听评论点赞
@@ -61,8 +64,11 @@ export const initPush = () => {
         // popNewMessage(r);
         const arr = JSON.parse(r).key;
         const time = JSON.parse(JSON.parse(r).createtime);
-        const data = [arr.uid,time,GENERATORTYPE.NOTICE_3,arr.post_id,arr.num];
-        setNoticeList(GENERATORTYPE.NOTICE_3,'fabulousList',data);
+        getPostDetile(arr.num,arr.post_id).then((res:any) => {
+            const data = [arr.uid,time,GENERATORTYPE.NOTICE_3,arr.post_id,arr.num,res[0]];
+            setNoticeList(GENERATORTYPE.NOTICE_3,'fabulousList',data);
+        });  
+       
     });
 
     // 监听评论
@@ -71,8 +77,12 @@ export const initPush = () => {
         // popNewMessage(r);
         const arr = JSON.parse(r).key;
         const time = JSON.parse(JSON.parse(r).createtime);
-        const data = [JSON.parse(r).owner,time,GENERATORTYPE.NOTICE_4,arr.post_id,arr.num];
-        setNoticeList(GENERATORTYPE.NOTICE_4,'conmentList',data);
+        
+        getPostDetile(arr.num,arr.post_id).then((res:any) => {
+            const data = [JSON.parse(r).owner,time,GENERATORTYPE.NOTICE_4,arr.post_id,arr.num,res[0]];
+            setNoticeList(GENERATORTYPE.NOTICE_4,'conmentList',data);
+        });  
+        
     });
 
     // 监听评论的评论
@@ -81,8 +91,12 @@ export const initPush = () => {
         // popNewMessage(r);
         const arr = JSON.parse(r).key;
         const time = JSON.parse(JSON.parse(r).createtime);
-        const data = [JSON.parse(r).owner,time,GENERATORTYPE.NOTICE_4,arr.post_id,arr.num];
-        setNoticeList(GENERATORTYPE.NOTICE_4,'conmentList',data);
+
+        getPostDetile(arr.num,arr.post_id).then((res:any) => {
+            const data = [JSON.parse(r).owner,time,GENERATORTYPE.NOTICE_4,arr.post_id,arr.num,res[0]];
+            setNoticeList(GENERATORTYPE.NOTICE_4,'conmentList',data);
+        });  
+
     });
 
 };

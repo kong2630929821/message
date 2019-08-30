@@ -206,15 +206,12 @@ export const enum INFLAG  {
 }
 
 // 举报用户
-export const complaintUser = (name:string) => {
+export const complaintUser = (name:string,sex:number,avatar:string,msg:string) => {
     const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
     popNew('chat-client-app-widget-complaint-complaint'
-        ,{ title:'',content:content }
+        ,{ title:name,content,sex,avatar,msg }
         ,(selected) => {
-            if (selected.length === 0) {// 未选择举报类型不能举报
-                popNewMessage('您未选择举报类型');
-            }
-
+    
             let mess = `举报用户@${name}`;
             for (const i of selected) {
                 mess += `“${content[i]}”`; 

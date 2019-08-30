@@ -4,8 +4,8 @@
             {{if it1.length}}
                 {{for i,v of it1}}
                     {{if v[0]==0}}
-                    <div style="position:relative" on-longtap="openMessageRecall({{i}})" on-down="onShow">
-                        <div w-class="messageItem">
+                    <div style="position:relative">
+                        <div w-class="messageItem" on-longtap="openMessageRecall({{i}})" on-down="onShow">
                             <p w-class="msgTitle">{{v[1]}}</p>
                             <p w-class="msgName">昵称</p>
                             <p w-class="uName">{{v[2]}}</p>
@@ -23,8 +23,8 @@
                         {{end}}
                     </div>
                     {{else}}
-                    <div style="position:relative" on-longtap="openMessageRecall({{i}})" on-down="onShow">
-                        <div w-class="messageNotice" on-tap="gotoPostDetail({{i}})">
+                    <div style="position:relative">
+                        <div w-class="messageNotice" on-longtap="openMessageRecall({{i}})" on-tap="gotoPostDetail({{i}})" on-down="onShow" >
                             <div w-class="noticeTitle">{{v[1]}}</div>
                             <div w-class="noticeImg">
                                 <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{v[6]}}, width:"{{it.imgs.length==1?'80px':'80px'}}",notRound:true}</widget>

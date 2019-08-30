@@ -20,6 +20,7 @@ interface Props {
     friendAdd:any;// 搜索到的好友状态
     groupAdd:any;// 搜索到的群里状态
     postAdd:any;// 搜索到的公众号状态
+    fgSearch:boolean;
 }
 /**
  * 搜索
@@ -39,7 +40,8 @@ export class Search extends Widget {
         searchAll:false,
         friendAdd:[],
         groupAdd:[],
-        postAdd:[]
+        postAdd:[],
+        fgSearch:true
     };
 
     // 初始化
@@ -179,6 +181,11 @@ export class Search extends Widget {
         this.props.postAdd = [];
         // 是否支持全局搜索
         if (this.props.searchAll) {
+            if (!this.props.fgSearch) {
+                
+                return;
+            }
+            this.props.fgSearch = false;
             searchAllPost(searchItem).then((r:any) => {
                 r.forEach(v => {
                     const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
@@ -192,6 +199,7 @@ export class Search extends Widget {
                     this.props.postList.push({ text:v.name,num:v.num,img:avatar,myself:uid === v.owner,friend:status });  
                     this.props.postAdd.push(true);  
                 });
+                this.props.fgSearch = true;
                 this.paint();
             });
         } else {
@@ -213,6 +221,13 @@ export class Search extends Widget {
         this.props.chatHistory = [];
         // 搜索单聊
         for (const [key,value] of userHistory) {
+            if (value.msg.indexOf(searchItem) !== -1) {
+                const name = getFriendAlias(value.sid).name;
+                const avatar = getUserAvatar(value.sid) || '../../res/images/user_avatar.png';
+                this.props.chatHistory.push({ text:name,img:avatar,msg:value.msg });                
+            }
+        }
+        for (const [key,value] of groupHistory) {
             if (value.msg.indexOf(searchItem) !== -1) {
                 const name = getFriendAlias(value.sid).name;
                 const avatar = getUserAvatar(value.sid) || '../../res/images/user_avatar.png';
