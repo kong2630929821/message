@@ -31,7 +31,7 @@
                 </div>
                 {{for i,v of it.chatHistory}}
                     <div w-class="content">
-                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},msg:{{v.msg}},addType:"加好友" }</widget>
+                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},msg:{{v.msg}} }</widget>
                     </div>
                 {{end}}
             </div>

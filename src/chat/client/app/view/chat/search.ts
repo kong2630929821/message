@@ -210,6 +210,12 @@ export class Search extends Widget {
         }
     }
 
+    // 搜索文章
+    public searchArticle() {
+        this.props.articleList = [];
+        
+    }
+
     // 搜索更多
     public searchAllType() {
         if (this.props.tabIndex === 0) {
