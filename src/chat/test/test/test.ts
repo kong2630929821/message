@@ -8,8 +8,8 @@ import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
 import { changeUserInfo, searchFriend, set_gmAccount } from '../../server/data/rpc/user.p';
 import { UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
 
@@ -33,7 +33,7 @@ export const chatLogin = () => {
     const userChange = new UserChangeInfo();
     userChange.acc_id = '123123';
     userChange.avatar = 'aaa';
-    userChange.name = 'Stark';
+    userChange.name = 'Tony Stark';
     userChange.note = '...';
     userChange.sex = 1;
     userChange.tel = '13333333333';
@@ -66,9 +66,9 @@ export const setGM = () => {
 // 写帖子
 export const addPostPortTest = () => {
     const addPostArg = new AddPostArg();
-    addPostArg.num = '2';
+    addPostArg.num = '3';
     addPostArg.post_type = 1;
-    addPostArg.title = 'test1';
+    addPostArg.title = 'Vakanda Forever';
     addPostArg.body = 'test1';
     clientRpcFunc(addPostPort, addPostArg, (r: PostKey) => {
         console.log(r);
@@ -167,7 +167,7 @@ export const getSquarePostTest = () => {
 // 创建公众号
 export const createCommunityNumTest = () => {
     const arg = new CreateCommunity();
-    arg.name = 'brain storm';
+    arg.name = 'China No1';
     arg.comm_type = 2;
     arg.desc = 'lalalalala';
     clientRpcFunc(createCommunityNum, arg, (r: string) => {
@@ -264,8 +264,24 @@ export const searchFriendTest = () => {
 
 // 搜索群
 export const searchGroupTest = () => {
-    const arg = '10001';
+    const arg = 'aasdads';
     clientRpcFunc(searchGroup, arg, (r: GroupInfoList) => {
+        console.log(r);
+    });
+};
+
+// 搜索公众号
+export const searchPublicTest = () => {
+    const arg = 'China';
+    clientRpcFunc(searchPublic, arg, (r: NumArr) => {
+        console.log(r);
+    });
+};
+
+// 搜索文章
+export const searchPostTest = () => {
+    const arg = 'Vakanda';
+    clientRpcFunc(searchPost, arg, (r: PostArr) => {
         console.log(r);
     });
 };
@@ -276,6 +292,14 @@ const props = {
         {
             name: '用户登陆',
             func: () => { chatLogin(); }
+        },
+        {
+            name: '搜索公众号',
+            func: () => { searchPublicTest(); }
+        },
+        {
+            name: '搜索文章',
+            func: () => { searchPostTest(); }
         },
         {
             name: '搜索用户',

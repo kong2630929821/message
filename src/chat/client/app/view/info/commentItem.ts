@@ -1,5 +1,5 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
@@ -109,9 +109,12 @@ export class CommentItem extends Widget {
      */
     public delComment(e:any) {
         this.closeUtils();
-        delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
-            notify(e.node,'ev-comment-delete',{ key:this.props.key });
+        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除评论',content:'删除评论后，评论下所有的回复都会被删除。' },() => {
+            delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
+                notify(e.node,'ev-comment-delete',{ key:this.props.key });
+            });
         });
+        
     }
 
     /**

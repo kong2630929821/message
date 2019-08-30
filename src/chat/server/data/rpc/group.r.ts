@@ -443,13 +443,25 @@ export const searchGroup = (group: string): GroupInfoList => {
     const groupInfoBucket = new Bucket(CONSTANT.WARE_NAME, GroupInfo._$info.name);
     const groupInfoList = new GroupInfoList();
     groupInfoList.list = [];
-    // 根据id查找
-    try {
-        const gid = parseInt(group, 10);
-        console.log('!!!!!!!!!!!!gid:', gid);
-        const groupInfo = groupInfoBucket.get<number, GroupInfo[]>(gid)[0];
-        groupInfoList.list.push(groupInfo);
-    } catch (error) {
+    const gid = parseInt(group, 10);
+    if (isNaN(gid)) {
+        // 不是群组id
+        const iter = groupInfoBucket.iter(null, false);
+        do {
+            const v = iter.next();
+            console.log('!!!!!!!!!!!!v:', v);
+            if (!v) break;
+            const groupInfo: GroupInfo = v[1];
+            if (groupInfo.name.split(group).length > 1) {
+                groupInfoList.list.push(groupInfo);
+                continue;
+            }
+        } while (iter);
+
+        return groupInfoList;
+    }
+    const groupInfo = groupInfoBucket.get<number, GroupInfo[]>(gid)[0];
+    if (!groupInfo) {
         // id查找失败 根据群名称查找
         const iter = groupInfoBucket.iter(null, false);
         do {
@@ -457,11 +469,13 @@ export const searchGroup = (group: string): GroupInfoList => {
             console.log('!!!!!!!!!!!!v:', v);
             if (!v) break;
             const groupInfo: GroupInfo = v[1];
-            if (group === groupInfo.name) {
+            if (groupInfo.name.split(group).length > 1) {
                 groupInfoList.list.push(groupInfo);
                 continue;
             }
         } while (iter);
+    } else {
+        groupInfoList.list.push(groupInfo);
     }
 
     return groupInfoList;
