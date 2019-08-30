@@ -4,12 +4,13 @@
 
 // ================================================ 导入
 import { Json } from '../../../../../pi/lang/type';
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE, UserInfo, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { depCopy, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias, getGroupAvatar, getUserAvatar } from '../../logic/logic';
+import { getFriendAlias, getGroupAvatar, getUserAvatar, rippleShow } from '../../logic/logic';
 import { getUsersBasicInfo } from '../../net/rpc';
 
 interface Props {
@@ -29,7 +30,9 @@ export class ContactItem extends Widget {
         chatType:GENERATOR_TYPE.USER,  
         text:'',
         totalNew: null,
-        official:false  
+        official:false,
+        msg:'',
+        addType:'' 
     };
 
     public setProps(props: any) {
@@ -110,6 +113,16 @@ export class ContactItem extends Widget {
 
         return true;
     }
+
+    // 添加
+    public addType(e:any) {
+        notify(e.node,'ev-addType',null);
+    }
+
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
+    }
 }
 
 // ================================================ 本地
@@ -122,4 +135,6 @@ interface Props {
     show?:boolean; // 是否显示
     img?:string; // 图标或头像
     official:boolean; // 是否是官方群组
+    msg?:string;// 聊天记录
+    addType?:string;// 添加好友群公众号
 }

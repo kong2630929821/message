@@ -1,6 +1,6 @@
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -146,9 +146,13 @@ export class SquareItem extends Widget {
      */
     public delPost(e:any) {
         this.closeUtils(e);
-        delPost(this.props.key.num,this.props.key.id).then(r => {
-            notify(e.node,'ev-delBtn',{ value:this.props.key });
+        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除',content:'确定删除该动态或文章？' },() => {
+            delPost(this.props.key.num,this.props.key.id).then(r => {
+                notify(e.node,'ev-delBtn',{ value:this.props.key });
+                this.paint();
+            });
         });
+        
     }
 
     /**
@@ -156,7 +160,14 @@ export class SquareItem extends Widget {
      */
     public followUser(e:any) {
         this.closeUtils(e);
-        follow(this.props.key.num);
+        if (this.props.followed) {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
+                follow(this.props.key.num);
+            });
+        } else {
+            follow(this.props.key.num);
+        }
+        
     }
 
     /**

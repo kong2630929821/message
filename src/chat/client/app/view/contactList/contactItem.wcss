@@ -49,3 +49,36 @@
     margin-left: 10px;
     font-weight: 300;
 }
+.item-right{
+    display: flex;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+}
+.contact-right{
+    width: 400px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.msg{
+    font-size:24px;
+    font-family:STHeitiSC;
+    font-weight:300;
+    color:rgba(136,136,136,1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.addBtn{
+    padding: 0 20px;
+    height:60px;
+    background:rgba(42,86,198,1);
+    font-size:28px;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+    line-height:60px;
+    text-align: center;
+    border-radius: 6px;
+}

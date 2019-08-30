@@ -3,7 +3,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { getMedalest } from '../../../../../earn/client/app/net/rpc';
 import { getMedalList } from '../../../../../earn/client/app/utils/util';
 import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { CommType } from '../../../../server/data/rpc/community.s';
@@ -205,10 +205,20 @@ export class UserDetail extends Widget {
      * 关注用户
      */
     public followUser() {
-        follow(this.props.num).then(r => {
-            this.props.followed = !this.props.followed;
-            this.paint();
-        });
+        if (this.props.followed) {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
+                follow(this.props.num).then(r => {
+                    this.props.followed = !this.props.followed;
+                    this.paint();
+                });
+            });
+        } else {
+            follow(this.props.num).then(r => {
+                this.props.followed = !this.props.followed;
+                this.paint();
+            });
+        }
+        
     }
 
     /**
