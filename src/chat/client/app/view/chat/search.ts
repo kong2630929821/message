@@ -66,6 +66,11 @@ export class Search extends Widget {
     }
     // 确认搜索
     public searchBtn() {
+        if (!this.props.search) {
+            popNewMessage('请输入搜索条件');
+            
+            return;
+        }
         switch (this.props.tabIndex) {
             case 0 :// 全部
                 this.searchFriend();
@@ -213,7 +218,7 @@ export class Search extends Widget {
     // 搜索文章
     public searchArticle() {
         this.props.articleList = [];
-        
+
     }
 
     // 搜索更多
