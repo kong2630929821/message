@@ -4,7 +4,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { getFriendAlias, getUserAvatar, rippleShow } from '../../logic/logic';
-import { applyToGroup, applyUserFriend, follow, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
+import { applyToGroup, applyUserFriend, follow, searchAllArticle, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
 
 interface Props {
     sreachTab:any;// 搜索选项卡
@@ -69,7 +69,7 @@ export class Search extends Widget {
         if (!this.props.search) {
             popNewMessage('请输入搜索条件');
             this.init();
-            
+
             return;
         }
         switch (this.props.tabIndex) {
@@ -77,7 +77,11 @@ export class Search extends Widget {
                 this.searchFriend();
                 this.searchGroup();
                 this.searchPost();
-                this.searchChat();
+                if (this.props.searchAll) {
+                    this.searchArticle();
+                } else {
+                    this.searchChat();
+                }    
                 break;
             case 1:// 好友
                 this.searchFriend();
@@ -89,6 +93,7 @@ export class Search extends Widget {
                 this.searchPost();
                 break;
             case 4:// 文章
+                this.searchArticle();
                 break;
             default:
         }
@@ -219,7 +224,15 @@ export class Search extends Widget {
     // 搜索文章
     public searchArticle() {
         this.props.articleList = [];
-
+        const searchItem = this.props.search;
+        const uid = store.getStore('uid');
+        searchAllArticle(searchItem).then((r:any) => {
+            r.forEach(v => {
+                const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
+                this.props.articleList.push({ text:v.username,img:avatar,msg:v.title });
+                this.paint();
+            });
+        });
     }
 
     // 搜索更多

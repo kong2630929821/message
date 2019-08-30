@@ -21,6 +21,7 @@
         {{: fgFriend = it.friendList.length }}
         {{: fgGroup =  it.groupList.length }}
         {{: fgPost = it.postList.length }}
+        {{: fgArticle = it.articleList.length}}
 
         {{if fgChat}}
             <div style="background:#fff;margin-top:20px">
@@ -82,7 +83,27 @@
             </div>
         {{end}}
 
-        {{if (!fgChat && !fgFriend && !fgGroup && !fgPost) ||  it.searchAll}}
+        {{if fgArticle}}
+            <div style="background:#fff;margin-top:20px">
+                <div w-class="title">
+                    <span w-class="mark"></span>
+                    <span style="flex:1 0 0;">文章</span>
+                    <img src="../../res/images/arrowRight.png"/>
+                </div>
+                {{for i,v of it.articleList}}
+                    <div w-class="searchArticle">
+                        <div w-class="articleTitle">{{v.msg}}</div>
+                        <div w-class="userInfo">
+                            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{v.img}},width:"40px;"}</widget>
+                            <div w-class="userName">{{v.text}}</div>
+                            <span w-class="official">公众号</span>
+                        </div>
+                    </div>
+                {{end}}
+            </div>
+        {{end}}
+
+        {{if (!fgChat && !fgFriend && !fgGroup && !fgPost && !fgArticle) ||  it.searchAll}}
             <div style="background:#fff;margin-top:20px" on-tap="searchAllType" on-down="onShow">
                 <div w-class="searchAll">
                     <img style="width: 80px;height: 80px;" src="../../res/images/searchAll.png" alt=""/>
