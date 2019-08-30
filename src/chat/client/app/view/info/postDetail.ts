@@ -122,14 +122,6 @@ export class PostDetail extends Widget {
                 // 失败了则撤销点赞或取消点赞操作
                 this.props.likeActive = !this.props.likeActive;
                 this.props.likeCount += this.props.likeActive ? 1 : -1;
-                const uid = getStore('uid');
-                const userinfo = getStore(`userInfoMap/${uid}`,{});
-                this.props.likeList.unshift({
-                    username: userinfo.name,
-                    avatar: buildupImgPath(userinfo.avatar),
-                    gender: userinfo.sex,
-                    createtime:Date.now()
-                });
                 this.paint();
             });
         } catch (r) {

@@ -41,7 +41,7 @@
             <div w-class="text-wrap" style="color:#222222;background:#fff;" on-tap="openArticle">
                 <div style="font-weight:500;">{{it.message.msg.title}}</div>
                 <div style="display:flex;align-items: center;">
-                    <div style="font-size:28px;">{{it.message.msg.content}}</div>
+                    <div w-class="article">{{it.message.msg.content}}</div>
                     <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{it.message.image}}, width:"100px",notRound:true}</widget>
                 </div>
             </div>
@@ -110,11 +110,12 @@
                 </div>
             </div>
 
+            {{% ========================文章=========================}}
             {{elseif it.message.mtype == 14}}
             <div w-class="text-wrap" style="color:#222222;background:#fff;" on-tap="openArticle">
                 <div style="font-weight:500;">{{it.message.msg.title}}</div>
                 <div style="display:flex;align-items: center;">
-                    <div style="font-size:28px;">{{it.message.msg.content}}</div>
+                    <div w-class="article">{{it.message.msg.content}}</div>
                     <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{it.message.image}}, width:"100px",notRound:true}</widget>
                 </div>
             </div>
