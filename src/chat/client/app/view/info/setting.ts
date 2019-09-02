@@ -257,7 +257,8 @@ export class Setting extends Widget {
      * 举报用户
      */
     public complaint() {
-        complaintUser(this.props.userInfo.name);
+        const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
+        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,this.props.avatar,msg);
     }
 
     /**

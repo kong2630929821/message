@@ -6,7 +6,7 @@
         </div>
        <div w-class="item-right">
            <div w-class="contact-right">
-                <div>
+                <div style="display:flex;">
                     <span w-class="text">{{it.text ? it.text : it.name}}</span>
                     {{if it.official}}
                         <span w-class="official">官方</span>
