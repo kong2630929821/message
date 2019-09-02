@@ -25,7 +25,7 @@
             {{if it1.notice.length&&it1.notice[0]}}
             <div>
                 <div ev-chat="notice" ev-msgCard-utils="changeUtils(e,0)" >
-                    <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{it1.notice[0]}},time:{{it1.notice[1]}},chatType:{{it1.notice[2]}},messageFlag:true,messageTime:{{it1.notice[1]}} }</widget>
+                    <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{it1.notice[0]}},time:{{it1.notice[1]}},chatType:{{it1.notice[2]}},messageTime:{{it1.notice[1]}} }</widget>
                 </div>
             </div>
             {{end}}
@@ -33,7 +33,7 @@
             <div>
                 {{for i,v of it1.lastChat}}
                 <div ev-chat="chat({{i}})" ev-msgCard-utils="changeUtils(e,{{i}})" >
-                    <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{v[0]}},time:{{v[1]}},chatType:{{v[2]}},showUtils:{{it.showMsgUtils == i}},messageFlag:false }</widget>
+                    <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{v[0]}},time:{{v[1]}},chatType:{{v[2]}},showUtils:{{it.showMsgUtils == i}},messageTime:{{v[1]}} }</widget>
                 </div>
                 {{end}} 
             </div>

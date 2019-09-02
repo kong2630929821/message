@@ -1,11 +1,11 @@
 import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
-import { UserArray } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
 import { delNotice, rippleShow } from '../../logic/logic';
-import { applyUserFriend, getChatUid, getPostDetile, getUsersBasicInfo } from '../../net/rpc';
+import { applyUserFriend } from '../../net/rpc';
 // tslint:disable-next-line:missing-jsdoc
 interface Props {
     name:string;
@@ -153,6 +153,15 @@ export class Notice extends Widget {
     public onShow(e:any) {
         rippleShow(e);
     }
+
+    // 设置
+    public groupDetail() {
+        popNew('chat-client-app-view-info-setting',{ noticeSet:true },() => {
+            this.state = [];
+            this.paint();
+        });
+    }
+    
 }
 
 const STATE = [];

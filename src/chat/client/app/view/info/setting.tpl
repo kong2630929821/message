@@ -8,7 +8,7 @@
         <div w-class="itemName">{{v[0]}}</div>
         {{if v[1]}}
         <div ev-switch-click="switchClick(e,{{i}})">
-            <widget w-tag="chat-client-app-widget-switch-switch">{types:false}</widget>
+            <widget w-tag="chat-client-app-widget-switch-switch">{types:{{v[2]}} }</widget>
         </div>
         {{else}}
             {{if v[2]}}
