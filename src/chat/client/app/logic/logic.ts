@@ -284,9 +284,20 @@ export const getMessageIndex = (arr:any) => {
     const data = store.getStore('noticeList',[]);
     let index = -1;
     data.forEach((v,i) => {
-        if (arr[0] === v[0] && arr[1] === v[1] && arr[2] === v[2]) {
-            index = i;
+        if (arr[2] === store.GENERATORTYPE.NOTICE_3 && arr[0] === v[0] && arr[2] === v[2] && arr[3] === v[3] && arr[4] === v[4]) {
+            // 当前已读的是点赞消息
+            if (arr[1] === v[1]) {
+                index = i;
+            } else {
+                index = i - 1;
+            }
+           
+        } else {
+            if (arr[0] === v[0] && arr[1] === v[1] && arr[2] === v[2]) {
+                index = i;
+            }
         }
+        
     });
 
     return index;
@@ -298,6 +309,7 @@ export const setNoticeList = (itype:string,storeStr:string,arr:any) => {
     if (itype === store.GENERATORTYPE.NOTICE_3) {
         let flags = -1;
         list.forEach((v,i) => {
+            // 相同的则替换
             if (v[0] === arr[0] && v[2] === arr[2] && v[3] === arr[3] && v[4] === arr[4]) {
                 flags = i;
             }

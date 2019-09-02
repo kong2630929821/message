@@ -1,5 +1,6 @@
 
 // ================================================ 导入
+import { NOTICESET } from '../../../../../app/publicLib/config';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -44,7 +45,9 @@ export class MessageCard extends Widget {
         super.setProps(props);
         const sid = store.getStore(`uid`);
         let hincId;  // 最新一条消息的ID
-        if (props.messageFlag) {
+
+        // 消息通知处理
+        if (props.chatType !== GENERATOR_TYPE.GROUP && props.chatType !== GENERATOR_TYPE.USER) {
             const time = depCopy(this.props.messageTime);
             this.props.name = '消息通知';
             this.props.avatar = '../../res/images/user_avatar.png';
@@ -65,6 +68,7 @@ export class MessageCard extends Widget {
             const count1  = getMessageIndex([props.rid,time,props.chatType]) ;
             const count2  =  getMessageIndex(arr);
             this.props.unReadCount = count1 > count2 && (count1 - count2);
+            this.init();
         } else {
             if (props.chatType === GENERATOR_TYPE.GROUP)  { // 群聊
                 const groupInfo = store.getStore(`groupInfoMap/${this.props.rid}`,new GroupInfo());
@@ -108,6 +112,14 @@ export class MessageCard extends Widget {
         }
     }
 
+    // 消息通知设置
+    public init() {
+        const setting = store.getStore('setting',{ msgTop:[],msgAvoid:[] });
+        this.props.msgTop = setting && setting.msgTop && setting.msgTop.findIndex(item => item === NOTICESET) > -1;
+        this.props.msgAvoid = setting && setting.msgAvoid && setting.msgAvoid.findIndex(item => item === NOTICESET) > -1;
+    }
+
+    // 群聊单聊设置
     public initData() {
         // 消息额外设置，免打扰|置顶
         const setting = store.getStore('setting',{ msgTop:[],msgAvoid:[] });
@@ -171,9 +183,9 @@ export class MessageCard extends Widget {
 
     // 操作栏显示隐藏
     // public changeUtils(e:any) {
-        // this.props.showUtils = !this.props.showUtils;
-        // this.paint(); 
-        // notify(e.node,'ev-msgCard-utils',{ value:this.props.showUtils });
+    //     this.props.showUtils = !this.props.showUtils;
+    //     this.paint(); 
+    //     notify(e.node,'ev-msgCard-utils',{ value:this.props.showUtils });
     // }
     
     // 动画效果执行
