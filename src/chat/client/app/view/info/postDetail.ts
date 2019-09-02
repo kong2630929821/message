@@ -74,39 +74,32 @@ export class PostDetail extends Widget {
             this.props.commentLikeList = r;
             this.paint();
         });
-        this.init(this.props.active);
+        showComment(this.props.key.num, this.props.key.id).then((r: any) => {
+            this.props.commentList = r.map(v => {
+                v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
+
+                return v;
+            });
+            this.paint();
+        });
+        showLikeList(this.props.key.num,this.props.key.id).then((r: any) => {
+            this.props.likeList = r.map(v => {
+                v.avatar = buildupImgPath(v.avatar);
+                
+                return v;
+            });
+            this.paint();
+        });
     }
 
-    public init(tab:string) {
-        if (tab === TAB.comment) {
-            showComment(this.props.key.num, this.props.key.id).then((r: any) => {
-                this.props.commentList = r.map(v => {
-                    v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
-
-                    return v;
-                });
-                this.paint();
-            });
-            
-        } else {
-            showLikeList(this.props.key.num,this.props.key.id).then((r: any) => {
-                this.props.likeList = r.map(v => {
-                    v.avatar = buildupImgPath(v.avatar);
-                    
-                    return v;
-                });
-                this.paint();
-            });
-        }
-    }
-
+    // 返回
     public goBack() {
         this.ok && this.ok();
     }
 
+    // 切换tab
     public changeTab(tab: string) {
         this.props.active = tab;
-        this.init(tab);
         this.paint();
     }
 
@@ -116,7 +109,6 @@ export class PostDetail extends Widget {
     public async likeBtn() {
         this.props.likeActive = !this.props.likeActive;
         this.props.likeCount += this.props.likeActive ? 1 : -1;
-        this.paint();
         try {
             await postLaud(this.props.key.num, this.props.key.id, () => {
                 // 失败了则撤销点赞或取消点赞操作
@@ -124,14 +116,30 @@ export class PostDetail extends Widget {
                 this.props.likeCount += this.props.likeActive ? 1 : -1;
                 this.paint();
             });
+            const uid = getStore('uid',0);
+            if (this.props.likeActive) {
+                this.props.likeList.push({
+                    key:{ uid },
+                    avatar:this.props.active,
+                    createtime:Date.now(),
+                    username:this.props.username,
+                    gender:this.props.gender
+                }); 
+            } else {
+                const ind = this.props.likeList.findIndex(r => r.key.uid === this.props.key.num === uid);
+                ind > -1 && this.props.likeList.splice(ind,1);
+            }
+            this.paint();
+            const postlist = getStore('postList',[]);
+            const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
+            if (ind > -1) {
+                postlist[ind].likeActive = this.props.likeActive;
+                postlist[ind].likeCount = this.props.likeCount;
+                setStore('postList',postlist);
+            }
         } catch (r) {
             popNewMessage('点赞失败了');
         }
-        const postlist = getStore('postList',[]);
-        const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
-        postlist[ind].likeActive = this.props.likeActive;
-        postlist[ind].likeCount = this.props.likeCount;
-        setStore('postList',postlist);
     }
 
     /**
@@ -153,11 +161,7 @@ export class PostDetail extends Widget {
             });
             this.props.commentCount++;
             this.paint();
-
-            const postlist = getStore('postList',[]);
-            const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
-            postlist[ind].commentCount = this.props.commentCount;
-            setStore('postList',postlist);
+            this.updateComment();
         });
     }
 
@@ -181,11 +185,7 @@ export class PostDetail extends Widget {
         });
         this.props.commentCount++;
         this.paint();
-
-        const postlist = getStore('postList',[]);
-        const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
-        postlist[ind].commentCount = this.props.commentCount;
-        setStore('postList',postlist);
+        this.updateComment();
     }
 
     /**
@@ -195,6 +195,17 @@ export class PostDetail extends Widget {
         this.props.commentList.splice(i,1);
         this.props.commentCount--;
         this.paint();
+        this.updateComment();
+    }
+
+    // 更新评论
+    public updateComment() {
+        const postlist = getStore('postList',[]);
+        const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
+        if (ind > -1) {
+            postlist[ind].commentCount = this.props.commentCount;
+            setStore('postList',postlist);
+        }
     }
 
     /**
@@ -240,4 +251,5 @@ export class PostDetail extends Widget {
             
         }
     }
+
 }

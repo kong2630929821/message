@@ -17,10 +17,7 @@ import { setUserInfo } from '../../net/init_1';
 import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
 export const forelet = new Forelet();
-const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 interface Props {
     offlienType:OfflienType;

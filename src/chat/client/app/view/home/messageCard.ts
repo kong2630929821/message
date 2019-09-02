@@ -38,6 +38,8 @@ interface Props {
  */
 export class MessageCard extends Widget {
     public props: Props;
+    public bindUpdate:any = this.updateData.bind(this);
+
     public setProps(props:any) {
         super.setProps(props);
         const sid = store.getStore(`uid`);
@@ -109,8 +111,8 @@ export class MessageCard extends Widget {
     public initData() {
         // 消息额外设置，免打扰|置顶
         const setting = store.getStore('setting',{ msgTop:[],msgAvoid:[] });
-        this.props.msgTop = setting.msgTop && setting.msgTop.findIndex(item => item === this.props.hid) > -1;
-        this.props.msgAvoid = setting.msgAvoid && setting.msgAvoid.findIndex(item => item === this.props.hid) > -1;
+        this.props.msgTop = setting && setting.msgTop && setting.msgTop.findIndex(item => item === this.props.hid) > -1;
+        this.props.msgAvoid = setting && setting.msgAvoid && setting.msgAvoid.findIndex(item => item === this.props.hid) > -1;
         
         // 最新一条消息内容处理，空结构体等于true
         if (this.props.lastMessage.time) {
@@ -144,21 +146,19 @@ export class MessageCard extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        store.register('setting',(r) => {
-            this.props.msgTop = r && r.msgTop && r.msgTop.findIndex(item => item === this.props.hid) > -1;
-            this.props.msgAvoid = r && r.msgAvoid && r.msgAvoid.findIndex(item => item === this.props.hid) > -1;
-            this.paint();
-        });
+        store.register('setting',this.bindUpdate);
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             const sid = store.getStore(`uid`);
-            store.register(`friendLinkMap/${genUuid(sid,this.props.rid)}`,(r) => {
-                this.props.name = r.alias;
-                this.paint();
-            });
+            store.register(`friendLinkMap/${genUuid(sid,this.props.rid)}`,this.bindUpdate);
         }
-        store.register('lastReadNotice',(r:any) => {
-            this.setProps(this.props);
-        });
+        if (this.props.messageFlag) {
+            store.register('lastReadNotice',this.bindUpdate);
+        }
+    }
+
+    // 更新信息
+    public updateData(r:any) {
+        this.setProps(this.props);
     }
 
     // 点击进入聊天页面清除未读消息数
@@ -246,6 +246,18 @@ export class MessageCard extends Widget {
         }
         store.setStore(`lastChat`,lastChat);
 
+    }
+
+    public detach() {
+        super.detach();
+        store.unregister('setting',this.bindUpdate);
+        if (this.props.chatType === GENERATOR_TYPE.USER) {
+            const sid = store.getStore(`uid`);
+            store.unregister(`friendLinkMap/${genUuid(sid,this.props.rid)}`,this.bindUpdate);
+        }
+        if (this.props.messageFlag) {
+            store.unregister('lastReadNotice',this.bindUpdate);
+        }
     }
 
     // 停止冒泡

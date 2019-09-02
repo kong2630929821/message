@@ -116,5 +116,5 @@
     -webkit-line-clamp: 2;
     word-break: break-all;
     display: -webkit-box;
-    width: 100%;
+    width: 100%;   
 }

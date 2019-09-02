@@ -3,7 +3,6 @@
  */
 
 // ================================================ 导入
-import { Json } from '../../../../../pi/lang/type';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
@@ -12,15 +11,6 @@ import { depCopy, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getFriendAlias, getGroupAvatar, getUserAvatar, rippleShow } from '../../logic/logic';
 import { getUsersBasicInfo } from '../../net/rpc';
-
-interface Props {
-    uid?:number;
-    gid?:number;
-    ginfo?:Json;
-    info?:Json; // 用户信息
-    text?:string; // 显示文本
-    totalNew?: number;// 多少条消息
-}
 
 // ================================================ 导出
 export class ContactItem extends Widget {
@@ -34,6 +24,7 @@ export class ContactItem extends Widget {
         msg:'',
         addType:'' 
     };
+    public bindUpdate:any = this.updateData.bind(this);
 
     public setProps(props: any) {
         super.setProps(props);
@@ -72,44 +63,32 @@ export class ContactItem extends Widget {
     public firstPaint() {
         super.firstPaint();
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            store.register(`userInfoMap/${this.props.id}`,this.updateUserinfo);
-            const sid = store.getStore(`uid`);
+            store.register(`userInfoMap/${this.props.id}`,this.bindUpdate);
+            console.log('contactItem firstPaint',`userInfoMap/${this.props.id}`);
+            const sid = store.getStore(`uid`, 0);
             if (sid !== this.props.id) {
-                store.register(`friendLinkMap/${genUuid(sid,this.props.id)}`,this.updateAlias);
+                store.register(`friendLinkMap/${genUuid(sid,this.props.id)}`,this.bindUpdate);
+                console.log('contactItem firstPaint',`friendLinkMap/${genUuid(sid,this.props.id)}`);
             }
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
-            store.register(`groupInfoMap/${this.props.id}`,this.updateGroupinfo);
+            store.register(`groupInfoMap/${this.props.id}`,this.bindUpdate);
         }
     }
 
-    // 更新别名
-    public updateAlias(r:any) {
-        this.props.name = r.alias;
-        this.paint();
-    }
-
-    // 更新用户信息
-    public updateUserinfo(r:UserInfo) {
-        this.props.name = r.name;
-        this.props.img = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
-        this.paint();
-    }
-
-    // 更新群组信息
-    public updateGroupinfo(r:GroupInfo) {
-        this.props.name = r.name;
-        this.props.img = getGroupAvatar(this.props.id) || '../../res/images/groups.png';
+    // 更新信息
+    public updateData() {
+        this.setProps(this.props);
         this.paint();
     }
 
     public destroy() {
         super.destroy();
-        const sid = store.getStore(`uid`);
-        if (sid !== this.props.uid) {
-            store.unregister(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.updateAlias);
+        const sid = store.getStore(`uid`,0);
+        if (sid !== this.props.id) {
+            store.unregister(`friendLinkMap/${genUuid(sid,this.props.id)}`,this.bindUpdate);
         }
-        store.unregister(`groupInfoMap/${this.props.id}`,this.updateGroupinfo);
-        store.unregister(`userInfoMap/${this.props.id}`,this.updateUserinfo);
+        store.unregister(`groupInfoMap/${this.props.id}`,this.bindUpdate);
+        store.unregister(`userInfoMap/${this.props.id}`,this.bindUpdate);
 
         return true;
     }

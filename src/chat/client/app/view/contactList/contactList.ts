@@ -9,10 +9,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { rippleShow } from '../../logic/logic';
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
 export const forelet = new Forelet();
-const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 interface Props {
     sid:number;  // uid
@@ -20,14 +17,24 @@ interface Props {
 }
 export class ContactList extends Widget {
     public ok:() => void;
-    public props:Props; 
+    public props:Props = {
+        sid:0,
+        newApply:0
+    }; 
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.sid = store.getStore('uid');
+        this.props.sid = store.getStore('uid',0);
     }
 
-     // 返回上一页
+    public firstPaint() {
+        super.firstPaint();
+        store.register('uid',() => {  // 聊天用户登陆成功
+            this.setProps(this.props);
+        });
+    }
+
+    // 返回上一页
     public goBack() {
         this.ok();
     }

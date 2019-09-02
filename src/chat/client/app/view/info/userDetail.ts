@@ -10,7 +10,7 @@ import { CommType } from '../../../../server/data/rpc/community.s';
 import { genUuid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
-import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
+import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo, postLaud } from '../../net/rpc';
 
 interface Props {
     uid: number;
@@ -28,6 +28,9 @@ interface Props {
     followList:string[];  // 关注列表
     fansList:string[];  // 粉丝列表
     gameList:string[]; // 最近玩过的游戏列表
+    expandItem:number;  // 当前展开工具栏的帖子下标
+    dealData:any;  // 组装数据
+    refresh:boolean; // 是否可以请求更多数据
 }
 
 /**
@@ -54,8 +57,12 @@ export class UserDetail extends Widget {
         postList:[],
         followList:[],
         fansList:[],
-        gameList:[]
+        gameList:[],
+        expandItem:-1,
+        dealData:this.dealData,
+        refresh:true
     };
+    public bindUpdate:any = this.updateData.bind(this);
 
     public setProps(props:any) {
         this.props = {
@@ -144,18 +151,12 @@ export class UserDetail extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        const sid = getStore(`uid`);
+        const sid = getStore(`uid`, 0);
         if (sid !== this.props.uid) {
-            register(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.updateAlias);
+            register(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.bindUpdate);
+            register(`followNumList/${sid}`,this.bindUpdate);
         }
-    }
-
-    /**
-     * 更新别名
-     */
-    public updateAlias(r:any) {
-        this.props.alias = r.alias;
-        this.paint();
+        
     }
 
     public goBack() {
@@ -207,16 +208,10 @@ export class UserDetail extends Widget {
     public followUser() {
         if (this.props.followed) {
             popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
-                follow(this.props.num).then(r => {
-                    this.props.followed = !this.props.followed;
-                    this.paint();
-                });
+                follow(this.props.num);
             });
         } else {
-            follow(this.props.num).then(r => {
-                this.props.followed = !this.props.followed;
-                this.paint();
-            });
+            follow(this.props.num);
         }
         
     }
@@ -233,12 +228,103 @@ export class UserDetail extends Widget {
             });
         });
     }
+    /**
+     * 点赞
+     */
+    public likeBtn(i:number) {
+        const v = this.props.postList[i];
+        v.likeActive = !v.likeActive;
+        v.likeCount += v.likeActive ? 1 :-1;
+        this.paint();
+        postLaud(v.key.num, v.key.id, () => {
+            // 失败了则撤销点赞或取消点赞操作
+            v.likeActive = !v.likeActive;
+            v.likeCount += v.likeActive ? 1 :-1;
+            this.paint();
+        });
+    }
 
+    /**
+     * 评论
+     */
+    public commentBtn(i:number) {
+        const v = this.props.postList[i];
+        popNew('chat-client-app-view-info-editComment',{ key:v.key },() => {
+            v.commentCount ++;
+            this.paint();
+            popNew('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
+        });
+    }
+
+    /**
+     * 删除
+     */
+    public delPost(i:number) {
+        this.props.postList.splice(i,1);
+        this.paint();
+    }
+    
+    /**
+     * 查看详情
+     */
+    public goDetail(i:number) {
+        popNew('chat-client-app-view-info-postDetail',{ ...this.props.postList[i],showAll:true });
+    }
+
+    /**
+     * 展示操作
+     */
+    public expandTools(e:any,i:number) {
+        this.props.expandItem = e.value ? i :-1;
+        this.paint();
+    }
+
+    public pageClick() {
+        this.props.expandItem = -1;
+        this.paint();
+    }
+
+    /**
+     * 组装squareItem的数据
+     */
+    public dealData(v:any,r:boolean,t:boolean) {
+        return { 
+            ...v,
+            showUtils: r,
+            followed: t
+        };
+    }
+
+    // 更新信息
+    public updateData() {
+        this.setProps(this.props);
+        this.paint();
+    }
+
+    /**
+     * 滚动加载更多帖子
+     */
+    public scrollPage() {
+        const page = document.getElementById('userDetailPage');
+        const contain = document.getElementById('userDetailContain');
+        if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.props.postList.length % 20 === 0) {
+            this.props.refresh = false;
+            let list = this.props.postList;
+            getUserPostList(this.props.num,list[list.length - 1].key.id).then((r:any) => {
+                this.props.refresh = true;
+                list = list.concat(r.list);
+                this.props.postList = list;
+                this.paint();
+            });
+        }
+    }
+    
     public destroy() {
         super.destroy();
         const sid = getStore(`uid`);
         if (sid !== this.props.uid) {
-            unregister(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.updateAlias);
+            unregister(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.bindUpdate);
+            unregister(`followNumList/${sid}`,this.bindUpdate);
         }
 
         return true;
