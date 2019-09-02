@@ -179,6 +179,11 @@ export class UserDetail extends Widget {
     // 申请公众号 去我的公众号
     public goPublic() {
         if (!this.props.pubNum) {
+            if (!this.props.userInfo.tel) {
+                popNewMessage('请绑定手机号码');
+                
+                return;
+            }
             addCommunityNum('我的公众号',CommType.publicAcc,'').then((r:string) => {
                 this.props.pubNum = r;
                 setStore('pubNum',r);

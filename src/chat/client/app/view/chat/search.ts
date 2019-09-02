@@ -4,7 +4,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { getFriendAlias, getUserAvatar, rippleShow } from '../../logic/logic';
-import { applyToGroup, applyUserFriend, follow, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
+import { applyToGroup, applyUserFriend, follow, searchAllArticle, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
 
 interface Props {
     sreachTab:any;// 搜索选项卡
@@ -20,6 +20,7 @@ interface Props {
     friendAdd:any;// 搜索到的好友状态
     groupAdd:any;// 搜索到的群里状态
     postAdd:any;// 搜索到的公众号状态
+    fgSearch:boolean;
 }
 /**
  * 搜索
@@ -39,7 +40,8 @@ export class Search extends Widget {
         searchAll:false,
         friendAdd:[],
         groupAdd:[],
-        postAdd:[]
+        postAdd:[],
+        fgSearch:true
     };
 
     // 初始化
@@ -69,7 +71,7 @@ export class Search extends Widget {
         if (!this.props.search) {
             popNewMessage('请输入搜索条件');
             this.init();
-            
+
             return;
         }
         switch (this.props.tabIndex) {
@@ -77,7 +79,11 @@ export class Search extends Widget {
                 this.searchFriend();
                 this.searchGroup();
                 this.searchPost();
-                this.searchChat();
+                if (this.props.searchAll) {
+                    this.searchArticle();
+                } else {
+                    this.searchChat();
+                }    
                 break;
             case 1:// 好友
                 this.searchFriend();
@@ -89,6 +95,7 @@ export class Search extends Widget {
                 this.searchPost();
                 break;
             case 4:// 文章
+                this.searchArticle();
                 break;
             default:
         }
@@ -174,6 +181,11 @@ export class Search extends Widget {
         this.props.postAdd = [];
         // 是否支持全局搜索
         if (this.props.searchAll) {
+            if (!this.props.fgSearch) {
+                
+                return;
+            }
+            this.props.fgSearch = false;
             searchAllPost(searchItem).then((r:any) => {
                 r.forEach(v => {
                     const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
@@ -187,6 +199,7 @@ export class Search extends Widget {
                     this.props.postList.push({ text:v.name,num:v.num,img:avatar,myself:uid === v.owner,friend:status });  
                     this.props.postAdd.push(true);  
                 });
+                this.props.fgSearch = true;
                 this.paint();
             });
         } else {
@@ -214,12 +227,27 @@ export class Search extends Widget {
                 this.props.chatHistory.push({ text:name,img:avatar,msg:value.msg });                
             }
         }
+        for (const [key,value] of groupHistory) {
+            if (value.msg.indexOf(searchItem) !== -1) {
+                const name = getFriendAlias(value.sid).name;
+                const avatar = getUserAvatar(value.sid) || '../../res/images/user_avatar.png';
+                this.props.chatHistory.push({ text:name,img:avatar,msg:value.msg });                
+            }
+        }
     }
 
     // 搜索文章
     public searchArticle() {
         this.props.articleList = [];
-
+        const searchItem = this.props.search;
+        const uid = store.getStore('uid');
+        searchAllArticle(searchItem).then((r:any) => {
+            r.forEach(v => {
+                const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
+                this.props.articleList.push({ text:v.username,img:avatar,msg:v.title });
+                this.paint();
+            });
+        });
     }
 
     // 搜索更多
