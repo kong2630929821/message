@@ -1,6 +1,5 @@
 
 // ================================================ 导入
-import { NOTICESET } from '../../../../../app/publicLib/config';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -11,7 +10,7 @@ import { setData } from '../../../../server/data/rpc/basic.p';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, genUuid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias, getGroupAvatar, getMessageIndex, getUserAvatar, timestampFormat } from '../../logic/logic';
+import { getFriendAlias, getGroupAvatar, getMessageIndex, getUserAvatar, timestampFormat, NOTICESET } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { getUsersBasicInfo } from '../../net/rpc';
 // ================================================ 导出

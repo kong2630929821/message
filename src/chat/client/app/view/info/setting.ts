@@ -1,4 +1,3 @@
-import { NOTICESET } from '../../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -11,7 +10,7 @@ import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { complaintUser, getFriendAlias, getUserAvatar } from '../../logic/logic';
+import { complaintUser, getFriendAlias, getUserAvatar, NOTICESET } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';

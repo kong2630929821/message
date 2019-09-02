@@ -6,12 +6,14 @@
         </div>
        <div w-class="item-right">
            <div w-class="contact-right">
-                <div style="display:flex;">
+                <div style="display:flex;align-items: center;">
                     <span w-class="text">{{it.text ? it.text : it.name}}</span>
                     {{if it.official}}
                         <span w-class="official">官方</span>
                     {{end}}
-        
+                    {{if it.sex&&it.sex!=2}}
+                        <img src="../../res/images/{{it.sex==1?'girl.png':'boy.png'}}" w-class="sexImg"/>
+                    {{end}}
                     {{if it.totalNew>0}}
                         <div w-class="other">
                             {{it.totalNew}}

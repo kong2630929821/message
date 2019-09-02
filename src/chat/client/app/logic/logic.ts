@@ -350,3 +350,5 @@ export const delNotice = (itype:string,data:any) => {
     store.setStore('noticeList',noticeList);
     store.setStore('lastReadNotice',indexDbNotice);
 };
+
+export const NOTICESET = 'noticeSet';// 消息通知设置标志
