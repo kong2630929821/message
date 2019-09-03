@@ -1,3 +1,4 @@
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -26,6 +27,7 @@ interface Props {
     msgTop:boolean; // 置顶
     msgAvoid:boolean; // 免打扰
     noticeSet:number;// 消息通知设置  0好友设置  1消息通知  2非好友设置
+    urlPath:string;//
 }
 
 /**
@@ -53,7 +55,8 @@ export class Setting extends Widget {
         setting:null,
         msgAvoid:false,
         msgTop:false,
-        noticeSet:0
+        noticeSet:0,
+        urlPath:uploadFileUrlPrefix
     };
     private blackPerson:boolean;
 
@@ -325,7 +328,8 @@ export class Setting extends Widget {
      */
     public complaint() {
         const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
-        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,this.props.avatar,msg);
+        const avatar = this.props.avatar ? this.props.urlPath + this.props.avatar :'../../res/images/user_avatar.png';
+        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg);
     }
 
     /**

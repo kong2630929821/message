@@ -61,7 +61,7 @@ export class ModalBox extends Widget {
         this.cancel && this.cancel();
     }
     public okBtnClick(e: any) {
-        if (!this.props.selected) {
+        if (!this.props.selected.length) {
             popNewMessage('您未选择举报类型');
             
             return ;

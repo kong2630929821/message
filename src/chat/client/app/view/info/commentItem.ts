@@ -6,6 +6,7 @@ import { getStore } from '../../data/store';
 import { buildupImgPath, complaintUser, copyToClipboard, timestampFormat } from '../../logic/logic';
 import { commentLaud, delComment } from '../../net/rpc';
 import { parseEmoji } from '../home/square';
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 
 interface Props {
     key:any;  // 帖子评论的key
@@ -24,6 +25,7 @@ interface Props {
     owner:number; // 评论者的uid
     isMine:boolean;  // 是否本人
     timeFormat:any; // 时间处理
+    urlPath:string;
 }
 
 /**
@@ -50,7 +52,8 @@ export class CommentItem extends Widget {
         gender:0,
         owner:0,
         isMine:false,
-        timeFormat:timestampFormat
+        timeFormat:timestampFormat,
+        urlPath:uploadFileUrlPrefix
     };
 
     public setProps(props:any) {
@@ -133,7 +136,8 @@ export class CommentItem extends Widget {
      */
     public complaint() {
         this.closeUtils();
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,this.props.avatar,this.props.msg);
+        const avatar = this.props.avatar ? this.props.urlPath + this.props.avatar :'../../res/images/user_avatar.png';
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.msg);
     }
 
     // 关闭操作列表
