@@ -174,7 +174,6 @@ export class Contact extends SpecialWidget {
     }
 
     public handleFatherTap(e: any) {
-        
         switch (e.index) {
             case 0:// 点击添加好友
                 popNew3('chat-client-app-view-chat-addUser');
@@ -188,7 +187,6 @@ export class Contact extends SpecialWidget {
                     console.log(res);
                     this.paint();
                 });
-                // openTestWebview(10001);      
                 break;
             case 3:
                 popNew3('app-view-mine-other-addFriend'); 
