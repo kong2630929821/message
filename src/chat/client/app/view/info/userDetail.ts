@@ -1,6 +1,6 @@
 import { getUserRecentGame } from '../../../../../app/net/pull';
 import { popNewMessage } from '../../../../../app/utils/tools';
-import { getMedalest } from '../../../../../earn/client/app/net/rpc';
+import { getAllMedal } from '../../../../../earn/client/app/net/rpc';
 import { getMedalList } from '../../../../../earn/client/app/utils/util';
 import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
@@ -129,21 +129,29 @@ export class UserDetail extends Widget {
             this.props.numList[2][0] = r.length;
             this.paint();
         });
-        getMedalest([this.props.userInfo.acc_id]).then((r:any) => {
-            const ktNum = r.arr[0].resultNum;  // 勋章
-            const data = getMedalList(CoinType.KT, 'coinType');
-            const list = [];
-            data.forEach((element,i) => {
-                const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
-                if (element.coinNum <= ktNum) {
-                    medal.isHave = true;
-                    list.push(medal);
-                }
-            });
-            this.props.medalList = list.splice(-5);
+        
+        // getMedalest([this.props.userInfo.acc_id]).then((r:any) => {
+        //     const ktNum = r.arr[0].resultNum;  // 勋章
+        //     const data = getMedalList(CoinType.KT, 'coinType');
+        //     const list = [];
+        //     data.forEach((element,i) => {
+        //         const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
+        //         if (element.coinNum <= ktNum) {
+        //             medal.isHave = true;
+        //             list.push(medal);
+        //         }
+        //     });
+        //     this.props.medalList = list.splice(-5);
+        //     this.paint();
+        // });
+
+        // 获取全部勋章
+        getAllMedal().then(r => {
+            this.props.medalList = r.medals;
             this.paint();
         });
         getUserRecentGame(this.props.userInfo.acc_id,5).then(r => {
+            
             this.props.gameList = r;   // 游戏
             this.paint();
         });

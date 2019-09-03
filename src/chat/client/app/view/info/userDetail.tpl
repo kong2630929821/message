@@ -48,7 +48,7 @@
                 <div w-class="content">
                     {{for i,v of it.medalList}}
                     <div w-class="imgBox">
-                        <img src="../../../../../earn/client/app/res/image/medals/{{v.img}}.png" class="{{v.isHave?'':'grayscale'}}" style="height:80px;" />
+                        <img src="../../../../../earn/client/app/res/image/medals/medal{{v}}.png" style="height:80px;" />
                     </div>
                     {{end}}
                 </div>
