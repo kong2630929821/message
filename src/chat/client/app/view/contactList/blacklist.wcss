@@ -1,0 +1,28 @@
+.new-page{
+    display: flex;
+    flex-direction: column;
+}
+.blackList{
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex: 1 0 0;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+    position: relative;
+    background:rgba(249,249,249,1);
+}
+.content{
+    display: flex;
+    margin: 20px;
+}
+.avatar-wrap{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    margin-right:30px;
+}
+.avatar{
+    width:80px;
+}

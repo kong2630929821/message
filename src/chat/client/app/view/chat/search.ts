@@ -20,7 +20,7 @@ interface Props {
     friendAdd:any;// 搜索到的好友状态
     groupAdd:any;// 搜索到的群里状态
     postAdd:any;// 搜索到的公众号状态
-    fgSearch:boolean;
+    fgSearch:any;
 }
 /**
  * 搜索
@@ -41,7 +41,7 @@ export class Search extends Widget {
         friendAdd:[],
         groupAdd:[],
         postAdd:[],
-        fgSearch:true
+        fgSearch:[true,true,true,true]
     };
 
     // 初始化
@@ -57,7 +57,6 @@ export class Search extends Widget {
     public checkTab(index:number) {
         this.init();
         this.props.tabIndex = index;
-        this.searchBtn();
         this.paint();
     }
 
@@ -111,6 +110,11 @@ export class Search extends Widget {
         this.props.friendAdd = [];
         // 是否支持搜索全部用户
         if (this.props.searchAll) {
+            if (!this.props.fgSearch[0]) {
+                
+                return;
+            }
+            this.props.fgSearch[0] = false;
             searchAllUserInfo(searchItem).then((r:any) => {
                 r.forEach(v => {
                     const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
@@ -124,12 +128,13 @@ export class Search extends Widget {
                     this.props.friendList.push({ text:v.name,uid:v.uid,img:avatar,myself:uid === v.uid,friend:status });  
                     this.props. friendAdd.push(true);  
                 });
+                this.props.fgSearch[0] = true;
                 this.paint();
             });
         } else {
             // 本地搜索
             for (const [key,value] of friends) {
-                if (JSON.stringify(value.uid) === searchItem || value.name === searchItem || value.acc_id === searchItem) {
+                if (JSON.stringify(value.uid).indexOf(searchItem) !== -1 || value.name.indexOf(searchItem) !== -1  || value.acc_id.indexOf(searchItem) !== -1) {
                     const avatar = value.avatar ? this.props.urlPath + value.avatar :'../../res/images/user_avatar.png';
                     this.props.friendList.push({ text:value.name,uid:value.uid,img:avatar,friend:true });
                 }
@@ -146,6 +151,11 @@ export class Search extends Widget {
         this.props.groupAdd = [];
         // 是否支持全局搜索
         if (this.props.searchAll) {
+            if (!this.props.fgSearch[1]) {
+                
+                return;
+            }
+            this.props.fgSearch[1] = false;
             searchAllGroup(searchItem).then((r:any) => {
                 r.forEach(v => {
                     const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
@@ -159,11 +169,12 @@ export class Search extends Widget {
                     this.props.groupList.push({ text:v.name,gid:v.gid,img:avatar,myself:uid === v.ownerid,friend:status });  
                     this.props.groupAdd.push(true);  
                 });
+                this.props.fgSearch[1] = true;
                 this.paint();
             });
         } else {
             for (const[key,value] of group) {
-                if (JSON.stringify(value.gid) === searchItem || value.name === searchItem) {
+                if (JSON.stringify(value.gid).indexOf(searchItem) !== -1  || value.name.indexOf(searchItem) !== -1) {
                     const avatar = value.avatar ? this.props.urlPath + value.avatar :'../../res/images/groups.png';
                     this.props.groupList.push({ text:value.name,gid:value.gid,img:avatar });
                 }
@@ -181,11 +192,11 @@ export class Search extends Widget {
         this.props.postAdd = [];
         // 是否支持全局搜索
         if (this.props.searchAll) {
-            if (!this.props.fgSearch) {
+            if (!this.props.fgSearch[2]) {
                 
                 return;
             }
-            this.props.fgSearch = false;
+            this.props.fgSearch[2] = false;
             searchAllPost(searchItem).then((r:any) => {
                 r.forEach(v => {
                     const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
@@ -199,12 +210,12 @@ export class Search extends Widget {
                     this.props.postList.push({ text:v.name,num:v.num,img:avatar,myself:uid === v.owner,friend:status });  
                     this.props.postAdd.push(true);  
                 });
-                this.props.fgSearch = true;
+                this.props.fgSearch[2] = true;
                 this.paint();
             });
         } else {
             for (const [key ,value] of post) {
-                if (value.comm_info.num === searchItem || value.user_info.name === searchItem) {
+                if (value.comm_info.num.indexOf(searchItem) !== -1  || value.user_info.name.indexOf(searchItem) !== -1) {
                     const avatar = value.user_info.avatar ? this.props.urlPath + value.user_info.avatar :'../../res/images/user_avatar.png';
                     this.props.postList = [{ text:value.user_info.name,num:value.comm_info.num,img:avatar }];
                 }
@@ -241,12 +252,18 @@ export class Search extends Widget {
         this.props.articleList = [];
         const searchItem = this.props.search;
         const uid = store.getStore('uid');
+        if (!this.props.fgSearch[3]) {
+                
+            return;
+        }
+        this.props.fgSearch[3] = false;
         searchAllArticle(searchItem).then((r:any) => {
             r.forEach(v => {
                 const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
-                this.props.articleList.push({ text:v.username,img:avatar,msg:v.title });
-                this.paint();
+                this.props.articleList.push({ text:v.username,img:avatar,msg:v.title }); 
             });
+            this.paint();
+            this.props.fgSearch[3] = true;
         });
     }
 

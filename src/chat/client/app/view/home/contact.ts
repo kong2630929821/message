@@ -8,7 +8,7 @@ import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap'
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { registerStoreData } from '../../../../../app/viewLogic/common';
 import { Forelet } from '../../../../../pi/widget/forelet';
-import { UserInfo } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { deelNotice, rippleShow } from '../../logic/logic';
@@ -131,8 +131,13 @@ export class Contact extends SpecialWidget {
     public chat(num:number) {
         this.closeMore();
         const value = this.state.lastChat[num];
-        const gid = value.length === 4 ? value[3] :null ;
-        popNew3('chat-client-app-view-chat-chat', { id: value[0], chatType: value[2], groupId:gid }) ;
+        if (value[2] !== GENERATOR_TYPE.GROUP && value[2] !== GENERATOR_TYPE.USER) {
+            popNew3('chat-client-app-view-chat-notice', { name:'消息通知' }) ;
+        } else {
+            const gid = value.length === 4 ? value[3] :null ;
+            popNew3('chat-client-app-view-chat-chat', { id: value[0], chatType: value[2], groupId:gid }) ;
+        }
+        
     }
 
     // 动画效果执行
@@ -284,8 +289,18 @@ store.register(`noticeList`, (r:any) => {
     if (r.length === 0) {
         return ;
     }
-    STATE.notice = r[r.length - 1];
-    forelet.paint(STATE);
+    const data = r[r.length - 1];
+    // STATE.notice = r[r.length - 1];
+    const lastChat = store.getStore(`lastChat`, []);
+    const index = lastChat.findIndex(item => item[2] !== GENERATOR_TYPE.USER && item[2] !== GENERATOR_TYPE.GROUP);
+    if (index > -1) {
+        lastChat.splice(index,1,data);
+        
+    } else {
+        lastChat.push(data);
+    }
+    store.setStore('lastChat',lastChat);
+    // forelet.paint(STATE);
 });
 
 // 监听点赞列表变化

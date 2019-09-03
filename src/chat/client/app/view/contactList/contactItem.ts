@@ -22,7 +22,8 @@ export class ContactItem extends Widget {
         totalNew: null,
         official:false,
         msg:'',
-        addType:'' 
+        addType:'',
+        sex:2
     };
     public bindUpdate:any = this.updateData.bind(this);
 
@@ -116,4 +117,5 @@ interface Props {
     official:boolean; // 是否是官方群组
     msg?:string;// 聊天记录
     addType?:string;// 添加好友群公众号
+    sex?:number;// 
 }
