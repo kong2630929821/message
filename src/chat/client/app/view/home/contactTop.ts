@@ -32,6 +32,7 @@ export class ContactTop extends Widget {
         super.setProps(props);
         this.props.showAcTag = TagList[props.acTag];
         this.props.utilList = [
+            { iconPath: 'search.png', utilText: '搜索' },
             { iconPath: 'add-blue.png', utilText: '添加好友' },
             { iconPath: 'add-friend.png', utilText: '加群聊' },
             { iconPath: 'group-chat.png', utilText: '创建群聊' }
@@ -82,13 +83,16 @@ export class ContactTop extends Widget {
 
     public utilClick(e:any,ind:number) {
         switch (ind) {
-            case 0:// 点击添加好友
+            case 0:// 搜索
+                popNew3('chat-client-app-view-chat-search');
+                break;
+            case 1:// 点击添加好友
                 popNew3('chat-client-app-view-chat-addUser');
                 break;
-            case 1:// 加群聊
+            case 2:// 加群聊
                 popNew3('chat-client-app-view-group-groupList');
                 break;
-            case 2:// 创建群聊 setGroupChat
+            case 3:// 创建群聊 setGroupChat
                 popNew3('chat-client-app-view-group-setGroupChat');
                 break;
 
