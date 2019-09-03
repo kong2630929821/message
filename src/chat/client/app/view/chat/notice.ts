@@ -1,7 +1,9 @@
 import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { openNewActivity } from '../../../../../app/viewLogic/native';
 import { popNew } from '../../../../../pi/ui/root';
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { delNotice, rippleShow } from '../../logic/logic';
@@ -85,6 +87,7 @@ export class Notice extends Widget {
         this.state = noticeList;   
         const lastReadNotice = list[list.length - 1];
         store.setStore('lastReadNotice',lastReadNotice);
+        this.latestMsg();
     }
     public goBack() {
         this.ok && this.ok(); 
@@ -160,6 +163,26 @@ export class Notice extends Widget {
             this.state = [];
             this.paint();
         });
+    }
+
+    /**
+     * 定位最新消息
+     */
+    public latestMsg() {
+        setTimeout(() => {
+            const $scrollElem = this.getScrollElem();
+            // console.log($scrollElem.scrollHeight);
+            $scrollElem.scrollTop = $scrollElem.scrollHeight;
+            this.paint();
+        }, 100);
+        
+    }
+
+    /**
+     * 获取滚动区元素
+     */
+    public getScrollElem() {
+        return getRealNode((<any>this.tree).children[1]);
     }
     
 }
