@@ -10,6 +10,7 @@ interface Props {
     name:string;// 标题
     blackList:any;// 黑名单
     urlPath:string;// 图片路径
+    addType?:string;
 }
 
 /**
@@ -19,7 +20,8 @@ export class BlackList extends Widget {
     public props:Props = {
         name:'',
         blackList:[],
-        urlPath:uploadFileUrlPrefix
+        urlPath:uploadFileUrlPrefix,
+        addType:''
     };
 
     public ok:() => void;
@@ -30,7 +32,12 @@ export class BlackList extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.initData();
+        if (!this.props.addType) {
+            this.init();// 公众号
+        } else {
+            this.initData();// 黑名单
+        }
+        
     }
 
     // 初始化数据
@@ -46,6 +53,15 @@ export class BlackList extends Widget {
                 this.props.blackList.push({ text:v.name,uid:v.uid,img:avatar,msg:note,sex:v.gender });
             }
         });
+    }
+
+    // 初始化公众号
+    public init() {
+        const post = store.getStore('communityInfoMap',[]);
+        for (const [key ,value] of post) {
+            const avatar = value.user_info.avatar ? this.props.urlPath + value.user_info.avatar :'../../res/images/user_avatar.png';
+            this.props.blackList = [{ text:value.user_info.name,num:value.comm_info.num,img:avatar }];
+        }
     }
 
     // 返回

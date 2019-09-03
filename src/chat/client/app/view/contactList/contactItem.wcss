@@ -56,7 +56,7 @@
     align-items: center;
 }
 .contact-right{
-    width: 444px;
+    width: 420px;
     height: 80px;
     display: flex;
     flex-direction: column;

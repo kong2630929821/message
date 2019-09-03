@@ -47,7 +47,10 @@ export class ContactList extends Widget {
             case 1:
                 popNew3(`chat-client-app-view-group-groupList`);  // 群聊列表
                 break;
-            case 2:case 3:
+            case 2:
+                popNew3('chat-client-app-view-contactList-blacklist',{ title:'公众号' ,addType:'' });
+                break;
+            case 3:case 4:
                 popNew3('chat-client-app-view-info-userDetail',{ uid:uid }); // 本人信息
                 break;
             default:
