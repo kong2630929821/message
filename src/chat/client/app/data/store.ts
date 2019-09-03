@@ -140,7 +140,8 @@ export const initStore = () => {
         noticeList:[],
         lastReadNotice:[],
         conmentList:[],
-        fabulousList:[]
+        fabulousList:[],
+        messageData: [[],[],[],[]]
     };
 };
 
@@ -264,6 +265,7 @@ export interface Store {
     pubNum:number;  // 公众号ID
     conmentList:any;// 评论消息列表
     fabulousList:any;// 点赞消息列表
+    messageData:any;// 消息通知列表
 }
 
 /**

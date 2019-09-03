@@ -10,7 +10,7 @@ import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { complaintUser, getFriendAlias, getFriendsInfo, getUserAvatar, NOTICESET } from '../../logic/logic';
+import { complaintUser, getFriendAlias, getFriendsInfo, getUserAvatar,  NOTICESET } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
@@ -171,6 +171,7 @@ export class Setting extends Widget {
                         store.setStore('fabulousList',[]);// 清空点赞
                         store.setStore('conmentList',[]);// 清空评论
                         store.setStore('noticeList',[]);// 清空通知列表
+                        store.setStore('messageData',[[],[],[],[]]);
                         popNewMessage('删除成功');
                     } else {
                         store.setStore(`userChatMap/${genUserHid(sid,this.props.uid)}`,[]);

@@ -90,6 +90,8 @@
     <div w-class="btns">
         {{if !it.isFriend}}
         <div w-class="btn" on-tap="addUser">+好友</div>
+        {{else}}
+        <div w-class="btn" on-tap="goChat">聊天</div>
         {{end}}
         {{if !it.followed}}
         <div w-class="btn" on-tap="followUser">关注</div>

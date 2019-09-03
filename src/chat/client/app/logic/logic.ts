@@ -252,9 +252,9 @@ export const buildupImgPath = (url:string) => {
     return url;
 };
 
-export const messageData = [[],[],[],[]];
 // 处理消息通知
 export const deelNotice = (arr:any,fg:string) => {
+    const messageData = store.getStore('messageData',[[],[],[],[]]);
     if (fg === store.GENERATORTYPE.NOTICE_1) {
         messageData[0] = arr;
     } else if (fg === store.GENERATORTYPE.NOTICE_2) {
@@ -266,6 +266,7 @@ export const deelNotice = (arr:any,fg:string) => {
     }
 
     const dataList = [];
+    store.getStore('messageData',messageData);
     messageData.forEach(v => {
         if (v[0] && v[0].length) {
             dataList.push(...v);
