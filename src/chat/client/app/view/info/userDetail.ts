@@ -151,7 +151,7 @@ export class UserDetail extends Widget {
             this.paint();
         });
         getUserRecentGame(this.props.userInfo.acc_id,5).then(r => {
-            
+
             this.props.gameList = r;   // 游戏
             this.paint();
         });
@@ -341,6 +341,11 @@ export class UserDetail extends Widget {
         }
 
         return true;
+    }
+
+    // 去好友的公众号
+    public goHisPublic() {
+        popNew('chat-client-app-view-person-publicHome',{ uid:this.props.userInfo.uid,pubNum:this.props.userInfo.comm_num });
     }
 }
 

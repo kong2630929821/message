@@ -59,7 +59,7 @@ export class PublicHome extends Widget {
             this.props.postList = r.list.map(r => { // 动态
                 return {
                     ...r,
-                    img: JSON.parse(r.body).imgs[0]
+                    img: JSON.parse(r.body).imgs[0] ? this.props.urlPath + JSON.parse(r.body).imgs[0] :(r.avatar ? r.avatar :'../../res/images/user_avatar.png')
                 };
             });  
             this.props.totalPost = r.total;

@@ -6,7 +6,7 @@
             <div w-class="topBox">
                 <div style="display:flex;align-items: center;">
                     <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"160px;"}</widget>
-                    <div>
+                    <div style="width: 410px;">
                         <div w-class="numList">
                             {{for i,v of it.numList}}
                             <div w-class="numItem" on-tap="goPersonHome({{i}})">
@@ -18,7 +18,12 @@
                         {{if it.isOwner}}
                         <div w-class="followBtn" on-tap="goPublic">{{it.pubNum ? "我的公众号":"申请公众号"}}</div>
                         {{else}}
-                        <div w-class="{{it.followed ? 'cancelBtn':'followBtn'}}" on-tap="followUser">{{it.followed ? "取消关注":"关注ta"}}</div>
+                        <div w-class="friendsPub">
+                            {{if it.followed}}
+                                <div w-class="followBtn" on-tap="goHisPublic">{{"公众号"}}</div>
+                            {{end}}
+                            <div w-class="{{it.followed ? 'cancelBtn':'followBtn'}}" on-tap="followUser">{{it.followed ? "取消关注":"关注ta"}}</div>
+                        </div>
                         {{end}}
                     </div>
                 </div>
