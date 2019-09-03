@@ -138,7 +138,8 @@ export class SquareItem extends Widget {
      */
     public complaint(e:any) {
         this.closeUtils(e);
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,this.props.avatar,this.props.content);
+        const avatar = this.props.avatar ? this.props.urlPath + this.props.avatar :'../../res/images/user_avatar.png';
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content);
     }
 
     /**

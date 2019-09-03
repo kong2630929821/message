@@ -6,7 +6,7 @@
             <div w-class="topBox">
                 <div style="display:flex;align-items: center;">
                     <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"160px;"}</widget>
-                    <div>
+                    <div style="width: 410px;">
                         <div w-class="numList">
                             {{for i,v of it.numList}}
                             <div w-class="numItem" on-tap="goPersonHome({{i}})">
@@ -18,7 +18,12 @@
                         {{if it.isOwner}}
                         <div w-class="followBtn" on-tap="goPublic">{{it.pubNum ? "我的公众号":"申请公众号"}}</div>
                         {{else}}
-                        <div w-class="{{it.followed ? 'cancelBtn':'followBtn'}}" on-tap="followUser">{{it.followed ? "取消关注":"关注ta"}}</div>
+                        <div w-class="friendsPub">
+                            {{if it.followed}}
+                                <div w-class="followBtn" on-tap="goHisPublic">{{"公众号"}}</div>
+                            {{end}}
+                            <div w-class="{{it.followed ? 'cancelBtn':'followBtn'}}" on-tap="followUser">{{it.followed ? "取消关注":"关注ta"}}</div>
+                        </div>
                         {{end}}
                     </div>
                 </div>
@@ -48,7 +53,7 @@
                 <div w-class="content">
                     {{for i,v of it.medalList}}
                     <div w-class="imgBox">
-                        <img src="../../../../../earn/client/app/res/image/medals/{{v.img}}.png" class="{{v.isHave?'':'grayscale'}}" style="height:80px;" />
+                        <img src="../../../../../earn/client/app/res/image/medals/medal{{v}}.png" style="height:80px;" />
                     </div>
                     {{end}}
                 </div>
@@ -85,6 +90,8 @@
     <div w-class="btns">
         {{if !it.isFriend}}
         <div w-class="btn" on-tap="addUser">+好友</div>
+        {{else}}
+        <div w-class="btn" on-tap="goChat">聊天</div>
         {{end}}
         {{if !it.followed}}
         <div w-class="btn" on-tap="followUser">关注</div>

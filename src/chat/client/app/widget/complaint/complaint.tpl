@@ -8,7 +8,7 @@
             <div w-class="user">
                     <div w-class="userName">@ {{it.title}}</div>
                     {{if it.sex!=2}}
-                    <img src="{{it.sex==0?'../../res/images/boy.png':'../../res/images/girl.png'}}" alt=""/>
+                    <img src="{{it.sex==0?'../../res/images/boy.png':'../../res/images/girl.png'}}" alt="" w-class="sexImg"/>
                     {{end}}
                 </div>
                 <div w-class="contentBox">{{it.msg}}</div>

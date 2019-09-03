@@ -3,7 +3,7 @@
     <div w-class="blackList">
         {{for i,v of it.blackList}}
         <div w-class="content" ev-addType="remove({{i}})">
-            <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},addType:"放出",msg:{{v.msg}},sex:{{v.sex}}  }</widget>
+            <widget w-tag="chat-client-app-view-contactList-contactItem" style="width:100%;">{text:{{v.text}}, img:{{v.img}},addType:{{it.addType}},msg:{{v.msg}},sex:{{v.sex}}  }</widget>
         </div>
         {{end}}
     </div>

@@ -10,7 +10,7 @@ import { setData } from '../../../../server/data/rpc/basic.p';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, genUuid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias, getGroupAvatar, getMessageIndex, getUserAvatar, timestampFormat, NOTICESET } from '../../logic/logic';
+import { getFriendAlias, getGroupAvatar, getMessageIndex, getUserAvatar, NOTICESET, timestampFormat } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { getUsersBasicInfo } from '../../net/rpc';
 // ================================================ 导出
@@ -44,7 +44,6 @@ export class MessageCard extends Widget {
         super.setProps(props);
         const sid = store.getStore(`uid`);
         let hincId;  // 最新一条消息的ID
-
         // 消息通知处理
         if (props.chatType !== GENERATOR_TYPE.GROUP && props.chatType !== GENERATOR_TYPE.USER) {
             const time = depCopy(this.props.messageTime);

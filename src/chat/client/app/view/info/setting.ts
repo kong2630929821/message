@@ -1,3 +1,4 @@
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -10,7 +11,7 @@ import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { complaintUser, getFriendAlias, getUserAvatar, NOTICESET } from '../../logic/logic';
+import { complaintUser, getFriendAlias, getFriendsInfo, getUserAvatar,  NOTICESET } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
@@ -25,7 +26,8 @@ interface Props {
     setting:any; // 额外设置，免打扰|置顶
     msgTop:boolean; // 置顶
     msgAvoid:boolean; // 免打扰
-    noticeSet:boolean;// 消息通知设置
+    noticeSet:number;// 消息通知设置  0好友设置  1消息通知  2非好友设置
+    urlPath:string;//
 }
 
 /**
@@ -53,7 +55,8 @@ export class Setting extends Widget {
         setting:null,
         msgAvoid:false,
         msgTop:false,
-        noticeSet:false
+        noticeSet:0,
+        urlPath:uploadFileUrlPrefix
     };
     private blackPerson:boolean;
 
@@ -63,7 +66,34 @@ export class Setting extends Widget {
             ...props
         };
         super.setProps(this.props);
-        if (props.noticeSet) {
+        // 判断是否是好友
+        const friends = getFriendsInfo();
+        if (this.props.noticeSet !== 1) {
+            if (!friends.get(`${this.props.uid}`)) {
+                this.props.noticeSet = 2;
+            }
+        }
+        // 好友设置
+        if (this.props.noticeSet === 0) {
+            this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
+        
+            this.props.setList[0][2] = this.props.userAlias = getFriendAlias(this.props.uid).name;
+            this.props.isFriend = getFriendAlias(this.props.uid).isFriend;
+            if (!this.props.userAlias) {
+                this.getUserData(this.props.uid);
+            }
+            this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
+            
+            const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
+            const sid = store.getStore('uid');
+            
+            this.props.setting = setting;
+            this.props.msgTop = setting.msgTop.findIndex(item => item === genUserHid(sid,this.props.uid)) > -1;
+            this.props.msgAvoid = setting.msgAvoid.findIndex(item => item === genUserHid(sid,this.props.uid)) > -1;
+            this.props.setList[3][2] = this.props.msgTop;
+            this.props.setList[4][2] = this.props.msgAvoid;
+        } else if (this.props.noticeSet === 1) { 
+            // 消息通知设置
             const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
             this.props.setting = setting;
             this.props.msgTop = setting.msgTop.findIndex(item => item === NOTICESET) > -1;
@@ -73,27 +103,14 @@ export class Setting extends Widget {
                 ['消息免打扰',1,this.props.msgAvoid],
                 ['清空聊天记录',0]
             ];
-
-            return ;
+        } else {
+            // 非好友设置
+            this.props.setList = [
+                ['举报',0],
+                ['加入黑名单',0]
+            ];
         }
-
-        this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
         
-        this.props.setList[0][2] = this.props.userAlias = getFriendAlias(this.props.uid).name;
-        this.props.isFriend = getFriendAlias(this.props.uid).isFriend;
-        if (!this.props.userAlias) {
-            this.getUserData(this.props.uid);
-        }
-        this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
-        
-        const setting = store.getStore('setting',{ msgAvoid:[],msgTop:[] });
-        const sid = store.getStore('uid');
-        
-        this.props.setting = setting;
-        this.props.msgTop = setting.msgTop.findIndex(item => item === genUserHid(sid,this.props.uid)) > -1;
-        this.props.msgAvoid = setting.msgAvoid.findIndex(item => item === genUserHid(sid,this.props.uid)) > -1;
-        this.props.setList[3][2] = this.props.msgTop;
-        this.props.setList[4][2] = this.props.msgAvoid;
     }
 
         // 非好友获取信息
@@ -114,8 +131,11 @@ export class Setting extends Widget {
 
     // 单项点击
     public itemClick(i:number) {
-        if (this.props.noticeSet) {
+        if (this.props.noticeSet === 1) {
             i = i + 3;
+        }
+        if (this.props.noticeSet === 2) {
+            i = i + 6;
         }
         switch (i) {
             case 0:  // 修改备注
@@ -154,6 +174,7 @@ export class Setting extends Widget {
                         store.setStore('fabulousList',[]);// 清空点赞
                         store.setStore('conmentList',[]);// 清空评论
                         store.setStore('noticeList',[]);// 清空通知列表
+                        store.setStore('messageData',[[],[],[],[]]);
                         popNewMessage('删除成功');
                     } else {
                         store.setStore(`userChatMap/${genUserHid(sid,this.props.uid)}`,[]);
@@ -179,7 +200,7 @@ export class Setting extends Widget {
 
     // 滑块点击
     public switchClick(e:any,i:number) {
-        if (this.props.noticeSet) {
+        if (this.props.noticeSet === 1) {
             i = i + 3;
         }
         switch (i) {
@@ -235,7 +256,7 @@ export class Setting extends Widget {
         this.props.msgAvoid = fg;
         const setting = this.props.setting;
         const sid = store.getStore('uid');
-        const hid = this.props.noticeSet ? NOTICESET :genUserHid(sid,this.props.uid);
+        const hid = this.props.noticeSet === 1 ? NOTICESET :genUserHid(sid,this.props.uid);
         const index = setting.msgAvoid.findIndex(item => item === hid);
         if (fg) {
             index === -1 && setting.msgAvoid.push(hid);
@@ -258,7 +279,7 @@ export class Setting extends Widget {
         this.props.msgTop = fg;
         const setting = this.props.setting;
         const sid = store.getStore('uid');
-        const hid = this.props.noticeSet ? NOTICESET :genUserHid(sid,this.props.uid);
+        const hid = this.props.noticeSet === 1 ? NOTICESET :genUserHid(sid,this.props.uid);
         const index = setting.msgTop.findIndex(item => item === hid);
         if (fg) {
             index === -1 && setting.msgTop.push(hid);
@@ -276,7 +297,7 @@ export class Setting extends Widget {
     // 压入最近会话列表
     public pushLastChat(fg:boolean,setting:any) {
         const lastChat = store.getStore(`lastChat`, []);
-        if (!this.props.noticeSet) {
+        if (this.props.noticeSet === 0) {
             const ind = lastChat.findIndex(item => item[0] === this.props.uid && item[2] === GENERATOR_TYPE.USER);
             ind > -1 && lastChat.splice(ind, 1); 
             if (fg) { // 置顶放到最前面
@@ -307,7 +328,8 @@ export class Setting extends Widget {
      */
     public complaint() {
         const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
-        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,this.props.avatar,msg);
+        const avatar = this.props.avatar ? this.props.urlPath + this.props.avatar :'../../res/images/user_avatar.png';
+        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg);
     }
 
     /**
@@ -374,7 +396,7 @@ export class Setting extends Widget {
     public refreshData() {
         // 改变当前的时间 实现刷新
         const lastChat = store.getStore(`lastChat`, []);
-        if (!this.props.noticeSet) {
+        if (this.props.noticeSet === 0) {
             const ind = lastChat.findIndex(item => item[0] === this.props.uid && item[2] === GENERATOR_TYPE.USER);
             ind > -1 && lastChat.splice(ind, 1,[this.props.uid, Date.now(), GENERATOR_TYPE.USER]); 
         } else {

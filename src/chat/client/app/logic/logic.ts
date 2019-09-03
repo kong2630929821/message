@@ -252,9 +252,9 @@ export const buildupImgPath = (url:string) => {
     return url;
 };
 
-export const messageData = [[],[],[],[]];
 // 处理消息通知
 export const deelNotice = (arr:any,fg:string) => {
+    const messageData = store.getStore('messageData',[[],[],[],[]]);
     if (fg === store.GENERATORTYPE.NOTICE_1) {
         messageData[0] = arr;
     } else if (fg === store.GENERATORTYPE.NOTICE_2) {
@@ -266,6 +266,7 @@ export const deelNotice = (arr:any,fg:string) => {
     }
 
     const dataList = [];
+    store.getStore('messageData',messageData);
     messageData.forEach(v => {
         if (v[0] && v[0].length) {
             dataList.push(...v);
@@ -352,3 +353,19 @@ export const delNotice = (itype:string,data:any) => {
 };
 
 export const NOTICESET = 'noticeSet';// 消息通知设置标志
+
+// 获取好友信息
+export const getFriendsInfo = () => {
+    const uid = store.getStore('uid');
+    const userInfos = store.getStore('userInfoMap',[]);
+    const friendIdList = store.getStore('contactMap',[]);
+    const fId = friendIdList.size ? friendIdList.get(`${uid}`).friends :[];
+    const friends = new Map();
+    for (const [key,value] of userInfos) {
+        if (fId.indexOf(value.uid) !== -1) {
+            friends.set(key,value);
+        }
+    }
+
+    return friends;
+};
