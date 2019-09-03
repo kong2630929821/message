@@ -105,3 +105,7 @@
     line-height: 80px;
     margin: 62px auto;
 }
+.sexImg{
+    width: 36px;
+    height: 36px;
+}
