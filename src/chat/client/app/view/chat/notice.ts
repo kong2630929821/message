@@ -156,7 +156,7 @@ export class Notice extends Widget {
 
     // 设置
     public groupDetail() {
-        popNew('chat-client-app-view-info-setting',{ noticeSet:true },() => {
+        popNew('chat-client-app-view-info-setting',{ noticeSet:1 },() => {
             this.state = [];
             this.paint();
         });

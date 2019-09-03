@@ -352,3 +352,19 @@ export const delNotice = (itype:string,data:any) => {
 };
 
 export const NOTICESET = 'noticeSet';// 消息通知设置标志
+
+// 获取好友信息
+export const getFriendsInfo = () => {
+    const uid = store.getStore('uid');
+    const userInfos = store.getStore('userInfoMap',[]);
+    const friendIdList = store.getStore('contactMap',[]);
+    const fId = friendIdList.size ? friendIdList.get(`${uid}`).friends :[];
+    const friends = new Map();
+    for (const [key,value] of userInfos) {
+        if (fId.indexOf(value.uid) !== -1) {
+            friends.set(key,value);
+        }
+    }
+
+    return friends;
+};

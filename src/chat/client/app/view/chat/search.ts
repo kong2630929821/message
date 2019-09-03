@@ -3,7 +3,7 @@ import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
-import { getFriendAlias, getUserAvatar, rippleShow } from '../../logic/logic';
+import { getFriendAlias, getUserAvatar, rippleShow, getFriendsInfo } from '../../logic/logic';
 import { applyToGroup, applyUserFriend, follow, searchAllArticle, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
 
 interface Props {
@@ -103,9 +103,9 @@ export class Search extends Widget {
 
     // 搜索好友
     public searchFriend() {
-        const friends = store.getStore('userInfoMap',[]);
         const searchItem = this.props.search;
         const uid = store.getStore('uid');
+        const friends = getFriendsInfo();
         this.props.friendList = [];
         this.props.friendAdd = [];
         // 是否支持搜索全部用户

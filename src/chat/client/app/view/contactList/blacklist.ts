@@ -3,6 +3,7 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import { removeFromBlackList } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
+import { getFriendsInfo } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 interface Props {
@@ -37,7 +38,7 @@ export class BlackList extends Widget {
         const data =  store.getStore('contactMap',[]);
         const uid = store.getStore('uid');
         const blackList = data.size ? data.get(`${uid}`).blackList :[];
-        const friends = store.getStore('userInfoMap',[]);
+        const friends = getFriendsInfo();
         friends.forEach(v => {
             if (blackList.indexOf(v.uid) !== -1) {
                 const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
