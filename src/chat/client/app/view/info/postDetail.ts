@@ -3,7 +3,7 @@ import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, setStore } from '../../data/store';
 import { buildupImgPath, judgeLiked, timestampFormat } from '../../logic/logic';
-import { getCommentLaudList, postLaud, showComment, showLikeList } from '../../net/rpc';
+import { getCommentLaudList, getPostDetile, postLaud, showComment, showLikeList } from '../../net/rpc';
 
 interface Props {
     key: any;
@@ -89,6 +89,19 @@ export class PostDetail extends Widget {
                 return v;
             });
             this.paint();
+        });
+        getPostDetile(this.props.key.num,this.props.key.id).then((r:any) => {
+            this.props.likeCount = r[0].likeCount;
+            this.props.commentCount = r[0].commentCount;
+            this.paint();
+            // 刷新广场数据
+            const postlist = getStore('postList',[]);
+            const ind = postlist.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
+            if (ind > -1) {
+                postlist[ind].commentCount = this.props.commentCount;
+                postlist[ind].likeCount = this.props.likeCount;
+                setStore('postList',postlist);
+            }
         });
     }
 
