@@ -152,16 +152,10 @@ export class Contact extends SpecialWidget {
         // gotoGameService('fairyChivalry');
         // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
-            if (this.props.activeTab === TAB.square) {
-                if (this.state.pubNum) {
-                    // 有公众号
-                    this.props.isUtilVisible = !this.props.isUtilVisible;
-                } else {
-                    // 没有公众号默认发布动态
-                    popNew3('chat-client-app-view-info-editPost',{ isPublic:false },() => {
-                        showPost(this.props.acTag + 1);
-                    });
-                }
+            if (this.props.activeTab === TAB.square && !this.state.pubNum) {
+                popNew3('chat-client-app-view-info-editPost',{ isPublic:false },() => {
+                    showPost(this.props.acTag + 1);
+                });
             } else {
                 this.props.isUtilVisible = !this.props.isUtilVisible;
             }
