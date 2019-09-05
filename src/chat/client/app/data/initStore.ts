@@ -47,6 +47,12 @@ export const initAccount = () => {
             if (!value) return;
             store.setStore('userInfoMap', value.userInfoMap || new Map(), false);
             store.setStore('friendLinkMap', value.friendLinkMap || new Map(), false);
+            const data  = value.userInfoMap;
+            const accIdToUid = store.getStore('accIdToUid',[]);
+            for (const [key,value] of data) {
+                accIdToUid.set(value.acc_id,JSON.parse(key));
+                store.setStore('accIdToUid',accIdToUid);
+            }
         },() => {
             console.log('read userInfoMap error');
         });

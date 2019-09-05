@@ -14,7 +14,7 @@ import * as store from '../../data/store';
 import { deelNotice, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
-import { showPost } from '../../net/rpc';
+import { getUsersBasicInfo, showPost } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出
@@ -152,16 +152,19 @@ export class Contact extends SpecialWidget {
         // gotoGameService('fairyChivalry');
         // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
-            if (this.state.pubNum) {
-                // 有公众号
-                this.props.isUtilVisible = !this.props.isUtilVisible;
+            if (this.props.activeTab === TAB.square) {
+                if (this.state.pubNum) {
+                    // 有公众号
+                    this.props.isUtilVisible = !this.props.isUtilVisible;
+                } else {
+                    // 没有公众号默认发布动态
+                    popNew3('chat-client-app-view-info-editPost',{ isPublic:false },() => {
+                        showPost(this.props.acTag + 1);
+                    });
+                }
             } else {
-                // 没有公众号默认发布动态
-                popNew3('chat-client-app-view-info-editPost',{ isPublic:false },() => {
-                    showPost(this.props.acTag + 1);
-                });
+                this.props.isUtilVisible = !this.props.isUtilVisible;
             }
-           
             this.paint();
         } else {
             popNewMessage('聊天未登陆');
@@ -254,7 +257,7 @@ store.register('contactMap', (r) => {
 });
 
 // 邀请好友成功
-registerStoreData('inviteUsers/invite_success',(r) => {
+registerStoreData('inviteUsers/invite_success', (r) => {
     const ans = updateInviteUsers(depCopy(r) || []);
     if (ans.length < r.length) {
         setStoreData('inviteUsers/invite_success',ans);

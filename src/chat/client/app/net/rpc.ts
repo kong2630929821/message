@@ -80,6 +80,7 @@ export const getUsersBasicInfo = (uids: number[], accIds:string[] = []) => {
 
     return new Promise((resolve,reject) => {
         clientRpcFunc(getUsersInfo, info, (r: UserArray) => {
+            console.log('getUsersBasicInfo-------------',r);
             if (r && r.arr.length > 0) {
                 resolve(r);
             } else {
