@@ -292,8 +292,7 @@ export const sendPicture = (e:any) => {
                     originalImg:''
                 };
                 imgResize(buffer,(res) => {
-                    value.compressImg = res.base64;
-                    // { compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }
+                    value.compressImg = `<img src="${res.base64}" alt="img" class='imgMsg'></img>`;
                     // 预览图片
                     notify(e.node,'ev-send-before',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) }); 
 

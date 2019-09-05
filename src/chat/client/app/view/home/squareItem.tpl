@@ -40,7 +40,7 @@
             {{if i==2 && it.imgs.length==4}}
             <div></div>
             {{end}}
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{it.urlPath + v}}, width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image" on-tap="showBigImg({{i}})">{imgURL:{{it.urlPath + v.compressImg}}, width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
         {{end}}
     </div>
 
