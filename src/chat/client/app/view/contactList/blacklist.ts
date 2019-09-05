@@ -55,7 +55,7 @@ export class BlackList extends Widget {
         const data =  store.getStore('contactMap',[]);
         const uid = store.getStore('uid');
         const blackList = data.size ? data.get(`${uid}`).blackList :[];
-        const friends = getFriendsInfo();
+        const friends = getFriendsInfo().friends;
         friends.forEach(v => {
             if (blackList.indexOf(v.uid) !== -1) {
                 const avatar = v.avatar ? this.props.urlPath + v.avatar :'../../res/images/user_avatar.png';
