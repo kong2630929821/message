@@ -1,9 +1,10 @@
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../../app/utils/tools';
+import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { removeFromBlackList } from '../../../../server/data/rpc/user.p';
 import * as store from '../../data/store';
-import { getFriendsInfo } from '../../logic/logic';
+import { getFriendsInfo, rippleShow } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
     blackList:any;// 黑名单
     urlPath:string;// 图片路径
     addType?:string;
+    chatHistory?:any;// 聊天记录
+    minTitle?:string;// 小标题
 }
 
 /**
@@ -21,7 +24,9 @@ export class BlackList extends Widget {
         name:'',
         blackList:[],
         urlPath:uploadFileUrlPrefix,
-        addType:''
+        addType:'',
+        chatHistory:[],
+        minTitle:''
     };
 
     public ok:() => void;
@@ -32,6 +37,11 @@ export class BlackList extends Widget {
             ...props
         };
         super.setProps(this.props);
+        if (this.props.chatHistory.length) {
+            this.props.blackList = this.props.chatHistory;
+
+            return ;
+        }
         if (!this.props.addType) {
             this.init();// 公众号
         } else {
@@ -79,5 +89,24 @@ export class BlackList extends Widget {
                 this.paint();
             }
         });
+    }
+
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
+    }
+    
+    // 跳转
+    public goTo(index:number) {
+        const data = this.props.blackList[index];
+        if (this.props.chatHistory.length) {
+            // popNew3('chat-client-app-view-chat-chat', { id: data.uid, chatType: GENERATOR_TYPE.USER });
+        } else if (!this.props.addType) {
+            // 公众号
+            popNew3('chat-client-app-view-person-publicHome',{ uid:data.uid,pubNum:data.num });
+        } else {
+            // 黑名单
+            popNew3('chat-client-app-view-info-userDetail',{ uid:data.uid });
+        }
     }
 }

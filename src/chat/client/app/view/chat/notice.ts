@@ -7,7 +7,7 @@ import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { delNotice, rippleShow } from '../../logic/logic';
-import { applyUserFriend } from '../../net/rpc';
+import { applyUserFriend, getUsersBasicInfo } from '../../net/rpc';
 // tslint:disable-next-line:missing-jsdoc
 interface Props {
     name:string;
@@ -52,6 +52,8 @@ export class Notice extends Widget {
         const list = store.getStore('noticeList',[]);
         this.props.noticeAllList = list;
         const noticeList = [];
+        const userInfos = store.getStore('userInfoMap',[]);
+        const accIdToUid = store.getStore('accIdToUid',[]);
         list.forEach(async (v) => {
             let fg = 0;
             let msg = '';
@@ -78,7 +80,28 @@ export class Notice extends Widget {
                 }
                 name = v[5].username;
             } else {
-                name = v[3];
+                // name = userInfos.get(v[0]).name;
+                let uid = accIdToUid.get(v[0]);
+                if (uid) {
+                    const info = userInfos.get(`${uid}`);
+                    if (info) {
+                        // 如果存在用户信息
+                        name = info.name;
+                    } else {
+                        // 不存在用户信息
+                        const res:any = await getUsersBasicInfo([],[v[0]]);
+                        userInfos.set(`${uid}`,res.arr[0]);
+                        store.setStore('userInfoMap',userInfos);
+                        name = res.arr[0].name;
+                    }
+                } else {
+                    const res:any = await getUsersBasicInfo([],[v[0]]);
+                    uid = res.arr[0].uid;
+                    userInfos.set(`${uid}`,res.arr[0]);
+                    accIdToUid.set(v[0],uid);
+                    store.setStore('userInfoMap',userInfos);
+                    name = res.arr[0].name;
+                }
             }
             
             noticeList.push([fg,msg,name,v[0],v[3],v[4],img,v[5]]);

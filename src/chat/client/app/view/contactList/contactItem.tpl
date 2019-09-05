@@ -27,6 +27,9 @@
            {{if it.addType}}
            <div w-class="addBtn" on-tap="addType" on-down="onShow">{{it.addType}}</div>
            {{end}}
+           {{if it.time}}
+           <div w-class="time">{{it.time}}</div>
+           {{end}}
        </div>
     </div>
     {{end}}

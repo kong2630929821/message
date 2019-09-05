@@ -3,6 +3,7 @@
  */
 
 // ================================ 导入
+import { setStoreData } from '../../../../../app/middleLayer/wrap';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -43,7 +44,7 @@ export class ContactTop extends Widget {
      * 跳转到下一页
      */
     public goNext(event:any) {
-        notify(event.node,'ev-next-click',{});
+        notify(event.node,'ev-next-click',{ fg:true });
     }
     
     /**
@@ -78,7 +79,7 @@ export class ContactTop extends Widget {
                 showPost(this.props.acTag + 1);
             });
         }
-        notify(e.node,'ev-next-click',{});
+        notify(e.node,'ev-next-click',{ fg:false });
     }
 
     public utilClick(e:any,ind:number) {

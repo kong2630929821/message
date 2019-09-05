@@ -87,3 +87,8 @@
     height: 32px;
     margin-left: 10px;
 }
+.time{
+    font-size:24px;
+    font-family:Helvetica;
+    color:rgba(136,136,136,1);
+}
