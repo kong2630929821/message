@@ -118,4 +118,5 @@ interface Props {
     msg?:string;// 聊天记录
     addType?:string;// 添加好友群公众号
     sex?:number;// 
+    time?:string;// 时间
 }

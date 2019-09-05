@@ -119,3 +119,12 @@
     padding: 20px;
     padding-bottom: 0;
 }
+.followIng{
+    width: 120px;
+    height: 60px;
+    background: rgb(204, 204, 204);
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

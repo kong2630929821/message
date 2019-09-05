@@ -141,7 +141,8 @@ export const initStore = () => {
         lastReadNotice:[],
         conmentList:[],
         fabulousList:[],
-        messageData: [[],[],[],[]]
+        messageData: [[],[],[],[]],
+        accIdToUid:new Map()
     };
 };
 
@@ -266,6 +267,7 @@ export interface Store {
     conmentList:any;// 评论消息列表
     fabulousList:any;// 点赞消息列表
     messageData:any;// 消息通知列表
+    accIdToUid:Map<string,number>;// accID转uid
 }
 
 /**

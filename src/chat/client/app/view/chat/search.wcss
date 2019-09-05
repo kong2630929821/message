@@ -149,3 +149,12 @@
     margin-left: 10px;
     font-weight: 300;
 }
+.no{
+    height: 300px;
+    font-size: 28px;
+    font-family: STHeitiSC;
+    font-weight: 300;
+    color: rgba(204,204,204,1);
+    text-align: center;
+    line-height: 300px;
+}

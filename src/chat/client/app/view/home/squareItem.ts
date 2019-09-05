@@ -30,6 +30,7 @@ interface Props {
     isMine:boolean;  // 是否本人发的帖
     urlPath:string;  // 图片路径前
     timeFormat:any;  // 时间处理
+    fgStatus:boolean;// 关注动画
 }
 /**
  * 广场帖子
@@ -57,7 +58,8 @@ export class SquareItem extends Widget {
         gender:1,   // 性别 0男 1女
         isMine:false,
         urlPath:uploadFileUrlPrefix,
-        timeFormat:timestampFormat
+        timeFormat:timestampFormat,
+        fgStatus:false
     };
 
     public setProps(props:any) {
@@ -166,7 +168,14 @@ export class SquareItem extends Widget {
                 follow(this.props.key.num);
             });
         } else {
-            follow(this.props.key.num);
+            this.props.fgStatus = true;
+            this.paint();
+            setTimeout(() => {
+                this.props.fgStatus = false;
+                popNewMessage('关注成功');
+                follow(this.props.key.num);
+            },400);
+            
         }
         
     }

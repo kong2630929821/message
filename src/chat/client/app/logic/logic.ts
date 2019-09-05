@@ -354,18 +354,26 @@ export const delNotice = (itype:string,data:any) => {
 
 export const NOTICESET = 'noticeSet';// 消息通知设置标志
 
-// 获取好友信息
+// 获取好友群聊信息
 export const getFriendsInfo = () => {
     const uid = store.getStore('uid');
     const userInfos = store.getStore('userInfoMap',[]);
     const friendIdList = store.getStore('contactMap',[]);
+    const groupList = store.getStore('groupInfoMap',[]);
     const fId = friendIdList.size ? friendIdList.get(`${uid}`).friends :[];
+    const gId = friendIdList.size ? friendIdList.get(`${uid}`).group :[];
     const friends = new Map();
+    const groups = new Map();
     for (const [key,value] of userInfos) {
         if (fId.indexOf(value.uid) !== -1) {
             friends.set(key,value);
         }
     }
+    for (const [key,value] of groupList) {
+        if (gId.indexOf(value.uid) !== -1) {
+            groups.set(key,value);
+        }
+    }
 
-    return friends;
+    return { friends,groups };
 };
