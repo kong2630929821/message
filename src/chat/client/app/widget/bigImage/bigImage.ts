@@ -7,6 +7,12 @@ import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import { saveImage } from '../../logic/native';
 
+interface Props {
+    img: string;  // 图片
+    originalImg:string; // 原图
+    showOrg:boolean; // 是否显示原图
+}
+
 // ================================================ 导出
 export class BigImage extends Widget {
     public props: Props;
@@ -29,11 +35,4 @@ export class BigImage extends Widget {
         });
     }
 
-}
-
-// ================================================ 本地
-interface Props {
-    img: string;  // 图片
-    originalImg:string; // 原图
-    showOrg:boolean; // 是否显示原图
 }

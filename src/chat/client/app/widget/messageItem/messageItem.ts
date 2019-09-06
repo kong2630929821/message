@@ -253,10 +253,15 @@ const parseEmoji = (msg:any) => {
 // 转换图片;
 const parseImg = (msg:any) => {    
     const mess = JSON.parse(msg.msg);
-    msg.msg = {
-        compressImg: `<img src="${uploadFileUrlPrefix}${mess.compressImg}" alt="img" class='imgMsg'></img>`,
-        originalImg: uploadFileUrlPrefix + mess.originalImg
-    };
+    // 预览图片不解析
+    if(mess.compressImg.indexOf('<div') === -1){
+        msg.msg = {
+            compressImg: `<img src="${uploadFileUrlPrefix}${mess.compressImg}" alt="img" class='imgMsg'></img>`,
+            originalImg: uploadFileUrlPrefix + mess.originalImg
+        };
+    }else{
+        msg.msg = mess;
+    }
 
     return msg;
 };
