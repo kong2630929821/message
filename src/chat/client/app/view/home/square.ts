@@ -1,12 +1,16 @@
 import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
+import { BScroll } from '../../../../../pi/widget/scroller/core/index';
+import { PullDown } from '../../../../../pi/widget/scroller/pull-down/index';
+import { PullUp } from '../../../../../pi/widget/scroller/pull-up/index';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, register } from '../../data/store';
 import { postLaud, showPost } from '../../net/rpc';
 import { EMOJIS_MAP } from '../../widget/emoji/emoji';
 
 export const forelet = new Forelet();
+export const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 interface Props {
     showTag:boolean;  // 显示标签列表
@@ -16,8 +20,18 @@ interface Props {
     expandItem:number;  // 当前展开工具栏的帖子下标
     dealData:any;  // 组装数据
     refresh:boolean; // 是否可以请求更多数据
+
+    beforePullDown:boolean;
+    isPullingDown:boolean;
+    isPullUpLoad:boolean;
 }
 export const TagList = ['广场','关注','公众号','热门'];
+BScroll.use(PullDown);
+BScroll.use(PullUp);
+const TIME_BOUNCE = 800;
+const TIME_STOP = 600;
+const THRESHOLD = 70;
+const STOP = 56;
 /**
  * 广场
  */
@@ -30,9 +44,14 @@ export class Square extends Widget {
         follows:0,
         expandItem:-1,
         dealData:this.dealData,
-        refresh:true
-    };
+        refresh:true,
 
+        beforePullDown:true,
+        isPullingDown:false,
+        isPullUpLoad:false
+    };
+    public bscroll:BScroll;// 下拉
+    public upBscroll:BScroll;// 上拉
     public setProps(props:any) {
         this.props = {
             ...this.props,
@@ -41,11 +60,16 @@ export class Square extends Widget {
         super.setProps(this.props);
         State.postList = [];
         this.state = State;
-        
         this.init(this.props.active);
         showPost(this.props.active + 1);
     }
 
+    public create() {
+        super.create();
+        this.props.isPullingDown = false;
+        this.props.isPullUpLoad = false;
+        this.bscroll = null;
+    }
     public firstPaint() {
         super.firstPaint();
         register('uid',() => {  // 聊天用户登陆成功
@@ -162,6 +186,87 @@ export class Square extends Widget {
             });
         }
     }
+
+    // 下拉刷新
+
+    public attach() {
+        this.initBscroll();
+    }
+
+    //
+    public initBscroll() {
+        this.bscroll = new BScroll(<HTMLElement>this.tree.link.children[0], {
+            scrollY: true,
+            bounceTime: TIME_BOUNCE,
+            pullUpLoad: true,
+            pullDownRefresh: {
+                threshold: THRESHOLD,
+                stop: STOP
+            }
+        });
+
+        this.bscroll.on('pullingDown', this.pullingDownHandler.bind(this));
+        this.bscroll.on('pullingUp', this.pullingUpHandler.bind(this));
+    }
+    public async pullingDownHandler() {
+        this.props.beforePullDown = false;
+        this.props.isPullingDown = true;
+        this.paint();
+
+        await this.requestData(true);
+
+        this.props.isPullingDown = false;
+        this.paint();
+        this.finishPullDown();
+    }
+
+    public async pullingUpHandler() {
+        this.props.isPullUpLoad = true;
+        await this.requestData(false);
+        this.paint();
+        setTimeout(() => {
+            this.bscroll.finishPullUp();
+            this.bscroll.refresh();
+            this.props.isPullUpLoad = false;
+        }, 50);
+    }
+    public async finishPullDown() {
+        const stopTime = TIME_STOP;
+        await new Promise(resolve => {
+            setTimeout(() => {
+                this.bscroll.finishPullDown();
+                resolve();
+            }, stopTime);
+        });
+        setTimeout(() => {
+            this.props.beforePullDown = true;
+            this.paint();
+            this.bscroll.refresh();
+        }, TIME_BOUNCE);
+    }
+  
+    public async requestData(fg:boolean) {
+        try {
+            if (fg) {
+                // 下拉刷新
+                return showPost(this.props.active + 1);
+            } else {
+                return showPost(this.props.active + 1, this.state.postList[ this.state.postList.length - 1].key.num, this.state.postList[ this.state.postList.length - 1].key.id);
+            }
+            
+        } catch (err) {
+            // handle err
+            console.log(err);
+        }
+    }
+
+    public refreshScroller() {
+        setTimeout(() => {
+            this.bscroll.refresh();
+            this.props.isPullUpLoad = false;
+            this.paint();
+        }, 50);
+    }
 }
 const State = {
     followList:{
@@ -198,6 +303,10 @@ register('laudPostList',r => {
 register('postList',r => {
     State.postList = r;
     forelet.paint(State);
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    setTimeout(() => {
+        w.refreshScroller();
+    },1000);
 });
 
 // 转换文字中的链接

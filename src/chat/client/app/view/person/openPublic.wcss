@@ -1,0 +1,72 @@
+.page{
+    display: flex;
+    flex-direction: column;
+    background:#fff;
+}
+.openPublicBox{
+    flex: 1 0 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+}
+.avatar{
+    height: 283px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:rgba(249,249,249,1);
+}
+.bindPhone{
+    height: 100px;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-around;
+}
+.phone{
+    font-size:32px;
+    font-family:STHeitiSC;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+}
+.bindStatus{
+    display: flex;
+}
+.status{
+    font-size:28px;
+    font-family:STHeitiSC;
+    font-weight:300;
+    color:rgba(136,136,136,0.87);
+}
+.more{
+    width: 50px;
+    height: 50px;
+}
+.pubInfo{
+    height: 83px;
+    line-height: 100px;
+    padding: 0 0 0 40px;
+    font-size:24px;
+    font-family:PingFangSC;
+    font-weight:400;
+    color:rgba(204,204,204,1);
+    background:rgba(249,249,249,1);
+}
+.name-box{
+    height: 110px;
+    position: relative;
+    color: #222;
+    font-size: 32px;
+    line-height: 45px;
+    align-items: center;
+}
+.infoArea{
+    margin: 0 20px 20px;
+}
+.await{
+    padding: 40px 0;
+    text-align: center;
+    font-size:28px;
+    font-family:PingFangSC;
+    font-weight:400;
+    color:rgba(142,150,171,1);
+}
