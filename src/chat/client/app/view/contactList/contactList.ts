@@ -9,10 +9,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { rippleShow } from '../../logic/logic';
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
 export const forelet = new Forelet();
-const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 interface Props {
     sid:number;  // uid
@@ -20,14 +17,24 @@ interface Props {
 }
 export class ContactList extends Widget {
     public ok:() => void;
-    public props:Props; 
+    public props:Props = {
+        sid:0,
+        newApply:0
+    }; 
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.sid = store.getStore('uid');
+        this.props.sid = store.getStore('uid',0);
     }
 
-     // 返回上一页
+    public firstPaint() {
+        super.firstPaint();
+        store.register('uid',() => {  // 聊天用户登陆成功
+            this.setProps(this.props);
+        });
+    }
+
+    // 返回上一页
     public goBack() {
         this.ok();
     }
@@ -40,7 +47,10 @@ export class ContactList extends Widget {
             case 1:
                 popNew3(`chat-client-app-view-group-groupList`);  // 群聊列表
                 break;
-            case 2:case 3:
+            case 2:
+                popNew3('chat-client-app-view-contactList-blacklist',{ title:'公众号' ,addType:'' });
+                break;
+            case 3:case 4:
                 popNew3('chat-client-app-view-info-userDetail',{ uid:uid }); // 本人信息
                 break;
             default:

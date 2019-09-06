@@ -1,0 +1,43 @@
+.new-page{
+    display: flex;
+    flex-direction: column;
+}
+.blackList{
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex: 1 0 0;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 10px;
+    position: relative;
+    background:rgba(249,249,249,1);
+}
+.content{
+    display: flex;
+}
+.avatar-wrap{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    margin-right:30px;
+}
+.avatar{
+    width:80px;
+}
+.title{
+    display: flex;
+    align-items: center;
+    height:50px;
+    font-size:28px;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+    line-height:50px;
+    margin: 20px;
+}
+.mark{
+    width:8px;
+    height:24px;
+    background:rgba(255,244,101,1);
+    margin-right: 20px;
+}

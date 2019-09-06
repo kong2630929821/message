@@ -14,6 +14,7 @@ interface Props {
     isPublic:boolean;  // 发布公众号帖子
     isOnEmoji:boolean;  // 展开表情选择
     num:string; // 社区ID
+    fg:boolean;// 防止多次发布
 }
 
 /**
@@ -29,7 +30,8 @@ export class EditPost extends Widget {
         contentInput:'',
         isPublic:false,
         isOnEmoji:false,
-        num:''
+        num:'',
+        fg:true
     };
     
     public setProps(props:any) {
@@ -164,6 +166,9 @@ export class EditPost extends Widget {
 
     // 发送
     public async send() {
+        if (!this.props.fg) {
+            return;
+        }
         if (this.props.imgs.length) {
             const loadding = popNewLoading('图片上传中');
             try {
@@ -188,8 +193,11 @@ export class EditPost extends Widget {
             msg:this.props.contentInput,
             imgs:this.props.imgs
         };
+        this.props.fg = false;
         addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then(r => {
             popNewMessage('发布成功');
+            this.props.fg = true;
+            this.paint();
             this.ok && this.ok();
         }).catch(r => {
             popNewMessage('发布失败');

@@ -108,3 +108,13 @@
     background-color:#F0F9FF;
     flex-shrink: 0;
 }
+.article{
+    font-size:28px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    word-break: break-all;
+    display: -webkit-box;
+    width: 100%;   
+}

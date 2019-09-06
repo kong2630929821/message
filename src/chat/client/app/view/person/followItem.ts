@@ -1,3 +1,4 @@
+import { popModalBoxs } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { CommType } from '../../../../server/data/rpc/community.s';
 import { getStore } from '../../data/store';
@@ -51,9 +52,19 @@ export class FoolowItem extends Widget {
      * 关注用户
      */
     public followUser() {
-        follow(this.props.comm_info.num).then(r => {
-            this.props.followed = !this.props.followed;
-            this.paint();
-        });
+        if (this.props.followed) {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
+                follow(this.props.comm_info.num).then(r => {
+                    this.props.followed = !this.props.followed;
+                    this.paint();
+                });
+            });
+        } else {
+            follow(this.props.comm_info.num).then(r => {
+                this.props.followed = !this.props.followed;
+                this.paint();
+            });
+        }
+        
     }
 }

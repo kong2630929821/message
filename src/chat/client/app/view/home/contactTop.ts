@@ -3,6 +3,7 @@
  */
 
 // ================================ 导入
+import { setStoreData } from '../../../../../app/middleLayer/wrap';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -21,6 +22,7 @@ interface Props {
     acTag:number;  // 当前活跃的广场标签下标
     showUtils:boolean;  // 显示操作栏
     utilList:any[]; // 操作列表
+    
 }
 
 // ================================ 导出
@@ -31,6 +33,7 @@ export class ContactTop extends Widget {
         super.setProps(props);
         this.props.showAcTag = TagList[props.acTag];
         this.props.utilList = [
+            { iconPath: 'search.png', utilText: '搜索' },
             { iconPath: 'add-blue.png', utilText: '添加好友' },
             { iconPath: 'add-friend.png', utilText: '加群聊' },
             { iconPath: 'group-chat.png', utilText: '创建群聊' }
@@ -41,7 +44,7 @@ export class ContactTop extends Widget {
      * 跳转到下一页
      */
     public goNext(event:any) {
-        notify(event.node,'ev-next-click',{});
+        notify(event.node,'ev-next-click',{ fg:true });
     }
     
     /**
@@ -76,18 +79,21 @@ export class ContactTop extends Widget {
                 showPost(this.props.acTag + 1);
             });
         }
-        notify(e.node,'ev-next-click',{});
+        notify(e.node,'ev-next-click',{ fg:false });
     }
 
     public utilClick(e:any,ind:number) {
         switch (ind) {
-            case 0:// 点击添加好友
+            case 0:// 搜索
+                popNew3('chat-client-app-view-chat-search');
+                break;
+            case 1:// 点击添加好友
                 popNew3('chat-client-app-view-chat-addUser');
                 break;
-            case 1:// 加群聊
+            case 2:// 加群聊
                 popNew3('chat-client-app-view-group-groupList');
                 break;
-            case 2:// 创建群聊 setGroupChat
+            case 3:// 创建群聊 setGroupChat
                 popNew3('chat-client-app-view-group-setGroupChat');
                 break;
 

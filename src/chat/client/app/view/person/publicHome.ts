@@ -1,6 +1,6 @@
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../../app/utils/tools';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
@@ -59,7 +59,7 @@ export class PublicHome extends Widget {
             this.props.postList = r.list.map(r => { // 动态
                 return {
                     ...r,
-                    img: JSON.parse(r.body).imgs[0]
+                    img: JSON.parse(r.body).imgs[0] ? this.props.urlPath + JSON.parse(r.body).imgs[0] :(r.avatar ? r.avatar :'../../res/images/user_avatar.png')
                 };
             });  
             this.props.totalPost = r.total;
@@ -83,10 +83,20 @@ export class PublicHome extends Widget {
     // 关注 取消关注
     public followBtn() {
         this.closeUtils();
-        follow(this.props.pubNum).then(r => {
-            this.props.followed = !this.props.followed;
-            this.paint();
-        });
+        if (this.props.followed) {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
+                follow(this.props.pubNum).then(r => {
+                    this.props.followed = !this.props.followed;
+                    this.paint();
+                });
+            });
+        } else {
+            follow(this.props.pubNum).then(r => {
+                this.props.followed = !this.props.followed;
+                this.paint();
+            });
+        }
+        
     }
 
     // 关闭操作列表

@@ -8,19 +8,17 @@ import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap'
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { registerStoreData } from '../../../../../app/viewLogic/common';
 import { Forelet } from '../../../../../pi/widget/forelet';
-import { UserInfo } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { deelNotice, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
+import { getUsersBasicInfo, showPost } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
 export const forelet = new Forelet();
-const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 interface Props {
     offlienType:OfflienType;
@@ -68,6 +66,7 @@ export class Contact extends SpecialWidget {
     public create() {
         super.create();
         this.state = STATE;
+        this.state.pubNum = store.getStore('pubNum',0);
         // 判断是否从钱包项目进入
         // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
         // getStoreData('wallet').then((wallet) => {
@@ -83,7 +82,6 @@ export class Contact extends SpecialWidget {
         this.props.isLogin = !!uid;
         this.props.activeTab = TAB.square;
         const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
-        
         if (this.props.isLogin) {   // 聊天已登录成功
             getStoreData('user',{ info:{},id:'' }).then(wUser => {
                 // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
@@ -120,7 +118,8 @@ export class Contact extends SpecialWidget {
                 },
                 inviteUsers:[],
                 convertUser:[],
-                notice:[]
+                notice:[],
+                pubNum:0
             };
             this.paint();
         });
@@ -134,8 +133,13 @@ export class Contact extends SpecialWidget {
     public chat(num:number) {
         this.closeMore();
         const value = this.state.lastChat[num];
-        const gid = value.length === 4 ? value[3] :null ;
-        popNew3('chat-client-app-view-chat-chat', { id: value[0], chatType: value[2], groupId:gid }) ;
+        if (value[2] !== GENERATOR_TYPE.GROUP && value[2] !== GENERATOR_TYPE.USER) {
+            popNew3('chat-client-app-view-chat-notice', { name:'消息通知' }) ;
+        } else {
+            const gid = value.length === 4 ? value[3] :null ;
+            popNew3('chat-client-app-view-chat-chat', { id: value[0], chatType: value[2], groupId:gid }) ;
+        }
+        
     }
 
     // 动画效果执行
@@ -148,7 +152,13 @@ export class Contact extends SpecialWidget {
         // gotoGameService('fairyChivalry');
         // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
-            this.props.isUtilVisible = !this.props.isUtilVisible;
+            if (this.props.activeTab === TAB.square && !this.state.pubNum) {
+                popNew3('chat-client-app-view-info-editPost',{ isPublic:false },() => {
+                    showPost(this.props.acTag + 1);
+                });
+            } else {
+                this.props.isUtilVisible = !this.props.isUtilVisible;
+            }
             this.paint();
         } else {
             popNewMessage('聊天未登陆');
@@ -161,7 +171,6 @@ export class Contact extends SpecialWidget {
     }
 
     public handleFatherTap(e: any) {
-        
         switch (e.index) {
             case 0:// 点击添加好友
                 popNew3('chat-client-app-view-chat-addUser');
@@ -175,7 +184,6 @@ export class Contact extends SpecialWidget {
                     console.log(res);
                     this.paint();
                 });
-                // openTestWebview(10001);      
                 break;
             case 3:
                 popNew3('app-view-mine-other-addFriend'); 
@@ -219,7 +227,8 @@ const STATE = {
     },
     inviteUsers:[],
     convertUser:[],
-    notice:[]
+    notice:[],
+    pubNum:0
 };
 store.register(`lastChat`, (r: [number, number][]) => {
     STATE.lastChat = r;
@@ -242,7 +251,7 @@ store.register('contactMap', (r) => {
 });
 
 // 邀请好友成功
-registerStoreData('inviteUsers/invite_success',(r) => {
+registerStoreData('inviteUsers/invite_success', (r) => {
     const ans = updateInviteUsers(depCopy(r) || []);
     if (ans.length < r.length) {
         setStoreData('inviteUsers/invite_success',ans);
@@ -289,8 +298,18 @@ store.register(`noticeList`, (r:any) => {
     if (r.length === 0) {
         return ;
     }
-    STATE.notice = r[r.length - 1];
-    forelet.paint(STATE);
+    const data = r[r.length - 1];
+    // STATE.notice = r[r.length - 1];
+    const lastChat = store.getStore(`lastChat`, []);
+    const index = lastChat.findIndex(item => item[2] !== GENERATOR_TYPE.USER && item[2] !== GENERATOR_TYPE.GROUP);
+    if (index > -1) {
+        lastChat.splice(index,1,data);
+        
+    } else {
+        lastChat.push(data);
+    }
+    store.setStore('lastChat',lastChat);
+    // forelet.paint(STATE);
 });
 
 // 监听点赞列表变化
@@ -307,4 +326,10 @@ store.register(`conmentList`, (r:any) => {
         return ;
     }
     deelNotice(r,store.GENERATORTYPE.NOTICE_4);
+});
+
+// 监听公众号变化
+store.register(`pubNum`,(r:number) => {
+    STATE.pubNum = r;
+    forelet.paint(STATE);
 });

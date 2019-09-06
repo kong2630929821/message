@@ -7,7 +7,13 @@
             <div w-class="offical">公众号</div>        
         </div>
         {{if !it.followed}}
-        <div w-class="follow" on-tap="followUser">+关注</div>
+            {{if it.fgStatus}}
+            <div w-class="followIng">
+                <img src="../../res/images/loading.gif" alt="" style="width: 42px;height: 42px;"/>
+            </div>
+            {{else}}
+            <div w-class="follow" on-tap="followUser">+关注</div>
+            {{end}}
         {{end}}
     </div>
 

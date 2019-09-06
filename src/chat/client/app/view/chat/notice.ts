@@ -1,11 +1,13 @@
 import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { openNewActivity } from '../../../../../app/viewLogic/native';
+import { popNew } from '../../../../../pi/ui/root';
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
-import { UserArray } from '../../../../server/data/rpc/basic.s';
 import * as store from '../../data/store';
 import { delNotice, rippleShow } from '../../logic/logic';
-import { applyUserFriend, getChatUid, getPostDetile, getUsersBasicInfo } from '../../net/rpc';
+import { applyUserFriend, getUsersBasicInfo } from '../../net/rpc';
 // tslint:disable-next-line:missing-jsdoc
 interface Props {
     name:string;
@@ -50,69 +52,65 @@ export class Notice extends Widget {
         const list = store.getStore('noticeList',[]);
         this.props.noticeAllList = list;
         const noticeList = [];
+        const userInfos = store.getStore('userInfoMap',[]);
+        const accIdToUid = store.getStore('accIdToUid',[]);
         list.forEach(async (v) => {
-            console.log(`1111111111111111111111111111是${v}`);
+            let fg = 0;
             let msg = '';
             let name = '';
-            // const name = await getUserInfoName([v[0]]);
-            getChatUid(v[0]).then((res:number) => {
-                getUsersBasicInfo([res],[]).then((res: UserArray) => {
-                    if (v[4]) {
-                        getPostDetile(v[4],v[3]).then((r:any) => {
-                            name = res.arr[0].name;
-                            let fg = 0;
-                            if (v[2] === store.GENERATORTYPE.NOTICE_1) {
-                                msg = '你邀请的好友上线了';
-                                fg = 0;
-                            } else if (v[2] === store.GENERATORTYPE.NOTICE_2) {
-                                msg = '邀请你的好友上线了';
-                                fg = 0;
-                            } else if (v[2] === store.GENERATORTYPE.NOTICE_3) {
-                                msg = '有人赞了你的动态';
-                                fg = 1;
-                            } else if (v[2] === store.GENERATORTYPE.NOTICE_4) {
-                                msg = '有人@了你';
-                                fg = 1;
-                            }
-                            let img = '';
-                            if (r[0].imgs.length) {
-                                img = this.props.urlPath + r[0].imgs[0];
-                            } else {
-                                img = r[0].avatar ? r[0].avatar :'../../res/images/user_avatar.png';
-                            }
-                            // 类型 消息 名字 Uid pid num 图片 帖子详细信息
-                            noticeList.push([fg,msg,name,v[0],v[3],v[4],img,r[0]]);
-                            this.paint();
-                            
-                        });
+            if (v[2] === store.GENERATORTYPE.NOTICE_1) {
+                msg = '你邀请的好友上线了';
+                fg = 0;
+            } else if (v[2] === store.GENERATORTYPE.NOTICE_2) {
+                msg = '邀请你的好友上线了';
+                fg = 0;
+            } else if (v[2] === store.GENERATORTYPE.NOTICE_3) {
+                msg = '有人赞了你的动态';
+                fg = 1;
+            } else if (v[2] === store.GENERATORTYPE.NOTICE_4) {
+                msg = '有人@了你';
+                fg = 1;
+            }
+            let img = '';
+            if (v[4]) {
+                if (v[5].imgs.length) {
+                    img = this.props.urlPath + v[5].imgs[0];
+                } else {
+                    img = v[5].avatar ? v[5].avatar :'../../res/images/user_avatar.png';
+                }
+                name = v[5].username;
+            } else {
+                // name = userInfos.get(v[0]).name;
+                let uid = accIdToUid.get(v[0]);
+                if (uid) {
+                    const info = userInfos.get(`${uid}`);
+                    if (info) {
+                        // 如果存在用户信息
+                        name = info.name;
                     } else {
+                        // 不存在用户信息
+                        const res:any = await getUsersBasicInfo([],[v[0]]);
+                        userInfos.set(`${uid}`,res.arr[0]);
+                        store.setStore('userInfoMap',userInfos);
                         name = res.arr[0].name;
-                        let fg = 0;
-                        if (v[2] === store.GENERATORTYPE.NOTICE_1) {
-                            msg = '你邀请的好友上线了';
-                            fg = 0;
-                        } else if (v[2] === store.GENERATORTYPE.NOTICE_2) {
-                            msg = '邀请你的好友上线了';
-                            fg = 0;
-                        } else if (v[2] === store.GENERATORTYPE.NOTICE_3) {
-                            msg = '有人赞了你的动态';
-                            fg = 1;
-                        } else if (v[2] === store.GENERATORTYPE.NOTICE_4) {
-                            msg = '有人@了你';
-                            fg = 1;
-                        }
-                            // 类型 消息 名字 Uid pid num 图片 帖子详细信息
-                        noticeList.push([fg,msg,name,v[0],v[3],v[4]]);
-                        this.paint();
                     }
-                    
-                });
-            });
+                } else {
+                    const res:any = await getUsersBasicInfo([],[v[0]]);
+                    uid = res.arr[0].uid;
+                    userInfos.set(`${uid}`,res.arr[0]);
+                    accIdToUid.set(v[0],uid);
+                    store.setStore('userInfoMap',userInfos);
+                    name = res.arr[0].name;
+                }
+            }
             
+            noticeList.push([fg,msg,name,v[0],v[3],v[4],img,v[5]]);
+
         });
         this.state = noticeList;   
         const lastReadNotice = list[list.length - 1];
         store.setStore('lastReadNotice',lastReadNotice);
+        this.latestMsg();
     }
     public goBack() {
         this.ok && this.ok(); 
@@ -147,6 +145,7 @@ export class Notice extends Widget {
     public gotoPostDetail(index:number) {
         const data  = this.state[index][7];
         popNew3('chat-client-app-view-info-postDetail',{ ...data,showAll:true }) ;
+        this.close();
     }
 
     // 长按打开消息撤回
@@ -166,7 +165,7 @@ export class Notice extends Widget {
             delNotice('conmentList',data);
         }
         this.state.splice(index,1);
-        this.props.currentIndex = -1;
+        
         this.paint(); 
     }
 
@@ -180,6 +179,35 @@ export class Notice extends Widget {
     public onShow(e:any) {
         rippleShow(e);
     }
+
+    // 设置
+    public groupDetail() {
+        popNew('chat-client-app-view-info-setting',{ noticeSet:1 },() => {
+            this.state = [];
+            this.paint();
+        });
+    }
+
+    /**
+     * 定位最新消息
+     */
+    public latestMsg() {
+        setTimeout(() => {
+            const $scrollElem = this.getScrollElem();
+            // console.log($scrollElem.scrollHeight);
+            $scrollElem.scrollTop = $scrollElem.scrollHeight;
+            this.paint();
+        }, 100);
+        
+    }
+
+    /**
+     * 获取滚动区元素
+     */
+    public getScrollElem() {
+        return getRealNode((<any>this.tree).children[1]);
+    }
+    
 }
 
 const STATE = [];

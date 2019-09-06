@@ -6,12 +6,14 @@
     flex: 1 0 0;
     overflow-x: hidden;
     overflow-y: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 .avatar{
     margin: 40px;
 }
 .followBtn{
-    width:410px;
+    flex: 1;
     height:60px;
     background:rgba(49,91,200,0.9);
     border-radius:8px;
@@ -21,9 +23,10 @@
     line-height:60px;
     text-align: center;
     margin-top: 28px;
+    margin-right: 20px;
 }
 .cancelBtn{
-    width:410px;
+    flex: 1;
     height:60px;
     background:#fff;
     border:1px solid rgba(69,107,205,1);
@@ -127,4 +130,8 @@
     line-height:100px;
     margin-left: 50px;
     text-align: center;
+}
+.friendsPub{
+    display: flex;
+    width: 410px;
 }

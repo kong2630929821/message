@@ -107,12 +107,6 @@ export class AddUser extends Widget {
     public onShow(e:any) {
         rippleShow(e);
     }
-
-    // 点击搜索
-    public goSearch() {
-        popNew('chat-client-app-view-chat-search');
-    }
-
 }
 
 // ================================================ 本地

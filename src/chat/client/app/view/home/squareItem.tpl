@@ -15,7 +15,13 @@
             <div w-class="time">{{it.timeFormat(it.createtime,3)}}</div>
         </div>
         {{if !it.followed}}
-        <div w-class="follow" on-tap="followUser">+关注</div>
+            {{if it.fgStatus}}
+            <div w-class="followIng">
+                <img src="../../res/images/loading.gif" alt="" style="width: 42px;height: 42px;"/>
+            </div>
+            {{else}}
+            <div w-class="follow" on-tap="followUser">+关注</div>
+            {{end}}
         {{end}}
         <img src="../../res/images/squareArrow.png" w-class="btn" on-tap="showTools"/>
     </div>

@@ -1,11 +1,12 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
 import { buildupImgPath, complaintUser, copyToClipboard, timestampFormat } from '../../logic/logic';
 import { commentLaud, delComment } from '../../net/rpc';
 import { parseEmoji } from '../home/square';
+import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 
 interface Props {
     key:any;  // 帖子评论的key
@@ -24,6 +25,7 @@ interface Props {
     owner:number; // 评论者的uid
     isMine:boolean;  // 是否本人
     timeFormat:any; // 时间处理
+    urlPath:string;
 }
 
 /**
@@ -50,7 +52,8 @@ export class CommentItem extends Widget {
         gender:0,
         owner:0,
         isMine:false,
-        timeFormat:timestampFormat
+        timeFormat:timestampFormat,
+        urlPath:uploadFileUrlPrefix
     };
 
     public setProps(props:any) {
@@ -109,9 +112,12 @@ export class CommentItem extends Widget {
      */
     public delComment(e:any) {
         this.closeUtils();
-        delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
-            notify(e.node,'ev-comment-delete',{ key:this.props.key });
+        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除评论',content:'删除评论后，评论下所有的回复都会被删除。' },() => {
+            delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
+                notify(e.node,'ev-comment-delete',{ key:this.props.key });
+            });
         });
+        
     }
 
     /**
@@ -130,7 +136,8 @@ export class CommentItem extends Widget {
      */
     public complaint() {
         this.closeUtils();
-        complaintUser(this.props.username);
+        const avatar = this.props.avatar ? this.props.urlPath + this.props.avatar :'../../res/images/user_avatar.png';
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.msg);
     }
 
     // 关闭操作列表

@@ -1,16 +1,17 @@
 import { getUserRecentGame } from '../../../../../app/net/pull';
 import { popNewMessage } from '../../../../../app/utils/tools';
-import { getMedalest } from '../../../../../earn/client/app/net/rpc';
+import { getAllMedal } from '../../../../../earn/client/app/net/rpc';
 import { getMedalList } from '../../../../../earn/client/app/utils/util';
 import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { CommType } from '../../../../server/data/rpc/community.s';
 import { genUuid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
-import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
+import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo, postLaud } from '../../net/rpc';
 
 interface Props {
     uid: number;
@@ -28,6 +29,9 @@ interface Props {
     followList:string[];  // 关注列表
     fansList:string[];  // 粉丝列表
     gameList:string[]; // 最近玩过的游戏列表
+    expandItem:number;  // 当前展开工具栏的帖子下标
+    dealData:any;  // 组装数据
+    refresh:boolean; // 是否可以请求更多数据
 }
 
 /**
@@ -54,8 +58,12 @@ export class UserDetail extends Widget {
         postList:[],
         followList:[],
         fansList:[],
-        gameList:[]
+        gameList:[],
+        expandItem:-1,
+        dealData:this.dealData,
+        refresh:true
     };
+    public bindUpdate:any = this.updateData.bind(this);
 
     public setProps(props:any) {
         this.props = {
@@ -122,21 +130,29 @@ export class UserDetail extends Widget {
             this.props.numList[2][0] = r.length;
             this.paint();
         });
-        getMedalest([this.props.userInfo.acc_id]).then((r:any) => {
-            const ktNum = r.arr[0].resultNum;  // 勋章
-            const data = getMedalList(CoinType.KT, 'coinType');
-            const list = [];
-            data.forEach((element,i) => {
-                const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
-                if (element.coinNum <= ktNum) {
-                    medal.isHave = true;
-                    list.push(medal);
-                }
-            });
-            this.props.medalList = list.splice(-5);
+        
+        // getMedalest([this.props.userInfo.acc_id]).then((r:any) => {
+        //     const ktNum = r.arr[0].resultNum;  // 勋章
+        //     const data = getMedalList(CoinType.KT, 'coinType');
+        //     const list = [];
+        //     data.forEach((element,i) => {
+        //         const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
+        //         if (element.coinNum <= ktNum) {
+        //             medal.isHave = true;
+        //             list.push(medal);
+        //         }
+        //     });
+        //     this.props.medalList = list.splice(-5);
+        //     this.paint();
+        // });
+
+        // 获取全部勋章
+        getAllMedal().then(r => {
+            this.props.medalList = r.medals;
             this.paint();
         });
         getUserRecentGame(this.props.userInfo.acc_id,5).then(r => {
+
             this.props.gameList = r;   // 游戏
             this.paint();
         });
@@ -144,18 +160,12 @@ export class UserDetail extends Widget {
 
     public firstPaint() {
         super.firstPaint();
-        const sid = getStore(`uid`);
+        const sid = getStore(`uid`, 0);
         if (sid !== this.props.uid) {
-            register(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.updateAlias);
+            register(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.bindUpdate);
+            register(`followNumList/${sid}`,this.bindUpdate);
         }
-    }
-
-    /**
-     * 更新别名
-     */
-    public updateAlias(r:any) {
-        this.props.alias = r.alias;
-        this.paint();
+        
     }
 
     public goBack() {
@@ -179,6 +189,11 @@ export class UserDetail extends Widget {
     // 申请公众号 去我的公众号
     public goPublic() {
         if (!this.props.pubNum) {
+            if (!this.props.userInfo.tel) {
+                popNewMessage('请绑定手机号码');
+                
+                return;
+            }
             addCommunityNum('我的公众号',CommType.publicAcc,'').then((r:string) => {
                 this.props.pubNum = r;
                 setStore('pubNum',r);
@@ -205,10 +220,14 @@ export class UserDetail extends Widget {
      * 关注用户
      */
     public followUser() {
-        follow(this.props.num).then(r => {
-            this.props.followed = !this.props.followed;
-            this.paint();
-        });
+        if (this.props.followed) {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
+                follow(this.props.num);
+            });
+        } else {
+            follow(this.props.num);
+        }
+        
     }
 
     /**
@@ -223,15 +242,116 @@ export class UserDetail extends Widget {
             });
         });
     }
+    /**
+     * 点赞
+     */
+    public likeBtn(i:number) {
+        const v = this.props.postList[i];
+        v.likeActive = !v.likeActive;
+        v.likeCount += v.likeActive ? 1 :-1;
+        this.paint();
+        postLaud(v.key.num, v.key.id, () => {
+            // 失败了则撤销点赞或取消点赞操作
+            v.likeActive = !v.likeActive;
+            v.likeCount += v.likeActive ? 1 :-1;
+            this.paint();
+        });
+    }
 
+    /**
+     * 评论
+     */
+    public commentBtn(i:number) {
+        const v = this.props.postList[i];
+        popNew('chat-client-app-view-info-editComment',{ key:v.key },() => {
+            v.commentCount ++;
+            this.paint();
+            popNew('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
+        });
+    }
+
+    /**
+     * 删除
+     */
+    public delPost(i:number) {
+        this.props.postList.splice(i,1);
+        this.paint();
+    }
+    
+    /**
+     * 查看详情
+     */
+    public goDetail(i:number) {
+        popNew('chat-client-app-view-info-postDetail',{ ...this.props.postList[i],showAll:true });
+    }
+
+    /**
+     * 展示操作
+     */
+    public expandTools(e:any,i:number) {
+        this.props.expandItem = e.value ? i :-1;
+        this.paint();
+    }
+
+    public pageClick() {
+        this.props.expandItem = -1;
+        this.paint();
+    }
+
+    /**
+     * 组装squareItem的数据
+     */
+    public dealData(v:any,r:boolean,t:boolean) {
+        return { 
+            ...v,
+            showUtils: r,
+            followed: t
+        };
+    }
+
+    // 更新信息
+    public updateData() {
+        this.setProps(this.props);
+        this.paint();
+    }
+
+    /**
+     * 滚动加载更多帖子
+     */
+    public scrollPage() {
+        const page = document.getElementById('userDetailPage');
+        const contain = document.getElementById('userDetailContain');
+        if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.props.postList.length % 20 === 0) {
+            this.props.refresh = false;
+            let list = this.props.postList;
+            getUserPostList(this.props.num,list[list.length - 1].key.id).then((r:any) => {
+                this.props.refresh = true;
+                list = list.concat(r.list);
+                this.props.postList = list;
+                this.paint();
+            });
+        }
+    }
+    
     public destroy() {
         super.destroy();
         const sid = getStore(`uid`);
         if (sid !== this.props.uid) {
-            unregister(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.updateAlias);
+            unregister(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.bindUpdate);
+            unregister(`followNumList/${sid}`,this.bindUpdate);
         }
 
         return true;
+    }
+
+    // 去好友的公众号
+    public goHisPublic() {
+        popNew('chat-client-app-view-person-publicHome',{ uid:this.props.userInfo.uid,pubNum:this.props.userInfo.comm_num });
+    }
+
+    // 去聊天
+    public goChat() {
+        popNew('chat-client-app-view-chat-chat', { id: this.props.userInfo.uid, chatType: GENERATOR_TYPE.USER });
     }
 }
 

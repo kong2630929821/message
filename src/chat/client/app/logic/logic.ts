@@ -206,15 +206,12 @@ export const enum INFLAG  {
 }
 
 // 举报用户
-export const complaintUser = (name:string) => {
+export const complaintUser = (name:string,sex:number,avatar:string,msg:string) => {
     const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
     popNew('chat-client-app-widget-complaint-complaint'
-        ,{ title:'',content:content }
+        ,{ title:name,content,sex,avatar,msg }
         ,(selected) => {
-            if (selected.length === 0) {// 未选择举报类型不能举报
-                popNewMessage('您未选择举报类型');
-            }
-
+    
             let mess = `举报用户@${name}`;
             for (const i of selected) {
                 mess += `“${content[i]}”`; 
@@ -255,9 +252,9 @@ export const buildupImgPath = (url:string) => {
     return url;
 };
 
-export const messageData = [[],[],[],[]];
 // 处理消息通知
 export const deelNotice = (arr:any,fg:string) => {
+    const messageData = store.getStore('messageData',[[],[],[],[]]);
     if (fg === store.GENERATORTYPE.NOTICE_1) {
         messageData[0] = arr;
     } else if (fg === store.GENERATORTYPE.NOTICE_2) {
@@ -269,6 +266,7 @@ export const deelNotice = (arr:any,fg:string) => {
     }
 
     const dataList = [];
+    store.getStore('messageData',messageData);
     messageData.forEach(v => {
         if (v[0] && v[0].length) {
             dataList.push(...v);
@@ -287,9 +285,20 @@ export const getMessageIndex = (arr:any) => {
     const data = store.getStore('noticeList',[]);
     let index = -1;
     data.forEach((v,i) => {
-        if (arr[0] === v[0] && arr[1] === v[1] && arr[2] === v[2]) {
-            index = i;
+        if (arr[2] === store.GENERATORTYPE.NOTICE_3 && arr[0] === v[0] && arr[2] === v[2] && arr[3] === v[3] && arr[4] === v[4]) {
+            // 当前已读的是点赞消息
+            if (arr[1] === v[1]) {
+                index = i;
+            } else {
+                index = i - 1;
+            }
+           
+        } else {
+            if (arr[0] === v[0] && arr[1] === v[1] && arr[2] === v[2]) {
+                index = i;
+            }
         }
+        
     });
 
     return index;
@@ -301,6 +310,7 @@ export const setNoticeList = (itype:string,storeStr:string,arr:any) => {
     if (itype === store.GENERATORTYPE.NOTICE_3) {
         let flags = -1;
         list.forEach((v,i) => {
+            // 相同的则替换
             if (v[0] === arr[0] && v[2] === arr[2] && v[3] === arr[3] && v[4] === arr[4]) {
                 flags = i;
             }
@@ -340,4 +350,30 @@ export const delNotice = (itype:string,data:any) => {
     store.setStore(itype,list);
     store.setStore('noticeList',noticeList);
     store.setStore('lastReadNotice',indexDbNotice);
+};
+
+export const NOTICESET = 'noticeSet';// 消息通知设置标志
+
+// 获取好友群聊信息
+export const getFriendsInfo = () => {
+    const uid = store.getStore('uid');
+    const userInfos = store.getStore('userInfoMap',[]);
+    const friendIdList = store.getStore('contactMap',[]);
+    const groupList = store.getStore('groupInfoMap',[]);
+    const fId = friendIdList.size ? friendIdList.get(`${uid}`).friends :[];
+    const gId = friendIdList.size ? friendIdList.get(`${uid}`).group :[];
+    const friends = new Map();
+    const groups = new Map();
+    for (const [key,value] of userInfos) {
+        if (fId.indexOf(value.uid) !== -1) {
+            friends.set(key,value);
+        }
+    }
+    for (const [key,value] of groupList) {
+        if (gId.indexOf(value.uid) !== -1) {
+            groups.set(key,value);
+        }
+    }
+
+    return { friends,groups };
 };

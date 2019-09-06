@@ -1,6 +1,6 @@
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
-import { popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -30,6 +30,7 @@ interface Props {
     isMine:boolean;  // 是否本人发的帖
     urlPath:string;  // 图片路径前
     timeFormat:any;  // 时间处理
+    fgStatus:boolean;// 关注动画
 }
 /**
  * 广场帖子
@@ -57,7 +58,8 @@ export class SquareItem extends Widget {
         gender:1,   // 性别 0男 1女
         isMine:false,
         urlPath:uploadFileUrlPrefix,
-        timeFormat:timestampFormat
+        timeFormat:timestampFormat,
+        fgStatus:false
     };
 
     public setProps(props:any) {
@@ -138,7 +140,8 @@ export class SquareItem extends Widget {
      */
     public complaint(e:any) {
         this.closeUtils(e);
-        complaintUser(this.props.username);
+        const avatar = this.props.avatar ? this.props.urlPath + this.props.avatar :'../../res/images/user_avatar.png';
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content);
     }
 
     /**
@@ -146,9 +149,13 @@ export class SquareItem extends Widget {
      */
     public delPost(e:any) {
         this.closeUtils(e);
-        delPost(this.props.key.num,this.props.key.id).then(r => {
-            notify(e.node,'ev-delBtn',{ value:this.props.key });
+        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除',content:'确定删除该动态或文章？' },() => {
+            delPost(this.props.key.num,this.props.key.id).then(r => {
+                notify(e.node,'ev-delBtn',{ value:this.props.key });
+                this.paint();
+            });
         });
+        
     }
 
     /**
@@ -156,7 +163,21 @@ export class SquareItem extends Widget {
      */
     public followUser(e:any) {
         this.closeUtils(e);
-        follow(this.props.key.num);
+        if (this.props.followed) {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
+                follow(this.props.key.num);
+            });
+        } else {
+            this.props.fgStatus = true;
+            this.paint();
+            setTimeout(() => {
+                this.props.fgStatus = false;
+                popNewMessage('关注成功');
+                follow(this.props.key.num);
+            },400);
+            
+        }
+        
     }
 
     /**
