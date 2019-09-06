@@ -229,54 +229,16 @@ export const addPostPort = (arg: AddPostArg): PostKey => {
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
     const community = communityBaseBucket.get(arg.num)[0];
     console.log('!!!!!!!!!!!!!!!!!!addPostPort communityBase',arg,community);
-    const key = new PostKey();
+    let key = new PostKey();
     key.num = arg.num;
     key.id = getIndexID(CONSTANT.POST_INDEX, 1);
     // 不能用别人的社区账号发帖
     if (community && community.owner !== uid) {
         key.num = '';
-
+        
         return key;
     }
-    const PostBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const value = new Post();
-    value.key = key;
-    value.title = arg.title;
-    value.body = arg.body;
-    value.post_type = arg.post_type;
-    value.owner = uid;
-    value.createtime = Date.now().toString().toString();
-    value.state = CONSTANT.NORMAL_STATE;
-    // 检查帖子是否存在
-    if (!PostBucket.get(key)[0]) {
-        // 写入帖子
-        if (PostBucket.put(key, value)) {
-            // 写入社区的帖子
-            const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
-            let communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
-            console.log('!!!!!!!!!!!!!!!!!!communityPost',communityPost);
-            if (!communityPost) {
-                communityPost = new CommunityPost();
-                communityPost.num = arg.num;
-                communityPost.id_list = [];
-            }
-            communityPost.id_list.push(key.id);
-            communityPostBucket.put(arg.num, communityPost);
-            // 初始化计数表
-            const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
-            const postCount = new PostCount();
-            postCount.key = key;
-            postCount.likeList = [];
-            postCount.collectList = [];
-            postCount.commentList = [];
-            postCount.forwardList = [];
-            if (postCountBucket.put(key, postCount)) {
-
-                return key;
-            }
-        }
-    }
-    key.num = '';
+    key = addPost(uid, arg, key);
 
     return key;
 };
@@ -303,56 +265,8 @@ export const getPostInfoByIds = (postKeyList: PostKeyList): PostArr => {
 // #[rpc=rpcServer]
 export const postLaudPost = (postKey: PostKey): boolean => {
     const uid = getUid();
-    // 点赞计数表
-    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
-    // 点赞记录
-    const postLaudLogBucket = new Bucket(CONSTANT.WARE_NAME, PostLaudLog._$info.name);
-    // 获取用户是否已经点赞
-    const logKey = new PostLaudLogKey();
-    logKey.uid = uid;
-    logKey.num = postKey.num;
-    logKey.post_id = postKey.id;
-    const logR = postLaudLogBucket.get(logKey)[0];
-    console.log('!!!!!!!!!!!!!!!!postLaudPost logR',logR);
-    if (!logR) {
-        // 不存在则添加点赞记录
-        const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
-        postCount.likeList.push(uid);
-        // 添加计数
-        if (!postCountBucket.put(postKey, postCount)) {
-            
-            return false;
-        }
-        // 添加记录
-        const postLaudLog = new PostLaudLog();
-        postLaudLog.key = logKey;
-        postLaudLog.createtime = Date.now().toString();
-        addLaudIndex(uid,postKey.id,postKey.num,true);
-        // 推送
-        const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-        const post = postBucket.get<PostKey, Post[]>(postKey)[0];
-        if (!post) return false;
-        const fuid = post.owner;
-        if (uid !== fuid) send(fuid, CONSTANT.SEND_POST_LAUD, JSON.stringify(postLaudLog));
-
-        return postLaudLogBucket.put(logKey, postLaudLog);
-    } else {
-        // 已经点赞则取消
-        const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
-        // 从用户点赞列表中删除uid
-        const index = postCount.likeList.indexOf(uid);
-        if (index >= 0) postCount.likeList.splice(index, 1);
-        // 添加计数
-        if (!postCountBucket.put(postKey, postCount)) {
-            
-            return false;
-        }
-        // 删除记录
-        addLaudIndex(uid,postKey.id,postKey.num,false);
-
-        return postLaudLogBucket.delete(logKey);
-    }
-
+    
+    return postLaud(uid, postKey);
 };
 
 /**
@@ -552,60 +466,8 @@ export const deletePost = (postKey: PostKey): number => {
 export const addCommentPost = (arg: AddCommentArg): CommentKey => {
     console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost', arg);
     const uid = getUid();
-    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
-    const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
-    const key = new CommentKey();
-    key.num = arg.num;
-    key.post_id = arg.post_id;
-    key.id = getIndexID(CONSTANT.COMMENT_INDEX, 1);
-    const value = new Comment();
-    value.key = key;
-    value.comment_type = arg.comment_type;
-    value.msg = arg.msg;
-    value.likeCount = 0;
-    value.reply = arg.reply;
-    value.owner = uid;
-    value.createtime = Date.now().toString();
-    // 检查评论是否存在
-    if (!commentBucket.get(key)[0]) {
-        const postkey = new PostKey();
-        postkey.id = arg.post_id;
-        postkey.num = arg.num;
-        const postCount = postCountBucket.get<PostKey, PostCount[]>(postkey)[0];
-        console.log('!!!!!!!!!!!!!!!!!!!!!!commentList', postCount);
-        postCount.commentList.push(key.id);
-        // 添加评论计数
-        if (!postCountBucket.put(postkey, postCount)) {
-            key.num = '';
-            
-            return key;
-        }
-        // 添加评论记录
-        if (commentBucket.put(key, value)) {
-            if (arg.reply === 0) {
-                // 评论帖子,推送给发帖人
-                const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-                const post = postBucket.get<PostKey, Post[]>(postkey)[0];
-                if (!post) return;
-                const fuid = post.owner;
-                if (uid !== fuid) send(fuid, CONSTANT.SEND_COMMENT, JSON.stringify(value));
-            } else {
-                // 评论帖子的评论,推送给原评论者
-                const originCommentKey = new CommentKey();
-                originCommentKey.post_id = arg.post_id;
-                originCommentKey.num = arg.num;
-                originCommentKey.id = arg.reply;
-                const originComment = commentBucket.get<CommentKey, Comment[]>(originCommentKey)[0];
-                const fuid1 = originComment.owner;
-                if (uid !== fuid1) send(fuid1, CONSTANT.SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
-            }
-           
-            return key;
-        }
-    }
-    key.num = '';
     
-    return key;
+    return addComment(uid, arg);
 };
 
 /**
@@ -1091,6 +953,171 @@ export const userfollow = (uid: number, communityNum:string):boolean => {
     }
    
     return false;   
+};
+
+/**
+ * 发帖
+ * @param uid uid
+ * @param arg 发帖参数
+ * @param key 帖子主键
+ */
+export const addPost = (uid: number, arg: AddPostArg, key: PostKey): PostKey => {
+    const PostBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const value = new Post();
+    value.key = key;
+    value.title = arg.title;
+    value.body = arg.body;
+    value.post_type = arg.post_type;
+    value.owner = uid;
+    value.createtime = Date.now().toString().toString();
+    value.state = CONSTANT.NORMAL_STATE;
+    // 检查帖子是否存在
+    if (!PostBucket.get(key)[0]) {
+        // 写入帖子
+        if (PostBucket.put(key, value)) {
+            // 写入社区的帖子
+            const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
+            let communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
+            console.log('!!!!!!!!!!!!!!!!!!communityPost',communityPost);
+            if (!communityPost) {
+                communityPost = new CommunityPost();
+                communityPost.num = arg.num;
+                communityPost.id_list = [];
+            }
+            communityPost.id_list.push(key.id);
+            communityPostBucket.put(arg.num, communityPost);
+            // 初始化计数表
+            const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+            const postCount = new PostCount();
+            postCount.key = key;
+            postCount.likeList = [];
+            postCount.collectList = [];
+            postCount.commentList = [];
+            postCount.forwardList = [];
+            if (postCountBucket.put(key, postCount)) {
+
+                return key;
+            }
+        }
+    }
+    key.num = '';
+
+    return key;
+};
+
+/**
+ * 帖子点赞
+ */
+export const postLaud = (uid: number, postKey: PostKey): boolean => {
+    // 点赞计数表
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    // 点赞记录
+    const postLaudLogBucket = new Bucket(CONSTANT.WARE_NAME, PostLaudLog._$info.name);
+    // 获取用户是否已经点赞
+    const logKey = new PostLaudLogKey();
+    logKey.uid = uid;
+    logKey.num = postKey.num;
+    logKey.post_id = postKey.id;
+    const logR = postLaudLogBucket.get(logKey)[0];
+    console.log('!!!!!!!!!!!!!!!!postLaudPost logR',logR);
+    if (!logR) {
+        // 不存在则添加点赞记录
+        const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
+        postCount.likeList.push(uid);
+        // 添加计数
+        if (!postCountBucket.put(postKey, postCount)) {
+            
+            return false;
+        }
+        // 添加记录
+        const postLaudLog = new PostLaudLog();
+        postLaudLog.key = logKey;
+        postLaudLog.createtime = Date.now().toString();
+        addLaudIndex(uid,postKey.id,postKey.num,true);
+        // 推送
+        const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+        const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+        if (!post) return false;
+        const fuid = post.owner;
+        if (uid !== fuid) send(fuid, CONSTANT.SEND_POST_LAUD, JSON.stringify(postLaudLog));
+
+        return postLaudLogBucket.put(logKey, postLaudLog);
+    } else {
+        // 已经点赞则取消
+        const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postKey)[0];
+        // 从用户点赞列表中删除uid
+        const index = postCount.likeList.indexOf(uid);
+        if (index >= 0) postCount.likeList.splice(index, 1);
+        // 添加计数
+        if (!postCountBucket.put(postKey, postCount)) {
+            
+            return false;
+        }
+        // 删除记录
+        addLaudIndex(uid,postKey.id,postKey.num,false);
+
+        return postLaudLogBucket.delete(logKey);
+    }
+};
+
+/**
+ * 添加评论
+ */
+export const addComment = (uid: number, arg: AddCommentArg): CommentKey => {
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
+    const key = new CommentKey();
+    key.num = arg.num;
+    key.post_id = arg.post_id;
+    key.id = getIndexID(CONSTANT.COMMENT_INDEX, 1);
+    const value = new Comment();
+    value.key = key;
+    value.comment_type = arg.comment_type;
+    value.msg = arg.msg;
+    value.likeCount = 0;
+    value.reply = arg.reply;
+    value.owner = uid;
+    value.createtime = Date.now().toString();
+    // 检查评论是否存在
+    if (!commentBucket.get(key)[0]) {
+        const postkey = new PostKey();
+        postkey.id = arg.post_id;
+        postkey.num = arg.num;
+        const postCount = postCountBucket.get<PostKey, PostCount[]>(postkey)[0];
+        console.log('!!!!!!!!!!!!!!!!!!!!!!commentList', postCount);
+        postCount.commentList.push(key.id);
+        // 添加评论计数
+        if (!postCountBucket.put(postkey, postCount)) {
+            key.num = '';
+            
+            return key;
+        }
+        // 添加评论记录
+        if (commentBucket.put(key, value)) {
+            if (arg.reply === 0) {
+                // 评论帖子,推送给发帖人
+                const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+                const post = postBucket.get<PostKey, Post[]>(postkey)[0];
+                if (!post) return;
+                const fuid = post.owner;
+                if (uid !== fuid) send(fuid, CONSTANT.SEND_COMMENT, JSON.stringify(value));
+            } else {
+                // 评论帖子的评论,推送给原评论者
+                const originCommentKey = new CommentKey();
+                originCommentKey.post_id = arg.post_id;
+                originCommentKey.num = arg.num;
+                originCommentKey.id = arg.reply;
+                const originComment = commentBucket.get<CommentKey, Comment[]>(originCommentKey)[0];
+                const fuid1 = originComment.owner;
+                if (uid !== fuid1) send(fuid1, CONSTANT.SEND_COMMENT_TO_COMMENT, JSON.stringify(value));
+            }
+           
+            return key;
+        }
+    }
+    key.num = '';
+    
+    return key;
 };
 
 /**
