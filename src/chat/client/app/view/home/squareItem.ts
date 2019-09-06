@@ -1,6 +1,6 @@
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
-import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
+import { popModalBoxs } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -184,7 +184,7 @@ export class SquareItem extends Widget {
      * 分享文章
      */
     public shareArt() {
-        popNew('chat-client-app-view-person-friendList',null,(r) => {
+        popNew3('chat-client-app-view-person-friendList',null,(r) => {
             console.log('11111111111111111111',r);
             sendUserMsg(r,JSON.stringify(this.props),MSG_TYPE.Article).then((res:any) => {
                 updateUserMessage(r, res);
@@ -193,5 +193,16 @@ export class SquareItem extends Widget {
                 popNewMessage('分享失败');
             });
         });
+    }
+
+    /**
+     * 查看大图
+     */
+    public showBigImg(ind:number){
+        const val:any = this.props.imgs[ind];
+        popNew3('chat-client-app-widget-bigImage-bigImage',{
+            img: this.props.urlPath + val.compressImg,
+            originalImg: this.props.urlPath + val.originalImg
+        })
     }
 }

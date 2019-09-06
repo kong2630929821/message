@@ -1,11 +1,11 @@
 
 import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
-import { deepCopy } from '../../../../../app/store/memstore';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
 import { getFriendAlias, getFriendsInfo, getUserAvatar, rippleShow, timestampFormat } from '../../logic/logic';
-import { applyToGroup, applyUserFriend, follow, getUserPostList, searchAllArticle, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
+import { applyToGroup, applyUserFriend, follow, searchAllArticle, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
+import { deepCopy } from '../../../../../pi/util/util';
 
 interface Props {
     sreachTab:any;// 搜索选项卡

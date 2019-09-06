@@ -246,8 +246,7 @@ export const sendImage = (e:any) => {
                 };
 
                 imgResize(buffer,(res) => {  // 压缩图片
-                    value.compressImg = res.base64;
-                    // { compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }
+                    value.compressImg = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
                     // 预览图片
                     notify(e.node,'ev-send-before',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) });
                     
@@ -292,8 +291,7 @@ export const sendPicture = (e:any) => {
                     originalImg:''
                 };
                 imgResize(buffer,(res) => {
-                    value.compressImg = res.base64;
-                    // { compressImg:`<img src="${res.base64}" alt="img" class='imgMsg'></img>` }
+                    value.compressImg = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
                     // 预览图片
                     notify(e.node,'ev-send-before',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) }); 
 
