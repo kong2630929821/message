@@ -254,11 +254,13 @@ const parseEmoji = (msg:any) => {
 const parseImg = (msg:any) => {    
     const mess = JSON.parse(msg.msg);
     // 预览图片不解析
-    if(msg.msg.compressImg.indexOf('<img') === -1){
+    if(mess.compressImg.indexOf('<div') === -1){
         msg.msg = {
             compressImg: `<img src="${uploadFileUrlPrefix}${mess.compressImg}" alt="img" class='imgMsg'></img>`,
             originalImg: uploadFileUrlPrefix + mess.originalImg
         };
+    }else{
+        msg.msg = mess;
     }
 
     return msg;
