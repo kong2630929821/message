@@ -2,21 +2,23 @@
     <div w-class="pullup-bswrapper" >
         <div  w-class="pullup-scroller">
             <div w-class="pulldown-wrapper">
-                {{if it.beforePullDown}}
-                    <div>
-                        <span>下拉刷新</span>
-                    </div>
-                    {{else}}
-                    {{if !it.beforePullDown}}
-                    <div>
-                        {{if it.isPullingDown}}
+                {{if it.createPullDown}}
+                    {{if it.beforePullDown}}
                         <div>
-                            <span>正在刷新</span>
+                            <span>下拉刷新</span>
                         </div>
-                        {{else}}
-                        <div><span>刷新成功</span></div>
+                    {{else}}
+                        {{if !it.beforePullDown}}
+                        <div>
+                            {{if it.isPullingDown}}
+                            <div>
+                                <span>正在刷新</span>
+                            </div>
+                            {{else}}
+                            <div><span>刷新成功</span></div>
+                            {{end}}
+                        </div>
                         {{end}}
-                    </div>
                     {{end}}
                 {{end}}
             </div>
@@ -58,9 +60,10 @@
                         </div>
                     {{end}}
                 </div>
+   
             </div>
                 
-
+                {{if it.createPullUp}}
                 <div  w-class="pullup-wrapper">
                     {{if !it.isPullUpLoad}}
                     <div  w-class="before-trigger">
@@ -72,7 +75,7 @@
                     </div>
                     {{end}}
                 </div>
-     
+                {{end}}
         </div>
     </div>
 </div>

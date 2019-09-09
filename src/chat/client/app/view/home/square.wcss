@@ -60,21 +60,33 @@
 }
 
 .pullup{
-    height: 100%;
+    height: 110%;
     display: flex;
 }
   
 .pullup-bswrapper{
-    width: 100%;
-    flex: 1 0 0;
+	width: 100%;
+    flex: 1;
 	padding: 0 10px;
-	border: 1px solid #ccc;
-    overflow: hidden;
-    margin-bottom: 260px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+	overflow: hidden;
 }
 
 .pullup-list{
 	padding: 0;
+}
+  
+.pullup-list-item{
+	padding: 10px 0;
+	list-style: none;
+	border-bottom: 1px solid #ccc;
+}
+
+.pullup-wrapper{
+	padding: 20px;
+	text-align: center;
+	color: #999;
 }
 .pullup-wrapper{
 	padding: 20px;
