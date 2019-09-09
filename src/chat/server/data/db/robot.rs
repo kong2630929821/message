@@ -1,4 +1,4 @@
-
+use community.s::{PostKey};
 /**
  * 虚拟用户id索引
  */
@@ -65,6 +65,15 @@ struct RobotActiveSwitch {
 struct CommonComment {
     msg: String , // 评论内容
     weight: u32, //权重
+}
+
+/**
+ * 帖子下虚拟用户数量
+ */
+#[primary=post_key,db=file,dbMonitor=true]
+struct PostRobotNum {
+    post_key: PostKey , // 帖子主键
+    count: u32, //虚拟用户数量
 }
 
 struct AddCommonComment {

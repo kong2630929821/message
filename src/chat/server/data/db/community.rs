@@ -5,6 +5,7 @@
 struct CommunityBase {
     num: String,            //社区编号
     name: String,           //社区名
+    avatar: String,         //头像
     desc: String,           //简介
     comm_type: u8,          //社区类型-公众号、个人、好嗨号
     property: String,       //属性 公共、登录即可访问、私有  
@@ -180,4 +181,11 @@ struct CommunityAccIndex{
 struct FansIndex{
     num: String,              // 用户ID
     list: &[String]           // 粉丝社区编号列表
+}
+
+// 公众号名索引表
+#[primary=name,db=file,dbMonitor=true]
+struct PublicNameIndex{
+    name: String,        // 公众号名
+    num: String          // 社区编号
 }
