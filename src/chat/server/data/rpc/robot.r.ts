@@ -118,7 +118,8 @@ export const robotActive = () => {
     console.log('!!!!!!!!!!!!accountGenerator:', accountGenerator);
     if (!accountGenerator) return false;
     const robotMaxId = accountGenerator.currentIndex;
-    const robotId = randomInt(1, robotMaxId);
+    // const robotId = randomInt(1, robotMaxId);
+    const robotId = 22;
     const robotIndexBucket = new Bucket(CONSTANT.WARE_NAME, RobotIndex._$info.name);
     const robotIndex = robotIndexBucket.get<number, RobotIndex[]>(robotId)[0];
     console.log('!!!!!!!!!!!!robotIndex:', robotIndex);
@@ -139,7 +140,7 @@ export const robotActive = () => {
     } else {
         // 遍历最近的帖子 随机从最近n条帖子选择一条
         const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-        const iter = postBucket.iter(null, false);
+        const iter = postBucket.iter(null, true);
         let count = randomInt(0, CONSTANT.LAST_POST_NUM);
         do {
             const v = iter.next();
@@ -150,10 +151,10 @@ export const robotActive = () => {
             const postRobotNum = postRobotNumBucket.get<PostKey, PostRobotNum[]>(post.key)[0];
             if (postRobotNum && postRobotNum.count >= CONSTANT.MAX_POST_ROBOTS) break; // 帖子下虚拟用户人数超过限制 
             if (post.state === CONSTANT.DELETE_STATE) continue;
-            if (activeId < 2) { // 点赞
-                r = robotLaud(robotIndex, post.key);
-            } else { // 评论
+            if (activeId < 2) { // 评论
                 r = robotComment(robotIndex, post.key);
+            } else { // 点赞
+                r = robotLaud(robotIndex, post.key);
             }
             count --;
         } while (iter);
@@ -176,16 +177,26 @@ const robotPost = (robotIndex: RobotIndex, num: string): boolean => {
         getRobotWeiboInfo(robotIndex.rid);
     }
     userWeiboInfo = userWeiboInfoBucket.get<number, UserWeiboInfo[]>(robotIndex.rid)[0];
-    console.log('!!!!!!!!!!!!userWeiboInfo:', userWeiboInfo);
+    console.log('!!!!!!!!!!!!userWeiboInfo:', robotIndex.rid, userWeiboInfo);
     if (userWeiboInfo.weibo_list.length === 0) return false;
     // 发送动态
     const wid = userWeiboInfo.weibo_list[0]; // 最新的微博
     const weiboInfo = weiboInfoBucket.get<string, WeiboInfo[]>(wid)[0];
     if (!weiboInfo) return false;
-    const value = {
-        msg:weiboInfo.content,
-        imgs:weiboInfo.imgs
+    const value: any = {
+        msg: '',
+        imgs: []
     };
+    value.msg = weiboInfo.content;
+    for (let i = 0; i < weiboInfo.imgs.length; i++) {
+        const Image = {
+            compressImg: '',
+            originalImg: ''
+        };
+        Image.compressImg = weiboInfo.imgs[i];
+        Image.originalImg = weiboInfo.imgs[i];
+        value.imgs.push(Image);
+    }
     const postArg = new AddPostArg();
     postArg.title = '';
     postArg.num = num;
@@ -226,7 +237,7 @@ const robotComment = (robotIndex: RobotIndex, postKey: PostKey): boolean => {
     const addCommentArg = new AddCommentArg();
     // 遍历通用评论表
     const commonCommentBucket = new Bucket(CONSTANT.WARE_NAME, CommonComment._$info.name);
-    const iter = commonCommentBucket.iter(null, false);
+    const iter = commonCommentBucket.iter(null, true);
     // let count = randomInt(0, CONSTANT.LAST_POST_NUM);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const comment_list = [];
@@ -241,7 +252,11 @@ const robotComment = (robotIndex: RobotIndex, postKey: PostKey): boolean => {
         }       
     } while (iter);
     const max = comment_list.length;
-    addCommentArg.msg = comment_list[randomInt(0, max)];
+    const value = {
+        msg:comment_list[randomInt(0, max - 1)],
+        img:''
+    };
+    addCommentArg.msg = JSON.stringify(value);
     addCommentArg.comment_type = 0; 
     addCommentArg.num = postKey.num;
     addCommentArg.post_id = postKey.id;
@@ -325,23 +340,27 @@ export const weiboDataFilter = (weibo_infos: any, rid: number): any => {
         if (weibo_infos[i].original_pictures !== '无') {
             const publish_time = weibo_infos[i].publish_time;
             const date = publish_time.split(' ')[0];
-            console.log('publish_time =====',date);
             const date1 = date.split('-');
+            console.log('publish_time =====',date1);
             if (date1.length === 3) {
-                const file_prefix = `${date1[0]}${date1[1]}${date1[2]}_${weibo_infos[i].id}`;
-                const origin_urls = weibo_infos[i].original_pictures.split(',');
-                if (origin_urls.length > 1) {
+                const file_prefix = `${CONSTANT.WEIBO_SPIDER_HOST}${CONSTANT.SPIDER_WEIBO_IMG}${date1[0]}${date1[1]}${date1[2]}_${weibo_infos[i].id}`;
+                console.log('origin_urls =====', weibo_infos[i].original_pictures);
+                const origin_urls = weibo_infos[i].original_pictures;
+                if (typeof(origin_urls) === 'object' && origin_urls.length > 1) {
                     // 图片命名规则：日期+微博id 
                     let file_prefixs = `${CONSTANT.WEIBO_SPIDER_HOST}${CONSTANT.SPIDER_WEIBO_IMG}${file_prefix}_1.jpg`;
+                    console.log('file_prefixs =====',file_prefixs);
                     for (let index = 1; index < origin_urls.length; index++) {
                         file_prefixs = `${file_prefixs},${file_prefix}_${index + 1}.jpg`;
                     }
                     weibo_infos[i].original_pictures = file_prefixs;
                 } else {
-                    weibo_infos[i].original_pictures = `${CONSTANT.WEIBO_SPIDER_HOST}${CONSTANT.SPIDER_WEIBO_IMG}${file_prefix}.jpg`;
+                    weibo_infos[i].original_pictures = `${file_prefix}.jpg`;
                 }
+                console.log('origin_urls22222222222222222 =====', weibo_infos[i].original_pictures);
             }
             weiboInfo.imgs = weibo_infos[i].original_pictures.split(',');
+            console.log(' weiboInfo.imgs =====', weiboInfo.imgs);
         } else {
             weiboInfo.imgs = [];
         }
@@ -351,7 +370,6 @@ export const weiboDataFilter = (weibo_infos: any, rid: number): any => {
         weiboInfo.content = weibo_infos[i].content;
         weiboInfo.publish_tool = weibo_infos[i].publish_tool;
         weiboInfo.time = new Date(weibo_infos[i].publish_time).getTime().toString();
-        console.log('weiboInfo =====',weiboInfo);
         weiboInfoBucket.put(weiboInfo.wid, weiboInfo);
         userWeiboInfo.weibo_list.push(weiboInfo.wid);
         console.log('userWeiboInfo111111111111 =====',userWeiboInfo);
@@ -366,6 +384,13 @@ export const weiboDataFilter = (weibo_infos: any, rid: number): any => {
 export const weiboTypeFilter = (weibo_type: string): boolean => {
     if (weibo_type.indexOf('微博') >= 0) return true;
     if (weibo_type.indexOf('活动') >= 0) return true;
+    if (weibo_type.indexOf('任务') >= 0) return true;
+    if (weibo_type.indexOf('超话') >= 0) return true;
+    if (weibo_type.indexOf('应用') >= 0) return true;
+    if (weibo_type.indexOf('生日') >= 0) return true;
+    if (weibo_type.indexOf('联通') >= 0) return true;
+    if (weibo_type.indexOf('移动') >= 0) return true;
+    if (weibo_type.indexOf('电信') >= 0) return true;
     switch (weibo_type) {
         case 'ShareSDK':
             return true;
