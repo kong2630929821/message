@@ -118,8 +118,8 @@ export const robotActive = () => {
     console.log('!!!!!!!!!!!!accountGenerator:', accountGenerator);
     if (!accountGenerator) return false;
     const robotMaxId = accountGenerator.currentIndex;
-    // const robotId = randomInt(1, robotMaxId);
-    const robotId = 22;
+    const robotId = randomInt(1, robotMaxId);
+    // const robotId = 22;
     const robotIndexBucket = new Bucket(CONSTANT.WARE_NAME, RobotIndex._$info.name);
     const robotIndex = robotIndexBucket.get<number, RobotIndex[]>(robotId)[0];
     console.log('!!!!!!!!!!!!robotIndex:', robotIndex);
