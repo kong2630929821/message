@@ -90,7 +90,7 @@
     <div w-class="btns">
         {{if !it.isFriend}}
         <div w-class="btn" on-tap="addUser">+好友</div>
-        {{else}}
+        {{elseif !it.isOwner}}
         <div w-class="btn" on-tap="goChat">聊天</div>
         {{end}}
         {{if !it.followed}}
