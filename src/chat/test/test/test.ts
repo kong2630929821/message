@@ -294,7 +294,7 @@ export const searchPostTest = () => {
 // 添加机器人
 export const getRobotUserInfoTest = () => {
     // tslint:disable-next-line:prefer-template
-    const src = `${WEIBO_SPIDER_HOST}${SPIDER_USER_INFO}?user_id=${2808306097}&count=${10}`;
+    const src = `${WEIBO_SPIDER_HOST}${SPIDER_USER_INFO}?user_id=${5498972025}&count=${20}`;
     console.log('==========开始爬取用户数据==========');
     const imageSrc = 'https://picsum.photos/200/200';
 

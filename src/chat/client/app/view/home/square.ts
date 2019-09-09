@@ -21,9 +21,11 @@ interface Props {
     dealData:any;  // 组装数据
     refresh:boolean; // 是否可以请求更多数据
 
-    beforePullDown:boolean;
-    isPullingDown:boolean;
-    isPullUpLoad:boolean;
+    beforePullDown:boolean;// 下拉前样式
+    isPullingDown:boolean;// 是否开始下拉
+    isPullUpLoad:boolean;// 是否已经下拉
+    createPullUp:boolean;// 上拉创建时样式
+    createPullDown:boolean;// 下拉创建时样式
 }
 export const TagList = ['广场','关注','公众号','热门'];
 BScroll.use(PullDown);
@@ -48,10 +50,11 @@ export class Square extends Widget {
 
         beforePullDown:true,
         isPullingDown:false,
-        isPullUpLoad:false
+        isPullUpLoad:false,
+        createPullUp:false,
+        createPullDown:false
     };
-    public bscroll:BScroll;// 下拉
-    public upBscroll:BScroll;// 上拉
+    public bscroll:BScroll;// 上下拉
     public setProps(props:any) {
         this.props = {
             ...this.props,
@@ -188,13 +191,16 @@ export class Square extends Widget {
     }
 
     // 下拉刷新
-
     public attach() {
+       // 初始化上拉下拉状态
+        this.props.createPullDown = true;
+        this.props.createPullUp = true;
         this.initBscroll();
     }
 
-    //
+    // 初始化组件
     public initBscroll() {
+        this.tree.link.children[0];
         this.bscroll = new BScroll(<HTMLElement>this.tree.link.children[0], {
             scrollY: true,
             bounceTime: TIME_BOUNCE,

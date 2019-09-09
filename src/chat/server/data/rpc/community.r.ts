@@ -2,7 +2,7 @@ import { Env } from '../../../../pi/lang/env';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import * as CONSTANT from '../constant';
-import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey } from '../db/community.s';
+import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex } from '../db/community.s';
 import { UserInfo } from '../db/user.s';
 import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getIndexID } from '../util';
@@ -19,12 +19,22 @@ declare var env: Env;
 export const createCommunityNum = (arg:CreateCommunity):string => {
     console.log('!!!!!!!!!!!!!!!!CreateCommunity',arg);
     const uid = getUid();
+    const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
     // 生成社区账号
     const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
     const r = communityBaseBucket.get(num);
     if (!r[0]) {
         const communityBase = new CommunityBase();
+        // 创建公众号添加头像
+        if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+            communityBase.avatar = arg.avatar;
+            // 判断公众号名是否重复
+            const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
+            if (publicNameIndex) return 'repeat name';
+        } else {
+            communityBase.avatar = '';
+        }
         communityBase.num = num;
         communityBase.name = arg.name;
         communityBase.desc = arg.desc;
@@ -46,9 +56,14 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
             publicAccIndex.num = num;
         } else {
+            // 添加公众号名索引
+            publicAccIndexBucket.put(uid, publicAccIndex);
+            const publicNameIndex = new PublicNameIndex();
+            publicNameIndex.name = arg.name;
+            publicNameIndex.num = num;
+            publicNameIndexBucket.put(arg.name, publicNameIndex);
             publicAccIndex.list.push(num);
         }
-        publicAccIndexBucket.put(uid, publicAccIndex);
         
         // 创建成功自动关注公众号
         userFollow(num);
@@ -335,7 +350,7 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const iter = postBucket.iter(key, false);
+    const iter = postBucket.iter(key, true);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     for (let i = 0; i < count; i++) {
@@ -536,6 +551,14 @@ export const showCommentPort = (arg: IterCommentArg) :CommentArr => {
             commentKey.num = arg.num;
             commentKey.post_id = arg.post_id;
             const com = commentBucket.get<CommentKey, Comment[]>(commentKey)[0];
+            if (com.msg === '6666666666666' || com.msg === '真棒!' || com.msg === '羡慕') {
+                const value = {
+                    msg:com.msg,
+                    img:''
+                };
+                com.msg = JSON.stringify(value);
+                commentBucket.put(commentKey, com);
+            }
             const user = new GetUserInfoReq();
             user.uids = [com.owner];
             const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
@@ -824,7 +847,7 @@ export const searchPublic = (comm: string): NumArr => {
         // 公众号id匹配
         numArr.arr.push(communityBase);
     } else { // 公众号id不匹配, 根据名称模糊查找
-        const iter = communityBaseBucket.iter(null, false);
+        const iter = communityBaseBucket.iter(null, true);
         do {
             const v = iter.next();
             if (!v) break;
@@ -847,7 +870,7 @@ export const searchPublic = (comm: string): NumArr => {
 // #[rpc=rpcServer]
 export const searchPost = (str: string): PostArr => {
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const iter = postBucket.iter(null, false);
+    const iter = postBucket.iter(null, true);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     do {
@@ -1250,7 +1273,7 @@ export const getHotPost = (arg: IterPostArg) :PostArr => {
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const iter = postBucket.iter(key, false);
+    const iter = postBucket.iter(key, true);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     // 遍历一个月内的帖子
@@ -1307,7 +1330,7 @@ export const getAllPublicPost = (arg: IterPostArg) :PostArr => {
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const iter = postBucket.iter(key, false);
+    const iter = postBucket.iter(key, true);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     // 遍历一个月内的帖子
