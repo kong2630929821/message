@@ -13,6 +13,7 @@ struct CreateCommunity {
     name: String,           //社区名
     comm_type: CommType,    //社区类型-公众号、个人、好嗨号
     desc: String,           //简介
+    avatar: Option<String>, //头像
 }
 
 //发帖

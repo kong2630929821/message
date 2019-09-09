@@ -7,7 +7,7 @@ import { Bucket } from '../../../utils/db';
 import { genNewIdFromOld } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 import { CommentKey, CommunityAccIndex, Post, PostKey } from '../db/community.s';
-import { AddCommonComment, AddRobotArg, CommonComment, RobotActiveSwitch, RobotIndex, UserWeiboInfo, WeiboInfo } from '../db/robot.s';
+import { AddCommonComment, AddRobotArg, CommonComment, PostRobotNum, RobotActiveSwitch, RobotIndex, UserWeiboInfo, WeiboInfo } from '../db/robot.s';
 import { AccountGenerator } from '../db/user.s';
 import * as http from '../http_client';
 import { getIndexID } from '../util';
@@ -110,6 +110,7 @@ export const robotActive = () => {
     const RobotActiveSwitchBucket = new Bucket(CONSTANT.WARE_NAME, RobotActiveSwitch._$info.name);
     const robotActiveSwitch = RobotActiveSwitchBucket.get<string, RobotActiveSwitch[]>('all')[0];
     const indexBucket = new Bucket(CONSTANT.WARE_NAME, AccountGenerator._$info.name);
+    const postRobotNumBucket = new Bucket(CONSTANT.WARE_NAME, PostRobotNum._$info.name);
     console.log('!!!!!!!!!!!!robotActiveSwitch:', robotActiveSwitch);
     if (!robotActiveSwitch || robotActiveSwitch.state === 0) return false;
     // 随机获取虚拟用户id
@@ -146,6 +147,8 @@ export const robotActive = () => {
             if (!v) break;
             if (count < 0) break;
             const post:Post = v[1];
+            const postRobotNum = postRobotNumBucket.get<PostKey, PostRobotNum[]>(post.key)[0];
+            if (postRobotNum && postRobotNum.count >= CONSTANT.MAX_POST_ROBOTS) break; // 帖子下虚拟用户人数超过限制 
             if (post.state === CONSTANT.DELETE_STATE) continue;
             if (activeId < 2) { // 点赞
                 r = robotLaud(robotIndex, post.key);
@@ -156,7 +159,7 @@ export const robotActive = () => {
         } while (iter);
         console.log('!!!!!!!!!!!!next loop:');
     }
-    const timeout = randomInt(1 * 30 * 1000, 2 * 30 * 1000);
+    const timeout = randomInt(1 * 60 * 1000, 3 * 60 * 1000);
     setTimeout(() => { 
         robotActive();
     }, timeout);
@@ -201,6 +204,17 @@ const robotPost = (robotIndex: RobotIndex, num: string): boolean => {
 
 // 虚拟用户点赞
 const robotLaud = (robotIndex: RobotIndex, postKey: PostKey): boolean => {
+    const postRobotNumBucket = new Bucket(CONSTANT.WARE_NAME, PostRobotNum._$info.name);
+    let postRobotNum = postRobotNumBucket.get<PostKey, PostRobotNum[]>(postKey)[0];
+    if (!postRobotNum) {
+        postRobotNum = new PostRobotNum();
+        postRobotNum.post_key = postKey;
+        postRobotNum.count = 0;
+    }
+    postRobotNum.count += 1;
+    // 增加帖子下虚拟用户人数
+    postRobotNumBucket.put(postKey, postRobotNum);
+
     console.log('!!!!!!!!!!!!robotLaud:', postKey);
     
     return postLaud(robotIndex.uid, postKey);
@@ -232,6 +246,16 @@ const robotComment = (robotIndex: RobotIndex, postKey: PostKey): boolean => {
     addCommentArg.num = postKey.num;
     addCommentArg.post_id = postKey.id;
     addCommentArg.reply = 0; 
+    // 增加帖子下虚拟用户人数
+    const postRobotNumBucket = new Bucket(CONSTANT.WARE_NAME, PostRobotNum._$info.name);
+    let postRobotNum = postRobotNumBucket.get<PostKey, PostRobotNum[]>(postKey)[0];
+    if (!postRobotNum) {
+        postRobotNum = new PostRobotNum();
+        postRobotNum.post_key = postKey;
+        postRobotNum.count = 0;
+    }
+    postRobotNum.count += 1;
+    postRobotNumBucket.put(postKey, postRobotNum);
     addComment(robotIndex.uid, addCommentArg);
 
     return true;
