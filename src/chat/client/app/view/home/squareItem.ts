@@ -1,4 +1,3 @@
-import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
@@ -28,9 +27,9 @@ interface Props {
     isPublic:boolean; // 公众号文章
     gender:number;  // 性别 0 男 1 女
     isMine:boolean;  // 是否本人发的帖
-    urlPath:string;  // 图片路径前
     timeFormat:any;  // 时间处理
     fgStatus:boolean;// 关注动画
+    buildImage:any;  // 图片路径
 }
 /**
  * 广场帖子
@@ -57,9 +56,9 @@ export class SquareItem extends Widget {
         offical:false,
         gender:1,   // 性别 0男 1女
         isMine:false,
-        urlPath:uploadFileUrlPrefix,
         timeFormat:timestampFormat,
-        fgStatus:false
+        fgStatus:false,
+        buildImage:buildupImgPath
     };
 
     public setProps(props:any) {
@@ -140,7 +139,7 @@ export class SquareItem extends Widget {
      */
     public complaint(e:any) {
         this.closeUtils(e);
-        const avatar = this.props.avatar ? this.props.urlPath + this.props.avatar :'../../res/images/user_avatar.png';
+        const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
         complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content);
     }
 
@@ -201,8 +200,8 @@ export class SquareItem extends Widget {
     public showBigImg(ind:number){
         const val:any = this.props.imgs[ind];
         popNew3('chat-client-app-widget-bigImage-bigImage',{
-            img: this.props.urlPath + val.compressImg,
-            originalImg: this.props.urlPath + val.originalImg
+            img: buildupImgPath(val.compressImg),
+            originalImg: buildupImgPath(val.originalImg)
         })
     }
 }

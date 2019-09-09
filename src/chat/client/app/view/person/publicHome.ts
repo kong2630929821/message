@@ -1,4 +1,3 @@
-import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -19,7 +18,6 @@ interface Props {
     totalPost:number;  // 总文章数
     name:string;   // 公众号名
     avatar:string;
-    urlPath:string;  // 图片路径前
 }
 
 /**
@@ -38,7 +36,6 @@ export class PublicHome extends Widget {
         totalPost:0,
         name:'',
         avatar:'',
-        urlPath:uploadFileUrlPrefix
     };
 
     public setProps(props:any) {
@@ -59,7 +56,7 @@ export class PublicHome extends Widget {
             this.props.postList = r.list.map(r => { // 动态
                 return {
                     ...r,
-                    img: JSON.parse(r.body).imgs[0] ? this.props.urlPath + JSON.parse(r.body).imgs[0] :(r.avatar ? r.avatar :'../../res/images/user_avatar.png')
+                    img: JSON.parse(r.body).imgs[0] ? buildupImgPath(JSON.parse(r.body).imgs[0]) :(r.avatar ? buildupImgPath(r.avatar) :'../../res/images/user_avatar.png')
                 };
             });  
             this.props.totalPost = r.total;
