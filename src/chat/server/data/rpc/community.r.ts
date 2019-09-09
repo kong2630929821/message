@@ -350,7 +350,7 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const iter = postBucket.iter(key, false);
+    const iter = postBucket.iter(key, true);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     for (let i = 0; i < count; i++) {
@@ -551,6 +551,14 @@ export const showCommentPort = (arg: IterCommentArg) :CommentArr => {
             commentKey.num = arg.num;
             commentKey.post_id = arg.post_id;
             const com = commentBucket.get<CommentKey, Comment[]>(commentKey)[0];
+            if (com.msg === '6666666666666' || com.msg === '真棒!' || com.msg === '羡慕') {
+                const value = {
+                    msg:com.msg,
+                    img:''
+                };
+                com.msg = JSON.stringify(value);
+                commentBucket.put(commentKey, com);
+            }
             const user = new GetUserInfoReq();
             user.uids = [com.owner];
             const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
@@ -839,7 +847,7 @@ export const searchPublic = (comm: string): NumArr => {
         // 公众号id匹配
         numArr.arr.push(communityBase);
     } else { // 公众号id不匹配, 根据名称模糊查找
-        const iter = communityBaseBucket.iter(null, false);
+        const iter = communityBaseBucket.iter(null, true);
         do {
             const v = iter.next();
             if (!v) break;
@@ -862,7 +870,7 @@ export const searchPublic = (comm: string): NumArr => {
 // #[rpc=rpcServer]
 export const searchPost = (str: string): PostArr => {
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const iter = postBucket.iter(null, false);
+    const iter = postBucket.iter(null, true);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     do {
@@ -1265,7 +1273,7 @@ export const getHotPost = (arg: IterPostArg) :PostArr => {
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const iter = postBucket.iter(key, false);
+    const iter = postBucket.iter(key, true);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     // 遍历一个月内的帖子
@@ -1322,7 +1330,7 @@ export const getAllPublicPost = (arg: IterPostArg) :PostArr => {
         key.num = num;
     }
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
-    const iter = postBucket.iter(key, false);
+    const iter = postBucket.iter(key, true);
     console.log('!!!!!!!!!!!!showPostPort iter:', iter);
     const arr:PostData[] = [];
     // 遍历一个月内的帖子
