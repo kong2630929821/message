@@ -70,7 +70,9 @@
 	padding: 0 10px;
     border: 1px solid #ccc;
     margin-bottom: 20px;
-	overflow: hidden;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .pullup-list{
@@ -101,4 +103,8 @@
 	transform: translateY(-100%) translateZ(0);
 	text-align: center;
 	color: #999;
+}
+.pullup-scroller{
+    flex: 1;
+    margin-bottom: -4px;
 }

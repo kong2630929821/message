@@ -946,3 +946,18 @@ export const searchAllArticle = (article:string) => {
         });
     });
 };
+
+// 申请公众号
+export const openPublic = (name:string,desc:string,avatar:string) => {
+    const arg = new CreateCommunity();
+    arg.name = name;
+    arg.comm_type = 2;
+    arg.desc = desc;
+    arg.avatar = avatar;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(createCommunityNum,arg,(r:string) => {
+            res(r);
+        });
+    });
+};

@@ -30,6 +30,7 @@ interface Props {
     timeFormat:any;  // 时间处理
     fgStatus:boolean;// 关注动画
     buildupImgPath:any;  // 组装图片路径
+    publicName:string;//公众号名字
 }
 /**
  * 广场帖子
@@ -58,7 +59,8 @@ export class SquareItem extends Widget {
         isMine:false,
         timeFormat:timestampFormat,
         fgStatus:false,
-        buildupImgPath:buildupImgPath
+        buildupImgPath:buildupImgPath,
+        publicName:''
     };
 
     public setProps(props:any) {

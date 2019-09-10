@@ -15,12 +15,14 @@
     justify-content: center;
     align-items: center;
     background:rgba(249,249,249,1);
+    flex-direction: column;
 }
 .bindPhone{
     height: 100px;
     padding: 0 40px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
 }
 .phone{
     font-size:32px;
@@ -30,12 +32,14 @@
 }
 .bindStatus{
     display: flex;
+    align-items: center;
 }
 .status{
     font-size:28px;
     font-family:STHeitiSC;
     font-weight:300;
     color:rgba(136,136,136,0.87);
+    margin-right: 10px;
 }
 .more{
     width: 50px;
@@ -50,6 +54,7 @@
     font-weight:400;
     color:rgba(204,204,204,1);
     background:rgba(249,249,249,1);
+    line-height: 83px;
 }
 .name-box{
     height: 110px;
@@ -58,9 +63,10 @@
     font-size: 32px;
     line-height: 45px;
     align-items: center;
+    padding: 0 40px;
 }
 .infoArea{
-    margin: 0 20px 20px;
+    margin: 0 40px 20px 40px;
 }
 .await{
     padding: 40px 0;
@@ -69,4 +75,15 @@
     font-family:PingFangSC;
     font-weight:400;
     color:rgba(142,150,171,1);
+}
+.upLoadAvatar{
+    font-size:28px;
+    font-family:PingFangSC;
+    font-weight:400;
+    color:rgba(34,34,34,1);
+    text-align: center;
+    margin-top: 10px;
+}
+.btn{
+    padding: 0 40px;
 }
