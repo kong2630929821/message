@@ -66,7 +66,7 @@
   
 .pullup-bswrapper{
 	width: 100%;
-    flex: 1;
+    height: 100%;
 	padding: 0 10px;
     border: 1px solid #ccc;
     margin-bottom: 20px;
@@ -107,4 +107,6 @@
 .pullup-scroller{
     flex: 1;
     margin-bottom: -4px;
+    display: flex;
+    flex-direction: column;
 }

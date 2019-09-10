@@ -227,14 +227,21 @@ export class Square extends Widget {
     }
 
     public async pullingUpHandler() {
-        this.props.isPullUpLoad = true;
-        await this.requestData(false);
-        this.paint();
-        setTimeout(() => {
-            this.bscroll.finishPullUp();
-            this.bscroll.refresh();
-            this.props.isPullUpLoad = false;
-        }, 50);
+
+        if (this.props.refresh && this.state.postList.length % 20 === 0) {
+            this.props.isPullUpLoad = true;
+            this.props.refresh = false;
+            const list = this.state.postList;
+            await this.requestData(false);
+            this.props.refresh = true;
+            this.paint();
+            setTimeout(() => {
+                this.bscroll.finishPullUp();
+                this.bscroll.refresh();
+                this.props.isPullUpLoad = false;
+            }, 50);
+        }
+       
     }
     public async finishPullDown() {
         const stopTime = TIME_STOP;
@@ -257,7 +264,9 @@ export class Square extends Widget {
                 // 下拉刷新
                 return showPost(this.props.active + 1);
             } else {
+
                 return showPost(this.props.active + 1, this.state.postList[ this.state.postList.length - 1].key.num, this.state.postList[ this.state.postList.length - 1].key.id);
+               
             }
             
         } catch (err) {
@@ -265,7 +274,6 @@ export class Square extends Widget {
             console.log(err);
         }
     }
-
     public refreshScroller() {
         setTimeout(() => {
             this.bscroll.refresh();

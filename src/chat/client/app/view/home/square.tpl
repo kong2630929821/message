@@ -22,8 +22,8 @@
                     {{end}}
                 {{end}}
             </div>
-            <div>
-                <div id="squareContain">
+            <div style="flex:1;">
+                <div>
                     {{if !it.showTag}}
                         {{%=============1:关注  2:公众号===================}}
                         {{if it.active==1 || it.active==2}}
@@ -60,9 +60,8 @@
                         </div>
                     {{end}}
                 </div>
-   
             </div>
-                
+            <div style="height:100px;"></div>  
                 {{if it.createPullUp}}
                 <div  w-class="pullup-wrapper">
                     {{if !it.isPullUpLoad}}
