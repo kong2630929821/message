@@ -7,12 +7,14 @@ import { clientRpcFunc } from '../../client/app/net/init';
 import { initPush } from '../../client/app/net/receive';
 import { SPIDER_USER_INFO, SPIDER_WEIBO_IMG, SPIDER_WEIBO_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
 import { CommentKey, PostKey } from '../../server/data/db/community.s';
+import { RootUser } from '../../server/data/db/manager.s';
 import { AddCommonComment, AddRobotArg, CommonComment, RobotUserInfo } from '../../server/data/db/robot.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
+import { createRoot, rootLogin } from '../../server/data/rpc/manager.p';
 import { addCommonCommernt, closeRobot, getRobotUserInfo, getRobotWeiboInfo, startRobot } from '../../server/data/rpc/robot.p';
 import { changeUserInfo, searchFriend, set_gmAccount } from '../../server/data/rpc/user.p';
 import { UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
@@ -422,12 +424,40 @@ export const closeRobottTest = () => {
     });
 };
 
+// 管理注册
+export const createRootTest = () => {
+    const arg = new RootUser();
+    arg.user = 'haohai';
+    arg.pwd = 'zxcvbnm';
+    clientRpcFunc(createRoot, arg, (r: boolean) => {
+        console.log(r);
+    });
+};
+
+// 管理登陆
+export const rootLoginTest = () => {
+    const arg = new RootUser();
+    arg.user = 'haohai';
+    arg.pwd = 'zxcvbnm';
+    clientRpcFunc(rootLogin, arg, (r: boolean) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
         {
             name: '用户登陆',
             func: () => { chatLogin(); }
+        },
+        {
+            name: '管理注册',
+            func: () => { createRootTest(); }
+        },
+        {
+            name: '管理登陆',
+            func: () => { rootLoginTest(); }
         },
         {
             name: '关闭机器人行为',

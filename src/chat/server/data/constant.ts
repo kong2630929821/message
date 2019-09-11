@@ -89,3 +89,9 @@ export const SPIDER_WEIBO_IMG = 'weibo/img/';  // 微博图片
 // 虚拟用户行为配置
 export const LAST_POST_NUM = 10; // 处理最新帖子的数量
 export const MAX_POST_ROBOTS = 10; // 一条帖子下最大的虚拟用户人数
+
+// 举报类型
+export const REPORT_PERSON = 1;  // 举报个人
+export const REPORT_PUBLIC = 2;  // 举报公众号
+export const REPORT_POST = 3;    // 举报帖子
+export const REPORT_COMMENT = 4; // 举报评论
