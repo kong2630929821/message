@@ -44,3 +44,10 @@ struct SendMsg {
     last: u32, //最新消息ID
     gid: Option<u32>, //临时聊天的群组id
 }
+
+//举报参数
+struct ReportArg {
+    key: String,         //根据举报类型定位到具体的人/公众号/帖子/评论
+    report_type: u8,     //举报类型
+    evidence: String,    //证据
+}

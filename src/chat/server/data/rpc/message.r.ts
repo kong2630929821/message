@@ -2,9 +2,9 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, UserHistory, UserMsg } from '../db/message.s';
+import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, Report, ReportCount, UserHistory, UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
-import { GroupSend, HistoryCursor, SendMsg, TempSend, UserSend } from './message.s';
+import { GroupSend, HistoryCursor, ReportArg, SendMsg, TempSend, UserSend } from './message.s';
 
 import { BonBuffer } from '../../../../pi/util/bon';
 import { mqttPublish, QoS } from '../../../../pi_pt/rust/pi_serv/js_net';
@@ -466,6 +466,19 @@ export const isUserOnline = (uid: number): Result => {
         return res;
     }
 };
+
+/**
+ * 判断用户是否在线
+ */
+// #[rpc=rpcServer]
+// export const report = (agr: ReportArg): number => {
+//     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+//     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
+//     const uid = getUid();
+//     // 添加举报记录
+//     const report = new Report();
+    
+// };
 
 // ----------------- helpers ------------------
 

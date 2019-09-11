@@ -57,12 +57,12 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
             publicAccIndex.num = num;
         } else {
             // 添加公众号名索引
-            publicAccIndexBucket.put(uid, publicAccIndex);
             const publicNameIndex = new PublicNameIndex();
             publicNameIndex.name = arg.name;
             publicNameIndex.num = num;
             publicNameIndexBucket.put(arg.name, publicNameIndex);
             publicAccIndex.list.push(num);
+            publicAccIndexBucket.put(uid, publicAccIndex);
         }
         
         // 创建成功自动关注公众号
@@ -383,7 +383,10 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
         }
         const post:Post = v[1];
         const postKey = v[0];
-        if (post.state === CONSTANT.DELETE_STATE) continue;
+        if (post.state === CONSTANT.DELETE_STATE) {
+            i --;
+            continue;
+        }
         const postData = getPostInfo(postKey, post);
         arr.push(postData);
         console.log('!!!!!!!!!!!!!!!!!!!!!!showPostPort PostData', postData);
