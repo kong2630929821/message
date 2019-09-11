@@ -8,7 +8,7 @@ import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST,
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
+import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
 import { getUid } from './group.r';
 
 declare var env: Env;
@@ -57,12 +57,12 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
             publicAccIndex.num = num;
         } else {
             // 添加公众号名索引
-            publicAccIndexBucket.put(uid, publicAccIndex);
             const publicNameIndex = new PublicNameIndex();
             publicNameIndex.name = arg.name;
             publicNameIndex.num = num;
             publicNameIndexBucket.put(arg.name, publicNameIndex);
             publicAccIndex.list.push(num);
+            publicAccIndexBucket.put(uid, publicAccIndex);
         }
         
         // 创建成功自动关注公众号
@@ -71,6 +71,28 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         return num;
     } 
 
+};
+
+/**
+ * 修改公众号信息
+ */
+// #[rpc=rpcServer]
+export const changeCommunity = (arg:ChangeCommunity):string => {
+    console.log('!!!!!!!!!!!!!!!!CreateCommunity',arg);
+    const uid = getUid();
+    const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const communityBase = communityBaseBucket.get<string, CommunityBase[]>(arg.num)[0];
+    if (!communityBase || communityBase.owner !== uid || communityBase.comm_type !== CONSTANT.COMMUNITY_TYPE_PUBLIC) return 'error_num';
+    // 判断公众号名是否重复
+    const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
+    if (publicNameIndex) return 'repeat name';
+    communityBase.name = arg.name;
+    communityBase.desc = arg.desc;
+    communityBase.avatar = arg.avatar;
+    communityBaseBucket.put(arg.num, communityBase);
+
+    return arg.num;
 };
 
 /**
@@ -361,7 +383,10 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
         }
         const post:Post = v[1];
         const postKey = v[0];
-        if (post.state === CONSTANT.DELETE_STATE) continue;
+        if (post.state === CONSTANT.DELETE_STATE) {
+            i --;
+            continue;
+        }
         const postData = getPostInfo(postKey, post);
         arr.push(postData);
         console.log('!!!!!!!!!!!!!!!!!!!!!!showPostPort PostData', postData);
@@ -1392,6 +1417,11 @@ export const getPostInfo = (postKey: PostKey, post: Post): PostData => {
     postData.avatar = userinfo.avatar;
     postData.gender = userinfo.sex;
     postData.comm_type = commBase.comm_type;
+    // 公众号的帖子返回公众号信息
+    if (commBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+        postData.username = commBase.name;
+        postData.avatar = commBase.avatar;
+    }
 
     return postData;
 };
@@ -1428,6 +1458,11 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     postData.avatar = userinfo.avatar;
     postData.gender = userinfo.sex;
     postData.comm_type = commBase.comm_type;
+    // 公众号的帖子返回公众号信息
+    if (commBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+        postData.username = commBase.name;
+        postData.avatar = commBase.avatar;
+    }
 
     return postData;
 };

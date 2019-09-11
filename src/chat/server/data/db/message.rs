@@ -113,3 +113,28 @@ struct GroupHistoryCursor {
     guid: String, //群成员的id"-1"代表不存在,"10001:10002",前面代表gid后面代表uid
     cursor: i32,  //当前已推送给用户uid的最新消息
 }
+
+/**
+* 举报
+*/
+#[primary=id,db=file,dbMonitor=true]
+struct Report {
+    id: u32,             //举报id
+    report_type: u8,     //举报类型
+    key: String,         //根据举报类型定位到具体的人/公众号/帖子/评论
+    evidence: String,    //凭证
+    ruid: u32,           //举报人
+    time: String,        //时间
+    state: u8 ,          //状态
+}
+
+/**
+* 举报统计
+*/
+#[primary=key,db=file,dbMonitor=true]
+struct ReportCount {
+    key: String,         //根据举报类型定位到具体的人/公众号/帖子/评论
+    report_type: u8,     //举报类型
+    reported: &[u32],    //被举报的举报id列表
+    report: &[u32],      //举报他人的举报id列表
+}

@@ -16,6 +16,22 @@ struct CreateCommunity {
     avatar: Option<String>, //头像
 }
 
+// 修改公众号信息
+struct ChangeCommunity {
+    num: String,            //社区编号
+    name: String,           //社区名
+    desc: String,           //简介
+    avatar: Option<String>, //头像
+}
+
+// 修改公众号信息
+struct ChaangeCommunity {
+    num: String,            //社区编号
+    name: String,           //社区名
+    desc: String,           //简介
+    avatar: Option<String>, //头像
+}
+
 //发帖
 struct AddPostArg {
     num: String,           //社区编号
