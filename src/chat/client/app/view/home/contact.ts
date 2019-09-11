@@ -95,8 +95,7 @@ export class Contact extends SpecialWidget {
                     }
                 } 
             });
-        }
-        
+        } 
     }
 
     public firstPaint() {
@@ -123,28 +122,6 @@ export class Contact extends SpecialWidget {
             };
             this.paint();
         });
-    }
-
-    /**
-     * 进入聊天页面
-     * @param id 好友ID或群ID
-     * @param chatType 群聊或单聊
-     */
-    public chat(num:number) {
-        this.closeMore();
-        const value = this.state.lastChat[num];
-        if (value[2] !== GENERATOR_TYPE.GROUP && value[2] !== GENERATOR_TYPE.USER) {
-            popNew3('chat-client-app-view-chat-notice', { name:'消息通知' }) ;
-        } else {
-            const gid = value.length === 4 ? value[3] :null ;
-            popNew3('chat-client-app-view-chat-chat', { id: value[0], chatType: value[2], groupId:gid }) ;
-        }
-        
-    }
-
-    // 动画效果执行
-    public onShow(e:any) {
-        rippleShow(e);
     }
 
     // 打开更多功能
@@ -210,9 +187,9 @@ export class Contact extends SpecialWidget {
         this.paint();
     }
 
-    // 消息通知
-    public notice() {
-        popNew3('chat-client-app-view-chat-notice', { name:'消息通知' }) ;
+    // 聊天通知点击
+    public evChat() {
+        this.closeMore();
     }
 
 }
@@ -230,10 +207,6 @@ const STATE = {
     notice:[],
     pubNum:0
 };
-store.register(`lastChat`, (r: [number, number][]) => {
-    STATE.lastChat = r;
-    forelet.paint(STATE);
-});
 
 store.register('contactMap', (r) => {
     getStoreData('inviteUsers').then(inviteUsers => {
