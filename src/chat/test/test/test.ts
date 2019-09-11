@@ -15,6 +15,9 @@ import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/b
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
 import { createRoot, rootLogin } from '../../server/data/rpc/manager.p';
+import { report } from '../../server/data/rpc/message.p';
+import { ReportArg } from '../../server/data/rpc/message.s';
+import { unifiedorder } from '../../server/data/rpc/oauth_lib.p';
 import { addCommonCommernt, closeRobot, getRobotUserInfo, getRobotWeiboInfo, startRobot } from '../../server/data/rpc/robot.p';
 import { changeUserInfo, searchFriend, set_gmAccount } from '../../server/data/rpc/user.p';
 import { UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
@@ -444,6 +447,24 @@ export const rootLoginTest = () => {
     });
 };
 
+// 签名
+export const signTest = () => {
+    clientRpcFunc(unifiedorder, null, (r: boolean) => {
+        console.log(r);
+    });
+};
+
+// 举报
+export const reportTest = () => {
+    const arg = new ReportArg();
+    arg.key = '111';
+    arg.evidence = '';
+    arg.report_type = 1;
+    clientRpcFunc(report, arg, (r: number) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
@@ -452,12 +473,12 @@ const props = {
             func: () => { chatLogin(); }
         },
         {
-            name: '管理注册',
-            func: () => { createRootTest(); }
+            name: '签名',
+            func: () => { signTest(); }
         },
         {
-            name: '管理登陆',
-            func: () => { rootLoginTest(); }
+            name: '举报',
+            func: () => { reportTest(); }
         },
         {
             name: '关闭机器人行为',
