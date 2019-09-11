@@ -200,8 +200,8 @@ export class Square extends Widget {
 
     // 初始化组件
     public initBscroll() {
-        this.tree.link.children[0];
-        this.bscroll = new BScroll(<HTMLElement>this.tree.link.children[0], {
+        const obj = document.querySelector('#squareBox');
+        this.bscroll = new BScroll(<HTMLElement>obj, {
             scrollY: true,
             bounceTime: TIME_BOUNCE,
             pullUpLoad: true,
@@ -228,7 +228,7 @@ export class Square extends Widget {
 
     public async pullingUpHandler() {
 
-        if (this.props.refresh && this.state.postList.length % 20 === 0) {
+        if (this.props.refresh && this.state.postList.length % 5 === 0) {
             this.props.isPullUpLoad = true;
             this.props.refresh = false;
             const list = this.state.postList;
@@ -264,9 +264,7 @@ export class Square extends Widget {
                 // 下拉刷新
                 return showPost(this.props.active + 1);
             } else {
-
-                return showPost(this.props.active + 1, this.state.postList[ this.state.postList.length - 1].key.num, this.state.postList[ this.state.postList.length - 1].key.id);
-               
+                return showPost(this.props.active + 1, this.state.postList[ this.state.postList.length - 1].key.num, this.state.postList[ this.state.postList.length - 1].key.id);    
             }
             
         } catch (err) {

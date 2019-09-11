@@ -590,7 +590,7 @@ export const showUserFollow = (num_type:number = 1) => {
 /**
  * 获取最新的帖子
  */
-export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 20) => {
+export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 5) => {
     const arg = new IterSquarePostArg();
     arg.count = count;
     arg.id = id;

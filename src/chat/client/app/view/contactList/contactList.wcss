@@ -1,9 +1,17 @@
-.contactList{
-    overflow-x: hidden;
-    overflow-y: auto;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    flex: 1;
+.warper{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.inner{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-bottom: 2px solid transparent;
+    box-sizing: content-box;
+}
+.history-wrap{
+   min-height: 100%;
 }
 .topic-wrap{
     margin: 30px 20px;
@@ -27,31 +35,6 @@
     color:gray;
     text-transform:uppercase;  
 }
-.pullup{
-    height: 110%;
-    display: flex;
-}
-  
-.pullup-bswrapper{
-	width: 100%;
-    flex: 1;
-	padding: 0 10px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.pullup-list{
-	padding: 0;
-}
-  
-.pullup-list-item{
-	padding: 10px 0;
-	list-style: none;
-	border-bottom: 1px solid #ccc;
-}
-
 .pullup-wrapper{
 	padding: 20px;
 	text-align: center;
@@ -69,4 +52,6 @@
 .pullup-scroller{
     flex: 1;
     margin-bottom: -4px;
+    display: flex;
+    flex-direction: column;
 }

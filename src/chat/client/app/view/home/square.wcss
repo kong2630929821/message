@@ -1,3 +1,18 @@
+.warper{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.inner{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-bottom: 2px solid transparent;
+    box-sizing: content-box;
+}
+.history-wrap{
+   min-height: 100%;
+}
 .page{
     background: #F9F9F9;
     flex: 1;
@@ -57,32 +72,6 @@
     display: inline-block;
     text-align: center;
     margin-left: 10px;
-}
-
-.pullup{
-    height: 110%;
-    display: flex;
-}
-  
-.pullup-bswrapper{
-	width: 100%;
-    height: 100%;
-	padding: 0 10px;
-    border: 1px solid #ccc;
-    margin-bottom: 20px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.pullup-list{
-	padding: 0;
-}
-  
-.pullup-list-item{
-	padding: 10px 0;
-	list-style: none;
-	border-bottom: 1px solid #ccc;
 }
 
 .pullup-wrapper{

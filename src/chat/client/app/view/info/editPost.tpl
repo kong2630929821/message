@@ -11,8 +11,17 @@
             <widget w-tag="chat-client-app-widget-input-input">{placeHolder:"标题1-24个字",input:{{it.titleInput}}, maxLength:24 }</widget>
         </div>
         {{end}}
-        <div w-class="content" ev-input-change="contentChange">
-            <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>
+        <div class="container">
+            <div class="hero-unit"> 
+            <div id="editor">Go ！！！ </div>
+            <div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">
+            <div class="btn-group">
+                <a class="btn" title="Insert picture (or just drag & drop)" id="pictureBtn"><i class="icon-picture"></i></a>
+                <input type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" />
+            </div>
+        
+            <input type="text" data-edit="inserttext" id="voiceBtn" x-webkit-speech="">
+            </div>
         </div>
         
         {{% ========================上传图片======================}}

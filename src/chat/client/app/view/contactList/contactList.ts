@@ -101,8 +101,8 @@ export class ContactList extends Widget {
  
      // 初始化组件
     public initBscroll() {
-        this.tree.link.children[0];
-        this.bscroll = new BScroll(<HTMLElement>this.tree.link.children[0], {
+        const obj = document.querySelector('#newBox');
+        this.bscroll = new BScroll(<HTMLElement>obj, {
             scrollY: true,
             bounceTime: TIME_BOUNCE,
             pullUpLoad: true,

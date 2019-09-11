@@ -7,8 +7,10 @@
     
     {{if it.activeTab == "square"}}
     {{% ======================广场===============================}}
-    <widget w-tag="chat-client-app-view-home-square">{showTag:{{it.showTag}},active:{{it.acTag}} }</widget>
-
+    
+    <div style="height:100%;overflow: hidden;">
+        <widget w-tag="chat-client-app-view-home-square">{showTag:{{it.showTag}},active:{{it.acTag}} }</widget>
+    </div>
     {{elseif it.activeTab == "message"}}
     {{% ======================消息===============================}}
     <div style="height:100%;overflow: hidden;" ev-chat="evChat">
@@ -17,7 +19,9 @@
 
     {{elseif it.activeTab == "friend"}}
     {{% ======================好友===============================}}
-    <widget w-tag="chat-client-app-view-contactList-contactList" >{newApply:{{show}} }</widget>
+    <div style="height:100%;overflow: hidden;">
+        <widget w-tag="chat-client-app-view-contactList-contactList" >{newApply:{{show}} }</widget>
+    </div>
     {{end}}
     
 </div>
