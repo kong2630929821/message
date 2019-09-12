@@ -109,4 +109,10 @@ export class EditComment extends Widget {
         });
     }
 
+    // 删除
+    public remove() {
+        this.props.img = '';
+        this.paint();
+    }
+
 }

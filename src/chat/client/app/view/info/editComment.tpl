@@ -27,7 +27,12 @@
         </div>
     </div>
     {{end}}
-    
+    {{if it.img}}
+    <div w-class="innerImg">
+        <img src="../../res/images/remove.png" alt="" w-class="remove" on-tap="remove"/>
+        <widget w-tag="chat-client-app-widget-imgShow-imgShow">{imgURL:{{it.img}}, width:"150px;",notRound:true}</widget>
+    </div>
+    {{end}}
     <div w-class="tools" ev-emoji-click="pickEmoji">
         <div>
             <img src="../../res/images/emoji.png" w-class="btn" on-tap="openEmoji"/>
