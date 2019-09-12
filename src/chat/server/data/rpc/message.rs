@@ -47,7 +47,8 @@ struct SendMsg {
 
 //举报参数
 struct ReportArg {
-    key: String,         //根据举报类型定位到具体的人/公众号/帖子/评论
+    key: String,         //根据举报类型定位到具体的人/公众号/帖子/评论 例如举报uid为10001的个人，则key为'1:10001',举报帖子,则key为'3:postKey'
     report_type: u8,     //举报类型
+    reason: String,      //举报原因
     evidence: String,    //证据
 }

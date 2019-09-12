@@ -535,3 +535,8 @@ export const getData = (uid:number):FrontStoreData => {
 };
 
 // ================================================================= 本地
+export const getUserInfoById = (uid: number): UserInfo => {
+    const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE);
+    
+    return userInfoBucket.get<number,UserInfo[]>(uid)[0];
+};
