@@ -12,7 +12,7 @@ import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
 
 import { Logger } from '../../../utils/logger';
-import { Contact, OnlineUsers, UserInfo, VIP_LEVEL } from '../db/user.s';
+import { AccountGenerator, Contact, OnlineUsers, UserInfo, VIP_LEVEL } from '../db/user.s';
 
 import { Env } from '../../../../pi/lang/env';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
@@ -468,17 +468,48 @@ export const isUserOnline = (uid: number): Result => {
 };
 
 /**
- * 判断用户是否在线
+ * 举报
  */
 // #[rpc=rpcServer]
-// export const report = (agr: ReportArg): number => {
-//     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
-//     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
-//     const uid = getUid();
-//     // 添加举报记录
-//     const report = new Report();
-    
-// };
+export const report = (arg: ReportArg): number => {
+    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+    const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
+    const uid = getUid();
+    // 添加举报记录
+    const report = new Report();
+    report.id = getReportId();
+    report.key = arg.key;
+    report.report_type = arg.report_type;
+    report.reason = arg.reason;
+    report.evidence = arg.evidence;
+    report.ruid = uid;
+    report.time = Date.now().toString(); 
+    report.handle_time = '0';
+    report.state = 0;
+    reportBucket.put(report.id, report);
+    // 添加被举报人统计信息
+    let reportCount = reportCountBucket.get<string, ReportCount[]>(report.key)[0];
+    if (!reportCount) {
+        reportCount = new ReportCount();
+        reportCount.key = report.key;
+        reportCount.report = [];
+        reportCount.reported = [];
+    }
+    reportCount.reported.push(report.id);
+    reportCountBucket.put(reportCount.key, reportCount);
+    // 添加举报人统计信息
+    let reportCount1 = reportCountBucket.get<string, ReportCount[]>(`${CONSTANT.REPORT_PERSON}:${uid}`)[0];
+    if (!reportCount1) {
+        reportCount1 = new ReportCount();
+        reportCount1.key = `${CONSTANT.REPORT_PERSON}:${uid}`;
+        reportCount1.report = [];
+        reportCount1.reported = [];
+    }
+    reportCount1.report.push(report.id);
+    reportCountBucket.put(reportCount1.key, reportCount1);
+
+    return report.id;
+};
 
 // ----------------- helpers ------------------
 
@@ -549,4 +580,19 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
     if (message.mtype === MSG_TYPE.COMPLAINT) {
         sendFirstWelcomeMessage('收到您的举报，好嗨将会尽快核实并给予处理',message.rid);
     }
+};
+
+// 举报id
+const getReportId = () : number => {
+    const indexBucket = new Bucket(CONSTANT.WARE_NAME, AccountGenerator._$info.name);
+    let accountGenerator = indexBucket.get<string, AccountGenerator[]>('report')[0];
+    if (!accountGenerator) {
+        accountGenerator = new AccountGenerator();
+        accountGenerator.index = 'report';
+        accountGenerator.currentIndex = 0;
+    }
+    accountGenerator.currentIndex += 1;
+    indexBucket.put('report', accountGenerator);
+
+    return accountGenerator.currentIndex;
 };
