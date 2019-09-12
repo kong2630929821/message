@@ -5,18 +5,25 @@ import { selectImage } from '../../../../../app/viewLogic/native';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
+import { CommunityBase } from '../../../../server/data/db/community.s';
+import { UserInfo } from '../../../../server/data/db/user.s';
+import { CommUserInfo } from '../../../../server/data/rpc/community.s';
 import * as store from '../../data/store';
-import { openPublic } from '../../net/rpc';
+import { buildupImgPath } from '../../logic/logic';
+import { changePublic, openPublic } from '../../net/rpc';
 export const forelet = new Forelet();
 
 interface Props {
-    chooseImage:boolean;
-    avatar:string;
+    chooseImage:boolean;// 选择图片
+    avatar:string;// 头像
     avatarHtml:string;
-    publicName:string;
-    contentInput:string;
+    publicName:string;// 公众号名字
+    contentInput:string;// 秒速
     userProtocolReaded:boolean;
     userInfo:any;
+    changePublic:boolean;
+    publicInfo:any;// 公众号信息
+    pubNum:string;// 公众号ID
 }
 const STATE = {
     phone:''
@@ -33,7 +40,11 @@ export class OpenPublic extends Widget {
         publicName:'',
         contentInput:'',
         userProtocolReaded:true,
-        userInfo:{}
+        userInfo:{},
+        changePublic:false,
+        publicInfo:{},
+        pubNum:''
+
     };
     public setProps(props:any) {
         this.props = {
@@ -46,8 +57,17 @@ export class OpenPublic extends Widget {
     }
 
     public init() {
+        let publicInfo = null;
+        // 申请
+        if (this.props.pubNum) {
+            const pub =  store.getStore('communityInfoMap',[]);
+            publicInfo = pub.size ? pub.get(this.props.pubNum).comm_info :{};
+        } 
+        this.props.publicInfo = publicInfo;
         const userInfo = this.props.userInfo;
-        this.props.avatar = userInfo.avatar ? userInfo.avatar :'../../res/images/user_avatar.png';
+        this.props.avatar = publicInfo ? buildupImgPath(publicInfo.avatar) :'';
+        this.props.contentInput = publicInfo ? publicInfo.desc :'';
+        this.props.publicName = publicInfo ? publicInfo.name :'';
         if (userInfo.tel) {
             const str = String(userInfo.tel).substr(3, 6);
             this.state.phone = userInfo.tel.replace(str, '******');
@@ -77,6 +97,10 @@ export class OpenPublic extends Widget {
      * 绑定手机号
      */
     public changePhone() {
+        // 修改公众号不需要绑定手机号码
+        if (this.props.changePublic) {
+            return ;
+        }
         if (!this.state.phone) {  // 绑定
             popNew('app-view-mine-setting-phone');
         } else { // 重新绑定
@@ -128,6 +152,40 @@ export class OpenPublic extends Widget {
     // 返回
     public goBack() {
         this.ok && this.ok();
+    }
+
+    /**
+     * 修改公众号
+     */
+    public changePublic() {
+        if (!this.props.publicName) {
+            popNewMessage('请输入名字');
+
+            return;
+        }
+        if (!this.props.contentInput) {
+            popNewMessage('请输入公众号描述');
+
+            return;
+        }
+        changePublic(this.props.publicName,this.props.contentInput,this.props.avatar,this.props.pubNum).then(r => {
+            if (r === 'repeat name') {
+                popNewMessage('已存在该名字');
+            } else {
+                popNewMessage('修改成功');
+                const val = store.getStore('communityInfoMap',new Map());
+                const commUserInfo = new CommUserInfo();
+                const userinfo:UserInfo = this.props.userInfo;
+                const community:CommunityBase = val.get(this.props.pubNum);
+                community.name = this.props.publicName;
+                community.desc = this.props.contentInput;
+                community.avatar = this.props.avatar; 
+                commUserInfo.user_info = userinfo;
+                commUserInfo.comm_info = community;
+                val.set(this.props.pubNum,commUserInfo);
+                this.ok && this.ok(community);
+            }
+        });
     }
 }
 

@@ -3,7 +3,7 @@
     <div w-class="openPublicBox">
         <div w-class="avatar" on-tap="uploadAvatar" on-down="onShow">
             {{if !it.chooseImage}}
-                <widget w-tag="chat-client-app-widget-imgShow-imgShow" on-tap="uploadAvatar">{imgURL:{{it.avatar}},width:"160px;"}</widget>
+                <widget w-tag="chat-client-app-widget-imgShow-imgShow" on-tap="uploadAvatar">{imgURL:{{it.avatar?it.avatar:'../../res/images/user_avatar.png'}},width:"160px;"}</widget>
             {{else}}
                 <widget w-tag="pi-ui-html" on-tap="uploadAvatar" w-class="ui-html">{{it.avatarHtml}}</widget>
             {{end}}
@@ -24,9 +24,15 @@
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"描述嗨嗨号", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:140 }</widget>
         </div>
         <div w-class="await">12-24小时内反馈申请进度</div>
-        <div ev-btn-tap="createClick" w-class="btn">
-            <app-components1-btn-btn>{"name":"发送开通申请","types":"big","color":"blue","cannotClick":{{!it.userProtocolReaded}} }</app-components1-btn-btn>
-        </div>
+        {{if !it.pubNum}}
+            <div ev-btn-tap="createClick" w-class="btn">
+                <app-components1-btn-btn>{"name":"发送开通申请","types":"big","color":"blue","cannotClick":{{!it.userProtocolReaded}} }</app-components1-btn-btn>
+            </div>
+        {{else}}
+            <div ev-btn-tap="changePublic" w-class="btn">
+                <app-components1-btn-btn>{"name":"修改","types":"big","color":"blue","cannotClick":{{!it.userProtocolReaded}} }</app-components1-btn-btn>
+            </div>
+        {{end}}
     </div>
     
 </div>

@@ -4,9 +4,9 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, setStore } from '../../data/store';
 import { openCamera, selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
-import { base64ToFile, imgResize, uploadFile, arrayBuffer2File } from '../../net/upload';
+import { arrayBuffer2File, base64ToFile, imgResize, uploadFile } from '../../net/upload';
 
-interface IMAGE{
+interface IMAGE {
     compressImg:string;
     originalImg:any;  
 }
@@ -89,13 +89,13 @@ export class EditPost extends Widget {
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        const url =`<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
                         uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
                             console.log('上传压缩图',imgUrlSuf);
-                            const image:any = {}
+                            const image:any = {};
                             image.compressImg = imgUrlSuf;
 
                             // 原图
@@ -108,11 +108,11 @@ export class EditPost extends Widget {
                                         image.originalImg = imgurl;
                                         this1.props.saveImgs[len] = image;
 
-                                        if(this.props.isUploading){
+                                        if (this.props.isUploading) {
                                             this.props.isUploading = false;
                                             this.send();
                                         }
-                                    })
+                                    });
                                 }
                             });
                         });
@@ -144,7 +144,7 @@ export class EditPost extends Widget {
 
                         uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
                             console.log('上传压缩图',imgUrlSuf);
-                            const image:any = {}
+                            const image:any = {};
                             image.compressImg = imgUrlSuf;
 
                             // 原图
@@ -157,11 +157,11 @@ export class EditPost extends Widget {
                                         image.originalImg = imgurl;
                                         this1.props.saveImgs[len] = image;
                                         
-                                        if(this.props.isUploading){
+                                        if (this.props.isUploading) {
                                             this.props.isUploading = false;
                                             this.send();
                                         }
-                                    })
+                                    });
                                 }
                             });
                         });

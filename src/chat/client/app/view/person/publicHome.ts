@@ -35,7 +35,7 @@ export class PublicHome extends Widget {
         totalFans:0,
         totalPost:0,
         name:'',
-        avatar:'',
+        avatar:''
     };
 
     public setProps(props:any) {
@@ -49,8 +49,8 @@ export class PublicHome extends Widget {
         this.props.isMine = this.props.uid === sid;
 
         getUserInfoByNum([this.props.pubNum]).then(r => {
-            this.props.name = r[0].user_info.name;
-            this.props.avatar = buildupImgPath(r[0].user_info.avatar);
+            this.props.name = r[0].comm_info.name;
+            this.props.avatar = buildupImgPath(r[0].comm_info.avatar);
         });
         getUserPostList(this.props.pubNum).then((r:any) => {
             this.props.postList = r.list.map(r => { // 动态
@@ -58,7 +58,7 @@ export class PublicHome extends Widget {
                     ...r,
                     img: JSON.parse(r.body).imgs[0] ? buildupImgPath(JSON.parse(r.body).imgs[0]) :(r.avatar ? buildupImgPath(r.avatar) :'../../res/images/user_avatar.png')
                 };
-            });  
+            }); 
             this.props.totalPost = r.total;
             this.paint();
         });
@@ -147,5 +147,19 @@ export class PublicHome extends Widget {
                 popNewMessage('推荐失败');
             });
         });
+    }
+
+    // 修改公众号
+    public changePublic() {
+        const userInfo = getStore(`userInfoMap/${this.props.uid}`, {});
+        this.props.showTool = false;
+        popNew('chat-client-app-view-person-openPublic',{ chooseImage:false ,userInfo,changePublic:true,pubNum:this.props.pubNum },(r) => {
+            if (r) {
+                this.props.name = r.name;
+                this.props.avatar = r.avatar;
+                this.paint();
+            }
+        });
+        this.paint();
     }
 }
