@@ -93,5 +93,6 @@ export const MAX_POST_ROBOTS = 10; // 一条帖子下最大的虚拟用户人数
 // 举报类型
 export const REPORT_PERSON = 1;  // 举报个人
 export const REPORT_PUBLIC = 2;  // 举报公众号
-export const REPORT_POST = 3;    // 举报帖子
-export const REPORT_COMMENT = 4; // 举报评论
+export const REPORT_POST = 3;    // 举报动态
+export const REPORT_ARTICLE = 4; // 举报文章
+export const REPORT_COMMENT = 5; // 举报评论

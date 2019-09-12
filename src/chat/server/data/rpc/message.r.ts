@@ -471,17 +471,20 @@ export const isUserOnline = (uid: number): Result => {
  * 举报
  */
 // #[rpc=rpcServer]
-export const report = (agr: ReportArg): number => {
+export const report = (arg: ReportArg): number => {
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
     const uid = getUid();
     // 添加举报记录
     const report = new Report();
     report.id = getReportId();
-    report.key = agr.key;
-    report.report_type = agr.report_type;
+    report.key = arg.key;
+    report.report_type = arg.report_type;
+    report.reason = arg.reason;
+    report.evidence = arg.evidence;
     report.ruid = uid;
     report.time = Date.now().toString(); 
+    report.handle_time = '0';
     report.state = 0;
     reportBucket.put(report.id, report);
     // 添加被举报人统计信息
@@ -489,18 +492,16 @@ export const report = (agr: ReportArg): number => {
     if (!reportCount) {
         reportCount = new ReportCount();
         reportCount.key = report.key;
-        reportCount.report_type = report.report_type;
         reportCount.report = [];
         reportCount.reported = [];
     }
     reportCount.reported.push(report.id);
     reportCountBucket.put(reportCount.key, reportCount);
     // 添加举报人统计信息
-    let reportCount1 = reportCountBucket.get<string, ReportCount[]>(uid.toString())[0];
+    let reportCount1 = reportCountBucket.get<string, ReportCount[]>(`${CONSTANT.REPORT_PERSON}:${uid}`)[0];
     if (!reportCount1) {
         reportCount1 = new ReportCount();
-        reportCount1.key = report.key;
-        reportCount1.report_type = CONSTANT.REPORT_PERSON;
+        reportCount1.key = `${CONSTANT.REPORT_PERSON}:${uid}`;
         reportCount1.report = [];
         reportCount1.reported = [];
     }

@@ -7,14 +7,14 @@ import { clientRpcFunc } from '../../client/app/net/init';
 import { initPush } from '../../client/app/net/receive';
 import { SPIDER_USER_INFO, SPIDER_WEIBO_IMG, SPIDER_WEIBO_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
 import { CommentKey, PostKey } from '../../server/data/db/community.s';
-import { RootUser } from '../../server/data/db/manager.s';
+import { ReportList, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { AddCommonComment, AddRobotArg, CommonComment, RobotUserInfo } from '../../server/data/db/robot.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
-import { createRoot, rootLogin } from '../../server/data/rpc/manager.p';
+import { createRoot, getReportList, rootLogin } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
 import { unifiedorder } from '../../server/data/rpc/oauth_lib.p';
@@ -351,47 +351,6 @@ export const getRobotUserInfoTest = () => {
     
 };
 
-// 获取微博信息
-// export const getRobotWeiboInfoTest = () => {
-//     // tslint:disable-next-line:prefer-template
-//     const src = `${WEIBO_SPIDER_HOST}${SPIDER_WEIBO_INFO}?user_id=${5613304897}`;
-//     console.log('==========开始爬取微博数据==========');
-
-//     return fetch(src).then(res => {
-//         return res.json().then(r => {
-//             console.log('r =====',r);
-//             const weibo_infos = r.weibo_list;
-//             for (let i = 0; i < weibo_infos.length; i++) {
-//                 if (weibo_infos[i].original_pictures === '无') break;
-//                 const publish_time = weibo_infos[i].publish_time;
-//                 const date = publish_time.split(' ')[0];
-//                 const date1 = date.split('-');
-//                 if (date1.length === 3) {
-//                     const file_prefix = `${date1[0]}${date1[1]}${date1[2]}_${weibo_infos[i].id}`;
-//                     const origin_urls = weibo_infos[i].original_pictures.split(',');
-//                     if (origin_urls.length > 1) {
-//                         let file_prefixs = `${WEIBO_SPIDER_HOST}${SPIDER_WEIBO_IMG}${file_prefix}_1.jpg`;
-//                         for (let index = 1; index < origin_urls.length; index++) {
-//                             file_prefixs = `${file_prefixs},${file_prefix}_${index + 1}.jpg`;
-//                         }
-//                         weibo_infos[i].original_pictures = file_prefixs;
-//                     } else {
-//                         weibo_infos[i].original_pictures = `${WEIBO_SPIDER_HOST}${SPIDER_WEIBO_IMG}${file_prefix}.jpg`;
-//                     }
-                    
-//                 }
-//             }
-//             console.log('weibo_infos =====',weibo_infos);
-    
-//             return weibo_infos;
-//         }). catch (e => {
-//             return [];
-//         });
-      
-//     });
-    
-// };
-
 // 添加通用评论
 export const addCommonCommerntTest = () => {
     const arg = new AddCommonComment();
@@ -457,11 +416,25 @@ export const signTest = () => {
 // 举报
 export const reportTest = () => {
     const arg = new ReportArg();
-    arg.key = '111';
+    arg.key = '1:10002';
     arg.evidence = '';
     arg.report_type = 1;
+    arg.reason = '涉嫌诈骗';
     clientRpcFunc(report, arg, (r: number) => {
         console.log(r);
+    });
+};
+
+// 举报列表
+export const getReportListTest = () => {
+    const arg = new ReportListArg();
+    arg.count = 10;
+    arg.id = 0;
+    arg.state = 0;
+    clientRpcFunc(getReportList, arg, (r: string) => {
+        console.log(r);
+        const r1:ReportList = JSON.parse(r);
+        console.log(r1);
     });
 };
 
@@ -473,12 +446,20 @@ const props = {
             func: () => { chatLogin(); }
         },
         {
-            name: '签名',
-            func: () => { signTest(); }
+            name: '举报列表',
+            func: () => { getReportListTest(); }
         },
         {
             name: '举报',
             func: () => { reportTest(); }
+        },
+        {
+            name: '管理注册',
+            func: () => { createRootTest(); }
+        },
+        {
+            name: '管理登陆',
+            func: () => { rootLoginTest(); }
         },
         {
             name: '关闭机器人行为',
