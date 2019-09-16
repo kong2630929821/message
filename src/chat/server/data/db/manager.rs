@@ -16,7 +16,8 @@ struct RootUser {
 struct Punish {
     id: u32,                   //惩罚id
     punish_type: u32,          //惩罚类型
-    time: String,              //时间
+    start_time: String,        //开始时间
+    end_time: String,          //结束时间
     report_id: u32,            //举报id
     state: u8,                 //状态
 }
@@ -96,4 +97,21 @@ struct ReportData {
 */
 struct ReportList {
     list: &[ReportData],
+}
+
+/**
+*惩罚参数
+*/
+struct PunishArg {
+    report_id: u32,      //举报id
+    key: String,         //举报对象
+    punish_type: u32,    //惩罚类型
+    time: Option<u32>,   //惩罚时间
+}
+
+/**
+*惩罚列表
+*/
+struct PunishList {
+    list: &[Punish],
 }

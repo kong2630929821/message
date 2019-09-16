@@ -20,6 +20,7 @@ import { GROUP_STATE, GroupInfo } from '../db/group.s';
 import { NOT_GROUP_OWNNER, NOTIN_SAME_GROUP } from '../errorNum';
 import * as http from '../http_client';
 import { getUid } from './group.r';
+import { getUserPunishing } from './manager.r';
 import { sendFirstWelcomeMessage } from './user.r';
 
 declare var env: Env;
@@ -156,6 +157,14 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     // 判断群是否解散
     if (gInfo.state === GROUP_STATE.DISSOLVE) {
         gh.hIncId = CONSTANT.DEFAULT_ERROR_STR;
+
+        return gh;
+    }
+
+    // 如果有禁言则不能发消息
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}:${getUid()}`, CONSTANT.BAN_MESAAGE);
+    if (punishList.list.length > 0) {
+        gh.hIncId = JSON.stringify(punishList);
 
         return gh;
     }
@@ -359,6 +368,15 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
             return userHistory;
         }
     }
+
+    // 如果有禁言则不能发消息
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}:${sid}`, CONSTANT.BAN_MESAAGE);
+    if (punishList.list.length > 0) {
+        userHistory.hIncId = JSON.stringify(punishList);
+
+        return userHistory;
+    }
+
     // 发送消息
     sendMessage(message, userHistory);
 
@@ -405,6 +423,15 @@ export const sendTempMessage = (message: TempSend): UserHistory => {
 
         return userHistory;
     }
+
+    // 如果有禁言则不能发消息
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}:${sid}`, CONSTANT.BAN_MESAAGE);
+    if (punishList.list.length > 0) {
+        userHistory.hIncId = JSON.stringify(punishList);
+
+        return userHistory;
+    }
+
     // 发送消息
     sendMessage(message, userHistory, message.gid);
 
@@ -477,7 +504,7 @@ export const report = (arg: ReportArg): number => {
     const uid = getUid();
     // 添加举报记录
     const report = new Report();
-    report.id = getReportId();
+    report.id = getIndexId('report');
     report.key = arg.key;
     report.report_type = arg.report_type;
     report.reason = arg.reason;
@@ -582,17 +609,17 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
     }
 };
 
-// 举报id
-const getReportId = () : number => {
+// 自增id
+export const getIndexId = (name: string) : number => {
     const indexBucket = new Bucket(CONSTANT.WARE_NAME, AccountGenerator._$info.name);
-    let accountGenerator = indexBucket.get<string, AccountGenerator[]>('report')[0];
+    let accountGenerator = indexBucket.get<string, AccountGenerator[]>(name)[0];
     if (!accountGenerator) {
         accountGenerator = new AccountGenerator();
-        accountGenerator.index = 'report';
+        accountGenerator.index = name;
         accountGenerator.currentIndex = 0;
     }
     accountGenerator.currentIndex += 1;
-    indexBucket.put('report', accountGenerator);
+    indexBucket.put(name, accountGenerator);
 
     return accountGenerator.currentIndex;
 };

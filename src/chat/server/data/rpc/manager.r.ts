@@ -4,12 +4,15 @@
 
 import { getSession } from '../../../../pi_pt/util/autologin.r';
 import { Bucket } from '../../../utils/db';
+import { send } from '../../../utils/send';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { Comment, CommentKey, CommunityBase, Post, PostKey } from '../db/community.s';
-import { Punish, PunishCount, PunishData, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser } from '../db/manager.s';
+import { Comment, CommentKey, CommunityBase, Post, PostCount, PostKey } from '../db/community.s';
+import { Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser } from '../db/manager.s';
 import { Report, ReportCount } from '../db/message.s';
+import { COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
+import { getIndexId } from './message.r';
 
 /**
  * 创建管理员
@@ -50,8 +53,8 @@ export const rootLogin = (user: RootUser): boolean => {
  */
 // #[rpc=rpcServer]
 export const getReportList = (arg: ReportListArg): string => {
+    if (!getSession('root')) return 'not login';
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
-
     const reportList = new ReportList();
     reportList.list = [];
     let reportId: number;
@@ -78,6 +81,85 @@ export const getReportList = (arg: ReportListArg): string => {
     console.log('============reportList:', reportList);
 
     return JSON.stringify(reportList);
+};
+
+/**
+ * 惩罚指定对象
+ */
+// #[rpc=rpcServer]
+export const punish = (arg: PunishArg): string => {
+    if (!getSession('root')) return 'not login';
+    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+    const report = reportBucket.get<number, Report[]>(arg.report_id)[0];
+    if (!report) return 'error report id';
+    if (report.state !== 0) return 'error report state';
+    let uid = 0;
+    const report_type = parseInt(arg.key.split(':')[0], 10);
+    if (arg.punish_type === CONSTANT.DELETE_CONTENT) { // 删除内容
+        if (report_type === CONSTANT.REPORT_POST || report_type === CONSTANT.REPORT_ARTICLE) {
+            const postKey: PostKey = JSON.parse(arg.key.split(':')[1]);
+            // 删除帖子
+            deletePost(postKey);
+            const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+            const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+            if (post) uid = post.owner;
+        }
+        if (report_type === CONSTANT.REPORT_COMMENT) {
+            const commentKey: CommentKey = JSON.parse(arg.key.split(':')[1]);
+            // 删除评论
+            deleteComment(commentKey);
+            const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
+            const comment = commentBucket.get<CommentKey, Comment[]>(commentKey)[0];
+            if (comment)  uid = comment.owner;
+        }
+    }
+    if (report_type === CONSTANT.REPORT_PUBLIC) {
+        const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+        const commNum = arg.key.split(':')[1];
+        const communityBase = communityBaseBucket.get<string, CommunityBase[]>(commNum)[0];
+        if (communityBase)  uid = communityBase.owner;
+    }
+    if (report_type === CONSTANT.REPORT_PERSON) {
+        uid = parseInt(arg.key.split(':')[1], 10);
+    }
+    // 禁言和禁止发动态只用添加惩罚记录,在发消息时查询有无惩罚记录
+    const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
+    const punish = new Punish();
+    punish.id = getIndexId('punish');
+    punish.start_time = Date.now().toString();
+    punish.end_time = (Date.now() + arg.time).toString();
+    punish.punish_type = arg.punish_type;
+    punish.report_id = arg.report_id;
+    punish.state = CONSTANT.PUNISH_LAST;
+    punishBucket.put(punish.id, punish);
+    const punishCountBucket = new Bucket(CONSTANT.WARE_NAME, PunishCount._$info.name);
+    let punishCount = punishCountBucket.get<string, PunishCount[]>(arg.key)[0];
+    if (!punishCount) {
+        punishCount = new PunishCount();
+        punishCount.key = arg.key;
+        punishCount.punish_list = [];
+        punishCount.punish_history = [];
+    }
+    punishCount.punish_list.push(punish.id);
+    punishCountBucket.put(punishCount.key, punishCount);
+    // 推送惩罚信息
+    send(uid, CONSTANT.SEND_PUNISH, JSON.stringify(punish));
+
+    return punish.id.toString();
+};
+
+/**
+ * 举报受理完成
+ */
+// #[rpc=rpcServer]
+export const reportHandled = (report_id: number): string => {
+    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+    const report = reportBucket.get<number, Report[]>(report_id)[0];
+    if (!report) return 'error report id';
+    report.state = 1;
+    reportBucket.put(report.id, report);
+
+    return report_id.toString();
 };
 
 // 获取举报数据
@@ -225,4 +307,73 @@ export const getUserPunish = (key: string): PunishCount => {
     }
     
     return punishCount;
+};
+
+// 获取指定对象正在生效的惩罚信息
+export const getUserPunishing = (key: string, punishType: number): PunishList => {
+    const punishCountBucket = new Bucket(CONSTANT.WARE_NAME, PunishCount._$info.name);
+    const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
+    const punishCount = getUserPunish(key);
+    const punishList = new PunishList();
+    punishList.list = [];
+    for (let i = 0; i < punishCount.punish_list.length; i++) {
+        const punish = punishBucket.get<number, Punish[]>(punishCount.punish_list[i])[0];
+        if (!punish) continue;
+        if ((punish.punish_type !== CONSTANT.FREEZE) && (punish.punish_type !== punishType)) continue;
+        // 惩罚时间结束
+        if (parseInt(punish.end_time, 10) <= Date.now()) {
+            punishCount.punish_history.push(punishCount.punish_list[i]);
+            punishCount.punish_list.splice(i, 1);
+            punishCountBucket.put(key, punishCount);
+            punish.state = 1;
+            punishBucket.put(punish.id, punish);
+            i ++;
+            continue;
+        } else {
+            punishList.list.push(punish);
+        }
+    }
+
+    return punishList;
+};
+
+// 删除帖子
+const deletePost = (postKey: PostKey): number => {
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+    if (!post) return POST_NOT_EXIST;
+    post.state = CONSTANT.DELETE_STATE;
+    if (!postBucket.put(postKey, post)) return DB_ERROR;
+
+    return CONSTANT.RESULT_SUCCESS;
+};
+
+// 删除评论
+const deleteComment = (arg: CommentKey): number => {
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
+    const comment = commentBucket.get(arg)[0];
+    // 检查评论是否存在
+    if (!comment) {
+        return COMMENT_NOT_EXIST;
+    }
+    const postkey = new PostKey();
+    postkey.id = arg.post_id;
+    postkey.num = arg.num;
+    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
+    // 从用户评论列表中删除uid
+    const index = postCount.commentList.indexOf(arg.id);
+    if (index >= 0) postCount.commentList.splice(index, 1);
+    // 添加评论计数
+    if (!postCountBucket.put(postkey, postCount)) {
+        
+        return DB_ERROR;
+    }
+    // 删除评论记录
+    if (!commentBucket.delete(arg)) {
+       
+        return DB_ERROR;
+    }
+    
+    return CONSTANT.RESULT_SUCCESS;
 };
