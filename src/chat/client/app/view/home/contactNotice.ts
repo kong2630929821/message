@@ -42,6 +42,14 @@ export class ContactNotice extends Widget {
         this.state = STATE;
         this.bscroll = null;
     }
+
+    public setProps(props:any){
+        this.props={
+            ...this.props,
+            ...props
+        }
+        super.setProps(this.props);
+    }
     /**
      * 进入聊天页面
      * @param id 好友ID或群ID

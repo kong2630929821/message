@@ -33,6 +33,7 @@ interface Props {
     activeTab:string;  // 当前活跃的tab
     acTag:number;   // 当前活跃的广场标签下标
     showTag:boolean;  // 展示广场下拉
+    tabBarList:any;
 }
 export const TAB = {
     message:'message',
@@ -60,7 +61,21 @@ export class Contact extends SpecialWidget {
         netClose:false,
         userInfo:{},
         acTag:0,
-        showTag:false
+        showTag:false,
+        tabBarList:[
+            {
+                modulName:'square',
+                components:'chat-client-app-view-home-square'
+            },
+            {
+                modulName:'message',
+                components:'chat-client-app-view-home-contactNotice'
+            },
+            {
+                modulName:'friend',
+                components:'chat-client-app-view-contactList-contactList'
+            }
+        ]
     };
 
     public create() {

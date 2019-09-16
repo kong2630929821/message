@@ -1,4 +1,4 @@
-<div w-class="warper" id="outBox">
+<div w-class="warper" id="outBox" class="new-page">
     <div w-class="inner">
         <div w-class="pulldown-wrapper">
             {{if it.createPullDown}}

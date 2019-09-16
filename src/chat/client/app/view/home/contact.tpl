@@ -5,23 +5,9 @@
     </div>
     <app-components1-offlineTip-offlineTip>{ offlienType:{{it.offlienType}} }</app-components1-offlineTip-offlineTip>
     
-    {{if it.activeTab == "square"}}
-    {{% ======================广场===============================}}
-    
-    <div style="height:100%;overflow: hidden;">
-        <widget w-tag="chat-client-app-view-home-square">{showTag:{{it.showTag}},active:{{it.acTag}} }</widget>
-    </div>
-    {{elseif it.activeTab == "message"}}
-    {{% ======================消息===============================}}
-    <div style="height:100%;overflow: hidden;" ev-chat="evChat">
-        <widget w-tag="chat-client-app-view-home-contactNotice"></widget>
-    </div>
-
-    {{elseif it.activeTab == "friend"}}
-    {{% ======================好友===============================}}
-    <div style="height:100%;overflow: hidden;">
-        <widget w-tag="chat-client-app-view-contactList-contactList" >{newApply:{{show}} }</widget>
+    {{for i, v of it.tabBarList}}
+    <div style="visibility: {{v.modulName == it.activeTab ? 'visible' : 'hidden'}}; z-index:{{v.modulName == it.activeTab ? 0 :-1}}; position:absolute;top:132px; width:100%;height:100%;">
+        <widget w-tag={{v.components}} >{isActive:{{v.modulName == it.activeTab}},showTag:{{it.showTag}},active:{{it.acTag}},newApply:{{show}} }</widget>
     </div>
     {{end}}
-    
 </div>

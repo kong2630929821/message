@@ -52,7 +52,11 @@ export class ContactList extends Widget {
     }
 
     public setProps(props:any) {
-        super.setProps(props);
+        this.props={
+            ...this.props,
+            ...props
+        }
+        super.setProps(this.props);
         this.props.sid = store.getStore('uid',0);
     }
 
@@ -96,6 +100,7 @@ export class ContactList extends Widget {
         // 初始化上拉下拉状态
         this.props.createPullDown = true;
         this.props.createPullUp = true;
+        this.paint();
         this.initBscroll();
     }
  
