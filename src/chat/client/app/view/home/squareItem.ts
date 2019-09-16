@@ -30,7 +30,7 @@ interface Props {
     timeFormat:any;  // 时间处理
     fgStatus:boolean;// 关注动画
     buildupImgPath:any;  // 组装图片路径
-    publicName:string;//公众号名字
+    publicName:string;// 公众号名字
 }
 /**
  * 广场帖子
@@ -199,11 +199,19 @@ export class SquareItem extends Widget {
     /**
      * 查看大图
      */
-    public showBigImg(ind:number){
-        const val:any = this.props.imgs[ind];
-        popNew3('chat-client-app-widget-bigImage-bigImage',{
-            img: buildupImgPath(val.compressImg),
-            originalImg: buildupImgPath(val.originalImg)
-        })
+    public showBigImg(ind:number) {
+        // const val:any = this.props.imgs[ind];
+        // popNew3('chat-client-app-widget-bigImage-bigImage',{
+        //     img: buildupImgPath(val.compressImg),
+        //     originalImg: buildupImgPath(val.originalImg)
+        // });
+        const val = [];
+        this.props.imgs.forEach((v:any) => {
+            val.push(buildupImgPath(v.originalImg));
+        });
+        popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
+            list:val,
+            activeIndex:ind + 1
+        });
     }
 }
