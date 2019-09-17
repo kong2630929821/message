@@ -3,6 +3,7 @@ import { popModalBoxs } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { REPORT_ARTICLE, REPORT_POST } from '../../../../server/data/constant';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
@@ -142,7 +143,8 @@ export class SquareItem extends Widget {
     public complaint(e:any) {
         this.closeUtils(e);
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content);
+        const key = `${this.props.isPublic ? REPORT_ARTICLE :REPORT_POST}:${JSON.stringify(this.props.key)}`;
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content,this.props.isPublic ? REPORT_ARTICLE :REPORT_POST,key);
     }
 
     /**

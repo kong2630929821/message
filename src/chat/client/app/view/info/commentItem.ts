@@ -2,6 +2,7 @@ import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { REPORT_COMMENT } from '../../../../server/data/constant';
 import { getStore } from '../../data/store';
 import { buildupImgPath, complaintUser, copyToClipboard, timestampFormat } from '../../logic/logic';
 import { commentLaud, delComment } from '../../net/rpc';
@@ -137,7 +138,8 @@ export class CommentItem extends Widget {
     public complaint() {
         this.closeUtils();
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.msg);
+        const key = `${REPORT_COMMENT}:${JSON.stringify(this.props.key)}`;
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,JSON.parse(this.props.msg).msg,REPORT_COMMENT,key);
     }
 
     // 关闭操作列表

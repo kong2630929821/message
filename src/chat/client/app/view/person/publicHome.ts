@@ -4,8 +4,9 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
-import { buildupImgPath, judgeFollowed } from '../../logic/logic';
+import { buildupImgPath, complaintUser, judgeFollowed } from '../../logic/logic';
 import { follow, getFansList, getUserInfoByNum, getUserPostList, sendUserMsg } from '../../net/rpc';
+import { REPORT_PUBLIC } from '../../../../server/data/constant';
 
 interface Props {
     isMine:boolean;  // 是否自己的公众号
@@ -18,6 +19,7 @@ interface Props {
     totalPost:number;  // 总文章数
     name:string;   // 公众号名
     avatar:string;
+    publicInfo:any;
 }
 
 /**
@@ -35,7 +37,8 @@ export class PublicHome extends Widget {
         totalFans:0,
         totalPost:0,
         name:'',
-        avatar:''
+        avatar:'',
+        publicInfo:{}
     };
 
     public setProps(props:any) {
@@ -51,6 +54,7 @@ export class PublicHome extends Widget {
         getUserInfoByNum([this.props.pubNum]).then(r => {
             this.props.name = r[0].comm_info.name;
             this.props.avatar = buildupImgPath(r[0].comm_info.avatar);
+            this.props.publicInfo = r[0].comm_info;
         });
         getUserPostList(this.props.pubNum).then((r:any) => {
             this.props.postList = r.list.map(r => { // 动态
@@ -161,5 +165,13 @@ export class PublicHome extends Widget {
             }
         });
         this.paint();
+    }
+
+    // 举报公众号
+    public reportType() {
+        const msg = this.props.publicInfo.desc ? this.props.publicInfo.desc :'没有简介';
+        const avatar = this.props.publicInfo.avatar ? buildupImgPath(this.props.publicInfo.avatar) :'../../res/images/user_avatar.png';
+        const key = `${REPORT_PUBLIC}:${this.props.publicInfo.num}`;
+        complaintUser(`${this.props.publicInfo.name} 名称`,2,avatar,msg,REPORT_PUBLIC,key);
     }
 }

@@ -34,7 +34,7 @@
             {{end}}
             <div></div>
             {{if !it.isMine}}
-            <div>举报</div>
+            <div on-tap="reportType">举报</div>
             {{end}}
         </div>
         {{end}}

@@ -10,10 +10,11 @@ import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUserHid, genUuid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { complaintUser, getFriendAlias, getFriendsInfo, getUserAvatar,  NOTICESET, buildupImgPath } from '../../logic/logic';
+import { buildupImgPath, complaintUser, getFriendAlias, getFriendsInfo,  getUserAvatar, NOTICESET } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
+import { REPORT_PERSON } from '../../../../server/data/constant';
 
 interface Props {
     userAlias:string;  // 好友备注
@@ -53,7 +54,7 @@ export class Setting extends Widget {
         setting:null,
         msgAvoid:false,
         msgTop:false,
-        noticeSet:0,
+        noticeSet:0
     };
     private blackPerson:boolean;
 
@@ -106,6 +107,7 @@ export class Setting extends Widget {
                 ['举报',0],
                 ['加入黑名单',0]
             ];
+            this.getUserData(this.props.uid);
         }
         
     }
@@ -326,7 +328,8 @@ export class Setting extends Widget {
     public complaint() {
         const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg);
+        const key = `${REPORT_PERSON}:${this.props.uid}`;
+        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg,REPORT_PERSON,key);
     }
 
     /**

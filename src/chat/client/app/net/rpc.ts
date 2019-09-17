@@ -17,8 +17,8 @@ import { AddCommentArg, AddPostArg, ChangeCommunity, CommentArr, CommType, Commu
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GroupInfoList, GuidsAdminArray } from '../../../server/data/rpc/group.s';
 // tslint:disable-next-line:max-line-length
-import { getGroupHistoryCursor, getUserHistoryCursor, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
-import { GroupSend, HistoryCursor, TempSend, UserSend } from '../../../server/data/rpc/message.s';
+import { getGroupHistoryCursor, getUserHistoryCursor, report, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
+import { GroupSend, HistoryCursor, ReportArg, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
 import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, getRealUid, searchFriend, set_gmAccount } from '../../../server/data/rpc/user.p';
 import { SetOfficial, UserAgree, UserInfoList } from '../../../server/data/rpc/user.s';
@@ -972,6 +972,21 @@ export const changePublic = (name:string,desc:string,avatar:string,num:string) =
 
     return new Promise((res,rej) => {
         clientRpcFunc(changeCommunity,arg,(r:string) => {
+            res(r);
+        });
+    });
+};
+
+// 举报
+export const complaintType = (key:string,evidence:string,status:number,reason:string) => {
+    const arg = new ReportArg();
+    arg.key = key;
+    arg.evidence = evidence;
+    arg.report_type = status;
+    arg.reason = reason;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(report,arg,(r:number) => {
             res(r);
         });
     });
