@@ -83,19 +83,12 @@ export class ModalBox extends Widget {
         this.cancel && this.cancel();
     }
     public okBtnClick(e: any) {
-        if (this.props.status === 1 || this.props.status === 2) {
+        if ((this.props.status === 1 || this.props.status === 2) && this.props.imgs.length) {
             // 等待图片上传完成
             if (this.props.imgs.length !== this.props.saveImgs.length) {
                 this.props.isUploading = true;
 
                 return;
-            }
-
-            // 是否填写描述
-            if (!this.props.contentInput) {
-                popNewMessage('请填写描述');
-
-                return ;
             }
         }
         
