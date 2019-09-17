@@ -7,14 +7,14 @@ import { clientRpcFunc } from '../../client/app/net/init';
 import { initPush } from '../../client/app/net/receive';
 import { SPIDER_USER_INFO, SPIDER_WEIBO_IMG, SPIDER_WEIBO_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
 import { CommentKey, PostKey } from '../../server/data/db/community.s';
-import { handleArticleArg, PostListArg, PunishArg, ReportList, ReportListArg, RootUser } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportList, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { AddCommonComment, AddRobotArg, CommonComment, RobotUserInfo } from '../../server/data/db/robot.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
-import { createRoot, getPostList, getReportList, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
+import { createRoot, getApplyPublicList, getPostList, getReportList, handleApplyPublic, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
 import { unifiedorder } from '../../server/data/rpc/oauth_lib.p';
@@ -177,9 +177,10 @@ export const getSquarePostTest = () => {
 // 创建公众号
 export const createCommunityNumTest = () => {
     const arg = new CreateCommunity();
-    arg.name = 'China No1';
+    arg.name = 'China No1..';
     arg.comm_type = 2;
     arg.desc = 'lalalalala';
+    arg.avatar = 'jpg';
     clientRpcFunc(createCommunityNum, arg, (r: string) => {
         console.log(r);
     });
@@ -484,12 +485,42 @@ export const handleArticleTest = () => {
     });
 };
 
+// 获取公众号审核列表
+export const getApplyPublicListTest = () => {
+    const arg = new PublicApplyListArg();
+    arg.state = 0;
+    arg.count = 10;
+    arg.id = 0;
+    clientRpcFunc(getApplyPublicList, arg, (r: string) => {
+        console.log(r);
+    });
+};
+
+// 审核公众号
+export const handleApplyPublicTest = () => {
+    const arg = new HandleApplyPublicArg();
+    arg.result = false;
+    arg.reason = '';
+    arg.id = 1;
+    clientRpcFunc(handleApplyPublic, arg, (r: boolean) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
         {
             name: '用户登陆',
             func: () => { chatLogin(); }
+        },
+        {
+            name: '审核公众号',
+            func: () => { handleApplyPublicTest(); }
+        },
+        {
+            name: '公众号列表',
+            func: () => { getApplyPublicListTest(); }
         },
         {
             name: '审核文章',

@@ -3,6 +3,7 @@ import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex } from '../db/community.s';
+import { ApplyPublic, UserApplyPublic } from '../db/manager.s';
 import { UserInfo } from '../db/user.s';
 import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getIndexID } from '../util';
@@ -11,6 +12,7 @@ import { GetUserInfoReq } from './basic.s';
 import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
 import { getUid } from './group.r';
 import { addManagerPostIndex, getUserPunishing } from './manager.r';
+import { getIndexId } from './message.r';
 
 declare var env: Env;
 /**
@@ -31,8 +33,17 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
             communityBase.avatar = arg.avatar;
             // 判断公众号名是否重复
-            const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
+            let publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
             if (publicNameIndex) return 'repeat name';
+            // 添加公众号名索引
+            publicNameIndex = new PublicNameIndex();
+            publicNameIndex.name = arg.name;
+            publicNameIndex.num = num;
+            publicNameIndexBucket.put(arg.name, publicNameIndex);
+            // 添加到公众号申请表
+            console.log('!!!!!!!!!!!!!!!!num',num);
+
+            return applyPublicComm(uid, num, arg.name, arg.avatar, arg.desc);
         } else {
             communityBase.avatar = '';
         }
@@ -57,11 +68,6 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
             publicAccIndex.num = num;
         } else {
-            // 添加公众号名索引
-            const publicNameIndex = new PublicNameIndex();
-            publicNameIndex.name = arg.name;
-            publicNameIndex.num = num;
-            publicNameIndexBucket.put(arg.name, publicNameIndex);
             publicAccIndex.list.push(num);
             publicAccIndexBucket.put(uid, publicAccIndex);
         }
@@ -1488,6 +1494,50 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     }
 
     return postData;
+};
+
+/**
+ * 申请公众号
+ * @param uid 用户id
+ * @param name 社区编号
+ * @param name 公众号名
+ * @param avatar 公众号头像
+ * @param desc 公众号描述
+ */
+export const applyPublicComm = (uid: number, num: string, name: string, avatar: string, desc: string): string => {
+    const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
+    const userApplyPublicBucket = new Bucket(CONSTANT.WARE_NAME, UserApplyPublic._$info.name);
+    
+    // 添加到公众号申请表
+    const applyPublic = new ApplyPublic();
+    applyPublic.id = getIndexId('apply_public');
+    applyPublic.uid = uid;
+    applyPublic.num = num;
+    applyPublic.name = name;
+    applyPublic.desc = desc;
+    applyPublic.time = Date.now().toString();
+    applyPublic.avatar = avatar;
+    applyPublic.handle_time = '';
+    applyPublic.reason = '';
+    applyPublic.state = CONSTANT.PUBLIC_APPLYING;
+    // 添加用户申请记录
+    let userApplyPublic = userApplyPublicBucket.get<number, UserApplyPublic[]>(uid)[0];
+    if (!userApplyPublic) {
+        userApplyPublic = new UserApplyPublic();
+        userApplyPublic.uid = uid;
+        userApplyPublic.list = [];
+    } else if (userApplyPublic.list.length > 0) {
+        // 判断用户上一次申请是否完成
+        const last_id = userApplyPublic.list[userApplyPublic.list.length - 1];
+        const applyPublic = applyPublicBucket.get<number, ApplyPublic[]>(last_id)[0];
+        if (!applyPublic) return 'db error';
+        if (applyPublic.state === CONSTANT.PUBLIC_APPLYING) return 'applying';
+    }
+    userApplyPublic.list.push(applyPublic.id);
+    applyPublicBucket.put(applyPublic.id, applyPublic);
+    userApplyPublicBucket.put(uid, userApplyPublic);
+
+    return 'apply public';
 };
 
 // postKey根据帖子id快速排序

@@ -7,11 +7,12 @@ import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { Comment, CommentKey, CommunityBase, Post, PostCount, PostKey } from '../db/community.s';
-import { handleArticleArg, ManagerPostList, PostList, PostListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser } from '../db/manager.s';
+import { Comment, CommentKey, CommunityAccIndex, CommunityBase, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
+import { ApplyPublic, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic } from '../db/manager.s';
 import { Report, ReportCount } from '../db/message.s';
 import { COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
+import { userFollow } from './community.r';
 import { getIndexId } from './message.r';
 
 /**
@@ -57,6 +58,7 @@ export const getReportList = (arg: ReportListArg): string => {
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reportList = new ReportList();
     reportList.list = [];
+    reportList.total = 0;
     let reportId: number;
     if (arg.id <= 0) {
         reportId = null;
@@ -68,8 +70,9 @@ export const getReportList = (arg: ReportListArg): string => {
     do {
         const v = iter.next();
         if (!v) break;
-        if (count >= arg.count) break;
         const report: Report = v[1];
+        if (report.state === arg.state) reportList.total ++;
+        if (count >= arg.count) continue;
         console.log('============loop report:', report);
         if (report.state === arg.state) { // 匹配举报状态
             const reportData = getReportData(report);
@@ -217,10 +220,99 @@ export const handleArticle = (arg: handleArticleArg): boolean => {
         addManagerPostIndex(CONSTANT.REVIEW_REFUSE, arg.postKey, true); // 添加驳回审核文章索引
     }
     postBucket.put(arg.postKey, post);
+    const handleArticleResultBucket = new Bucket(CONSTANT.WARE_NAME, HandleArticleResult._$info.name);
+    const handleArticleResult = new HandleArticleResult();
+    handleArticleResult.postKey = arg.postKey;
+    handleArticleResult.result = arg.result;
+    handleArticleResult.time = Date.now().toString();
+    handleArticleResult.reason = arg.reason;
+    handleArticleResultBucket.put(arg.postKey, handleArticleResult);
     // 推送审核结果通知
     send(post.owner, CONSTANT.SEND_ARTICLE_REVIEW, JSON.stringify(arg));
 
     return true;
+};
+
+/**
+ * 待审核公众号申请列表
+ */
+// #[rpc=rpcServer]
+export const getApplyPublicList = (arg: PublicApplyListArg): string => {
+    const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
+    let key = null;
+    if (arg.id !== 0) key = arg.id;
+    const iter = applyPublicBucket.iter(key, true);
+    const publicApplyList = new PublicApplyList();
+    publicApplyList.list = [];
+    publicApplyList.total = 0;
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const applyPublic: ApplyPublic = v[1];
+        if (arg.state === applyPublic.state) publicApplyList.total ++;
+        if (arg.count <= 0) continue;
+        if (arg.state === applyPublic.state) {
+            const publicApplyData = getPublicApplyData(applyPublic);
+            publicApplyList.list.push(publicApplyData);
+        }
+    } while (iter);
+
+    return JSON.stringify(publicApplyList);
+};
+
+/**
+ * 处理公众号申请
+ */
+// #[rpc=rpcServer]
+export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
+    console.log('============handleApplyPublic:', arg);
+    if (!getSession('root')) return 'not login';
+    const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
+    const applyPublic = applyPublicBucket.get<number, ApplyPublic[]>(arg.id)[0];
+    if (!applyPublic) return 'error id';
+    if (applyPublic.state !== CONSTANT.PUBLIC_APPLYING) return 'error state';
+    applyPublic.handle_time = Date.now().toString();
+    applyPublic.reason = arg.reason;
+    if (arg.result) {
+        // 同意
+        applyPublic.state = CONSTANT.PUBLIC_APPLY_SUCCESS;
+    } else {
+        // 拒绝时清除公众号名索引
+        applyPublic.state = CONSTANT.PUBLIC_APPLY_REFUSED;
+        const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
+        const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(applyPublic.name)[0];
+        if (publicNameIndex) publicNameIndexBucket.delete(applyPublic.name);
+    }
+    applyPublicBucket.put(arg.id, applyPublic);
+    // 添加公众号
+
+    return addPublicComm(applyPublic.name, applyPublic.num, applyPublic.avatar, applyPublic.desc, applyPublic.uid, applyPublic.time);
+};
+
+// 获取公众号申请详情
+export const getPublicApplyData = (applyPublic: ApplyPublic): PublicApplyData => {
+    const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
+    const userApplyPublicBucket = new Bucket(CONSTANT.WARE_NAME, UserApplyPublic._$info.name);
+    let userApplyPublic = userApplyPublicBucket.get<number, UserApplyPublic[]>(applyPublic.uid)[0];
+    if (!userApplyPublic) {
+        userApplyPublic = new UserApplyPublic();
+        userApplyPublic.uid = applyPublic.uid;
+        userApplyPublic.list = [];
+    }
+    // 历史申请记录中减去本次申请
+    const index = userApplyPublic.list.indexOf(applyPublic.id);
+    if (index > -1) userApplyPublic.list.splice(index, 1);
+    const publicApplyData = new PublicApplyData();
+    publicApplyData.user_info = getUserInfoById(applyPublic.uid);
+    publicApplyData.apply_info = applyPublic;
+    publicApplyData.apply_list = [];
+    for (let i = 0; i < userApplyPublic.list.length; i++) {
+        const applyPublic = applyPublicBucket.get<number, ApplyPublic[]>(userApplyPublic.list[i])[0];
+        if (!applyPublic) continue;
+        publicApplyData.apply_list.push(applyPublic);
+    }
+
+    return publicApplyData;
 };
 
 // 获取举报数据
@@ -465,4 +557,42 @@ export const addManagerPostIndex = (state: number, postKey: PostKey, flag: boole
     managerPostListBucket.put(state, managerPostList);
 
     return true;
+};
+
+/**
+ * 
+ * @param name 公众号名
+ * @param num 社区编号
+ * @param avatar 头像
+ * @param desc 描述
+ * @param uid 用户id
+ * @param time 创建时间
+ */
+export const addPublicComm = (name: string, num: string, avatar: string, desc: string, uid: number, time: string): string => {
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const communityBase = new CommunityBase();
+    communityBase.num = num;
+    communityBase.name = name;
+    communityBase.desc = desc;
+    communityBase.owner = uid;
+    communityBase.property = '';
+    communityBase.createtime = time;
+    communityBase.comm_type = CONSTANT.COMMUNITY_TYPE_PUBLIC;
+    communityBase.avatar = avatar;
+    console.log('!!!!!!!!!!!!!!!!CommunityBase',communityBase);
+
+    communityBaseBucket.put(num, communityBase);
+    // 添加用户社区账号索引
+    const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
+    let publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
+    if (!publicAccIndex) {
+        publicAccIndex = new CommunityAccIndex();
+        publicAccIndex.uid = uid;
+        publicAccIndex.list = [];
+    }
+    publicAccIndex.list.push(num);
+    console.log('==================publicAccIndex',publicAccIndex);
+    publicAccIndexBucket.put(uid, publicAccIndex);
+
+    return num;
 };

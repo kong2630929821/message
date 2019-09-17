@@ -111,3 +111,8 @@ export const FREEZE = 4;            // 冻结
 // 惩罚状态
 export const PUNISH_LAST = 0; // 惩罚中
 export const PUNISH_END = 1; // 惩罚结束
+
+// 公众号申请状态
+export const PUBLIC_APPLYING = 0;    // 申请中
+export const PUBLIC_APPLY_SUCCESS = 1; // 申请成功
+export const PUBLIC_APPLY_REFUSED = 2; // 申请驳回
