@@ -23,7 +23,7 @@ interface Props {
     contentInput:string;
     status:number;// 举报类型  0其他 1表示用户
     reportKey:string;// 举报的key值
-    uploadLoding:boolean;
+    uploadLoding:any;
 }
 interface IMAGE {
     compressImg:string;
@@ -49,7 +49,7 @@ export class ModalBox extends Widget {
         contentInput:'',
         status:0,
         reportKey:'',
-        uploadLoding:true
+        uploadLoding:[]
     };
     public ok: (selected:any) => void;
     public cancel: () => void;
@@ -126,14 +126,14 @@ export class ModalBox extends Widget {
     
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
-            const len = this.props.imgs.length;
-            this.props.uploadLoding = true;
+            const len = this.props.uploadLoding.length;
+            this.props.uploadLoding[len] = true;
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
-                        this.props.uploadLoding = false;
+                        this.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 

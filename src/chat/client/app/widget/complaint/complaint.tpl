@@ -23,14 +23,19 @@
         {{% ========================上传图片======================}}
         {{if it.status==1 || it.status==2}}
         <div w-class="imageList">
-            {{for i,v of it.imgs}}
-            <div w-class="imgBox">
-                <pi-ui-html style="display:inline-block;margin: 5px;">{{v}}</pi-ui-html>
-                <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
-            </div>
+            {{for i,v of it.uploadLoding}}
+            {{if v}}
+                <div w-class="upload" on-tap="chooseImage" style="background-image:url(../../res/images/loading.gif)"></div>
+            {{else}}
+                <div w-class="imgBox">
+                    <pi-ui-html style="display:inline-block;margin: 5px;">{{it.imgs[i]}}</pi-ui-html>
+                    <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
+                </div>
             {{end}}
-            {{if it.imgs.length < 3 }}
-            <div w-class="upload" on-tap="chooseImage" style="background-image:url({{it.uploadLoding?'../../res/images/loading.gif':'../../res/images/add_black.png'}})"></div>
+            
+            {{end}}
+            {{if it.uploadLoding.length < 3 }}
+            <div w-class="upload" on-tap="chooseImage"></div>
             {{end}}
         </div>
         <div w-class="reportType">补充描述（140字内）：</div>

@@ -138,6 +138,7 @@
     display: inline-block;
     background-position: center center;
     background-repeat: no-repeat;
+    background-image: url(../../res/images/add_black.png);
 }
 .content1{
     margin: 24px 0 0 0;
