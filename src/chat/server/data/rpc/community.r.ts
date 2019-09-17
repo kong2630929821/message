@@ -10,7 +10,7 @@ import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
 import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
 import { getUid } from './group.r';
-import { getUserPunishing } from './manager.r';
+import { addManagerPostIndex, getUserPunishing } from './manager.r';
 
 declare var env: Env;
 /**
@@ -285,7 +285,6 @@ export const addPostPort = (arg: AddPostArg): PostKey => {
 
             return key;
         }
-        // 公众号发帖需审核
     }
     // 不能用别人的社区账号发帖
     if (community && community.owner !== uid) {
@@ -1038,11 +1037,15 @@ export const addPost = (uid: number, arg: AddPostArg, key: PostKey, comm_type: n
     value.owner = uid;
     value.createtime = Date.now().toString().toString();
     value.state = CONSTANT.NORMAL_STATE;
-    if (comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) value.state = CONSTANT.NOT_REVIEW_STATE;
+    if (comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) value.state = CONSTANT.NOT_REVIEW_STATE;
     // 检查帖子是否存在
     if (!PostBucket.get(key)[0]) {
         // 写入帖子
         if (PostBucket.put(key, value)) {
+            // 公众号帖子添加到待审核列表
+            if (comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+                addManagerPostIndex(CONSTANT.NOT_REVIEW_STATE, key, true);
+            }
             // 写入社区的帖子
             const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
             let communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];

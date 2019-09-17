@@ -56,6 +56,7 @@ export const SEND_COMMENT_LAUD = 'comment_laud'; // 评论点赞
 export const SEND_COMMENT = 'comment'; // 评论推送
 export const SEND_COMMENT_TO_COMMENT = 'comment_to_comment'; // 评论帖子的评论
 export const SEND_PUNISH = 'punish'; // 惩罚推送
+export const SEND_ARTICLE_REVIEW = 'article_review'; // 文章审核结果通知
 
 // --------------------------自增ID源----------------
 // 创建社区num
@@ -81,6 +82,8 @@ export const SQUARE_HOT = 4; // 热门
 export const NORMAL_STATE = 1;  // 正常状态
 export const DELETE_STATE = 0; // 标记删除
 export const NOT_REVIEW_STATE = 2; // 待审核
+export const REVIEW_PASS = 3;      // 审核通过
+export const REVIEW_REFUSE = 4;    // 审核驳回
 
 // 爬虫服务地址
 export const WEIBO_SPIDER_HOST = 'http://39.98.48.66:9999/'; // 爬虫服务器地址

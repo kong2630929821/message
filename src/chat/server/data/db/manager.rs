@@ -1,5 +1,6 @@
 use message.s::{Report, ReportCount};
 use user.s::{UserInfo};
+use community.s::{PostKey, Post}
 /**
 *超级管理员
 */
@@ -114,4 +115,39 @@ struct PunishArg {
 */
 struct PunishList {
     list: &[Punish],
+}
+
+/**
+*管理端帖子列表
+*/
+#[primary=state,db=file,dbMonitor=true]
+struct ManagerPostList {
+    state: u32,       //状态
+    list: &[PostKey]  // 帖子主键列表
+}
+
+/**
+*获取指定状态的帖子列表参数
+*/
+struct PostListArg {
+    postKey: PostKey,         //开始遍历的帖子主键
+    count: u32,               //获取数量
+    state: u32,               //帖子状态
+}
+
+/**
+*指定状态的帖子列表
+*/
+struct PostList {
+    list: &[Post], // 帖子列表
+    total: u32,    // 总数
+}
+
+/**
+*处理待审核文章
+*/
+struct handleArticleArg {
+    postKey: PostKey,         //开始遍历的帖子主键
+    result: bool,             //处理结果
+    reason: Option<String>,   //驳回原因
 }

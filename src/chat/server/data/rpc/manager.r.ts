@@ -8,7 +8,7 @@ import { send } from '../../../utils/send';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { Comment, CommentKey, CommunityBase, Post, PostCount, PostKey } from '../db/community.s';
-import { Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser } from '../db/manager.s';
+import { handleArticleArg, ManagerPostList, PostList, PostListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser } from '../db/manager.s';
 import { Report, ReportCount } from '../db/message.s';
 import { COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
@@ -160,6 +160,67 @@ export const reportHandled = (report_id: number): string => {
     reportBucket.put(report.id, report);
 
     return report_id.toString();
+};
+
+/**
+ * 获取文章列表
+ */
+// #[rpc=rpcServer]
+export const getPostList = (arg: PostListArg): string => {
+    const managerPostListBucket = new Bucket(CONSTANT.WARE_NAME, ManagerPostList._$info.name);
+    let managerPostList = managerPostListBucket.get<number, ManagerPostList[]>(arg.state)[0];
+    console.log('============managerPostList:', managerPostList);
+    if (!managerPostList) {
+        managerPostList = new ManagerPostList();
+        managerPostList.state = arg.state;
+        managerPostList.list = [];
+    }
+    managerPostList.list.reverse();
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const postList = new PostList();
+    postList.list = [];
+    let flag = false;
+    if (arg.postKey.id === 0) flag = true;
+    for (let i = 0; i < managerPostList.list.length; i++) {
+        if (arg.count <= 0) break;
+        const post = postBucket.get<PostKey, Post[]>(managerPostList.list[i])[0];
+        if (!post) continue;
+        if (flag) {
+            postList.list.push(post);
+            arg.count --;
+        }
+        if (managerPostList.list[i].id === arg.postKey.id) flag = true;
+    }
+    postList.total = managerPostList.list.length;
+
+    return JSON.stringify(postList);
+};
+
+/**
+ * 处理待审核文章
+ */
+// #[rpc=rpcServer]
+export const handleArticle = (arg: handleArticleArg): boolean => {
+    console.log('============handleArticle:', arg);
+    if (!getSession('root')) return false;
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const post = postBucket.get<PostKey, Post[]>(arg.postKey)[0];
+    if (!post) return false;
+    addManagerPostIndex(CONSTANT.NOT_REVIEW_STATE, arg.postKey, false); // 减去待审核文章索引
+    // 审核通过
+    if (arg.result) {
+        post.state = CONSTANT.NORMAL_STATE;
+        addManagerPostIndex(CONSTANT.REVIEW_PASS, arg.postKey, true); // 添加审核通过文章索引
+    } else {
+        // 审核驳回
+        post.state = CONSTANT.REVIEW_REFUSE; 
+        addManagerPostIndex(CONSTANT.REVIEW_REFUSE, arg.postKey, true); // 添加驳回审核文章索引
+    }
+    postBucket.put(arg.postKey, post);
+    // 推送审核结果通知
+    send(post.owner, CONSTANT.SEND_ARTICLE_REVIEW, JSON.stringify(arg));
+
+    return true;
 };
 
 // 获取举报数据
@@ -344,6 +405,7 @@ const deletePost = (postKey: PostKey): number => {
     if (!post) return POST_NOT_EXIST;
     post.state = CONSTANT.DELETE_STATE;
     if (!postBucket.put(postKey, post)) return DB_ERROR;
+    addManagerPostIndex(post.state, post.key, true);
 
     return CONSTANT.RESULT_SUCCESS;
 };
@@ -376,4 +438,31 @@ const deleteComment = (arg: CommentKey): number => {
     }
     
     return CONSTANT.RESULT_SUCCESS;
+};
+
+/**
+ * 添加管理端帖子索引
+ * @param state 帖子状态
+ * @param postKey 帖子主键
+ * @param flag true为增 false为减
+ */
+export const addManagerPostIndex = (state: number, postKey: PostKey, flag: boolean): boolean => {
+    console.log('============addManagerPostIndex:', state);
+    const managerPostListBucket = new Bucket(CONSTANT.WARE_NAME, ManagerPostList._$info.name);
+    let managerPostList = managerPostListBucket.get<number, ManagerPostList[]>(state)[0];
+    if (!managerPostList) {
+        managerPostList = new ManagerPostList();
+        managerPostList.state = state;
+        managerPostList.list = [];
+    }
+    if (flag) {
+        managerPostList.list.push(postKey);
+    } else {
+        for (let i = 0; i < managerPostList.list.length; i++) {
+            if (managerPostList.list[i].id === postKey.id) managerPostList.list.splice(i, 1);
+        }
+    }
+    managerPostListBucket.put(state, managerPostList);
+
+    return true;
 };
