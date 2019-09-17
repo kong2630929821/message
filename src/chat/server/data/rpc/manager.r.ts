@@ -285,8 +285,11 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     }
     applyPublicBucket.put(arg.id, applyPublic);
     // 添加公众号
+    addPublicComm(applyPublic.name, applyPublic.num, applyPublic.avatar, applyPublic.desc, applyPublic.uid, applyPublic.time);
+    // 推送结果
+    send(applyPublic.uid, CONSTANT.SEND_PUBLIC_APPLY, JSON.stringify(arg));
 
-    return addPublicComm(applyPublic.name, applyPublic.num, applyPublic.avatar, applyPublic.desc, applyPublic.uid, applyPublic.time);
+    return applyPublic.num;
 };
 
 // 获取公众号申请详情

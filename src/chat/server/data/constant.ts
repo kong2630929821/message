@@ -57,6 +57,7 @@ export const SEND_COMMENT = 'comment'; // 评论推送
 export const SEND_COMMENT_TO_COMMENT = 'comment_to_comment'; // 评论帖子的评论
 export const SEND_PUNISH = 'punish'; // 惩罚推送
 export const SEND_ARTICLE_REVIEW = 'article_review'; // 文章审核结果通知
+export const SEND_PUBLIC_APPLY = 'public_apply'; // 公众号审核结果通知
 
 // --------------------------自增ID源----------------
 // 创建社区num
