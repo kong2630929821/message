@@ -23,6 +23,7 @@ interface Props {
     contentInput:string;
     status:number;// 举报类型  0其他 1表示用户
     reportKey:string;// 举报的key值
+    uploadLoding:boolean;
 }
 interface IMAGE {
     compressImg:string;
@@ -47,7 +48,8 @@ export class ModalBox extends Widget {
         placeholder:'请详细填写，已确保投诉能够受理',
         contentInput:'',
         status:0,
-        reportKey:''
+        reportKey:'',
+        uploadLoding:true
     };
     public ok: (selected:any) => void;
     public cancel: () => void;
@@ -125,11 +127,13 @@ export class ModalBox extends Widget {
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.imgs.length;
+            this.props.uploadLoding = true;
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        this.props.uploadLoding = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
@@ -160,6 +164,7 @@ export class ModalBox extends Widget {
                     });
                 }
             });
+            this.paint();
         });
     }
 

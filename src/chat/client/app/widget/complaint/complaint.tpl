@@ -30,7 +30,7 @@
             </div>
             {{end}}
             {{if it.imgs.length < 3 }}
-            <div w-class="upload" on-tap="chooseImage"></div>
+            <div w-class="upload" on-tap="chooseImage" style="background-image:url({{it.uploadLoding?'../../res/images/loading.gif':'../../res/images/add_black.png'}})"></div>
             {{end}}
         </div>
         <div w-class="reportType">补充描述（140字内）：</div>

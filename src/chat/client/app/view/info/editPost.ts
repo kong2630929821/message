@@ -20,6 +20,7 @@ interface Props {
     isOnEmoji:boolean;  // 展开表情选择
     num:string; // 社区ID
     isUploading:boolean;// 正在上传图片
+    uploadLoding:boolean;
 }
 
 /**
@@ -37,7 +38,8 @@ export class EditPost extends Widget {
         isPublic:false,
         isOnEmoji:false,
         num:'',
-        isUploading:false
+        isUploading:false,
+        uploadLoding:false
     };
     
     public setProps(props:any) {
@@ -85,11 +87,13 @@ export class EditPost extends Widget {
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.imgs.length;
+            this.props.uploadLoding = true;
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        this.props.uploadLoding = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
@@ -120,6 +124,7 @@ export class EditPost extends Widget {
                     });
                 }
             });
+            this.paint();
         });
     }
 
@@ -133,12 +138,13 @@ export class EditPost extends Widget {
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.imgs.length;
+            this.props.uploadLoding = true;
             camera.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
-                       
+                        this.props.uploadLoding = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
@@ -168,6 +174,7 @@ export class EditPost extends Widget {
                     });
                 }
             });
+            this.paint();
         });
     }
 

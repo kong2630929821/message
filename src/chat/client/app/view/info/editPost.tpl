@@ -23,7 +23,7 @@
             </div>
             {{end}}
             {{if it.imgs.length < 9 }}
-            <div w-class="upload" on-tap="chooseImage"></div>
+            <div w-class="upload" on-tap="chooseImage" style="background-image:url({{it.uploadLoding?'../../res/images/loading.gif':'../../res/images/add_black.png'}})"></div>
             {{end}}
         </div>
     </div>
