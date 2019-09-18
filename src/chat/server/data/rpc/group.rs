@@ -9,7 +9,8 @@ struct GroupCreate{
     name:String,
     note:String,
     avatar:String,
-    need_agree:bool// 入群是否需要被同意
+    need_agree:bool,       // 入群是否需要被同意
+    level: Option<u8>,     // 指定群等级，但不可高于用户等级，默认群等级等于用户等级
 }
 
 struct GroupAgree{

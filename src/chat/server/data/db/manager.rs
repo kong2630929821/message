@@ -1,5 +1,6 @@
 use message.s::{Report, ReportCount};
 use user.s::{UserInfo};
+use community.s::{PostKey, Post}
 /**
 *超级管理员
 */
@@ -16,7 +17,8 @@ struct RootUser {
 struct Punish {
     id: u32,                   //惩罚id
     punish_type: u32,          //惩罚类型
-    time: String,              //时间
+    start_time: String,        //开始时间
+    end_time: String,          //结束时间
     report_id: u32,            //举报id
     state: u8,                 //状态
 }
@@ -96,4 +98,125 @@ struct ReportData {
 */
 struct ReportList {
     list: &[ReportData],
+    total: u32,
+}
+
+/**
+*惩罚参数
+*/
+struct PunishArg {
+    report_id: u32,      //举报id
+    key: String,         //举报对象
+    punish_type: u32,    //惩罚类型
+    time: Option<u32>,   //惩罚时间
+}
+
+/**
+*惩罚列表
+*/
+struct PunishList {
+    list: &[Punish],
+}
+
+/**
+*管理端帖子列表
+*/
+#[primary=state,db=file,dbMonitor=true]
+struct ManagerPostList {
+    state: u32,       //状态
+    list: &[PostKey]  // 帖子主键列表
+}
+
+/**
+*获取指定状态的帖子列表参数
+*/
+struct PostListArg {
+    postKey: PostKey,         //开始遍历的帖子主键
+    count: u32,               //获取数量
+    state: u32,               //帖子状态
+}
+
+/**
+*指定状态的帖子列表
+*/
+struct PostList {
+    list: &[Post], // 帖子列表
+    total: u32,    // 总数
+}
+
+/**
+*处理待审核文章
+*/
+struct handleArticleArg {
+    postKey: PostKey,         //开始遍历的帖子主键
+    result: bool,             //处理结果
+    reason: String,           //驳回原因
+}
+
+/**
+*处理待审核文章结果
+*/
+#[primary=postKey,db=file,dbMonitor=true]
+struct HandleArticleResult {
+    postKey: PostKey,         //开始遍历的帖子主键
+    result: bool,             //处理结果
+    time: String,             //处理时间
+    reason: String,           //驳回原因
+}
+
+// 公众号待审核表
+#[primary=uid,db=file,dbMonitor=true]
+struct ApplyPublic{
+    id: u32,                  // 申请id
+    uid: u32,                 // 用户ID
+    num: String,              // 社区编号
+    name: String,             // 公众号名
+    desc: String,             // 描述
+    avatar: String,           // 头像
+    state: u32,               // 状态
+    time: String,             // 申请时间
+    handle_time: String,      // 处理时间
+    reason: String,           // 驳回原因
+}
+
+// 用户公众号申请历史
+#[primary=uid,db=file,dbMonitor=true]
+struct UserApplyPublic{
+    uid: u32,                 // 用户ID
+    list: &[u32]      // 申请记录
+}
+
+/**
+*待审核公众号申请
+*/
+struct PublicApplyListArg {
+    id: u32,                 // 开始遍历的申请id
+    count: u32,              // 获取数量
+    state: u32,              //状态
+}
+
+/**
+*待审核公众号申请详情
+*/
+struct PublicApplyData {
+    user_info: UserInfo,         //用户信息
+    apply_info: ApplyPublic,     //当前申请信息
+    apply_list: &[ApplyPublic]   //历史申请记录
+}
+
+/**
+*待审核公众号申请列表
+*/
+struct PublicApplyList {
+    list : &[PublicApplyData], // 申请详情列表
+    total : u32,               // 总申请数量
+}
+
+/**
+*处理公众号申请参数
+*/
+struct HandleApplyPublicArg {
+    id: u32,                   // 申请id
+    result : bool,             // 处理结果
+    reason: String,            // 驳回原因
 }

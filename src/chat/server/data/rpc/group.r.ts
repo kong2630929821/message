@@ -806,7 +806,7 @@ export const getGroupUserLink = (gid: number): GroupUserLinkArray => {
 /**
  * 创建群之前的判断 群组等级 初始化群组基础信息
  */
-const judgeCreateGroup = (uid:number,contact:Contact) => {
+const judgeCreateGroup = (uid:number,contact:Contact, level1: any) => {
     const userInfoBucket = new Bucket('file', UserInfo._$info.name);
     const gInfo = new GroupInfo();
     // 获取用户的权限等级和对应的群组限制
@@ -814,6 +814,8 @@ const judgeCreateGroup = (uid:number,contact:Contact) => {
     const userInfo = userInfoBucket.get<number,UserInfo>(uid)[0];
     if (!userInfo) {
         level = VIP_LEVEL.VIP0;
+    } else if (level1) {
+        level = level1;
     } else {
         level = userInfo.level;
     }
@@ -867,7 +869,7 @@ export const createGroup = (groupInfo: GroupCreate): GroupInfo => {
     const accountGeneratorBucket = new Bucket('file', CONSTANT.ACCOUNT_GENERATOR_TABLE);
     const contactBucket = getContactBucket();
     const contact = contactBucket.get<number, [Contact]>(uid)[0];
-    const gInfo = judgeCreateGroup(uid,contact);
+    const gInfo = judgeCreateGroup(uid, contact, groupInfo.level);
     if (gInfo.gid) {  // 创建的群个数超出限制
         return gInfo;
     }
