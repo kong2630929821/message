@@ -5,38 +5,9 @@
     </div>
     <app-components1-offlineTip-offlineTip>{ offlienType:{{it.offlienType}} }</app-components1-offlineTip-offlineTip>
     
-    {{if it.activeTab == "square"}}
-    {{% ======================广场===============================}}
-    <widget w-tag="chat-client-app-view-home-square">{showTag:{{it.showTag}},active:{{it.acTag}} }</widget>
-
-    {{elseif it.activeTab == "message"}}
-    {{% ======================消息===============================}}
-    <div w-class="history-wrap" >
-        {{%<!-- <div w-class="input" on-tap="goSearch">
-            <div w-class="searchBox">用户名/ID/手机号</div>
-            <img w-class="searchIcon" src="../../res/images/search-gray.png" />
-        </div> -->}}
-        {{if it1.lastChat && it1.lastChat.length == 0}}
-        <div style="text-align: center;">
-            <img src="../../res/images/chatEmpty.png" w-class="emptyImg"/>
-            <div w-class="emptyText">快开始聊天吧~</div>
-        </div>
-        {{else}}
-            {{if it1.lastChat}}
-            <div>
-                {{for i,v of it1.lastChat}}
-                <div ev-chat="chat({{i}})" ev-msgCard-utils="changeUtils(e,{{i}})" >
-                    <widget w-tag="chat-client-app-view-home-messageCard">{rid:{{v[0]}},time:{{v[1]}},chatType:{{v[2]}},showUtils:{{it.showMsgUtils == i}},messageTime:{{v[1]}} }</widget>
-                </div>
-                {{end}} 
-            </div>
-            {{end}}
-        {{end}}
+    {{for i, v of it.tabBarList}}
+    <div style="visibility: {{v.modulName == it.activeTab ? 'visible' : 'hidden'}}; z-index:{{v.modulName == it.activeTab ? 0 :-1}}; position:absolute;top:132px; width:100%;height:100%;">
+        <widget w-tag={{v.components}} >{isActive:{{v.modulName == it.activeTab}},showTag:{{it.showTag}},active:{{it.acTag}},newApply:{{show}} }</widget>
     </div>
-
-    {{elseif it.activeTab == "friend"}}
-    {{% ======================好友===============================}}
-    <widget w-tag="chat-client-app-view-contactList-contactList" >{newApply:{{show}} }</widget>
     {{end}}
-    
 </div>

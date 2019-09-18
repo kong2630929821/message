@@ -11,7 +11,7 @@ import { CommType } from '../../../../server/data/rpc/community.s';
 import { genUuid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
-import { addCommunityNum, applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo, postLaud } from '../../net/rpc';
+import { applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo, postLaud } from '../../net/rpc';
 
 interface Props {
     uid: number;
@@ -189,17 +189,20 @@ export class UserDetail extends Widget {
     // 申请公众号 去我的公众号
     public goPublic() {
         if (!this.props.pubNum) {
-            if (!this.props.userInfo.tel) {
-                popNewMessage('请绑定手机号码');
+            // if (!this.props.userInfo.tel) {
+            //     popNewMessage('请绑定手机号码');
                 
-                return;
-            }
-            addCommunityNum('我的公众号',CommType.publicAcc,'').then((r:string) => {
+            //     return;
+            // }
+            // addCommunityNum('我的公众号',CommType.publicAcc,'').then((r:string) => {
+            //     this.props.pubNum = r;
+            //     setStore('pubNum',r);
+            //     this.paint();
+            // });
+            popNew('chat-client-app-view-person-openPublic',{ chooseImage:false ,userInfo:this.props.userInfo },(r) => {
                 this.props.pubNum = r;
-                setStore('pubNum',r);
                 this.paint();
             });
-            
         } else {
             popNew('chat-client-app-view-person-publicHome',{ uid:this.props.uid,pubNum:this.props.pubNum });
         }
