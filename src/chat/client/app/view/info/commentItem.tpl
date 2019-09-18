@@ -23,11 +23,17 @@
         <div w-class="content">
             <span style="font-weight: 600;">{{it.orgName}}:&nbsp;</span>
             <widget w-tag="pi-ui-html" style="display: inline-block;">{{it.orgMess}}</widget>
+            {{if it.orgImg}}
+                <span w-class="lookBigImg" on-tap="lookBigImg">【查看图片】</span>
+            {{end}}
         </div>
     </div>
     {{end}}
     <div w-class="comment">
         <widget w-tag="pi-ui-html">{{it.mess}}</widget>
+        {{if it.img}}
+            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="imgContent">{imgURL:{{it.img}}, width:"230px;"}</widget>
+        {{end}}
     </div>
 
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">

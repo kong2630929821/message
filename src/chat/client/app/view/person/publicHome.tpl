@@ -29,8 +29,12 @@
         {{if it.showTool}}
         <div w-class="utils">
             <div w-class="util" on-tap="recomment">推荐给朋友</div>
+            {{if it.isMine}}
+            <div w-class="util" on-tap="changePublic">修改资料</div>
+            {{end}}
+            <div></div>
             {{if !it.isMine}}
-            <div>举报</div>
+            <div on-tap="reportType">举报</div>
             {{end}}
         </div>
         {{end}}

@@ -206,10 +206,10 @@ export const enum INFLAG  {
 }
 
 // 举报用户
-export const complaintUser = (name:string,sex:number,avatar:string,msg:string) => {
+export const complaintUser = (name:string,sex:number,avatar:string,msg:string,status:number,reportKey:string) => {
     const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
     popNew('chat-client-app-widget-complaint-complaint'
-        ,{ title:name,content,sex,avatar,msg }
+        ,{ title:name,content,sex,avatar,msg,status,reportKey }
         ,(selected) => {
     
             let mess = `举报用户@${name}`;

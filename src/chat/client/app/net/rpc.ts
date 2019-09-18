@@ -11,14 +11,14 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, ChangeCommunity, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GroupInfoList, GuidsAdminArray } from '../../../server/data/rpc/group.s';
 // tslint:disable-next-line:max-line-length
-import { getGroupHistoryCursor, getUserHistoryCursor, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
-import { GroupSend, HistoryCursor, TempSend, UserSend } from '../../../server/data/rpc/message.s';
+import { getGroupHistoryCursor, getUserHistoryCursor, report, sendGroupMessage, sendTempMessage, sendUserMessage } from '../../../server/data/rpc/message.p';
+import { GroupSend, HistoryCursor, ReportArg, TempSend, UserSend } from '../../../server/data/rpc/message.s';
 // tslint:disable-next-line:max-line-length
 import { acceptFriend as acceptUserFriend, applyFriend, delFriend as delUserFriend, getRealUid, searchFriend, set_gmAccount } from '../../../server/data/rpc/user.p';
 import { SetOfficial, UserAgree, UserInfoList } from '../../../server/data/rpc/user.s';
@@ -590,7 +590,7 @@ export const showUserFollow = (num_type:number = 1) => {
 /**
  * 获取最新的帖子
  */
-export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 20) => {
+export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 5) => {
     const arg = new IterSquarePostArg();
     arg.count = count;
     arg.id = id;
@@ -943,6 +943,51 @@ export const searchAllArticle = (article:string) => {
             } else {
                 rej();
             }
+        });
+    });
+};
+
+// 申请公众号
+export const openPublic = (name:string,desc:string,avatar:string) => {
+    const arg = new CreateCommunity();
+    arg.name = name;
+    arg.comm_type = 2;
+    arg.desc = desc;
+    arg.avatar = avatar;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(createCommunityNum,arg,(r:string) => {
+            res(r);
+        });
+    });
+};
+
+// 修改公众号
+export const changePublic = (name:string,desc:string,avatar:string,num:string) => {
+    const arg = new ChangeCommunity();
+    arg.name = name;
+    arg.num = num;
+    arg.desc = desc;
+    arg.avatar = avatar;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(changeCommunity,arg,(r:string) => {
+            res(r);
+        });
+    });
+};
+
+// 举报
+export const complaintType = (key:string,evidence:string,status:number,reason:string) => {
+    const arg = new ReportArg();
+    arg.key = key;
+    arg.evidence = evidence;
+    arg.report_type = status;
+    arg.reason = reason;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(report,arg,(r:number) => {
+            res(r);
         });
     });
 };
