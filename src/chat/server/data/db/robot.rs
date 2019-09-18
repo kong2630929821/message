@@ -73,9 +73,35 @@ struct CommonComment {
 #[primary=post_key,db=file,dbMonitor=true]
 struct PostRobotNum {
     post_key: PostKey , // 帖子主键
-    count: u32, //虚拟用户数量
+    laud_count: u32,    // 虚拟用户点赞数量
+    comment_count: u32, // 虚拟用户评论数量
 }
 
-struct AddCommonComment {
+/**
+ * 通用评论列表
+ */
+struct CommonCommentList {
     list: &[CommonComment]
+}
+
+/**
+ * 机器人行为设置
+ */
+#[primary=active,db=file,dbMonitor=true]
+struct RobotActiveSet {
+    active: String ,        // 机器人活动类型
+    min_time: u32 ,         // 最小时间间隔
+    max_time: u32 ,         // 最大时间间隔
+    weight: u32 ,           // 权重
+    post_user_limit: u32 ,  // 单个帖子机器人上限
+    daily_limit: u32 ,      // 每天限制数量
+}
+
+/**
+ * 每天虚拟用户行为统计
+ */
+#[primary=key,db=file,dbMonitor=true]
+struct DailyRobotCount {
+    key: String ,   // 主键 拼接天数和行为类型 如'23135:robot_comment'
+    count: u32 ,    // 数量
 }

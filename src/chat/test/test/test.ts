@@ -8,7 +8,7 @@ import { initPush } from '../../client/app/net/receive';
 import { SPIDER_USER_INFO, SPIDER_WEIBO_IMG, SPIDER_WEIBO_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
 import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { HandleApplyPublicArg, handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportList, ReportListArg, RootUser } from '../../server/data/db/manager.s';
-import { AddCommonComment, AddRobotArg, CommonComment, RobotUserInfo } from '../../server/data/db/robot.s';
+import { AddRobotArg, CommonComment, CommonCommentList, RobotActiveSet, RobotUserInfo } from '../../server/data/db/robot.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
@@ -18,7 +18,7 @@ import { createRoot, getApplyPublicList, getPostList, getReportList, handleApply
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
 import { unifiedorder } from '../../server/data/rpc/oauth_lib.p';
-import { addCommonCommernt, closeRobot, getRobotUserInfo, getRobotWeiboInfo, startRobot } from '../../server/data/rpc/robot.p';
+import { addCommonCommernt, closeRobot, getCommonCommernt, getRobotSet, getRobotUserInfo, getRobotWeiboInfo, initRobotSet, modifyRobotSet, startRobot } from '../../server/data/rpc/robot.p';
 import { changeUserInfo, searchFriend, set_gmAccount } from '../../server/data/rpc/user.p';
 import { UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
 
@@ -322,18 +322,6 @@ export const getRobotUserInfoTest = () => {
                     fetch(imageSrc).then(image => {
                         robotInfo.avatar = image.url;
                     });
-                    // // 获取微博数据
-                    // const weibosrc = `${WEIBO_SPIDER_HOST}${SPIDER_WEIBO_INFO}?user_id=${user_infos[i].uid}`;
-                    // fetch(weibosrc).then(res => {
-                    //     res.json().then(r => {
-                    //         const weibo_infos = r.weibo_list;
-                    //         console.log('weibo_infos =====',weibo_infos);
-                    //         robotInfo.weibo_list = weibo_infos;
-                    //     }). catch (e => {
-                    //         console.log('error =====',e);
-                    //     });
-                      
-                    // });
                     arg.list.push(robotInfo);
                 }
                 console.log('==========开始生成虚拟用户=========', arg);
@@ -354,7 +342,7 @@ export const getRobotUserInfoTest = () => {
 
 // 添加通用评论
 export const addCommonCommerntTest = () => {
-    const arg = new AddCommonComment();
+    const arg = new CommonCommentList();
     const c1 = new CommonComment();
     c1.msg = '6666666666666';
     c1.weight = 2;
@@ -507,12 +495,80 @@ export const handleApplyPublicTest = () => {
     });
 };
 
+// 初始化机器人配置
+export const initRobotSetTest = () => {
+    clientRpcFunc(initRobotSet, null, (r: boolean) => {
+        console.log(r);
+    });
+};
+
+// 获取机器人配置
+export const getRobotSetTest = () => {
+    const arg = 'robot_post';
+    clientRpcFunc(getRobotSet, arg, (r: string) => {
+        console.log(r);
+    });
+};
+
+// 修改机器人配置
+export const modifyRobotSetTest = () => {
+    const arg = new RobotActiveSet();
+    arg.active = 'robot_post';
+    arg.min_time = 1 * 60 * 1000;
+    arg.max_time = 2 * 60 * 1000;
+    arg.post_user_limit = 5;
+    arg.daily_limit = 10;
+    arg.weight = 1000;
+    clientRpcFunc(modifyRobotSet, arg, (r: boolean) => {
+        console.log(r);
+    });
+};
+
+// 获取通用评论
+export const getCommonCommerntTest = () => {
+    clientRpcFunc(getCommonCommernt, null, (r: string) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
         {
             name: '用户登陆',
             func: () => { chatLogin(); }
+        },
+        {
+            name: '关闭机器人行为',
+            func: () => { closeRobottTest(); }
+        },
+        {
+            name: '添加机器人',
+            func: () => { getRobotUserInfoTest(); }
+        },
+        {
+            name: '初始化配置',
+            func: () => { initRobotSetTest(); }
+        },
+        {
+            name: '获取配置',
+            func: () => { getRobotSetTest(); }
+        },
+        {
+            name: '修改配置',
+            func: () => { modifyRobotSetTest(); }
+        },
+        {
+            name: '开启机器人行为',
+            func: () => { startRobotTest(); }
+        },
+        {
+            name: '添加通用评论',
+            func: () => { addCommonCommerntTest(); }
+        },
+        {
+            name: '查看通用评论',
+            func: () => { getCommonCommerntTest(); }
         },
         {
             name: '审核公众号',
@@ -553,38 +609,6 @@ const props = {
         {
             name: '管理登陆',
             func: () => { rootLoginTest(); }
-        },
-        {
-            name: '关闭机器人行为',
-            func: () => { closeRobottTest(); }
-        },
-        {
-            name: '添加机器人',
-            func: () => { getRobotUserInfoTest(); }
-        },
-        {
-            name: '添加通用评论',
-            func: () => { addCommonCommerntTest(); }
-        },
-        {
-            name: '开启机器人行为',
-            func: () => { startRobotTest(); }
-        },
-        {
-            name: '搜索公众号',
-            func: () => { searchPublicTest(); }
-        },
-        {
-            name: '搜索文章',
-            func: () => { searchPostTest(); }
-        },
-        {
-            name: '搜索用户',
-            func: () => { searchFriendTest(); }
-        },
-        {
-            name: '搜索群',
-            func: () => { searchGroupTest(); }
         },
         {
             name: '创建群',
