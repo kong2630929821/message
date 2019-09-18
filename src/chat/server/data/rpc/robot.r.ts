@@ -150,7 +150,7 @@ export const robotActive = () => {
             const post:Post = v[1];
             const postRobotNum = postRobotNumBucket.get<PostKey, PostRobotNum[]>(post.key)[0];
             if (postRobotNum && postRobotNum.count >= CONSTANT.MAX_POST_ROBOTS) break; // 帖子下虚拟用户人数超过限制 
-            if (post.state === CONSTANT.DELETE_STATE) continue;
+            if (post.state !== CONSTANT.NORMAL_STATE) continue;
             if (activeId < 2) { // 评论
                 r = robotComment(robotIndex, post.key);
             } else { // 点赞
@@ -205,7 +205,7 @@ const robotPost = (robotIndex: RobotIndex, num: string): boolean => {
     const key = new PostKey();
     key.num = num;
     key.id = getIndexID(CONSTANT.POST_INDEX, 1);
-    addPost(robotIndex.uid, postArg, key);
+    addPost(robotIndex.uid, postArg, key, CONSTANT.COMMUNITY_TYPE_PERSON);
     // 微博已使用从userWeiboInfo中删除
     userWeiboInfo.weibo_list.splice(0, 1);
     userWeiboInfoBucket.put(robotIndex.rid, userWeiboInfo);

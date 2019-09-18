@@ -1,7 +1,8 @@
-import { popNewMessage } from '../../../../../app/utils/tools';
+import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { REPORT_COMMENT } from '../../../../server/data/constant';
 import { getStore } from '../../data/store';
 import { buildupImgPath, complaintUser, copyToClipboard, timestampFormat } from '../../logic/logic';
 import { commentLaud, delComment } from '../../net/rpc';
@@ -24,6 +25,7 @@ interface Props {
     owner:number; // 评论者的uid
     isMine:boolean;  // 是否本人
     timeFormat:any; // 时间处理
+    orgImg:string;// 原评论图片
 }
 
 /**
@@ -51,6 +53,7 @@ export class CommentItem extends Widget {
         owner:0,
         isMine:false,
         timeFormat:timestampFormat,
+        orgImg:''
     };
 
     public setProps(props:any) {
@@ -61,7 +64,7 @@ export class CommentItem extends Widget {
         super.setProps(this.props);
         const val = props.msg ? JSON.parse(props.msg) :{ msg:'',img:'' };
         this.props.mess = parseEmoji(val.msg);
-        this.props.img = val.img; 
+        this.props.img = val.img ? buildupImgPath(val.img) :'';
         this.props.isMine = this.props.owner === getStore('uid',0);
         this.props.avatar = buildupImgPath(props.avatar);
 
@@ -69,6 +72,7 @@ export class CommentItem extends Widget {
             this.props.orgName = props.reply.username;
             const val = props.reply.msg ? JSON.parse(props.reply.msg) :{ msg:'',img:'' };
             this.props.orgMess = parseEmoji(val.msg);
+            this.props.orgImg = val.img ? buildupImgPath(val.img) :'';
         }
     }
 
@@ -134,12 +138,20 @@ export class CommentItem extends Widget {
     public complaint() {
         this.closeUtils();
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.msg);
+        const key = `${REPORT_COMMENT}:${JSON.stringify(this.props.key)}`;
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,JSON.parse(this.props.msg).msg,REPORT_COMMENT,key);
     }
 
     // 关闭操作列表
     public closeUtils() {
         this.props.showUtils = false;
         this.paint();
+    }
+
+    // 查看大图
+    public lookBigImg() {
+        popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
+            list:[this.props.orgImg]
+        });
     }
 }

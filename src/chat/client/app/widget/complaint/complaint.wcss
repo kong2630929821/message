@@ -7,6 +7,10 @@
     display: flex;
     flex-direction: column;
     margin: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 .report-violations{
     font-size:32px;
@@ -80,6 +84,7 @@
     background:rgba(242,242,242,1);
     text-align: center;
     line-height: 60px;
+    margin-top: 10px;
 }
 .active{
     width:220px;
@@ -91,6 +96,7 @@
     background:rgba(48,90,199,1);
     text-align: center;
     line-height: 60px;
+    margin-top: 10px;
 }
 .btn{
     width:500px;
@@ -108,4 +114,34 @@
 .sexImg{
     width: 36px;
     height: 36px;
+}
+.imageList{
+    padding-bottom: 20px;
+}
+.imgBox{
+    position: relative;
+    display: inline-block;
+}
+.close{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50px;
+    height: 50px;
+}
+.upload{
+    width:230px;
+    height:230px;
+    margin: 5px;
+    background:rgba(242,242,242,1);
+    border-radius:4px;
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: url(../../res/images/add_black.png);
+}
+.content1{
+    margin: 24px 0 0 0;
+    padding: 10px 20px 30px 20px;
+    border: 1px solid rgba(204,204,204,1);
 }

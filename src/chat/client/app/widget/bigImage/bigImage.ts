@@ -11,6 +11,7 @@ interface Props {
     img: string;  // 图片
     originalImg:string; // 原图
     showOrg:boolean; // 是否显示原图
+    list:any;
 }
 
 // ================================================ 导出

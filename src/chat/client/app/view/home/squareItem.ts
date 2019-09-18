@@ -3,6 +3,7 @@ import { popModalBoxs } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { REPORT_ARTICLE, REPORT_POST } from '../../../../server/data/constant';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
@@ -30,6 +31,7 @@ interface Props {
     timeFormat:any;  // 时间处理
     fgStatus:boolean;// 关注动画
     buildupImgPath:any;  // 组装图片路径
+    publicName:string;// 公众号名字
 }
 /**
  * 广场帖子
@@ -58,7 +60,8 @@ export class SquareItem extends Widget {
         isMine:false,
         timeFormat:timestampFormat,
         fgStatus:false,
-        buildupImgPath:buildupImgPath
+        buildupImgPath:buildupImgPath,
+        publicName:''
     };
 
     public setProps(props:any) {
@@ -140,7 +143,8 @@ export class SquareItem extends Widget {
     public complaint(e:any) {
         this.closeUtils(e);
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content);
+        const key = `${this.props.isPublic ? REPORT_ARTICLE :REPORT_POST}:${JSON.stringify(this.props.key)}`;
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content,this.props.isPublic ? REPORT_ARTICLE :REPORT_POST,key);
     }
 
     /**
@@ -197,11 +201,19 @@ export class SquareItem extends Widget {
     /**
      * 查看大图
      */
-    public showBigImg(ind:number){
-        const val:any = this.props.imgs[ind];
-        popNew3('chat-client-app-widget-bigImage-bigImage',{
-            img: buildupImgPath(val.compressImg),
-            originalImg: buildupImgPath(val.originalImg)
-        })
+    public showBigImg(ind:number) {
+        // const val:any = this.props.imgs[ind];
+        // popNew3('chat-client-app-widget-bigImage-bigImage',{
+        //     img: buildupImgPath(val.compressImg),
+        //     originalImg: buildupImgPath(val.originalImg)
+        // });
+        const val = [];
+        this.props.imgs.forEach((v:any) => {
+            val.push(buildupImgPath(v.originalImg));
+        });
+        popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
+            list:val,
+            activeIndex:ind + 1
+        });
     }
 }

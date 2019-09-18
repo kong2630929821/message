@@ -13,17 +13,21 @@
         {{end}}
         <div w-class="content" ev-input-change="contentChange">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>
-        </div>
-        
+        </div>  
         {{% ========================上传图片======================}}
         <div w-class="imageList">
-            {{for i,v of it.imgs}}
-            <div w-class="imgBox">
-                <pi-ui-html style="display:inline-block;margin: 5px;">{{v}}</pi-ui-html>
-                <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
-            </div>
+            {{for i,v of it.uploadLoding}}
+            {{if v}}
+                <div w-class="upload" style="background-image:url(../../res/images/loading.gif)"></div>
+            {{else}}
+                <div w-class="imgBox">
+                    <pi-ui-html style="display:inline-block;margin: 5px;">{{it.imgs[i]}}</pi-ui-html>
+                    <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
+                </div>
             {{end}}
-            {{if it.imgs.length < 9 }}
+            
+            {{end}}
+            {{if it.uploadLoding.length < 9 }}
             <div w-class="upload" on-tap="chooseImage"></div>
             {{end}}
         </div>

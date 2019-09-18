@@ -9,6 +9,4 @@
         <div w-class="btn" style="right:50px;" on-tap="download">下载</div>
         {{end}}
     </div>
-    
-    <iframe style="display:none;" id="IframeReportImg" name="IframeReportImg" width="0" height="0" src="{{it.originalImg}}"></iframe>
 </div>
