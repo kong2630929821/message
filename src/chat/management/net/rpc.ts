@@ -1,10 +1,10 @@
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { PostKey } from '../../server/data/db/community.s';
-import { handleArticleArg, PostListArg, RootUser } from '../../server/data/db/manager.s';
+import { handleArticleArg, PostListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { createRoot, getPostList, handleArticle, rootLogin } from '../../server/data/rpc/manager.p';
+import { createRoot, getPostList, getReportList, handleArticle, rootLogin } from '../../server/data/rpc/manager.p';
 import { timestampFormat } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
@@ -90,6 +90,20 @@ export const getHandleArticle = (result:boolean,reason:string,id:number,num:stri
 
     return new Promise((res,rej) => {
         clientRpcFunc(handleArticle,arg,(r:boolean) => {
+            res(r);
+        });
+    });
+};
+
+// 获取举报列表
+export const getAllReport = (count:number,id:number,state:number) => {
+    const arg = new ReportListArg();
+    arg.count = count;
+    arg.id = id;
+    arg.state = state;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getReportList,arg,(r:boolean) => {
             res(r);
         });
     });

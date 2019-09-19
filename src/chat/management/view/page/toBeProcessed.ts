@@ -1,5 +1,6 @@
 import { Widget } from '../../../../pi/widget/widget';
 import { perPage } from '../../components/pagination';
+import { getAllReport } from '../../net/rpc';
 import { rippleShow } from '../../utils/tools';
 
 interface Props {
@@ -31,7 +32,7 @@ export class ToBeProcessed extends Widget {
             ['用户昵称用户昵称用户昵称','用户','人身攻击',1,'2018-09-12 14:50','张三']
         ],
         showTitleList:['名称','类别','举报原因','被举报次数','举报时间','举报人'],
-        status:true
+        status:false
     };
 
     public create() {
@@ -43,7 +44,9 @@ export class ToBeProcessed extends Widget {
      * 初始化数据
      */
     public initData() {
-        //
+        getAllReport(900000,0,0).then((r:any) => {
+            debugger;
+        });
     }
 
     // 切换tab

@@ -1,0 +1,84 @@
+.reportBox{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    padding: 0 75px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.body{
+    width: 700px;
+    height: 500px;
+    background:rgba(255,255,255,1);
+    box-shadow:0px 0px 10px 0px rgba(0,0,0,0.2);
+    border-radius:4px;
+    display: flex;
+    flex-direction: column;
+}
+.reportTitle{
+    margin: 30px;
+    display: flex;
+    font-size:16px;
+    font-family:SourceHanSansCN;
+    font-weight:bold;
+    color:rgba(53,64,82,1);
+}
+.sexImg{
+    width: 16px;
+    height: 16px;
+    margin-left: 10px;
+}
+.checkType{
+    height: 55px;
+    margin: 0 30px;
+    background:rgba(242,242,242,1);
+    border-left:1px solid rgba(204,204,204,1);
+    border-top:1px solid rgba(204,204,204,1);
+    border-right:1px solid rgba(204,204,204,1);
+    display: flex;
+    font-size:14px;
+    font-family:SourceHanSansCN;
+    font-weight:400;
+    color:rgba(53,64,82,1);
+}
+.typeList{
+    height: 93px;
+    font-size:14px;
+    font-family:SourceHanSansCN;
+    font-weight:400;
+    color:rgba(53,64,82,1);
+    border:1px solid rgba(204,204,204,1);
+    margin: 0 30px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+.row1{
+    width: 103px;
+    display: flex;
+    margin-left: 20px;
+    align-items: center;
+    cursor: pointer;
+}
+.rowItem{
+    margin-left: 10px;
+}
+.rowImg{
+    width: 16px;
+    height: 16px;
+}
+.checkBox{
+    display: flex;
+    margin-left: 20px;
+}
+.sendNotice{
+    font-size:14px;
+    font-family:SourceHanSansCN;
+    font-weight:400;
+    color:rgba(53,64,82,1);
+    margin: 30px;
+}

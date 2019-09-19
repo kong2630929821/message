@@ -30,7 +30,11 @@ export class Login extends Widget {
         // popNew('chat-management-view-base-home');
         if (this.props.name && this.props.pwd) {
             managementLogin(this.props.name,this.props.pwd).then(r => {
-                popNew('chat-management-view-base-home');
+                if (r === 1) {
+                    popNew('chat-management-view-base-home');
+                } else {
+                    popNewMessage('账号密码错误');
+                }
             }).catch(() => {
                 popNewMessage('账号密码错误','error');
             });

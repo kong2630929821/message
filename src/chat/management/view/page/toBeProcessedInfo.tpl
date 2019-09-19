@@ -3,7 +3,7 @@
     <div w-class="deelArtice">
         <div w-class="titleObj">
             <div style="line-height: 40px;margin-left: 20px;">举报对象</div>
-            <div w-class="deel">处理内容</div>
+            <div w-class="deel" on-tap="deelContent">处理内容</div>
         </div>
         <div w-class="deelArticeTitle">
             <div w-class="item">
