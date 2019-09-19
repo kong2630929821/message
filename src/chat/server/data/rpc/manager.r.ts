@@ -94,9 +94,9 @@ export const getReportList = (arg: ReportListArg): string => {
 // #[rpc=rpcServer]
 export const punish = (arg: PunishArg): string => {
     if (!getSession('root')) return 'not login';
-    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
-    const report = reportBucket.get<number, Report[]>(arg.report_id)[0];
-    if (!report) return 'error report id';
+    // const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+    // const report = reportBucket.get<number, Report[]>(arg.report_id)[0];
+    // if (!report) return 'error report id';
     // if (report.state !== 0) return 'error report state';
     let uid = 0;
     const report_type = parseInt(arg.key.split(':')[0], 10);
@@ -332,13 +332,14 @@ export const setGmAccount = (setUser:SetOfficial): Result => {
  */
 // #[rpc=rpcServer]
 export const modifyPunish = (arg: ModifyPunishArg): number => {
+    if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
     const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
     const punish = punishBucket.get<number, Punish[]>(arg.id)[0];
     if (!punish) return ERROR_NUM.ERROR_PUNISH_ID;
     const end_time = parseInt(punish.start_time, 10) + arg.rest_time;
-    if (end_time <= Date.now()) punish.state = CONSTANT.PUNISH_END;
     punish.end_time = end_time.toString();
     punishBucket.put(punish.id, punish);
+    if (end_time <= Date.now()) endPunish(`${CONSTANT.REPORT_PERSON}:${arg.uid}`, arg.id);
 
     return CONSTANT.RESULT_SUCCESS;
 };
@@ -615,12 +616,7 @@ export const getUserPunishing = (key: string, punishType: number): PunishList =>
         if ((punish.punish_type !== CONSTANT.FREEZE) && (punish.punish_type !== punishType)) continue;
         // 惩罚时间结束
         if (parseInt(punish.end_time, 10) <= Date.now()) {
-            punishCount.punish_history.push(punishCount.punish_list[i]);
-            punishCount.punish_list.splice(i, 1);
-            punishCountBucket.put(key, punishCount);
-            punish.state = 1;
-            punishBucket.put(punish.id, punish);
-            i ++;
+            endPunish(key, punishCount.punish_list[i]);
             continue;
         } else {
             punishList.list.push(punish);
@@ -628,6 +624,27 @@ export const getUserPunishing = (key: string, punishType: number): PunishList =>
     }
 
     return punishList;
+};
+
+/**
+ * 结束惩罚
+ * @param key 惩罚对象主键
+ * @param id 惩罚id
+ */
+export const endPunish = (key: string, id: number): boolean => {
+    const punishCount = getUserPunish(key);
+    const punishCountBucket = new Bucket(CONSTANT.WARE_NAME, PunishCount._$info.name);
+    const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
+    const punish = punishBucket.get<number, Punish[]>(id)[0];
+    punish.state = CONSTANT.PUNISH_END;
+    punishBucket.put(id, punish);
+    const index = punishCount.punish_list.indexOf(id);
+    if (index > -1) {
+        punishCount.punish_list.splice(index, 1);
+    }
+    punishCount.punish_history.push(id);
+
+    return punishCountBucket.put(key, punishCount);
 };
 
 // 删除帖子

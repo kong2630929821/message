@@ -267,5 +267,6 @@ struct UserReportDetail {
 */
 struct ModifyPunishArg {
     id: u32,             // 惩罚id
+    uid: u32,            // 用户id
     rest_time: u32,      // 剩余惩罚时间
 }

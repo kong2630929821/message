@@ -432,8 +432,8 @@ export const getReportListTest = () => {
 // 惩罚指定对象
 export const punishTest = () => {
     const arg = new PunishArg();
-    arg.key = '1:10002';
-    arg.report_id = 3;
+    arg.key = '1:10023';
+    arg.report_id = 1;
     arg.punish_type = 4;
     arg.time = 300000;
     clientRpcFunc(punish, arg, (r: string) => {
@@ -515,12 +515,12 @@ export const getRobotSetTest = () => {
 // 修改机器人配置
 export const modifyRobotSetTest = () => {
     const arg = new RobotActiveSet();
-    arg.active = 'robot_post';
-    arg.min_time = 1 * 60 * 1000;
-    arg.max_time = 2 * 60 * 1000;
-    arg.post_user_limit = 5;
-    arg.daily_limit = 10;
-    arg.weight = 1000;
+    arg.active = 'robot_post'; // 行为类型
+    arg.min_time = 1 * 60 * 1000; // 活动最小时间间隔
+    arg.max_time = 2 * 60 * 1000; // 活动最大时间间隔
+    arg.post_user_limit = 5; // 单个帖子上限
+    arg.daily_limit = 10; // 每天上限
+    arg.weight = 1000; // 权重
     clientRpcFunc(modifyRobotSet, arg, (r: boolean) => {
         console.log(r);
     });
@@ -546,10 +546,10 @@ export const getUserDetalTest = () => {
 export const modifyPunishTest = () => {
     const arg = new ModifyPunishArg();
     arg.id = 1; // 惩罚id
+    arg.uid = 10023; // 用户id
     arg.rest_time = 0; // 惩罚剩余时间
     clientRpcFunc(modifyPunish, arg, (r: string) => {
         console.log(r);
-        console.log(JSON.parse(r));
     });
 };
 
@@ -563,6 +563,10 @@ const props = {
         {
             name: '用户详情',
             func: () => { getUserDetalTest(); }
+        },
+        {
+            name: '调整惩罚时间',
+            func: () => { modifyPunishTest(); }
         },
         // {
         //     name: '关闭机器人行为',
