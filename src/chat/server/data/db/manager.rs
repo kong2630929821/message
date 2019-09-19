@@ -1,6 +1,6 @@
 use message.s::{Report, ReportCount};
 use user.s::{UserInfo};
-use community.s::{PostKey, Post}
+use community.s::{PostKey}
 /**
 *超级管理员
 */
@@ -55,23 +55,23 @@ struct ReportListArg {
 *举报用户信息
 */
 struct ReportUserInfo {
-    user_info: UserInfo,         //用户信息
-    report_count: u32,           //举报次数
-    reported_count: u32,         //被举报次数
-    punish_count: u32,           //被惩罚次数
-    punish_list: &[Punish]       //当前惩罚列表
+    user_info: UserInfo,               //用户信息
+    report_list: &[Report],            //举报列表
+    reported_list: &[Report],          //被举报列表
+    punish_history_list: &[Punish],     //历史被惩罚列表
+    punish_list: &[Punish]             //当前惩罚列表
 }
 
 /**
 *举报公众号信息
 */
 struct ReportPublicInfo {
-    num: String,                 //社区编号
-    name: String,                //社区名
-    owner: u32,                  //所属用户
-    reported_count: u32,         //被举报次数
-    punish_count: u32,           //被惩罚次数
-    punish_list: &[Punish]       //当前惩罚列表
+    num: String,                    //社区编号
+    name: String,                   //社区名
+    owner: u32,                     //所属用户
+    reported_list: &[Report],       //被举报列表
+    punish_history_list: &[Punish],  //历史被惩罚列表
+    punish_list: &[Punish]          //当前惩罚列表
 }
 
 /**
@@ -137,10 +137,26 @@ struct PostListArg {
 }
 
 /**
+*公众号文章
+*/
+struct Article {
+    key: PostKey,       //key
+    post_type:u8,       //帖子类型图文、语言、视频
+    title: String,      //标题
+    body: String,       //正文
+    owner: u32,         //发送者
+    createtime: String,    //创建时间
+    state: u8,          //帖子状态
+    num: String,         // 社区编号
+    name: String,       // 公众号名
+    avatar: String,         //头像
+}
+
+/**
 *指定状态的帖子列表
 */
 struct PostList {
-    list: &[Post], // 帖子列表
+    list: &[Article], // 帖子列表
     total: u32,    // 总数
 }
 
