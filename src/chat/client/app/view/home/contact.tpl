@@ -6,7 +6,7 @@
     <app-components1-offlineTip-offlineTip>{ offlienType:{{it.offlienType}} }</app-components1-offlineTip-offlineTip>
     
     {{for i, v of it.tabBarList}}
-    <div style="visibility: {{v.modulName == it.activeTab ? 'visible' : 'hidden'}}; z-index:{{v.modulName == it.activeTab ? 0 :-1}}; position:absolute;top:132px; width:100%;height:100%;">
+    <div style="visibility: {{v.modulName == it.activeTab ? 'visible' : 'hidden'}}; z-index:{{v.modulName == it.activeTab ? 0 :-1}}; position:absolute;top:132px; width:100%;height:100%;overflow: hidden;">
         <widget w-tag={{v.components}} >{isActive:{{v.modulName == it.activeTab}},showTag:{{it.showTag}},active:{{it.acTag}},newApply:{{show}} }</widget>
     </div>
     {{end}}

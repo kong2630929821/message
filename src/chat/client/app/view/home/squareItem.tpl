@@ -20,10 +20,10 @@
                 <img src="../../res/images/loading.gif" alt="" style="width: 42px;height: 42px;"/>
             </div>
             {{else}}
-            <div w-class="follow" on-tap="followUser">+关注</div>
+            <div w-class="follow" on-tap="followUser">关注</div>
             {{end}}
         {{end}}
-        <img src="../../res/images/squareArrow.png" w-class="btn" on-tap="showTools"/>
+        <img src="../../res/images/greyDown.png" w-class="btn" on-tap="showTools"/>
     </div>
 
     {{if it.showAll}}
@@ -62,11 +62,11 @@
     {{% =====================广场展示评论点赞按钮======================}}
     <div w-class="btns">
         <div w-class="btnBox" on-tap="doComment">
-            <img src="../../res/images/comment.png" w-class="btn"/>
+            <img src="../../res/images/commentsGrey.png" w-class="btn"/>
             <span w-class="time">{{it.commentCount>0?it.commentCount:"评论"}}</span>
         </div>
         <div w-class="btnBox" on-tap="likeBtn">
-            <img src="../../res/images/{{it.likeActive?'like_active.png':'like.png'}}" w-class="btn" />
+            <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
             <span w-class="time">{{it.likeCount>0?it.likeCount:"点赞"}}</span>
         </div>
     </div>

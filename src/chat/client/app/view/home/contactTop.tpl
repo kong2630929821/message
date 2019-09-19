@@ -24,7 +24,7 @@
         <div style="width:90px;"></div>
 
         <div style="position:absolute;right:0;" on-down="onShow">
-            <img on-tap="goNext" src="../../res/images/{{it.activeTab=='square'?'squareEdit.png':'add_white.png'}}" w-class="btn" />
+            <img on-tap="goNext" src="../../res/images/{{it.activeTab=='square'?'squareWhite.png':'add_white.png'}}" w-class="btn" />
         </div>
     </div>
 
