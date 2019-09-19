@@ -236,3 +236,11 @@ struct HandleApplyPublicArg {
     result : bool,             // 处理结果
     reason: String,            // 驳回原因
 }
+
+/**
+* 用户举报和惩罚详情
+*/
+struct UserReportDetail {
+    user_report: ReportUserInfo,        // 用户的举报和惩罚详情
+    user_public: &[ReportPublicInfo],   // 用户公众号的举报和惩罚详情
+}

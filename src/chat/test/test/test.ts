@@ -7,14 +7,14 @@ import { clientRpcFunc } from '../../client/app/net/init';
 import { initPush } from '../../client/app/net/receive';
 import { SPIDER_USER_INFO, SPIDER_WEIBO_IMG, SPIDER_WEIBO_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
 import { CommentKey, PostKey } from '../../server/data/db/community.s';
-import { HandleApplyPublicArg, handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportList, ReportListArg, RootUser } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportList, ReportListArg, RootUser, UserReportDetail } from '../../server/data/db/manager.s';
 import { AddRobotArg, CommonComment, CommonCommentList, RobotActiveSet, RobotUserInfo } from '../../server/data/db/robot.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
-import { createRoot, getApplyPublicList, getPostList, getReportList, handleApplyPublic, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
+import { createRoot, getApplyPublicList, getPostList, getReportList, getUserDetal, handleApplyPublic, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
 import { unifiedorder } from '../../server/data/rpc/oauth_lib.p';
@@ -405,7 +405,7 @@ export const signTest = () => {
 // 举报
 export const reportTest = () => {
     const arg = new ReportArg();
-    arg.key = '1:10002';
+    arg.key = '1:10023';
     arg.evidence = '';
     arg.report_type = 1;
     arg.reason = '涉嫌诈骗';
@@ -422,8 +422,8 @@ export const getReportListTest = () => {
     arg.state = 0;
     clientRpcFunc(getReportList, arg, (r: string) => {
         console.log(r);
-        // const r1:ReportList = JSON.parse(r);
-        // console.log(r1);
+        const r1:ReportList = JSON.parse(r);
+        console.log(r1);
     });
 };
 
@@ -531,6 +531,15 @@ export const getCommonCommerntTest = () => {
     });
 };
 
+// 用户详情
+export const getUserDetalTest = () => {
+    const uid = 10023;
+    clientRpcFunc(getUserDetal, uid, (r: string) => {
+        console.log(r);
+        console.log(JSON.parse(r));
+    });
+};
+
 const props = {
     bts: [
         
@@ -539,53 +548,57 @@ const props = {
             func: () => { chatLogin(); }
         },
         {
-            name: '关闭机器人行为',
-            func: () => { closeRobottTest(); }
+            name: '用户详情',
+            func: () => { getUserDetalTest(); }
         },
-        {
-            name: '添加机器人',
-            func: () => { getRobotUserInfoTest(); }
-        },
-        {
-            name: '初始化配置',
-            func: () => { initRobotSetTest(); }
-        },
-        {
-            name: '获取配置',
-            func: () => { getRobotSetTest(); }
-        },
-        {
-            name: '修改配置',
-            func: () => { modifyRobotSetTest(); }
-        },
-        {
-            name: '开启机器人行为',
-            func: () => { startRobotTest(); }
-        },
-        {
-            name: '添加通用评论',
-            func: () => { addCommonCommerntTest(); }
-        },
-        {
-            name: '查看通用评论',
-            func: () => { getCommonCommerntTest(); }
-        },
-        {
-            name: '审核公众号',
-            func: () => { handleApplyPublicTest(); }
-        },
-        {
-            name: '公众号列表',
-            func: () => { getApplyPublicListTest(); }
-        },
-        {
-            name: '审核文章',
-            func: () => { handleArticleTest(); }
-        },
-        {
-            name: '文章列表',
-            func: () => { getPostListTest(); }
-        },
+        // {
+        //     name: '关闭机器人行为',
+        //     func: () => { closeRobottTest(); }
+        // },
+        // {
+        //     name: '添加机器人',
+        //     func: () => { getRobotUserInfoTest(); }
+        // },
+        // {
+        //     name: '初始化配置',
+        //     func: () => { initRobotSetTest(); }
+        // },
+        // {
+        //     name: '获取配置',
+        //     func: () => { getRobotSetTest(); }
+        // },
+        // {
+        //     name: '修改配置',
+        //     func: () => { modifyRobotSetTest(); }
+        // },
+        // {
+        //     name: '开启机器人行为',
+        //     func: () => { startRobotTest(); }
+        // },
+        // {
+        //     name: '添加通用评论',
+        //     func: () => { addCommonCommerntTest(); }
+        // },
+        // {
+        //     name: '查看通用评论',
+        //     func: () => { getCommonCommerntTest(); }
+        // },
+        // {
+        //     name: '审核公众号',
+        //     func: () => { handleApplyPublicTest(); }
+        // },
+        // {
+        //     name: '公众号列表',
+        //     func: () => { getApplyPublicListTest(); }
+        // },
+        // {
+        //     name: '审核文章',
+        //     func: () => { handleArticleTest(); }
+        // },
+        // {
+        //     name: '文章列表',
+        //     func: () => { getPostListTest(); }
+        // },
         {
             name: '举报受理',
             func: () => { reportHandledTest(); }
