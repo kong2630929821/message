@@ -181,7 +181,7 @@ export class Square extends Widget {
     public scrollPage() {
         const page = document.getElementById('squarePage');
         const contain = document.getElementById('squareContain');
-        if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.state.postList.length % 20 === 0) {
+        if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.state.postList.length % 5 === 0) {
             this.props.refresh = false;
             const list = this.state.postList;
             showPost(this.props.active + 1,list[list.length - 1].key.num,list[list.length - 1].key.id).then(r => {

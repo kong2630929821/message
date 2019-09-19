@@ -32,3 +32,9 @@ export const COMMENT_NOT_EXIST = 3002;
 export const CANT_DETETE_OTHERS_POST = 3003;
 // 不能删除他人的评论
 export const CANT_DETETE_OTHERS_COMMENT = 3004;
+
+// ==================管理端===================
+// 密码错误
+export const MGR_ERROR_PASSWORD = 4001;
+// 管理端没有登陆
+export const MGR_NOT_LOGIN = 4002;

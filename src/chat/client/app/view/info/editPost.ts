@@ -21,6 +21,8 @@ interface Props {
     num:string; // 社区ID
     isUploading:boolean;// 正在上传图片
     uploadLoding:any;
+    emoji:boolean;// 表情
+    camera:boolean;// 相机
 }
 
 /**
@@ -39,7 +41,9 @@ export class EditPost extends Widget {
         isOnEmoji:false,
         num:'',
         isUploading:false,
-        uploadLoding:[]
+        uploadLoding:[],
+        emoji:true,
+        camera: true
     };
     
     public setProps(props:any) {
@@ -132,6 +136,7 @@ export class EditPost extends Widget {
      * 打开照相机
      */
     public takePhoto(e:any) {
+        this.props.camera = !this.props.camera;
         const camera = openCamera((url) => {
             console.log('拍摄的图片',url);
     
@@ -254,7 +259,14 @@ export class EditPost extends Widget {
     // 打开表情包图库
     public openEmoji() {
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight() + 90}px`;
+        this.props.emoji = !this.props.emoji;
         this.props.isOnEmoji = !this.props.isOnEmoji;
+        this.paint();
+        
+    }
+    public openPhoto () {
+        this.props.camera = !this.props.camera;
+        // this.props.isOnEmoji = !this.props.isOnEmoji;
         this.paint();
     }
 

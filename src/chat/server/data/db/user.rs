@@ -20,7 +20,7 @@ enum VIP_LEVEL {
     VIP1 = 1,
     VIP2 = 2, 
     VIP3 = 3,
-    VIP4 = 4,
+    VIP4 = 4, // 机器人
     VIP5 = 5, // 官方账号
 }
 
