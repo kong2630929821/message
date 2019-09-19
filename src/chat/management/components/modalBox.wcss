@@ -1,0 +1,85 @@
+.openBox{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    padding: 0 75px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.body{
+    width: 500px;
+    background:rgba(255,255,255,1);
+    box-shadow:0px 0px 10px 0px rgba(0,0,0,0.2);
+    border-radius:4px;
+}
+.title{
+    font-size:16px;
+    font-family:SourceHanSansCN;
+    font-weight:bold;
+    color:rgba(53,64,82,1);
+    margin: 30px;
+}
+.postInfo{
+    display: flex;
+    align-items: center;
+    margin: 0 30px;
+}
+.postName{
+    font-size:14px;
+    font-family:SourceHanSansCN;
+    font-weight:400;
+    color:rgba(34,34,34,1);
+    margin-left: 10px;
+}
+.checkType{
+    width: 429px;
+    height: 55px;
+    background:rgba(242,242,242,1);
+    margin: 30px 30px 0 30px;
+    display: flex;
+}
+.row1{
+    width: 103px;
+    display: flex;
+    margin-left: 20px;
+    align-items: center;
+    cursor: pointer;
+}
+.rowItem{
+    margin-left: 10px;
+}
+.rowImg{
+    width: 16px;
+    height: 16px;
+}
+.checkTypeTwo{
+    width:429px;
+    height:106px;
+    background:rgba(255,255,255,1);
+    border:1px solid rgba(204,204,204,1);
+    margin: 0 30px;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+}
+.btnGroup{
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-around;
+}
+.btn{
+    width:86px;
+    height:36px;
+    border-radius:4px;
+    border:1px solid rgba(0,0,0,0.1);
+    font-size:14px;
+    font-family:SourceHanSansCN;
+    font-weight:400;
+    color:rgba(53,64,82,1);
+    text-align: center;
+    line-height: 36px;
+    cursor: pointer;
+}

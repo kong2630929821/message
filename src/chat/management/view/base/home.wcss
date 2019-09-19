@@ -1,0 +1,76 @@
+.new_page{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+}
+.base{
+    display: flex;
+    color: #354052;
+    height: 100%;
+}
+.left{
+    width: 250px;
+    flex-shrink: 0;
+    background:#273142;
+    color: #fff;
+    cursor: pointer;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+}
+.icon-left{
+    width: 16px;
+    height: 16px;
+    margin:0 16px;
+}
+.icon-right{
+    width: 12px;
+    height: 12px;
+    margin: 0 24px;
+}
+.logo{
+    height: 80px;
+    font-size:24px;
+    line-height: 80px;
+    color: #fff;
+    padding-left: 30px;
+    background:#273142;
+}
+.item{
+    font-size:18px;
+    height: 60px;
+    line-height: 60px;
+    display: flex;
+    align-items: center;
+}
+.childItem{
+    background: #2d3948;
+}
+.active{
+    color: #fff;
+    background:#1991EB;
+}
+.right{
+    flex: 1 0 0 ;
+    display: flex;
+    flex-direction: column;
+    background: #F0F2F5;
+    overflow: hidden;
+}
+.topLogin{
+    height: 80px;
+    border-bottom:1px solid rgba(204,204,204,1);
+    background:rgba(255,255,255,1);
+}
+.exit{
+    font-size:16px;
+    font-family:SourceHanSansCN;
+    font-weight:400;
+    color:rgba(53,64,82,1);
+    text-align: right;
+    margin-right: 60px;
+    line-height: 80px;
+}
