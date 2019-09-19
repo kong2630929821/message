@@ -12,7 +12,7 @@
                 <img src="../../res/images/loading.gif" alt="" style="width: 42px;height: 42px;"/>
             </div>
             {{else}}
-            <div w-class="follow" on-tap="followUser">+关注</div>
+            <div w-class="follow" on-tap="followUser">关注</div>
             {{end}}
         {{end}}
     </div>

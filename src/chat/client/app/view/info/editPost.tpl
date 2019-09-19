@@ -35,8 +35,8 @@
 
     <div w-class="tools" ev-emoji-click="pickEmoji" >
         <div>
-            <img src="../../res/images/emoji.png" w-class="btn" on-tap="openEmoji"/>
-            <img src="../../res/images/tool-camera.png" w-class="btn" on-tap="takePhoto"/>
+            <img src="{{it.emoji?'../../res/images/emoji.png':'../../res/images/emojiblue.png'}}" w-class="btn" on-tap="openEmoji"/>
+            <img src="{{it.camera?'../../res/images/tool-cameraGrey.png':'../../res/images/tool-camera.png'}}" w-class="btn" on-tap="openPhoto" on-tap="takePhoto"/>
         </div>
 
         <widget w-tag="chat-client-app-widget-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}"></widget>

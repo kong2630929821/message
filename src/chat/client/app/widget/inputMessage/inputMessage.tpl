@@ -1,8 +1,8 @@
 <div w-class="outer" >
 	<div w-class="input-message-wrap">
-		<img w-class="audio" on-tap="openAudio" src="../../res/images/audio.png"/>
+		<img w-class="audio" on-tap="openAudio" src="{{it.isOnAudio?'../../res/images/audioIcon.png':'../../res/images/audio.png'}}"/>
 		<chat-client-app-widget-input-textarea w-class="inputMessage">{placeHolder:"输入消息",input:{{it.message}} }</chat-client-app-widget-input-textarea>
-		<img w-class="emoji" on-tap="openEmoji" src="../../res/images/emoji.png"/>
+		<img w-class="emoji" on-tap="openEmoji" src="{{it.isOnEmoji?'../../res/images/emojiblue.png':'../../res/images/emoji.png'}}"/>
 		{{if it.message}}
 		<img w-class="unfold" on-tap="send" src="../../res/images/send.png"/>
 		{{else}}
