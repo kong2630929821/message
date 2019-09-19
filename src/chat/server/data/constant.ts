@@ -55,6 +55,9 @@ export const SEND_POST_LAUD = 'post_laud'; // 帖子点赞
 export const SEND_COMMENT_LAUD = 'comment_laud'; // 评论点赞
 export const SEND_COMMENT = 'comment'; // 评论推送
 export const SEND_COMMENT_TO_COMMENT = 'comment_to_comment'; // 评论帖子的评论
+export const SEND_PUNISH = 'punish'; // 惩罚推送
+export const SEND_ARTICLE_REVIEW = 'article_review'; // 文章审核结果通知
+export const SEND_PUBLIC_APPLY = 'public_apply'; // 公众号审核结果通知
 
 // --------------------------自增ID源----------------
 // 创建社区num
@@ -79,6 +82,9 @@ export const SQUARE_HOT = 4; // 热门
 // 帖子状态
 export const NORMAL_STATE = 1;  // 正常状态
 export const DELETE_STATE = 0; // 标记删除
+export const NOT_REVIEW_STATE = 2; // 待审核
+export const REVIEW_PASS = 3;      // 审核通过
+export const REVIEW_REFUSE = 4;    // 审核驳回
 
 // 爬虫服务地址
 export const WEIBO_SPIDER_HOST = 'http://39.98.48.66:9999/'; // 爬虫服务器地址
@@ -96,3 +102,18 @@ export const REPORT_PUBLIC = 2;  // 举报公众号
 export const REPORT_POST = 3;    // 举报动态
 export const REPORT_ARTICLE = 4; // 举报文章
 export const REPORT_COMMENT = 5; // 举报评论
+
+// 惩罚类型
+export const DELETE_CONTENT = 1;    // 删除内容
+export const BAN_MESAAGE = 2;       // 禁言
+export const BAN_POST = 3;          // 禁止发动态
+export const FREEZE = 4;            // 冻结
+
+// 惩罚状态
+export const PUNISH_LAST = 0; // 惩罚中
+export const PUNISH_END = 1; // 惩罚结束
+
+// 公众号申请状态
+export const PUBLIC_APPLYING = 0;    // 申请中
+export const PUBLIC_APPLY_SUCCESS = 1; // 申请成功
+export const PUBLIC_APPLY_REFUSED = 2; // 申请驳回

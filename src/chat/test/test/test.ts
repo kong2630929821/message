@@ -7,14 +7,14 @@ import { clientRpcFunc } from '../../client/app/net/init';
 import { initPush } from '../../client/app/net/receive';
 import { SPIDER_USER_INFO, SPIDER_WEIBO_IMG, SPIDER_WEIBO_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
 import { CommentKey, PostKey } from '../../server/data/db/community.s';
-import { ReportList, ReportListArg, RootUser } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportList, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { AddCommonComment, AddRobotArg, CommonComment, RobotUserInfo } from '../../server/data/db/robot.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
-import { createRoot, getReportList, rootLogin } from '../../server/data/rpc/manager.p';
+import { createRoot, getApplyPublicList, getPostList, getReportList, handleApplyPublic, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
 import { unifiedorder } from '../../server/data/rpc/oauth_lib.p';
@@ -76,7 +76,7 @@ export const setGM = () => {
 // 写帖子
 export const addPostPortTest = () => {
     const addPostArg = new AddPostArg();
-    addPostArg.num = '12';
+    addPostArg.num = '23';
     addPostArg.post_type = 0;
     addPostArg.title = 'Vakanda Forever';
     addPostArg.body = 'test1';
@@ -177,9 +177,10 @@ export const getSquarePostTest = () => {
 // 创建公众号
 export const createCommunityNumTest = () => {
     const arg = new CreateCommunity();
-    arg.name = 'China No1';
+    arg.name = 'China No1..';
     arg.comm_type = 2;
     arg.desc = 'lalalalala';
+    arg.avatar = 'jpg';
     clientRpcFunc(createCommunityNum, arg, (r: string) => {
         console.log(r);
     });
@@ -433,8 +434,76 @@ export const getReportListTest = () => {
     arg.state = 0;
     clientRpcFunc(getReportList, arg, (r: string) => {
         console.log(r);
-        const r1:ReportList = JSON.parse(r);
-        console.log(r1);
+        // const r1:ReportList = JSON.parse(r);
+        // console.log(r1);
+    });
+};
+
+// 惩罚指定对象
+export const punishTest = () => {
+    const arg = new PunishArg();
+    arg.key = '1:10002';
+    arg.report_id = 3;
+    arg.punish_type = 4;
+    arg.time = 300000;
+    clientRpcFunc(punish, arg, (r: string) => {
+        console.log(r);
+    });
+};
+
+// 举报受理完成
+export const reportHandledTest = () => {
+    const arg = 3;
+    clientRpcFunc(reportHandled, arg, (r: string) => {
+        console.log(r);
+    });
+};
+
+// 获取文章列表
+export const getPostListTest = () => {
+    const arg = new PostListArg();
+    arg.state = 2;
+    arg.count = 10;
+    arg.postKey = new PostKey();
+    arg.postKey.id = 0;
+    arg.postKey.num = '23';
+    clientRpcFunc(getPostList, arg, (r: string) => {
+        console.log(r);
+    });
+};
+
+// 审核文章
+export const handleArticleTest = () => {
+    const arg = new handleArticleArg();
+    arg.result = true;
+    arg.reason = '';
+    arg.postKey = new PostKey();
+    arg.postKey.id = 6;
+    arg.postKey.num = '23';
+    clientRpcFunc(handleArticle, arg, (r: boolean) => {
+        console.log(r);
+    });
+};
+
+// 获取公众号审核列表
+export const getApplyPublicListTest = () => {
+    const arg = new PublicApplyListArg();
+    arg.state = 0;
+    arg.count = 10;
+    arg.id = 0;
+    clientRpcFunc(getApplyPublicList, arg, (r: string) => {
+        console.log(r);
+    });
+};
+
+// 审核公众号
+export const handleApplyPublicTest = () => {
+    const arg = new HandleApplyPublicArg();
+    arg.result = false;
+    arg.reason = '';
+    arg.id = 1;
+    clientRpcFunc(handleApplyPublic, arg, (r: boolean) => {
+        console.log(r);
     });
 };
 
@@ -444,6 +513,30 @@ const props = {
         {
             name: '用户登陆',
             func: () => { chatLogin(); }
+        },
+        {
+            name: '审核公众号',
+            func: () => { handleApplyPublicTest(); }
+        },
+        {
+            name: '公众号列表',
+            func: () => { getApplyPublicListTest(); }
+        },
+        {
+            name: '审核文章',
+            func: () => { handleArticleTest(); }
+        },
+        {
+            name: '文章列表',
+            func: () => { getPostListTest(); }
+        },
+        {
+            name: '举报受理',
+            func: () => { reportHandledTest(); }
+        },
+        {
+            name: '惩罚',
+            func: () => { punishTest(); }
         },
         {
             name: '举报列表',

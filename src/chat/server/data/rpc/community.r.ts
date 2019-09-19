@@ -3,6 +3,7 @@ import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex } from '../db/community.s';
+import { ApplyPublic, UserApplyPublic } from '../db/manager.s';
 import { UserInfo } from '../db/user.s';
 import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getIndexID } from '../util';
@@ -10,6 +11,8 @@ import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
 import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
 import { getUid } from './group.r';
+import { addManagerPostIndex, getUserPunishing } from './manager.r';
+import { getIndexId } from './message.r';
 
 declare var env: Env;
 /**
@@ -30,8 +33,17 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
             communityBase.avatar = arg.avatar;
             // 判断公众号名是否重复
-            const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
+            let publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
             if (publicNameIndex) return 'repeat name';
+            // 添加公众号名索引
+            publicNameIndex = new PublicNameIndex();
+            publicNameIndex.name = arg.name;
+            publicNameIndex.num = num;
+            publicNameIndexBucket.put(arg.name, publicNameIndex);
+            // 添加到公众号申请表
+            console.log('!!!!!!!!!!!!!!!!num',num);
+
+            return applyPublicComm(uid, num, arg.name, arg.avatar, arg.desc);
         } else {
             communityBase.avatar = '';
         }
@@ -56,11 +68,6 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
             publicAccIndex.num = num;
         } else {
-            // 添加公众号名索引
-            const publicNameIndex = new PublicNameIndex();
-            publicNameIndex.name = arg.name;
-            publicNameIndex.num = num;
-            publicNameIndexBucket.put(arg.name, publicNameIndex);
             publicAccIndex.list.push(num);
             publicAccIndexBucket.put(uid, publicAccIndex);
         }
@@ -264,18 +271,35 @@ export const getFansId = (num: string): CommunityNumList => {
 export const addPostPort = (arg: AddPostArg): PostKey => {
     const uid = getUid();
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
-    const community = communityBaseBucket.get(arg.num)[0];
+    const community = communityBaseBucket.get<string, CommunityBase[]>(arg.num)[0];
     console.log('!!!!!!!!!!!!!!!!!!addPostPort communityBase',arg,community);
     let key = new PostKey();
+    key.id = 0;
     key.num = arg.num;
-    key.id = getIndexID(CONSTANT.POST_INDEX, 1);
+    // 判断用户是否被禁止发动态
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}:${getUid()}`, CONSTANT.BAN_POST);
+    if (punishList.list.length > 0) {
+        key.num = JSON.stringify(punishList);
+
+        return key;
+    }
+    // 如果是公众号发帖判断公众号是否被禁止发动态
+    if (community.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+        const punishList1 = getUserPunishing(`${CONSTANT.REPORT_PUBLIC}:${arg.num}`, CONSTANT.BAN_POST);
+        if (punishList1.list.length > 0) {
+            key.num = JSON.stringify(punishList1);
+
+            return key;
+        }
+    }
     // 不能用别人的社区账号发帖
     if (community && community.owner !== uid) {
         key.num = '';
         
         return key;
     }
-    key = addPost(uid, arg, key);
+    key.id = getIndexID(CONSTANT.POST_INDEX, 1);
+    key = addPost(uid, arg, key, community.comm_type);
 
     return key;
 };
@@ -383,7 +407,7 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
         }
         const post:Post = v[1];
         const postKey = v[0];
-        if (post.state === CONSTANT.DELETE_STATE) {
+        if (post.state !== CONSTANT.NORMAL_STATE) {
             i --;
             continue;
         }
@@ -454,7 +478,7 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
         postKey.id = communityPost.id_list[i];
         postKey.num = communityPost.num;
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
-        if (post.state === CONSTANT.DELETE_STATE) continue; // 帖子已删除
+        if (post.state !== CONSTANT.NORMAL_STATE) continue; // 帖子已删除
         post_id_list.push(postKey);
         postArrWithTotal.total ++;
     }
@@ -906,7 +930,7 @@ export const searchPost = (str: string): PostArr => {
         }
         const post:Post = v[1];
         const postKey = v[0];
-        if (post.state === CONSTANT.DELETE_STATE) continue;
+        if (post.state !== CONSTANT.NORMAL_STATE) continue;
         const postData = getPostInfo(postKey, post);
         if (postData.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC && postData.title.split(str).length > 1) {
             arr.push(postData);
@@ -1009,7 +1033,7 @@ export const userfollow = (uid: number, communityNum:string):boolean => {
  * @param arg 发帖参数
  * @param key 帖子主键
  */
-export const addPost = (uid: number, arg: AddPostArg, key: PostKey): PostKey => {
+export const addPost = (uid: number, arg: AddPostArg, key: PostKey, comm_type: number): PostKey => {
     const PostBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const value = new Post();
     value.key = key;
@@ -1019,10 +1043,15 @@ export const addPost = (uid: number, arg: AddPostArg, key: PostKey): PostKey => 
     value.owner = uid;
     value.createtime = Date.now().toString().toString();
     value.state = CONSTANT.NORMAL_STATE;
+    if (comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) value.state = CONSTANT.NOT_REVIEW_STATE;
     // 检查帖子是否存在
     if (!PostBucket.get(key)[0]) {
         // 写入帖子
         if (PostBucket.put(key, value)) {
+            // 公众号帖子添加到待审核列表
+            if (comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+                addManagerPostIndex(CONSTANT.NOT_REVIEW_STATE, key, true);
+            }
             // 写入社区的帖子
             const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
             let communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
@@ -1311,7 +1340,7 @@ export const getHotPost = (arg: IterPostArg) :PostArr => {
             break;
         }
         const post:Post = v[1];
-        if (post.state === CONSTANT.DELETE_STATE) continue;
+        if (post.state !== CONSTANT.NORMAL_STATE) continue;
         const postKey = v[0];
         const postData = getPostInfo(postKey, post);
         if (today - get_day(postData.createtime) > 30) break;
@@ -1369,7 +1398,7 @@ export const getAllPublicPost = (arg: IterPostArg) :PostArr => {
             break;
         }
         const post:Post = v[1];
-        if (post.state === CONSTANT.DELETE_STATE) continue;
+        if (post.state !== CONSTANT.NORMAL_STATE) continue;
         const postKey = v[0];
         const postData = getPostInfo(postKey, post);
         if (today - get_day(postData.createtime) > 30) break;
@@ -1436,7 +1465,7 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
     const post = postBucket.get<PostKey, Post[]>(postKey)[0];
     if (!post) return;
-    if (post.state === CONSTANT.DELETE_STATE) return; // 帖子已删除
+    if (post.state !== CONSTANT.NORMAL_STATE) return; // 帖子已删除
     const user = new GetUserInfoReq();
     user.uids = [post.owner];
     const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
@@ -1465,6 +1494,50 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     }
 
     return postData;
+};
+
+/**
+ * 申请公众号
+ * @param uid 用户id
+ * @param name 社区编号
+ * @param name 公众号名
+ * @param avatar 公众号头像
+ * @param desc 公众号描述
+ */
+export const applyPublicComm = (uid: number, num: string, name: string, avatar: string, desc: string): string => {
+    const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
+    const userApplyPublicBucket = new Bucket(CONSTANT.WARE_NAME, UserApplyPublic._$info.name);
+    
+    // 添加到公众号申请表
+    const applyPublic = new ApplyPublic();
+    applyPublic.id = getIndexId('apply_public');
+    applyPublic.uid = uid;
+    applyPublic.num = num;
+    applyPublic.name = name;
+    applyPublic.desc = desc;
+    applyPublic.time = Date.now().toString();
+    applyPublic.avatar = avatar;
+    applyPublic.handle_time = '';
+    applyPublic.reason = '';
+    applyPublic.state = CONSTANT.PUBLIC_APPLYING;
+    // 添加用户申请记录
+    let userApplyPublic = userApplyPublicBucket.get<number, UserApplyPublic[]>(uid)[0];
+    if (!userApplyPublic) {
+        userApplyPublic = new UserApplyPublic();
+        userApplyPublic.uid = uid;
+        userApplyPublic.list = [];
+    } else if (userApplyPublic.list.length > 0) {
+        // 判断用户上一次申请是否完成
+        const last_id = userApplyPublic.list[userApplyPublic.list.length - 1];
+        const applyPublic = applyPublicBucket.get<number, ApplyPublic[]>(last_id)[0];
+        if (!applyPublic) return 'db error';
+        if (applyPublic.state === CONSTANT.PUBLIC_APPLYING) return 'applying';
+    }
+    userApplyPublic.list.push(applyPublic.id);
+    applyPublicBucket.put(applyPublic.id, applyPublic);
+    userApplyPublicBucket.put(uid, userApplyPublic);
+
+    return 'apply public';
 };
 
 // postKey根据帖子id快速排序
