@@ -87,10 +87,16 @@ export const REVIEW_PASS = 3;      // 审核通过
 export const REVIEW_REFUSE = 4;    // 审核驳回
 
 // 爬虫服务地址
-export const WEIBO_SPIDER_HOST = 'http://39.98.48.66:9999/'; // 爬虫服务器地址
+export const WEIBO_SPIDER_HOST = 'http://127.0.0.1:9999/'; // 爬虫服务器地址
 export const SPIDER_USER_INFO = 'user_spider.py'; // 爬取用户信息
 export const SPIDER_WEIBO_INFO = 'weibo_spider.py'; // 爬取微博信息
 export const SPIDER_WEIBO_IMG = 'weibo/img/';  // 微博图片
+
+// 虚拟用户行为类型
+export const ROBOT_ACTIVE_POST = 'robot_post'; // 发帖
+export const ROBOT_ACTIVE_LAUD = 'robot_laud'; // 点赞
+export const ROBOT_ACTIVE_COMMENT = 'robot_comment'; // 评论
+export const ROBOT_ACTIVE_ALL = 'robot_active'; // 全部行为
 
 // 虚拟用户行为配置
 export const LAST_POST_NUM = 10; // 处理最新帖子的数量

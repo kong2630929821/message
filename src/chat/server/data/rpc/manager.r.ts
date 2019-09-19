@@ -8,25 +8,24 @@ import { send } from '../../../utils/send';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { Comment, CommentKey, CommunityAccIndex, CommunityBase, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
-import { ApplyPublic, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic } from '../db/manager.s';
+import { ApplyPublic, Article, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail } from '../db/manager.s';
 import { Report, ReportCount } from '../db/message.s';
-import { COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
+import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
-import { userFollow } from './community.r';
 import { getIndexId } from './message.r';
 
 /**
  * 创建管理员
  */
 // #[rpc=rpcServer]
-export const createRoot = (user: RootUser): boolean => {
+export const createRoot = (user: RootUser): number => {
     const rootUserBucket = new Bucket(CONSTANT.WARE_NAME, RootUser._$info.name);
     if (user.user && user.pwd) {
         rootUserBucket.put(user.user, user);
 
-        return true;
+        return CONSTANT.RESULT_SUCCESS;
     } else {
-        return false;
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
     }
 };
 
@@ -34,18 +33,18 @@ export const createRoot = (user: RootUser): boolean => {
  * 管理员登陆
  */
 // #[rpc=rpcServer]
-export const rootLogin = (user: RootUser): boolean => {
+export const rootLogin = (user: RootUser): number => {
     const rootUserBucket = new Bucket(CONSTANT.WARE_NAME, RootUser._$info.name);
     const rootUser = rootUserBucket.get<string, RootUser[]>(user.user)[0];
-    if (!rootUser) return false;
+    if (!rootUser) return ERROR_NUM.DB_ERROR;
     if (rootUser.pwd === user.pwd) {
         // 写入会话
         setSession('root', user.user);
         console.log(getSession('root'));
 
-        return true;
+        return CONSTANT.RESULT_SUCCESS;
     } else {
-        return false;
+        return ERROR_NUM.MGR_ERROR_PASSWORD;
     }
 };
 
@@ -179,14 +178,14 @@ export const getPostList = (arg: PostListArg): string => {
         managerPostList.list = [];
     }
     managerPostList.list.reverse();
-    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const articleBucket = new Bucket(CONSTANT.WARE_NAME, Article._$info.name);
     const postList = new PostList();
     postList.list = [];
     let flag = false;
     if (arg.postKey.id === 0) flag = true;
     for (let i = 0; i < managerPostList.list.length; i++) {
         if (arg.count <= 0) break;
-        const post = postBucket.get<PostKey, Post[]>(managerPostList.list[i])[0];
+        const post = articleBucket.get<PostKey, Article[]>(managerPostList.list[i])[0];
         if (!post) continue;
         if (flag) {
             postList.list.push(post);
@@ -203,12 +202,12 @@ export const getPostList = (arg: PostListArg): string => {
  * 处理待审核文章
  */
 // #[rpc=rpcServer]
-export const handleArticle = (arg: handleArticleArg): boolean => {
+export const handleArticle = (arg: handleArticleArg): number => {
     console.log('============handleArticle:', arg);
-    if (!getSession('root')) return false;
+    if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const post = postBucket.get<PostKey, Post[]>(arg.postKey)[0];
-    if (!post) return false;
+    if (!post) return ERROR_NUM.DB_ERROR;
     addManagerPostIndex(CONSTANT.NOT_REVIEW_STATE, arg.postKey, false); // 减去待审核文章索引
     // 审核通过
     if (arg.result) {
@@ -230,7 +229,7 @@ export const handleArticle = (arg: handleArticleArg): boolean => {
     // 推送审核结果通知
     send(post.owner, CONSTANT.SEND_ARTICLE_REVIEW, JSON.stringify(arg));
 
-    return true;
+    return CONSTANT.RESULT_SUCCESS;
 };
 
 /**
@@ -290,6 +289,24 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     send(applyPublic.uid, CONSTANT.SEND_PUBLIC_APPLY, JSON.stringify(arg));
 
     return applyPublic.num;
+};
+
+/**
+ * 管理端获取用户详情
+ */
+// #[rpc=rpcServer]
+export const getUserDetal = (uid: number): string => {
+    const userDetail = new UserReportDetail();
+    userDetail.user_report = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${uid}`, uid);
+    userDetail.user_public = [];
+    const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
+    const publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
+    if (!publicAccIndex || publicAccIndex.list.length === 0) return JSON.stringify(userDetail);
+    for (let i = 0; i < publicAccIndex.list.length; i++) {
+        userDetail.user_public.push(getReportPublicInfo(`${CONSTANT.REPORT_PUBLIC}:${publicAccIndex.list[i]}`));
+    }
+
+    return JSON.stringify(userDetail);
 };
 
 // 获取公众号申请详情
@@ -400,18 +417,41 @@ export const getReportData = (report: Report): ReportData => {
 export const getReportUserInfo = (key: string, uid: number): ReportUserInfo => {
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
     const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
+    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reporterUserInfo = new ReportUserInfo();
-    const reporterCount = reportCountBucket.get<string, ReportCount[]>(key)[0];
+    let reporterCount = reportCountBucket.get<string, ReportCount[]>(key)[0];
+    if (!reporterCount) {
+        reporterCount = new ReportCount();
+        reporterCount.key = key;
+        reporterCount.report = [];
+        reporterCount.reported = [];
+    }
     reporterUserInfo.user_info = getUserInfoById(uid);
-    reporterUserInfo.report_count = reporterCount.report.length;
-    reporterUserInfo.reported_count = reporterCount.reported.length;
+    // 举报列表
+    reporterUserInfo.report_list = [];
+    for (let i = 0; i < reporterCount.report.length; i++) {
+        const report = reportBucket.get<number, Report[]>(reporterCount.report[i])[0];
+        if (report) reporterUserInfo.report_list.push(report);
+    }
+    // 被举报列表
+    reporterUserInfo.reported_list = [];
+    for (let i = 0; i < reporterCount.reported.length; i++) {
+        const report = reportBucket.get<number, Report[]>(reporterCount.reported[i])[0];
+        if (report) reporterUserInfo.reported_list.push(report);
+    }
+    // 当前惩罚列表
     reporterUserInfo.punish_list = [];
     const punishCount = getUserPunish(key);
     for (let i = 0; i < punishCount.punish_list.length; i++) {
         const punish = punishBucket.get<number, Punish[]>(punishCount.punish_list[i])[0];
         reporterUserInfo.punish_list.push(punish);
     }
-    reporterUserInfo.punish_count = punishCount.punish_list.length + punishCount.punish_history.length;
+    // 历史惩罚列表
+    reporterUserInfo.punish_history_list = [];
+    for (let i = 0; i < punishCount.punish_history.length; i++) {
+        const punish = punishBucket.get<number, Punish[]>(punishCount.punish_history[i])[0];
+        reporterUserInfo.punish_history_list.push(punish);
+    }
 
     return reporterUserInfo;
 };
@@ -420,6 +460,7 @@ export const getReportUserInfo = (key: string, uid: number): ReportUserInfo => {
 export const getReportPublicInfo = (key: string): ReportPublicInfo => {
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
     const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
+    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
     const reportPublicInfo = new ReportPublicInfo();
     const communityNum = key.split(':')[1];
@@ -427,15 +468,33 @@ export const getReportPublicInfo = (key: string): ReportPublicInfo => {
     reportPublicInfo.num = communityNum;
     reportPublicInfo.name = CommunityBase.name;
     reportPublicInfo.owner = communityBase.owner;
-    const reportCount = reportCountBucket.get<string, ReportCount[]>(key)[0];
-    reportPublicInfo.reported_count = reportCount.reported.length;
+    let reportCount = reportCountBucket.get<string, ReportCount[]>(key)[0];
+    if (!reportCount) {
+        reportCount = new ReportCount();
+        reportCount.key = key;
+        reportCount.report = [];
+        reportCount.reported = [];
+    }
+    reportPublicInfo.reported_list = [];
+    // 被举报列表
+    reportPublicInfo.reported_list = [];
+    for (let i = 0; i < reportCount.reported.length; i++) {
+        const report = reportBucket.get<number, Report[]>(reportCount.reported[i])[0];
+        if (report) reportPublicInfo.reported_list.push(report);
+    }
+    // 当前惩罚列表
     reportPublicInfo.punish_list = [];
     const punishCount = getUserPunish(key);
     for (let i = 0; i < punishCount.punish_list.length; i++) {
         const punish = punishBucket.get<number, Punish[]>(punishCount.punish_list[i])[0];
         reportPublicInfo.punish_list.push(punish);
     }
-    reportPublicInfo.punish_count = punishCount.punish_list.length + punishCount.punish_history.length;
+    // 历史惩罚列表
+    reportPublicInfo.punish_history_list = [];
+    for (let i = 0; i < punishCount.punish_history.length; i++) {
+        const punish = punishBucket.get<number, Punish[]>(punishCount.punish_history[i])[0];
+        reportPublicInfo.punish_history_list.push(punish);
+    }
 
     return reportPublicInfo;
 };
@@ -443,7 +502,13 @@ export const getReportPublicInfo = (key: string): ReportPublicInfo => {
 // 获取被举报内容信息
 export const getReportContentInfo = (key: string): ReportContentInfo => {
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
-    const reportCount = reportCountBucket.get<string, ReportCount[]>(key)[0];
+    let reportCount = reportCountBucket.get<string, ReportCount[]>(key)[0];
+    if (!reportCount) {
+        reportCount = new ReportCount();
+        reportCount.key = key;
+        reportCount.report = [];
+        reportCount.reported = [];
+    }
     const reportContentInfo = new ReportContentInfo();
     reportContentInfo.key = key;
     reportContentInfo.reported_count = reportCount.reported.length;
@@ -497,9 +562,9 @@ export const getUserPunishing = (key: string, punishType: number): PunishList =>
 const deletePost = (postKey: PostKey): number => {
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const post = postBucket.get<PostKey, Post[]>(postKey)[0];
-    if (!post) return POST_NOT_EXIST;
+    if (!post) return ERROR_NUM.POST_NOT_EXIST;
     post.state = CONSTANT.DELETE_STATE;
-    if (!postBucket.put(postKey, post)) return DB_ERROR;
+    if (!postBucket.put(postKey, post)) return ERROR_NUM.DB_ERROR;
     addManagerPostIndex(post.state, post.key, true);
 
     return CONSTANT.RESULT_SUCCESS;
@@ -512,7 +577,7 @@ const deleteComment = (arg: CommentKey): number => {
     const comment = commentBucket.get(arg)[0];
     // 检查评论是否存在
     if (!comment) {
-        return COMMENT_NOT_EXIST;
+        return ERROR_NUM.COMMENT_NOT_EXIST;
     }
     const postkey = new PostKey();
     postkey.id = arg.post_id;
@@ -524,12 +589,12 @@ const deleteComment = (arg: CommentKey): number => {
     // 添加评论计数
     if (!postCountBucket.put(postkey, postCount)) {
         
-        return DB_ERROR;
+        return ERROR_NUM.DB_ERROR;
     }
     // 删除评论记录
     if (!commentBucket.delete(arg)) {
        
-        return DB_ERROR;
+        return ERROR_NUM.DB_ERROR;
     }
     
     return CONSTANT.RESULT_SUCCESS;
