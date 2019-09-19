@@ -11,6 +11,7 @@ interface Props {
     returnStatus:number;// 选择的类型
     showDataList:any;// 表格内容
     showTitleList:any;// 表格标题
+    status:boolean;// true列表页面 false详情页面
 }
 
 /**
@@ -24,8 +25,13 @@ export class ToBeProcessed extends Widget {
         expandIndex:false,
         perPageIndex:0,
         returnStatus:0,
-        showDataList:[],
-        showTitleList:['名称','类别','举报原因','被举报次数','举报时间','举报人']
+        showDataList:[
+            ['用户昵称用户昵称用户昵称','用户','人身攻击',1,'2018-09-12 14:50','张三'],
+            ['用户昵称用户昵称用户昵称','用户','人身攻击',1,'2018-09-12 14:50','张三'],
+            ['用户昵称用户昵称用户昵称','用户','人身攻击',1,'2018-09-12 14:50','张三']
+        ],
+        showTitleList:['名称','类别','举报原因','被举报次数','举报时间','举报人'],
+        status:true
     };
 
     public create() {
@@ -38,6 +44,12 @@ export class ToBeProcessed extends Widget {
      */
     public initData() {
         //
+    }
+
+    // 切换tab
+    public checkType(index:number) {
+        this.props.returnStatus = index;
+        this.paint();
     }
 
     // 重置页面的展开状态

@@ -1,7 +1,8 @@
 .page{
-    background: #F0F2F5;
+    background: white;
     padding: 20px 60px;
     color:#354052;
+    height: 100%;
 }
 .tabRow{
     display: flex;
@@ -16,7 +17,7 @@
     width:300px;
     background:rgba(255,255,255,1);
 }
-.title{
+.title1{
     width:150px;
     height:48px;
     line-height: 48px;
@@ -28,6 +29,7 @@
     background:white;
     margin: 25px;
     cursor: pointer;
+    border: 1px solid rgb(204, 204, 204);
 }
 .activeTitle{
     width:150px;

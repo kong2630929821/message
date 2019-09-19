@@ -26,13 +26,7 @@
                     
                     {{for j,r of v}}
                     <td w-class="td {{it.auto?'autoTd':''}}">
-                        {{if it.color==1&&r=='退货成功'}}
-                            <span style="word-break: break-all;color:rgba(33,129,28,1)">{{typeof(r)=="string" ? r :JSON.stringify(r)}}</span>
-                        {{elseif it.color==1&&r=='退货失败'}}
-                            <span style="word-break: break-all;color:red">{{typeof(r)=="string" ? r :JSON.stringify(r)}}</span>
-                        {{else}}
-                            <span style="word-break: break-all;">{{typeof(r)=="string" ? r :JSON.stringify(r)}}</span>
-                        {{end}}
+                        <span style="word-break: break-all;">{{typeof(r)=="string" ? r :JSON.stringify(r)}}</span>
                     </td>
                     {{end}}
 

@@ -12,6 +12,7 @@
     table-layout: fixed;
     border-collapse: collapse;
     min-width: 100%;
+    border-left: 1px solid rgb(204, 204, 204);
 }
 .has-gutter{
     color: #909399;
@@ -66,6 +67,7 @@
     font-size: 14px;
     display: inline-block;
     cursor: pointer;
+    padding: 10px;
 }
 .btnColor{
     color: red;

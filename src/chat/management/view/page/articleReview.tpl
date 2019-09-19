@@ -1,18 +1,18 @@
 <div w-class="page" on-tap="close">
     <div w-class="articleList">
         <div w-class="leftBox">
-            {{for i ,v of [1,2,3,3,3,3,3,1,2,3,3,3]}}
+            {{for i ,v of it.showDataList}}
                 <div w-class="listItem">
                     <div w-class="titleBox">
-                        <div w-class="title">光荣公布Gust新作《妖精的尾巴》 预计2020年发售</div>
+                        <div w-class="title">{{v.title}}</div>
                         <div w-class="btn" on-tap="review({{i}})">审核</div>
                     </div>
                     <div w-class="titleBox">
                         <div w-class="userInfo">
-                            <img src="../../res/images/money.png" alt="" w-class="avatar"/>
-                            <div w-class="userName">嗨嗨号名称</div>
+                            <img src="{{v.avatar}}" alt="" w-class="avatar"/>
+                            <div w-class="userName">{{v.name}}</div>
                         </div>
-                        <div w-class="userName">提交时间：2018-06-21 12:20:12</div>
+                        <div w-class="userName">提交时间：{{v.createtime}}</div>
                     </div>
                 </div>
             {{end}}
@@ -26,19 +26,23 @@
     <div w-class="articleInfo">
         <div w-class="listItem">
             <div w-class="titleBox">
-                <div w-class="title">光荣公布Gust新作《妖精的尾巴》 预计2020年发售</div>
+                <div w-class="title">{{it.activeData.title}}</div>
             </div>
             <div w-class="titleBox">
                 <div w-class="userInfo">
-                    <img src="../../res/images/money.png" alt="" w-class="avatar"/>
-                    <div w-class="userName">嗨嗨号名称</div>
+                    <img src="{{it.activeData.avatar}}" alt="" w-class="avatar"/>
+                    <div w-class="userName">{{it.activeData.name}}</div>
                 </div>
-                <div w-class="userName">提交时间：2018-06-21 12:20:12</div>
+                <div w-class="userName">提交时间：{{it.activeData.createtime}}</div>
             </div>
         </div>
         <div w-class="articleContent">
-            <div>发行商光荣特库摩和开发商Gust公布了全新RPG游戏，《妖精的尾巴（FAIRY TAIL）》。本作以同名动画原作为基础展开，并由原作作者真岛浩老师担任监制。《妖精的尾巴》将于2020年登陆PS4、Switch以及PC Steam平台，中文版也将同步发售。发行商光荣特库摩和开发商Gust公布了全新RPG游戏，《妖精的尾巴（FAIRY TAIL）》。本作以同名动画原作为基础展开，并由原作作者真岛浩老师担任监制。《妖精的尾巴》将于2020年登陆PS4、Switch以及PC Steam平台，中文版也将同步发售。发行商光荣特库摩和开发商Gust公布了全新RPG游戏，《妖精的尾巴（FAIRY TAIL）》。本作以同名动画原作为基础展开，并由原作作者真岛浩老师担任监制。《妖精的尾巴》将于2020年登陆PS4、Switch以及PC Steam平台，中文版也将同步发售。发行商光荣特库摩和开发商Gust公布了全新RPG游戏，《妖精的尾巴（FAIRY TAIL）》。本作以同名动画原作为基础展开，并由原作作者真岛浩老师担任监制。《妖精的尾巴》将于2020年登陆PS4、Switch以及PC Steam平台，中文版也将同步发售。 </div>
-            <img src="../../res/images/ArrowLeft.png" alt="" w-class="img"/>
+            <div>{{it.activeData.body.msg}}</div>
+            {{if it.activeData.body.imgs.length}}
+                {{for i,v of it.activeData.body.imgs}}
+                    <img src="{{v}}" alt="" w-class="img"/>
+                {{end}}
+            {{end}}
         </div>
     </div>
 </div>

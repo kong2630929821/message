@@ -1,6 +1,7 @@
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
 import { perPage } from '../../components/pagination';
+import { getAllPostList } from '../../net/rpc';
 import { rippleShow } from '../../utils/tools';
 
 interface Props {
@@ -9,6 +10,9 @@ interface Props {
     currentIndex:number;// 当前页数
     expandIndex:boolean;// 控制分页显示隐藏
     perPageIndex:number;// 每页显示多少个的下标
+    showDataList:any;// 数据列表
+    activeData:any;// 右侧选中的文章
+    dataList:any;// 全部文章
 }
 
 /**
@@ -20,19 +24,37 @@ export class ArticleReview extends Widget {
         perPage:perPage[0],
         currentIndex:0,
         expandIndex:false,
-        perPageIndex:0
+        perPageIndex:0,
+        showDataList:[],
+        activeData:{
+            avatar: '../../res/images/user_avatar.png',
+            body: { msg: '1232134214321432423333333333333范德萨发士大夫撒地方', imgs:[] },
+            createtime: '2019-09-19 11:05:14',
+            key: { id: 5, num: '10' },
+            owner: 10006,
+            post_type: 0,
+            state: 2,
+            title: '这是一个带审核地方撒发生'
+        },
+        dataList:[]
     };
 
     public create() {
         super.create();
-        this.initData();
+        this.initData(0,'');
     }
 
     /**
      * 初始化数据
      */
-    public initData() {
-        //
+    public initData(id:number,num:string) {
+        getAllPostList(900000,id,num).then((r:any) => {
+            this.props.dataList = r.list;
+            this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+            this.props.sum = r.total;
+            this.props.activeData = this.props.showDataList[0];
+            this.paint();
+        });
     }
 
     // 重置页面的展开状态
@@ -45,9 +67,7 @@ export class ArticleReview extends Widget {
     public pageChange(e:any) {
         this.close();
         this.props.currentIndex = e.value;
-        // console.log('当前页数据：',this.props.showDataList);
-        // const index = (e.value) * this.props.perPage;
-        // this.init(index === 0 ? 1 :index);
+        this.props.showDataList = this.props.dataList.slice(e.value * this.props.perPage,(e.value + 1) * this.props.perPage);
         this.paint();
     }
 
@@ -67,12 +87,18 @@ export class ArticleReview extends Widget {
         this.props.perPage = e.value;
         this.props.perPageIndex = e.index;
         this.props.expandIndex = false;
+        this.pageChange({ value:0 });   
         this.paint();  
     }
 
     // 点击审核
     public review(index:number) {
-        popNew('chat-management-components-modalBox',{ title:'光荣公布Gust新作《妖精的尾巴》预计2020年发售' });
+        const data = this.props.showDataList[index];
+        popNew('chat-management-components-modalBox',{ data },() => {
+            this.props.showDataList.replace(index,1);
+            this.props.dataList.replace((this.props.currentIndex * this.props.perPage) + index,1);
+            this.paint();
+        });
     }
 
 }
