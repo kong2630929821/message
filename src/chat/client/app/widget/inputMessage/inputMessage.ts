@@ -27,6 +27,7 @@ export class InputMessage extends Widget {
         chatType:'user',
         istyle:[0,0],
         audioText:'按住说话(30S)'
+        
     };
     private audioCount:number;   // 录音倒计数
     private interval:any;    // 录音倒计时循环事件
@@ -169,7 +170,9 @@ export class InputMessage extends Widget {
         setTimeout(() => {
             notify(e.node,'ev-open-Emoji',{});
         }, 100);
-        
+        // 更换图标样式
+        this.props.isOnEmoji = !this.props.isOnEmoji;
+        this.paint();
     }
 
     // 打开更多功能
@@ -183,11 +186,14 @@ export class InputMessage extends Widget {
 
     // 打开语音录入
     public openAudio(e:any) {
+        this.props.isOnAudio = !this.props.isOnAudio;
+        console.log(this.props.isOnAudio);
         getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
         document.getElementById('audioWrap').style.height = `${getKeyBoardHeight()}px`;
         setTimeout(() => {
             notify(e.node,'ev-open-audio',{});
         }, 100);
+        this.paint();
     }
 
     // 点击发送
@@ -228,6 +234,7 @@ interface Props {
     recordAudio:boolean;  // 正在录入语音
     istyle:number[];   // 语音录入进度条宽度
     audioText:string;  // 语音录入提示语
+    is:boolean;
 }
 
 /**
