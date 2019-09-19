@@ -24,6 +24,14 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
     const uid = getUid();
     const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
+    // 获取社区账号索引
+    let publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
+    if (!publicAccIndex) {
+        publicAccIndex = new CommunityAccIndex();
+        publicAccIndex.uid = uid;
+        publicAccIndex.list = [];
+    }
     // 生成社区账号
     const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
     const r = communityBaseBucket.get(num);
@@ -32,6 +40,8 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         // 创建公众号添加头像
         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
             communityBase.avatar = arg.avatar;
+            // 判断是否已有公众号
+            if (publicAccIndex.list.length > 0) return 'already have public';
             // 判断公众号名是否重复
             let publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
             if (publicNameIndex) return 'repeat name';
@@ -58,13 +68,6 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
 
         communityBaseBucket.put(num, communityBase);
         // 添加用户社区账号索引
-        const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
-        let publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
-        if (!publicAccIndex) {
-            publicAccIndex = new CommunityAccIndex();
-            publicAccIndex.uid = uid;
-            publicAccIndex.list = [];
-        }
         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
             publicAccIndex.num = num;
         } else {
@@ -73,7 +76,7 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         }
         
         // 创建成功自动关注公众号
-        userFollow(num);
+        // userFollow(num);
 
         return num;
     } 

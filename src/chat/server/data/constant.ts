@@ -87,7 +87,7 @@ export const REVIEW_PASS = 3;      // 审核通过
 export const REVIEW_REFUSE = 4;    // 审核驳回
 
 // 爬虫服务地址
-export const WEIBO_SPIDER_HOST = 'http://127.0.0.1:9999/'; // 爬虫服务器地址
+export const WEIBO_SPIDER_HOST = 'http://39.98.48.66:9999/'; // 爬虫服务器地址
 export const SPIDER_USER_INFO = 'user_spider.py'; // 爬取用户信息
 export const SPIDER_WEIBO_INFO = 'weibo_spider.py'; // 爬取微博信息
 export const SPIDER_WEIBO_IMG = 'weibo/img/';  // 微博图片
