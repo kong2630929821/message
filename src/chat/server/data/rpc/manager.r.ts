@@ -7,12 +7,15 @@ import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
-import { Comment, CommentKey, CommunityAccIndex, CommunityBase, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
-import { ApplyPublic, Article, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail } from '../db/manager.s';
+import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
+import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail } from '../db/manager.s';
 import { Report, ReportCount } from '../db/message.s';
+import { AccountGenerator } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
-import { getIndexId } from './message.r';
+import { Result } from './basic.s';
+import { setOfficialAccount } from './user.r';
+import { SetOfficial } from './user.s';
 
 /**
  * 创建管理员
@@ -94,7 +97,7 @@ export const punish = (arg: PunishArg): string => {
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const report = reportBucket.get<number, Report[]>(arg.report_id)[0];
     if (!report) return 'error report id';
-    if (report.state !== 0) return 'error report state';
+    // if (report.state !== 0) return 'error report state';
     let uid = 0;
     const report_type = parseInt(arg.key.split(':')[0], 10);
     if (arg.punish_type === CONSTANT.DELETE_CONTENT) { // 删除内容
@@ -155,6 +158,7 @@ export const punish = (arg: PunishArg): string => {
  */
 // #[rpc=rpcServer]
 export const reportHandled = (report_id: number): string => {
+    if (!getSession('root')) return 'not login';
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const report = reportBucket.get<number, Report[]>(report_id)[0];
     if (!report) return 'error report id';
@@ -169,6 +173,7 @@ export const reportHandled = (report_id: number): string => {
  */
 // #[rpc=rpcServer]
 export const getPostList = (arg: PostListArg): string => {
+    if (!getSession('root')) return 'not login';
     const managerPostListBucket = new Bucket(CONSTANT.WARE_NAME, ManagerPostList._$info.name);
     let managerPostList = managerPostListBucket.get<number, ManagerPostList[]>(arg.state)[0];
     console.log('============managerPostList:', managerPostList);
@@ -237,6 +242,7 @@ export const handleArticle = (arg: handleArticleArg): number => {
  */
 // #[rpc=rpcServer]
 export const getApplyPublicList = (arg: PublicApplyListArg): string => {
+    if (!getSession('root')) return 'not login';
     const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
     let key = null;
     if (arg.id !== 0) key = arg.id;
@@ -296,17 +302,83 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
  */
 // #[rpc=rpcServer]
 export const getUserDetal = (uid: number): string => {
-    const userDetail = new UserReportDetail();
-    userDetail.user_report = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${uid}`, uid);
-    userDetail.user_public = [];
+    if (!getSession('root')) return 'not login';
+    
     const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
     const publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
-    if (!publicAccIndex || publicAccIndex.list.length === 0) return JSON.stringify(userDetail);
-    for (let i = 0; i < publicAccIndex.list.length; i++) {
-        userDetail.user_public.push(getReportPublicInfo(`${CONSTANT.REPORT_PUBLIC}:${publicAccIndex.list[i]}`));
-    }
+    if (!publicAccIndex) return 'db error';
+    const userDetail = new UserReportDetail();
+    // 用户的社区信息
+    userDetail.person_community = getCommmunityDetail(uid, publicAccIndex.num);
+    // 用户的举报惩罚信息
+    userDetail.user_report = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${uid}`, uid);
+    if (publicAccIndex.list.length === 0) return JSON.stringify(userDetail);
+    userDetail.user_public = getReportPublicInfo(`${CONSTANT.REPORT_PUBLIC}:${publicAccIndex.list[0]}`);
+    userDetail.public_community = getCommmunityDetail(uid, publicAccIndex.list[0]);
 
     return JSON.stringify(userDetail);
+};
+
+/**
+ * 设置官方账号 rpc
+ */
+// #[rpc=rpcServer]
+export const setGmAccount = (setUser:SetOfficial): Result => {
+    return setOfficialAccount(setUser.accId,setUser.appId);
+};
+
+/**
+ * 调整用户惩罚时间
+ */
+// #[rpc=rpcServer]
+export const modifyPunish = (arg: ModifyPunishArg): number => {
+    const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
+    const punish = punishBucket.get<number, Punish[]>(arg.id)[0];
+    if (!punish) return ERROR_NUM.ERROR_PUNISH_ID;
+    const end_time = parseInt(punish.start_time, 10) + arg.rest_time;
+    if (end_time <= Date.now()) punish.state = CONSTANT.PUNISH_END;
+    punish.end_time = end_time.toString();
+    punishBucket.put(punish.id, punish);
+
+    return CONSTANT.RESULT_SUCCESS;
+};
+
+// 获取公众号详情
+export const getCommmunityDetail = (uid: number, num: string): CommunityDetail => {
+    const communityInfo = new CommunityDetail();
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    // 社区基础信息
+    const personCommunityBase = communityBaseBucket.get<string, CommunityBase[]>(num)[0];
+    communityInfo.num = personCommunityBase.num;
+    communityInfo.name = personCommunityBase.name;
+    communityInfo.desc = personCommunityBase.desc;
+    communityInfo.avatar = personCommunityBase.avatar;
+    communityInfo.time = personCommunityBase.createtime;
+    communityInfo.comm_type = personCommunityBase.comm_type;
+    communityInfo.attention_list = [];
+    communityInfo.fans_list = [];
+    communityInfo.post_list = [];
+    // 关注列表
+    const attentionIndexBucket = new Bucket(CONSTANT.WARE_NAME, AttentionIndex._$info.name);
+    const attentionIndex = attentionIndexBucket.get<number, AttentionIndex[]>(uid)[0];
+    if (attentionIndex) communityInfo.attention_list = attentionIndex.person_list.concat(attentionIndex.public_list);
+    // 粉丝列表
+    const fansIndexBucket = new Bucket(CONSTANT.WARE_NAME, FansIndex._$info.name);
+    const fansIndex = fansIndexBucket.get<string, FansIndex[]>(num)[0];
+    if (fansIndex) communityInfo.fans_list = fansIndex.list;
+    // 帖子列表
+    const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
+    const communityPost = communityPostBucket.get<string, CommunityPost[]>(num)[0];
+    if (communityPost) {
+        for (let i = 0; i < communityPost.id_list.length; i++) {
+            const postKey = new PostKey();
+            postKey.num = num;
+            postKey.id = communityPost.id_list[i];
+            communityInfo.post_list.push(postKey);
+        }
+    }
+
+    return communityInfo;
 };
 
 // 获取公众号申请详情
@@ -663,4 +735,19 @@ export const addPublicComm = (name: string, num: string, avatar: string, desc: s
     publicAccIndexBucket.put(uid, publicAccIndex);
 
     return num;
+};
+
+// 自增id
+export const getIndexId = (name: string) : number => {
+    const indexBucket = new Bucket(CONSTANT.WARE_NAME, AccountGenerator._$info.name);
+    let accountGenerator = indexBucket.get<string, AccountGenerator[]>(name)[0];
+    if (!accountGenerator) {
+        accountGenerator = new AccountGenerator();
+        accountGenerator.index = name;
+        accountGenerator.currentIndex = 0;
+    }
+    accountGenerator.currentIndex += 1;
+    indexBucket.put(name, accountGenerator);
+
+    return accountGenerator.currentIndex;
 };
