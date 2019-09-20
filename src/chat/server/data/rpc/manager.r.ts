@@ -174,26 +174,40 @@ export const reportHandled = (report_id: number): string => {
 // #[rpc=rpcServer]
 export const getPostList = (arg: PostListArg): string => {
     if (!getSession('root')) return 'not login';
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
     const managerPostListBucket = new Bucket(CONSTANT.WARE_NAME, ManagerPostList._$info.name);
     let managerPostList = managerPostListBucket.get<number, ManagerPostList[]>(arg.state)[0];
-    console.log('============managerPostList:', managerPostList);
     if (!managerPostList) {
         managerPostList = new ManagerPostList();
         managerPostList.state = arg.state;
         managerPostList.list = [];
     }
+    console.log('============managerPostList:', managerPostList);
     managerPostList.list.reverse();
-    const articleBucket = new Bucket(CONSTANT.WARE_NAME, Article._$info.name);
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const postList = new PostList();
     postList.list = [];
     let flag = false;
     if (arg.postKey.id === 0) flag = true;
     for (let i = 0; i < managerPostList.list.length; i++) {
         if (arg.count <= 0) break;
-        const post = articleBucket.get<PostKey, Article[]>(managerPostList.list[i])[0];
+        const post = postBucket.get<PostKey, Post[]>(managerPostList.list[i])[0];
         if (!post) continue;
+        // 社区基础信息
+        const communityBase = communityBaseBucket.get<string, CommunityBase[]>(post.key.num)[0];
+        const article = new Article();
+        article.name = communityBase.name;
+        article.num = communityBase.num;
+        article.avatar = communityBase.avatar;
+        article.owner = communityBase.owner;
+        article.key = post.key;
+        article.post_type = post.post_type;
+        article.title = post.title;
+        article.createtime = post.createtime;
+        article.body = post.body;
+        article.state = post.state;
         if (flag) {
-            postList.list.push(post);
+            postList.list.push(article);
             arg.count --;
         }
         if (managerPostList.list[i].id === arg.postKey.id) flag = true;
