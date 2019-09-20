@@ -603,7 +603,9 @@ export const getReportPublicInfo = (key: string): ReportPublicInfo => {
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
     const reportPublicInfo = new ReportPublicInfo();
+    console.log('===============key:', key);
     const communityNum = key.split('%')[1];
+    console.log('===============communityNum:', communityNum);
     const communityBase = communityBaseBucket.get<string, CommunityBase[]>(communityNum)[0];
     reportPublicInfo.num = communityNum;
     reportPublicInfo.name = CommunityBase.name;
