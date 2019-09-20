@@ -14,7 +14,7 @@ import { login } from '../../server/data/rpc/basic.p';
 import { Result, UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
-import { createRoot, getApplyPublicList, getPostList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setGmAccount } from '../../server/data/rpc/manager.p';
+import { cancelGmAccount, createRoot, getApplyPublicList, getPostList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setGmAccount } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
 import { unifiedorder } from '../../server/data/rpc/oauth_lib.p';
@@ -553,6 +553,14 @@ export const modifyPunishTest = () => {
     });
 };
 
+// 取消官方账号
+export const cancelGmAccountTest = () => {
+    const uid = 10023;
+    clientRpcFunc(cancelGmAccount, uid, (r: number) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
@@ -567,6 +575,10 @@ const props = {
         {
             name: '调整惩罚时间',
             func: () => { modifyPunishTest(); }
+        },
+        {
+            name: '取消官方',
+            func: () => { cancelGmAccountTest(); }
         },
         // {
         //     name: '关闭机器人行为',

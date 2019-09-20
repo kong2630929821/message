@@ -10,11 +10,11 @@ import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
 import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail } from '../db/manager.s';
 import { Report, ReportCount } from '../db/message.s';
-import { AccountGenerator } from '../db/user.s';
+import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { Result } from './basic.s';
-import { setOfficialAccount } from './user.r';
+import { getRealUid, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
 
 /**
@@ -342,6 +342,40 @@ export const setGmAccount = (setUser:SetOfficial): Result => {
 };
 
 /**
+ * 取消官方账号
+ */
+// #[rpc=rpcServer]
+export const cancelGmAccount = (accId: string): number => {
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name); 
+    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const uid = getRealUid(accId);  // 通过accid找到对应的uid
+    const userinfo = userInfoBucket.get<number, UserInfo>(uid)[0];
+    if (!userinfo) return ERROR_NUM.ACC_ID_ERROR;
+    const iter = officialBucket.iter(null, true);
+    let appId = '';
+    let index = 0;
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const officialUsers: OfficialUsers = v[1];
+        index = officialUsers.uids.indexOf(uid);
+        if (index > -1) {
+            appId = officialUsers.appId;
+            continue;
+        }
+    } while (iter);
+    if (appId === '') {
+        return ERROR_NUM.NOT_OFFICIAL_ACCOUNT;
+    } else {
+        const official = officialBucket.get(appId)[0];
+        official.splice(index, 1);
+        officialBucket.put(appId, official);
+
+        return CONSTANT.RESULT_SUCCESS;
+    }
+};
+
+/**
  * 调整用户惩罚时间
  */
 // #[rpc=rpcServer]
@@ -457,6 +491,9 @@ export const getReportData = (report: Report): ReportData => {
         // 获取帖子信息
         const reportContentInfo = getReportContentInfo(report.key);
         reportData.reported_content = reportContentInfo;
+        console.log('============report.key:', report.key);
+        const postKeyJson = report.key.split(':')[1];
+        console.log('============postKeyJson:', postKeyJson);
         const postKey: PostKey = JSON.parse(report.key.split(':')[1]);
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
         report.evidence = JSON.stringify(post);
