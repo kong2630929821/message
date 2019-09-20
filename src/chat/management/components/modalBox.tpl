@@ -2,7 +2,7 @@
     <div w-class="body">
         <div w-class="title">{{it.title}}</div>
         <div w-class="postInfo">
-            <img src="{{it.avatar}}" alt="" style="width:24px;height:24px;"/>
+            <img src="{{it.avatar?it.avatar:'../res/images/avatar1.png'}}" alt="" style="width:24px;height:24px;"/>
             <div w-class="postName">{{it.name}}</div>
         </div>
         <div w-class="checkType">

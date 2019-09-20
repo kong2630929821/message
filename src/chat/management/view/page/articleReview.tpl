@@ -9,7 +9,7 @@
                     </div>
                     <div w-class="titleBox">
                         <div w-class="userInfo">
-                            <img src="{{v.avatar}}" alt="" w-class="avatar"/>
+                            <img src="{{v.avatar?v.avatar:'../../res/images/avatar1.png'}}" alt="" w-class="avatar"/>
                             <div w-class="userName">{{v.name}}</div>
                         </div>
                         <div w-class="userName">提交时间：{{v.createtime}}</div>
@@ -24,13 +24,14 @@
         </div>
     </div>
     <div w-class="articleInfo">
+        {{if it.activeData}}
         <div w-class="listItem">
             <div w-class="titleBox">
                 <div w-class="title">{{it.activeData.title}}</div>
             </div>
             <div w-class="titleBox">
                 <div w-class="userInfo">
-                    <img src="{{it.activeData.avatar}}" alt="" w-class="avatar"/>
+                    <img src="{{it.activeData.avatar?it.activeData.avatar:'../../res/images/avatar1.png'}}" alt="" w-class="avatar"/>
                     <div w-class="userName">{{it.activeData.name}}</div>
                 </div>
                 <div w-class="userName">提交时间：{{it.activeData.createtime}}</div>
@@ -44,5 +45,6 @@
                 {{end}}
             {{end}}
         </div>
+        {{end}}
     </div>
 </div>

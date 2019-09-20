@@ -27,14 +27,14 @@ export class ArticleReview extends Widget {
         perPageIndex:0,
         showDataList:[],
         activeData:{
-            avatar: '../../res/images/user_avatar.png',
-            body: { msg: '1232134214321432423333333333333范德萨发士大夫撒地方', imgs:[] },
-            createtime: '2019-09-19 11:05:14',
-            key: { id: 5, num: '10' },
-            owner: 10006,
+            avatar: '',
+            body: { msg: '', imgs:[] },
+            createtime: '',
+            key: { id: 0, num: '0' },
+            owner: 0,
             post_type: 0,
-            state: 2,
-            title: '这是一个带审核地方撒发生'
+            state: 0,
+            title: ''
         },
         dataList:[]
     };
@@ -95,8 +95,7 @@ export class ArticleReview extends Widget {
     public review(index:number) {
         const data = this.props.showDataList[index];
         popNew('chat-management-components-modalBox',{ data },() => {
-            this.props.showDataList.replace(index,1);
-            this.props.dataList.replace((this.props.currentIndex * this.props.perPage) + index,1);
+            this.initData(0,'');
             this.paint();
         });
     }

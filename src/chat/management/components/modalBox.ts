@@ -80,6 +80,7 @@ export class ModalBox extends Widget {
         }
         getHandleArticle(this.props.checked,reason,this.props.data.key.id,this.props.data.key.num).then(r => {
             if (r === 1) {
+                popNewMessage('审核成功');
                 this.ok && this.ok();
             } else {
                 popNewMessage('审核失败');

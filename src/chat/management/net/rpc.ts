@@ -1,10 +1,10 @@
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { PostKey } from '../../server/data/db/community.s';
-import { handleArticleArg, PostListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
+import { handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { createRoot, getPostList, getReportList, handleArticle, rootLogin } from '../../server/data/rpc/manager.p';
+import { createRoot, getApplyPublicList, getPostList, getReportList, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
 import { timestampFormat } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
@@ -68,7 +68,7 @@ export const getAllPostList = (count:number,id:number,num:string) => {
             const data = JSON.parse(r);
             data.list.forEach((v,i) => {
                 data.list[i].createtime = timestampFormat(JSON.parse(v.createtime));
-                data.list[i].avatar = data.list[i].avatar ? buildupImgPath(v.avatar) :'../../res/images/user_avatar.png';
+                data.list[i].avatar = data.list[i].avatar ? buildupImgPath(v.avatar) :'';
                 data.list[i].body = JSON.parse(data.list[i].body);
                 data.list[i].body.imgs.forEach((t,j) => {
                     data.list[i].body.imgs[j] = buildupImgPath(t);
@@ -104,6 +104,46 @@ export const getAllReport = (count:number,id:number,state:number) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(getReportList,arg,(r:boolean) => {
+            res(r);
+        });
+    });
+};
+
+// 惩罚指定对象
+export const setPunish = (key:string,report_id:number,punish_type:number,time:number) => {
+    const arg = new PunishArg();
+    arg.key = key;
+    arg.report_id = report_id;
+    arg.punish_type = punish_type;
+    arg.time = time;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(punish,arg,(r:string) => {
+            res(r);
+        });
+    });
+}; 
+
+// 投诉不成立
+export const setReportHandled = (id:number) => {
+    const arg = id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(reportHandled,arg,(r:string) => {
+            res(r);
+        });
+    });
+};
+
+// 获取所有公众号审核列表
+export const getAllApplyPublicList = (count:number,state:number,id:number) => {
+    const arg = new PublicApplyListArg();
+    arg.state = state;
+    arg.count = count;
+    arg.id = id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getApplyPublicList,arg,(r:string) => {
             res(r);
         });
     });

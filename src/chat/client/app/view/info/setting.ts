@@ -328,7 +328,7 @@ export class Setting extends Widget {
     public complaint() {
         const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        const key = `${REPORT_PERSON}:${this.props.uid}`;
+        const key = `${REPORT_PERSON}%${this.props.uid}`;
         complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg,REPORT_PERSON,key);
     }
 

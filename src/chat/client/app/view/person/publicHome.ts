@@ -1,12 +1,12 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { REPORT_PUBLIC } from '../../../../server/data/constant';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
 import { buildupImgPath, complaintUser, judgeFollowed } from '../../logic/logic';
 import { follow, getFansList, getUserInfoByNum, getUserPostList, sendUserMsg } from '../../net/rpc';
-import { REPORT_PUBLIC } from '../../../../server/data/constant';
 
 interface Props {
     isMine:boolean;  // 是否自己的公众号
@@ -171,7 +171,7 @@ export class PublicHome extends Widget {
     public reportType() {
         const msg = this.props.publicInfo.desc ? this.props.publicInfo.desc :'没有简介';
         const avatar = this.props.publicInfo.avatar ? buildupImgPath(this.props.publicInfo.avatar) :'../../res/images/user_avatar.png';
-        const key = `${REPORT_PUBLIC}:${this.props.publicInfo.num}`;
+        const key = `${REPORT_PUBLIC}%${this.props.publicInfo.num}`;
         complaintUser(`${this.props.publicInfo.name} 名称`,2,avatar,msg,REPORT_PUBLIC,key);
     }
 }
