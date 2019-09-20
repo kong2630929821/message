@@ -14,6 +14,7 @@ import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { Result } from './basic.s';
+import { getPostInfoById } from './community.r';
 import { getRealUid, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
 
@@ -332,9 +333,9 @@ export const getUserDetal = (uid: number): string => {
     // 用户的社区信息
     userDetail.person_community = getCommmunityDetail(uid, publicAccIndex.num);
     // 用户的举报惩罚信息
-    userDetail.user_report = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${uid}`, uid);
+    userDetail.user_report = getReportUserInfo(`${CONSTANT.REPORT_PERSON}%${uid}`, uid);
     if (publicAccIndex.list.length === 0) return JSON.stringify(userDetail);
-    userDetail.user_public = getReportPublicInfo(`${CONSTANT.REPORT_PUBLIC}:${publicAccIndex.list[0]}`);
+    userDetail.user_public = getReportPublicInfo(`${CONSTANT.REPORT_PUBLIC}%${publicAccIndex.list[0]}`);
     userDetail.public_community = getCommmunityDetail(uid, publicAccIndex.list[0]);
 
     return JSON.stringify(userDetail);
@@ -394,7 +395,7 @@ export const modifyPunish = (arg: ModifyPunishArg): number => {
     const end_time = parseInt(punish.start_time, 10) + arg.rest_time;
     punish.end_time = end_time.toString();
     punishBucket.put(punish.id, punish);
-    if (end_time <= Date.now()) endPunish(`${CONSTANT.REPORT_PERSON}:${arg.uid}`, arg.id);
+    if (end_time <= Date.now()) endPunish(`${CONSTANT.REPORT_PERSON}%${arg.uid}`, arg.id);
 
     return CONSTANT.RESULT_SUCCESS;
 };
@@ -472,7 +473,7 @@ export const getReportData = (report: Report): ReportData => {
     const reportData = new ReportData(); // 举报数据
     // 获取举报人用户信息
     console.log('============reporter uid:', report.ruid);
-    const reporterUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${report.ruid}`, report.ruid);
+    const reporterUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}%${report.ruid}`, report.ruid);
     reportData.report_user = reporterUserInfo;
 
     if (report.report_type === CONSTANT.REPORT_PERSON) { // 举报个人
@@ -490,7 +491,7 @@ export const getReportData = (report: Report): ReportData => {
         reportData.reported_public = reportedPublicInfo;
         // 获取被举报人信息
         const uid = reportedPublicInfo.owner;
-        const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${uid}`, uid);
+        const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}%${uid}`, uid);
         reportData.reported_user = reportedUserInfo;
     }
 
@@ -504,11 +505,11 @@ export const getReportData = (report: Report): ReportData => {
         postKey.num = postKey1.num;
         postKey.id = postKey1.id;
         console.log('============postKey:', postKey);
-        const post = postBucket.get<PostKey, Post[]>(postKey)[0];
-        report.evidence = JSON.stringify(post);
+        const postData = getPostInfoById(postKey);
+        report.evidence = JSON.stringify(postData);
         // 获取用户信息
         const uid = post.owner;
-        const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${uid}`, uid);
+        const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}%${uid}`, uid);
         reportData.reported_user = reportedUserInfo;
     }
 
@@ -520,15 +521,15 @@ export const getReportData = (report: Report): ReportData => {
         const postKey = new PostKey();
         postKey.num = postKey1.num;
         postKey.id = postKey1.id;
-        const post = postBucket.get<PostKey, Post[]>(postKey)[0];
-        report.evidence = JSON.stringify(post);
+        const postData = getPostInfoById(postKey);
+        report.evidence = JSON.stringify(postData);
         // 获取公众号信息
-        const publicKey = `${CONSTANT.REPORT_PUBLIC}:${post.key.num}`;
+        const publicKey = `${CONSTANT.REPORT_PUBLIC}%${post.key.num}`;
         const reportedPublicInfo = getReportPublicInfo(publicKey);
         reportData.reported_public = reportedPublicInfo;
         // 获取用户信息
         const uid = post.owner;
-        const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${uid}`, uid);
+        const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}%${uid}`, uid);
         reportData.reported_user = reportedUserInfo;
     }
 
@@ -545,7 +546,7 @@ export const getReportData = (report: Report): ReportData => {
         report.evidence = JSON.stringify(comment);
         // 获取用户信息
         const uid = comment.owner;
-        const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}:${uid}`, uid);
+        const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}%${uid}`, uid);
         reportData.reported_user = reportedUserInfo;
     }
     reportData.report_info = report;
