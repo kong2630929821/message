@@ -238,9 +238,35 @@ struct HandleApplyPublicArg {
 }
 
 /**
+* 社区信息
+*/
+struct CommunityDetail {
+    num: String,                    // 社区编号
+    name: String,                   // 社区名
+    desc: String,                   // 描述
+    avatar: String,                 // 头像
+    comm_type: u8,                  // 类型
+    time: String,                   // 创建时间
+    attention_list: &[String],      // 关注的社区号列表
+    fans_list: &[String],           // 粉丝的社区号列表
+    post_list: &[PostKey],          // 帖子key列表
+}
+
+/**
 * 用户举报和惩罚详情
 */
 struct UserReportDetail {
-    user_report: ReportUserInfo,        // 用户的举报和惩罚详情
-    user_public: &[ReportPublicInfo],   // 用户公众号的举报和惩罚详情
+    user_report: ReportUserInfo,                // 用户的举报和惩罚详情
+    person_community: CommunityDetail,          // 个人社区详情
+    user_public: Option<ReportPublicInfo>,      // 用户公众号的举报和惩罚详情
+    public_community: Option<CommunityDetail>,  // 个人社区详情
+}
+
+/**
+* 惩罚时间调整参数
+*/
+struct ModifyPunishArg {
+    id: u32,             // 惩罚id
+    uid: u32,            // 用户id
+    rest_time: u32,      // 剩余惩罚时间
 }

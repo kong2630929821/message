@@ -38,3 +38,9 @@ export const CANT_DETETE_OTHERS_COMMENT = 3004;
 export const MGR_ERROR_PASSWORD = 4001;
 // 管理端没有登陆
 export const MGR_NOT_LOGIN = 4002;
+// 惩罚id错误
+export const ERROR_PUNISH_ID = 4003;
+// Acc_id错误
+export const ACC_ID_ERROR = 4004;
+// 指定账户非官方账号
+export const NOT_OFFICIAL_ACCOUNT = 4005;
