@@ -99,10 +99,10 @@ export const punish = (arg: PunishArg): string => {
     // if (!report) return 'error report id';
     // if (report.state !== 0) return 'error report state';
     let uid = 0;
-    const report_type = parseInt(arg.key.split(':')[0], 10);
+    const report_type = parseInt(arg.key.split('%')[0], 10);
     if (arg.punish_type === CONSTANT.DELETE_CONTENT) { // 删除内容
         if (report_type === CONSTANT.REPORT_POST || report_type === CONSTANT.REPORT_ARTICLE) {
-            const postKey: PostKey = JSON.parse(arg.key.split(':')[1]);
+            const postKey: PostKey = JSON.parse(arg.key.split('%')[1]);
             // 删除帖子
             deletePost(postKey);
             const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
@@ -110,7 +110,7 @@ export const punish = (arg: PunishArg): string => {
             if (post) uid = post.owner;
         }
         if (report_type === CONSTANT.REPORT_COMMENT) {
-            const commentKey: CommentKey = JSON.parse(arg.key.split(':')[1]);
+            const commentKey: CommentKey = JSON.parse(arg.key.split('%')[1]);
             // 删除评论
             deleteComment(commentKey);
             const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
@@ -120,12 +120,12 @@ export const punish = (arg: PunishArg): string => {
     }
     if (report_type === CONSTANT.REPORT_PUBLIC) {
         const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
-        const commNum = arg.key.split(':')[1];
+        const commNum = arg.key.split('%')[1];
         const communityBase = communityBaseBucket.get<string, CommunityBase[]>(commNum)[0];
         if (communityBase)  uid = communityBase.owner;
     }
     if (report_type === CONSTANT.REPORT_PERSON) {
-        uid = parseInt(arg.key.split(':')[1], 10);
+        uid = parseInt(arg.key.split('%')[1], 10);
     }
     // 禁言和禁止发动态只用添加惩罚记录,在发消息时查询有无惩罚记录
     const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
@@ -470,7 +470,7 @@ export const getReportData = (report: Report): ReportData => {
 
     if (report.report_type === CONSTANT.REPORT_PERSON) { // 举报个人
         // 获取被举报人信息
-        const uid = parseInt(report.key.split(':')[1], 10);
+        const uid = parseInt(report.key.split('%')[1], 10);
         console.log('============reported uid:', uid);
         const reportedUserInfo = getReportUserInfo(report.key, uid);
         reportData.reported_user = reportedUserInfo;
@@ -492,9 +492,9 @@ export const getReportData = (report: Report): ReportData => {
         const reportContentInfo = getReportContentInfo(report.key);
         reportData.reported_content = reportContentInfo;
         console.log('============report.key:', report.key);
-        const postKeyJson = report.key.split(':')[1];
+        const postKeyJson = report.key.split('%')[1];
         console.log('============postKeyJson:', postKeyJson);
-        const postKey: PostKey = JSON.parse(report.key.split(':')[1]);
+        const postKey: PostKey = JSON.parse(report.key.split('%')[1]);
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
         report.evidence = JSON.stringify(post);
         // 获取用户信息
@@ -507,7 +507,7 @@ export const getReportData = (report: Report): ReportData => {
         // 获取帖子信息
         const reportContentInfo = getReportContentInfo(report.key);
         reportData.reported_content = reportContentInfo;
-        const postKey: PostKey = JSON.parse(report.key.split(':')[1]);
+        const postKey: PostKey = JSON.parse(report.key.split('%')[1]);
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
         report.evidence = JSON.stringify(post);
         // 获取公众号信息
@@ -524,7 +524,7 @@ export const getReportData = (report: Report): ReportData => {
         // 获取评论信息
         const reportContentInfo = getReportContentInfo(report.key);
         reportData.reported_content = reportContentInfo;
-        const commentKey: CommentKey = JSON.parse(report.key.split(':')[1]);
+        const commentKey: CommentKey = JSON.parse(report.key.split('%')[1]);
         const comment = commentBucket.get<CommentKey, Comment[]>(commentKey)[0];
         report.evidence = JSON.stringify(comment);
         // 获取用户信息
@@ -587,7 +587,7 @@ export const getReportPublicInfo = (key: string): ReportPublicInfo => {
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
     const reportPublicInfo = new ReportPublicInfo();
-    const communityNum = key.split(':')[1];
+    const communityNum = key.split('%')[1];
     const communityBase = communityBaseBucket.get<string, CommunityBase[]>(communityNum)[0];
     reportPublicInfo.num = communityNum;
     reportPublicInfo.name = CommunityBase.name;
