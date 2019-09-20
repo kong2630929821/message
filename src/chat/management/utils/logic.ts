@@ -146,43 +146,62 @@ export const unicode2ReadStr = (item:any) => {
     
 };
 
-// 现金来源类型
-export enum CashLogType {
-    upHwang = 1,  // 其他人升级海王获得收益
-    upHbao,    // 其他人升级海宝获得收益
-    reShop,   // 购物返利
-    reInvite,  // 邀请返利
-    recharge,   // 充值
-    withdraw,  // 提现
-    shopping,    // 购物
-    reCash,     // 提现退款
-    other,       // 其他
-    turntable,    // 大转盘
-    shopReturn,     // 购物退款
-    manage,        // 管理端调整
-    hBaoGoods      // 399商品返利
+export enum REPORT {
+    REPORT_PERSON= 1,
+    REPORT_PUBLIC,
+    REPORT_POST,
+    REPORT_ARTICLE,
+    REPORT_COMMENT= 5
 }
-// 现金来源名称
-const CashLogName = {
-    upHwang:'升级海王',
-    upHbao:'升级海宝',
-    reShop:'购物返利',
-    reInvite:'邀请返利',
-    recharge:'充值',
-    withdraw:'提现',
-    shopping:'购物',
-    reCash:'提现退款',
-    other:'其他',
-    turntable:'大转盘',
-    shopReturn:'退款',
-    manage:'客服调整',
-    hBaoGoods:'399商品返利'
+export enum REPORTTITLE {
+    REPORT_PERSON= '用户',
+    REPORT_PUBLIC= '嗨嗨号',
+    REPORT_POST= '动态',
+    REPORT_ARTICLE= '文章',
+    REPORT_COMMENT= '评论'
+}
+// 处理举报数据列表
+export const deelReportList = (r:any) => {
+    if (r.total === 0) {
+        return r;
+    }
+    const list = r.list;
+    const showDataList = [[],[],[],[],[],[]];
+    const dataList = [[],[],[],[],[],[]];
+    list.forEach((v,i) => {
+        const key = v.reported_content.key.split('%');
+        const reportInfo = JSON.parse(v.report_info.reason).join(',');
+        const reportTime = timestampFormat(JSON.parse(v.report_info.time));
+        const reportPeople = v.report_user.user_info.name;
+        const data = [v.reported_user.user_info.name,REPORTTITLE[REPORT[key[0]]],reportInfo,v.reported_content.reported_count,reportTime,reportPeople];
+        showDataList[0].push(data);
+        showDataList[key[0]].push(data); 
+        dataList[0].push(v);
+        dataList[key[0]].push(v);
+    });
+    r.showDataList = showDataList;
+    r.list = dataList;
+
+    return r;
 };
 
-/**
- * 获取现金来源名称
- * @param ttype type
- */
-export const getCashLogName = (ttype:number) => {
-    return CashLogName[CashLogType[ttype]];
+export enum PENALTY {
+    DELETE_CONTENT= 1,
+    BAN_MESAAGE,
+    BAN_POST,
+    FREEZE= 4
+}
+export enum PENALTYTEXT {
+    DELETE_CONTENT= '删除内容',
+    BAN_MESAAGE= '禁言',
+    BAN_POST= '禁止发动态',
+    FREEZE= '冻结'
+}
+// 处理处罚文字
+export const penaltyText = (r:any,str:string) => {
+    const penType = PENALTYTEXT[PENALTY[r.punish_type]];
+    const lastTime = (Date.now() - JSON.parse(r.start_time)) / (60 * 60 * 1000);
+    const time = (JSON.parse(r.end_time) - JSON.parse(r.start_time)) / (60 * 60 * 1000);
+    
+    return `${penType}${str}${time}小时 （剩余${lastTime}小时）`;
 };

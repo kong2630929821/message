@@ -103,6 +103,8 @@
     font-family:SourceHanSansCN;
     font-weight:400;
     color:rgba(53,64,82,1);
+    display: flex;
+    align-items: center;
 }
 .sexImg{
     width: 16px;
@@ -144,5 +146,19 @@
     line-height: 49px;
     background:rgba(25,145,235,1);
     cursor: pointer;
-    margin-top: 20px;
+    margin: 20px 0 50px 0;
+}
+.haihaiName{
+    width:40px;
+    height:16px;
+    border-radius:8px;
+    border:1px solid rgba(49,91,200,1);
+    font-size:12px;
+    font-family:STHeitiSC;
+    font-weight:300;
+    color:rgba(49,91,200,1);
+    text-align: center;
+    line-height: 16px;
+    margin-left: 10px;
+    padding: 2px;
 }

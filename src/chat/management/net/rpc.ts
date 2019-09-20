@@ -5,7 +5,7 @@ import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
 import { createRoot, getApplyPublicList, getPostList, getReportList, handleApplyPublic, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
-import { timestampFormat } from '../utils/logic';
+import { deelReportList, timestampFormat } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -103,8 +103,9 @@ export const getAllReport = (count:number,id:number,state:number) => {
     arg.state = state;
 
     return new Promise((res,rej) => {
-        clientRpcFunc(getReportList,arg,(r:boolean) => {
-            res(r);
+        clientRpcFunc(getReportList,arg,(r:string) => {
+            const data = JSON.parse(r);
+            res(deelReportList(data));
         });
     });
 };

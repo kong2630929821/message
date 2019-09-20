@@ -29,6 +29,7 @@ interface IMAGE {
     compressImg:string;
     originalImg:any;  
 }
+const report = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
 /**
  * 举报
  */
@@ -99,11 +100,16 @@ export class ModalBox extends Widget {
             
             return ;
         }
+        const reportList = [];
+        this.props.selected.forEach(v => {
+            reportList.push(report[v]);
+        });
         const evidence = {
             msg:this.props.contentInput,
-            img:JSON.stringify(this.props.imgs)
+            img:JSON.stringify(this.props.imgs),
+            type:JSON.stringify(reportList)
         };
-        complaintType(this.props.reportKey,JSON.stringify(evidence),this.props.status,JSON.stringify(this.props.selected)).then(r => {
+        complaintType(this.props.reportKey,this.props.status,JSON.stringify(evidence)).then(r => {
             if (r > 0) {
                 this.ok && this.ok(this.props.selected);
             }

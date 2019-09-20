@@ -978,10 +978,10 @@ export const changePublic = (name:string,desc:string,avatar:string,num:string) =
 };
 
 // 举报
-export const complaintType = (key:string,evidence:string,status:number,reason:string) => {
+export const complaintType = (key:string,status:number,reason:string) => {
     const arg = new ReportArg();
     arg.key = key;
-    arg.evidence = evidence;
+    arg.evidence = '';
     arg.report_type = status;
     arg.reason = reason;
 

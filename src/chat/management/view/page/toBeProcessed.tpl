@@ -3,8 +3,10 @@
     <div w-class="tabRow">
         <div w-class="{{it.returnStatus==0?'activeTitle':'title1'}}" on-tap="checkType(0)" on-down="onShow">全部</div>
         <div w-class="{{it.returnStatus==1?'activeTitle':'title1'}}" on-tap="checkType(1)" on-down="onShow">用户</div>
-        <div w-class="{{it.returnStatus==2?'activeTitle':'title1'}}" on-tap="checkType(2)" on-down="onShow">内容</div>
-        <div w-class="{{it.returnStatus==3?'activeTitle':'title1'}}" on-tap="checkType(3)" on-down="onShow">嗨嗨号</div>
+        <div w-class="{{it.returnStatus==2?'activeTitle':'title1'}}" on-tap="checkType(2)" on-down="onShow">嗨嗨号</div>
+        <div w-class="{{it.returnStatus==3?'activeTitle':'title1'}}" on-tap="checkType(3)" on-down="onShow">动态</div>
+        <div w-class="{{it.returnStatus==4?'activeTitle':'title1'}}" on-tap="checkType(4)" on-down="onShow">文章</div>
+        <div w-class="{{it.returnStatus==5?'activeTitle':'title1'}}" on-tap="checkType(5)" on-down="onShow">评论</div>
     </div>
     <div ev-table-detail="goDetail">
         <div w-class="tableTitle">数据列表</div>
@@ -17,7 +19,7 @@
     </div>
     {{else}}
         <div style="height:100%" ev-exit="exit">
-            <widget w-tag="chat-management-view-page-toBeProcessedInfo"></widget>
+            <widget w-tag="chat-management-view-page-toBeProcessedInfo">{data:{{it.currentData}}}</widget>
         </div>
     {{end}}
 </div>
