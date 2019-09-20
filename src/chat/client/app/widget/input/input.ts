@@ -129,9 +129,6 @@ export class Input extends Widget {
         
         this.state.showClear = this.props.clearable && !this.props.disabled && this.state.currentValue !== '';
         this.state.focused = true;
-
-        // 调整光标位置
-        event.currentTarget.setSelectionRange(event.selectionEnd(),event.selectionEnd());
         this.paint();  
     }
 
