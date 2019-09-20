@@ -1,5 +1,5 @@
 <div w-class="page">
-    <div w-class="cancle">返回上一页</div>
+    <div w-class="cancle" on-tap="exit">返回上一页</div>
     <div w-class="deelArtice">
         <div w-class="titleObj">
             <div style="line-height: 40px;margin-left: 20px;">举报对象</div>

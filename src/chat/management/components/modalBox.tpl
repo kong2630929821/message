@@ -26,8 +26,8 @@
             </div>
         {{end}}
         <div w-class="btnGroup">
-            <div w-class="btn" on-tap="cancleBtn">取消</div>
-            <div w-class="btn" on-tap="okBtn">确认</div>
+            <div w-class="btn" on-tap="cancleBtn" on-down="onShow">取消</div>
+            <div w-class="btn" on-tap="okBtn" on-down="onShow">确认</div>
         </div>
     </div>
 </div>

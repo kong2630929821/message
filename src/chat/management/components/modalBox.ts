@@ -1,6 +1,7 @@
 import { Widget } from '../../../pi/widget/widget';
 import { getHandleArticle } from '../net/rpc';
 import { popNewMessage } from '../utils/logic';
+import { rippleShow } from '../utils/tools';
 
 interface Props {
     title:string;// 标题
@@ -85,5 +86,10 @@ export class ModalBox extends Widget {
             }
         });
         
+    }
+
+    // 动画效果执行
+    public onShow(e:any) {
+        rippleShow(e);
     }
 }

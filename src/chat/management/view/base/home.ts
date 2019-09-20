@@ -3,6 +3,7 @@
  */
 
 // ================================================ 导入
+import { popNew } from '../../../../pi/ui/root';
 import { Forelet } from '../../../../pi/widget/forelet';
 import { Widget } from '../../../../pi/widget/widget';
 import { rippleShow } from '../../utils/tools';
@@ -63,8 +64,14 @@ export class Home extends Widget {
         this.props.activePage = this.props.pageList[num].children[index];
         this.paint();
     }
-        // 动画效果执行
+
+    // 动画效果执行
     public onShow(e:any) {
         rippleShow(e);
+    }
+
+    // 退出登录
+    public exit() {
+        popNew('chat-management-view-base-login');
     }
 }

@@ -20,7 +20,7 @@
 
         <div w-class="right">
             <div w-class="topLogin">
-                <div w-class="exit">退出登录</div>
+                <div w-class="exit" on-tap="exit" on-down="onShow">退出登录</div>
             </div>
             <widget w-tag="chat-management-view-page-{{it.activePage.page}}"></widget>
         </div>

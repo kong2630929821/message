@@ -55,6 +55,11 @@ export class ToBeProcessed extends Widget {
         this.paint();
     }
 
+    // 表格查看详情
+    public goDetail(e:any) {
+        this.props.status = false;
+        this.paint();
+    }
     // 重置页面的展开状态
     public close() {
         this.props.expandIndex = false;
@@ -88,5 +93,11 @@ export class ToBeProcessed extends Widget {
         this.props.perPageIndex = e.index;
         this.props.expandIndex = false;
         this.paint();  
+    }
+
+    // 返回
+    public exit() {
+        this.props.status = true;
+        this.paint();
     }
 }

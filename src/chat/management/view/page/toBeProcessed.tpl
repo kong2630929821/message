@@ -12,11 +12,11 @@
     </div>
     <div w-class="ctroller">
         <div ev-changeCurrent="pageChange" w-class="pagination" ev-perPage="perPage" ev-expand="expand">
-                <widget w-tag="chat-management-components-pagination">{pages:{{Math.ceil(it.sum/ it.perPage)}},filterShow:true,currentIndex:{{it.currentIndex}},expand:{{it.expandIndex}},numberCheckActiveIndex:{{it.perPageIndex}} }</widget>
+            <widget w-tag="chat-management-components-pagination">{pages:{{Math.ceil(it.sum/ it.perPage)}},filterShow:true,currentIndex:{{it.currentIndex}},expand:{{it.expandIndex}},numberCheckActiveIndex:{{it.perPageIndex}} }</widget>
         </div>
     </div>
     {{else}}
-        <div style="height:100%">
+        <div style="height:100%" ev-exit="exit">
             <widget w-tag="chat-management-view-page-toBeProcessedInfo"></widget>
         </div>
     {{end}}
