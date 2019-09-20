@@ -102,7 +102,10 @@ export const punish = (arg: PunishArg): string => {
     const report_type = parseInt(arg.key.split('%')[0], 10);
     if (arg.punish_type === CONSTANT.DELETE_CONTENT) { // 删除内容
         if (report_type === CONSTANT.REPORT_POST || report_type === CONSTANT.REPORT_ARTICLE) {
-            const postKey: PostKey = JSON.parse(arg.key.split('%')[1]);
+            const postKey1: PostKey = JSON.parse(arg.key.split('%')[1]);
+            const postKey = new PostKey();
+            postKey.num = postKey1.num;
+            postKey.id = postKey1.id;
             // 删除帖子
             deletePost(postKey);
             const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
@@ -110,7 +113,11 @@ export const punish = (arg: PunishArg): string => {
             if (post) uid = post.owner;
         }
         if (report_type === CONSTANT.REPORT_COMMENT) {
-            const commentKey: CommentKey = JSON.parse(arg.key.split('%')[1]);
+            const commentKey1: CommentKey = JSON.parse(arg.key.split('%')[1]);
+            const commentKey = new CommentKey();
+            commentKey.id = commentKey1.id;
+            commentKey.num = commentKey1.num;
+            commentKey.post_id = commentKey1.post_id;
             // 删除评论
             deleteComment(commentKey);
             const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
@@ -492,9 +499,11 @@ export const getReportData = (report: Report): ReportData => {
         const reportContentInfo = getReportContentInfo(report.key);
         reportData.reported_content = reportContentInfo;
         console.log('============report.key:', report.key);
-        const postKeyJson = report.key.split('%')[1];
-        console.log('============postKeyJson:', postKeyJson);
-        const postKey: PostKey = JSON.parse(report.key.split('%')[1]);
+        const postKey1: PostKey = JSON.parse(report.key.split('%')[1]);
+        const postKey = new PostKey();
+        postKey.num = postKey1.num;
+        postKey.id = postKey1.id;
+        console.log('============postKey:', postKey);
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
         report.evidence = JSON.stringify(post);
         // 获取用户信息
@@ -507,7 +516,10 @@ export const getReportData = (report: Report): ReportData => {
         // 获取帖子信息
         const reportContentInfo = getReportContentInfo(report.key);
         reportData.reported_content = reportContentInfo;
-        const postKey: PostKey = JSON.parse(report.key.split('%')[1]);
+        const postKey1: PostKey = JSON.parse(report.key.split('%')[1]);
+        const postKey = new PostKey();
+        postKey.num = postKey1.num;
+        postKey.id = postKey1.id;
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
         report.evidence = JSON.stringify(post);
         // 获取公众号信息
@@ -524,7 +536,11 @@ export const getReportData = (report: Report): ReportData => {
         // 获取评论信息
         const reportContentInfo = getReportContentInfo(report.key);
         reportData.reported_content = reportContentInfo;
-        const commentKey: CommentKey = JSON.parse(report.key.split('%')[1]);
+        const commentKey1: CommentKey = JSON.parse(report.key.split('%')[1]);
+        const commentKey = new CommentKey();
+        commentKey.id = commentKey1.id;
+        commentKey.num = commentKey1.num;
+        commentKey.post_id = commentKey1.post_id;
         const comment = commentBucket.get<CommentKey, Comment[]>(commentKey)[0];
         report.evidence = JSON.stringify(comment);
         // 获取用户信息
