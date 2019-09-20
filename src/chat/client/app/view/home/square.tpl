@@ -23,6 +23,7 @@
         </div>
 
         <div w-class="history-wrap">
+            <div>
             {{if !it.showTag}}
                 {{%=============1:关注  2:公众号===================}}
                 {{if it.active==1 || it.active==2}}
@@ -58,6 +59,7 @@
                     </dv>
                 </div>
             {{end}}
+            </div>
         </div>
 
         {{if it.createPullUp}}

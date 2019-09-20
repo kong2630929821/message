@@ -214,20 +214,36 @@ export class Square extends Widget {
         this.bscroll.on('pullingDown', this.pullingDownHandler.bind(this));
         this.bscroll.on('pullingUp', this.pullingUpHandler.bind(this));
     }
+    // 重新绑定上拉刷新事件
+    public initBscroll1() {
+        const obj = document.querySelector('#squareBox');
+        this.bscroll = new BScroll(<HTMLElement>obj, {
+            scrollY: true,
+            bounceTime: TIME_BOUNCE,
+            pullUpLoad: true
+            
+        });
+
+        // this.bscroll.on('pullingDown', this.pullingDownHandler.bind(this));
+        this.bscroll.on('pullingUp', this.pullingUpHandler.bind(this));
+    }
     public async pullingDownHandler() {
         this.props.beforePullDown = false;
         this.props.isPullingDown = true;
+        // console.log('现在正在下拉刷新');
         this.paint();
-
+        
         await this.requestData(true);
-
         this.props.isPullingDown = false;
+        // this.props.beforePullDown = true;
+        // this.initBscroll1();
+        
         this.paint();
         this.finishPullDown();
+        
     }
-
     public async pullingUpHandler() {
-
+        console.log('现在正在上拉刷新');
         if (this.props.refresh && this.state.postList.length % 5 === 0) {
             this.props.isPullUpLoad = true;
             this.props.refresh = false;
@@ -241,7 +257,7 @@ export class Square extends Widget {
                 this.props.isPullUpLoad = false;
             }, 50);
         }
-       
+        
     }
     public async finishPullDown() {
         const stopTime = TIME_STOP;
@@ -256,6 +272,7 @@ export class Square extends Widget {
             this.paint();
             this.bscroll.refresh();
         }, TIME_BOUNCE);
+        this.initBscroll();
     }
   
     public async requestData(fg:boolean) {
@@ -275,7 +292,7 @@ export class Square extends Widget {
     public refreshScroller() {
         setTimeout(() => {
             this.bscroll.refresh();
-            this.props.isPullUpLoad = false;
+            // this.props.isPullUpLoad = false;
             this.paint();
         }, 50);
     }
