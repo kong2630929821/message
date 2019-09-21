@@ -170,10 +170,16 @@ export const deelReportList = (r:any) => {
     const dataList = [[],[],[],[],[],[]];
     list.forEach((v,i) => {
         const key = v.reported_content.key.split('%');
-        const reportInfo = JSON.parse(v.report_info.reason).join(',');
+        const reportInfo = JSON.parse(v.report_info.reason);
+        let reportInfos = null;
+        if (reportInfo.type) {
+            reportInfos = JSON.parse(reportInfo.type).join(',');
+        } else {
+            reportInfos = reportInfo.join(',');
+        }
         const reportTime = timestampFormat(JSON.parse(v.report_info.time));
         const reportPeople = v.report_user.user_info.name;
-        const data = [v.reported_user.user_info.name,REPORTTITLE[REPORT[key[0]]],reportInfo,v.reported_content.reported_count,reportTime,reportPeople];
+        const data = [v.reported_user.user_info.name,REPORTTITLE[REPORT[key[0]]],reportInfos,v.reported_content.reported_count,reportTime,reportPeople];
         showDataList[0].push(data);
         showDataList[key[0]].push(data); 
         dataList[0].push(v);

@@ -508,7 +508,7 @@ export const getReportData = (report: Report): ReportData => {
         const postData = getPostInfoById(postKey);
         report.evidence = JSON.stringify(postData);
         // 获取用户信息
-        const uid = post.owner;
+        const uid = postData.owner;
         const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}%${uid}`, uid);
         reportData.reported_user = reportedUserInfo;
     }
@@ -524,11 +524,11 @@ export const getReportData = (report: Report): ReportData => {
         const postData = getPostInfoById(postKey);
         report.evidence = JSON.stringify(postData);
         // 获取公众号信息
-        const publicKey = `${CONSTANT.REPORT_PUBLIC}%${post.key.num}`;
+        const publicKey = `${CONSTANT.REPORT_PUBLIC}%${postData.key.num}`;
         const reportedPublicInfo = getReportPublicInfo(publicKey);
         reportData.reported_public = reportedPublicInfo;
         // 获取用户信息
-        const uid = post.owner;
+        const uid = postData.owner;
         const reportedUserInfo = getReportUserInfo(`${CONSTANT.REPORT_PERSON}%${uid}`, uid);
         reportData.reported_user = reportedUserInfo;
     }

@@ -67,10 +67,17 @@ export class ToBeProcessedInfo extends Widget {
     // 处理内容
     public deelContent(data:any,state:number) {
         // 处理内容
+        const reportInfo = JSON.parse(data.report_info.reason);
+        let reportInfos = null;
+        if (reportInfo.type) {
+            reportInfos = JSON.parse(reportInfo.type).join(',');
+        } else {
+            reportInfos = reportInfo.join(',');
+        }
         this.props.deelObj = [
             {
                 key:'举报原因',
-                value:JSON.parse(data.report_info.reason).join(',')
+                value:reportInfos
             },
             {
                 key:'被举报次数总计',
@@ -91,6 +98,8 @@ export class ToBeProcessedInfo extends Widget {
             JSON.parse(evidence.body).imgs.forEach(v => {
                 imgs.push(buildupImgPath(v));
             });
+            this.props.likeCount = evidence.likeCount;
+            this.props.reply = evidence.commentCount;
         }
         this.props.dynamic = {
             title:state === 4 ? evidence.title  :'',
