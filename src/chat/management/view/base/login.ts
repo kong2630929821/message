@@ -42,6 +42,23 @@ export class Login extends Widget {
             popNewMessage('请输入账号密码','warn');
         }
     }
+
+    // 注册
+    public reg() {
+        if (this.props.name && this.props.pwd) {
+            createRootTest(this.props.name,this.props.pwd).then(r => {
+                if (r === 1) {
+                    popNewMessage('注册成功');
+                } else {
+                    popNewMessage('注册失败');
+                }
+            }).catch(() => {
+                popNewMessage('注册失败','error');
+            });
+        } else {
+            popNewMessage('请输入账号密码','warn');
+        }
+    }
     
     // 动画效果执行
     public onShow(e:any) {

@@ -10,10 +10,12 @@
         <div w-class="title" ev-input-change="titleChange">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"标题1-24个字",input:{{it.titleInput}}, maxLength:24 }</widget>
         </div>
-        {{end}}
+        <div contenteditable="true" w-class="editBox"></div>
+        {{else}}
         <div w-class="content" ev-input-change="contentChange">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>
         </div>  
+        {{end}}
         {{% ========================上传图片======================}}
         <div w-class="imageList">
             {{for i,v of it.uploadLoding}}

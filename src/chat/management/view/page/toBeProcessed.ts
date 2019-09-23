@@ -52,6 +52,9 @@ export class ToBeProcessed extends Widget {
      */
     public initData() {
         getAllReport(900000,0,0).then((r:any) => {
+            if (!r.total) {
+                return;
+            }
             this.props.allList = r.list;
             this.props.list =  r.showDataList;
             this.props.sum = r.total;

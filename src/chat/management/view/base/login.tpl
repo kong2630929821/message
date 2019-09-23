@@ -1,6 +1,6 @@
 <div w-class="page">
     <div w-class="content">
-        <img src="../../res/images/logo.png" w-class="img"/>
+        <img src="../../res/images/logo.png" w-class="img" on-tap="reg"/>
         <div w-class="title">好嗨管理后台</div>
         <div ev-input-change="nameChange" w-class="input">
             <img src="../../res/images/account.png"/>

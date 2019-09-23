@@ -61,6 +61,7 @@ export class ConfirmBox extends Widget {
             setPunish(key,this.props.id,punish,0).then((r:any) => {
                 if (!isNaN(r)) {
                     popNewMessage('处理成功');
+                    this.ok && this.ok();
                 } else {
                     popNewMessage('处理失败');
                 }
