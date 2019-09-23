@@ -2,7 +2,7 @@
     <div w-class="articleList">
         <div w-class="leftBox">
             {{for i ,v of it.showDataList}}
-                <div w-class="listItem">
+                <div w-class="{{i==it.active?'listItemActice':'listItem'}}" on-tap="checkedItem({{i}})">
                     <div w-class="titleBox">
                         <div w-class="title">{{v.title}}</div>
                         <div w-class="btn" on-tap="review({{i}})">审核</div>

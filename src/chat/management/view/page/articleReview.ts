@@ -13,6 +13,7 @@ interface Props {
     showDataList:any;// 数据列表
     activeData:any;// 右侧选中的文章
     dataList:any;// 全部文章
+    active:number;// 左侧选中
 }
 
 /**
@@ -36,7 +37,8 @@ export class ArticleReview extends Widget {
             state: 0,
             title: ''
         },
-        dataList:[]
+        dataList:[],
+        active:0
     };
 
     public create() {
@@ -98,6 +100,13 @@ export class ArticleReview extends Widget {
             this.initData(0,'');
             this.paint();
         });
+    }
+
+    // 选中
+    public checkedItem(index:number) {
+        this.props.active = index;
+        this.props.activeData = this.props.showDataList[index];
+        this.paint();
     }
 
 }
