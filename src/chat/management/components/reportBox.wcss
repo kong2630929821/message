@@ -98,3 +98,17 @@
     line-height: 36px;
     cursor: pointer;
 }
+.haihaiName{
+    width:40px;
+    height:16px;
+    border-radius:8px;
+    border:1px solid rgba(49,91,200,1);
+    font-size:12px;
+    font-family:STHeitiSC;
+    font-weight:300;
+    color:rgba(49,91,200,1);
+    text-align: center;
+    line-height: 16px;
+    margin-left: 10px;
+    padding: 2px;
+}

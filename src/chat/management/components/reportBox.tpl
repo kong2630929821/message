@@ -1,10 +1,15 @@
 <div w-class="reportBox">
     <div w-class="body">
         <div w-class="reportTitle">
-            <div>好嗨ID：1233213</div>
-            <div style="margin-left:40px">
-                用户名称：打算打打死
-                <img src="../../client/app/res/images/girl.png" alt="" w-class="sexImg"/>
+            <div>{{it.state==0?'好嗨ID':'嗨嗨号ID'}}：{{it.userInfo.id}}</div>
+            <div style="margin-left:40px; display: flex;">
+                {{it.state==0?'用户昵称':'嗨嗨号昵称'}}：{{it.userInfo.name}}
+                {{if it.userInfo.sex}}
+                    <img src="{{it.userInfo.sex}}" alt="" w-class="sexImg"/>
+                {{end}}
+                {{if it.userInfo.isPublic}}
+                    <div w-class="haihaiName">嗨嗨号</div>
+                {{end}}
             </div>
         </div>
         <div w-class="checkType">
@@ -29,7 +34,9 @@
         <div w-class="sendNotice">发送处罚通知</div>
         <div w-class="checkType" style="justify-content: space-between;align-items: center;">
             <div style=" margin-left: 20px;line-height: 55px;">危险操作</div>
+            {{if it.state==1}}
             <div w-class="btn" style="margin-right:20px"  on-down="onShow">删除嗨嗨号</div>
+            {{end}}
         </div>
         <div w-class="typeList">
             <div style="margin-left:20px;">冻结用户</div>

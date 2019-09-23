@@ -169,7 +169,7 @@ export const deelReportList = (r:any) => {
     const showDataList = [[],[],[],[],[],[]];
     const dataList = [[],[],[],[],[],[]];
     list.forEach((v,i) => {
-        const key = v.reported_content.key.split('%');
+        const key = v.report_info.key.split('%');
         const reportInfo = JSON.parse(v.report_info.reason);
         let reportInfos = null;
         if (reportInfo.type) {
@@ -179,7 +179,15 @@ export const deelReportList = (r:any) => {
         }
         const reportTime = timestampFormat(JSON.parse(v.report_info.time));
         const reportPeople = v.report_user.user_info.name;
-        const data = [v.reported_user.user_info.name,REPORTTITLE[REPORT[key[0]]],reportInfos,v.reported_content.reported_count,reportTime,reportPeople];
+        let count = 0;
+        if (v.reported_content) {
+            count = v.reported_content.reported_count;
+        } else if (v.reported_public) {
+            count = v.reported_public.reported_list.length;
+        } else {
+            count = v.reported_user.reported_list.length;
+        }
+        const data = [v.reported_user.user_info.name,REPORTTITLE[REPORT[key[0]]],reportInfos,count,reportTime,reportPeople];
         showDataList[0].push(data);
         showDataList[key[0]].push(data); 
         dataList[0].push(v);
@@ -204,10 +212,14 @@ export enum PENALTYTEXT {
     FREEZE= '冻结'
 }
 // 处理处罚文字
-export const penaltyText = (r:any,str:string) => {
-    const penType = PENALTYTEXT[PENALTY[r.punish_type]];
-    const lastTime = (Date.now() - JSON.parse(r.start_time)) / (60 * 60 * 1000);
-    const time = (JSON.parse(r.end_time) - JSON.parse(r.start_time)) / (60 * 60 * 1000);
+export const penaltyText = (res:any,str:string) => {
+    const data = [];
+    res.forEach(r => {
+        const penType = PENALTYTEXT[PENALTY[r.punish_type]];
+        const lastTime = (JSON.parse(r.end_time) - Date.now()) / 1000 / 60 / 60;
+        const time = (JSON.parse(r.end_time) - JSON.parse(r.start_time)) / (60 * 60 * 1000);
+        data.push(`${penType}${str}${time}小时 （剩余${lastTime.toFixed(2)}小时）`);
+    });
     
-    return `${penType}${str}${time}小时 （剩余${lastTime}小时）`;
+    return data.join(',');
 };

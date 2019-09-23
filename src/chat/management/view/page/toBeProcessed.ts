@@ -32,11 +32,7 @@ export class ToBeProcessed extends Widget {
         expandIndex:false,
         perPageIndex:0,
         returnStatus:0,
-        showDataList:[
-            ['用户昵称用户昵称用户昵称','用户','人身攻击',1,'2018-09-12 14:50','张三'],
-            ['用户昵称用户昵称用户昵称','用户','人身攻击',1,'2018-09-12 14:50','张三'],
-            ['用户昵称用户昵称用户昵称','用户','人身攻击',1,'2018-09-12 14:50','张三']
-        ],
+        showDataList:[],
         showTitleList:['名称','类别','举报原因','被举报次数','举报时间','举报人'],
         status:true,
         dataList:[],
@@ -120,5 +116,11 @@ export class ToBeProcessed extends Widget {
     public exit() {
         this.props.status = true;
         this.paint();
+    }
+
+    // 刷新页面
+    public ok() {
+        this.props.status = true;
+        this.initData();
     }
 }
