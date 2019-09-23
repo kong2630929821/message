@@ -1,3 +1,4 @@
+import { sourceIp } from '../../../../../app/publicLib/config';
 import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -24,7 +25,6 @@ interface Props {
     emoji:boolean;// 表情
     camera:boolean;// 相机
 }
-
 /**
  * 发布帖子
  */
@@ -101,29 +101,32 @@ export class EditPost extends Widget {
                         this1.props.imgs[len] = url;
                         this1.paint();
 
-                        uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
-                            console.log('上传压缩图',imgUrlSuf);
-                            const image:any = {};
-                            image.compressImg = imgUrlSuf;
-
-                            // 原图
-                            imagePicker.getContent({
-                                quality:100,
-                                success(buffer1:ArrayBuffer) {
-                                    
-                                    uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
-                                        console.log('上传原图',imgurl);
-                                        image.originalImg = imgurl;
-                                        this1.props.saveImgs[len] = image;
-
-                                        if (this.props.isUploading) {
-                                            this.props.isUploading = false;
-                                            this.send();
-                                        }
-                                    });
-                                }
+                        if (this1.props.isPublic) {
+                            this.addImg(res.base64);
+                        } else {
+                            uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
+                                console.log('上传压缩图',imgUrlSuf);
+                                const image:any = {};
+                                image.compressImg = imgUrlSuf;
+    
+                                // 原图
+                                imagePicker.getContent({
+                                    quality:100,
+                                    success(buffer1:ArrayBuffer) {
+                                        
+                                        uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
+                                            console.log('上传原图',imgurl);
+                                            image.originalImg = imgurl;
+                                            this1.props.saveImgs[len] = image;
+                                            if (this.props.isUploading) {
+                                                this.props.isUploading = false;
+                                                this.send();
+                                            }
+                                        });
+                                    }
+                                });
                             });
-                        });
+                        }
                         
                     });
                 }
@@ -153,29 +156,32 @@ export class EditPost extends Widget {
                         this1.props.imgs[len] = url;
                         this1.paint();
 
-                        uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
-                            console.log('上传压缩图',imgUrlSuf);
-                            const image:any = {};
-                            image.compressImg = imgUrlSuf;
-
-                            // 原图
-                            camera.getContent({
-                                quality:100,
-                                success(buffer1:ArrayBuffer) {
-                                    
-                                    uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
-                                        console.log('上传原图',imgurl);
-                                        image.originalImg = imgurl;
-                                        this1.props.saveImgs[len] = image;
+                        if (this1.props.isPublic) {
+                            this.addImg(res.base64);
+                        } else {
+                            uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
+                                console.log('上传压缩图',imgUrlSuf);
+                                const image:any = {};
+                                image.compressImg = imgUrlSuf;
+    
+                                // 原图
+                                camera.getContent({
+                                    quality:100,
+                                    success(buffer1:ArrayBuffer) {
                                         
-                                        if (this.props.isUploading) {
-                                            this.props.isUploading = false;
-                                            this.send();
-                                        }
-                                    });
-                                }
+                                        uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
+                                            console.log('上传原图',imgurl);
+                                            image.originalImg = imgurl;
+                                            this1.props.saveImgs[len] = image;
+                                            if (this.props.isUploading) {
+                                                this.props.isUploading = false;
+                                                this.send();
+                                            }
+                                        });
+                                    }
+                                });
                             });
-                        });
+                        }
                     });
                 }
             });
@@ -223,35 +229,49 @@ export class EditPost extends Widget {
 
     // 发送
     public async send() {
-        // 等待图片上传完成
-        if (this.props.imgs.length !== this.props.saveImgs.length) {
-            this.props.isUploading = true;
+        if (this.props.isPublic) {
+            if (!this.props.titleInput) {
+                popNewMessage('标题不能为空');
 
-            return;
-        }
-        
-        if (this.props.isPublic && !this.props.titleInput) {
-            popNewMessage('标题不能为空');
+                return;
+            }
+            const editer = document.querySelector('#editBox');
+            if (!editer.innerHTML) {
+                popNewMessage('内容不能为空');
 
-            return;
-        }
-        if (!this.props.contentInput) {
-            popNewMessage('内容不能为空');
-
-            return;
-        }
-        const value = {
-            msg:this.props.contentInput,
-            imgs:this.props.saveImgs
-        };
-
-        if (!this.props.isUploading) {  // 图片上传完成
-            addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then(r => {
+                return;
+            }
+            addPost(this.props.titleInput,editer.innerHTML,this.props.num).then(r => {
                 popNewMessage('发布成功');
                 this.ok && this.ok();
             }).catch(r => {
                 popNewMessage('发布失败');
             });
+        } else {
+            // 等待图片上传完成
+            if (this.props.imgs.length !== this.props.saveImgs.length) {
+                this.props.isUploading = true;
+
+                return;
+            }
+            if (!this.props.contentInput) {
+                popNewMessage('内容不能为空');
+
+                return;
+            }
+            const value = {
+                msg:this.props.contentInput,
+                imgs:this.props.saveImgs
+            };
+
+            if (!this.props.isUploading) {  // 图片上传完成
+                addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then(r => {
+                    popNewMessage('发布成功');
+                    this.ok && this.ok();
+                }).catch(r => {
+                    popNewMessage('发布失败');
+                });
+            }
         }
         
     }
@@ -274,7 +294,21 @@ export class EditPost extends Widget {
      * 选择表情
      */
     public pickEmoji(emoji:any) {
+        if (this.props.isPublic) {
+            const src = `http://${sourceIp}/wallet/chat/client/app/res/emoji/${emoji}`;
+            this.addImg(src,true);
+
+            return;
+        }
         this.props.contentInput += `[${emoji}]`; // 只能在内容中加表情
         this.paint();
+    }
+
+    // 非正式输入的添加图片
+    public addImg(src:string,state:boolean= false) {
+        const editer = document.querySelector('#editBox');
+        editer.focus();
+        const filePath = src;
+        document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :''} />`); 
     }
 }

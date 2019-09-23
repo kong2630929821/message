@@ -26,7 +26,7 @@
     {{else}}
     {{% ======================广场展示部分内容===========================}}
     <div w-class="content" on-tap="goDetail" class="content">
-        <widget w-tag="pi-ui-html">{{it.content}}</widget>
+        <widget w-tag="pi-ui-html" id="minImg">{{it.content}}</widget>
         <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
     </div>
     {{end}}

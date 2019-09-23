@@ -69,10 +69,6 @@ export const getAllPostList = (count:number,id:number,num:string) => {
             data.list.forEach((v,i) => {
                 data.list[i].createtime = timestampFormat(JSON.parse(v.createtime));
                 data.list[i].avatar = data.list[i].avatar ? buildupImgPath(v.avatar) :'';
-                data.list[i].body = JSON.parse(data.list[i].body);
-                data.list[i].body.imgs.forEach((t,j) => {
-                    data.list[i].body.imgs[j] = buildupImgPath(t);
-                });
             });
             res(data);
         });

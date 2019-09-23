@@ -28,7 +28,7 @@ export class ArticleReview extends Widget {
         showDataList:[],
         activeData:{
             avatar: '',
-            body: { msg: '', imgs:[] },
+            body: '',
             createtime: '',
             key: { id: 0, num: '0' },
             owner: 0,

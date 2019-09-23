@@ -10,13 +10,14 @@
         <div w-class="title" ev-input-change="titleChange">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"标题1-24个字",input:{{it.titleInput}}, maxLength:24 }</widget>
         </div>
-        <div contenteditable="true" w-class="editBox"></div>
+        <div contenteditable="true" w-class="editBox" id="editBox"></div>
         {{else}}
         <div w-class="content" ev-input-change="contentChange">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>
         </div>  
         {{end}}
         {{% ========================上传图片======================}}
+        {{if !it.isPublic}}
         <div w-class="imageList">
             {{for i,v of it.uploadLoding}}
             {{if v}}
@@ -29,18 +30,20 @@
             {{end}}
             
             {{end}}
-            {{if it.uploadLoding.length < 9 }}
+            {{if it.uploadLoding.length < 1 }}
             <div w-class="upload" on-tap="chooseImage"></div>
             {{end}}
         </div>
+        {{end}}
     </div>
 
     <div w-class="tools" ev-emoji-click="pickEmoji" >
         <div>
             <img src="{{it.emoji?'../../res/images/emoji.png':'../../res/images/emojiblue.png'}}" w-class="btn" on-tap="openEmoji"/>
+            <img src="../../res/images/tool-pictures.png" w-class="btn" on-tap="chooseImage"/>
             <img src="{{it.camera?'../../res/images/tool-cameraGrey.png':'../../res/images/tool-camera.png'}}" w-class="btn" on-tap="openPhoto" on-tap="takePhoto"/>
         </div>
 
-        <widget w-tag="chat-client-app-widget-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}"></widget>
+        <widget w-tag="chat-client-app-widget-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}">{isPublic:{{it.isPublic}}}</widget>
     </div>
 </div>

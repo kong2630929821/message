@@ -28,7 +28,7 @@
 
     {{if it.showAll}}
     {{% =================帖子详情展示全部内容=======================}}
-    <div w-class="content1">
+    <div w-class="content1" id="minImg">
         <widget w-tag="pi-ui-html">{{it.content}}</widget>
     </div>
 

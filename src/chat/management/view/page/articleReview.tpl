@@ -38,12 +38,9 @@
             </div>
         </div>
         <div w-class="articleContent">
-            <div>{{it.activeData.body.msg}}</div>
-            {{if it.activeData.body.imgs.length}}
-                {{for i,v of it.activeData.body.imgs}}
-                    <img src="{{v}}" alt="" w-class="img"/>
-                {{end}}
-            {{end}}
+            <div>
+                <widget w-tag="pi-ui-html">{{it.activeData.body}}</widget>
+            </div>
         </div>
         {{end}}
     </div>
