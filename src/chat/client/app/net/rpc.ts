@@ -508,7 +508,7 @@ export const addPost = (title: string, body: string, num:string, post_type: numb
     return new Promise((resolve,reject) => {
         clientRpcFunc(addPostPort,arg,(r:PostKey) => {
             if (r && r.num !== '') {
-                resolve();
+                resolve(JSON.parse(r.num));
             } else {
                 reject();
             }

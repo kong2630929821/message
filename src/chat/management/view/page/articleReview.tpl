@@ -5,7 +5,7 @@
                 <div w-class="{{i==it.active?'listItemActice':'listItem'}}" on-tap="checkedItem({{i}})">
                     <div w-class="titleBox">
                         <div w-class="title">{{v.title}}</div>
-                        <div w-class="btn" on-tap="review({{i}})">审核</div>
+                        <div w-class="btn" on-tap="review({{i}})" on-down="onShow">审核</div>
                     </div>
                     <div w-class="titleBox">
                         <div w-class="userInfo">

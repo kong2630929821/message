@@ -103,15 +103,26 @@ export class ToBeProcessedInfo extends Widget {
             this.props.likeCount = evidence.likeCount;
             this.props.reply = evidence.reply;
         } else {
-            JSON.parse(evidence.body).imgs.forEach(v => {
-                imgs.push(buildupImgPath(v));
-            });
+            if (state !== 4) {
+                JSON.parse(evidence.body).imgs.forEach(v => {
+                    imgs.push(buildupImgPath(v));
+                });
+            } 
+           
             this.props.likeCount = evidence.likeCount;
             this.props.reply = evidence.commentCount;
         }
+        let msg = '';
+        if (state === 5) {
+            msg = parseManagementEmoji(JSON.parse(evidence.msg).msg); 
+        } else if (state === 4) {
+            msg = evidence.body;
+        } else {
+            msg = parseManagementEmoji(JSON.parse(evidence.body).msg);
+        }
         this.props.dynamic = {
             title:state === 4 ? evidence.title  :'',
-            msg:state === 5 ? parseManagementEmoji(JSON.parse(evidence.msg).msg) :parseManagementEmoji(JSON.parse(evidence.body).msg),
+            msg,
             imgs:imgs,
             time:timestampFormat(JSON.parse(evidence.createtime))
         };
@@ -190,7 +201,7 @@ export class ToBeProcessedInfo extends Widget {
                 { key:'手机号',value:reportPeople.user_info.tel ? reportPeople.user_info.tel :'无' },
                 { key:'被举报次数总计',value:reportPublic.reported_list.length },
                 { key:'被惩罚次数总计',value:reportPublic.punish_history_list.length },
-                { key:'当前惩罚',value:reportPeople.punish_list.length ? penaltyText(reportPublic.punish_list,'嗨嗨号') :'无' }
+                { key:'当前惩罚',value:reportPublic.punish_list.length ? penaltyText(reportPublic.punish_list,'嗨嗨号') :'无' }
         ];
     }
 

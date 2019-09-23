@@ -3,7 +3,9 @@
     <div w-class="modal-mask">
         <div w-class="report-violations">投诉 @ {{it.title}}</div>
         <div w-class="userInfo">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"150px;"}</widget>
+            <div w-class="avatar">
+                <widget w-tag="chat-client-app-widget-imgShow-imgShow">{imgURL:{{it.avatar}},width:"150px;"}</widget>
+            </div>
             <div w-class="content">
             <div w-class="user">
                     <div w-class="userName">@ {{it.title}}</div>
@@ -11,7 +13,9 @@
                     <img src="{{it.sex==0?'../../res/images/boy.png':'../../res/images/girl.png'}}" alt="" w-class="sexImg"/>
                     {{end}}
                 </div>
-                <div w-class="contentBox">{{it.msg}}</div>
+                <div w-class="contentBox">
+                    <widget w-tag="pi-ui-html">{{it.msg}}</widget>
+                </div>
             </div>
         </div>
         <div w-class="reportType">请选择你要投诉的类型：</div>

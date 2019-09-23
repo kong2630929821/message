@@ -2,6 +2,7 @@ import { sourceIp } from '../../../../../app/publicLib/config';
 import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { PENALTY } from '../../../../management/utils/logic';
 import { getStore, setStore } from '../../data/store';
 import { openCamera, selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
@@ -241,9 +242,20 @@ export class EditPost extends Widget {
 
                 return;
             }
-            addPost(this.props.titleInput,editer.innerHTML,this.props.num).then(r => {
-                popNewMessage('发布成功');
-                this.ok && this.ok();
+            addPost(this.props.titleInput,editer.innerHTML,this.props.num).then((r:any) => {
+                if (!isNaN(r)) {
+                    popNewMessage('发布成功');
+                    this.ok && this.ok();
+                } else {
+                    r.list.forEach(v => {
+                        if (v.punish_type === PENALTY.FREEZE) {
+                            popNewMessage('该嗨嗨号被冻结');
+
+                            return;
+                        }
+                    });
+                    
+                }
             }).catch(r => {
                 popNewMessage('发布失败');
             });
@@ -265,9 +277,21 @@ export class EditPost extends Widget {
             };
 
             if (!this.props.isUploading) {  // 图片上传完成
-                addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then(r => {
-                    popNewMessage('发布成功');
-                    this.ok && this.ok();
+                addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then((r:any) => {
+                    if (!isNaN(r)) {
+                        popNewMessage('发布成功');
+                        this.ok && this.ok();
+                    } else {
+                        r.list.forEach(v => {
+                            if (v.punish_type === PENALTY.BAN_POST) {
+                                popNewMessage('禁止发动态');
+
+                                return;
+                            }
+                        });
+                        
+                    }
+                
                 }).catch(r => {
                     popNewMessage('发布失败');
                 });

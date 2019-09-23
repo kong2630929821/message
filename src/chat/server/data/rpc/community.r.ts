@@ -336,15 +336,17 @@ export const addPostPort = (arg: AddPostArg): PostKey => {
     key.id = 0;
     key.num = arg.num;
     // 判断用户是否被禁止发动态
-    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}:${getUid()}`, CONSTANT.BAN_POST);
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${getUid()}`, CONSTANT.BAN_POST);
+    console.log('!!!!!!!!!!!!!!!!!!punishList',punishList);
     if (punishList.list.length > 0) {
         key.num = JSON.stringify(punishList);
-
+        console.log('!!!!!!!!!!!!!!!!!!key',key);
+        
         return key;
     }
     // 如果是公众号发帖判断公众号是否被禁止发动态
     if (community.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
-        const punishList1 = getUserPunishing(`${CONSTANT.REPORT_PUBLIC}:${arg.num}`, CONSTANT.BAN_POST);
+        const punishList1 = getUserPunishing(`${CONSTANT.REPORT_PUBLIC}%${arg.num}`, CONSTANT.BAN_POST);
         if (punishList1.list.length > 0) {
             key.num = JSON.stringify(punishList1);
 

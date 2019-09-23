@@ -609,7 +609,7 @@ export const getReportPublicInfo = (key: string): ReportPublicInfo => {
     console.log('===============communityNum:', communityNum);
     const communityBase = communityBaseBucket.get<string, CommunityBase[]>(communityNum)[0];
     reportPublicInfo.num = communityNum;
-    reportPublicInfo.name = CommunityBase.name;
+    reportPublicInfo.name = communityBase.name;
     reportPublicInfo.owner = communityBase.owner;
     let reportCount = reportCountBucket.get<string, ReportCount[]>(key)[0];
     if (!reportCount) {
@@ -669,7 +669,8 @@ export const getUserPunish = (key: string): PunishCount => {
         punishCount.punish_list = [];
         punishCount.punish_history = [];
     }
-    
+    console.log('===============punishCount1111:', punishCount, key);
+
     return punishCount;
 };
 
@@ -678,6 +679,7 @@ export const getUserPunishing = (key: string, punishType: number): PunishList =>
     const punishCountBucket = new Bucket(CONSTANT.WARE_NAME, PunishCount._$info.name);
     const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
     const punishCount = getUserPunish(key);
+    console.log('===============punishCount:', punishCount);
     const punishList = new PunishList();
     punishList.list = [];
     for (let i = 0; i < punishCount.punish_list.length; i++) {
