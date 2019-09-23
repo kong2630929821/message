@@ -567,10 +567,10 @@ export const delCommentPost = (arg: CommentKey): number => {
         return DB_ERROR;
     }
     // 删除评论记录
-    if (!commentBucket.delete(arg)) {
+    // if (!commentBucket.delete(arg)) {
        
-        return DB_ERROR;
-    }
+    //     return DB_ERROR;
+    // }
     
     return CONSTANT.RESULT_SUCCESS;
 };
