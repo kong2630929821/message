@@ -13,8 +13,8 @@ import { Report, ReportCount } from '../db/message.s';
 import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
-import { Result } from './basic.s';
-import { getPostInfoById } from './community.r';
+import { GetUserInfoReq, Result } from './basic.s';
+import { PostData } from './community.s';
 import { getRealUid, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
 
@@ -822,6 +822,46 @@ export const addPublicComm = (name: string, num: string, avatar: string, desc: s
     publicAccIndexBucket.put(uid, publicAccIndex);
 
     return num;
+};
+
+/**
+ * 获取指定社区账户帖子信息(已删除也可获取)
+ * @ param postKey
+ */
+export const getPostInfoById = (postKey: PostKey): PostData => {
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
+    const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+    if (!post) return;
+    const user = new GetUserInfoReq();
+    user.uids = [post.owner];
+    const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
+    const commBase:CommunityBase = communityBaseBucket.get(postKey.num)[0]; // 社区基础信息
+    // 读取点赞等数据
+    const valueCount = postCountBucket.get<PostKey, PostCount[]>(postKey)[0];
+    const postData = new PostData();
+    postData.key = postKey;
+    postData.body = post.body;
+    postData.collectCount = valueCount.collectList.length;
+    postData.createtime = parseInt(post.createtime, 10);
+    postData.forwardCount = valueCount.forwardList.length;
+    postData.likeCount = valueCount.likeList.length;
+    postData.commentCount = valueCount.commentList.length;
+    postData.owner = post.owner;
+    postData.post_type = post.post_type;
+    postData.title = post.title;
+    postData.username = userinfo.name;
+    postData.avatar = userinfo.avatar;
+    postData.gender = userinfo.sex;
+    postData.comm_type = commBase.comm_type;
+    // 公众号的帖子返回公众号信息
+    if (commBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+        postData.username = commBase.name;
+        postData.avatar = commBase.avatar;
+    }
+
+    return postData;
 };
 
 // 自增id
