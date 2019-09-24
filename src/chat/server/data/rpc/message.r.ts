@@ -162,7 +162,7 @@ export const sendGroupMessage = (message: GroupSend): GroupHistory => {
     }
 
     // 如果有禁言则不能发消息
-    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}:${getUid()}`, CONSTANT.BAN_MESAAGE);
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${getUid()}`, CONSTANT.BAN_MESAAGE);
     if (punishList.list.length > 0) {
         gh.hIncId = JSON.stringify(punishList);
 
@@ -370,7 +370,7 @@ export const sendUserMessage = (message: UserSend): UserHistory => {
     }
 
     // 如果有禁言则不能发消息
-    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}:${sid}`, CONSTANT.BAN_MESAAGE);
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${sid}`, CONSTANT.BAN_MESAAGE);
     if (punishList.list.length > 0) {
         userHistory.hIncId = JSON.stringify(punishList);
 
@@ -425,7 +425,7 @@ export const sendTempMessage = (message: TempSend): UserHistory => {
     }
 
     // 如果有禁言则不能发消息
-    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}:${sid}`, CONSTANT.BAN_MESAAGE);
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${sid}`, CONSTANT.BAN_MESAAGE);
     if (punishList.list.length > 0) {
         userHistory.hIncId = JSON.stringify(punishList);
 
@@ -525,10 +525,10 @@ export const report = (arg: ReportArg): number => {
     reportCount.reported.push(report.id);
     reportCountBucket.put(reportCount.key, reportCount);
     // 添加举报人统计信息
-    let reportCount1 = reportCountBucket.get<string, ReportCount[]>(`${CONSTANT.REPORT_PERSON}:${uid}`)[0];
+    let reportCount1 = reportCountBucket.get<string, ReportCount[]>(`${CONSTANT.REPORT_PERSON}%${uid}`)[0];
     if (!reportCount1) {
         reportCount1 = new ReportCount();
-        reportCount1.key = `${CONSTANT.REPORT_PERSON}:${uid}`;
+        reportCount1.key = `${CONSTANT.REPORT_PERSON}%${uid}`;
         reportCount1.report = [];
         reportCount1.reported = [];
     }

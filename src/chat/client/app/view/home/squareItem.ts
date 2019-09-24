@@ -143,7 +143,7 @@ export class SquareItem extends Widget {
     public complaint(e:any) {
         this.closeUtils(e);
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        const key = `${this.props.isPublic ? REPORT_ARTICLE :REPORT_POST}:${JSON.stringify(this.props.key)}`;
+        const key = `${this.props.isPublic ? REPORT_ARTICLE :REPORT_POST}%${JSON.stringify(this.props.key)}`;
         complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content,this.props.isPublic ? REPORT_ARTICLE :REPORT_POST,key);
     }
 

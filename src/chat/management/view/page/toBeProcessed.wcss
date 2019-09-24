@@ -1,0 +1,66 @@
+.page{
+    background: white;
+    padding: 20px 60px;
+    color:#354052;
+    height: 100%;
+    overflow: auto;
+}
+.tabRow{
+    display: flex;
+}
+.tab{
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    margin-right: 30px;
+    align-items: center;
+    height: 120px;
+    width:300px;
+    background:rgba(255,255,255,1);
+}
+.title1{
+    width:150px;
+    height:48px;
+    line-height: 48px;
+    text-align: center;
+    color: #354052;
+    font-size:18px;
+    font-family:SourceSansPro-Semibold;
+    font-weight:600;
+    background:white;
+    margin: 25px;
+    cursor: pointer;
+    border: 1px solid rgb(204, 204, 204);
+}
+.activeTitle{
+    width:150px;
+    height:48px;
+    line-height: 48px;
+    text-align: center;
+    color: white;
+    font-size:18px;
+    font-family:SourceSansPro-Semibold;
+    font-weight:600;
+    background:#273142;
+    margin: 25px;
+    cursor: pointer;
+}
+.tableTitle{
+    height:48px;
+    font-size: 18px;
+    color: #fff;
+    line-height: 48px;
+    padding-left: 20px;
+    background:rgba(140,159,183,1);
+}
+.ctroller{
+    height: 48px;
+    border:1px solid rgba(204,204,204,1);
+    display: flex;
+    position: relative;
+}
+.pagination{
+    position: absolute;
+    top: -9px;
+    right: 50px;
+}

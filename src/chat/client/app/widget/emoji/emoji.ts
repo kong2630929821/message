@@ -20,15 +20,25 @@ export class Emoji extends Widget {
     constructor() {
         super();
         this.props = {
-            emojis:EMOJIS
+            emojis:EMOJIS,
+            isPublic:false
         };
+    }
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
     }
     public goBack() {
         this.ok();
     }
     public click(e:any,index:number) {
         // this.process(EMOJIS[index][0]);
-        notify(e.node,'ev-emoji-click',EMOJIS[index][0]);
+
+        notify(e.node,'ev-emoji-click',EMOJIS[index][this.props.isPublic ? 1 :0]);
+
     }    
 }
 export let EMOJIS_MAP = new Map();
@@ -148,4 +158,5 @@ EMOJIS.forEach((ele) => {
 
 interface Props {
     emojis:string[][];
+    isPublic:boolean;
 }

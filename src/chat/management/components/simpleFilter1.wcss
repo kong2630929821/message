@@ -1,0 +1,89 @@
+.filter{
+    position: relative;
+    font-size: 14px;
+ }
+ .optionList{
+     box-sizing: border-box;
+     background: #fff;
+     width:210px;
+     box-sizing: border-box;
+     box-shadow:0px 1px 4px 0px rgba(0,0,0,0.08);
+     position: absolute;
+     left: 0;
+     max-height: 270px;
+     margin-top: 5px;
+     z-index: 1;
+     overflow-x: hidden;
+     overflow-y: auto;
+ }
+ .userTypeList{
+    width:382px;
+ }
+ .optionList_1{
+    box-sizing: border-box;
+    background: #fff;
+    width:75px;
+    box-sizing: border-box;
+    box-shadow:0px 1px 4px 0px rgba(0,0,0,0.08);
+    position: absolute;
+    left: 0;
+    bottom: 50px;
+    max-height: 270px;
+    margin-top: 5px;
+    z-index: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+ .option{
+     height: 37px;
+     line-height: 37px;
+     padding-left: 10px; 
+     display: flex;
+     align-items: center;
+ }
+ .show{
+     padding: 0 15px;
+     display: flex;
+     align-items: center;
+     width:180px;
+     box-sizing: border-box;
+     height:48px;
+     border:1px solid rgba(0,0,0,0.1);
+     border-radius:4px;
+     background: #fff;
+ }
+.show_1{
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    width:75px;
+    box-sizing: border-box;
+    height:36px;
+    border:1px solid rgba(0,0,0,0.1);
+    border-radius:4px;
+    background: #fff;
+}
+.show2{
+    width:382px;
+}
+ .showTesxt{
+     text-overflow: ellipsis;
+     word-break: break-all;
+     white-space: nowrap;
+     overflow: hidden;
+     width: 120px;
+ }
+ .showText2{
+    width: 330px;
+ }
+ .arrow{
+     width: 16px;
+     height: 16px;
+ }
+ .active{
+     background:#f0f0f0;
+ }
+ .input{
+    height:44px;
+    display: inline-block;
+}

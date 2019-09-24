@@ -9,7 +9,9 @@
                 {{elseif it.offical}}
                 <div w-class="offical">官方</div>
                 {{else}}
-                <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
+                    {{if it.gender!=2}}
+                        <img src="../../res/images/{{it.gender===1?'girl.png':'boy.png'}}"/>
+                    {{end}}
                 {{end}}
             </div>
             <div w-class="time">{{it.timeFormat(it.createtime,3)}}</div>
@@ -28,7 +30,7 @@
 
     {{if it.showAll}}
     {{% =================帖子详情展示全部内容=======================}}
-    <div w-class="content1">
+    <div w-class="content1" id="minImg">
         <widget w-tag="pi-ui-html">{{it.content}}</widget>
     </div>
 

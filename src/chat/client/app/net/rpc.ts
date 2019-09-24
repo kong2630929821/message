@@ -508,7 +508,7 @@ export const addPost = (title: string, body: string, num:string, post_type: numb
     return new Promise((resolve,reject) => {
         clientRpcFunc(addPostPort,arg,(r:PostKey) => {
             if (r && r.num !== '') {
-                resolve();
+                resolve(JSON.parse(r.num));
             } else {
                 reject();
             }
@@ -607,11 +607,18 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;
                     data[i].isPublic = res.comm_type === CommType.publicAcc;
-                    const body = JSON.parse(res.body);
-                    data[i].content = parseEmoji(body.msg);
-                    data[i].imgs = body.imgs;
                     data[i].followed = judgeFollowed(res.key.num);
                     data[i].likeActive = judgeLiked(res.key.num,res.key.id);
+                    if (data[i].isPublic) {
+                        data[i].content = res.body;
+                        data[i].imgs = '';
+                    } else {
+                        const body = JSON.parse(res.body);
+                        data[i].content = parseEmoji(body.msg);
+                        data[i].imgs = body.imgs;
+                        
+                    }
+                   
                 });
 
                 // 最后一条帖子ID作为查询条件，并且返回了新一页的帖子
@@ -978,10 +985,10 @@ export const changePublic = (name:string,desc:string,avatar:string,num:string) =
 };
 
 // 举报
-export const complaintType = (key:string,evidence:string,status:number,reason:string) => {
+export const complaintType = (key:string,status:number,reason:string) => {
     const arg = new ReportArg();
     arg.key = key;
-    arg.evidence = evidence;
+    arg.evidence = '';
     arg.report_type = status;
     arg.reason = reason;
 

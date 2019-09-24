@@ -163,7 +163,7 @@ export const userExitGroup = (gid: number): Result => {
         logger.debug('Remove group: ', gid, 'from user\'s contact');
 
         const groupUserLinkBucket = getGroupUserLinkBucket();
-        groupUserLinkBucket.delete(`${gid}:${uid}`);
+        groupUserLinkBucket.delete(`${gid}%${uid}`);
         logger.debug('delete user: ', uid, 'from groupUserLinkBucket');
         res.r = 1;
         

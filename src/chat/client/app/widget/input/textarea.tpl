@@ -3,7 +3,7 @@
     <textarea 
         unchange = "true"
         w-class="pi-input__inner" 
-        style="{{it.style ? it.style : ''}}"
+        style="{{it.style ? it.style : ''}};"
         type="text" 
         autocomplete="off" 
         placeholder="{{it && it.placeHolder ? it.placeHolder : ''}}" 
