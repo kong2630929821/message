@@ -25,7 +25,11 @@ interface Props {
     uploadLoding:any;
     emoji:boolean;// 表情
     camera:boolean;// 相机
+    placeHolderInfo:number;// 发文章提示文字个数
+    editorText:string;// 富文本框内容
+    isEditor:boolean;// 是否开启富文本框模式
 }
+const editorTextNum = 1500;
 /**
  * 发布帖子
  */
@@ -44,7 +48,10 @@ export class EditPost extends Widget {
         isUploading:false,
         uploadLoding:[],
         emoji:true,
-        camera: true
+        camera: true,
+        placeHolderInfo:editorTextNum,
+        editorText:'',
+        isEditor:true
     };
     
     public setProps(props:any) {
@@ -70,6 +77,18 @@ export class EditPost extends Widget {
         } else {
             this.props.num = props.num || getStore(`userInfoMap/${uid}`,{}).comm_num ;
         }
+
+    }
+
+    public attach() {
+        super.attach();
+        if (!this.props.isPublic) {
+            return;
+        }
+        // 赋值富文本框内容
+        const editer = document.querySelector('#editBox');
+        // tslint:disable-next-line:no-inner-html
+        editer.innerHTML = this.props.editorText;
     }
 
     // 标题
@@ -193,9 +212,12 @@ export class EditPost extends Widget {
     // 关闭
     public close() {
         // 有内容时提醒保存草稿
-        if (this.props.titleInput || this.props.contentInput || this.props.imgs.length > 0) {
+        if (this.props.titleInput || this.props.contentInput || this.props.imgs.length > 0 || this.props.placeHolderInfo === 0) {
             popNew('chat-client-app-widget-modalBox-modalBox',{ content:'保留此次编辑' },() => {
                 if (this.props.isPublic) {
+                     // 编辑的div
+                    const editor = document.querySelector('#editBox');
+                    this.props.editorText = editor.innerHTML;
                     setStore('postDraft',this.props);
                 } else {
                     setStore('pubPostDraft',this.props);
@@ -245,6 +267,8 @@ export class EditPost extends Widget {
             addPost(this.props.titleInput,editer.innerHTML,this.props.num).then((r:any) => {
                 if (!isNaN(r)) {
                     popNewMessage('发布成功');
+                    // 初始化草稿箱
+                    setStore('postDraft',null);
                     this.ok && this.ok();
                 } else {
                     r.list.forEach(v => {
@@ -280,6 +304,8 @@ export class EditPost extends Widget {
                 addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then((r:any) => {
                     if (!isNaN(r)) {
                         popNewMessage('发布成功');
+                        // 初始化草稿箱
+                        setStore('pubPostDraft',null);
                         this.ok && this.ok();
                     } else {
                         r.list.forEach(v => {
@@ -333,6 +359,35 @@ export class EditPost extends Widget {
         const editer = document.querySelector('#editBox');
         editer.focus();
         const filePath = src;
-        document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :''} />`); 
+        if (this.props.placeHolderInfo !== 0) {
+            document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :'style="width:100%;height:auto;"'} />`);   
+        }
+    }
+
+    public editBoxChange() {
+        // 编辑的div
+        const editor = document.querySelector('#editBox');
+        // // 富文本框的内容
+        // this.props.editorText = editor.innerHTML;
+        // 输入的文字数（包括空格，换行）
+        const textNumber = editor.innerText.length;
+        // 插入的图片个数
+        const imgNumber = editor.getElementsByTagName('img').length;
+        if (editorTextNum - textNumber - imgNumber <= 0) {
+            this.props.placeHolderInfo = 0;
+            editor.blur();
+        } else {
+            this.props.placeHolderInfo = editorTextNum - textNumber - imgNumber;
+        }
+        this.paint();
+    }
+
+    public editorTap(e:any) {
+        // 编辑的div
+        const editor = document.querySelector('#editBox');
+        if (this.props.placeHolderInfo === 0 && e.key !== 'Backspace') {
+            editor.blur();
+            this.paint();
+        }
     }
 }

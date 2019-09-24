@@ -10,7 +10,10 @@
         <div w-class="title" ev-input-change="titleChange">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"标题1-24个字",input:{{it.titleInput}}, maxLength:24 }</widget>
         </div>
-        <div contenteditable="true" w-class="editBox" id="editBox"></div>
+        <div style="position: relative;">
+            <div contenteditable="{{it.isEditor}}" w-class="editBox" id="editBox" class="editor" on-input="editBoxChange" on-keydown="editorTap"></div>
+            <div w-class="placeHolder">{{it.placeHolderInfo}}</div>
+        </div>
         {{else}}
         <div w-class="content" ev-input-change="contentChange">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>

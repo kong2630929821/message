@@ -21,13 +21,23 @@
 }
 .editBox{
     margin: 0 20px 20px;
-    height: 300px;
-    overflow: auto;
+    min-height: 300px;
     font-family: monospace;
     line-height: 40px;
     font-size: 28px;
     color: rgb(34, 34, 34);
     padding-bottom: 20px;
+    outline: none;
+    margin-top: 20px;
+}
+.placeHolder{
+    position: absolute;
+    right: 20px;
+    bottom: -20px;
+    font-size: 20px;
+    font-family: SourceSansPro-Regular;
+    font-weight: 400;
+    color: rgb(197, 208, 222);
 }
 .img{
     margin: 5px;
