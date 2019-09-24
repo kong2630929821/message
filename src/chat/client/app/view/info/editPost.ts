@@ -25,11 +25,11 @@ interface Props {
     uploadLoding:any;
     emoji:boolean;// 表情
     camera:boolean;// 相机
-    placeHolderInfo:number;// 发文章提示文字个数
+    // placeHolderInfo:number;// 发文章提示文字个数
     editorText:string;// 富文本框内容
-    isEditor:boolean;// 是否开启富文本框模式
+    // isEditor:boolean;// 是否开启富文本框模式
 }
-const editorTextNum = 1500;
+// const editorTextNum = 10;
 /**
  * 发布帖子
  */
@@ -49,9 +49,9 @@ export class EditPost extends Widget {
         uploadLoding:[],
         emoji:true,
         camera: true,
-        placeHolderInfo:editorTextNum,
-        editorText:'',
-        isEditor:true
+        // placeHolderInfo:editorTextNum,
+        editorText:''
+        // isEditor:true
     };
     
     public setProps(props:any) {
@@ -359,35 +359,40 @@ export class EditPost extends Widget {
         const editer = document.querySelector('#editBox');
         editer.focus();
         const filePath = src;
-        if (this.props.placeHolderInfo !== 0) {
-            document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :'style="width:100%;height:auto;"'} />`);   
-        }
+        // if (this.props.placeHolderInfo !== 0) {
+        document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :'style="width:100%;height:auto;"'} />`);   
+        // }
     }
 
-    public editBoxChange() {
-        // 编辑的div
-        const editor = document.querySelector('#editBox');
-        // // 富文本框的内容
-        // this.props.editorText = editor.innerHTML;
-        // 输入的文字数（包括空格，换行）
-        const textNumber = editor.innerText.length;
-        // 插入的图片个数
-        const imgNumber = editor.getElementsByTagName('img').length;
-        if (editorTextNum - textNumber - imgNumber <= 0) {
-            this.props.placeHolderInfo = 0;
-            editor.blur();
-        } else {
-            this.props.placeHolderInfo = editorTextNum - textNumber - imgNumber;
-        }
-        this.paint();
-    }
+    // public editBoxChange() {
+    //     // 编辑的div
+    //     const editor = document.querySelector('#editBox');
+    //     // // 富文本框的内容
+    //     // this.props.editorText = editor.innerHTML;
+    //     // 输入的文字数（包括空格，换行）
+    //     const textNumber = editor.innerText.length;
+    //     // 插入的图片个数
+    //     const imgNumber = editor.getElementsByTagName('img').length;
+    //     if (editorTextNum - textNumber - imgNumber <= 0) {
+    //         this.props.placeHolderInfo = 0;
+    //         this.props.editorText = editor.innerHTML;
+    //         editor.blur();
+    //     } else {
+    //         this.props.placeHolderInfo = editorTextNum - textNumber - imgNumber;
+    //     }
+    //     this.paint();
+    // }
 
-    public editorTap(e:any) {
-        // 编辑的div
-        const editor = document.querySelector('#editBox');
-        if (this.props.placeHolderInfo === 0 && e.key !== 'Backspace') {
-            editor.blur();
-            this.paint();
-        }
-    }
+    // public editorTap(e:any) {
+    //     // 编辑的div
+    //     const editor = document.querySelector('#editBox');
+    //     if (this.props.placeHolderInfo === 0 && e.key !== 'Backspace') {
+    //         editor.blur();
+    //         this.paint();
+    //     }
+    // }
+
+    // public onpaste(e:any) {
+    //     e.preventDefault();
+    // }
 }

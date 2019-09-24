@@ -11,8 +11,7 @@
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"标题1-24个字",input:{{it.titleInput}}, maxLength:24 }</widget>
         </div>
         <div style="position: relative;">
-            <div contenteditable="{{it.isEditor}}" w-class="editBox" id="editBox" class="editor" on-input="editBoxChange" on-keydown="editorTap"></div>
-            <div w-class="placeHolder">{{it.placeHolderInfo}}</div>
+            <div contenteditable="true" w-class="editBox" id="editBox" class="editor" on-input="editBoxChange" on-keydown="editorTap" on-paste="onpaste" ></div>
         </div>
         {{else}}
         <div w-class="content" ev-input-change="contentChange">
