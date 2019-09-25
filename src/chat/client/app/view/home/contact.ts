@@ -55,7 +55,7 @@ export class Contact extends SpecialWidget {
         ],
         isUtilVisible:false,
         messageList:[],
-        activeTab:TAB.message,
+        activeTab:TAB.square,
         isLogin:false,
         hasWallet:false,
         netClose:false,
