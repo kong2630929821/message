@@ -580,38 +580,38 @@ const props = {
             name: '取消官方',
             func: () => { cancelGmAccountTest(); }
         },
-        // {
-        //     name: '关闭机器人行为',
-        //     func: () => { closeRobottTest(); }
-        // },
-        // {
-        //     name: '添加机器人',
-        //     func: () => { getRobotUserInfoTest(); }
-        // },
-        // {
-        //     name: '初始化配置',
-        //     func: () => { initRobotSetTest(); }
-        // },
-        // {
-        //     name: '获取配置',
-        //     func: () => { getRobotSetTest(); }
-        // },
-        // {
-        //     name: '修改配置',
-        //     func: () => { modifyRobotSetTest(); }
-        // },
-        // {
-        //     name: '开启机器人行为',
-        //     func: () => { startRobotTest(); }
-        // },
-        // {
-        //     name: '添加通用评论',
-        //     func: () => { addCommonCommerntTest(); }
-        // },
-        // {
-        //     name: '查看通用评论',
-        //     func: () => { getCommonCommerntTest(); }
-        // },
+        {
+            name: '关闭机器人行为',
+            func: () => { closeRobottTest(); }
+        },
+        {
+            name: '添加机器人',
+            func: () => { getRobotUserInfoTest(); }
+        },
+        {
+            name: '初始化配置',
+            func: () => { initRobotSetTest(); }
+        },
+        {
+            name: '获取配置',
+            func: () => { getRobotSetTest(); }
+        },
+        {
+            name: '修改配置',
+            func: () => { modifyRobotSetTest(); }
+        },
+        {
+            name: '开启机器人行为',
+            func: () => { startRobotTest(); }
+        },
+        {
+            name: '添加通用评论',
+            func: () => { addCommonCommerntTest(); }
+        },
+        {
+            name: '查看通用评论',
+            func: () => { getCommonCommerntTest(); }
+        },
         {
             name: '审核公众号',
             func: () => { handleApplyPublicTest(); }

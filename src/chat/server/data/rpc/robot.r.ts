@@ -7,7 +7,7 @@ import { Bucket } from '../../../utils/db';
 import { genNewIdFromOld } from '../../../utils/util';
 import * as CONSTANT from '../constant';
 import { CommentKey, CommunityAccIndex, Post, PostKey } from '../db/community.s';
-import { AddRobotArg, CommonComment, CommonCommentList, DailyRobotCount, PostRobotNum, RobotActiveSet, RobotActiveSwitch, RobotIndex, UserWeiboInfo, WeiboInfo } from '../db/robot.s';
+import { AddRobotArg, CommonComment, CommonCommentList, DailyRobotCount, PostRobotNum, RobotActiveSet, RobotActiveSwitch, RobotIndex, UPDATE_STAGE, UserWeiboInfo, WeiboInfo, WeiboUpdate } from '../db/robot.s';
 import { AccountGenerator, UserInfo, VIP_LEVEL } from '../db/user.s';
 import * as http from '../http_client';
 import { getIndexID } from '../util';
@@ -239,17 +239,38 @@ const robotPost = (robotIndex: RobotIndex, num: string): boolean => {
     console.log('!!!!!!!!!!!!robotPost:', robotIndex);
     const weiboInfoBucket = new Bucket(CONSTANT.WARE_NAME, WeiboInfo._$info.name);
     const userWeiboInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserWeiboInfo._$info.name);
+    const weiboUpdateBucket = new Bucket(CONSTANT.WARE_NAME, WeiboUpdate._$info.name);
     let userWeiboInfo = userWeiboInfoBucket.get<number, UserWeiboInfo[]>(robotIndex.rid)[0];
-    // 不存在微博数据 爬取用户微博
-    if (!userWeiboInfo) {
+    // 根据用户微博更新阶梯判断是否更新微博
+    let weiboUpdate = weiboUpdateBucket.get<number, WeiboUpdate[]>(robotIndex.rid)[0];
+    if (!weiboUpdate) {
+        // 未爬取过微博 直接爬取
+        weiboUpdate = new WeiboUpdate();
+        weiboUpdate.rid = robotIndex.rid;
+        weiboUpdate.stage = UPDATE_STAGE.STAGE0;
+        weiboUpdate.update_time = Date.now().toString();
         getRobotWeiboInfo(robotIndex.rid);
+    } else {
+        // 爬取过微博 根据更新阶梯判断是否达到更新时间
+        if (checkStageUpdate(parseInt(weiboUpdate.update_time, 10), weiboUpdate.stage)) {
+            getRobotWeiboInfo(robotIndex.rid);
+        }
     }
     userWeiboInfo = userWeiboInfoBucket.get<number, UserWeiboInfo[]>(robotIndex.rid)[0];
     console.log('!!!!!!!!!!!!userWeiboInfo:', robotIndex.rid, userWeiboInfo);
     if (!userWeiboInfo || userWeiboInfo.weibo_list.length === 0) return false;
     // 发送动态
-    const wid = userWeiboInfo.weibo_list[0]; // 最新的微博
-    const weiboInfo = weiboInfoBucket.get<string, WeiboInfo[]>(wid)[0];
+    let weiboInfo;
+    for (let i = 0; i < userWeiboInfo.weibo_list.length; i++) {
+        const weiboInfo1 = weiboInfoBucket.get<string, WeiboInfo[]>(userWeiboInfo.weibo_list[i])[0];
+        if (!weiboInfo1) continue;
+        console.log('!!!!!!!!!!!!weiboInfo1111111111:', weiboInfo1);
+        if (weiboInfo1.state === 0) {
+            weiboInfo = weiboInfo1;
+            break;
+        }
+    }
+    console.log('!!!!!!!!!!!!weiboInfo:', weiboInfo);
     if (!weiboInfo) return false;
     const value: any = {
         msg: '',
@@ -276,9 +297,9 @@ const robotPost = (robotIndex: RobotIndex, num: string): boolean => {
     addPost(robotIndex.uid, postArg, key, CONSTANT.COMMUNITY_TYPE_PERSON);
     // 添加当天行为统计
     addDailyCount(CONSTANT.ROBOT_ACTIVE_POST);
-    // 微博已使用从userWeiboInfo中删除
-    userWeiboInfo.weibo_list.splice(0, 1);
-    userWeiboInfoBucket.put(robotIndex.rid, userWeiboInfo);
+    // 改变微博状态
+    weiboInfo.state = 1;
+    weiboInfoBucket.put(weiboInfo.id, weiboInfo);
 
     return true;
 };
@@ -368,6 +389,8 @@ const getRobotId = () : number => {
 // 获取指定虚拟用户的微博信息
 // #[rpc=rpcServer]
 export const getRobotWeiboInfo = (rid: number) => {
+    const weiboUpdateBucket = new Bucket(CONSTANT.WARE_NAME, WeiboUpdate._$info.name);
+    const userWeiboInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserWeiboInfo._$info.name);
     const robotIndexBucket = new Bucket(CONSTANT.WARE_NAME, RobotIndex._$info.name);
     const robotIndex = robotIndexBucket.get<number, RobotIndex[]>(rid)[0];
     const wuid = robotIndex.wuid;
@@ -380,7 +403,30 @@ export const getRobotWeiboInfo = (rid: number) => {
         try {
             const info = JSON.parse(r.ok);
             let weibo_infos = info.weibo_list;
-            // console.log('weibo_infos =====',weibo_infos);
+            const userWeiboInfo = userWeiboInfoBucket.get<number, UserWeiboInfo[]>(robotIndex.rid)[0];
+            let weiboUpdate = weiboUpdateBucket.get<number, WeiboUpdate[]>(robotIndex.rid)[0];
+            if (!weiboUpdate) {
+                weiboUpdate = new WeiboUpdate();
+                weiboUpdate.rid = robotIndex.rid;
+                weiboUpdate.stage = UPDATE_STAGE.STAGE0;
+                weiboUpdate.update_time = Date.now().toString();
+            }
+            // 是更新微博则调整更新策略
+            if (userWeiboInfo) {
+                if (userWeiboInfo.weibo_list[0] === weibo_infos[0].id) {
+                    // 微博未更新 调整更新策略
+                    if (weiboUpdate.stage < UPDATE_STAGE.STAGE5) weiboUpdate.stage += 1;
+                    weiboUpdate.update_time = Date.now().toString();
+                    weiboUpdateBucket.put(weiboUpdate.rid, weiboUpdate);
+
+                    return false;
+                } else {
+                    // 微博更新 阶梯重置为0
+                    weiboUpdate.stage = UPDATE_STAGE.STAGE0;
+                    weiboUpdate.update_time = Date.now().toString();
+                    weiboUpdateBucket.put(weiboUpdate.rid, weiboUpdate);
+                }
+            }
             // 数据清洗
             weibo_infos = weiboDataFilter(weibo_infos, rid);
         } catch (e) {
@@ -407,6 +453,10 @@ export const weiboDataFilter = (weibo_infos: any, rid: number): any => {
             i --;
             continue;
         }
+        userWeiboInfo.weibo_list.push(weibo_infos[i].id);
+        // 微博数据已存在则忽略
+        const oldWeiboInfo = weiboInfoBucket.get<string, WeiboInfo[]>(weibo_infos[i].id)[0];
+        if (oldWeiboInfo) continue;
         // 微博内容数据清洗
         const weiboInfo = new WeiboInfo();
         weibo_infos[i].content = weiboMsgFilter(weibo_infos[i].content);
@@ -444,8 +494,8 @@ export const weiboDataFilter = (weibo_infos: any, rid: number): any => {
         weiboInfo.content = weibo_infos[i].content;
         weiboInfo.publish_tool = weibo_infos[i].publish_tool;
         weiboInfo.time = new Date(weibo_infos[i].publish_time).getTime().toString();
+        weiboInfo.state = 0;
         weiboInfoBucket.put(weiboInfo.wid, weiboInfo);
-        userWeiboInfo.weibo_list.push(weiboInfo.wid);
         console.log('userWeiboInfo111111111111 =====',userWeiboInfo);
     }
     console.log('userWeiboInfo2222222222 =====',userWeiboInfo);
@@ -558,6 +608,38 @@ export const addDailyCount = (active: string): boolean => {
     dailyRobotCount.count ++;
 
     return dailyRobotCountBucket.put(key, dailyRobotCount);
+};
+
+// 根据上次更新时间和阶梯判断是否可更新
+export const checkStageUpdate = (update_time: number, stage: number): boolean => {
+    let update_day = 0;
+    switch (stage) {
+        case UPDATE_STAGE.STAGE0:
+            update_day = 0;
+            break;
+        case UPDATE_STAGE.STAGE1:
+            update_day = 1;
+            break;
+        case UPDATE_STAGE.STAGE2:
+            update_day = 3;
+            break;
+        case UPDATE_STAGE.STAGE3:
+            update_day = 7;
+            break;
+        case UPDATE_STAGE.STAGE4:
+            update_day = 15;
+            break;
+        case UPDATE_STAGE.STAGE5:
+            update_day = 30;
+            break;
+        default:
+            update_day = 0;
+    }
+    if (get_day(Date.now()) - get_day(update_time) >= update_day) {
+        return true;
+    } else {
+        return false;
+    }
 };
 
 // 微博发布类型筛选
