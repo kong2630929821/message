@@ -21,7 +21,7 @@ import { SendMsg } from '../../../server/data/rpc/message.s';
 import { genUuid, getGidFromGuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
-import { exitGroup } from '../logic/logic';
+import { exitGroup } from '../logic/tools';
 import * as subscribedb from '../net/subscribedb';
 import { walletSignIn } from './init_1';
 import { initPush } from './receive';

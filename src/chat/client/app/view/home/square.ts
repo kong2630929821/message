@@ -336,25 +336,3 @@ register('postList',r => {
         w.refreshScroller();
     },1000);
 });
-
-// 转换文字中的链接
-const httpHtml = (str:string) => {
-    const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-|:|#)+)/g;
-    
-    return str.replace(reg, '<a href="javascript:;" class="linkMsg">$1$2</a>');
-};
-
-// 转换表情包
-export const parseEmoji = (msg:any) => {    
-    msg = httpHtml(msg);
-    msg = msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
-        const url = EMOJIS_MAP.get(capture) || undefined;
-        if (url) {
-            return `<img src="../../chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
-        } else {
-            return match;
-        }
-    });
-
-    return msg;
-};

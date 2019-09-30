@@ -1,7 +1,7 @@
 /**
  * 一些底层操作
  */
-import { popNewMessage } from '../../../../app/utils/tools';
+import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { AudioRecorder } from '../../../../pi/browser/audio_recorder';
 import { CameraPicker } from '../../../../pi/browser/cameraPicker';
 import { ImagePicker } from '../../../../pi/browser/imagePicker';
