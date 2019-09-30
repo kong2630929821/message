@@ -2,8 +2,8 @@
  * 一些全局方法
  */
 // =====================================导入
-import { uploadFileUrlPrefix } from '../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../app/utils/tools';
+import { uploadFileUrlPrefix } from '../../../../app/public/config';
+import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';

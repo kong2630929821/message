@@ -1,4 +1,3 @@
-import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { BScroll } from '../../../../../pi/widget/scroller/core/index';
