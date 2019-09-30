@@ -1,7 +1,7 @@
 /**
  * 登录 登出
  */
-import { loginWallet, logoutWallet } from '../../../../app/viewLogic/login';
+import { loginWallet, logoutWallet } from '../../../../app/net/login';
 import * as store from '../data/store';
 import { disconnect, initClient } from './init';
 

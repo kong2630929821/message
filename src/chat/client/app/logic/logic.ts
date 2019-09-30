@@ -2,8 +2,8 @@
  * 一些全局方法
  */
 // =====================================导入
-import { uploadFileUrlPrefix } from '../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../app/utils/tools';
+import { uploadFileUrlPrefix } from '../../../../app/public/config';
+import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
@@ -79,30 +79,6 @@ export const getFriendAlias = (rid:number) => {
         name: friend.alias || user.name,
         isFriend: isFriend
     };
-};
-
-/**
- * 用户退出群组后取消订阅清空本地数据
- */
-export const exitGroup = (gid:number) => {
-    const groupChatMap = store.getStore('groupChatMap',new Map());
-    groupChatMap.delete(genGroupHid(gid)); // 删除聊天记录
-    store.setStore('groupChatMap',groupChatMap);
-
-    const lastChat = store.getStore(`lastChat`, []);
-    const index = lastChat.findIndex(item => item[0] === gid && item[2] === GENERATOR_TYPE.GROUP);
-    if (index > -1) { // 删除最近对话记录
-        lastChat.splice(index,1);
-        store.setStore('lastChat',lastChat);
-    }
-
-    const lastRead = store.getStore(`lastRead`, []);
-    lastRead.delete(genGroupHid(gid));  // 删除已读消息记录
-    store.setStore(`lastRead`, lastRead);
-
-    const gInfoMap = store.getStore(`groupInfoMap`,new Map());    
-    gInfoMap.delete(gid.toString());  // 删除群组信息
-    store.setStore(`groupInfoMap`, gInfoMap);
 };
 
 // 复制到剪切板
