@@ -58,6 +58,7 @@ export const walletSignIn = (openid) => {
                 getMyPublicNum().then((r:string) => {
                     store.setStore('pubNum',r);
                 });
+                // 设置用户信息
                 setUserInfo();
 
                 // 从json文件中获取
