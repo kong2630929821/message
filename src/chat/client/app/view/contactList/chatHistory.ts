@@ -1,4 +1,4 @@
-import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
+import { uploadFileUrlPrefix } from '../../../../../app/public/config';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import { rippleShow } from '../../logic/logic';

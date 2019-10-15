@@ -12,16 +12,9 @@ import { disconnect, initClient } from './init';
 // });
 
 export const chatLogin = () => {
-    (<any>window).pi_sdk.api.addAuthorizeListener({ appId:'10' },(err, result) => {
-        console.log('addAuthorizeListener',err,JSON.stringify(result));
-        initClient(result.openid);
-    });
-
     (<any>window).pi_sdk.api.authorize({ appId:'10' },(err, result) => {
         console.log('authorize',err,JSON.stringify(result));
-        if (err === -1) {  // 没有账号
-            // (<any>window).pi_sdk.api.openSignInPage();
-        } else if (err === 0) { // 网络未连接
+        if (err === 0) { // 网络未连接
             console.log('网络未连接');
         } else {
             console.log('聊天登录成功',result);

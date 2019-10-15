@@ -3,9 +3,9 @@
  */
 
 // ================================================ 导入
-import { getStoreData } from '../../../../../app/middleLayer/wrap';
-import { popNewMessage } from '../../../../../app/utils/tools';
-import { registerStoreData } from '../../../../../app/viewLogic/common';
+import { getStoreData } from '../../../../../app/api/walletApi';
+import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';

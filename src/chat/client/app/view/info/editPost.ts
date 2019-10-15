@@ -1,5 +1,5 @@
-import { sourceIp } from '../../../../../app/publicLib/config';
-import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
+import { sourceIp } from '../../../../../app/public/config';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { PENALTY } from '../../../../management/utils/logic';

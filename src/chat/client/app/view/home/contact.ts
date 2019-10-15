@@ -3,10 +3,11 @@
  */
 
 // ================================================ 导入
+import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
 import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
-import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
-import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
-import { registerStoreData } from '../../../../../app/viewLogic/common';
+import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
@@ -70,10 +71,6 @@ export class Contact extends SpecialWidget {
             {
                 modulName:'message',
                 components:'chat-client-app-view-home-contactNotice'
-            },
-            {
-                modulName:'friend',
-                components:'chat-client-app-view-contactList-contactList'
             }
         ]
     };
