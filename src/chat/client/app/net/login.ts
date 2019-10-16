@@ -18,7 +18,7 @@ export const chatLogin = () => {
             console.log('网络未连接');
         } else {
             console.log('聊天登录成功',result);
-            initClient(result.openid);
+            initClient(result.openId);
         }
     });
 };
