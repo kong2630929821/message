@@ -71,6 +71,10 @@ export class Contact extends SpecialWidget {
             {
                 modulName:'message',
                 components:'chat-client-app-view-home-contactNotice'
+            },
+            {
+                modulName:'friend',
+                components:'chat-client-app-view-contactList-contactList'
             }
         ]
     };
@@ -89,7 +93,15 @@ export class Contact extends SpecialWidget {
     }
 
     public setProps(props: Props) {
-        super.setProps(props);
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+        this.initDate();
+    }
+
+    public initDate() {
         const uid = store.getStore('uid', 0);
         this.props.isLogin = !!uid;
         this.props.activeTab = TAB.square;
@@ -107,9 +119,8 @@ export class Contact extends SpecialWidget {
                     }
                 } 
             });
-        } 
+        }
     }
-
     public firstPaint() {
         super.firstPaint();
         registerStoreData('user/info',() => { // 钱包用户信息修改

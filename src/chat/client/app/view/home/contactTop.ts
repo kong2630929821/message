@@ -50,8 +50,8 @@ export class ContactTop extends Widget {
     /**
      * 打开我的设置
      */
-    public showMine() {
-        popNew3('app-view-mine-home-home');
+    public showMine(e:any) {
+        notify(e.node,'ev-myHome',null);
     }
 
     // 动画效果执行

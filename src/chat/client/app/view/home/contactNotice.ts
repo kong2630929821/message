@@ -7,7 +7,7 @@ import { PullUp } from '../../../../../pi/widget/scroller/pull-up/index';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
-import { rippleShow } from '../../../../../app/utils/pureUtils';
+import { rippleShow } from '../../logic/logic';
 export const forelet = new Forelet();
 
 interface Props {

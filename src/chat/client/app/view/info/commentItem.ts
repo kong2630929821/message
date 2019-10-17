@@ -1,12 +1,12 @@
-import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { REPORT_COMMENT } from '../../../../server/data/constant';
 import { getStore } from '../../data/store';
 import { buildupImgPath, complaintUser, copyToClipboard, timestampFormat } from '../../logic/logic';
+import { parseEmoji, popNewMessage } from '../../logic/tools';
 import { commentLaud, delComment } from '../../net/rpc';
-import { parseEmoji } from '../home/square';
 
 interface Props {
     key:any;  // 帖子评论的key

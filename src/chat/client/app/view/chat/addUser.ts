@@ -3,7 +3,6 @@
  */
 
 // ================================================ 导入
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -11,6 +10,7 @@ import { Contact, GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/us
 import * as store from '../../data/store';
 import { rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
+import { popNewMessage } from '../../logic/tools';
 import { applyUserFriend } from '../../net/rpc';
 
 // ================================================ 导出

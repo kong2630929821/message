@@ -14,7 +14,6 @@
                     {{end}}
                 {{end}}
             </div>
-            <div w-class="time">{{it.timeFormat(it.createtime,3)}}</div>
         </div>
         {{if !it.followed}}
             {{if it.fgStatus}}
@@ -63,14 +62,17 @@
     {{if !it.showAll}}
     {{% =====================广场展示评论点赞按钮======================}}
     <div w-class="btns">
-        <div w-class="btnBox" on-tap="doComment">
-            <img src="../../res/images/commentsGrey.png" w-class="btn"/>
-            <span w-class="time">{{it.commentCount>0?it.commentCount:"评论"}}</span>
-        </div>
-        <div w-class="btnBox" on-tap="likeBtn">
-            <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
-            <span w-class="time">{{it.likeCount>0?it.likeCount:"点赞"}}</span>
-        </div>
+        <div w-class="time" style="flex:1;">{{it.timeFormat(it.createtime,3)}}</div>
+       <div w-class="btnGroup">
+            <div w-class="btnBox" on-tap="doComment">
+                <img src="../../res/images/commentsGrey.png" w-class="btn"/>
+                <span w-class="time">{{it.commentCount>0?it.commentCount:"评论"}}</span>
+            </div>
+            <div w-class="btnBox" on-tap="likeBtn">
+                <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
+                <span w-class="time">{{it.likeCount>0?it.likeCount:"点赞"}}</span>
+            </div>
+       </div>
     </div>
     {{end}}
 

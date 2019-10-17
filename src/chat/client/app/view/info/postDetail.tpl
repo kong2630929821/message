@@ -51,7 +51,7 @@
             <span w-class="time">{{it.commentCount>0 ? it.commentCount:"评论"}}</span>
         </div>
         <div style="display:flex;align-items: center" on-tap="likeBtn">
-            <img src="../../res/images/{{it.likeActive?'like_active.png':'like.png'}}" w-class="btn" />
+            <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
             <span w-class="time">{{it.likeCount>0 ? it.likeCount:"点赞"}}</span>
         </div>
     </div>

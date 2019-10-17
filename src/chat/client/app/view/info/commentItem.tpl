@@ -14,7 +14,7 @@
         </div>
         <img src="../../res/images/comment.png" w-class="btn" style="margin-right:20px;" on-tap="showTools"/>
         <div on-tap="likeBtn" style="display:flex;align-items:center;">
-            <img src="../../res/images/{{it.likeActive?'like_active.png':'like.png'}}" w-class="btn"/>
+            <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn"/>
             <div w-class="time">{{it.likeCount}}</div>
         </div>
     </div>

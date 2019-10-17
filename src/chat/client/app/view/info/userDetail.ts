@@ -1,5 +1,4 @@
 import { getUserRecentGame } from '../../../../../app/net/pull';
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { getAllMedal } from '../../../../../earn/client/app/net/rpc';
 import { getMedalList } from '../../../../../earn/client/app/utils/util';
 import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
@@ -11,6 +10,7 @@ import { CommType } from '../../../../server/data/rpc/community.s';
 import { genUuid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';
+import { popNewMessage } from '../../logic/tools';
 import { applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo, postLaud } from '../../net/rpc';
 
 interface Props {

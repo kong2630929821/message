@@ -16,6 +16,7 @@
             {{end}}
 
             <div w-class="tab {{it.activeTab=='message'?'activeTab':''}}" on-tap="changeTab(e,'message')">消息</div>
+            <div w-class="tab {{it.activeTab=='friend'?'activeTab':''}}" on-tap="changeTab(e,'friend')">好友</div>
             {{if it.showSpot}}
                 <span w-class="redSpot" ></span>
             {{end}}

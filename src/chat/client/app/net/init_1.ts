@@ -5,6 +5,7 @@
  */
 
 // ================================================ 导入
+import { getStoreData } from '../../../../app/api/walletApi';
 import { sourceIp } from '../../../../app/public/config';
 import { getStore } from '../../../../app/store/memstore';
 import { piFetch } from '../../../../app/utils/pureUtils';
@@ -42,8 +43,10 @@ export const walletSignIn = (openid) => {
         init2.login(UserType.WALLET, openId, 'sign', async (r: UserInfo) => {
 
             if (r && r.uid > 0) {
-                console.log('聊天登陆成功！！！！！！！！！！！！！！');
+                console.log('聊天登陆成功！！！！！！！！！！！！！！',r);
                 store.setStore(`uid`, r.uid);
+                const user = await getStoreData('user');
+                r.acc_id = user.acc_id;
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 store.setStore('isLogin',true);
                 getSetting();   // 获取设置信息
@@ -103,8 +106,10 @@ export const  setUserInfo = async () => {
     if (!uid) {
         return;
     }
-    init2.clientRpcFunc(changeUserInfo, r, (res) => {
+    init2.clientRpcFunc(changeUserInfo, r, async (res) => {
         if (res && res.uid > 0) {
+            const user = await getStoreData('user');
+            res.acc_id = user.acc_id;
             store.setStore(`userInfoMap/${uid}`, res);
         } else if (res.uid === 0) {  // 普通用户 钱包名称中含有 “好嗨客服”
             const chatUser = store.getStore(`userInfoMap/${uid}`,{ name:'' });

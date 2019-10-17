@@ -5,7 +5,6 @@
 // ================================================ 导入
 import { getStoreData } from '../../../../../app/api/walletApi';
 import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
-import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
@@ -14,6 +13,7 @@ import { agreeJoinGroup } from '../../../../server/data/rpc/group.p';
 import { GroupAgree } from '../../../../server/data/rpc/group.s';
 import { acceptFriend } from '../../../app/net/rpc';
 import * as  store from '../../data/store';
+import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -74,6 +74,7 @@ const STATE = {
     convertUser:[]  // 我兑换好友的邀请码
 };
 store.register('contactMap', (r) => {
+    debugger;
     for (const value of r.values()) {
         STATE.contact = value;
         forelet.paint(STATE);

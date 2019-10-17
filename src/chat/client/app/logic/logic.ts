@@ -105,7 +105,11 @@ export const getUserAvatar = (rid:number) => {
         const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
         let avatar = user.avatar ? depCopy(user.avatar) : '';
         if (avatar && avatar.indexOf('data:image') < 0) {
-            avatar = `${uploadFileUrlPrefix}${avatar}`;
+            if (avatar.slice(0,4) === 'http') {
+                avatar = avatar;   
+            } else {
+                avatar = `${uploadFileUrlPrefix}${avatar}`;
+            }
         }
 
         return avatar;
@@ -122,7 +126,11 @@ export const getGroupAvatar = (gid:number) => {
         const group = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
         let avatar = group.avatar ? depCopy(group.avatar) : '';
         if (avatar && avatar.indexOf('data:image') < 0) {
-            avatar = `${uploadFileUrlPrefix}${avatar}`;
+            if (avatar.slice(0,4) === 'http') {
+                avatar = avatar;   
+            } else {
+                avatar = `${uploadFileUrlPrefix}${avatar}`;
+            }
         }
 
         return avatar;
@@ -139,7 +147,11 @@ export const getGroupUserAvatar = (gid:number,rid:number) => {
         const user = store.getStore(`groupUserLinkMap/${genGuid(gid,rid)}`,new GroupUserLink());
         let avatar = user.avatar ? depCopy(user.avatar) : '';
         if (avatar && avatar.indexOf('data:image') < 0) {
-            avatar = `${uploadFileUrlPrefix}${avatar}`;
+            if (avatar.slice(0,4) === 'http') {
+                avatar = avatar;   
+            } else {
+                avatar = `${uploadFileUrlPrefix}${avatar}`;
+            }
         }
 
         return avatar;
