@@ -1,7 +1,7 @@
 
-import { setStoreData } from '../../../../app/middleLayer/wrap';
-import { uploadFileUrlPrefix } from '../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../app/utils/tools';
+import { setStoreData } from '../../../../app/api/walletApi';
+import { uploadFileUrlPrefix } from '../../../../app/public/config';
+import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { loadDir } from '../../../../pi/widget/util';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';

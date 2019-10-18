@@ -1,3 +1,4 @@
+import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { BScroll } from '../../../../../pi/widget/scroller/core/index';
@@ -63,7 +64,8 @@ export class Square extends Widget {
         State.postList = [];
         this.state = State;
         this.init(this.props.active);
-        showPost(this.props.active + 1);
+        // showPost(this.props.active + 1);
+        this.initData();
     }
 
     public create() {
@@ -77,6 +79,98 @@ export class Square extends Widget {
         register('uid',() => {  // 聊天用户登陆成功
             this.setProps(this.props);
         });
+    }
+
+    public initData() {
+        this.state.postList = [
+            {   
+                avatar: '',
+                body: { msg:'1111[发呆][发呆][流泪][得意]',imgs:[] },
+                collectCount: 0,
+                comm_type: 0,
+                commentCount: 0,
+                content: '1111<img src="../../chat/client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/ client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/client/app/res/emoji/5.gif" alt="流泪" class=\'emojiMsg\'></img><img src="../../chat/client/app/res/emoji/4.gif" alt="得意" class="emojiMsg"></img>',
+                createtime: 1569388109180,
+                followed: true,
+                forwardCount: 0,
+                gender: 2,
+                imgs: [],
+                isPublic: false,
+                key: { id: 36, num: '33' },
+                likeActive: false,
+                likeCount: 0,
+                offcial: false,
+                owner: 10009,
+                post_type: 0,
+                title: '',
+                username: '步和暖'
+            },
+            {   
+                avatar: '',
+                body: { msg:'1111[发呆][发呆][流泪][得意]',imgs:[] },
+                collectCount: 0,
+                comm_type: 0,
+                commentCount: 0,
+                content: '1111<img src="../../chat/client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/ client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/client/app/res/emoji/5.gif" alt="流泪" class=\'emojiMsg\'></img><img src="../../chat/client/app/res/emoji/4.gif" alt="得意" class="emojiMsg"></img>',
+                createtime: 1569388109180,
+                followed: true,
+                forwardCount: 0,
+                gender: 2,
+                imgs: [],
+                isPublic: false,
+                key: { id: 36, num: '33' },
+                likeActive: false,
+                likeCount: 0,
+                offcial: false,
+                owner: 10009,
+                post_type: 0,
+                title: '',
+                username: '步和暖'
+            },
+            {   
+                avatar: '',
+                body: { msg:'1111[发呆][发呆][流泪][得意]',imgs:[] },
+                collectCount: 0,
+                comm_type: 0,
+                commentCount: 0,
+                content: '1111<img src="../../chat/client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/ client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/client/app/res/emoji/5.gif" alt="流泪" class=\'emojiMsg\'></img><img src="../../chat/client/app/res/emoji/4.gif" alt="得意" class="emojiMsg"></img>',
+                createtime: 1569388109180,
+                followed: true,
+                forwardCount: 0,
+                gender: 2,
+                imgs: [],
+                isPublic: false,
+                key: { id: 36, num: '33' },
+                likeActive: false,
+                likeCount: 0,
+                offcial: false,
+                owner: 10009,
+                post_type: 0,
+                title: '',
+                username: '步和暖'
+            },{   
+                avatar: '',
+                body: { msg:'1111[发呆][发呆][流泪][得意]',imgs:[] },
+                collectCount: 0,
+                comm_type: 0,
+                commentCount: 0,
+                content: '1111<img src="../../chat/client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/ client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/client/app/res/emoji/5.gif" alt="流泪" class=\'emojiMsg\'></img><img src="../../chat/client/app/res/emoji/4.gif" alt="得意" class="emojiMsg"></img>',
+                createtime: 1569388109180,
+                followed: true,
+                forwardCount: 0,
+                gender: 2,
+                imgs: [],
+                isPublic: false,
+                key: { id: 36, num: '33' },
+                likeActive: false,
+                likeCount: 0,
+                offcial: false,
+                owner: 10009,
+                post_type: 0,
+                title: '',
+                username: '步和暖'
+            }
+        ];
     }
 
     public init(ind:number) {
@@ -242,21 +336,14 @@ export class Square extends Widget {
         
     }
     public async pullingUpHandler() {
-        console.log('现在正在上拉刷新');
-        if (this.props.refresh && this.state.postList.length % 5 === 0) {
-            this.props.isPullUpLoad = true;
-            this.props.refresh = false;
-            const list = this.state.postList;
-            await this.requestData(false);
-            this.props.refresh = true;
-            this.paint();
-            setTimeout(() => {
-                this.bscroll.finishPullUp();
-                this.bscroll.refresh();
-                this.props.isPullUpLoad = false;
-            }, 50);
-        }
-        
+        this.props.isPullUpLoad = true;
+        await this.requestData(false);
+        this.paint();
+        setTimeout(() => {
+            this.bscroll.finishPullUp();
+            this.bscroll.refresh();
+            this.props.isPullUpLoad = false;
+        }, 50);
     }
     public async finishPullDown() {
         const stopTime = TIME_STOP;
@@ -278,15 +365,46 @@ export class Square extends Widget {
         try {
             if (fg) {
                 // 下拉刷新
-                return showPost(this.props.active + 1);
+                const newData = await this.ajaxGet(/* url */);
+                this.state.postList = [...this.state.postList,...this.state.postList,newData];
             } else {
-                return showPost(this.props.active + 1, this.state.postList[ this.state.postList.length - 1].key.num, this.state.postList[ this.state.postList.length - 1].key.id);    
+                const newData = await this.ajaxGet(/* url */);
+                this.state.postList = [...this.state.postList,...this.state.postList,newData];
             }
             
         } catch (err) {
             // handle err
             console.log(err);
         }
+    }
+
+    public ajaxGet(/* url */) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve({   
+                    avatar: '',
+                    body: { msg:'1111[发呆][发呆][流泪][得意]',imgs:[] },
+                    collectCount: 0,
+                    comm_type: 0,
+                    commentCount: 0,
+                    content: '1111<img src="../../chat/client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/ client/app/res/emoji/3.gif" alt="发呆" class="emojiMsg"></img><img src="../../chat/client/app/res/emoji/5.gif" alt="流泪" class=\'emojiMsg\'></img><img src="../../chat/client/app/res/emoji/4.gif" alt="得意" class="emojiMsg"></img>',
+                    createtime: 1569388109180,
+                    followed: true,
+                    forwardCount: 0,
+                    gender: 2,
+                    imgs: [],
+                    isPublic: false,
+                    key: { id: 36, num: '33' },
+                    likeActive: false,
+                    likeCount: 0,
+                    offcial: false,
+                    owner: 10009,
+                    post_type: 0,
+                    title: '',
+                    username: '步和暖'
+                });
+            }, 1000);
+        });
     }
     public refreshScroller() {
         setTimeout(() => {

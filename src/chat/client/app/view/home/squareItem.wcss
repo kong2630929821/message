@@ -42,7 +42,7 @@
   color: #888888;
 }
 .content {
-  margin: 40px 20px 20px;
+  margin: 40px 20px 20px 125px;
   line-height: 37px;
   min-height: 80px;
   position: relative;
@@ -60,10 +60,11 @@
   height: 80px;
   display: flex;
   align-items: center;
-  border-top: 1px solid #f2f2f2;
+  border-bottom: 1px solid #f2f2f2;
   justify-content: space-around;
   font-size: 24px;
   color: #888888;
+  margin-left: 125px;
 }
 .btn {
   width: 50px;
@@ -131,4 +132,8 @@
   align-items: center;
   flex: 1 0 0;
   justify-content: center;
+}
+.btnGroup{
+  flex: 1;
+  display: flex;
 }

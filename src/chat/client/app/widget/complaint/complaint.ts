@@ -1,9 +1,9 @@
 /**
  * modalbox
  */
-import { popNewMessage } from '../../../../../app/utils/tools';
-import { selectImage } from '../../../../../app/viewLogic/native';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { Widget } from '../../../../../pi/widget/widget';
+import { selectImage } from '../../logic/native';
 import { complaintType } from '../../net/rpc';
 import { arrayBuffer2File,base64ToFile,imgResize, uploadFile } from '../../net/upload';
 

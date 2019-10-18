@@ -3,7 +3,7 @@
  */ 
 
 // ================================================ 导入
-import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
+import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { UserArray } from '../../../../server/data/rpc/basic.s';

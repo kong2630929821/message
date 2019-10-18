@@ -14,7 +14,6 @@
                     {{end}}
                 {{end}}
             </div>
-            <div w-class="time">{{it.timeFormat(it.createtime,3)}}</div>
         </div>
         {{if !it.followed}}
             {{if it.fgStatus}}
@@ -37,13 +36,13 @@
     {{else}}
     {{% ======================广场展示部分内容===========================}}
     <div w-class="content" on-tap="goDetail" class="content">
-        <widget w-tag="pi-ui-html">{{it.content}}</widget>
+        1112223333
         <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
     </div>
     {{end}}
 
     {{% =====================图片区域========================}}
-    <div style="margin:20px 15px;width: 100%;" on-tap="goDetail">
+    <div style="margin:20px 15px 20px 125px;width: 100%;" on-tap="goDetail">
         {{for i,v of it.imgs}}
             {{if i==2 && it.imgs.length==4}}
             <div></div>
@@ -63,14 +62,17 @@
     {{if !it.showAll}}
     {{% =====================广场展示评论点赞按钮======================}}
     <div w-class="btns">
-        <div w-class="btnBox" on-tap="doComment">
-            <img src="../../res/images/commentsGrey.png" w-class="btn"/>
-            <span w-class="time">{{it.commentCount>0?it.commentCount:"评论"}}</span>
-        </div>
-        <div w-class="btnBox" on-tap="likeBtn">
-            <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
-            <span w-class="time">{{it.likeCount>0?it.likeCount:"点赞"}}</span>
-        </div>
+        <div w-class="time" style="flex:1;">{{it.timeFormat(it.createtime,3)}}</div>
+       <div w-class="btnGroup">
+            <div w-class="btnBox" on-tap="doComment">
+                <img src="../../res/images/commentsGrey.png" w-class="btn"/>
+                <span w-class="time">{{it.commentCount>0?it.commentCount:"评论"}}</span>
+            </div>
+            <div w-class="btnBox" on-tap="likeBtn">
+                <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
+                <span w-class="time">{{it.likeCount>0?it.likeCount:"点赞"}}</span>
+            </div>
+       </div>
     </div>
     {{end}}
 

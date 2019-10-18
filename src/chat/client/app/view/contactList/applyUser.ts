@@ -37,6 +37,7 @@ export class ApplyUser extends Widget {
     public setProps(props:any) {
         super.setProps(props);
         this.props.isagree = false;
+        debugger;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             const userInfo = store.getStore(`userInfoMap/${this.props.id}`,null);
             this.props.name = userInfo ? userInfo.name : '';

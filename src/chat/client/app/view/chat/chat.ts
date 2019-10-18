@@ -3,8 +3,7 @@
  */
 
 // ================================================ 导入
-import { inIOSApp } from '../../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../../app/utils/tools';
+import { inIOSApp } from '../../../../../app/public/config';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
@@ -18,6 +17,7 @@ import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias, getUserAvatar, INFLAG, timestampFormat } from '../../logic/logic';
 import { openNewActivity } from '../../logic/native';
+import { popNewMessage } from '../../logic/tools';
 import { applyUserFriend, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
 import { parseMessage } from '../../widget/messageItem/messageItem';
 

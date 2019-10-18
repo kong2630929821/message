@@ -52,10 +52,10 @@ export class ContactList extends Widget {
     }
 
     public setProps(props:any) {
-        this.props={
+        this.props = {
             ...this.props,
             ...props
-        }
+        };
         super.setProps(this.props);
         this.props.sid = store.getStore('uid',0);
     }
@@ -75,6 +75,7 @@ export class ContactList extends Widget {
     public goNext(i:number,uid:number) {
         switch (i) {
             case 0:
+                console.log('新朋友',this.props);
                 popNew3('chat-client-app-view-contactList-newFriend'); // 新好友验证
                 break;
             case 1:

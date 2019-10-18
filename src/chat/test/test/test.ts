@@ -17,7 +17,6 @@ import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoLi
 import { cancelGmAccount, createRoot, getApplyPublicList, getPostList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setGmAccount } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
-import { unifiedorder } from '../../server/data/rpc/oauth_lib.p';
 import { addCommonCommernt, closeRobot, getCommonCommernt, getRobotSet, getRobotUserInfo, getRobotWeiboInfo, initRobotSet, modifyRobotSet, startRobot } from '../../server/data/rpc/robot.p';
 import { changeUserInfo, searchFriend, set_gmAccount } from '../../server/data/rpc/user.p';
 import { SetOfficial, UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
@@ -398,11 +397,11 @@ export const rootLoginTest = () => {
 };
 
 // 签名
-export const signTest = () => {
-    clientRpcFunc(unifiedorder, null, (r: boolean) => {
-        console.log(r);
-    });
-};
+// export const signTest = () => {
+//     clientRpcFunc(unifiedorder, null, (r: boolean) => {
+//         console.log(r);
+//     });
+// };
 
 // 举报
 export const reportTest = () => {

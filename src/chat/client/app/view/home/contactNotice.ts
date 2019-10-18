@@ -1,4 +1,4 @@
-import { popNew3, rippleShow } from '../../../../../app/utils/tools';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { BScroll } from '../../../../../pi/widget/scroller/core/index';
@@ -7,6 +7,7 @@ import { PullUp } from '../../../../../pi/widget/scroller/pull-up/index';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import * as store from '../../data/store';
+import { rippleShow } from '../../logic/logic';
 export const forelet = new Forelet();
 
 interface Props {
@@ -43,11 +44,11 @@ export class ContactNotice extends Widget {
         this.bscroll = null;
     }
 
-    public setProps(props:any){
-        this.props={
+    public setProps(props:any) {
+        this.props = {
             ...this.props,
             ...props
-        }
+        };
         super.setProps(this.props);
     }
     /**
