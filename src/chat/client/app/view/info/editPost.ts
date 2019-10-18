@@ -105,6 +105,9 @@ export class EditPost extends Widget {
      * 选择图片
      */
     public chooseImage(e:any) {
+        if (this.props.uploadLoding.length >= 1) {
+            return;
+        }
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);
     
@@ -117,12 +120,12 @@ export class EditPost extends Widget {
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
-                        this.props.uploadLoding[len] = false;
+                        this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
                         if (this1.props.isPublic) {
-                            this.addImg(res.base64);
+                            this1.addImg(res.base64);
                         } else {
                             uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
                                 console.log('上传压缩图',imgUrlSuf);
@@ -138,9 +141,9 @@ export class EditPost extends Widget {
                                             console.log('上传原图',imgurl);
                                             image.originalImg = imgurl;
                                             this1.props.saveImgs[len] = image;
-                                            if (this.props.isUploading) {
-                                                this.props.isUploading = false;
-                                                this.send();
+                                            if (this1.props.isUploading) {
+                                                this1.props.isUploading = false;
+                                                this1.send();
                                             }
                                         });
                                     }
@@ -247,6 +250,7 @@ export class EditPost extends Widget {
     public delImage(ind:number) {
         this.props.imgs.splice(ind,1);
         this.props.saveImgs.splice(ind,1);
+        this.props.uploadLoding.splice(ind,1);
         this.paint();
     }
 

@@ -42,7 +42,7 @@
     {{end}}
 
     {{% =====================图片区域========================}}
-    <div style="margin:20px 15px;width: 100%;" on-tap="goDetail">
+    <div style="margin:20px 15px 20px 125px;width: 100%;" on-tap="goDetail">
         {{for i,v of it.imgs}}
             {{if i==2 && it.imgs.length==4}}
             <div></div>

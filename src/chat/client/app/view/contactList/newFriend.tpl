@@ -1,5 +1,6 @@
 <div class="new-page" ev-back-click="goBack">
     <chat-client-app-widget-topBar-topBar>{title:"新的朋友"}</chat-client-app-widget-topBar-topBar>
+    <div on-tap="test">新朋友多个</div>
     {{if (it1.contact.applyUser.length + it1.contact.applyGroup.length + it1.inviteUsers.length + it1.convertUser.length) > 0}}
     <div w-class="apply-status-wrap">
         <div w-class="title-wrap">新的朋友</div>

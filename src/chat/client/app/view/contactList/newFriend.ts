@@ -61,6 +61,10 @@ export class NewFriend extends Widget {
             store.setStore(`groupInfoMap/${gInfo.gid}`, gInfo);
         });
     }
+
+    public test() {
+        console.log('新朋友',this.state);
+    }
     
 }
 
