@@ -6,12 +6,10 @@ import { popNew } from '../../../../pi/ui/root';
 import { addWidget } from '../../../../pi/widget/util';
 
 // ============================== 导出
-export const run = () => {
-    const currentTime = (new Date()).getTime();
+export const run = (cb) => {
     addWidget(document.body, 'pi-ui-root');
-    document.oncontextmenu = (e) => {
-        // 或者return false;
-        e.preventDefault();
-    };
-    popNew('chat-client-app-view-register-login');
+    popNew('chat-client-app-view-home-contact');
+    setTimeout(() => {
+        if (cb) cb();
+    }, 20);
 };

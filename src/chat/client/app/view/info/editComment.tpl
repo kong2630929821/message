@@ -1,5 +1,5 @@
 <div class="new-page" w-class="page">
-    <app-components1-blankDiv-topDiv></app-components1-blankDiv-topDiv>
+    <app-publicComponents-blankDiv-topDiv></app-publicComponents-blankDiv-topDiv>
     <div w-class="topBar">
         <div w-class="topBarItem" on-tap="close">取消</div>
         <div w-class="topBarItem">{{it.title}}</div>

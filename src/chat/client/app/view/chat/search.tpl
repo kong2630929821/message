@@ -1,5 +1,5 @@
 <div class="new-page" w-class="page">
-    <app-components1-blankDiv-topDiv></app-components1-blankDiv-topDiv>
+    <app-publicComponents-blankDiv-topDiv></app-publicComponents-blankDiv-topDiv>
     <div w-class="topBar">
         <img src="../../res/images/left_arrow_blue.png" w-class="back" on-tap="goBack"/>
         <div w-class="input" ev-input-change="inputUid">

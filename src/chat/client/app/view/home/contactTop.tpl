@@ -1,5 +1,5 @@
 <div w-class="topBar">
-    <app-components1-blankDiv-topDiv></app-components1-blankDiv-topDiv>
+    <app-publicComponents-blankDiv-topDiv></app-publicComponents-blankDiv-topDiv>
    
     <div w-class="topBar-content">
         <div on-tap="showMine" on-down="onShow" style="position:relative;">

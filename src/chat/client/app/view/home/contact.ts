@@ -4,8 +4,8 @@
 
 // ================================================ 导入
 import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
-import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
 import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
+import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offlineTip';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
