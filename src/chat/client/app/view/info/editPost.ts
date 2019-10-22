@@ -105,7 +105,7 @@ export class EditPost extends Widget {
      * 选择图片
      */
     public chooseImage(e:any) {
-        if (this.props.uploadLoding.length >= 1) {
+        if (this.props.uploadLoding.length >= 9) {
             return;
         }
         const imagePicker = selectImage((width, height, url) => {
@@ -367,36 +367,4 @@ export class EditPost extends Widget {
         document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :'style="width:100%;height:auto;"'} />`);   
         // }
     }
-
-    // public editBoxChange() {
-    //     // 编辑的div
-    //     const editor = document.querySelector('#editBox');
-    //     // // 富文本框的内容
-    //     // this.props.editorText = editor.innerHTML;
-    //     // 输入的文字数（包括空格，换行）
-    //     const textNumber = editor.innerText.length;
-    //     // 插入的图片个数
-    //     const imgNumber = editor.getElementsByTagName('img').length;
-    //     if (editorTextNum - textNumber - imgNumber <= 0) {
-    //         this.props.placeHolderInfo = 0;
-    //         this.props.editorText = editor.innerHTML;
-    //         editor.blur();
-    //     } else {
-    //         this.props.placeHolderInfo = editorTextNum - textNumber - imgNumber;
-    //     }
-    //     this.paint();
-    // }
-
-    // public editorTap(e:any) {
-    //     // 编辑的div
-    //     const editor = document.querySelector('#editBox');
-    //     if (this.props.placeHolderInfo === 0 && e.key !== 'Backspace') {
-    //         editor.blur();
-    //         this.paint();
-    //     }
-    // }
-
-    // public onpaste(e:any) {
-    //     e.preventDefault();
-    // }
 }

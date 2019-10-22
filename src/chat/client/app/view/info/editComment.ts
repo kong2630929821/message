@@ -3,7 +3,7 @@ import { getKeyBoardHeight } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { selectImage } from '../../logic/native';
 import { addComment } from '../../net/rpc';
-import { base64ToFile, imgResize, uploadFile } from '../../net/upload';
+import { arrayBuffer2File, base64ToFile, imgResize, uploadFile } from '../../net/upload';
 
 interface Props {
     key:any;
@@ -15,6 +15,10 @@ interface Props {
     mess:string;  // 回复的评论内容
     isOnEmoji:boolean; // 是否展开表情库
     img:string;  // 可选择一张图片
+    uploadLoding:any;
+    imgs:any;
+    isUploading:boolean;
+    saveImgs:any;
 }
 
 /**
@@ -32,7 +36,11 @@ export class EditComment extends Widget {
         username:'用户2',
         mess:'',
         isOnEmoji:false,
-        img:''
+        img:'',
+        imgs:[],
+        isUploading:false,
+        uploadLoding:[],
+        saveImgs:[]
     };
 
     public setProps(props:any) {
@@ -56,9 +64,15 @@ export class EditComment extends Widget {
     }
 
     public send() {
+        // 等待图片上传完成
+        if (this.props.imgs.length !== this.props.saveImgs.length) {
+            this.props.isUploading = true;
+        
+            return;
+        }
         const value = {
             msg:this.props.contentInput,
-            img:this.props.img
+            img:this.props.saveImgs
         };
         const postId = this.props.key.post_id || this.props.key.id;   // 评论帖子时id表示帖子ID
         const reply = this.props.key.post_id ? this.props.key.id :0;  // 回复评论时post_id表示帖子ID
@@ -83,29 +97,63 @@ export class EditComment extends Widget {
         this.props.contentInput += `[${emoji}]`; // 只能在内容中加表情
         this.paint();
     }
-
+    // 删除图片
+    public delImage(ind:number) {
+        this.props.imgs.splice(ind,1);
+        this.props.saveImgs.splice(ind,1);
+        this.props.uploadLoding.splice(ind,1);
+        this.paint();
+    }
     /**
      * 选择图片
      */
     public chooseImage(e:any) {
+        if (this.props.uploadLoding.length >= 1) {
+            return;
+        }
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);
     
+            // tslint:disable-next-line:no-this-assignment
+            const this1 = this;
+            const len = this.props.uploadLoding.length;
+            this.props.uploadLoding[len] = true;
             imagePicker.getContent({
-                quality:30,
+                quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        this.props.img = res.base64;
-                        this.paint();
+                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        this1.props.uploadLoding[len] = false;
+                        this1.props.imgs[len] = url;
+                        this1.paint();
 
-                        uploadFile(base64ToFile(this.props.img),(imgUrlSuf:string) => {
-                            this.props.img = imgUrlSuf;
-                            this.paint();
-                            console.log('上传图片',imgUrlSuf);
+                        uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
+                            console.log('上传压缩图',imgUrlSuf);
+                            const image:any = {};
+                            image.compressImg = imgUrlSuf;
+
+                            // 原图
+                            imagePicker.getContent({
+                                quality:100,
+                                success(buffer1:ArrayBuffer) {
+                                    
+                                    uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
+                                        console.log('上传原图',imgurl);
+                                        image.originalImg = imgurl;
+                                        this1.props.saveImgs[len] = image;
+                                        if (this1.props.isUploading) {
+                                            this1.props.isUploading = false;
+                                            this1.send();
+                                        }
+                                    });
+                                }
+                            });
                         });
+                        
                     });
                 }
             });
+            this.paint();
         });
     }
 

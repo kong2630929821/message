@@ -76,3 +76,29 @@
     top: 6px;
     right: 6px;
 }
+.upload{
+    width:230px;
+    height:230px;
+    margin: 5px;
+    background:rgba(242,242,242,1);
+    border-radius:4px;
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: url(../../res/images/add_black.png);
+}
+.imageList{
+    border-bottom:2px solid #F2F2F2;
+    padding-bottom: 20px;
+}
+.imgBox{
+    position: relative;
+    display: inline-block;
+}
+.close{
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 50px;
+    height: 50px;
+}
