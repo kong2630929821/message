@@ -65,7 +65,18 @@ winit.initNext = function () {
 
 		//加载APP部分代码，实际项目中会分的更细致
 		var loadChatApp = function () {
-			util.loadDir(["chat/client/app/view/","chat/client/app/widget/","chat/client/app/res/css/","chat/client/app/res/images/"], flags, fm, undefined, function (fileMap) {
+			var sourceList  = [
+				"chat/client/app/view/",
+				"chat/client/app/widget/",
+				"chat/client/app/res/css/",
+				"chat/client/app/res/images/",
+				"app/publicComponents/blankDiv/",
+				"app/publicComponents/loading/loading1.js",
+				"app/publicComponents/loading/loading1.wcss",
+				"app/publicComponents/loading/loading1.tpl", 
+				"app/publicComponents/offlineTip/"
+			]
+			util.loadDir(sourceList, flags, fm, undefined, function (fileMap) {
 				console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
 				var tab = util.loadCssRes(fileMap);
 				// 将预加载的资源缓冲90秒，释放
@@ -91,15 +102,46 @@ winit.initNext = function () {
 
 		//初始化rpc服务
 		var registerChatStruct = function () {
-			util.loadDir(["chat/client/app/net/", "pi/struct/"], flags, fm, undefined, function (fileMap, mods) {
-				pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.registerRpcStruct(fm);
-				pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.initClient();
+			util.loadDir(["chat/client/app/net/", "pi/ui/", "pi/struct/"], flags, fm, undefined, function (fileMap, mods) {
+				var tab = util.loadCssRes(fileMap);
+				// 将预加载的资源缓冲90秒，释放
+				tab.timeout = 90000;
+				tab.release();
+				console.log("res time:", Date.now() - startTime);
+
+				var root = pi_modules.commonjs.exports.relativeGet("pi/ui/root").exports;
+				root.cfg.width = 750;
+				root.cfg.height = 1334;
+				root.cfg.hscale = 0.25;
+				root.cfg.wscale = 0;
+				loadPiSdk();
 				loadEmoji();
 			}, function (r) {
 				alert("加载目录失败, " + (r.error ? (r.error + ":" + r.reason) : r));
 			}, dirProcess.handler);
 		};
+		// 全部所需资源下载完成,进入app,显示界面
+		var enterApp = function(){
+			// 加载根组件
+			var index = pi_modules.commonjs.exports.relativeGet("chat/client/app/view/index").exports;
+				index.run();
 
+			pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.registerRpcStruct(fm);
+			pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.initClient();
+			
+		}
+		var loadPiSdk = function(){
+			util.loadDir(["pi_sdk/"], flags, fm, undefined, function (fileMap) {
+				pi_sdk.setWebviewManager("pi/browser/webview");
+				pi_sdk.piSdkInit((res)=>{
+					console.log('bind vm success', res);
+					//钱包登录
+					pi_modules.commonjs.exports.relativeGet("chat/client/app/net/login").exports.chatLogin(enterApp);	
+				});
+			}, function (r) {
+				alert("加载目录失败, " + r.error + ":" + r.reason);
+			}, dirProcess.handler);
+		}
 		var loadEmoji = function() {
 			util.loadDir(["chat/client/app/res/emoji/"],flags,fm,undefined,function(fileMap,mods){
 				//TODO: 可以长期放在缓存中达到更快的显示效果
