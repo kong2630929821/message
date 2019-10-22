@@ -1,4 +1,14 @@
 use community.s::{PostKey};
+
+enum UPDATE_STAGE {
+    STAGE0 = 0, // 即时更新
+    STAGE1 = 1, // 间隔1天更新
+    STAGE2 = 2, // 间隔3天更新
+    STAGE3 = 3, // 间隔7天更新
+    STAGE4 = 4, // 间隔15天更新
+    STAGE5 = 5, // 间隔30天更新
+}
+
 /**
  * 虚拟用户id索引
  */
@@ -20,7 +30,7 @@ struct WeiboInfo {
     imgs: &[String],  // 图片
     time: String , // 发布时间
     publish_tool: String , //发布工具
-    flag: String , // 状态
+    state: u8 , // 状态
 }
 
 /**
@@ -104,4 +114,14 @@ struct RobotActiveSet {
 struct DailyRobotCount {
     key: String ,   // 主键 拼接天数和行为类型 如'23135:robot_comment'
     count: u32 ,    // 数量
+}
+
+/**
+ * 用户微博更新记录
+ */
+#[primary=rid,db=file,dbMonitor=true]
+struct WeiboUpdate {
+    rid: u32 ,              // 虚拟用户id
+    update_time: String ,   // 上次更新时间
+    stage: UPDATE_STAGE ,   // 更新阶梯
 }
