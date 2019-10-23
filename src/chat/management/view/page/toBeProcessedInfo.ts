@@ -2,7 +2,6 @@ import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { buildupImgPath } from '../../../client/app/logic/logic';
-import { parseEmoji } from '../../../client/app/view/home/square';
 import { EMOJIS_MAP } from '../../../client/app/widget/emoji/emoji';
 import { REPORT_PERSON, REPORT_PUBLIC } from '../../../server/data/constant';
 import { penaltyText, REPORT, REPORTTITLE, timestampFormat } from '../../utils/logic';
@@ -98,14 +97,14 @@ export class ToBeProcessedInfo extends Widget {
         const imgs = [];
         if (state === 5) {
             if (JSON.parse(evidence.msg).img) {
-                imgs.push(buildupImgPath(JSON.parse(evidence.msg).img));
+                imgs.push(buildupImgPath(JSON.parse(evidence.msg).img.originalImg));
             }
             this.props.likeCount = evidence.likeCount;
             this.props.reply = evidence.reply;
         } else {
             if (state !== 4) {
                 JSON.parse(evidence.body).imgs.forEach(v => {
-                    imgs.push(buildupImgPath(v));
+                    imgs.push(buildupImgPath(v.originalImg));
                 });
             } 
            

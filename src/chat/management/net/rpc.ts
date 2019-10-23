@@ -101,6 +101,7 @@ export const getAllReport = (count:number,id:number,state:number) => {
     return new Promise((res,rej) => {
         clientRpcFunc(getReportList,arg,(r:string) => {
             const data = JSON.parse(r);
+            debugger;
             res(deelReportList(data));
         });
     });

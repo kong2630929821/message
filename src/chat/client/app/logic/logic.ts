@@ -4,6 +4,7 @@
 // =====================================导入
 import { uploadFileUrlPrefix } from '../../../../app/public/config';
 import { popNewMessage } from '../../../../app/utils/pureUtils';
+import { popNew3 } from '../../../../app/utils/tools';
 import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
@@ -196,7 +197,7 @@ export const enum INFLAG  {
 // 举报用户
 export const complaintUser = (name:string,sex:number,avatar:string,msg:string,status:number,reportKey:string) => {
     const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
-    popNew('chat-client-app-widget-complaint-complaint'
+    popNew3('chat-client-app-widget-complaint-complaint'
         ,{ title:name,content,sex,avatar,msg,status,reportKey }
         ,(selected) => {
     
