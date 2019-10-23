@@ -16,11 +16,11 @@ export const chatLogin = (cb) => {
         console.log('authorize',err,JSON.stringify(result));
         if (err === 0) { // 网络未连接
             console.log('网络未连接');
-            cb();
+            cb && cb();
         } else {
             console.log('聊天注册成功',result);
             initClient(result.openId);
-            cb();
+            cb && cb();
         }
     });
 };

@@ -66,15 +66,19 @@ winit.initNext = function () {
 		//加载APP部分代码，实际项目中会分的更细致
 		var loadChatApp = function () {
 			var sourceList  = [
-				"chat/client/app/view/",
-				"chat/client/app/widget/",
+				"chat/client/app/view/home/",
+				"chat/client/app/view/index.js",
 				"chat/client/app/res/css/",
-				"chat/client/app/res/images/",
-				"app/publicComponents/blankDiv/",
-				"app/publicComponents/loading/loading1.js",
-				"app/publicComponents/loading/loading1.wcss",
-				"app/publicComponents/loading/loading1.tpl", 
-				"app/publicComponents/offlineTip/"
+				"chat/client/app/view/contactList/contactList.tpl",
+				"chat/client/app/view/contactList/contactList.js",
+				"chat/client/app/view/contactList/contactList.wcss",
+				"chat/client/app/view/contactList/contactItem.tpl",
+				"chat/client/app/view/contactList/contactItem.js",
+				"chat/client/app/view/contactList/contactItem.wcss",
+				"chat/client/app/widget/imgShow/",
+				"app/publicComponents/",
+				"app/api/thirdApi.js",
+				"app/postMessage/postMessage.js",
 			]
 			util.loadDir(sourceList, flags, fm, undefined, function (fileMap) {
 				console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
