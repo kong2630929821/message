@@ -82,9 +82,9 @@
 		}
 		var name = "chat"; // 每个项目需要定义自己的名称，该名称决定了访问域名和本地存储名
 		var main = document.domain.replace(/^(\D+\w*\.)(\w+\.[\w\.]+)/,"$2");
-		var remote = (document.domain != main || /^\w+\.\w+$/.test(document.domain)) ? name +".":"";
+		// var remote = (document.domain != main || /^\w+\.\w+$/.test(document.domain)) ? name +".":"";
 		winit.store = name;
-		winit.debug = !remote;
+		winit.debug = false;
 		// main = location.port ? main+":"+location.port:main;
 		// winit.domains = [location.protocol+"//"+(remote ? "c"+remote:"")+main, location.protocol+"//"+remote+main];
 
@@ -103,7 +103,9 @@
 			}
 			winit.inApp = inApp = winit.inAndroidApp || winit.inIOSApp;
 		}
-
+		
+		winit.severIp = '192.168.31.226';
+		winit.severPort = '80';
 
 		var defaultDomains;
 		var remoteDomains = ["http://" + winit.severIp + ":" + winit.severPort];

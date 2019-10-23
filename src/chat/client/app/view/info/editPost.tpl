@@ -32,7 +32,7 @@
             {{end}}
             
             {{end}}
-            {{if it.uploadLoding.length < 1 }}
+            {{if it.uploadLoding.length < 9 }}
             <div w-class="upload" on-tap="chooseImage"></div>
             {{end}}
         </div>

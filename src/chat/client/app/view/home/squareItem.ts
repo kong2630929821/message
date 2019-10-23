@@ -77,144 +77,144 @@ export class SquareItem extends Widget {
         this.props.followed = judgeFollowed(this.props.key.num);
     }
 
-    // public attach() {
-    //     super.attach();
-    //     const content = getRealNode(this.tree).querySelector('div.content');
-    //     if (content && content.clientHeight > 120) {
-    //         (<any>content).style.display = '-webkit-box';
-    //         content.querySelector('span').style.display = 'block';
-    //     }
-    // }
+    public attach() {
+        super.attach();
+        const content = getRealNode(this.tree).querySelector('div.content');
+        if (content && content.clientHeight > 120) {
+            (<any>content).style.display = '-webkit-box';
+            content.querySelector('span').style.display = 'block';
+        }
+    }
 
-    // /**
-    //  * 查看详情
-    //  */
-    // public goDetail(e:any) {
-    //     this.closeUtils(e);
-    //     notify(e.node,'ev-goDetail',null);
-    // }
+    /**
+     * 查看详情
+     */
+    public goDetail(e:any) {
+        this.closeUtils(e);
+        notify(e.node,'ev-goDetail',null);
+    }
 
-    // /**
-    //  * 展示操作
-    //  */
-    // public showTools(e:any) {
-    //     this.props.showUtils = !this.props.showUtils;
-    //     this.paint();
-    //     notify(e.node,'ev-tools-expand',{ value:this.props.showUtils });
-    // }
+    /**
+     * 展示操作
+     */
+    public showTools(e:any) {
+        this.props.showUtils = !this.props.showUtils;
+        this.paint();
+        notify(e.node,'ev-tools-expand',{ value:this.props.showUtils });
+    }
 
-    // /**
-    //  * 点赞
-    //  */
-    // public likeBtn(e:any) {
-    //     this.closeUtils(e);
-    //     notify(e.node,'ev-likeBtn',{ value:this.props.key });
-    // }
+    /**
+     * 点赞
+     */
+    public likeBtn(e:any) {
+        this.closeUtils(e);
+        notify(e.node,'ev-likeBtn',{ value:this.props.key });
+    }
 
-    // /**
-    //  * 评论
-    //  */
-    // public doComment(e:any) {
-    //     this.closeUtils(e);
-    //     notify(e.node,'ev-commentBtn',{ value:this.props.key });
-    // }
+    /**
+     * 评论
+     */
+    public doComment(e:any) {
+        this.closeUtils(e);
+        notify(e.node,'ev-commentBtn',{ value:this.props.key });
+    }
 
-    // // 关闭操作列表
-    // public closeUtils(e:any) {
-    //     this.props.showUtils = false;
-    //     this.paint();
-    //     notify(e.node,'ev-closeTools',null);
-    // }
+    // 关闭操作列表
+    public closeUtils(e:any) {
+        this.props.showUtils = false;
+        this.paint();
+        notify(e.node,'ev-closeTools',null);
+    }
 
-    // /**
-    //  * 查看用户详情
-    //  */
-    // public goUserDetail(e:any) {
-    //     this.closeUtils(e);
-    //     if (this.props.isPublic) {
-    //         popNew3('chat-client-app-view-person-publicHome', { uid: this.props.owner, pubNum: this.props.key.num });
-    //     } else {
-    //         popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num });
-    //     }
-    // }
+    /**
+     * 查看用户详情
+     */
+    public goUserDetail(e:any) {
+        this.closeUtils(e);
+        if (this.props.isPublic) {
+            popNew3('chat-client-app-view-person-publicHome', { uid: this.props.owner, pubNum: this.props.key.num });
+        } else {
+            popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num });
+        }
+    }
 
-    // /**
-    //  * 举报
-    //  */
-    // public complaint(e:any) {
-    //     this.closeUtils(e);
-    //     const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-    //     const key = `${this.props.isPublic ? REPORT_ARTICLE :REPORT_POST}%${JSON.stringify(this.props.key)}`;
-    //     complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content,this.props.isPublic ? REPORT_ARTICLE :REPORT_POST,key);
-    // }
+    /**
+     * 举报
+     */
+    public complaint(e:any) {
+        this.closeUtils(e);
+        const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
+        const key = `${this.props.isPublic ? REPORT_ARTICLE :REPORT_POST}%${JSON.stringify(this.props.key)}`;
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content,this.props.isPublic ? REPORT_ARTICLE :REPORT_POST,key);
+    }
 
-    // /**
-    //  * 删除帖子
-    //  */
-    // public delPost(e:any) {
-    //     this.closeUtils(e);
-    //     popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除',content:'确定删除该动态或文章？' },() => {
-    //         delPost(this.props.key.num,this.props.key.id).then(r => {
-    //             notify(e.node,'ev-delBtn',{ value:this.props.key });
-    //             this.paint();
-    //         });
-    //     });
+    /**
+     * 删除帖子
+     */
+    public delPost(e:any) {
+        this.closeUtils(e);
+        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除',content:'确定删除该动态或文章？' },() => {
+            delPost(this.props.key.num,this.props.key.id).then(r => {
+                notify(e.node,'ev-delBtn',{ value:this.props.key });
+                this.paint();
+            });
+        });
         
-    // }
+    }
 
-    // /**
-    //  * 关注用户
-    //  */
-    // public followUser(e:any) {
-    //     this.closeUtils(e);
-    //     if (this.props.followed) {
-    //         popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
-    //             follow(this.props.key.num);
-    //         });
-    //     } else {
-    //         this.props.fgStatus = true;
-    //         this.paint();
-    //         setTimeout(() => {
-    //             this.props.fgStatus = false;
-    //             popNewMessage('关注成功');
-    //             follow(this.props.key.num);
-    //         },400);
+    /**
+     * 关注用户
+     */
+    public followUser(e:any) {
+        this.closeUtils(e);
+        if (this.props.followed) {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
+                follow(this.props.key.num);
+            });
+        } else {
+            this.props.fgStatus = true;
+            this.paint();
+            setTimeout(() => {
+                this.props.fgStatus = false;
+                popNewMessage('关注成功');
+                follow(this.props.key.num);
+            },400);
             
-    //     }
+        }
         
-    // }
+    }
 
-    // /**
-    //  * 分享文章
-    //  */
-    // public shareArt() {
-    //     popNew3('chat-client-app-view-person-friendList',null,(r) => {
-    //         console.log('11111111111111111111',r);
-    //         sendUserMsg(r,JSON.stringify(this.props),MSG_TYPE.Article).then((res:any) => {
-    //             updateUserMessage(r, res);
-    //             popNewMessage('分享成功');
-    //         },() => {
-    //             popNewMessage('分享失败');
-    //         });
-    //     });
-    // }
+    /**
+     * 分享文章
+     */
+    public shareArt() {
+        popNew3('chat-client-app-view-person-friendList',null,(r) => {
+            console.log('11111111111111111111',r);
+            sendUserMsg(r,JSON.stringify(this.props),MSG_TYPE.Article).then((res:any) => {
+                updateUserMessage(r, res);
+                popNewMessage('分享成功');
+            },() => {
+                popNewMessage('分享失败');
+            });
+        });
+    }
 
-    // /**
-    //  * 查看大图
-    //  */
-    // public showBigImg(ind:number) {
-    //     // const val:any = this.props.imgs[ind];
-    //     // popNew3('chat-client-app-widget-bigImage-bigImage',{
-    //     //     img: buildupImgPath(val.compressImg),
-    //     //     originalImg: buildupImgPath(val.originalImg)
-    //     // });
-    //     const val = [];
-    //     this.props.imgs.forEach((v:any) => {
-    //         val.push(buildupImgPath(v.originalImg));
-    //     });
-    //     popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
-    //         list:val,
-    //         activeIndex:ind + 1
-    //     });
-    // }
+    /**
+     * 查看大图
+     */
+    public showBigImg(ind:number) {
+        // const val:any = this.props.imgs[ind];
+        // popNew3('chat-client-app-widget-bigImage-bigImage',{
+        //     img: buildupImgPath(val.compressImg),
+        //     originalImg: buildupImgPath(val.originalImg)
+        // });
+        const val = [];
+        this.props.imgs.forEach((v:any) => {
+            val.push(buildupImgPath(v.originalImg));
+        });
+        popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
+            list:val,
+            activeIndex:ind + 1
+        });
+    }
 }

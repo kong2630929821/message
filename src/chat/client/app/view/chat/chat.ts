@@ -37,6 +37,7 @@ export class Chat extends Widget {
 
     public setProps(props:any) {
         super.setProps(props);
+        console.log('aaaaaaaaaaaaaaaaaaaaaaaa');
         this.props.sid = store.getStore('uid');
         this.props.inputMessage = '';
         this.props.newMsg = null;

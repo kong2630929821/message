@@ -67,6 +67,7 @@ winit.initNext = function () {
 		var loadChatApp = function () {
 			var sourceList  = [
 				"chat/client/app/view/home/",
+				"chat/client/app/view/chat/",
 				"chat/client/app/view/index.js",
 				"chat/client/app/res/css/",
 				"chat/client/app/view/contactList/contactList.tpl",
@@ -75,7 +76,7 @@ winit.initNext = function () {
 				"chat/client/app/view/contactList/contactItem.tpl",
 				"chat/client/app/view/contactList/contactItem.js",
 				"chat/client/app/view/contactList/contactItem.wcss",
-				"chat/client/app/widget/imgShow/",
+				"chat/client/app/widget/",
 				"app/publicComponents/",
 				"app/api/thirdApi.js",
 				"app/postMessage/postMessage.js",
@@ -93,10 +94,6 @@ winit.initNext = function () {
 				root.cfg.height = 1334;
 				root.cfg.hscale = 0.25;
 				root.cfg.wscale = 0;
-
-				var index = pi_modules.commonjs.exports.relativeGet("chat/client/app/view/index").exports;
-				index.run();
-
 				document.body.removeChild(div);
 				registerChatStruct();
 			}, function (r) {
@@ -128,8 +125,10 @@ winit.initNext = function () {
 		var enterApp = function(){
 			// 加载根组件
 			var index = pi_modules.commonjs.exports.relativeGet("chat/client/app/view/index").exports;
-				index.run();
-
+			index.run(function(){
+				// 关闭读取界面
+				document.body.removeChild(document.getElementById('rcmj_loading_log'));
+			});
 			pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.registerRpcStruct(fm);
 			pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.initClient();
 			

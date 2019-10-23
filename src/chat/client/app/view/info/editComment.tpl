@@ -27,12 +27,22 @@
         </div>
     </div>
     {{end}}
-    {{if it.img}}
-    <div w-class="innerImg">
-        <img src="../../res/images/remove.png" alt="" w-class="remove" on-tap="remove"/>
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow">{imgURL:{{it.img}}, width:"150px;",notRound:true}</widget>
+    <div w-class="imageList">
+        {{for i,v of it.uploadLoding}}
+        {{if v}}
+            <div w-class="upload" style="background-image:url(../../res/images/loading.gif)"></div>
+        {{else}}
+            <div w-class="imgBox">
+                <pi-ui-html style="display:inline-block;margin: 5px;">{{it.imgs[i]}}</pi-ui-html>
+                <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
+            </div>
+        {{end}}
+        
+        {{end}}
+        {{if it.uploadLoding.length < 1 }}
+        <div w-class="upload" on-tap="chooseImage"></div>
+        {{end}}
     </div>
-    {{end}}
     <div w-class="tools" ev-emoji-click="pickEmoji">
         <div>
             <img src="../../res/images/emoji.png" w-class="btn" on-tap="openEmoji"/>
