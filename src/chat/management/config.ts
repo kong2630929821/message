@@ -1,4 +1,3 @@
-import { chatLogicPort } from '../../app/ipConfig';
 
 /**
  * 配置文件
@@ -13,10 +12,11 @@ export const sourcePort = window.location.port || 80;
 export const httpPort = 8092;
 
 // 聊天逻辑服务器ip
-export const serverIp = sourceIp; 
+// export const serverIp = sourceIp; 39.98.71.177
+export const serverIp = '39.98.71.177';
 
 // 聊天逻辑服务器port
-export const serverPort = chatLogicPort;
+export const serverPort = 9080;
 
 // websock连接url
 export const wsUrl = `ws://${serverIp}:${serverPort}`;

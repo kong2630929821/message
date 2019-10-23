@@ -34,9 +34,6 @@
         <div w-class="sendNotice">发送处罚通知</div>
         <div w-class="checkType" style="justify-content: space-between;align-items: center;">
             <div style=" margin-left: 20px;line-height: 55px;">危险操作</div>
-            {{%<!-- {{if it.state==1}}
-            <div w-class="btn" style="margin-right:20px"  on-down="onShow">删除嗨嗨号</div>
-            {{end}} -->}}
         </div>
         <div w-class="typeList">
             <div style="margin-left:20px;">冻结用户</div>

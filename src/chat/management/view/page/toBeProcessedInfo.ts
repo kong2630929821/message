@@ -2,7 +2,6 @@ import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { buildupImgPath } from '../../../client/app/logic/logic';
-import { parseEmoji } from '../../../client/app/view/home/square';
 import { EMOJIS_MAP } from '../../../client/app/widget/emoji/emoji';
 import { REPORT_PERSON, REPORT_PUBLIC } from '../../../server/data/constant';
 import { penaltyText, REPORT, REPORTTITLE, timestampFormat } from '../../utils/logic';

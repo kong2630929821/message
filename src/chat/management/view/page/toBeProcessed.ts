@@ -51,7 +51,7 @@ export class ToBeProcessed extends Widget {
      * 初始化数据
      */
     public initData() {
-        getAllReport(900000,0,0).then((r:any) => {
+        getAllReport(4,0,0).then((r:any) => {
             if (!r.total) {
                 return;
             }
