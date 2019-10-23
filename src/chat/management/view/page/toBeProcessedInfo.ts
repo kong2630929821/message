@@ -95,16 +95,17 @@ export class ToBeProcessedInfo extends Widget {
         // 文章动态评论内容
         const evidence = JSON.parse(data.report_info.evidence);
         const imgs = [];
+        debugger;
         if (state === 5) {
             if (JSON.parse(evidence.msg).img) {
-                imgs.push(buildupImgPath(JSON.parse(evidence.msg).img));
+                imgs.push(buildupImgPath(JSON.parse(evidence.msg).img.originalImg));
             }
             this.props.likeCount = evidence.likeCount;
             this.props.reply = evidence.reply;
         } else {
             if (state !== 4) {
                 JSON.parse(evidence.body).imgs.forEach(v => {
-                    imgs.push(buildupImgPath(v));
+                    imgs.push(buildupImgPath(v.originalImg));
                 });
             } 
            
