@@ -43,7 +43,7 @@
             {{end}}
         </div>
         <div w-class="reportType">补充描述（140字内）：</div>
-        <div w-class="content1" ev-input-change="contentChange">
+        <div w-class="content1" ev-input-change="contentChange" on-tap="onClick">
             <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:{{it.placeholder}}, style:"max-height:229px;height:156px;font-size:28px;", input:{{it.contentInput}},maxLength:140 }</widget>
         </div>
         {{end}}

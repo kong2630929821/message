@@ -36,23 +36,3 @@
     color:gray;
     text-transform:uppercase;  
 }
-.pullup-wrapper{
-	padding: 20px;
-	text-align: center;
-	color: #999;
-}
-.pulldown-wrapper{
-	position: absolute;
-	width: 100%;
-	padding: 20px;
-	box-sizing: border-box;
-	transform: translateY(-100%) translateZ(0);
-	text-align: center;
-	color: #999;
-}
-.pullup-scroller{
-    flex: 1;
-    margin-bottom: -4px;
-    display: flex;
-    flex-direction: column;
-}

@@ -1,6 +1,6 @@
 <div w-class="item" on-tap="closeUtils">
     <div w-class="title">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{it.avatar||"../../res/images/user_avatar.png"}}, width:"80px;"}</widget>
+        <widget w-tag="chat-client-app-widget-imgShow-imgShow" on-tap="goUserDetail" w-class="userHead">{imgURL:{{it.avatar||"../../res/images/user_avatar.png"}}, width:"80px;"}</widget>
         <div w-class="titleCenter">
             <div style="display:flex;align-items:center;">
                 <span>{{it.username}}&nbsp;</span>
@@ -23,7 +23,7 @@
         <div w-class="content">
             <span style="font-weight: 600;">{{it.orgName}}:&nbsp;</span>
             <widget w-tag="pi-ui-html" style="display: inline-block;">{{it.orgMess}}</widget>
-            {{if it.orgImg}}
+            {{if it.orgImg.length}}
                 <span w-class="lookBigImg" on-tap="lookBigImg">【查看图片】</span>
             {{end}}
         </div>
@@ -32,7 +32,9 @@
     <div w-class="comment">
         <widget w-tag="pi-ui-html">{{it.mess}}</widget>
         {{if it.img}}
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="imgContent">{imgURL:{{it.img}}, width:"230px;"}</widget>
+            <div on-tap="lookInfoImg">
+                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="imgContent">{imgURL:{{it.img}}, width:"230px;",notRound:true}</widget>
+            </div>
         {{end}}
     </div>
 

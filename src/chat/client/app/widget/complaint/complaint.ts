@@ -2,6 +2,7 @@
  * modalbox
  */
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
+import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { selectImage } from '../../logic/native';
 import { complaintType } from '../../net/rpc';
@@ -104,13 +105,18 @@ export class ModalBox extends Widget {
         this.props.selected.forEach(v => {
             reportList.push(report[v]);
         });
+        const imgs = [];
+        this.props.saveImgs.forEach(v => {
+            imgs.push(v.originalImg);
+        });
         const evidence = {
             msg:this.props.contentInput,
-            img:JSON.stringify(this.props.imgs),
+            img:JSON.stringify(imgs),
             type:JSON.stringify(reportList)
         };
         complaintType(this.props.reportKey,this.props.status,JSON.stringify(evidence)).then(r => {
             if (r > 0) {
+                popNewMessage('举报成功');
                 this.ok && this.ok(this.props.selected);
             }
         });
@@ -127,6 +133,9 @@ export class ModalBox extends Widget {
      * 选择图片
      */
     public chooseImage(e:any) {
+        if (this.props.uploadLoding.length >= 3) {
+            return;
+        }
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);
     
@@ -138,8 +147,8 @@ export class ModalBox extends Widget {
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
-                        this.props.uploadLoding[len] = false;
+                        const url = `<div style="background-image:url(${res.base64});height: 220px;width: 220px;" class="previewImg"></div>`;
+                        this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
@@ -157,10 +166,9 @@ export class ModalBox extends Widget {
                                         console.log('上传原图',imgurl);
                                         image.originalImg = imgurl;
                                         this1.props.saveImgs[len] = image;
-
-                                        if (this.props.isUploading) {
-                                            this.props.isUploading = false;
-                                            this.okBtnClick();
+                                        if (this1.props.isUploading) {
+                                            this1.props.isUploading = false;
+                                            this1.okBtnClick(e);
                                         }
                                     });
                                 }
@@ -177,5 +185,28 @@ export class ModalBox extends Widget {
     // 文字描述
     public contentChange(e:any) {
         this.props.contentInput = e.value;
+    }
+
+    public onClick() {
+        this.latestMsg();
+    }
+    /**
+     * 定位最新消息
+     */
+    public latestMsg() {
+        setTimeout(() => {
+            const $scrollElem = this.getScrollElem();
+            // console.log($scrollElem.scrollHeight);
+            $scrollElem.scrollTop = $scrollElem.scrollHeight + $scrollElem.scrollHeight;
+            this.paint();
+        }, 100);
+        
+    }
+
+    /**
+     * 获取滚动区元素
+     */
+    public getScrollElem() {
+        return getRealNode((<any>this.tree).children[1]);
     }
 }

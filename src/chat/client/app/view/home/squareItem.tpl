@@ -36,13 +36,13 @@
     {{else}}
     {{% ======================广场展示部分内容===========================}}
     <div w-class="content" on-tap="goDetail" class="content">
-        1112223333
+        <widget w-tag="pi-ui-html">{{it.content}}</widget>
         <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
     </div>
     {{end}}
 
     {{% =====================图片区域========================}}
-    <div style="margin:20px 15px 20px 125px;width: 100%;" on-tap="goDetail">
+    <div style="margin:20px 15px 20px 125px;" on-tap="goDetail">
         {{for i,v of it.imgs}}
             {{if i==2 && it.imgs.length==4}}
             <div></div>

@@ -64,15 +64,14 @@ export class CommentItem extends Widget {
         super.setProps(this.props);
         const val = props.msg ? JSON.parse(props.msg) :{ msg:'',img:'' };
         this.props.mess = parseEmoji(val.msg);
-        this.props.img = val.img ? buildupImgPath(val.img) :'';
+        this.props.img = val.img.length ? buildupImgPath(val.img[0].originalImg) :'';
         this.props.isMine = this.props.owner === getStore('uid',0);
         this.props.avatar = buildupImgPath(props.avatar);
-
         if (props.reply) {  // 回复的原评论
             this.props.orgName = props.reply.username;
             const val = props.reply.msg ? JSON.parse(props.reply.msg) :{ msg:'',img:'' };
             this.props.orgMess = parseEmoji(val.msg);
-            this.props.orgImg = val.img ? buildupImgPath(val.img) :'';
+            this.props.orgImg = val.img.length ? buildupImgPath(val.img[0].originalImg) :'';
         }
     }
 
@@ -153,5 +152,15 @@ export class CommentItem extends Widget {
         popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
             list:[this.props.orgImg]
         });
+    }
+
+    public lookInfoImg() {
+        popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
+            list:[this.props.img]
+        });
+    }
+
+    public goUserDetail() {
+        popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num });
     }
 }
