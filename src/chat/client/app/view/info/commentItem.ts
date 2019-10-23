@@ -159,4 +159,8 @@ export class CommentItem extends Widget {
             list:[this.props.img]
         });
     }
+
+    public goUserDetail() {
+        popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num });
+    }
 }
