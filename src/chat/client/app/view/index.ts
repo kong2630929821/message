@@ -18,10 +18,7 @@ export const run = (cb) => {
         popNew('chat-client-app-view-chat-chat',{ uid:'10046',chatType: GENERATOR_TYPE.USER,name:`${item.title.zh_Hans}官方客服`,okCB:() => {
             WebViewManager.open(webviewName, `${item.url}?${Math.random()}`, webviewName,'', screenMode.landscape);
         } });
-    } else {
-        popNew('chat-client-app-view-home-contact');
-    }
-    
+    } 
     setTimeout(() => {
         cb && cb();
     }, 100);

@@ -62,7 +62,7 @@
 		align-items: center;
 		position: absolute;
 		z-index: 9998;
-		background-image: url(http://192.168.33.13/wallet/app/res/image1/haohaiLogin.jpg);
+		background-image: url(../../../app/res/image1/haohaiLogin.jpg);
 		background-position: center;
 		background-repeat: no-repeat;
 		background-size: cover;
@@ -126,6 +126,139 @@
 			defaultDomains = winit.domains = remoteDomains;
 		}
 
+		// =======================更新相关==================
+		// var jsInterceptID = 0;
+		// var jsInterceptMap = {};
+		// var jsInterceptUpdate = 100;
+		// var jsInterceptUpdateMap = {};
+
+
+		// window.handle_jsintercept_callback = function (listenerID, isSuccess, r1, r2, r3, r4, r5) {
+		// 	if (listenerID in jsInterceptMap) {
+		// 		var callback = jsInterceptMap[listenerID];
+		// 		delete jsInterceptMap[listenerID];
+		// 		callback && callback(isSuccess, r1, r2, r3, r4, r5);
+		// 	}
+		// }
+
+		// window.handle_jsintercept_update = function (cbID, total, progress) {
+		// 	if (cbID in jsInterceptUpdateMap) {
+		// 		var update = jsInterceptUpdateMap[cbID];
+		// 		update && update(total, progress);
+		// 		//相等的时候自动移除对象
+		// 		if (total === progress) {
+		// 			delete jsInterceptUpdateMap[jsInterceptUpdate]
+		// 		}
+		// 	}
+		// }
+
+
+		// winit.JSIntercept = {
+		// 	isNative: inApp,
+
+		// 	// 告诉底层已经完成数据库更新，可以更新底层版本了
+		// 	updateFinish: function (cb) {
+		// 		jsInterceptMap[++jsInterceptID] = cb;
+				
+		// 		if (inAndroidApp) {
+		// 			window.JSIntercept.updateFinish(jsInterceptID);
+		// 		} else if (inIOSApp) {
+		// 			window.webkit.messageHandlers.JSIntercept.postMessage(["updateFinish", jsInterceptID]);
+		// 		} else {
+		// 			setTimeout(cb, 0);
+		// 		}
+		// 	},
+
+		// 	// 取App底层版本号
+		// 	getAppVersion: function (cb) {
+
+		// 		jsInterceptMap[++jsInterceptID] = cb;
+
+		// 		if (inAndroidApp) {
+		// 			window.JSIntercept.getAppVersion(jsInterceptID);
+		// 		} else if (inIOSApp) {
+		// 			window.webkit.messageHandlers.JSIntercept.postMessage(["getAppVersion", jsInterceptID]);
+		// 		} else {
+		// 			setTimeout(cb, 0);
+		// 		}
+		// 	},
+
+		// 	// 更新App
+		// 	// iOS：url用来跳转到下载页面
+		// 	// Android：url用于底层更新apk文件
+		// 	updateApp: function (url, cb, progress) {
+		// 		jsInterceptMap[++jsInterceptID] = cb;
+		// 		jsInterceptUpdateMap[jsInterceptUpdate] = progress;
+
+		// 		if (inAndroidApp) {
+		// 			window.JSIntercept.updateApp(jsInterceptUpdate, url, jsInterceptID);
+		// 		} else if (inIOSApp) {
+		// 			// TODO: 弹出safari浏览器，跳转到url，并退出程序
+		// 			window.webkit.messageHandlers.JSIntercept.postMessage(["updateApp", jsInterceptUpdate, url, jsInterceptID]);
+		// 		} else {
+		// 			setTimeout(cb, 0);
+		// 		}
+		// 	},
+
+		// 	getBootFile: function (fileName) {
+		// 		return mobileBootFiles[fileName] && mobileBootFiles[fileName].content;
+		// 	},
+
+		// 	getMobileBootFiles: function (cb) {
+		// 		jsInterceptMap[++jsInterceptID] = cb;
+
+		// 		if (inAndroidApp) {
+		// 			window.JSIntercept.getBootFiles(jsInterceptID);
+		// 		} else if (inIOSApp) {
+		// 			window.webkit.messageHandlers.JSIntercept.postMessage(["getBootFiles", jsInterceptID]);
+		// 		} else {
+		// 			setTimeout(cb, 0);
+		// 		}
+		// 	},
+
+		// 	/*
+		// 		* 如果path为"update.flag"，表示在getBootFiles里面设置清空标志
+		// 		* content = "true"，表示正在更新
+		// 		*/
+		// 	saveFile: function (path, content, cb) {
+		// 		jsInterceptMap[++jsInterceptID] = cb;
+
+		// 		if (inAndroidApp) {
+		// 			window.JSIntercept.saveFile(path, content, jsInterceptID);
+		// 		} else if (inIOSApp) {
+		// 			window.webkit.messageHandlers.JSIntercept.postMessage(["saveFile", path, content, jsInterceptID]);
+		// 		} else {
+		// 			setTimeout(cb, 0);
+		// 		}
+		// 	},
+
+		// 	/**
+		// 	 * 刷新页面
+		// 	 */ 
+		// 	restartApp: function () {
+		// 		if (inAndroidApp) {
+		// 			window.JSIntercept.restartApp();
+		// 		} else if (inIOSApp) {
+		// 			window.webkit.messageHandlers.JSIntercept.postMessage(["restartApp"]);
+		// 		}
+		// 	}
+		// };
+		// =======================更新结束==================
+
+		var u8ArrayToStr = function (arr) {
+			const decoder = new TextDecoder('utf-8');
+			return decoder.decode(arr);
+		}
+
+		var base64ToU8Array = function (data) {
+			var string = window.atob(data);
+			var bytes = new Uint8Array(string.length);
+			for (var i = 0; i < string.length; i++) {
+				bytes[i] = string.charCodeAt(i);
+			}
+			return bytes;
+		}
+
 		winit.loadJS = function (roots, url, charset, callback, errText, i) {
 			var u, n, head;
 			if (Array.isArray(roots) && i >= roots.length) {
@@ -166,9 +299,17 @@
 		winit.initFail = function (url, err) { err ? alert(err +", " + url) : "";};
 		winit.init = function (){};
 		winit.flags = {};
-		winit.start = function() {
-			winit.loadJS(defaultDomains, "/wallet/chat/client/boot/index.js?" + Math.random(), "utf8", winit.initFail, "load index error");
+		mobileBootFiles = {};
+		winit.start = function () {
+			if (winit.debug) {
+				winit.loadJS(defaultDomains,
+					"/wallet/chat/client/boot/hotfix.js", "utf8", winit.initFail, "load hotupdate error");
+			}
+			winit.loadJS(defaultDomains,
+				"/wallet/chat/client/boot/index.js?" + Math.random(), "utf8", winit.initFail, "load index error");
 		};
+
+
 		if(document.hidden === true){
 			setTimeout(function(){
 				var div = document.createElement('div');

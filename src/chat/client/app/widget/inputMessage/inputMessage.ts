@@ -2,13 +2,13 @@
  * inputMessage 组件相关处理
  */
 // ===========================导入
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { endRadio, getPromise, openCamera, selectImage, startRadio } from '../../logic/native';
+import { popNewMessage } from '../../logic/tools';
 import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ===========================导出
@@ -234,7 +234,6 @@ interface Props {
     recordAudio:boolean;  // 正在录入语音
     istyle:number[];   // 语音录入进度条宽度
     audioText:string;  // 语音录入提示语
-    is:boolean;
 }
 
 /**
