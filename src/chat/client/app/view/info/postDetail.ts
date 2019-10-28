@@ -1,8 +1,8 @@
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, setStore } from '../../data/store';
 import { buildupImgPath, judgeLiked, timestampFormat } from '../../logic/logic';
+import { popNewMessage } from '../../logic/tools';
 import { getCommentLaudList, getPostDetile, postLaud, showComment, showLikeList } from '../../net/rpc';
 
 interface Props {
@@ -24,6 +24,8 @@ interface Props {
     commentLikeList:number[]; // 点赞的评论列表
     timeFormat:any;  // 时间处理
     refresh:boolean; // 是否可以请求更多数据
+    expandItem:number;// 动态详情工具展示
+    dealData:any;  // 组装数据
 }
 const TAB = {
     comment: 'comment',
@@ -55,7 +57,9 @@ export class PostDetail extends Widget {
         gender: 0,
         commentLikeList:[],
         timeFormat:timestampFormat,
-        refresh:true
+        refresh:true,
+        expandItem:-1,
+        dealData:this.dealData
     };
 
     public setProps(props: any) {
@@ -225,6 +229,7 @@ export class PostDetail extends Widget {
      * 滚动加载更多评论或点赞
      */
     public scrollPage() {
+        this.pageClick();
         const page = document.getElementById('postPage');
         const contain = document.getElementById('postContain');
         if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150) {
@@ -263,6 +268,30 @@ export class PostDetail extends Widget {
             }
             
         }
+    }
+
+    /**
+     * 展示操作
+     */
+    public expandTools(e:any,i:number) {
+        this.pageClick();
+        this.props.expandItem = e.value ? i :-1;
+        this.paint();
+    }
+
+    public pageClick() {
+        this.props.expandItem = -1;
+        this.paint();
+    }
+
+    /**
+     * 组装squareItem的数据
+     */
+    public dealData(v:any,r:boolean) {
+        return { 
+            ...v,
+            showUtils: r 
+        };
     }
 
 }
