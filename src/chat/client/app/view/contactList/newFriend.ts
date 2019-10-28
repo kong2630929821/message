@@ -78,7 +78,6 @@ const STATE = {
     convertUser:[]  // 我兑换好友的邀请码
 };
 store.register('contactMap', (r) => {
-    debugger;
     for (const value of r.values()) {
         STATE.contact = value;
         forelet.paint(STATE);

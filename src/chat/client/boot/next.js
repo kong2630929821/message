@@ -46,7 +46,7 @@ winit.initNext = function () {
 
 	(function(){
 		console.time("loadResource complete");
-		pi_modules.commonjs.exports.require(["pi/util/html", "pi/widget/util"], {}, function (mods, fileMap) {
+		pi_modules.commonjs.exports.require(["pi/util/html", "pi/widget/util","pi/browser/webview"], {}, function (mods, fileMap) {
 			console.log("first mods time:", Date.now() - startTime, mods, Date.now());
 			html = mods[0];
 			util = mods[1];
@@ -86,11 +86,16 @@ winit.initNext = function () {
 			"chat/client/app/group/latestAnnItem.js",
 			"chat/client/app/group/latestAnnItem.wcss",
 			"chat/client/app/res/css/",
-			// "chat/client/app/widget/",
+			"chat/client/app/widget/",
 
 			"app/publicComponents/",
 			"app/api/thirdApi.js",
 			"app/postMessage/postMessage.js",
+			
+			"pi/ui/root.js",
+			"pi/ui/root.tpl",
+			"pi/ui/html.js",
+			"pi/ui/html.tpl",
 		]
 		util.loadDir(sourceList, flags, fm, undefined, function (fileMap) {
 			// console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());
