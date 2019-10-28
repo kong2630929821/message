@@ -294,7 +294,7 @@ export class EditPost extends Widget {
 
                 return;
             }
-            if (!this.props.contentInput) {
+            if (!this.props.contentInput && this.props.saveImgs.length === 0) {
                 popNewMessage('内容不能为空');
 
                 return;
@@ -303,7 +303,6 @@ export class EditPost extends Widget {
                 msg:this.props.contentInput,
                 imgs:this.props.saveImgs
             };
-
             if (!this.props.isUploading) {  // 图片上传完成
                 addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then((r:any) => {
                     if (!isNaN(r)) {
