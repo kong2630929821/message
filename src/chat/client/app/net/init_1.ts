@@ -93,7 +93,7 @@ export const walletSignIn = (openid) => {
  * 改变用户信息
  */
 export const  setUserInfo = async () => {
-    const user = await getStore('user',{ info:{},id:'' });
+    const user = await getStoreData('user',{ info:{},id:'' });
     const r = new UserChangeInfo();
     r.note = user.info.note;
     r.sex = user.info.sex;

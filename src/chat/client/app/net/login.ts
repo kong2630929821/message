@@ -2,6 +2,7 @@
  * 登录 登出
  */
 import { logoutWallet } from '../../../../app/net/login';
+import { getOpenId } from '../../../../app/net/pull';
 import * as store from '../data/store';
 import { disconnect, initClient } from './init';
 
@@ -12,16 +13,19 @@ import { disconnect, initClient } from './init';
 // });
 
 export const chatLogin = (cb?) => {
-    (<any>window).pi_sdk.api.authorize({ appId:'10' },(err, result) => {
-        console.log('authorize',err,JSON.stringify(result));
-        if (err === 0) { // 网络未连接
-            console.log('网络未连接');
-        } else {
-            console.log('聊天注册成功',result);
-            initClient(result.openId);
-        }
-        cb && cb();
+    getOpenId('10').then(r => {
+        initClient(r.openId);
     });
+    // (<any>window).pi_sdk.api.authorize({ appId:'10' },(err, result) => {
+    //     console.log('authorize',err,JSON.stringify(result));
+    //     if (err === 0) { // 网络未连接
+    //         console.log('网络未连接');
+    //     } else {
+    //         console.log('聊天注册成功',result);
+           
+    //     }
+    //     cb && cb();
+    // });
 };
 
 // 登出
