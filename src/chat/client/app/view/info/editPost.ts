@@ -119,7 +119,7 @@ export class EditPost extends Widget {
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
                         this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
@@ -174,7 +174,7 @@ export class EditPost extends Widget {
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
                         this.props.uploadLoding = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
