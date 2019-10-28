@@ -294,4 +294,8 @@ export class PostDetail extends Widget {
         };
     }
 
+    public test() {
+        console.log(this.props.likeList);
+    }
+
 }
