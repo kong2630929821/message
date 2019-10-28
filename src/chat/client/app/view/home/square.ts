@@ -149,6 +149,7 @@ export class Square extends Widget {
      * 滚动加载更多帖子
      */
     public scrollPage() {
+        this.pageClick();
         const page = document.getElementById('squarePage');
         const contain = document.getElementById('squareContain');
         if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.state.postList.length % 5 === 0) {
