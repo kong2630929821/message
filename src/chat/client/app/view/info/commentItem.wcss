@@ -79,3 +79,10 @@
     font-weight:400;
     color:rgba(42,86,198,1);
 }
+.firstImage{
+    max-width: 574px;
+    max-height: 574px;
+    min-width: 180px;
+    min-height: 180px;
+    border-radius: 12px;
+  }

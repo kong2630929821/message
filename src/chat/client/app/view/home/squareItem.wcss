@@ -16,23 +16,22 @@
   margin: 0 20px;
 }
 .follow {
-  width: 100px;
+  width: 140px;
   height: 60px;
-  background: rgba(255, 255, 255, 1);
+  background:rgba(66,133,244,1);
   border-radius: 30px;
-  border: 1px solid rgba(42, 86, 198, 1);
   font-size: 28px;
   font-weight: 500;
-  color: rgba(49, 91, 200, 1);
+  color:rgba(255,255,255,1);
   line-height: 60px;
   text-align: center;
   margin-right: 20px;
 }
 .followIng {
-  width: 120px;
+  width: 140px;
   height: 60px;
   background: rgb(204, 204, 204);
-  border-radius: 6px;
+  border-radius:30px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -109,8 +108,7 @@
   text-align: center;
 }
 .image {
-  margin: 5px;
-  background-color: #f0f9ff;
+  margin: 17px 17px 0 0;
 }
 .shareBtn {
   display: flex;
@@ -136,4 +134,11 @@
 .btnGroup{
   flex: 1;
   display: flex;
+}
+.firstImage{
+  max-width: 574px;
+  max-height: 574px;
+  min-width: 180px;
+  min-height: 180px;
+  border-radius: 12px;
 }

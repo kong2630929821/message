@@ -110,7 +110,10 @@ export class EditPost extends Widget {
         }
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);
-    
+            if (!url) {
+
+                return;
+            }
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.uploadLoding.length;

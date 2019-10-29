@@ -23,31 +23,43 @@
             {{else}}
             <div w-class="follow" on-tap="followUser">关注</div>
             {{end}}
-        {{end}}
+        {{else}}
         <img src="../../res/images/greyDown.png" w-class="btn" on-tap="showTools"/>
+        {{end}}
     </div>
 
     {{if it.showAll}}
     {{% =================帖子详情展示全部内容=======================}}
+    {{if it.content}}
     <div w-class="content1" id="minImg">
         <widget w-tag="pi-ui-html">{{it.content}}</widget>
     </div>
-
+    {{end}}
     {{else}}
     {{% ======================广场展示部分内容===========================}}
-    <div w-class="content" on-tap="goDetail" class="content">
-        <widget w-tag="pi-ui-html">{{it.content}}</widget>
-        <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
-    </div>
+        {{if it.content}}
+        <div w-class="content" on-tap="goDetail" class="content">
+            <widget w-tag="pi-ui-html">{{it.content}}</widget>
+            <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
+        </div>
+        {{end}}
     {{end}}
 
     {{% =====================图片区域========================}}
     <div style="margin:20px 15px 20px 125px;" on-tap="goDetail">
         {{for i,v of it.imgs}}
-            {{if i==2 && it.imgs.length==4}}
-            <div></div>
+            {{if v}}
+                {{if it.imgs.length==1}}
+                <img src="{{it.buildupImgPath(v.compressImg)}}" alt="" w-class="firstImage" on-tap="showBigImg({{i}})"/>
+                {{else}}
+                    {{if it.imgs.length==4}}
+                        {{if i==2}}
+                        <div></div>
+                        {{end}}
+                    {{end}}
+                    <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="image" on-tap="showBigImg({{i}})">{imgURL:{{it.buildupImgPath(v.compressImg)}}, width:"{{it.imgs.length==1?'230px':'180px'}}",height:"{{it.imgs.length==1?'230px':'180px'}}",notRound:true}</widget>
+                {{end}}
             {{end}}
-            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="image" on-tap="showBigImg({{i}})">{imgURL:{{it.buildupImgPath(v.compressImg)}}, width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
         {{end}}
     </div>
 
@@ -66,11 +78,11 @@
        <div w-class="btnGroup">
             <div w-class="btnBox" on-tap="doComment">
                 <img src="../../res/images/commentsGrey.png" w-class="btn"/>
-                <span w-class="time">{{it.commentCount>0?it.commentCount:"评论"}}</span>
+                <span w-class="time">{{it.commentCount>0?(it.commentCount>99?'99+':it.commentCount):"评论"}}</span>
             </div>
             <div w-class="btnBox" on-tap="likeBtn">
                 <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
-                <span w-class="time">{{it.likeCount>0?it.likeCount:"点赞"}}</span>
+                <span w-class="time">{{it.likeCount>0?(it.likeCount>99?'99+':it.likeCount):"点赞"}}</span>
             </div>
        </div>
     </div>
