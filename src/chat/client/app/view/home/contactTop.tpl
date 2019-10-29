@@ -33,10 +33,10 @@
     </div>
 
     {{if it.showUtils && it.activeTab=="square"}}
-    <div w-class="utilList">
+    {{%<!-- <div w-class="utilList">
         <div w-class="util" on-tap="editPost(e,false)" on-down="onShow">写动态</div>
         <div on-tap="editPost(e,true)" on-down="onShow">发公众号消息</div>
-    </div>
+    </div> -->}}
     {{elseif it.showUtils}}
     <div w-class="utilList1" style="">
         {{for i, v of it.utilList}}
