@@ -45,7 +45,6 @@ export class ContactTop extends Widget {
      * 跳转到下一页
      */
     public goNext(event:any) {
-        popNew('chat-client-app-view-chat-chat',{ id:10064,chatType: 'user',name:`官方客服` });
         notify(event.node,'ev-next-click',{ fg:true });
     }
     
