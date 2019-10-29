@@ -43,23 +43,23 @@ export class Chat extends Widget {
         this.props.newMsg = null;
         this.props.activeAudio = null;
         this.audioSource = null;
+        this.props.showHincIdArray = [];
 
-        // if (this.props.accId) {
-        //     getChatUid(this.props.accId).then((res:number) => {
-        //         this.props.hid = genUserHid(this.props.sid, res);
-        //         this.initUser();
-        //     }).catch(err => {
-        //         console.log('获取游戏客服失败',err);
-        //     });
-        // } else if (this.props.gid) {
-        //     applyToGroup(this.props.gid).then((res:number) => {
-        //         this.props.hid = genGroupHid(res);
-        //         this.initGroup();
-        //     }).catch(err => {
-        //         console.log('获取游戏客服失败',err);
-        //     });
-        // } else
-        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+        if (this.props.accId) {
+            getChatUid(this.props.accId).then((res:number) => {
+                this.props.hid = genUserHid(this.props.sid, res);
+                this.initUser();
+            }).catch(err => {
+                console.log('获取游戏客服失败',err);
+            });
+        } else if (this.props.gid) {
+            applyToGroup(this.props.gid).then((res:number) => {
+                this.props.hid = genGroupHid(res);
+                this.initGroup();
+            }).catch(err => {
+                console.log('获取游戏客服失败',err);
+            });
+        } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.hid = genGroupHid(this.props.id);
             this.initGroup();
         } else {

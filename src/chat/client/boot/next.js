@@ -185,6 +185,9 @@ winit.initNext = function () {
 	var flags = winit.flags;
 	var html,util;
 	var fm;  // fileMap
+	var suffixCfg = {
+		png: 'down', jpg: 'down', jpeg: 'down', webp: 'down', gif: 'down', xlsx:'none',rs:'none'
+	};
 	/**
 	 * APP入口函数
 	 */
@@ -273,8 +276,9 @@ winit.initNext = function () {
 		});
 		pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.registerRpcStruct(fm);
 		pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.initClient();
-		loadEmoji();
 		
+		loadEmoji();
+		firstStageLoaded();
 	}
 
 	var loadPiSdk = function(){
