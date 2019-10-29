@@ -14,6 +14,7 @@ import { disconnect, initClient } from './init';
 
 export const chatLogin = (cb?) => {
     getOpenId('10').then(r => {
+        console.log('聊天注册成功',r);
         initClient(r.openId);
     });
     // (<any>window).pi_sdk.api.authorize({ appId:'10' },(err, result) => {

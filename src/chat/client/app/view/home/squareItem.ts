@@ -116,7 +116,13 @@ export class SquareItem extends Widget {
      */
     public doComment(e:any) {
         this.closeUtils(e);
-        notify(e.node,'ev-commentBtn',{ value:this.props.key });
+        // 当评论数量大于0则跳转详情
+        if (this.props.commentCount > 0) {
+            this.goDetail(e);
+        } else {
+            notify(e.node,'ev-commentBtn',{ value:this.props.key });
+        }
+       
     }
 
     // 关闭操作列表
