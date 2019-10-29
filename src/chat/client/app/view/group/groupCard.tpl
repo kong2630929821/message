@@ -1,5 +1,5 @@
 <div style="position:absolute;width:100%;height:100%;top:0px;left:0px;background-color:gray;">
-    <chat-client-app-widget-topBar-topBar>{title:"群名片",background:"none",shareImg:"share-white.png"}</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:"群名片",background:"none",shareImg:"share-white.png"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="group-card-wrap">
         <div w-class="top">
             <span w-class="group-name">群名</span>

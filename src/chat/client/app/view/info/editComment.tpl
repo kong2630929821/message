@@ -6,12 +6,12 @@
         <div w-class="topBarItem" style="color:#888888" on-tap="send">发送</div>
     </div>
     <div w-class="content" ev-input-change="contentChange">
-        <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:{{it.placeholder}}, style:"max-height:300px;height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:100 }</widget>
+        <widget w-tag="chat-client-app-widget1-input-textarea">{placeHolder:{{it.placeholder}}, style:"max-height:300px;height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:100 }</widget>
     </div>
 
     {{if it.mess}}
     <div w-class="orgComment">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="img">{imgURL:{{it.avatar || "../../res/images/user_avatar.png"}}, width:"150px;",notRound:true}</widget>
+        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="img">{imgURL:{{it.avatar || "../../res/images/user_avatar.png"}}, width:"150px;",notRound:true}</widget>
         <div style="border-bottom: 1px solid #F2F2F2;">
             <div w-class="username">
                 <span>@{{it.username}}&nbsp;</span>
@@ -49,6 +49,6 @@
             <img src="../../res/images/tool-pictures.png" w-class="btn" on-tap="chooseImage"/>
         </div>
 
-        <widget w-tag="chat-client-app-widget-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}"></widget>
+        <widget w-tag="chat-client-app-widget1-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}"></widget>
     </div>
 </div>

@@ -1,6 +1,6 @@
 <div w-class="item" on-tap="closeUtils">
     <div w-class="title">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" on-tap="goUserDetail" w-class="userHead">{imgURL:{{it.avatar||"../../res/images/user_avatar.png"}}, width:"80px;"}</widget>
+        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" on-tap="goUserDetail" w-class="userHead">{imgURL:{{it.avatar||"../../res/images/user_avatar.png"}}, width:"80px;"}</widget>
         <div w-class="titleCenter">
             <div style="display:flex;align-items:center;">
                 <span>{{it.username}}&nbsp;</span>
@@ -33,7 +33,7 @@
         <widget w-tag="pi-ui-html">{{it.mess}}</widget>
         {{if it.img}}
             <div on-tap="lookInfoImg">
-                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="imgContent">{imgURL:{{it.img}}, width:"230px;",notRound:true}</widget>
+                <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="imgContent">{imgURL:{{it.img}}, width:"230px;",notRound:true}</widget>
             </div>
         {{end}}
     </div>

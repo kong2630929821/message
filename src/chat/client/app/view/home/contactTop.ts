@@ -5,6 +5,7 @@
 // ================================ 导入
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
@@ -44,6 +45,7 @@ export class ContactTop extends Widget {
      * 跳转到下一页
      */
     public goNext(event:any) {
+        popNew('chat-client-app-view-chat-chat',{ id:10064,chatType: 'user',name:`官方客服` });
         notify(event.node,'ev-next-click',{ fg:true });
     }
     

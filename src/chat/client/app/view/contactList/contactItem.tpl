@@ -2,7 +2,7 @@
     {{if it.show}}
     <div w-class="contact-wrap">
         <div w-class="avatar-wrap">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.img}},width:"80px;"}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.img}},width:"80px;"}</widget>
         </div>
        <div w-class="item-right">
            <div w-class="contact-right">

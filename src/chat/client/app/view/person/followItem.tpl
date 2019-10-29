@@ -1,5 +1,5 @@
 <div w-class="item">
-    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}}, width:"80px;"}</widget>
+    <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}}, width:"80px;"}</widget>
     <div style="flex:1 0 0;">
         <div w-class="username">
             <span>{{it.user_info.name}}&nbsp;</span>

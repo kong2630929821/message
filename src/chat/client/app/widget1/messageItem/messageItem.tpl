@@ -6,7 +6,7 @@
 
             {{% ========================红包=========================}}
             {{if it.message.mtype == 9}}
-            <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.message.msg}},cardType:"redEnv",received:{{!!it.message.redEnvDetail}} }</widget>
+            <widget w-tag="chat-client-app-widget1-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.message.msg}},cardType:"redEnv",received:{{!!it.message.redEnvDetail}} }</widget>
             <span w-class="rightDownTail" style="border-top: 10px solid #fff;"></span>
 
             {{% ========================图片=========================}}
@@ -42,13 +42,13 @@
                 <div style="font-weight:500;">{{it.message.msg.title}}</div>
                 <div style="display:flex;align-items: center;">
                     <div w-class="article">{{it.message.msg.content}}</div>
-                    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{it.message.image}}, width:"100px",notRound:true}</widget>
+                    <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="image">{imgURL:{{it.message.image}}, width:"100px",notRound:true}</widget>
                 </div>
             </div>
 
             {{% ========================名片=========================}}
             {{elseif it.message.mtype == 15}}
-            <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="goDetail">{cardInfo:{{it.message.msg.name}},cardType:"namecard",cardTypeShow:{{it.message.msg.type}},avatarPath:{{it.message.image}} }</widget>
+            <widget w-tag="chat-client-app-widget1-nameCard-nameCard" on-tap="goDetail">{cardInfo:{{it.message.msg.name}},cardType:"namecard",cardTypeShow:{{it.message.msg.type}},avatarPath:{{it.message.image}} }</widget>
            
             {{% =====================其他消息类型======================}}
             {{else}}
@@ -71,7 +71,7 @@
             </div>
             {{end}}
 
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" style="margin-left:10px;" on-tap="userDetail(e,true)">{imgURL:{{it.myAvatar}},width:"80px;"}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" style="margin-left:10px;" on-tap="userDetail(e,true)">{imgURL:{{it.myAvatar}},width:"80px;"}</widget>
         </div>
 
         {{% ==========================被拒绝的消息标志=====================}}
@@ -83,12 +83,12 @@
         {{else}}
         <div w-class="username">{{it.name || "------"}}</div>
         <div style="display:flex;margin:10px 20px;">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="userDetail">{imgURL:{{it.avatar}},width:"80px;"}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar" on-tap="userDetail">{imgURL:{{it.avatar}},width:"80px;"}</widget>
 
             {{% ========================红包=========================}}
             {{if it.message.mtype == 9}}
             <span w-class="leftDownTail" style="border-bottom:10px solid rgba(235,79,79,1)"></span>
-            <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.message.msg}},cardType:"redEnv",received:{{!!it.message.redEnvDetail}} }</widget>
+            <widget w-tag="chat-client-app-widget1-nameCard-nameCard" on-tap="openRedEnvelope">{cardInfo:{{it.message.msg}},cardType:"redEnv",received:{{!!it.message.redEnvDetail}} }</widget>
             
             {{% ========================图片=========================}}
             {{elseif it.message.mtype == 2}}
@@ -116,13 +116,13 @@
                 <div style="font-weight:500;">{{it.message.msg.title}}</div>
                 <div style="display:flex;align-items: center;">
                     <div w-class="article">{{it.message.msg.content}}</div>
-                    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{it.message.image}}, width:"100px",notRound:true}</widget>
+                    <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="image">{imgURL:{{it.message.image}}, width:"100px",notRound:true}</widget>
                 </div>
             </div>
 
             {{% ========================名片=========================}}
             {{elseif it.message.mtype == 15}}
-            <widget w-tag="chat-client-app-widget-nameCard-nameCard" on-tap="goDetail">{cardInfo:{{it.message.msg.name}},cardType:"namecard",cardTypeShow:{{it.message.msg.type}},avatarPath:{{it.message.image}} }</widget>
+            <widget w-tag="chat-client-app-widget1-nameCard-nameCard" on-tap="goDetail">{cardInfo:{{it.message.msg.name}},cardType:"namecard",cardTypeShow:{{it.message.msg.type}},avatarPath:{{it.message.image}} }</widget>
 
             {{% ========================其他消息类型=========================}}
             {{else}}

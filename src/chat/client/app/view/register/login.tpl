@@ -1,15 +1,15 @@
 <div class="new-page">
     <img src="../../res/images/home_bg.png" w-class="home_bg"/>
-    <chat-client-app-widget-topBar-topBar w-class="title">{title:"登录聊天",background:"none"}</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar w-class="title">{title:"登录聊天",background:"none"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="logo-wrap" >
         <img w-class="logo" src="../../res/images/logo.png" />
     </div>
     <div w-class="input-wrap">
         <div ev-input-change="inputName">
-            <chat-client-app-widget-input-input w-class="pi-input idInput">{placeHolder : "ID",style : "font-size:32px;color:#318DE6"}</chat-client-app-widget-input-input>
+            <chat-client-app-widget1-input-input w-class="pi-input idInput">{placeHolder : "ID",style : "font-size:32px;color:#318DE6"}</chat-client-app-widget1-input-input>
         </div>
         <div ev-input-change="inputPasswd">
-            <chat-client-app-widget-input-input w-class="pi-input">{input:{{it.passwd}},placeHolder : "密码",itype :{{it.visible ? "text" : "password"}},clearable : true,style : "font-size:32px;color:#318DE6" }</chat-client-app-widget-input-input>
+            <chat-client-app-widget1-input-input w-class="pi-input">{input:{{it.passwd}},placeHolder : "密码",itype :{{it.visible ? "text" : "password"}},clearable : true,style : "font-size:32px;color:#318DE6" }</chat-client-app-widget1-input-input>
         </div>
     </div>
     <div w-class="eye" on-tap="changeEye">

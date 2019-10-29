@@ -27,7 +27,6 @@ export class InputMessage extends Widget {
         chatType:'user',
         istyle:[0,0],
         audioText:'按住说话(30S)'
-        
     };
     private audioCount:number;   // 录音倒计数
     private interval:any;    // 录音倒计时循环事件

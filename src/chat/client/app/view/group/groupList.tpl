@@ -1,10 +1,10 @@
 {{: it1 = it1 || {"group":[]} }}
 <div class="new-page" ev-next-click="groupChat" ev-back-click="goBack" w-class="new-page">
-    <chat-client-app-widget-topBar-topBar>{title:"群聊",nextImg:"add-blue.png"}</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:"群聊",nextImg:"add-blue.png"}</chat-client-app-widget1-topBar-topBar>
 
     <div w-class="content">
         <div w-class="search-input" ev-input-change="inputGid">
-            <chat-client-app-widget-input-input>{placeHolder : "搜索群聊",style : "font-size:32px;padding-left:82px;border-radius: 12px;"}</chat-client-app-widget-input-input>
+            <chat-client-app-widget1-input-input>{placeHolder : "搜索群聊",style : "font-size:32px;padding-left:82px;border-radius: 12px;"}</chat-client-app-widget1-input-input>
             <img w-class="searchIcon" src="../../res/images/search-gray.png" />
         </div>
 

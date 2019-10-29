@@ -1,7 +1,7 @@
 <div w-class="outer" >
 	<div w-class="input-message-wrap">
 		<img w-class="audio" on-tap="openAudio" src="{{it.isOnAudio?'../../res/images/audioIcon.png':'../../res/images/audio.png'}}"/>
-		<chat-client-app-widget-input-textarea w-class="inputMessage">{placeHolder:"输入消息",input:{{it.message}} }</chat-client-app-widget-input-textarea>
+		<chat-client-app-widget1-input-textarea w-class="inputMessage">{placeHolder:"输入消息",input:{{it.message}} }</chat-client-app-widget1-input-textarea>
 		<img w-class="emoji" on-tap="openEmoji" src="{{it.isOnEmoji?'../../res/images/emojiblue.png':'../../res/images/emoji.png'}}"/>
 		{{if it.message}}
 		<img w-class="unfold" on-tap="send" src="../../res/images/send.png"/>
@@ -10,7 +10,12 @@
 		{{end}}
 	</div>
 
-	<widget w-tag="chat-client-app-widget-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}"></widget>
+	<div id="emojiMap" style="min-height: 420px;display:{{it.isOnEmoji?'block':'none'}}">
+		{{if it.isOnEmoji}}
+		<widget w-tag="chat-client-app-widget1-emoji-emoji"></widget>
+		{{end}}
+	</div>
+	
 	
 	<div w-class="toolsMap" id="toolsMap" style="display:{{it.isOnTools ? 'block' : 'none'}}">
 		<div style="display:flex;flex-wrap: wrap;">

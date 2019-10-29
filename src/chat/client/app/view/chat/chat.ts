@@ -19,7 +19,7 @@ import { getFriendAlias, getUserAvatar, INFLAG, timestampFormat } from '../../lo
 import { openNewActivity } from '../../logic/native';
 import { popNewMessage } from '../../logic/tools';
 import { applyToGroup, applyUserFriend, getChatUid, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
-import { parseMessage } from '../../widget/messageItem/messageItem';
+import { parseMessage } from '../../widget1/messageItem/messageItem';
 
 // ================================================ 导出
 export const forelet = new Forelet();

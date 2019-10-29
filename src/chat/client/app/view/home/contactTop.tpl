@@ -3,7 +3,7 @@
    
     <div w-class="topBar-content">
         <div on-tap="showMine" on-down="onShow" style="position:relative;">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{it.avatar}}, width:"48px;"}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{it.avatar}}, width:"48px;"}</widget>
             {{%<!-- <span w-class="newMess">99+</span> -->}}
         </div>
         

@@ -13,7 +13,7 @@ import * as store from '../data/store';
 import { timestampFormat } from '../logic/logic';
 import { clientRpcFunc } from '../net/init';
 import { applyToGroup } from '../net/rpc';
-import { EMOJIS } from '../widget/emoji/emoji';
+import { EMOJIS } from '../widget1/emoji/emoji';
 
 /**
  * 第三方应用中聊天接口

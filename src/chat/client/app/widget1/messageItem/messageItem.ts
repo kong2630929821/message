@@ -155,7 +155,7 @@ export class MessageItem extends Widget {
     // 点击查看大图
     public openBigImage() {
         const url = this.props.message.msg.compressImg.split('"')[1];
-        popNew('chat-client-app-widget-bigImage-bigImage',{ img: url,originalImg:this.props.message.msg.originalImg });
+        popNew('chat-client-app-widget1-bigImage-bigImage',{ img: url,originalImg:this.props.message.msg.originalImg });
     }
 
     // 点击播放语音

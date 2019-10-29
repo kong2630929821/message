@@ -8,14 +8,14 @@
     <div w-class="contain">
         {{if it.isPublic}}
         <div w-class="title" ev-input-change="titleChange">
-            <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"标题1-24个字",input:{{it.titleInput}}, maxLength:24 }</widget>
+            <widget w-tag="chat-client-app-widget1-input-textarea">{placeHolder:"标题1-24个字",input:{{it.titleInput}}, maxLength:24 }</widget>
         </div>
         <div style="position: relative;">
             <div contenteditable="true" w-class="editBox" id="editBox" class="editor" on-input="editBoxChange" on-keydown="editorTap" on-paste="onpaste" ></div>
         </div>
         {{else}}
         <div w-class="content" ev-input-change="contentChange">
-            <widget w-tag="chat-client-app-widget-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>
+            <widget w-tag="chat-client-app-widget1-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>
         </div>  
         {{end}}
         {{% ========================上传图片======================}}
@@ -46,6 +46,6 @@
             <img src="{{it.camera?'../../res/images/tool-cameraGrey.png':'../../res/images/tool-camera.png'}}" w-class="btn" on-tap="openPhoto" on-tap="takePhoto"/>
         </div>
 
-        <widget w-tag="chat-client-app-widget-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}">{isPublic:{{it.isPublic}}}</widget>
+        <widget w-tag="chat-client-app-widget1-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}">{isPublic:{{it.isPublic}}}</widget>
     </div>
 </div>

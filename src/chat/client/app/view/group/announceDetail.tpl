@@ -1,5 +1,5 @@
 <div class="new-page" ev-back-click="goBack">
-    <chat-client-app-widget-topBar-topBar>{title:"群公告"}</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:"群公告"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="title-wrap">
         {{if !it.aIncId}}
         <span w-class="topping">置顶</span>

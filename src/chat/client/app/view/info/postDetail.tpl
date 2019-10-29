@@ -1,5 +1,5 @@
 <div class="new-page" w-class="page" ev-back-click="goBack">
-    <chat-client-app-widget-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="contain" id="postPage" on-scroll="scrollPage">
         <div style="margin: 20px 0;" id="postContain">
             {{if it.isPublic}}
@@ -25,7 +25,7 @@
                 <div>
                     {{for i,v of it.likeList}}
                     <div w-class="likeItem">
-                        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
+                        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
                         <div w-class="titleCenter">
                             <div w-class="username">
                                 <span>{{v.username}}&nbsp;</span>
