@@ -76,9 +76,9 @@ export class ContactTop extends Widget {
         if (fg && !getStore('pubNum',0)) {
             popNewMessage('没有公众号，不能发文章');
         } else {
-            popNew3('chat-client-app-view-info-editPost',{ isPublic:fg },() => {
-                showPost(this.props.acTag + 1);
-            });
+            // popNew3('chat-client-app-view-info-editPost',{ isPublic:fg },() => {
+            //     showPost(this.props.acTag + 1);
+            // });
         }
         notify(e.node,'ev-next-click',{ fg:false });
     }

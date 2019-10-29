@@ -33,7 +33,7 @@
         <widget w-tag="pi-ui-html">{{it.mess}}</widget>
         {{if it.img}}
             <div on-tap="lookInfoImg">
-                <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="imgContent">{imgURL:{{it.img}}, width:"230px;",notRound:true}</widget>
+                <img src="{{it.img}}" alt="" w-class="firstImage"/>
             </div>
         {{end}}
     </div>

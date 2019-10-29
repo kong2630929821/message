@@ -1,6 +1,6 @@
 
 <div w-class="auto" on-tap="pageClick" id="squarePage" on-scroll="scrollPage">
-    <div id="squareContain">
+    <div id="squareContain" style="background: white;">
     {{if !it.showTag}}
         {{%=============1:关注  2:公众号===================}}
         {{if it.active==1 || it.active==2}}
