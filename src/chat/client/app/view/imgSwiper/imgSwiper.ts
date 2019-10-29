@@ -1,8 +1,8 @@
 
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { saveImage } from '../../logic/native';
+import { popNewMessage } from '../../logic/tools';
 import { Swiper } from '../../res/js/swiper.min';
 
 interface Props {
