@@ -4,7 +4,6 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, register } from '../../data/store';
 import { postLaud, showPost } from '../../net/rpc';
-import { EMOJIS_MAP } from '../../widget/emoji/emoji';
 
 export const forelet = new Forelet();
 export const WIDGET_NAME = module.id.replace(/\//g, '-');

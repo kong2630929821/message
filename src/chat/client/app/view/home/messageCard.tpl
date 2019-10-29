@@ -3,7 +3,7 @@
     <div w-class="topFlag"><div w-class="flag"></div></div>
     {{end}}
     <div w-class="avatar-wrap">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
+        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
     </div>
     <div w-class="user-info-wrap">
         <div w-class="info-wrap">

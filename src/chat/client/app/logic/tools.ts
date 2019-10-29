@@ -3,7 +3,7 @@ import { lookup } from '../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
 import { genGroupHid } from '../../../utils/util';
 import { getStore, setStore } from '../data/store';
-import { EMOJIS_MAP } from '../widget/emoji/emoji';
+import { EMOJIS_MAP } from '../widget1/emoji/emoji';
 
 /**
  * tools

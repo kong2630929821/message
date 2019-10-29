@@ -210,7 +210,7 @@ export class SquareItem extends Widget {
      */
     public showBigImg(ind:number) {
         // const val:any = this.props.imgs[ind];
-        // popNew3('chat-client-app-widget-bigImage-bigImage',{
+        // popNew3('chat-client-app-widget1-bigImage-bigImage',{
         //     img: buildupImgPath(val.compressImg),
         //     originalImg: buildupImgPath(val.originalImg)
         // });

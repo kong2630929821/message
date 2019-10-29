@@ -1,7 +1,7 @@
 <div>
     <div w-class="pswInput" ev-input-change="pswChange" ev-input-focus="iconChange()">
         <div style="flex: 1">
-            <chat-client-app-widget-input-input w-class="pwInput">{itype:{{it.type}},placeHolder:"密码",input:{{it1.password}},isSuccess:{{it1.isSuccess}},clearable:true,style:"font-size:32px;color:#318DE6" }</chat-client-app-widget-input-input>
+            <chat-client-app-widget1-input-input w-class="pwInput">{itype:{{it.type}},placeHolder:"密码",input:{{it1.password}},isSuccess:{{it1.isSuccess}},clearable:true,style:"font-size:32px;color:#318DE6" }</chat-client-app-widget1-input-input>
         </div>
         
     </div>

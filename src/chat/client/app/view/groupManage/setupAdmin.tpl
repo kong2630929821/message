@@ -1,7 +1,7 @@
 {{let admins = it.ginfo.adminids}}
 <div class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar>{title:"设置管理员"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar>{title:"设置管理员"}</chat-client-app-widget1-topBar-topBar>
     </div>
     <div w-class="a-part" ev-changeSelect="changeSelect">
         <div w-class="a">管理员{{admins.length}}/5</div>

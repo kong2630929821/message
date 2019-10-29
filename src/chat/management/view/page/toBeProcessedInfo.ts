@@ -2,7 +2,7 @@ import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { buildupImgPath } from '../../../client/app/logic/logic';
-import { EMOJIS_MAP } from '../../../client/app/widget/emoji/emoji';
+import { EMOJIS_MAP } from '../../../client/app/widget1/emoji/emoji';
 import { REPORT_PERSON, REPORT_PUBLIC } from '../../../server/data/constant';
 import { penaltyText, REPORT, REPORTTITLE, timestampFormat } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';

@@ -2,22 +2,22 @@
     <div w-class="scroll-container" on-scroll="scrollPage" id="groupInfo">
         <div w-class="top-main-wrap" >
             {{if it.inFlag != 3}}
-            <widget w-tag="chat-client-app-widget-topBar-topBar2" style="transform:translateZ(10px)">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
+            <widget w-tag="chat-client-app-widget1-topBar-topBar2" style="transform:translateZ(10px)">{text:"",nextImg:{{it.scrollHeight ? "more-dot-blue.png":"more-dot-white.png"}},scrollHeight:{{it.scrollHeight}} }</widget>
             {{else}}
-            <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"transparent"}</widget>
+            <widget w-tag="chat-client-app-widget1-topBar-topBar">{title:"",background:"transparent"}</widget>
             {{end}}
 
             <div w-class="home-info-wrap">
                 {{if it.avatarHtml}}
                 <widget w-tag="pi-ui-html" style="width:190px">{{it.avatarHtml}}</widget>
                 {{else}}
-                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" on-tap="selectAvatar">{imgURL:{{it.avatar}},width:"190px;"}</widget>
+                <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar" on-tap="selectAvatar">{imgURL:{{it.avatar}},width:"190px;"}</widget>
                 {{end}}
 
                 <div w-class="nameText">
                     {{if it.editable}}
                     <div ev-input-change="groupAliasChange" on-tap="editGroupAlias" ev-input-blur="changeGroupAlias">
-                        <widget w-tag="chat-client-app-widget-input-input" w-class="groupAliasInput">{input:{{it.groupAlias}},style:"background:transparent;padding:0;color: #fff;" }</widget>
+                        <widget w-tag="chat-client-app-widget1-input-input" w-class="groupAliasInput">{input:{{it.groupAlias}},style:"background:transparent;padding:0;color: #fff;" }</widget>
                     </div>
                     {{else}}
                         <span>{{it.groupAlias || it.groupInfo.name || "------"}}</span>
@@ -89,7 +89,7 @@
                     <img w-class="grouperIcon" src="../../res/images/add_group_user.png" />
                     {{for i, v of it.members}}
                         {{if i < 5 }}
-                        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="grouperIcon">{imgURL:{{v || "../../res/images/user_avatar.png"}}, width:"88px"}</widget>
+                        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="grouperIcon">{imgURL:{{v || "../../res/images/user_avatar.png"}}, width:"88px"}</widget>
                         {{end}}
                     {{end}}
                     <img w-class="more" src="../../res/images/more-gray.png" />

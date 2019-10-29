@@ -1,6 +1,6 @@
 <div w-class="item">
     <div w-class="top">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
+        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
         <div w-class="topCenter">
             <div style="display:flex;align-items:center;">
                 <span>{{it.username}}&nbsp;</span>
@@ -57,7 +57,7 @@
                         <div></div>
                         {{end}}
                     {{end}}
-                    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image" on-tap="showBigImg({{i}})">{imgURL:{{it.buildupImgPath(v.compressImg)}}, width:"{{it.imgs.length==1?'230px':'180px'}}",height:"{{it.imgs.length==1?'230px':'180px'}}",notRound:true}</widget>
+                    <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="image" on-tap="showBigImg({{i}})">{imgURL:{{it.buildupImgPath(v.compressImg)}}, width:"{{it.imgs.length==1?'230px':'180px'}}",height:"{{it.imgs.length==1?'230px':'180px'}}",notRound:true}</widget>
                 {{end}}
             {{end}}
         {{end}}

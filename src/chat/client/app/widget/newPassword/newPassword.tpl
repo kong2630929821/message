@@ -1,7 +1,7 @@
 <div style="background: none;">
     <div w-class="pswInput" ev-input-change="pswChange" ev-input-focus="pswIconChange">
         <div style="flex: 1">
-            <chat-client-app-widget-input-input>{itype:"password",placeHolder:{{it.placeHolder?it.placeHolder:"密码"}},input:{{it1.password}} }</chat-client-app-widget-input-input>
+            <chat-client-app-widget1-input-input>{itype:"password",placeHolder:{{it.placeHolder?it.placeHolder:"密码"}},input:{{it1.password}} }</chat-client-app-widget1-input-input>
         </div>
         {{if it1.pswSuccess}}
         <img src="../../res/images/icon_right2.png" w-class="successPic"/>
@@ -23,7 +23,7 @@
 
     <div w-class="pswInput" ev-input-change="repChange" ev-input-focus="repIconChange">
     <div style="flex: 1">
-        <chat-client-app-widget-input-input>{itype:"password",placeHolder:"重复密码",input:{{it1.rePassword}} }</chat-client-app-widget-input-input>
+        <chat-client-app-widget1-input-input>{itype:"password",placeHolder:"重复密码",input:{{it1.rePassword}} }</chat-client-app-widget1-input-input>
     </div>
     {{if it1.repSuccess}}
     <img src="../../res/images/icon_right2.png" w-class="successPic"/>

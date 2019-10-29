@@ -1,5 +1,5 @@
 <div class="new-page" ev-back-click="goBack" w-class="new-page" ev-send="send" ev-next-click="groupDetail" on-tap="close">
-    <chat-client-app-widget-topBar-topBar>{title:{{it.name}},nextImg:"more-dot-blue.png" }</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:{{it.name}},nextImg:"more-dot-blue.png" }</chat-client-app-widget1-topBar-topBar>
     {{if it.chatHistory.length}}
     <div w-class="title" on-tap="goAllChat">
         <span w-class="mark"></span>

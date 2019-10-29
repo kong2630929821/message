@@ -1,7 +1,7 @@
 {{let membersButnoOwner = it.ginfo.memberids.filter(item => item !== it.ginfo.ownerid)}}
 <div class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar>{title:"转让群主"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar>{title:"转让群主"}</chat-client-app-widget1-topBar-topBar>
     </div>
    
     <div w-class="a-part" ev-changeSelect="changeSelect">

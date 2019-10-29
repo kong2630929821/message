@@ -1,8 +1,8 @@
 <div class="new-page" w-class="page" ev-back-click="goBack" ev-next-click="showUtils" on-tap="closeUtils">
-    <widget w-tag="chat-client-app-widget-topBar-topBar">{title:"",background:"#fff",nextImg:"more-dot-blue.png"}</widget>
+    <widget w-tag="chat-client-app-widget1-topBar-topBar">{title:"",background:"#fff",nextImg:"more-dot-blue.png"}</widget>
     <div w-class="contain">
         <div w-class="topBox">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"190px;"}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"190px;"}</widget>
             <div w-class="nameText">{{it.name}}</div>
             <div w-class="numList">
                 <span style="margin-right:40px;">{{it.totalPost}}&nbsp;篇文章</span>
@@ -21,7 +21,7 @@
 
         {{for i,v of it.postList}}
         <div w-class="item" on-tap="goDetail({{i}})">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="itemImg">{imgURL:{{v.img}},width:"150px;",notRound:true}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="itemImg">{imgURL:{{v.img}},width:"150px;",notRound:true}</widget>
             <div w-class="itemTitle">{{v.title}}</div>
         </div>
         {{end}}

@@ -1,5 +1,5 @@
 <div class="new-page" style="background:#F9F9F9" ev-back-click="goBack">
-    <chat-client-app-widget-topBar-topBar>{title:"消息设置"}</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:"消息设置"}</chat-client-app-widget1-topBar-topBar>
     {{for i,v of it.setList}}
         {{if i%3==0}}
         <div w-class="divide"></div>
