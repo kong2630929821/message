@@ -1,4 +1,4 @@
-<div class="new-page" w-class="page" ev-back-click="goBack">
+<div class="new-page" w-class="page" ev-back-click="goBack"  on-tap="pageClick">
     <chat-client-app-widget1-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="contain" id="postPage" on-scroll="scrollPage">
         <div style="margin: 20px 0;" id="postContain">
@@ -16,8 +16,8 @@
                 {{if it.active == 'comment'}}
                 <div id="commentBox">
                     {{for i,v of it.commentList}}
-                    <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})">
-                        <widget w-tag="chat-client-app-view-info-commentItem">{{v}}</widget>
+                    <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-close="pageClick">
+                        <widget w-tag="chat-client-app-view-info-commentItem">{{it.dealData(v,it.expandItem == i)}}</widget>
                     </div>
                     {{end}}
                 </div>
