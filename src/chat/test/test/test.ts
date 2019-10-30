@@ -7,18 +7,18 @@ import { clientRpcFunc } from '../../client/app/net/init';
 import { initPush } from '../../client/app/net/receive';
 import { SPIDER_USER_INFO, SPIDER_WEIBO_IMG, SPIDER_WEIBO_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
 import { CommentKey, PostKey } from '../../server/data/db/community.s';
-import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportList, ReportListArg, RootUser, UserReportDetail } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, RootUser, UserReportDetail } from '../../server/data/db/manager.s';
 import { AddRobotArg, CommonComment, CommonCommentList, RobotActiveSet, RobotUserInfo } from '../../server/data/db/robot.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { Result, UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
-import { cancelGmAccount, createRoot, getApplyPublicList, getPostList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setGmAccount } from '../../server/data/rpc/manager.p';
+import { cancelGmAccount, createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setGmAccount } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
 import { addCommonCommernt, closeRobot, getCommonCommernt, getRobotSet, getRobotUserInfo, getRobotWeiboInfo, initRobotSet, modifyRobotSet, startRobot } from '../../server/data/rpc/robot.p';
-import { changeUserInfo, searchFriend, set_gmAccount } from '../../server/data/rpc/user.p';
+import { applyFriend, changeUserInfo, searchFriend, set_gmAccount, testDB } from '../../server/data/rpc/user.p';
 import { SetOfficial, UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
 
 /**
@@ -30,7 +30,7 @@ import { SetOfficial, UserChangeInfo, UserInfoList } from '../../server/data/rpc
 // 聊天登陆
 export const chatLogin = () => {
     const walletLoginReq = new WalletLoginReq();
-    walletLoginReq.openid = '1003';
+    walletLoginReq.openid = '1001';
     walletLoginReq.sign = 'test';
     const userType = new UserType();
     userType.enum_type = UserType_Enum.WALLET;
@@ -40,13 +40,13 @@ export const chatLogin = () => {
     });
     initPush();
     const userChange = new UserChangeInfo();
-    userChange.acc_id = '123123';
+    userChange.acc_id = '12323';
     userChange.avatar = 'aaa';
     userChange.name = 'Tony Stark';
     userChange.note = '...';
     userChange.sex = 1;
-    userChange.tel = '13333333333';
-    userChange.wallet_addr = 'asdasdasd';
+    userChange.tel = '133333333323';
+    userChange.wallet_addr = 'asdasasdas';
     clientRpcFunc(changeUserInfo, userChange, (r: UserInfo) => {
         console.log(r);
     });
@@ -406,9 +406,9 @@ export const rootLoginTest = () => {
 // 举报
 export const reportTest = () => {
     const arg = new ReportArg();
-    arg.key = '2:24';
+    arg.key = '1%10002';
     arg.evidence = '';
-    arg.report_type = 2;
+    arg.report_type = 1;
     arg.reason = '涉嫌诈骗';
     clientRpcFunc(report, arg, (r: number) => {
         console.log(r);
@@ -418,21 +418,29 @@ export const reportTest = () => {
 // 举报列表
 export const getReportListTest = () => {
     const arg = new ReportListArg();
-    arg.count = 10;
-    arg.id = 0;
-    arg.state = 0;
+    arg.report_state = 0;
+    arg.report_type = 1;
     clientRpcFunc(getReportList, arg, (r: string) => {
         console.log(r);
-        const r1:ReportList = JSON.parse(r);
-        console.log(r1);
+        if (r !== '') {
+
+            const r1:ReportIndexList = JSON.parse(r);
+            for (let i = 0; i < r1.list.length; i++) {
+                const element:ReportIndex = r1.list[i];
+                const arg1 = new ReportDetailListArg();
+                arg1.report_ids = element.report_ids;
+                clientRpcFunc(getReportDetailList, arg1, (r2: string) => {
+                    console.log(r2);
+                });
+            }
+        }
     });
 };
 
 // 惩罚指定对象
 export const punishTest = () => {
     const arg = new PunishArg();
-    arg.key = '1:10023';
-    arg.report_id = 1;
+    arg.key = '1%10002';
     arg.punish_type = 4;
     arg.time = 300000;
     clientRpcFunc(punish, arg, (r: string) => {
@@ -442,7 +450,7 @@ export const punishTest = () => {
 
 // 举报受理完成
 export const reportHandledTest = () => {
-    const arg = 3;
+    const arg = '1%10002';
     clientRpcFunc(reportHandled, arg, (r: string) => {
         console.log(r);
     });
@@ -560,12 +568,35 @@ export const cancelGmAccountTest = () => {
     });
 };
 
+// 添加好友
+export const applyFriendTest = () => {
+    const uid = 10065;
+    clientRpcFunc(applyFriend, uid, (r: number) => {
+        console.log(r);
+    });
+};
+
+export const testDBtest = () => {
+    const uid = 10066;
+    clientRpcFunc(testDB, uid, (r: number) => {
+        console.log(r);
+    });
+};
+
 const props = {
     bts: [
         
         {
             name: '用户登陆',
             func: () => { chatLogin(); }
+        },
+        {
+            name: '添加好友',
+            func: () => { applyFriendTest(); }
+        },
+        {
+            name: '读数据库',
+            func: () => { testDBtest(); }
         },
         {
             name: '用户详情',

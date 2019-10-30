@@ -478,6 +478,18 @@ export const set_gmAccount = (setUser:SetOfficial): Result => {
 };
 
 /**
+ * 设置官方账号 rpc
+ */
+// #[rpc=rpcServer]
+export const testDB = (uid: number): string => {
+    const contactBucket = new Bucket(CONSTANT.WARE_NAME, CONSTANT.CONTACT_TABLE);
+    const contact = contactBucket.get<number, [Contact]>(uid)[0];
+    if (!contact) return '';
+
+    return JSON.stringify(contact);
+};
+
+/**
  * 设置官方账号
  */
 export const setOfficialAccount = (accId:string,appId:string): Result => {
