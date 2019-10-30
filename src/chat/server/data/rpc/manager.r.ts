@@ -8,8 +8,8 @@ import { send } from '../../../utils/send';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
-import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail } from '../db/manager.s';
-import { Report, ReportCount } from '../db/message.s';
+import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail } from '../db/manager.s';
+import { Report, ReportCount, ReportListTab } from '../db/message.s';
 import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
@@ -56,38 +56,101 @@ export const rootLogin = (user: RootUser): number => {
  * 举报信息列表
  */
 // #[rpc=rpcServer]
-export const getReportList = (arg: ReportListArg): string => {
+export const getReportList = (reportArg: ReportListArg): string => {
+    console.log('============getReportList:', reportArg);
     if (!getSession('root')) return 'not login';
+    const reportListTabBucket = new Bucket(CONSTANT.WARE_NAME, ReportListTab._$info.name);
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+    const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
+    const reportIndexList = new ReportIndexList();
+    reportIndexList.list = [];
+    const reportListTab = reportListTabBucket.get<number, ReportListTab[]>(reportArg.report_type)[0];
+    console.log('============reportListTab:', reportListTab);
+    if (!reportListTab) return '';
+    console.log('============reportListTab11111111111111:', reportListTab);
+    // 获取最近一条举报信息
+    for (let i = 0; i < reportListTab.key_list.length; i++) {
+        const userReport = reportCountBucket.get<string, ReportCount[]>(reportListTab.key_list[i])[0];
+        if (userReport) {
+            let reportIds = [];
+            if (reportArg.report_state === 0) { // 未处理
+                reportIds = userReport.not_handled_reported;
+            } else if (reportArg.report_state === 1) { // 已处理
+                reportIds = userReport.handled_reported;
+            }
+            if (reportIds.length > 0) {
+                const lastReport = reportBucket.get<number, Report[]>(reportIds[0])[0];
+                if (lastReport) {
+                    const reportIndex = new ReportIndex();
+                    reportIndex.user_name = reportGetUserName(reportArg.report_type, lastReport);
+                    reportIndex.last_user_name = getUserInfoById(lastReport.ruid).name;
+                    reportIndex.last_time = lastReport.time;
+                    reportIndex.last_resaon = lastReport.reason;
+                    reportIndex.report_ids = reportIds;
+                    reportIndexList.list.push(reportIndex);
+                }
+            }
+        }
+    }
+
+    return JSON.stringify(reportIndexList);
+};
+
+/**
+ * 获取指定举报对象举报详情列表
+ */
+// #[rpc=rpcServer]
+export const getReportDetailList = (arg: ReportDetailListArg): string => {
+    console.log('============getReportDetailList:', arg);
     const reportList = new ReportList();
     reportList.list = [];
-    reportList.total = 0;
-    let reportId: number;
-    if (arg.id <= 0) {
-        reportId = null;
-    } else {
-        reportId = arg.id - 1;
+    for (let i = 0; i < arg.report_ids.length; i++) {
+        const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+        const report = reportBucket.get<number, Report[]>(arg.report_ids[i])[0];
+        const reportData = getReportData(report);
+        reportList.list.push(reportData);
     }
-    const iter = reportBucket.iter(reportId, true);
-    let count = 0;
-    do {
-        const v = iter.next();
-        if (!v) break;
-        const report: Report = v[1];
-        if (report.state === arg.state) reportList.total ++;
-        if (count >= arg.count) continue;
-        console.log('============loop report:', report);
-        if (report.state === arg.state) { // 匹配举报状态
-            const reportData = getReportData(report);
-            reportList.list.push(reportData);
-            count ++;
-            continue;
-        }
-    } while (iter);
     console.log('============reportList:', reportList);
 
     return JSON.stringify(reportList);
 };
+
+/**
+ * 举报信息列表
+ */
+// #[rpc=rpcServer]
+// export const getReportList = (arg: ReportListArg): string => {
+//     if (!getSession('root')) return 'not login';
+//     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+//     const reportList = new ReportList();
+//     reportList.list = [];
+//     reportList.total = 0;
+//     let reportId: number;
+//     if (arg.id <= 0) {
+//         reportId = null;
+//     } else {
+//         reportId = arg.id - 1;
+//     }
+//     const iter = reportBucket.iter(reportId, true);
+//     let count = 0;
+//     do {
+//         const v = iter.next();
+//         if (!v) break;
+//         const report: Report = v[1];
+//         if (report.state === arg.state) reportList.total ++;
+//         if (count >= arg.count) continue;
+//         console.log('============loop report:', report);
+//         if (report.state === arg.state) { // 匹配举报状态
+//             const reportData = getReportData(report);
+//             reportList.list.push(reportData);
+//             count ++;
+//             continue;
+//         }
+//     } while (iter);
+//     console.log('============reportList:', reportList);
+
+//     return JSON.stringify(reportList);
+// };
 
 /**
  * 惩罚指定对象
@@ -135,6 +198,7 @@ export const punish = (arg: PunishArg): string => {
     if (report_type === CONSTANT.REPORT_PERSON) {
         uid = parseInt(arg.key.split('%')[1], 10);
     }
+    
     // 禁言和禁止发动态只用添加惩罚记录,在发消息时查询有无惩罚记录
     const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
     const punish = new Punish();
@@ -142,7 +206,6 @@ export const punish = (arg: PunishArg): string => {
     punish.start_time = Date.now().toString();
     punish.end_time = (Date.now() + arg.time).toString();
     punish.punish_type = arg.punish_type;
-    punish.report_id = arg.report_id;
     punish.state = CONSTANT.PUNISH_LAST;
     punishBucket.put(punish.id, punish);
     const punishCountBucket = new Bucket(CONSTANT.WARE_NAME, PunishCount._$info.name);
@@ -150,10 +213,10 @@ export const punish = (arg: PunishArg): string => {
     if (!punishCount) {
         punishCount = new PunishCount();
         punishCount.key = arg.key;
-        punishCount.punish_list = [];
+        punishCount.now_publish = 0;
         punishCount.punish_history = [];
     }
-    punishCount.punish_list.push(punish.id);
+    punishCount.now_publish = punish.id;
     punishCountBucket.put(punishCount.key, punishCount);
     // 推送惩罚信息
     send(uid, CONSTANT.SEND_PUNISH, JSON.stringify(punish));
@@ -165,15 +228,16 @@ export const punish = (arg: PunishArg): string => {
  * 举报受理完成
  */
 // #[rpc=rpcServer]
-export const reportHandled = (report_id: number): string => {
+export const reportHandled = (reportKey: string): string => {
     if (!getSession('root')) return 'not login';
-    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
-    const report = reportBucket.get<number, Report[]>(report_id)[0];
-    if (!report) return 'error report id';
-    report.state = 1;
-    reportBucket.put(report.id, report);
+    // 更新举报状态
+    const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
+    const userReport = reportCountBucket.get<string, ReportCount[]>(reportKey)[0];
+    userReport.handled_reported = userReport.not_handled_reported.concat(userReport.handled_reported);
+    userReport.not_handled_reported = [];
+    reportCountBucket.put(reportKey, userReport);
 
-    return report_id.toString();
+    return reportKey;
 };
 
 /**
@@ -583,10 +647,8 @@ export const getReportUserInfo = (key: string, uid: number): ReportUserInfo => {
     // 当前惩罚列表
     reporterUserInfo.punish_list = [];
     const punishCount = getUserPunish(key);
-    for (let i = 0; i < punishCount.punish_list.length; i++) {
-        const punish = punishBucket.get<number, Punish[]>(punishCount.punish_list[i])[0];
-        reporterUserInfo.punish_list.push(punish);
-    }
+    const nowPunish = punishBucket.get<number, Punish[]>(punishCount.now_publish)[0];
+    if (nowPunish) reporterUserInfo.punish_list.push(nowPunish);
     // 历史惩罚列表
     reporterUserInfo.punish_history_list = [];
     for (let i = 0; i < punishCount.punish_history.length; i++) {
@@ -628,10 +690,8 @@ export const getReportPublicInfo = (key: string): ReportPublicInfo => {
     // 当前惩罚列表
     reportPublicInfo.punish_list = [];
     const punishCount = getUserPunish(key);
-    for (let i = 0; i < punishCount.punish_list.length; i++) {
-        const punish = punishBucket.get<number, Punish[]>(punishCount.punish_list[i])[0];
-        reportPublicInfo.punish_list.push(punish);
-    }
+    const nowPunish = punishBucket.get<number, Punish[]>(punishCount.now_publish)[0];
+    if (nowPunish) reportPublicInfo.punish_list.push(nowPunish);
     // 历史惩罚列表
     reportPublicInfo.punish_history_list = [];
     for (let i = 0; i < punishCount.punish_history.length; i++) {
@@ -666,7 +726,7 @@ export const getUserPunish = (key: string): PunishCount => {
     if (!punishCount) {
         punishCount = new PunishCount();
         punishCount.key = key;
-        punishCount.punish_list = [];
+        punishCount.now_publish = 0;
         punishCount.punish_history = [];
     }
     console.log('===============punishCount1111:', punishCount, key);
@@ -676,23 +736,21 @@ export const getUserPunish = (key: string): PunishCount => {
 
 // 获取指定对象正在生效的惩罚信息
 export const getUserPunishing = (key: string, punishType: number): PunishList => {
-    const punishCountBucket = new Bucket(CONSTANT.WARE_NAME, PunishCount._$info.name);
     const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
     const punishCount = getUserPunish(key);
     console.log('===============punishCount:', punishCount);
     const punishList = new PunishList();
     punishList.list = [];
-    for (let i = 0; i < punishCount.punish_list.length; i++) {
-        const punish = punishBucket.get<number, Punish[]>(punishCount.punish_list[i])[0];
-        if (!punish) continue;
-        if ((punish.punish_type !== CONSTANT.FREEZE) && (punish.punish_type !== punishType)) continue;
-        // 惩罚时间结束
-        if (parseInt(punish.end_time, 10) <= Date.now()) {
-            endPunish(key, punishCount.punish_list[i]);
-            continue;
-        } else {
-            punishList.list.push(punish);
-        }
+    const punish = punishBucket.get<number, Punish[]>(punishCount.now_publish)[0];
+    if (!punish) return punishList;
+    if ((punish.punish_type !== CONSTANT.FREEZE) && (punish.punish_type !== punishType)) return punishList;
+    // 惩罚时间结束
+    if (parseInt(punish.end_time, 10) <= Date.now()) {
+        endPunish(key, punishCount.now_publish);
+
+        return punishList;
+    } else {
+        punishList.list.push(punish);
     }
 
     return punishList;
@@ -710,10 +768,8 @@ export const endPunish = (key: string, id: number): boolean => {
     const punish = punishBucket.get<number, Punish[]>(id)[0];
     punish.state = CONSTANT.PUNISH_END;
     punishBucket.put(id, punish);
-    const index = punishCount.punish_list.indexOf(id);
-    if (index > -1) {
-        punishCount.punish_list.splice(index, 1);
-    }
+    punishCount.now_publish = 0;
+
     punishCount.punish_history.push(id);
 
     return punishCountBucket.put(key, punishCount);
@@ -864,6 +920,37 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     }
 
     return postData;
+};
+
+const reportGetUserName = (reportType: number, report: Report): string => {
+    let uid = 0;
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
+    switch (reportType) {
+        case CONSTANT.REPORT_PERSON:
+            uid = JSON.parse(report.key.split('%')[1]);
+            break;
+        case CONSTANT.REPORT_PUBLIC:
+            const communityNum = report.key.split('%')[1];
+            const communityBase = communityBaseBucket.get<string, CommunityBase[]>(communityNum)[0];
+            uid = communityBase.owner;
+            break;
+        case CONSTANT.REPORT_POST:
+            const postKey: PostKey = JSON.parse(report.key.split('%')[1]);
+            const commBase:CommunityBase = communityBaseBucket.get(postKey.num)[0];
+            uid = commBase.owner;
+            break;
+        case CONSTANT.REPORT_COMMENT:
+            const commentKey: CommentKey = JSON.parse(report.key.split('%')[1]);
+            const commBase1:CommunityBase = communityBaseBucket.get(commentKey.num)[0];
+            uid = commBase1.owner;
+            break;
+        default:
+            uid = 0; 
+    }
+    const userInfo = getUserInfoById(uid);
+    if (!userInfo) return '';
+
+    return userInfo.name;
 };
 
 // 自增id
