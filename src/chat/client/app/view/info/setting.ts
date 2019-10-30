@@ -1,6 +1,7 @@
 import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { REPORT_PERSON } from '../../../../server/data/constant';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
@@ -14,7 +15,6 @@ import { buildupImgPath, complaintUser, getFriendAlias, getFriendsInfo,  getUser
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
-import { REPORT_PERSON } from '../../../../server/data/constant';
 
 interface Props {
     userAlias:string;  // 好友备注
@@ -117,6 +117,7 @@ export class Setting extends Widget {
         getUsersBasicInfo([uid]).then((r: UserArray) => {
             this.props.userInfo = r.arr[0];
             store.setStore(`userInfoMap/${uid}`,r.arr[0]);
+            this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
             this.paint();
         },(r) => {
             console.error('获取用户信息失败', r);
