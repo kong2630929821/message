@@ -11,6 +11,8 @@
                 {{else}}
                     {{if it.gender!=2}}
                         <img src="../../res/images/{{it.gender===1?'girl.png':'boy.png'}}"/>
+                    {{else}}
+                        <img src="../../res/images/neutral.png"/>
                     {{end}}
                 {{end}}
             </div>

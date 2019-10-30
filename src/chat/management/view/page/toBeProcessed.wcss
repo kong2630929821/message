@@ -19,30 +19,21 @@
     background:rgba(255,255,255,1);
 }
 .title1{
-    width:150px;
-    height:48px;
-    line-height: 48px;
     text-align: center;
-    color: #354052;
+    color:rgba(53,64,82,1);
     font-size:18px;
     font-family:SourceSansPro-Semibold;
     font-weight:600;
-    background:white;
-    margin: 25px;
+    margin: 0 25px;
     cursor: pointer;
-    border: 1px solid rgb(204, 204, 204);
 }
 .activeTitle{
-    width:150px;
-    height:48px;
-    line-height: 48px;
     text-align: center;
-    color: white;
+    color:rgba(24,134,217,1);
     font-size:18px;
     font-family:SourceSansPro-Semibold;
     font-weight:600;
-    background:#273142;
-    margin: 25px;
+    margin: 0 25px;
     cursor: pointer;
 }
 .tableTitle{
