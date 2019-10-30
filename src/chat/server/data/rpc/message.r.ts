@@ -2,7 +2,7 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, Report, ReportCount, UserHistory, UserMsg } from '../db/message.s';
+import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, Report, ReportCount, ReportListTab, UserHistory, UserMsg } from '../db/message.s';
 import { Result } from './basic.s';
 import { GroupSend, HistoryCursor, ReportArg, SendMsg, TempSend, UserSend } from './message.s';
 
@@ -501,6 +501,7 @@ export const isUserOnline = (uid: number): Result => {
 export const report = (arg: ReportArg): number => {
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
+    const reportListTabBucket = new Bucket(CONSTANT.WARE_NAME, ReportListTab._$info.name);
     const uid = getUid();
     // 添加举报记录
     const report = new Report();
@@ -520,9 +521,12 @@ export const report = (arg: ReportArg): number => {
         reportCount = new ReportCount();
         reportCount.key = report.key;
         reportCount.report = [];
+        reportCount.handled_reported = [];
+        reportCount.not_handled_reported = [];
         reportCount.reported = [];
     }
-    reportCount.reported.push(report.id);
+    reportCount.reported.unshift(report.id);
+    reportCount.not_handled_reported.unshift(report.id);
     reportCountBucket.put(reportCount.key, reportCount);
     // 添加举报人统计信息
     let reportCount1 = reportCountBucket.get<string, ReportCount[]>(`${CONSTANT.REPORT_PERSON}%${uid}`)[0];
@@ -530,10 +534,21 @@ export const report = (arg: ReportArg): number => {
         reportCount1 = new ReportCount();
         reportCount1.key = `${CONSTANT.REPORT_PERSON}%${uid}`;
         reportCount1.report = [];
+        reportCount1.handled_reported = [];
+        reportCount1.not_handled_reported = [];
         reportCount1.reported = [];
     }
-    reportCount1.report.push(report.id);
+    reportCount1.report.unshift(report.id);
     reportCountBucket.put(reportCount1.key, reportCount1);
+    // 添加举报列表索引
+    let reportListTab = reportListTabBucket.get<number, ReportListTab[]>(arg.report_type)[0];
+    if (!reportListTab) {
+        reportListTab = new ReportListTab();
+        reportListTab.report_type = arg.report_type;
+        reportListTab.key_list = [];
+    }
+    reportListTab.key_list.unshift(arg.key);
+    reportListTabBucket.put(arg.report_type, reportListTab);
 
     return report.id;
 };

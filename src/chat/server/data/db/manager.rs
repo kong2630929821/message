@@ -19,7 +19,6 @@ struct Punish {
     punish_type: u32,          //惩罚类型
     start_time: String,        //开始时间
     end_time: String,          //结束时间
-    report_id: u32,            //举报id
     state: u8,                 //状态
 }
 
@@ -29,7 +28,7 @@ struct Punish {
 #[primary=key,db=file,dbMonitor=true]
 struct PunishCount {
     key: String,               //主键
-    punish_list: &[u32],       //当前惩罚
+    now_publish: u32,          //当前惩罚
     punish_history: &[u32],    //历史惩罚
 }
 
@@ -38,7 +37,7 @@ struct PunishCount {
 */
 struct PunishData {
     key: String,                  //主键
-    punish_list: &[Punish],       //当前惩罚
+    now_publish: Punish,          //当前惩罚
     punish_history: &[Punish],    //历史惩罚
 }
 
@@ -46,9 +45,34 @@ struct PunishData {
 *请求举报列表参数
 */
 struct ReportListArg {
-    id: u32,        //开始遍历的id
-    count: u32,     //获取数量
-    state: u8 ,     //状态
+    report_type: u8,          //举报类型
+    report_state: u8,         //举报状态
+}
+
+/**
+*举报首页数据
+*/
+struct ReportIndex {
+    key: String,                //根据举报类型定位到具体的人/公众号/帖子/评论
+    user_name: String,          //用户名
+    last_resaon: String,        //最近一次举报的原因
+    last_user_name: String,     //最近一次举报的用户名
+    last_time: String,          //最近一次举报的时间
+    report_ids: &[u32],         //举报id列表
+}
+
+/**
+*举报首页数据列表
+*/
+struct ReportIndexList {
+    list: &[ReportIndex]
+}
+
+/**
+*获取举报详情列表参数
+*/
+struct ReportDetailListArg {
+    report_ids: &[u32],      //举报id列表
 }
 
 /**
@@ -97,15 +121,13 @@ struct ReportData {
 *举报列表
 */
 struct ReportList {
-    list: &[ReportData],
-    total: u32,
+    list: &[ReportData]
 }
 
 /**
 *惩罚参数
 */
 struct PunishArg {
-    report_id: u32,      //举报id
     key: String,         //举报对象
     punish_type: u32,    //惩罚类型
     time: Option<u32>,   //惩罚时间
