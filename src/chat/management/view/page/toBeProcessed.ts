@@ -33,7 +33,7 @@ export class ToBeProcessed extends Widget {
         perPageIndex:0,
         returnStatus:0,
         showDataList:[],
-        showTitleList:['名称','类别','举报原因','被举报次数','举报时间','举报人'],
+        showTitleList:['被举报人','类别','举报原因','被举报次数','举报时间','举报人'],
         status:true,
         dataList:[],
         reportDataList:[],
