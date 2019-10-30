@@ -127,7 +127,6 @@ struct Report {
     ruid: u32,           //举报人
     time: String,        //举报时间
     handle_time: String, //处理时间
-    state: u8 ,          //状态
 }
 
 /**
@@ -137,5 +136,16 @@ struct Report {
 struct ReportCount {
     key: String,         //根据举报类型定位到具体的人/公众号/帖子/评论
     reported: &[u32],    //被举报的举报id列表
+    handled_reported: &[u32], //已处理的举报id列表
+    not_handled_reported: &[u32],   // 未处理的举报id列表
     report: &[u32],      //举报他人的举报id列表
+}
+
+/**
+* 举报列表(按时间排序)
+*/
+#[primary=report_type,db=file,dbMonitor=true]
+struct ReportListTab {
+    report_type: u8,          //举报类型
+    key_list: &[String],      //举报主键列表
 }

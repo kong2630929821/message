@@ -13,6 +13,8 @@
                     {{end}}
                     {{if it.sex&&it.sex!=2}}
                         <img src="../../res/images/{{it.sex==1?'girl.png':'boy.png'}}" w-class="sexImg"/>
+                    {{else}}
+                    <img src="../../res/images/neutral.png" alt="" w-class="sexImg"/>
                     {{end}}
                     {{if it.totalNew>0}}
                         <div w-class="other">

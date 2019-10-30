@@ -1,14 +1,11 @@
 <div w-class="page" on-tap="close">
     {{if it.status}}
     <div w-class="tabRow">
-        <div w-class="{{it.returnStatus==0?'activeTitle':'title1'}}" on-tap="checkType(0)" on-down="onShow">全部</div>
-        <div w-class="{{it.returnStatus==1?'activeTitle':'title1'}}" on-tap="checkType(1)" on-down="onShow">用户</div>
-        <div w-class="{{it.returnStatus==2?'activeTitle':'title1'}}" on-tap="checkType(2)" on-down="onShow">嗨嗨号</div>
-        <div w-class="{{it.returnStatus==3?'activeTitle':'title1'}}" on-tap="checkType(3)" on-down="onShow">动态</div>
-        <div w-class="{{it.returnStatus==4?'activeTitle':'title1'}}" on-tap="checkType(4)" on-down="onShow">文章</div>
-        <div w-class="{{it.returnStatus==5?'activeTitle':'title1'}}" on-tap="checkType(5)" on-down="onShow">评论</div>
+        被举报类别：
+        <div w-class="{{it.returnStatus==0?'activeTitle':'title1'}}" on-tap="checkType(0)" on-down="onShow">玩家</div>
+        <div w-class="{{it.returnStatus==1?'activeTitle':'title1'}}" on-tap="checkType(1)" on-down="onShow">动态</div>
     </div>
-    <div ev-table-detail="goDetail">
+    <div ev-table-detail="goDetail" style="margin-top:37px;">
         <div w-class="tableTitle">数据列表</div>
         <widget w-tag="chat-management-components-table" style="max-height:550px;">{datas: {{it.showDataList}},title:{{it.showTitleList}},needCheckBox:false,inlineBtn2:"查看详情"}</widget>
     </div>
