@@ -2,6 +2,7 @@ import { deepCopy } from '../../../../app/store/memstore';
 import { Widget } from '../../../../pi/widget/widget';
 import { perPage } from '../../components/pagination';
 import { getAllReport } from '../../net/rpc';
+import { PENALTY } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';
 
 interface Props {
@@ -20,7 +21,6 @@ interface Props {
     allList:any;// 举报全部原始数据
     currentData:any;// 当前处理的数据
 }
-
 /**
  * 文章审核
  */
@@ -51,17 +51,13 @@ export class ToBeProcessed extends Widget {
      * 初始化数据
      */
     public initData() {
-        getAllReport(4,0,0).then((r:any) => {
-            if (!r.total) {
-                return;
-            }
-            this.props.allList = r.list;
-            this.props.list =  r.showDataList;
-            this.props.sum = r.total;
-            this.props.dataList = this.props.list[this.props.returnStatus];
-            this.props.reportDataList = this.props.allList[this.props.returnStatus];
-            this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
-            this.paint();
+        getAllReport(0,PENALTY.DELETE_CONTENT).then((r:any) => {
+            debugger;
+            this.props.allList[0] = r[0];
+            // this.props.dataList = this.props.list[this.props.returnStatus];
+            // this.props.reportDataList = this.props.allList[this.props.returnStatus];
+            // this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+            // this.paint();
         });
     }
 

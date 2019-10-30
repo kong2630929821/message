@@ -92,16 +92,15 @@ export const getHandleArticle = (result:boolean,reason:string,id:number,num:stri
 };
 
 // 获取举报列表
-export const getAllReport = (count:number,id:number,state:number) => {
+export const getAllReport = (state:number,report_type:number) => {
     const arg = new ReportListArg();
-    arg.count = count;
-    arg.id = id;
-    arg.state = state;
+    arg.report_type = report_type;
+    arg.report_state = state;
 
     return new Promise((res,rej) => {
         clientRpcFunc(getReportList,arg,(r:string) => {
             const data = JSON.parse(r);
-            res(deelReportList(data));
+            res(deelReportList(data,report_type));
         });
     });
 };

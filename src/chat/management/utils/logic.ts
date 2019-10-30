@@ -154,49 +154,34 @@ export enum REPORT {
     REPORT_COMMENT= 5
 }
 export enum REPORTTITLE {
-    REPORT_PERSON= '用户',
+    REPORT_PERSON= '玩家',
     REPORT_PUBLIC= '嗨嗨号',
     REPORT_POST= '动态',
     REPORT_ARTICLE= '文章',
     REPORT_COMMENT= '评论'
 }
 // 处理举报数据列表
-export const deelReportList = (r:any) => {
-    if (r.total === 0) {
-        return r;
+export const deelReportList = (r:any,report_type:number) => {
+    if (r.length === 0) {
+        return [[],[]];
     }
+    const dataList = [];// 表格数据
+    const idList = [];// 详情ID
     const list = r.list;
-    const showDataList = [[],[],[],[],[],[]];
-    const dataList = [[],[],[],[],[],[]];
     list.forEach((v,i) => {
-        const key = v.report_info.key.split('%');
-        const reportInfo = JSON.parse(v.report_info.reason);
-        let reportInfos = null;
-        if (reportInfo.type) {
-            reportInfos = JSON.parse(reportInfo.type).join(',');
-        } else {
-            reportInfos = reportInfo.join(',');
-        }
-        const reportTime = timestampFormat(JSON.parse(v.report_info.time));
-        const reportPeople = v.report_user.user_info.name;
-        let count = 0;
-        if (v.reported_content) {
-            count = v.reported_content.reported_count;
-        } else if (v.reported_public) {
-            count = v.reported_public.reported_list.length;
-        } else {
-            count = v.reported_user.reported_list.length;
-        }
-        const data = [v.reported_user.user_info.name,REPORTTITLE[REPORT[key[0]]],reportInfos,count,reportTime,reportPeople];
-        showDataList[0].push(data);
-        showDataList[key[0]].push(data); 
-        dataList[0].push(v);
-        dataList[key[0]].push(v);
+        const reportType = JSON.parse(JSON.parse(v.last_resaon).type).join(',');
+        dataList.push([
+            v.user_name, // 被举报人
+            REPORTTITLE[REPORT[report_type]],// 举报类型
+            reportType,// 举报原因
+            v.report_ids.length,// 举报次数
+            timestampFormat(JSON.parse(v.last_time)),// 举报时间
+            v.last_user_name// 举报人
+        ]);
+        idList.push(v.report_ids);
     });
-    r.showDataList = showDataList;
-    r.list = dataList;
-
-    return r;
+   
+    return [dataList,idList];
 };
 
 export enum PENALTY {
