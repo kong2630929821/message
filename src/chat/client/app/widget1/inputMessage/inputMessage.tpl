@@ -11,7 +11,7 @@
 	</div>
 
 	<div id="emojiMap" style="min-height: 420px;display:{{it.isOnEmoji?'block':'none'}}">
-		{{if it.isOnEmoji}}
+		{{if !it1.firstEnter}}
 		<widget w-tag="chat-client-app-widget1-emoji-emoji"></widget>
 		{{end}}
 	</div>

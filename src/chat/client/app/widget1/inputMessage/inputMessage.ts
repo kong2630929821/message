@@ -13,6 +13,9 @@ import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ===========================导出
 export class InputMessage extends Widget {
+    public state = { 
+        firstEnter:true 
+    };
     public props:Props = {
         message:'',
         isOnEmoji:false,
@@ -164,6 +167,7 @@ export class InputMessage extends Widget {
 
     // 打开表情包图库
     public openEmoji(e:any) {
+        this.state.firstEnter = false;
         getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight()}px`;
         setTimeout(() => {

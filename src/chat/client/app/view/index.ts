@@ -16,10 +16,12 @@ export const run = (cb) => {
     console.log('webviewName ',webviewName);
     if (webviewName) {
         const item:any = getGameItem(webviewName);
-        popNew('chat-client-app-view-chat-chat',{ accId:item.accId,id:10064,chatType: GENERATOR_TYPE.USER,name:`${item.title.zh_Hans}官方客服`,okCB:() => {
+        popNew('chat-client-app-view-chat-chat',{ accId:item.accId,chatType: GENERATOR_TYPE.USER,name:`${item.title.zh_Hans}官方客服`,okCB:() => {
             WebViewManager.open(webviewName, `${item.url}?${Math.random()}`, webviewName,'', item.screenMode);
         } });
-    } 
+    } else {
+        popNew('app-view-base-app');
+    }
     setTimeout(() => {
         cb && cb();
     }, 100);
