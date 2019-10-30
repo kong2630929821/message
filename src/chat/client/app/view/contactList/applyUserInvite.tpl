@@ -1,6 +1,6 @@
 <div w-class="user-apply-wrap" on-tap="viewApplyDetail" on-down="onShow">
         <div w-class="avatar-wrap">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
         </div>
          <div style="flex: 1 0 0;">
             <div w-class="userName">

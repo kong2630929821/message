@@ -1,11 +1,11 @@
 <div w-class="page" class="new-page" on-tap="pageClick" ev-back-click="goBack" ev-next-click="goSetting" >
-    <chat-client-app-widget-topBar-topBar>{title:"",nextImg:"setting.png"}</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:"",nextImg:"setting.png"}</chat-client-app-widget1-topBar-topBar>
     
     <div w-class="contain" id="userDetailPage" on-scroll="scrollPage">
         <div id="userDetailContain">
             <div w-class="topBox">
                 <div style="display:flex;align-items: center;">
-                    <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"160px;"}</widget>
+                    <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}},width:"160px;"}</widget>
                     <div style="width: 410px;">
                         <div w-class="numList">
                             {{for i,v of it.numList}}

@@ -2,17 +2,20 @@
  * inputMessage 组件相关处理
  */
 // ===========================导入
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { endRadio, getPromise, openCamera, selectImage, startRadio } from '../../logic/native';
+import { popNewMessage } from '../../logic/tools';
 import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
 
 // ===========================导出
 export class InputMessage extends Widget {
+    public state = { 
+        firstEnter:true 
+    };
     public props:Props = {
         message:'',
         isOnEmoji:false,
@@ -27,7 +30,6 @@ export class InputMessage extends Widget {
         chatType:'user',
         istyle:[0,0],
         audioText:'按住说话(30S)'
-        
     };
     private audioCount:number;   // 录音倒计数
     private interval:any;    // 录音倒计时循环事件
@@ -165,6 +167,7 @@ export class InputMessage extends Widget {
 
     // 打开表情包图库
     public openEmoji(e:any) {
+        this.state.firstEnter = false;
         getRealNode(this.tree).getElementsByTagName('textarea')[0].blur();
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight()}px`;
         setTimeout(() => {
@@ -234,7 +237,6 @@ interface Props {
     recordAudio:boolean;  // 正在录入语音
     istyle:number[];   // 语音录入进度条宽度
     audioText:string;  // 语音录入提示语
-    is:boolean;
 }
 
 /**

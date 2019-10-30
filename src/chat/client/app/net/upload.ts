@@ -1,4 +1,4 @@
-import { uploadFileUrl } from '../../../../app/config';
+import { uploadFileUrl } from '../../../../app/public/config';
 import { resize } from '../../../../pi/widget/resize/resize';
 
 /**

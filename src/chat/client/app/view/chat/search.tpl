@@ -1,9 +1,9 @@
 <div class="new-page" w-class="page">
-    <app-components1-blankDiv-topDiv></app-components1-blankDiv-topDiv>
+    <app-publicComponents-blankDiv-topDiv></app-publicComponents-blankDiv-topDiv>
     <div w-class="topBar">
         <img src="../../res/images/left_arrow_blue.png" w-class="back" on-tap="goBack"/>
         <div w-class="input" ev-input-change="inputUid">
-            <widget w-tag="chat-client-app-widget-input-input">{placeHolder:"搜索内容",input:{{it.search}},style:"border-radius:34px;background:#F9F9F9;font-size:28px;padding-left:65px",autofocus:true}</widget>
+            <widget w-tag="chat-client-app-widget1-input-input">{placeHolder:"搜索内容",input:{{it.search}},style:"border-radius:34px;background:#F9F9F9;font-size:28px;padding-left:65px",autofocus:true}</widget>
             <img w-class="searchIcon" src="../../res/images/search-gray.png" />
         </div>
         <div w-class="searchBtn" on-dowm="onShow" on-tap="searchBtn">搜索</div>
@@ -92,7 +92,7 @@
                     <div w-class="searchArticle" on-down="onShow" on-tap="goTo(4,{{i}})">
                         <div w-class="articleTitle">{{v.msg}}</div>
                         <div w-class="userInfo">
-                            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{v.img}},width:"40px;"}</widget>
+                            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar" >{imgURL:{{v.img}},width:"40px;"}</widget>
                             <div w-class="userName">{{v.text}}</div>
                             <span w-class="official">公众号</span>
                         </div>

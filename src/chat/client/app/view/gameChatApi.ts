@@ -1,7 +1,7 @@
 
-import { setStoreData } from '../../../../app/middleLayer/wrap';
-import { uploadFileUrlPrefix } from '../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../app/utils/tools';
+import { setStoreData } from '../../../../app/api/walletApi';
+import { uploadFileUrlPrefix } from '../../../../app/public/config';
+import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { loadDir } from '../../../../pi/widget/util';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
@@ -13,7 +13,7 @@ import * as store from '../data/store';
 import { timestampFormat } from '../logic/logic';
 import { clientRpcFunc } from '../net/init';
 import { applyToGroup } from '../net/rpc';
-import { EMOJIS } from '../widget/emoji/emoji';
+import { EMOJIS } from '../widget1/emoji/emoji';
 
 /**
  * 第三方应用中聊天接口

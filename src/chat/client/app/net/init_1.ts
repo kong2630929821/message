@@ -5,9 +5,12 @@
  */
 
 // ================================================ 导入
-import { getStoreData } from '../../../../app/middleLayer/wrap';
-import { getOfficial } from '../../../../app/publicLib/pull3';
-import { changeWalletName, popNewMessage } from '../../../../app/utils/tools';
+import { getStoreData } from '../../../../app/api/walletApi';
+import { sourceIp } from '../../../../app/public/config';
+import { getStore } from '../../../../app/store/memstore';
+import { piFetch } from '../../../../app/utils/pureUtils';
+// tslint:disable-next-line:no-duplicate-imports
+import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
@@ -16,7 +19,6 @@ import { setLocalStorage } from '../data/lcstore';
 import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { deelNotice } from '../logic/logic';
-import { playerName } from '../widget/randomName/randomName';
 import * as init2 from './init';
 import { getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting } from './rpc';
 
@@ -41,8 +43,10 @@ export const walletSignIn = (openid) => {
         init2.login(UserType.WALLET, openId, 'sign', async (r: UserInfo) => {
 
             if (r && r.uid > 0) {
-                console.log('聊天登陆成功！！！！！！！！！！！！！！');
+                console.log('聊天登陆成功！！！！！！！！！！！！！！',r);
                 store.setStore(`uid`, r.uid);
+                const user = await getStoreData('user');
+                r.acc_id = user.acc_id;
                 store.setStore(`userInfoMap/${r.uid}`, r);
                 store.setStore('isLogin',true);
                 getSetting();   // 获取设置信息
@@ -57,6 +61,7 @@ export const walletSignIn = (openid) => {
                 getMyPublicNum().then((r:string) => {
                     store.setStore('pubNum',r);
                 });
+                // 设置用户信息
                 setUserInfo();
 
                 // 从json文件中获取
@@ -71,8 +76,8 @@ export const walletSignIn = (openid) => {
 
                 });
                 // 获取邀请人数 被邀请
-                const invite = await getStoreData('inviteUsers/invite_success',[]);
-                const beInvited = await getStoreData('inviteUsers/convert_invite',[]);
+                const invite = await getStore('inviteUsers/invite_success',[]);
+                const beInvited = await getStore('inviteUsers/convert_invite',[]);
                 invite.length && deelNotice(invite,store.GENERATORTYPE.NOTICE_1);
                 beInvited.length && deelNotice([beInvited],store.GENERATORTYPE.NOTICE_2);
                 
@@ -101,16 +106,18 @@ export const  setUserInfo = async () => {
     if (!uid) {
         return;
     }
-    init2.clientRpcFunc(changeUserInfo, r, (res) => {
+    init2.clientRpcFunc(changeUserInfo, r, async (res) => {
         if (res && res.uid > 0) {
+            const user = await getStoreData('user');
+            res.acc_id = user.acc_id;
             store.setStore(`userInfoMap/${uid}`, res);
         } else if (res.uid === 0) {  // 普通用户 钱包名称中含有 “好嗨客服”
             const chatUser = store.getStore(`userInfoMap/${uid}`,{ name:'' });
             if (chatUser.name) {  // 有曾用名，直接改为曾用名
-                changeWalletName(chatUser.name);
+                // changeWalletName(chatUser.name);
 
             } else { // 新创建的钱包
-                changeWalletName(playerName()); // 随机设置一个新名字
+                // changeWalletName(playerName()); // 随机设置一个新名字
                 setUserInfo(); // 重新注册一次聊天
             }
         } else {
@@ -118,4 +125,13 @@ export const  setUserInfo = async () => {
             
         }
     });
+};
+
+/**
+ * 获取官方客服等配置信息
+ */
+export const getOfficial = () => {
+    const url = `http://${sourceIp}/appversion/official_service.json?${Math.random()}`;
+
+    return piFetch(url).catch();
 };

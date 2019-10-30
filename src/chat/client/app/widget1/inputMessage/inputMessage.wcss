@@ -31,12 +31,6 @@
     margin-right: 10px; 
     border: 20px solid transparent;
 }
-.emojiMap{
-    height:420px;
-    overflow-x:hidden;
-    overflow-y:auto;
-    min-height: 420px;
-}
 .toolsMap{
     height: 420px;
     min-height: 420px;

@@ -1,7 +1,7 @@
 import { uploadFile } from '../../../../../app/net/pull';
-import { getUserInfo, imgResize, popNewMessage } from '../../../../../app/utils/tools';
-import { registerStoreData } from '../../../../../app/viewLogic/common';
-import { selectImage } from '../../../../../app/viewLogic/native';
+import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
+import { getUserInfo, popNewMessage } from '../../../../../app/utils/pureUtils';
+import { imgResize } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -10,6 +10,7 @@ import { UserInfo } from '../../../../server/data/db/user.s';
 import { CommUserInfo } from '../../../../server/data/rpc/community.s';
 import * as store from '../../data/store';
 import { buildupImgPath } from '../../logic/logic';
+import { selectImage } from '../../logic/native';
 import { changePublic, openPublic } from '../../net/rpc';
 export const forelet = new Forelet();
 

@@ -26,7 +26,7 @@ import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from 
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
 import { judgeFollowed, judgeLiked } from '../logic/logic';
-import { parseEmoji } from '../view/home/square';
+import { parseEmoji } from '../logic/tools';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
 

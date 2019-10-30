@@ -1,5 +1,5 @@
-import { sourceIp } from '../../../../../app/publicLib/config';
-import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
+import { sourceIp } from '../../../../../app/public/config';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { PENALTY } from '../../../../management/utils/logic';
@@ -105,9 +105,15 @@ export class EditPost extends Widget {
      * 选择图片
      */
     public chooseImage(e:any) {
+        if (this.props.uploadLoding.length >= 9) {
+            return;
+        }
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);
-    
+            if (!url) {
+
+                return;
+            }
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.uploadLoding.length;
@@ -116,13 +122,13 @@ export class EditPost extends Widget {
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
-                        this.props.uploadLoding[len] = false;
+                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
+                        this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
                         if (this1.props.isPublic) {
-                            this.addImg(res.base64);
+                            this1.addImg(res.base64);
                         } else {
                             uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
                                 console.log('上传压缩图',imgUrlSuf);
@@ -138,9 +144,9 @@ export class EditPost extends Widget {
                                             console.log('上传原图',imgurl);
                                             image.originalImg = imgurl;
                                             this1.props.saveImgs[len] = image;
-                                            if (this.props.isUploading) {
-                                                this.props.isUploading = false;
-                                                this.send();
+                                            if (this1.props.isUploading) {
+                                                this1.props.isUploading = false;
+                                                this1.send();
                                             }
                                         });
                                     }
@@ -171,7 +177,7 @@ export class EditPost extends Widget {
                 quality:10,
                 success(buffer:ArrayBuffer) {
                     imgResize(buffer,(res) => {
-                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
+                        const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
                         this.props.uploadLoding = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
@@ -247,6 +253,7 @@ export class EditPost extends Widget {
     public delImage(ind:number) {
         this.props.imgs.splice(ind,1);
         this.props.saveImgs.splice(ind,1);
+        this.props.uploadLoding.splice(ind,1);
         this.paint();
     }
 
@@ -290,7 +297,7 @@ export class EditPost extends Widget {
 
                 return;
             }
-            if (!this.props.contentInput) {
+            if (!this.props.contentInput && this.props.saveImgs.length === 0) {
                 popNewMessage('内容不能为空');
 
                 return;
@@ -299,7 +306,6 @@ export class EditPost extends Widget {
                 msg:this.props.contentInput,
                 imgs:this.props.saveImgs
             };
-
             if (!this.props.isUploading) {  // 图片上传完成
                 addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then((r:any) => {
                     if (!isNaN(r)) {
@@ -363,36 +369,4 @@ export class EditPost extends Widget {
         document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :'style="width:100%;height:auto;"'} />`);   
         // }
     }
-
-    // public editBoxChange() {
-    //     // 编辑的div
-    //     const editor = document.querySelector('#editBox');
-    //     // // 富文本框的内容
-    //     // this.props.editorText = editor.innerHTML;
-    //     // 输入的文字数（包括空格，换行）
-    //     const textNumber = editor.innerText.length;
-    //     // 插入的图片个数
-    //     const imgNumber = editor.getElementsByTagName('img').length;
-    //     if (editorTextNum - textNumber - imgNumber <= 0) {
-    //         this.props.placeHolderInfo = 0;
-    //         this.props.editorText = editor.innerHTML;
-    //         editor.blur();
-    //     } else {
-    //         this.props.placeHolderInfo = editorTextNum - textNumber - imgNumber;
-    //     }
-    //     this.paint();
-    // }
-
-    // public editorTap(e:any) {
-    //     // 编辑的div
-    //     const editor = document.querySelector('#editBox');
-    //     if (this.props.placeHolderInfo === 0 && e.key !== 'Backspace') {
-    //         editor.blur();
-    //         this.paint();
-    //     }
-    // }
-
-    // public onpaste(e:any) {
-    //     e.preventDefault();
-    // }
 }

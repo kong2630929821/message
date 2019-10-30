@@ -1,5 +1,5 @@
 <div class="new-page" ev-back-click="goBack" w-class="new-page" ev-send="send" ev-next-click="groupDetail" on-tap="close">
-        <chat-client-app-widget-topBar-topBar>{title:{{it.name}},nextImg:"more-dot-blue.png" }</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar>{title:{{it.name}},nextImg:"more-dot-blue.png" }</chat-client-app-widget1-topBar-topBar>
         <div w-class="messageBox">
             {{if it1.length}}
                 {{for i,v of it1}}
@@ -27,7 +27,7 @@
                         <div w-class="messageNotice" on-longtap="openMessageRecall({{i}})" on-tap="gotoPostDetail({{i}})" on-down="onShow" >
                             <div w-class="noticeTitle">{{v[1]}}</div>
                             <div w-class="noticeImg">
-                                <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image">{imgURL:{{v[6]}}, width:"{{it.imgs.length==1?'80px':'80px'}}",notRound:true}</widget>
+                                <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="image">{imgURL:{{v[6]}}, width:"{{it.imgs.length==1?'80px':'80px'}}",notRound:true}</widget>
                             </div>
                          
                         </div>

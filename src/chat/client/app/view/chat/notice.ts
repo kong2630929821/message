@@ -1,7 +1,6 @@
-import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
-import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
+import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
+import { uploadFileUrlPrefix } from '../../../../../app/public/config';
 import { popNew3 } from '../../../../../app/utils/tools';
-import { openNewActivity } from '../../../../../app/viewLogic/native';
 import { popNew } from '../../../../../pi/ui/root';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';

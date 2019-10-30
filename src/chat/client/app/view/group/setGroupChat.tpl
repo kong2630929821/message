@@ -1,6 +1,6 @@
 <div w-class="newPage" class="new-page">
     <div w-class="top-main-wrap" ev-next-click="completeClick" ev-back-click="back">
-        <chat-client-app-widget-topBar-topBar>{title:"创建群聊({{it.inviteMembers.length}}/500)",nextImg:"{{it.isSelect?'complete_blue.png':'complete_gray.png'}}"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar>{title:"创建群聊({{it.inviteMembers.length}}/500)",nextImg:"{{it.isSelect?'complete_blue.png':'complete_gray.png'}}"}</chat-client-app-widget1-topBar-topBar>
     </div>
     <div w-class="group-info-wrap">
         <div w-class="group-avatar-wrap" on-tap="selectImageClick">
@@ -11,7 +11,7 @@
             {{end}}
         </div>
         <div w-class="groupName" ev-input-change="inputName">
-            <chat-client-app-widget-input-input>{placeHolder:"群名",input:{{it.name}},style:"width:500px;padding:20px 0;border-bottom:solid #318DE6 1px;"}</chat-client-app-widget-input-input>
+            <chat-client-app-widget1-input-input>{placeHolder:"群名",input:{{it.name}},style:"width:500px;padding:20px 0;border-bottom:solid #318DE6 1px;"}</chat-client-app-widget1-input-input>
         </div>
     </div>
     

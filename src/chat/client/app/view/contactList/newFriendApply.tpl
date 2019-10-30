@@ -1,10 +1,10 @@
 <div class="new-page">
     <div ev-back-click="goBack">
-        <chat-client-app-widget-topBar-topBar>{title:{{it.title}} }</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar>{title:{{it.title}} }</chat-client-app-widget1-topBar-topBar>
     </div>
     <div w-class="newfriend-wrap" on-tap="goDetail">
         <div w-class="user">
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar" >{imgURL:{{it.avatar}},width:"80px;"}</widget>
             <span w-class="text">{{it.name}}</span>
             <img w-class="more" src="../../res/images/more-gray.png"/>
         </div>

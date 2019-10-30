@@ -7,7 +7,7 @@ declare var pi_modules;
 
 // ================================================ 导入
 import { Client } from '../../../pi/net/mqtt_c';
-import { Struct, StructMgr } from '../../../pi/struct/struct_mgr';
+import { Struct, structMgr } from '../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../pi/util/bon';
 import { serverIp, serverPort } from '../config';
 import { AutoLoginMgr } from '../utils/autologin';
@@ -70,7 +70,7 @@ export const clientRpcFunc = (name: string, req: any, callback: Function, timeou
  */
 export const registerRpcStruct = (fileMap) => {
     if (!(<any>self).__mgr) {
-        (<any>self).__mgr = new StructMgr();
+        (<any>self).__mgr = structMgr;
     }
     for (const k in fileMap) {
         if (!k.endsWith('.s.js')) {

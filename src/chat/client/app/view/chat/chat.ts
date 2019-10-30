@@ -3,9 +3,8 @@
  */
 
 // ================================================ 导入
-import { inIOSApp } from '../../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../../app/utils/tools';
-import { popNew } from '../../../../../pi/ui/root';
+import { inIOSApp } from '../../../../../app/public/config';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -18,8 +17,9 @@ import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { getFriendAlias, getUserAvatar, INFLAG, timestampFormat } from '../../logic/logic';
 import { openNewActivity } from '../../logic/native';
-import { applyUserFriend, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
-import { parseMessage } from '../../widget/messageItem/messageItem';
+import { popNewMessage } from '../../logic/tools';
+import { applyToGroup, applyUserFriend, getChatUid, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
+import { parseMessage } from '../../widget1/messageItem/messageItem';
 
 // ================================================ 导出
 export const forelet = new Forelet();
@@ -37,21 +37,36 @@ export class Chat extends Widget {
 
     public setProps(props:any) {
         super.setProps(props);
+        console.log('aaaaaaaaaaaaaaaaaaaaaaaa');
         this.props.sid = store.getStore('uid');
         this.props.inputMessage = '';
         this.props.newMsg = null;
         this.props.activeAudio = null;
         this.audioSource = null;
+        this.props.showHincIdArray = [];
 
-        if (this.props.chatType === GENERATOR_TYPE.GROUP) {
+        if (this.props.accId) {
+            getChatUid(this.props.accId).then((res:number) => {
+                this.props.hid = genUserHid(this.props.sid, res);
+                this.initUser();
+            }).catch(err => {
+                console.log('获取游戏客服失败',err);
+            });
+        } else if (this.props.gid) {
+            applyToGroup(this.props.gid).then((res:number) => {
+                this.props.hid = genGroupHid(res);
+                this.initGroup();
+            }).catch(err => {
+                console.log('获取游戏客服失败',err);
+            });
+        } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             this.props.hid = genGroupHid(this.props.id);
             this.initGroup();
         } else {
             this.props.hid = genUserHid(this.props.sid, this.props.id);
             this.initUser();
         }
-        
-        this.latestMsg();
+    
     }
 
     /**
@@ -91,7 +106,8 @@ export class Chat extends Widget {
         const lastRead = store.getStore(`lastRead/${this.props.hid}`,{ msgId:undefined,msgType:GENERATOR_TYPE.USER });
         lastRead.msgId = hincId;
         store.setStore(`lastRead/${this.props.hid}`,lastRead);
-
+        
+        this.latestMsg();
     }
 
     /**
@@ -252,7 +268,7 @@ export class Chat extends Widget {
         innerItem.addEventListener('click', () => {
             const userinfo = store.getStore(`userInfoMap/${this.props.id}`,null);
             if (userinfo) {
-                popNew('chat-client-app-view-chat-addUser',{ rid: userinfo.acc_id });
+                popNew3('chat-client-app-view-chat-addUser',{ rid: userinfo.acc_id });
             }
             this.goBack();
         });
@@ -373,7 +389,7 @@ export class Chat extends Widget {
      * 查看群详细信息
      */
     public groupDetail() {
-        popNew('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag:INFLAG.chat_group },(r) => {
+        popNew3('chat-client-app-view-group-groupInfo', { gid:this.props.id, inFlag:INFLAG.chat_group },(r) => {
             if (r) {
                 this.goBack();
             }
@@ -504,4 +520,6 @@ interface Props {
     activeMessId:string;  // 当前选中要撤回的消息ID
     recallBtn:string; // 撤回按钮位置
     isOnAudio:boolean;  // 是否打开语音录入
+    accId:string;    // acc_id
+    gid:number;    // groupid
 }

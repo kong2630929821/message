@@ -2,7 +2,7 @@
  * textMessage 组件相关处理
  */
 // ================================================ 导入
-import { inAndroidApp, uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
+import { inAndroidApp, uploadFileUrlPrefix } from '../../../../../app/public/config';
 import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
@@ -155,7 +155,7 @@ export class MessageItem extends Widget {
     // 点击查看大图
     public openBigImage() {
         const url = this.props.message.msg.compressImg.split('"')[1];
-        popNew('chat-client-app-widget-bigImage-bigImage',{ img: url,originalImg:this.props.message.msg.originalImg });
+        popNew('chat-client-app-widget1-bigImage-bigImage',{ img: url,originalImg:this.props.message.msg.originalImg });
     }
 
     // 点击播放语音
@@ -254,12 +254,12 @@ const parseEmoji = (msg:any) => {
 const parseImg = (msg:any) => {    
     const mess = JSON.parse(msg.msg);
     // 预览图片不解析
-    if(mess.compressImg.indexOf('<div') === -1){
+    if (mess.compressImg.indexOf('<div') === -1) {
         msg.msg = {
             compressImg: `<img src="${uploadFileUrlPrefix}${mess.compressImg}" alt="img" class='imgMsg'></img>`,
             originalImg: uploadFileUrlPrefix + mess.originalImg
         };
-    }else{
+    } else {
         msg.msg = mess;
     }
 

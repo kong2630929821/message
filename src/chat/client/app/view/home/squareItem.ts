@@ -1,4 +1,4 @@
-import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { popModalBoxs } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
@@ -8,6 +8,7 @@ import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
 import { buildupImgPath, complaintUser, judgeFollowed, timestampFormat } from '../../logic/logic';
+import { popNewMessage } from '../../logic/tools';
 import { delPost, follow, sendUserMsg } from '../../net/rpc';
 
 interface Props {
@@ -115,7 +116,13 @@ export class SquareItem extends Widget {
      */
     public doComment(e:any) {
         this.closeUtils(e);
-        notify(e.node,'ev-commentBtn',{ value:this.props.key });
+        // 当评论数量大于0则跳转详情
+        if (this.props.commentCount > 0) {
+            this.goDetail(e);
+        } else {
+            notify(e.node,'ev-commentBtn',{ value:this.props.key });
+        }
+       
     }
 
     // 关闭操作列表
@@ -203,7 +210,7 @@ export class SquareItem extends Widget {
      */
     public showBigImg(ind:number) {
         // const val:any = this.props.imgs[ind];
-        // popNew3('chat-client-app-widget-bigImage-bigImage',{
+        // popNew3('chat-client-app-widget1-bigImage-bigImage',{
         //     img: buildupImgPath(val.compressImg),
         //     originalImg: buildupImgPath(val.originalImg)
         // });

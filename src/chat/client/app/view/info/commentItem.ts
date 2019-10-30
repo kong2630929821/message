@@ -1,12 +1,12 @@
-import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { REPORT_COMMENT } from '../../../../server/data/constant';
 import { getStore } from '../../data/store';
 import { buildupImgPath, complaintUser, copyToClipboard, timestampFormat } from '../../logic/logic';
+import { parseEmoji, popNewMessage } from '../../logic/tools';
 import { commentLaud, delComment } from '../../net/rpc';
-import { parseEmoji } from '../home/square';
 
 interface Props {
     key:any;  // 帖子评论的key
@@ -64,23 +64,23 @@ export class CommentItem extends Widget {
         super.setProps(this.props);
         const val = props.msg ? JSON.parse(props.msg) :{ msg:'',img:'' };
         this.props.mess = parseEmoji(val.msg);
-        this.props.img = val.img ? buildupImgPath(val.img) :'';
+        this.props.img = val.img.length ? buildupImgPath(val.img[0].originalImg) :'';
         this.props.isMine = this.props.owner === getStore('uid',0);
         this.props.avatar = buildupImgPath(props.avatar);
-
         if (props.reply) {  // 回复的原评论
             this.props.orgName = props.reply.username;
             const val = props.reply.msg ? JSON.parse(props.reply.msg) :{ msg:'',img:'' };
             this.props.orgMess = parseEmoji(val.msg);
-            this.props.orgImg = val.img ? buildupImgPath(val.img) :'';
+            this.props.orgImg = val.img.length ? buildupImgPath(val.img[0].originalImg) :'';
         }
     }
 
     /**
      * 展示操作
      */
-    public showTools() {
+    public showTools(e:any) {
         this.props.showUtils = !this.props.showUtils;
+        notify(e.node,'ev-tools-expand',{ value:this.props.showUtils });
         this.paint();
     }
 
@@ -102,7 +102,7 @@ export class CommentItem extends Widget {
      * 回复
      */
     public replyComment(e:any) {
-        this.closeUtils();
+        this.closeUtils(e);
         popNew('chat-client-app-view-info-editComment',{ ...this.props,title:'回复',orgId:true },(r) => {
             notify(e.node,'ev-comment-reply',{ ...this.props,key:r.key, value:r.value });
         });
@@ -112,7 +112,7 @@ export class CommentItem extends Widget {
      * 删除评论
      */
     public delComment(e:any) {
-        this.closeUtils();
+        this.closeUtils(e);
         popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除评论',content:'删除评论后，评论下所有的回复都会被删除。' },() => {
             delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
                 notify(e.node,'ev-comment-delete',{ key:this.props.key });
@@ -124,8 +124,8 @@ export class CommentItem extends Widget {
     /**
      * 复制
      */
-    public copyComment() {
-        this.closeUtils();
+    public copyComment(e:any) {
+        this.closeUtils(e);
         // 复制未解析的评论文字
         const val = this.props.msg ? JSON.parse(this.props.msg) :{ msg:'',img:'' };  
         copyToClipboard(val);
@@ -135,16 +135,17 @@ export class CommentItem extends Widget {
     /**
      * 举报
      */
-    public complaint() {
-        this.closeUtils();
+    public complaint(e:any) {
+        this.closeUtils(e);
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
         const key = `${REPORT_COMMENT}%${JSON.stringify(this.props.key)}`;
         complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,JSON.parse(this.props.msg).msg,REPORT_COMMENT,key);
     }
 
     // 关闭操作列表
-    public closeUtils() {
+    public closeUtils(e:any) {
         this.props.showUtils = false;
+        notify(e.node,'ev-close',null);
         this.paint();
     }
 
@@ -153,5 +154,16 @@ export class CommentItem extends Widget {
         popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
             list:[this.props.orgImg]
         });
+    }
+
+    public lookInfoImg() {
+        popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
+            list:[this.props.img]
+        });
+    }
+
+    public goUserDetail(e:any) {
+        popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num });
+        notify(e.node,'ev-close',null);
     }
 }

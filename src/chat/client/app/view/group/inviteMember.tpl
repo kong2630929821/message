@@ -1,9 +1,9 @@
 <div class="new-page">
     <div ev-back-click="goBack" ev-next-click="completeAddGroupMember">
-        <chat-client-app-widget-topBar-topBar>{title:"邀请成员",nextImg:"complete_blue.png"}</chat-client-app-widget-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar>{title:"邀请成员",nextImg:"complete_blue.png"}</chat-client-app-widget1-topBar-topBar>
     </div>
     <div w-class="search-input">
-        <chat-client-app-widget-input-input>{placeHolder : "搜索成员",style : "font-size:32px;color:#ccc;padding-left:82px;"}</chat-client-app-widget-input-input>
+        <chat-client-app-widget1-input-input>{placeHolder : "搜索成员",style : "font-size:32px;color:#ccc;padding-left:82px;"}</chat-client-app-widget1-input-input>
         <img w-class="searchIcon" src="../../res/images/search-gray.png" />
     </div>
     <div w-class="a-part" ev-changeSelect="changeSelect">

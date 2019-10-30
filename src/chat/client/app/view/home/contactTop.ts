@@ -3,8 +3,9 @@
  */
 
 // ================================ 导入
-import { setStoreData } from '../../../../../app/middleLayer/wrap';
-import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
+import { popNew3 } from '../../../../../app/utils/tools';
+import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
@@ -50,8 +51,8 @@ export class ContactTop extends Widget {
     /**
      * 打开我的设置
      */
-    public showMine() {
-        popNew3('app-view-mine-home-home');
+    public showMine(e:any) {
+        notify(e.node,'ev-myHome',null);
     }
 
     // 动画效果执行
@@ -75,9 +76,9 @@ export class ContactTop extends Widget {
         if (fg && !getStore('pubNum',0)) {
             popNewMessage('没有公众号，不能发文章');
         } else {
-            popNew3('chat-client-app-view-info-editPost',{ isPublic:fg },() => {
-                showPost(this.props.acTag + 1);
-            });
+            // popNew3('chat-client-app-view-info-editPost',{ isPublic:fg },() => {
+            //     showPost(this.props.acTag + 1);
+            // });
         }
         notify(e.node,'ev-next-click',{ fg:false });
     }

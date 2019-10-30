@@ -1,5 +1,5 @@
-<div class="new-page" w-class="page" ev-back-click="goBack">
-    <chat-client-app-widget-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget-topBar-topBar>
+<div class="new-page" w-class="page" ev-back-click="goBack"  on-tap="pageClick">
+    <chat-client-app-widget1-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="contain" id="postPage" on-scroll="scrollPage">
         <div style="margin: 20px 0;" id="postContain">
             {{if it.isPublic}}
@@ -16,8 +16,8 @@
                 {{if it.active == 'comment'}}
                 <div id="commentBox">
                     {{for i,v of it.commentList}}
-                    <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})">
-                        <widget w-tag="chat-client-app-view-info-commentItem">{{v}}</widget>
+                    <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-close="pageClick">
+                        <widget w-tag="chat-client-app-view-info-commentItem">{{it.dealData(v,it.expandItem == i)}}</widget>
                     </div>
                     {{end}}
                 </div>
@@ -25,7 +25,7 @@
                 <div>
                     {{for i,v of it.likeList}}
                     <div w-class="likeItem">
-                        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
+                        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
                         <div w-class="titleCenter">
                             <div w-class="username">
                                 <span>{{v.username}}&nbsp;</span>
@@ -51,7 +51,7 @@
             <span w-class="time">{{it.commentCount>0 ? it.commentCount:"评论"}}</span>
         </div>
         <div style="display:flex;align-items: center" on-tap="likeBtn">
-            <img src="../../res/images/{{it.likeActive?'like_active.png':'like.png'}}" w-class="btn" />
+            <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
             <span w-class="time">{{it.likeCount>0 ? it.likeCount:"点赞"}}</span>
         </div>
     </div>

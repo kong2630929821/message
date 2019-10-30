@@ -1,5 +1,5 @@
 <div class="new-page" ev-back-click="goBack" w-class="new-page" ev-send="send" ev-next-click="groupDetail">
-    <chat-client-app-widget-topBar-topBar>{title:{{it.name}},text:{{it.text}},nextImg:{{it.chatType=="group" ? "more-dot-blue.png":""}} }</chat-client-app-widget-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:{{it.name}},text:{{it.text}},nextImg:{{it.chatType=="group" ? "more-dot-blue.png":""}} }</chat-client-app-widget1-topBar-topBar>
     
     {{if it.lastAnnounce}}
     <div style="height:128px;" ev-close-announce="closeAnnounce">
@@ -9,7 +9,7 @@
 
     {{if it.temporary || it.groupId}}
     <div w-class="temporaryBox">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"80px;"}</widget>
+        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"80px;"}</widget>
         <div style="flex:1;">
             <div>{{it.name}}</div>
             <div style="font-size: 24px;color: #888888;">你们还不是好友</div>
@@ -20,12 +20,12 @@
 
     <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="playRadio" ev-delelte-user="goBack" id="chatMessageBox" on-scroll="scrollMessBox" ev-recall="openMessageRecall">
         {{for i,v of it.showHincIdArray}}
-            <chat-client-app-widget-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playAudio: {{it.activeAudio && v == it.activeAudio.hIncId ? it.activeAudio.playAudio : false}}, recallBtn:{{it.activeMessId == v}} }</chat-client-app-widget-messageItem-messageItem>
+            <chat-client-app-widget1-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playAudio: {{it.activeAudio && v == it.activeAudio.hIncId ? it.activeAudio.playAudio : false}}, recallBtn:{{it.activeMessId == v}} }</chat-client-app-widget1-messageItem-messageItem>
         {{end}} 
 
         {{if it.newMsg}}
         <div>
-            <widget w-tag="chat-client-app-widget-messageItem-messageItem" style="float:right;">{{it.newMsg}}</widget>
+            <widget w-tag="chat-client-app-widget1-messageItem-messageItem" style="float:right;">{{it.newMsg}}</widget>
             <img src="../../res/images/loading.gif" w-class="loading"/>
         </div>
         {{end}}
@@ -33,7 +33,7 @@
     </div>
 
     <div ev-open-Emoji="openEmoji" ev-input-focus="inputFocus" ev-input-change="msgChange" ev-emoji-click="pickEmoji" ev-open-Tools="openTools" ev-send-before="sendImgBefore" ev-open-audio="openAudio">
-        <widget w-tag="chat-client-app-widget-inputMessage-inputMessage">{isOnEmoji:{{it.isOnEmoji}},message:{{it.inputMessage}},isOnTools:{{it.isOnTools}},isOnAudio:{{it.isOnAudio}},chatType:{{it.chatType}} }</widget>  
+        <widget w-tag="chat-client-app-widget1-inputMessage-inputMessage">{isOnEmoji:{{it.isOnEmoji}},message:{{it.inputMessage}},isOnTools:{{it.isOnTools}},isOnAudio:{{it.isOnAudio}},chatType:{{it.chatType}} }</widget>  
     </div>
 </div>
 

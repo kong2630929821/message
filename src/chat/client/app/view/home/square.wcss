@@ -1,32 +1,11 @@
-.warper{
-    position: absolute;
-    top: 0px;
-    bottom: 55px;
-    left: 0;
-    right: 0;
-    
-    overflow: scroll;
-}
-.inner{
-    position: absolute;
+.auto{
     width: 100%;
-    
-    border-bottom: 2px solid transparent;
-    box-sizing: content-box;
-}
-.history-wrap{
-   min-height: 100%;
-   padding-bottom: 95px;
-}
-.page{
-    background: #F9F9F9;
-    flex: 1;
+    height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-    margin-bottom: 110px;
-    height: 100%;
+    background: #F9F9F9;
 }
 .title{
     height:24px;
@@ -77,30 +56,4 @@
     display: inline-block;
     text-align: center;
     margin-left: 10px;
-}
-
-.pullup-wrapper{
-	padding: 20px;
-	text-align: center;
-	color: #999;
-}
-.pullup-wrapper{
-	padding: 20px;
-	text-align: center;
-	color: #999;
-}
-.pulldown-wrapper{
-	position: absolute;
-	width: 100%;
-	padding: 20px;
-	box-sizing: border-box;
-	transform: translateY(-100%) translateZ(0);
-	text-align: center;
-	color: #999;
-}
-.pullup-scroller{
-    flex: 1;
-    margin-bottom: -4px;
-    display: flex;
-    flex-direction: column;
 }

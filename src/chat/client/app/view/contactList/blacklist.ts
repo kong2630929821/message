@@ -1,5 +1,6 @@
-import { uploadFileUrlPrefix } from '../../../../../app/publicLib/config';
-import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
+import { uploadFileUrlPrefix } from '../../../../../app/public/config';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { removeFromBlackList } from '../../../../server/data/rpc/user.p';

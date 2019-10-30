@@ -3,10 +3,11 @@
  */
 
 // ================================================ 导入
-import { OfflienType } from '../../../../../app/components1/offlineTip/offlineTip';
-import { getStoreData, setStoreData } from '../../../../../app/middleLayer/wrap';
-import { popNew3, popNewMessage } from '../../../../../app/utils/tools';
-import { registerStoreData } from '../../../../../app/viewLogic/common';
+import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
+import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
+import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offlineTip';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
@@ -55,7 +56,7 @@ export class Contact extends SpecialWidget {
         ],
         isUtilVisible:false,
         messageList:[],
-        activeTab:TAB.message,
+        activeTab:TAB.square,
         isLogin:false,
         hasWallet:false,
         netClose:false,
@@ -92,7 +93,15 @@ export class Contact extends SpecialWidget {
     }
 
     public setProps(props: Props) {
-        super.setProps(props);
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+        this.initDate();
+    }
+
+    public initDate() {
         const uid = store.getStore('uid', 0);
         this.props.isLogin = !!uid;
         this.props.activeTab = TAB.square;
@@ -110,9 +119,8 @@ export class Contact extends SpecialWidget {
                     }
                 } 
             });
-        } 
+        }
     }
-
     public firstPaint() {
         super.firstPaint();
         registerStoreData('user/info',() => { // 钱包用户信息修改

@@ -1,7 +1,7 @@
 <div w-class="item" on-tap="closeUtils">
     <div w-class="title">{{it.title}}</div>
     <div w-class="top">
-        <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}}, width:"40px;"}</widget>
+        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.avatar || '../../res/images/user_avatar.png'}}, width:"40px;"}</widget>
         <div w-class="topCenter">
             <span>{{it.username}}&nbsp;</span>
             <div w-class="offical">公众号</div>        
@@ -37,7 +37,7 @@
             {{if i==2 && it.imgs.length==4}}
             <div></div>
             {{end}}
-            <widget w-tag="chat-client-app-widget-imgShow-imgShow" w-class="image" on-tap="showBigImg({{i}})">{imgURL:{{it.buildupImgPath(v.compressImg)}}, width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
+            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="image" on-tap="showBigImg({{i}})">{imgURL:{{it.buildupImgPath(v.compressImg)}}, width:"{{it.imgs.length==1?'320px':'230px'}}",notRound:true}</widget>
         {{end}}
     </div>
 

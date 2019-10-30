@@ -2,8 +2,9 @@
  * 一些全局方法
  */
 // =====================================导入
-import { uploadFileUrlPrefix } from '../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../app/utils/tools';
+import { uploadFileUrlPrefix } from '../../../../app/public/config';
+import { popNewMessage } from '../../../../app/utils/pureUtils';
+import { popNew3 } from '../../../../app/utils/tools';
 import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
@@ -81,30 +82,6 @@ export const getFriendAlias = (rid:number) => {
     };
 };
 
-/**
- * 用户退出群组后取消订阅清空本地数据
- */
-export const exitGroup = (gid:number) => {
-    const groupChatMap = store.getStore('groupChatMap',new Map());
-    groupChatMap.delete(genGroupHid(gid)); // 删除聊天记录
-    store.setStore('groupChatMap',groupChatMap);
-
-    const lastChat = store.getStore(`lastChat`, []);
-    const index = lastChat.findIndex(item => item[0] === gid && item[2] === GENERATOR_TYPE.GROUP);
-    if (index > -1) { // 删除最近对话记录
-        lastChat.splice(index,1);
-        store.setStore('lastChat',lastChat);
-    }
-
-    const lastRead = store.getStore(`lastRead`, []);
-    lastRead.delete(genGroupHid(gid));  // 删除已读消息记录
-    store.setStore(`lastRead`, lastRead);
-
-    const gInfoMap = store.getStore(`groupInfoMap`,new Map());    
-    gInfoMap.delete(gid.toString());  // 删除群组信息
-    store.setStore(`groupInfoMap`, gInfoMap);
-};
-
 // 复制到剪切板
 export const copyToClipboard = (copyText) => {
     const input = document.createElement('input');
@@ -129,7 +106,11 @@ export const getUserAvatar = (rid:number) => {
         const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
         let avatar = user.avatar ? depCopy(user.avatar) : '';
         if (avatar && avatar.indexOf('data:image') < 0) {
-            avatar = `${uploadFileUrlPrefix}${avatar}`;
+            if (avatar.slice(0,4) === 'http') {
+                avatar = avatar;   
+            } else {
+                avatar = `${uploadFileUrlPrefix}${avatar}`;
+            }
         }
 
         return avatar;
@@ -146,7 +127,11 @@ export const getGroupAvatar = (gid:number) => {
         const group = store.getStore(`groupInfoMap/${gid}`,new GroupInfo());
         let avatar = group.avatar ? depCopy(group.avatar) : '';
         if (avatar && avatar.indexOf('data:image') < 0) {
-            avatar = `${uploadFileUrlPrefix}${avatar}`;
+            if (avatar.slice(0,4) === 'http') {
+                avatar = avatar;   
+            } else {
+                avatar = `${uploadFileUrlPrefix}${avatar}`;
+            }
         }
 
         return avatar;
@@ -163,7 +148,11 @@ export const getGroupUserAvatar = (gid:number,rid:number) => {
         const user = store.getStore(`groupUserLinkMap/${genGuid(gid,rid)}`,new GroupUserLink());
         let avatar = user.avatar ? depCopy(user.avatar) : '';
         if (avatar && avatar.indexOf('data:image') < 0) {
-            avatar = `${uploadFileUrlPrefix}${avatar}`;
+            if (avatar.slice(0,4) === 'http') {
+                avatar = avatar;   
+            } else {
+                avatar = `${uploadFileUrlPrefix}${avatar}`;
+            }
         }
 
         return avatar;
@@ -208,7 +197,7 @@ export const enum INFLAG  {
 // 举报用户
 export const complaintUser = (name:string,sex:number,avatar:string,msg:string,status:number,reportKey:string) => {
     const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
-    popNew('chat-client-app-widget-complaint-complaint'
+    popNew3('chat-client-app-widget-complaint-complaint'
         ,{ title:name,content,sex,avatar,msg,status,reportKey }
         ,(selected) => {
     

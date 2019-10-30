@@ -6,10 +6,10 @@
 declare var pi_modules;
 
 // ================================================ 导入
-import { chatLogicIp, chatLogicPort } from '../../../../app/publicLib/config';
-import { popNewMessage } from '../../../../app/utils/tools';
+import { chatLogicIp, chatLogicPort } from '../../../../app/public/config';
+import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { Client } from '../../../../pi/net/mqtt_c';
-import { Struct, StructMgr } from '../../../../pi/struct/struct_mgr';
+import { Struct, structMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
 import { AttentionIndex } from '../../../server/data/db/community.s';
 import { GroupUserLink } from '../../../server/data/db/group.s';
@@ -21,7 +21,7 @@ import { SendMsg } from '../../../server/data/rpc/message.s';
 import { genUuid, getGidFromGuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
-import { exitGroup } from '../logic/logic';
+import { exitGroup } from '../logic/tools';
 import * as subscribedb from '../net/subscribedb';
 import { walletSignIn } from './init_1';
 import { initPush } from './receive';
@@ -87,7 +87,7 @@ export const clientRpcFunc = (name: string, req: any, callback: Function, timeou
  */
 export const registerRpcStruct = (fileMap) => {
     if (!(<any>self).__mgr) {
-        (<any>self).__mgr = new StructMgr();
+        (<any>self).__mgr = structMgr;
     }
     for (const k in fileMap) {
         if (!k.endsWith('.s.js')) {
@@ -163,7 +163,7 @@ export const init = (uid: number) => {
     });
     subscribedb.subscribeCommNum(uid,(r:AttentionIndex) => {
         if (r && r.uid === uid) {
-            updatePubNum(r,uid);
+            // updatePubNum(r,uid);
         }
     });
 };
