@@ -33,6 +33,8 @@
                     <span>{{it.userInfo.name || "------"}}&nbsp;</span>
                     {{if it.userInfo.sex!=2}}
                         <img src="../../res/images/{{it.userInfo.sex==1 ? 'girl.png':'boy.png'}}"/>
+                    {{else}}
+                    <img src="../../res/images/neutral.png" alt=""/>
                     {{end}}
                 </div>
                 <div w-class="userId">
