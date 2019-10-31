@@ -121,7 +121,7 @@ export class EditPost extends Widget {
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,0.3,(res) => {
+                    imgResize(buffer,0.3,200,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
                         this1.props.imgs[len] = url;
                         this1.paint();
@@ -138,16 +138,19 @@ export class EditPost extends Widget {
                                 imagePicker.getContent({
                                     quality:100,
                                     success(buffer1:ArrayBuffer) {
-                                        uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
-                                            console.log('上传原图',imgurl);
-                                            image.originalImg = imgurl;
-                                            this1.props.uploadLoding[len] = false;
-                                            this1.paint();
-                                            this1.props.saveImgs[len] = image;
-                                            if (this1.props.isUploading) {
-                                                this1.props.isUploading = false;
-                                            }
+                                        imgResize(buffer1,0.8,1024,(res1) => {
+                                            uploadFile(base64ToFile(res1.base64),(imgurl:string) => {
+                                                console.log('上传原图',imgurl);
+                                                image.originalImg = imgurl;
+                                                this1.props.uploadLoding[len] = false;
+                                                this1.paint();
+                                                this1.props.saveImgs[len] = image;
+                                                if (this1.props.isUploading) {
+                                                    this1.props.isUploading = false;
+                                                }
+                                            });
                                         });
+                                        
                                     }
                                 });
                             });
@@ -174,7 +177,7 @@ export class EditPost extends Widget {
             camera.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,0.3,(res) => {
+                    imgResize(buffer,0.3,200,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
                         this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
@@ -192,17 +195,19 @@ export class EditPost extends Widget {
                                 camera.getContent({
                                     quality:100,
                                     success(buffer1:ArrayBuffer) {
-                                        
-                                        uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
-                                            console.log('上传原图',imgurl);
-                                            image.originalImg = imgurl;
-                                            this1.props.saveImgs[len] = image;
-                                            this1.props.uploadLoding[len] = false;
-                                            this1.paint();
-                                            if (this1.props.isUploading) {
-                                                this1.props.isUploading = false;
-                                            }
+                                        imgResize(buffer1,0.8,1024,(res1) => {
+                                            uploadFile(base64ToFile(res1.base64),(imgurl:string) => {
+                                                console.log('上传原图',imgurl);
+                                                image.originalImg = imgurl;
+                                                this1.props.saveImgs[len] = image;
+                                                this1.props.uploadLoding[len] = false;
+                                                this1.paint();
+                                                if (this1.props.isUploading) {
+                                                    this1.props.isUploading = false;
+                                                }
+                                            });
                                         });
+                                        
                                     }
                                 });
                             });
