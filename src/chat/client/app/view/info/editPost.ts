@@ -121,9 +121,8 @@ export class EditPost extends Widget {
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,(res) => {
+                    imgResize(buffer,0.3,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
-                        this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
@@ -139,14 +138,14 @@ export class EditPost extends Widget {
                                 imagePicker.getContent({
                                     quality:100,
                                     success(buffer1:ArrayBuffer) {
-                                        
                                         uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
                                             console.log('上传原图',imgurl);
                                             image.originalImg = imgurl;
+                                            this1.props.uploadLoding[len] = false;
+                                            this1.paint();
                                             this1.props.saveImgs[len] = image;
                                             if (this1.props.isUploading) {
                                                 this1.props.isUploading = false;
-                                                this1.send();
                                             }
                                         });
                                     }
@@ -168,22 +167,21 @@ export class EditPost extends Widget {
         this.props.camera = !this.props.camera;
         const camera = openCamera((url) => {
             console.log('拍摄的图片',url);
-    
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.uploadLoding.length;
-            this.props.uploadLoding = true;
+            this.props.uploadLoding[len] = true;
             camera.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,(res) => {
+                    imgResize(buffer,0.3,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
-                        this.props.uploadLoding = false;
+                        this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
                         if (this1.props.isPublic) {
-                            this.addImg(res.base64);
+                            this1.addImg(res.base64);
                         } else {
                             uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
                                 console.log('上传压缩图',imgUrlSuf);
@@ -199,9 +197,10 @@ export class EditPost extends Widget {
                                             console.log('上传原图',imgurl);
                                             image.originalImg = imgurl;
                                             this1.props.saveImgs[len] = image;
-                                            if (this.props.isUploading) {
-                                                this.props.isUploading = false;
-                                                this.send();
+                                            this1.props.uploadLoding[len] = false;
+                                            this1.paint();
+                                            if (this1.props.isUploading) {
+                                                this1.props.isUploading = false;
                                             }
                                         });
                                     }
@@ -294,6 +293,7 @@ export class EditPost extends Widget {
             // 等待图片上传完成
             if (this.props.imgs.length !== this.props.saveImgs.length) {
                 this.props.isUploading = true;
+                popNewMessage('正在上传图片');
 
                 return;
             }
