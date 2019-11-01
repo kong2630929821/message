@@ -397,14 +397,18 @@ export class EditPost extends Widget {
 register('offLine',(r) => {
     const w:any = forelet.getWidget(WIDGET_NAME);
     if (r && w) {
-        // debugger;
-        // const finshLength = w.props.saveImgs.length;// 已经上传的数量
-        // const unFinshLength = w.props.imgs.length;// 为上传的数量
-        // w.props.uploadLoding = w.props.uploadLoding.slice(0,finshLength);
-        // if (finshLength !== unFinshLength) {
-        //     // 已经上传和未上传的图片数量不一样时  删除已经上传的
-        //     w.props.imgs = w.props.imgs.slice(0,finshLength - 1);
-        // }
-        // w.paint();
+        const finshLength = w.props.saveImgs.length;// 已经上传的数量
+        const unFinshLength = w.props.imgs.length;// 为上传的数量
+        if (finshLength !== unFinshLength) {
+            // 已经上传和未上传的图片数量不一样时  删除已经上传的
+            const arr = [...w.props.uploadLoding];
+            arr.forEach((v,i) => {
+                if (v) {
+                    w.props.uploadLoding.splice(i,1);
+                    w.props.imgs.splice(i,1);
+                }
+            });
+        }
+        w.paint();
     }
 });
