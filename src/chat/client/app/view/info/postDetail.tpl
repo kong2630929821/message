@@ -32,7 +32,11 @@
                                 {{if it.offical}}
                                 <div>官方</div>
                                 {{else}}
-                                <img src="../../res/images/{{it.gender?'girl.png':'boy.png'}}"/>
+                                    {{if it.gender!=2}}
+                                        <img src="../../res/images/{{it.gender===1?'girl.png':'boy.png'}}"/>
+                                    {{else}}
+                                        <img src="../../res/images/neutral.png"/>
+                                    {{end}}
                                 {{end}}
                             </div>
                             <div w-class="time">{{it.timeFormat(v.createtime,3)}} 赞了动态</div>
