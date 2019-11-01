@@ -41,11 +41,12 @@ export class ImgSwiper extends Widget {
     public attach() {
         super.attach();
         if (this.swiper || this.props.list.length <= 1) return;
-        setTimeout(() => {
-            if (this.props.list.length > 1) {
-                this.initSwiper();
-            }
-        },500);
+        this.initSwiper();
+        // setTimeout(() => {
+        //     if (this.props.list.length > 1) {
+        //         this.initSwiper();
+        //     }
+        // },500);
     }
 
     public afterUpdate() {
