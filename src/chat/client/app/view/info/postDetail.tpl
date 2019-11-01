@@ -48,11 +48,11 @@
     <div w-class="btns">
         <div style="display:flex;align-items: center" on-tap="doComment">
             <img src="../../res/images/comment.png" w-class="btn"/>
-            <span w-class="time">{{it.commentCount>0 ? it.commentCount:"评论"}}</span>
+            <span w-class="time">{{it.commentCount>0 ? it.commentCount:""}}</span>
         </div>
         <div style="display:flex;align-items: center" on-tap="likeBtn">
             <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
-            <span w-class="time">{{it.likeCount>0 ? it.likeCount:"点赞"}}</span>
+            <span w-class="time">{{it.likeCount>0 ? it.likeCount:""}}</span>
         </div>
     </div>
 </div>

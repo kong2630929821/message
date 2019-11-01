@@ -80,11 +80,11 @@
        <div w-class="btnGroup">
             <div w-class="btnBox" on-tap="doComment">
                 <img src="../../res/images/commentsGrey.png" w-class="btn"/>
-                <span w-class="time">{{it.commentCount>0?(it.commentCount>99?'99+':it.commentCount):"评论"}}</span>
+                <span w-class="time">{{it.commentCount>0?(it.commentCount>99?'99+':it.commentCount):"0"}}</span>
             </div>
             <div w-class="btnBox" on-tap="likeBtn">
                 <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
-                <span w-class="time">{{it.likeCount>0?(it.likeCount>99?'99+':it.likeCount):"点赞"}}</span>
+                <span w-class="time">{{it.likeCount>0?(it.likeCount>99?'99+':it.likeCount):"0"}}</span>
             </div>
        </div>
     </div>
