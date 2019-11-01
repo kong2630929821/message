@@ -3,7 +3,7 @@
     <div w-class="topBar">
         <div w-class="topBarItem" on-tap="close">取消</div>
         <div w-class="topBarItem">{{it.title}}</div>
-        <div w-class="topBarItem" style="color:#888888" on-tap="send">发送</div>
+        <div w-class="topBarItem" style="color:#4285F4" on-tap="send">发送</div>
     </div>
     <div w-class="content" ev-input-change="contentChange">
         <widget w-tag="chat-client-app-widget1-input-textarea">{placeHolder:{{it.placeholder}}, style:"max-height:300px;height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:100 }</widget>
@@ -34,7 +34,7 @@
         {{else}}
             <div w-class="imgBox">
                 <pi-ui-html style="display:inline-block;margin: 5px;">{{it.imgs[i]}}</pi-ui-html>
-                <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
+                <img src="../../res/images/remove.png" w-class="close" on-tap="delImage({{i}})"/>
             </div>
         {{end}}
         
@@ -45,8 +45,8 @@
     </div>
     <div w-class="tools" ev-emoji-click="pickEmoji">
         <div>
-            <img src="../../res/images/emoji.png" w-class="btn" on-tap="openEmoji"/>
-            <img src="../../res/images/tool-pictures.png" w-class="btn" on-tap="chooseImage"/>
+            <img src="{{it.showType[0]?'../../res/images/emoji.png':'../../res/images/emojiblue.png'}}" w-class="btn" on-tap="openEmoji"/>
+            <img src="{{it.showType[1]?'../../res/images/tool-pictures.png':'../../res/images/tool-picturesBlue.png'}}" w-class="btn" on-tap="chooseImage"/>
         </div>
 
         <widget w-tag="chat-client-app-widget1-emoji-emoji" w-class="emojiMap" id="emojiMap" style="display:{{it.isOnEmoji ? 'block' : 'none'}}"></widget>

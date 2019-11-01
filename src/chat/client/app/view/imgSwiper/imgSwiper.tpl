@@ -3,7 +3,18 @@
         <div class="swiper-wrapper" on-tap="clickSlide">
             {{for i,v of it.list}}
             <div class="swiper-slide bg-img">
-                <img src="{{v}}" alt="" w-class="bgImg"/>
+                {{if it.showOrg}}
+                    {{if !it.isLoad[i]}}
+                        <div>
+                            <img src="{{it.thumbnail[i]}}" alt="" w-class="bgImg"/>
+                            <img src="../../res/images/loading.gif" alt="" w-class="loading"/>
+                        </div>
+                    {{end}}
+                    <img src="{{v}}" alt="" w-class="bgImg" on-load="load({{i}})" style="display:{{it.isLoad[i]?'block':'none'}}"/>  
+                {{else}}
+                    <img src="{{it.thumbnail[i]}}" alt="" w-class="bgImg"/>  
+                {{end}}
+                
             </div>
             {{end}}
         </div>

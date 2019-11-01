@@ -7,7 +7,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 88px;
+    height: 110px;
 }
 .userHead{
     border: 2px solid #ffffff;  
@@ -44,9 +44,9 @@
 .tabs{
     display: flex;
     justify-content: space-between;
-    font-size:32px;
+    font-size: 40px;
     font-weight:500;
-    color:rgba(255,255,255,0.6);
+    color:#888;
     height: 89px;
     line-height: 89px;
     position: relative;
@@ -58,8 +58,8 @@
     justify-content: center;
 }
 .activeTab{
-    color: #fff;
-    border-bottom: 6px solid #fff;
+    color:rgba(66,133,244,1);
+    border-bottom: 6px solid #4285F4;
 }
 .arrow{
     height: 0;

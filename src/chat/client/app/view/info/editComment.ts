@@ -1,7 +1,7 @@
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { selectImage } from '../../logic/native';
+import { popNewMessage } from '../../logic/tools';
 import { addComment } from '../../net/rpc';
 import { arrayBuffer2File, base64ToFile, imgResize, uploadFile } from '../../net/upload';
 
@@ -19,6 +19,7 @@ interface Props {
     imgs:any;
     isUploading:boolean;
     saveImgs:any;
+    showType:boolean[];// 0表情 1相册 2相机
 }
 
 /**
@@ -40,7 +41,8 @@ export class EditComment extends Widget {
         imgs:[],
         isUploading:false,
         uploadLoding:[],
-        saveImgs:[]
+        saveImgs:[],
+        showType:[true,true,true]
     };
 
     public setProps(props:any) {
@@ -85,6 +87,7 @@ export class EditComment extends Widget {
 
     // 打开表情包图库
     public openEmoji(e:any) {
+        this.reaset(0);
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight() + 90}px`;
         this.props.isOnEmoji = !this.props.isOnEmoji;
         this.paint();
@@ -108,12 +111,16 @@ export class EditComment extends Widget {
      * 选择图片
      */
     public chooseImage(e:any) {
+        this.reaset(1);
         if (this.props.uploadLoding.length >= 1) {
             return;
         }
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);
-    
+            if (!url) {
+
+                return;
+            }
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.uploadLoding.length;
@@ -121,7 +128,7 @@ export class EditComment extends Widget {
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,(res) => {
+                    imgResize(buffer,0.3,1024,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
                         this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
@@ -136,15 +143,17 @@ export class EditComment extends Widget {
                             imagePicker.getContent({
                                 quality:100,
                                 success(buffer1:ArrayBuffer) {
-                                    
-                                    uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
-                                        console.log('上传原图',imgurl);
-                                        image.originalImg = imgurl;
-                                        this1.props.saveImgs[len] = image;
-                                        if (this1.props.isUploading) {
-                                            this1.props.isUploading = false;
-                                            this1.send();
-                                        }
+                                    imgResize(buffer1,0.8,1024,(res1) => {
+                                        uploadFile(base64ToFile(res1.base64),(imgurl:string) => {
+                                            console.log('上传原图',imgurl);
+                                            image.originalImg = imgurl;
+                                            this1.props.uploadLoding[len] = false;
+                                            this1.paint();
+                                            this1.props.saveImgs[len] = image;
+                                            if (this1.props.isUploading) {
+                                                this1.props.isUploading = false;
+                                            }
+                                        });
                                     });
                                 }
                             });
@@ -160,6 +169,20 @@ export class EditComment extends Widget {
     // 删除
     public remove() {
         this.props.img = '';
+        this.paint();
+    }
+
+    /**
+     * 
+     * @param index 状态管理  showType的下标
+     */
+    public reaset(index:number) {
+        this.props.showType = [true,true,true];
+        if (index === 0) {
+            this.props.showType[index] = this.props.isOnEmoji;
+        } else {
+            this.props.showType[index] = false;
+        }
         this.paint();
     }
 

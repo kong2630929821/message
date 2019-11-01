@@ -9,6 +9,8 @@ interface Props {
     activeIndex:number;// 当前下标
     list:any;   // image path列表
     showOrg:boolean;// 是否展示原图
+    thumbnail:any;// 缩略图
+    isLoad:boolean[];// 是否在加载
 }
 /**
  * 轮播图组件
@@ -19,7 +21,9 @@ export class ImgSwiper extends Widget {
     public props:Props = {
         list:[],
         activeIndex:1,
-        showOrg:false
+        showOrg:false,
+        thumbnail:[],
+        isLoad:[]
     };
 
     public setProps(props:any) {
@@ -28,17 +32,21 @@ export class ImgSwiper extends Widget {
             ...props
         };
         super.setProps(this.props);
+        this.props.list.forEach(v => {
+            this.props.isLoad.push(false);
+        });
         console.log('ImgSwiper ====',this.props);
     }
-    
+
     public attach() {
         super.attach();
         if (this.swiper || this.props.list.length <= 1) return;
-        setTimeout(() => {
-            if (this.props.list.length > 1) {
-                this.initSwiper();
-            }
-        },500);
+        this.initSwiper();
+        // setTimeout(() => {
+        //     if (this.props.list.length > 1) {
+        //         this.initSwiper();
+        //     }
+        // },500);
     }
 
     public afterUpdate() {
@@ -90,5 +98,12 @@ export class ImgSwiper extends Widget {
         saveImage(this.props.list[this.props.activeIndex],() => {
             popNewMessage('保存成功');
         });
+    }
+
+    // 加载图完成
+    public load(index:number) {
+        console.log(`图片加载完成${index}`);
+        this.props.isLoad[index] = true;
+        this.paint();
     }
 }

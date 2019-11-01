@@ -196,3 +196,9 @@ register('postList',r => {
     State.postList = r;
     forelet.paint(State);
 });
+register('offLine',(r) => {
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    if (r && w) {
+        showPost(w.props.active + 1);
+    }
+});

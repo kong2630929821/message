@@ -1,7 +1,8 @@
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { GroupInfo } from '../../../../server/data/db/group.s';
 import { getStore, setStore } from '../../data/store';
-import { buildupImgPath, judgeLiked, timestampFormat } from '../../logic/logic';
+import { buildupImgPath, getUserAvatar, judgeLiked, timestampFormat } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
 import { getCommentLaudList, getPostDetile, postLaud, showComment, showLikeList } from '../../net/rpc';
 
@@ -135,13 +136,15 @@ export class PostDetail extends Widget {
             });
             const uid = getStore('uid',0);
             if (this.props.likeActive) {
-                this.props.likeList.push({
-                    key:{ uid },
-                    avatar:this.props.active,
-                    createtime:Date.now(),
-                    username:this.props.username,
-                    gender:this.props.gender
-                }); 
+
+                // const userInfo = getStore(`userInfoMap/${getStore('uid')}`);
+                // this.props.likeList.push({
+                //     key:{ uid },
+                //     avatar:getUserAvatar(userInfo.uid),
+                //     createtime:Date.now(),
+                //     username:userInfo.name,
+                //     gender:userInfo.sex
+                // }); 
             } else {
                 const ind = this.props.likeList.findIndex(r => r.key.uid === this.props.key.num === uid);
                 ind > -1 && this.props.likeList.splice(ind,1);

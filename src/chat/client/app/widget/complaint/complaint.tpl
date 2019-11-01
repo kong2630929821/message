@@ -35,7 +35,7 @@
             {{else}}
                 <div w-class="imgBox">
                     <pi-ui-html style="display:inline-block;margin: 5px;">{{it.imgs[i]}}</pi-ui-html>
-                    <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
+                    <img src="../../res/images/remove.png" w-class="close" on-tap="delImage({{i}})"/>
                 </div>
             {{end}}
             
