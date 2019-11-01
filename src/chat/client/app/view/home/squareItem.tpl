@@ -32,13 +32,13 @@
 
     {{if it.showAll}}
     {{% =================帖子详情展示全部内容=======================}}
-    {{if it.content}}
-    <div w-class="content1" id="minImg">
-        <widget w-tag="pi-ui-html">{{it.content}}</widget>
-    </div>
-    {{end}}
+        {{if it.content}}
+        <div w-class="content1" id="minImg">
+            <widget w-tag="pi-ui-html">{{it.content}}</widget>
+        </div>
+        {{end}}
     {{else}}
-    {{% ======================广场展示部分内容===========================}}
+        {{% ======================广场展示部分内容===========================}}
         {{if it.content}}
         <div w-class="content" on-tap="goDetail" class="content">
             <widget w-tag="pi-ui-html">{{it.content}}</widget>
@@ -52,7 +52,7 @@
         {{for i,v of it.imgs}}
             {{if v}}
                 {{if it.imgs.length==1}}
-                <img src="{{it.buildupImgPath(v.compressImg)}}" alt="" w-class="firstImage" on-tap="showBigImg({{i}})"/>
+                <img src="{{it.buildupImgPath(v.compressImg)}}" alt="" w-class="firstImage" on-tap="showBigImg({{i}})" style="width:{{it.imgWidth}}px;height:{{it.imgHeight}}px;"/>
                 {{else}}
                     {{if it.imgs.length==4}}
                         {{if i==2}}

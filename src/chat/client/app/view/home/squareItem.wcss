@@ -137,9 +137,6 @@
   display: flex;
 }
 .firstImage{
-  max-width: 574px;
-  max-height: 574px;
-  min-width: 180px;
-  min-height: 180px;
+  min-height: 131px;
   border-radius: 12px;
 }
