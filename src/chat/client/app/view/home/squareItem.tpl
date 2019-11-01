@@ -52,7 +52,7 @@
         {{for i,v of it.imgs}}
             {{if v}}
                 {{if it.imgs.length==1}}
-                <img src="{{it.buildupImgPath(v.compressImg)}}" alt="" w-class="firstImage" on-tap="showBigImg({{i}})" style="width:{{it.imgWidth}}px;height:{{it.imgHeight}}px;"/>
+                <img src="{{it.buildupImgPath(v.compressImg)}}" alt="" w-class="firstImage" on-tap="showBigImg({{i}})" style="max-width:{{it.imgWidth}}px;max-height:{{it.imgHeight}}px;"/>
                 {{else}}
                     {{if it.imgs.length==4}}
                         {{if i==2}}
