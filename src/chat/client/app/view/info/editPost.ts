@@ -23,11 +23,10 @@ interface Props {
     num:string; // 社区ID
     isUploading:boolean;// 正在上传图片
     uploadLoding:any;
-    emoji:boolean;// 表情
-    camera:boolean;// 相机
     // placeHolderInfo:number;// 发文章提示文字个数
     editorText:string;// 富文本框内容
     // isEditor:boolean;// 是否开启富文本框模式
+    showType:boolean[];// 0表情 1相册 2相机
 }
 // const editorTextNum = 10;
 /**
@@ -47,11 +46,10 @@ export class EditPost extends Widget {
         num:'',
         isUploading:false,
         uploadLoding:[],
-        emoji:true,
-        camera: true,
         // placeHolderInfo:editorTextNum,
-        editorText:''
-        // isEditor:true
+        editorText:'',
+        // isEditor:true,
+        showType:[true,true,true]
     };
     
     public setProps(props:any) {
@@ -105,6 +103,7 @@ export class EditPost extends Widget {
      * 选择图片
      */
     public chooseImage(e:any) {
+        this.reaset(1);
         if (this.props.uploadLoding.length >= 9) {
             return;
         }
@@ -161,15 +160,23 @@ export class EditPost extends Widget {
             });
             this.paint();
         });
+        this.paint();
     }
 
     /**
      * 打开照相机
      */
     public takePhoto(e:any) {
-        this.props.camera = !this.props.camera;
+        this.reaset(2);
+        if (this.props.uploadLoding.length >= 9) {
+            return;
+        }
         const camera = openCamera((url) => {
             console.log('拍摄的图片',url);
+            if (!url) {
+
+                return;
+            }
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.uploadLoding.length;
@@ -339,16 +346,11 @@ export class EditPost extends Widget {
 
     // 打开表情包图库
     public openEmoji() {
+        this.reaset(0);
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight() + 90}px`;
-        this.props.emoji = !this.props.emoji;
         this.props.isOnEmoji = !this.props.isOnEmoji;
         this.paint();
         
-    }
-    public openPhoto () {
-        this.props.camera = !this.props.camera;
-        // this.props.isOnEmoji = !this.props.isOnEmoji;
-        this.paint();
     }
 
     /**
@@ -373,5 +375,19 @@ export class EditPost extends Widget {
         // if (this.props.placeHolderInfo !== 0) {
         document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :'style="width:100%;height:auto;"'} />`);   
         // }
+    }
+
+    /**
+     * 
+     * @param index 状态管理  showType的下标
+     */
+    public reaset(index:number) {
+        this.props.showType = [true,true,true];
+        if (index === 0) {
+            this.props.showType[index] = this.props.isOnEmoji;
+        } else {
+            this.props.showType[index] = false;
+        }
+        this.paint();
     }
 }
