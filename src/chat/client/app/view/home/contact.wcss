@@ -3,7 +3,7 @@
     flex-direction: column;
 }
 .topBack{
-    background:linear-gradient(to right,#318DE6,#38CFE7);
+    background:white;
     position: relative;
 }
 .netClose{

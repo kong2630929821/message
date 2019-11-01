@@ -17,8 +17,8 @@ interface Props {
     status:boolean;// true列表页面 false详情页面
     dataList:any;// 表格原始数据
     reportDataList:any;// 举报当前原始数据
-    list:any;// 表格数据【全部】
     allList:any;// 举报全部原始数据
+    allId:any;// 举报全部的ID
     currentData:any;// 当前处理的数据
 }
 /**
@@ -37,8 +37,8 @@ export class ToBeProcessed extends Widget {
         status:true,
         dataList:[],
         reportDataList:[],
-        list:[],
-        allList:[],
+        allId:[[],[]],
+        allList:[[],[]],
         currentData:[]
     };
 
@@ -52,8 +52,8 @@ export class ToBeProcessed extends Widget {
      */
     public initData() {
         getAllReport(0,PENALTY.DELETE_CONTENT).then((r:any) => {
-            debugger;
             this.props.allList[0] = r[0];
+            this.props.allId[0] = r[1];
             // this.props.dataList = this.props.list[this.props.returnStatus];
             // this.props.reportDataList = this.props.allList[this.props.returnStatus];
             // this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
