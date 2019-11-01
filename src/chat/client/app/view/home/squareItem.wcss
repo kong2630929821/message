@@ -54,6 +54,7 @@
 .content1 {
   padding: 20px;
   word-break: break-all;
+  margin: 0 0 0 105px;
 }
 .btns {
   height: 80px;

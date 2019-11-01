@@ -1,13 +1,15 @@
 import { sourceIp } from '../../../../../app/public/config';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
+import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { PENALTY } from '../../../../management/utils/logic';
-import { getStore, setStore } from '../../data/store';
+import { getStore, register, setStore } from '../../data/store';
 import { openCamera, selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
 import { arrayBuffer2File, base64ToFile, imgResize, uploadFile } from '../../net/upload';
-
+export const forelet = new Forelet();
+export const WIDGET_NAME = module.id.replace(/\//g, '-');
 interface IMAGE {
     compressImg:string;
     originalImg:any;  
@@ -391,3 +393,18 @@ export class EditPost extends Widget {
         this.paint();
     }
 }
+
+register('offLine',(r) => {
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    if (r && w) {
+        // debugger;
+        // const finshLength = w.props.saveImgs.length;// 已经上传的数量
+        // const unFinshLength = w.props.imgs.length;// 为上传的数量
+        // w.props.uploadLoding = w.props.uploadLoding.slice(0,finshLength);
+        // if (finshLength !== unFinshLength) {
+        //     // 已经上传和未上传的图片数量不一样时  删除已经上传的
+        //     w.props.imgs = w.props.imgs.slice(0,finshLength - 1);
+        // }
+        // w.paint();
+    }
+});

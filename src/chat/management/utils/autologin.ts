@@ -10,6 +10,7 @@ import { auto_login, getToken } from '../../server/rpc/session.p';
 import { AutoLogin, GetToken, Token } from '../../server/rpc/session.s';
 import { clientRpcFunc, subscribe } from '../net/login';
 import { login as defLogin } from '../net/rpc';
+import { setStore } from '../store/memstore';
 
 // 用户类型
 export enum UserType {
