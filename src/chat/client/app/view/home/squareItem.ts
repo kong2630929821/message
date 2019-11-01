@@ -215,11 +215,14 @@ export class SquareItem extends Widget {
         //     originalImg: buildupImgPath(val.originalImg)
         // });
         const val = [];
+        const icon = [];
         this.props.imgs.forEach((v:any) => {
+            icon.push(buildupImgPath(v.compressImg));
             val.push(buildupImgPath(v.originalImg));
         });
         popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
             list:val,
+            thumbnail:icon,
             activeIndex:ind + 1
         });
     }

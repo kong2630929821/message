@@ -120,7 +120,7 @@ export class EditPost extends Widget {
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,0.3,200,(res) => {
+                    imgResize(buffer,0.3,1024,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
                         this1.props.imgs[len] = url;
                         this1.paint();
@@ -184,7 +184,7 @@ export class EditPost extends Widget {
             camera.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,0.3,200,(res) => {
+                    imgResize(buffer,0.3,1024,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
                         this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
