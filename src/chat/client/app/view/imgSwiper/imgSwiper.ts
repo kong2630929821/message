@@ -8,7 +8,7 @@ import { Swiper } from '../../res/js/swiper.min';
 interface Props {
     activeIndex:number;// 当前下标
     list:any;   // image path列表
-    showOrg:boolean;// 是否展示原图
+    showOrg:any;// 是否展示原图
     thumbnail:any;// 缩略图
     isLoad:boolean[];// 是否在加载
 }
@@ -21,7 +21,7 @@ export class ImgSwiper extends Widget {
     public props:Props = {
         list:[],
         activeIndex:1,
-        showOrg:false,
+        showOrg:[],
         thumbnail:[],
         isLoad:[]
     };
@@ -34,6 +34,7 @@ export class ImgSwiper extends Widget {
         super.setProps(this.props);
         this.props.list.forEach(v => {
             this.props.isLoad.push(false);
+            this.props.showOrg.push(false);
         });
         console.log('ImgSwiper ====',this.props);
     }
@@ -88,8 +89,8 @@ export class ImgSwiper extends Widget {
     }
 
     // 查看原图
-    public showOriginal() {
-        this.props.showOrg = true;
+    public showOriginal(index:number) {
+        this.props.showOrg[index] = true;
         this.paint();
     }
     
