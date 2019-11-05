@@ -1,7 +1,10 @@
 /**
  * 本地方法
  */
+import { uploadFileUrlPrefix } from '../../../app/public/config';
 import { popNew } from '../../../pi/ui/root';
+import { buildupImgPath } from '../../client/app/logic/logic';
+import { EMOJIS_MAP } from '../../client/app/widget1/emoji/emoji';
 
 /**
  * 弹窗提示
@@ -154,51 +157,248 @@ export enum REPORT {
     REPORT_COMMENT= 5
 }
 export enum REPORTTITLE {
-    REPORT_PERSON= '用户',
+    REPORT_PERSON= '玩家',
     REPORT_PUBLIC= '嗨嗨号',
     REPORT_POST= '动态',
     REPORT_ARTICLE= '文章',
     REPORT_COMMENT= '评论'
 }
 // 处理举报数据列表
-export const deelReportList = (r:any) => {
-    if (r.total === 0) {
-        return r;
-    }
+export const deelReportList = (r:any,report_type:number) => {
     const list = r.list;
-    const showDataList = [[],[],[],[],[],[]];
-    const dataList = [[],[],[],[],[],[]];
+    if (list.length === 0) {
+        return [[],[]];
+    }
+    const dataList = [];// 表格数据
+    const idList = [];// 详情ID
     list.forEach((v,i) => {
-        const key = v.report_info.key.split('%');
-        const reportInfo = JSON.parse(v.report_info.reason);
-        let reportInfos = null;
-        if (reportInfo.type) {
-            reportInfos = JSON.parse(reportInfo.type).join(',');
-        } else {
-            reportInfos = reportInfo.join(',');
-        }
-        const reportTime = timestampFormat(JSON.parse(v.report_info.time));
-        const reportPeople = v.report_user.user_info.name;
-        let count = 0;
-        if (v.reported_content) {
-            count = v.reported_content.reported_count;
-        } else if (v.reported_public) {
-            count = v.reported_public.reported_list.length;
-        } else {
-            count = v.reported_user.reported_list.length;
-        }
-        const data = [v.reported_user.user_info.name,REPORTTITLE[REPORT[key[0]]],reportInfos,count,reportTime,reportPeople];
-        showDataList[0].push(data);
-        showDataList[key[0]].push(data); 
-        dataList[0].push(v);
-        dataList[key[0]].push(v);
+        const reportType = JSON.parse(JSON.parse(v.last_resaon).type).join(',');
+        dataList.push([
+            v.user_name, // 被举报人
+            REPORTTITLE[REPORT[report_type]],// 举报类型
+            reportType,// 举报原因
+            v.report_ids.length,// 举报次数
+            timestampFormat(JSON.parse(v.last_time)),// 举报时间
+            v.last_user_name// 举报人
+        ]);
+        idList.push(v.report_ids);
     });
-    r.showDataList = showDataList;
-    r.list = dataList;
-
-    return r;
+   
+    return [dataList,idList];
 };
 
+export const deelReportListInfo = (r:any,state:number) => {
+    const list = r.list;
+    if (list.length === 0) {
+        return [[],[]];
+    }
+    let userInfo = [];// 被举报人信息
+    let dynamic = {};// 动态信息
+    const reportInfo = [];// 举报信息
+    const key = list[0].report_info.key;// 处罚的KEY
+    if (state === 0) {
+        // 被举报人信息处理
+        userInfo = (deelReportedUser(list[0].reported_user));
+        list.forEach(v => {
+        // 处理举报信息
+            reportInfo.push(deelUserReportInfo(v.report_info,v.report_user));
+        });
+        
+    } else if (state === 1) {
+        dynamic = deelDynamic(list[0].report_info,list.length)[0];
+        userInfo = (deelReportedUser(list[0].reported_user));
+        list.forEach(v => {
+            // 处理举报信息
+            reportInfo.push(deelDynamicReport(v.report_info,v.report_user));
+        });
+    }
+
+    return [dynamic,userInfo,reportInfo,key];
+};
+
+export const deelDynamicReport = (reportInfo:any,reportedUser:any) => {
+    const userPhone = reportedUser.user_info.tel ? reportedUser.user_info.tel :'无';
+    const reason  = JSON.parse(reportInfo.reason);
+    let origin = null;
+    if (reason.type) {
+        origin = JSON.parse(reason.type).join(',');
+    } else {
+        origin = reason.join(',');
+    }
+    let sex = '';
+    if (reportedUser.user_info.sex === 0) {
+        sex = 'chat/management/res/images/girl.png';
+    } else if (reportedUser.user_info.sex === 1) {
+        sex = 'chat/management/res/images/boy.png';
+    } else {
+        sex = 'chat/management/res/images/neutral.png';
+    }
+
+    return [
+        { key:'好嗨ID',value:reportedUser.user_info.acc_id },
+        { key:'用户昵称',value:reportedUser.user_info.name,fg:sex },
+        { key:'手机号',value:userPhone },
+        { key:'举报时间',value:timestampFormat(JSON.parse(reportInfo.time)) },
+        { key:'举报原因',value:origin },
+        { key:'被举报次数总计',value:reportedUser.reported_list.length },
+        { key:'举报次数总计',value:reportedUser.report_list.length }
+    ];
+};
+
+// 转换文字中的链接
+const httpHtml = (str:string) => {
+    const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-|:|#)+)/g;
+    
+    return str.replace(reg, '<a href="javascript:;" class="linkMsg">$1$2</a>');
+};
+// 转换表情包
+export const parseManagementEmoji = (msg:any) => {    
+    msg = httpHtml(msg);
+    msg = msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
+        const url = EMOJIS_MAP.get(capture) || undefined;
+        if (url) {
+            return `<img src="../../../chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
+        } else {
+            return match;
+        }
+    });
+
+    return msg;
+};
+
+/**
+ * 处理用户头像 
+ */
+export const getUserAvatar = (avatar:string) => {
+    if (avatar && avatar.indexOf('data:image') < 0) {
+        if (avatar.slice(0,4) === 'http') {
+            avatar = avatar;   
+        } else {
+            avatar = `${uploadFileUrlPrefix}${avatar}`;
+        }
+            
+    } else {
+        avatar = 'app/res/image/default_avater_big.png';
+    }
+
+    return avatar;
+};
+
+// 处理动态数据
+const deelDynamic = (reportInfo:any,count:number) => {
+    const evidence = JSON.parse(reportInfo.evidence);
+    const like = evidence.likeCount;// 点赞数
+    const commentCount = evidence.commentCount;// 评论数
+    const time = timestampFormat(evidence.createtime);// 发布时间
+    const avatar = getUserAvatar(evidence.avatar);// 用户头像
+    const userName = evidence.username;// 用户名
+    const body = JSON.parse(evidence.body);
+    const img = [];
+    body.imgs.forEach(v => {
+        img.push(buildupImgPath(v.originalImg));
+    });
+
+    return [
+        {
+            avatar,
+            name:userName,
+            like,
+            commentCount,
+            time,
+            count,
+            msg:parseManagementEmoji(body.msg),
+            imgs:img
+        }
+    ];
+
+};
+
+// 被举报人信息处理
+const deelReportedUser = (reportedUser:any) => {
+    const userPhone = reportedUser.user_info.tel ? reportedUser.user_info.tel :'无';
+    const gruel = reportedUser.punish_list.length ? penaltyText(reportedUser.punish_list,'用户') :'无';
+    let sex = '';
+    if (reportedUser.user_info.sex === 0) {
+        sex = 'chat/management/res/images/girl.png';
+    } else if (reportedUser.user_info.sex === 1) {
+        sex = 'chat/management/res/images/boy.png';
+    } else {
+        sex = 'chat/management/res/images/neutral.png';
+    }
+
+    return [
+        { key:'好嗨ID',value:reportedUser.user_info.acc_id },
+        { key:'用户昵称',value:reportedUser.user_info.name,fg:sex },
+        { key:'手机号',value:userPhone },
+        { key:'被举报次数总计',value:reportedUser.reported_list.length },
+        { key:'被惩罚次数总计',value:reportedUser.punish_history_list.length },
+        { key:'举报次数总计',value:reportedUser.report_list.length },
+        { key:'当前惩罚',value:gruel }
+    ];
+};
+
+/**
+ * 处理用户举报信息
+ * @param reportInfo 举报信息
+ * @param reportUser 举报人信息
+ */
+const deelUserReportInfo = (reportInfo:any,reportUser:any) => {
+    const reason  = JSON.parse(reportInfo.reason);
+    const imgList = JSON.parse(reason.img);
+    const msg = reason.msg ? reason.msg :'无';
+    let origin = null;
+    const img = [];
+    if (reason.type) {
+        origin = JSON.parse(reason.type).join(',');
+    } else {
+        origin = reason.join(',');
+    }
+    imgList.forEach(v => {
+        img.push(buildupImgPath(v));
+    });
+    let time = null;// 举报时间
+    reportUser.report_list.forEach(v => {
+        if (reportInfo.id === v.id) {
+            time = timestampFormat(JSON.parse(v.time));
+        }
+    });
+    let sex = '';
+    if (reportUser.user_info.sex === 0) {
+        sex = 'chat/management/res/images/girl.png';
+    } else if (reportUser.user_info.sex === 1) {
+        sex = 'chat/management/res/images/boy.png';
+    } else {
+        sex = 'chat/management/res/images/neutral.png';
+    }
+    const userInfo = [
+        { key:'好嗨ID',value:reportUser.user_info.acc_id },
+        { key:'用户昵称',value:reportUser.user_info.name,fg:sex },
+        { key:'手机号',value:reportUser.user_info.tel ? reportUser.user_info.tel :'无' },
+        { key:'举报时间',value:time },
+        { key:'被举报次数总计',value:reportUser.reported_list.length },
+        { key:'被惩罚次数总计',value:reportUser.punish_history_list.length },
+        { key:'举报次数总计',value: reportUser.report_list.length }
+    ];
+
+    return [
+        {
+            key:'上传截图',
+            value:img
+        },
+        {
+            key:'举报原因',
+            value:origin
+        },
+        {
+            key:'举报描述',
+            value:msg
+        },
+        {
+            key:'举报人',
+            value:userInfo
+        }
+    ];
+};
 export enum PENALTY {
     DELETE_CONTENT= 1,
     BAN_MESAAGE,

@@ -1,13 +1,15 @@
 import { sourceIp } from '../../../../../app/public/config';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
+import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { PENALTY } from '../../../../management/utils/logic';
-import { getStore, setStore } from '../../data/store';
+import { getStore, register, setStore } from '../../data/store';
 import { openCamera, selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
 import { arrayBuffer2File, base64ToFile, imgResize, uploadFile } from '../../net/upload';
-
+export const forelet = new Forelet();
+export const WIDGET_NAME = module.id.replace(/\//g, '-');
 interface IMAGE {
     compressImg:string;
     originalImg:any;  
@@ -23,11 +25,10 @@ interface Props {
     num:string; // 社区ID
     isUploading:boolean;// 正在上传图片
     uploadLoding:any;
-    emoji:boolean;// 表情
-    camera:boolean;// 相机
     // placeHolderInfo:number;// 发文章提示文字个数
     editorText:string;// 富文本框内容
     // isEditor:boolean;// 是否开启富文本框模式
+    showType:boolean[];// 0表情 1相册 2相机
 }
 // const editorTextNum = 10;
 /**
@@ -47,11 +48,10 @@ export class EditPost extends Widget {
         num:'',
         isUploading:false,
         uploadLoding:[],
-        emoji:true,
-        camera: true,
         // placeHolderInfo:editorTextNum,
-        editorText:''
-        // isEditor:true
+        editorText:'',
+        // isEditor:true,
+        showType:[true,true,true]
     };
     
     public setProps(props:any) {
@@ -105,6 +105,7 @@ export class EditPost extends Widget {
      * 选择图片
      */
     public chooseImage(e:any) {
+        this.reaset(1);
         if (this.props.uploadLoding.length >= 9) {
             return;
         }
@@ -121,9 +122,8 @@ export class EditPost extends Widget {
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,(res) => {
+                    imgResize(buffer,0.3,1024,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
-                        this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
@@ -139,16 +139,19 @@ export class EditPost extends Widget {
                                 imagePicker.getContent({
                                     quality:100,
                                     success(buffer1:ArrayBuffer) {
-                                        
-                                        uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
-                                            console.log('上传原图',imgurl);
-                                            image.originalImg = imgurl;
-                                            this1.props.saveImgs[len] = image;
-                                            if (this1.props.isUploading) {
-                                                this1.props.isUploading = false;
-                                                this1.send();
-                                            }
+                                        imgResize(buffer1,0.8,1024,(res1) => {
+                                            uploadFile(base64ToFile(res1.base64),(imgurl:string) => {
+                                                console.log('上传原图',imgurl);
+                                                image.originalImg = imgurl;
+                                                this1.props.uploadLoding[len] = false;
+                                                this1.paint();
+                                                this1.props.saveImgs[len] = image;
+                                                if (this1.props.isUploading) {
+                                                    this1.props.isUploading = false;
+                                                }
+                                            });
                                         });
+                                        
                                     }
                                 });
                             });
@@ -159,31 +162,38 @@ export class EditPost extends Widget {
             });
             this.paint();
         });
+        this.paint();
     }
 
     /**
      * 打开照相机
      */
     public takePhoto(e:any) {
-        this.props.camera = !this.props.camera;
+        this.reaset(2);
+        if (this.props.uploadLoding.length >= 9) {
+            return;
+        }
         const camera = openCamera((url) => {
             console.log('拍摄的图片',url);
-    
+            if (!url) {
+
+                return;
+            }
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.uploadLoding.length;
-            this.props.uploadLoding = true;
+            this.props.uploadLoding[len] = true;
             camera.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,(res) => {
+                    imgResize(buffer,0.3,1024,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;background-size: cover;" class="previewImg"></div>`;
-                        this.props.uploadLoding = false;
+                        this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
                         if (this1.props.isPublic) {
-                            this.addImg(res.base64);
+                            this1.addImg(res.base64);
                         } else {
                             uploadFile(base64ToFile(res.base64),(imgUrlSuf:string) => {
                                 console.log('上传压缩图',imgUrlSuf);
@@ -194,16 +204,19 @@ export class EditPost extends Widget {
                                 camera.getContent({
                                     quality:100,
                                     success(buffer1:ArrayBuffer) {
-                                        
-                                        uploadFile(arrayBuffer2File(buffer1),(imgurl:string) => {
-                                            console.log('上传原图',imgurl);
-                                            image.originalImg = imgurl;
-                                            this1.props.saveImgs[len] = image;
-                                            if (this.props.isUploading) {
-                                                this.props.isUploading = false;
-                                                this.send();
-                                            }
+                                        imgResize(buffer1,0.8,1024,(res1) => {
+                                            uploadFile(base64ToFile(res1.base64),(imgurl:string) => {
+                                                console.log('上传原图',imgurl);
+                                                image.originalImg = imgurl;
+                                                this1.props.saveImgs[len] = image;
+                                                this1.props.uploadLoding[len] = false;
+                                                this1.paint();
+                                                if (this1.props.isUploading) {
+                                                    this1.props.isUploading = false;
+                                                }
+                                            });
                                         });
+                                        
                                     }
                                 });
                             });
@@ -294,6 +307,7 @@ export class EditPost extends Widget {
             // 等待图片上传完成
             if (this.props.imgs.length !== this.props.saveImgs.length) {
                 this.props.isUploading = true;
+                popNewMessage('正在上传图片');
 
                 return;
             }
@@ -315,8 +329,8 @@ export class EditPost extends Widget {
                         this.ok && this.ok();
                     } else {
                         r.list.forEach(v => {
-                            if (v.punish_type === PENALTY.BAN_POST) {
-                                popNewMessage('禁止发动态');
+                            if (v.punish_type === PENALTY.FREEZE) {
+                                popNewMessage('您已被禁言');
 
                                 return;
                             }
@@ -334,16 +348,11 @@ export class EditPost extends Widget {
 
     // 打开表情包图库
     public openEmoji() {
+        this.reaset(0);
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight() + 90}px`;
-        this.props.emoji = !this.props.emoji;
         this.props.isOnEmoji = !this.props.isOnEmoji;
         this.paint();
         
-    }
-    public openPhoto () {
-        this.props.camera = !this.props.camera;
-        // this.props.isOnEmoji = !this.props.isOnEmoji;
-        this.paint();
     }
 
     /**
@@ -369,4 +378,37 @@ export class EditPost extends Widget {
         document.execCommand('insertHTML', false, `<img src ='${filePath}' ${state ? 'class="emojiMsg"' :'style="width:100%;height:auto;"'} />`);   
         // }
     }
+
+    /**
+     * 
+     * @param index 状态管理  showType的下标
+     */
+    public reaset(index:number) {
+        this.props.showType = [true,true,true];
+        if (index === 0) {
+            this.props.showType[index] = this.props.isOnEmoji;
+        } else {
+            this.props.showType[index] = false;
+        }
+        this.paint();
+    }
 }
+
+register('offLine',(r) => {
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    if (r && w) {
+        const finshLength = w.props.saveImgs.length;// 已经上传的数量
+        const unFinshLength = w.props.imgs.length;// 为上传的数量
+        if (finshLength !== unFinshLength) {
+            // 已经上传和未上传的图片数量不一样时  删除已经上传的
+            const arr = [...w.props.uploadLoding];
+            arr.forEach((v,i) => {
+                if (v) {
+                    w.props.uploadLoding.splice(i,1);
+                    w.props.imgs.splice(i,1);
+                }
+            });
+        }
+        w.paint();
+    }
+});

@@ -53,6 +53,234 @@
 
 <!--百度禁止转码-->
 <meta http-equiv="Cache-Control" content="no-siteapp" />
+<!--更新弹框样式begin-->
+<style>
+	.pi-mask {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	background-color: rgba(50, 50, 50, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
+  .pi-update-box {
+	background-color: #fff;
+	background-image: url(../res/image/update_bg.png);
+	background-repeat: no-repeat;
+	background-size: 100% 235px;
+	width: 630px;
+	border-radius: 12px;
+	padding-bottom: 30px;
+	position: relative;
+  }
+  .pi-update-rocket {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	transform: translate3d(-50%, -30%, 0);
+  }
+  .pi-update-content {
+	padding: 20px 40px;
+  }
+  .pi-update-title {
+	margin-top: 250px;
+	font-size: 32px;
+	color: #111;
+	line-height: 45px;
+  }
+  .pi-update-items {
+	margin-top: 20px;
+  }
+  .pi-update-item {
+	font-size: 28px;
+	line-height: 40px;
+	color: #8e96ab;
+  }
+  .pi-update-bottom{
+	  position: relative;
+	  margin-top: 30px;
+	  min-height: 100px;
+  }
+  .pi-update-btns {
+	position: absolute;
+	top: 0;
+	left: 80px;
+	right: 80px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	display: none;
+  }
+  .pi-update-cancel-btn {
+	width: 220px;
+	height: 80px;
+	border-radius: 50px;
+	border: 1px dashed rgba(136, 136, 136, 1);
+	font-size: 32px;
+	color: #888;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
+  .pi-update-ok-btn {
+	width: 220px;
+	height: 80px;
+	background: linear-gradient(
+	  270deg,
+	  rgba(68, 206, 237, 1) 0%,
+	  rgba(62, 179, 241, 1) 100%
+	);
+	box-shadow: 0px 5px 10px 0px rgba(13, 131, 246, 0.1);
+	border-radius: 50px;
+	font-size: 32px;
+	color: #fff;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
+  .pi-update-progress-container {
+	  font-size: 32px;
+	  text-align: center;
+	position: absolute;
+	top: 40px;
+	left: 30px;
+	right: 30px;
+  }
+  .pi-update-progress-bg {
+	position: relative;
+	height: 11px;
+	background: rgba(204, 204, 204, 1);
+	border-radius: 10px;
+	margin-bottom: 10px;
+  }
+  .pi-update-progress {
+	width: 0%;
+	height: 11px;
+	background: rgba(49, 141, 230, 1);
+	border-radius: 10px;
+  }
+  .pi-update-progress-text {
+	font-size: 24px;
+	color: rgba(34, 34, 34, 1);
+	line-height: 33px;
+	text-align: center;
+  }
+  .pi-update-complete-btn {
+	position: absolute;
+	top: 0;
+	left: 30px;
+	right: 30px;
+	height: 80px;
+	background: rgba(49, 141, 230, 1);
+	border-radius: 12px;
+	font-size: 32px;
+	color: rgba(255, 255, 255, 1);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	display: none;
+  }
+  @-webkit-keyframes bounceInUp {
+	from,
+	60%,
+	75%,
+	90%,
+	to {
+	  -webkit-animation-timing-function: cubic-bezier(
+		0.215,
+		0.61,
+		0.355,
+		1
+	  );
+	  animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+	}
+
+	from {
+	  opacity: 0;
+	  -webkit-transform: translate3d(0, 3000px, 0);
+	  transform: translate3d(0, 3000px, 0);
+	}
+
+	60% {
+	  opacity: 1;
+	  -webkit-transform: translate3d(0, -20px, 0);
+	  transform: translate3d(0, -20px, 0);
+	}
+
+	75% {
+	  -webkit-transform: translate3d(0, 10px, 0);
+	  transform: translate3d(0, 10px, 0);
+	}
+
+	90% {
+	  -webkit-transform: translate3d(0, -5px, 0);
+	  transform: translate3d(0, -5px, 0);
+	}
+
+	to {
+	  -webkit-transform: translate3d(0, 0, 0);
+	  transform: translate3d(0, 0, 0);
+	}
+  }
+
+  @keyframes bounceInUp {
+	from,
+	60%,
+	75%,
+	90%,
+	to {
+	  -webkit-animation-timing-function: cubic-bezier(
+		0.215,
+		0.61,
+		0.355,
+		1
+	  );
+	  animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+	}
+
+	from {
+	  opacity: 0;
+	  -webkit-transform: translate3d(0, 3000px, 0);
+	  transform: translate3d(0, 3000px, 0);
+	}
+
+	60% {
+	  opacity: 1;
+	  -webkit-transform: translate3d(0, -20px, 0);
+	  transform: translate3d(0, -20px, 0);
+	}
+
+	75% {
+	  -webkit-transform: translate3d(0, 10px, 0);
+	  transform: translate3d(0, 10px, 0);
+	}
+
+	90% {
+	  -webkit-transform: translate3d(0, -5px, 0);
+	  transform: translate3d(0, -5px, 0);
+	}
+
+	to {
+	  -webkit-transform: translate3d(0, 0, 0);
+	  transform: translate3d(0, 0, 0);
+	}
+  }
+
+  .bounceInUp {
+	-webkit-animation-name: bounceInUp;
+	animation-name: bounceInUp;
+  }
+  .animated {
+	-webkit-animation-duration: 1s;
+	animation-duration: 1s;
+	-webkit-animation-fill-mode: both;
+	animation-fill-mode: both;
+  }
+</style>
+<!--更新弹框样式end-->
 <style>
 	#rcmj_loading_log {
 		width: 100%;
@@ -72,21 +300,7 @@
 <script type="text/javascript">
 
 	var winit = {};
-	(function(){
-		winit.win = {};
-		winit.startTime = Date.now();
-		var k;
-		for(k in window){
-			if(window.hasOwnProperty(k))
-				winit.win[k] = 1;
-		}
-		var name = "chat"; // 每个项目需要定义自己的名称，该名称决定了访问域名和本地存储名
-		var main = document.domain.replace(/^(\D+\w*\.)(\w+\.[\w\.]+)/,"$2");
-		// var remote = (document.domain != main || /^\w+\.\w+$/.test(document.domain)) ? name +".":"";
-		winit.store = name;
-		winit.debug = false;
-		// main = location.port ? main+":"+location.port:main;
-		// winit.domains = [location.protocol+"//"+(remote ? "c"+remote:"")+main, location.protocol+"//"+remote+main];
+	(function(){		
 
 		/**
 		 * 判断是否在app内: 协议是file，而且在ios和android的webview运行
@@ -103,10 +317,32 @@
 			}
 			winit.inApp = inApp = winit.inAndroidApp || winit.inIOSApp;
 		}
+
+		winit.win = {};
+		winit.startTime = Date.now();
+		var k;
+		for(k in window){
+			if(window.hasOwnProperty(k))
+				winit.win[k] = 1;
+		}
+		var name = "chat"; // 每个项目需要定义自己的名称，该名称决定了访问域名和本地存储名
+		var main = document.domain.replace(/^(\D+\w*\.)(\w+\.[\w\.]+)/,"$2");
+		var remote = (document.domain != main || /^\w+\.\w+$/.test(document.domain)) ? name +".":"";
+		winit.store = name;
+		winit.debug = false;
+		// main = location.port ? main+":"+location.port:main;
+		winit.isLoc = location.protocol.indexOf("file")>=0  // 是否本地包
 		
-		winit.severIp = "192.168.31.226";  // 本地服务器
-		// winit.severIp = "39.98.200.23";  // 外网测试服
-		winit.severPort = '80';
+		if(!winit.isLoc){ // 浏览器版本自动识别
+			winit.severIp = main;
+			winit.severPort = location.port ? location.port : "80";		
+		}else{// 本地包需要配置服务器ip和port
+			// 外网 39.98.200.23   high.herominer.net 
+			winit.severIp = "192.168.31.226";  // 本地服务器
+			// winit.severIp = "39.98.200.23";  // 外网测试服
+			winit.severPort = "80";		
+		}
+
 		winit.appURL = "http://" + winit.severIp + ":" + winit.severPort + "/appversion";
 		var defaultDomains;
 		var remoteDomains = ["http://" + winit.severIp + ":" + winit.severPort];
@@ -205,13 +441,13 @@
 				return mobileBootFiles[fileName] && mobileBootFiles[fileName].content;
 			},
 
-			getMobileBootFiles: function (cb) {
+			getMobileBootFiles: function (paths, cb) {
 				jsInterceptMap[++jsInterceptID] = cb;
 
 				if (inAndroidApp) {
-					window.JSIntercept.getBootFiles(jsInterceptID);
+					window.JSIntercept.getBootFiles(jsInterceptID, paths);
 				} else if (inIOSApp) {
-					window.webkit.messageHandlers.JSIntercept.postMessage(["getBootFiles", jsInterceptID]);
+					window.webkit.messageHandlers.JSIntercept.postMessage(["getBootFiles", jsInterceptID, paths]);
 				} else {
 					setTimeout(cb, 0);
 				}
@@ -236,15 +472,17 @@
 			/**
 			 * 刷新页面
 			 */ 
-			restartApp: function () {
+				restartApp: function (restartPath) {
 				if (inAndroidApp) {
-					window.JSIntercept.restartApp();
+					window.JSIntercept.restartApp(restartPath);
 				} else if (inIOSApp) {
 					window.webkit.messageHandlers.JSIntercept.postMessage(["restartApp"]);
 				}
 			}
 		};
+
 		// =======================更新结束==================
+
 
 		var u8ArrayToStr = function (arr) {
 			const decoder = new TextDecoder('utf-8');
@@ -298,10 +536,78 @@
 		};
 
 		winit.initFail = function (url, err) { err ? alert(err +", " + url) : "";};
+
 		winit.init = function (){};
+
 		winit.flags = {};
-		mobileBootFiles = {};
+
+		winit.path="wallet/";
+		winit.bootPath = "chat/client/boot/";
+		var appBoot = winit.path + winit.bootPath;
+		var piBoot = winit.path + "pi/boot/";
+		var mobileBootFiles = {
+			"update.flag": {
+				path: winit.path + "update.flag"
+			},
+			"index.js": {
+				path: appBoot + "index.js",
+			},
+			"next.js": {
+				path: appBoot + "next.js",
+			},
+			"depend": {
+				path: winit.path + "depend",
+			},
+			"init.js": {
+				path: piBoot + "init.js",
+			},
+		};
+		winit.path = "/" + winit.path;
+		winit.updateFlagsPath = mobileBootFiles["update.flag"].path;
+
 		winit.start = function () {
+			if (winit.JSIntercept.isNative && location.protocol === "file:") {
+				
+				var keys = [];
+				var paths = [];
+
+				for (var k in mobileBootFiles) {
+					keys.push(k);
+					paths.push(mobileBootFiles[k].path);
+				}
+				winit.JSIntercept.getMobileBootFiles(JSON.stringify(paths), function (isSuccess, str) {
+					var contents = JSON.parse(str);
+					if (contents.length !== paths.length) {
+						throw new Error("getMobileBootFiles result invalid!");
+					}
+					for (var i = 0; i < keys.length; ++i) {
+						if (!contents[i]) continue;
+						var key = keys[i];
+						if (key === "update.flag") {
+							mobileBootFiles[key].content = window.atob(contents[i])
+						} else {
+							var buffer = base64ToU8Array(contents[i]);
+							var blob = new Blob([buffer], {
+								type: "text/javascript"
+							});
+							mobileBootFiles[key].content = u8ArrayToStr(buffer);
+							mobileBootFiles[key].url = URL.createObjectURL(blob);
+						}
+					}
+					winit.startImpl();
+				});
+			} else {
+				winit.startImpl();
+			}
+		};
+
+		winit.getLoadDomain = function (name, path) {
+			var domain = mobileBootFiles[name] && mobileBootFiles[name].url;
+			if (domain) return domain;
+			return defaultDomains;
+		}
+		
+		winit.startImpl = function () {
 			if (winit.debug) {
 				winit.loadJS(defaultDomains,
 					"/wallet/chat/client/boot/hotfix.js", "utf8", winit.initFail, "load hotupdate error");
@@ -309,7 +615,7 @@
 			winit.loadJS(defaultDomains,
 				"/wallet/chat/client/boot/index.js?" + Math.random(), "utf8", winit.initFail, "load index error");
 		};
-
+		
 
 		if(document.hidden === true){
 			setTimeout(function(){
@@ -327,7 +633,6 @@
 		}
 		
 	})(); 
-     
 </script>
 </head>
 <body onselectstart="return false" style="-webkit-text-size-adjust:none;-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;background-color:#696969;margin:0px;padding:0px;list-style:none;overflow:hidden;">

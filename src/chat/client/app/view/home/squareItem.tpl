@@ -10,7 +10,9 @@
                 <div w-class="offical">官方</div>
                 {{else}}
                     {{if it.gender!=2}}
-                        <img src="../../res/images/{{it.gender===1?'girl.png':'boy.png'}}"/>
+                        <img src="../../res/images/{{it.gender===0?'girl.png':'boy.png'}}"/>
+                    {{else}}
+                        <img src="../../res/images/neutral.png"/>
                     {{end}}
                 {{end}}
             </div>
@@ -30,13 +32,13 @@
 
     {{if it.showAll}}
     {{% =================帖子详情展示全部内容=======================}}
-    {{if it.content}}
-    <div w-class="content1" id="minImg">
-        <widget w-tag="pi-ui-html">{{it.content}}</widget>
-    </div>
-    {{end}}
+        {{if it.content}}
+        <div w-class="content1" id="minImg">
+            <widget w-tag="pi-ui-html">{{it.content}}</widget>
+        </div>
+        {{end}}
     {{else}}
-    {{% ======================广场展示部分内容===========================}}
+        {{% ======================广场展示部分内容===========================}}
         {{if it.content}}
         <div w-class="content" on-tap="goDetail" class="content">
             <widget w-tag="pi-ui-html">{{it.content}}</widget>
@@ -50,7 +52,7 @@
         {{for i,v of it.imgs}}
             {{if v}}
                 {{if it.imgs.length==1}}
-                <img src="{{it.buildupImgPath(v.compressImg)}}" alt="" w-class="firstImage" on-tap="showBigImg({{i}})"/>
+                <img src="{{it.buildupImgPath(v.compressImg)}}" alt="" w-class="firstImage" on-tap="showBigImg({{i}})" style="max-width:{{it.imgWidth}}px;max-height:{{it.imgHeight}}px;"/>
                 {{else}}
                     {{if it.imgs.length==4}}
                         {{if i==2}}
@@ -78,11 +80,11 @@
        <div w-class="btnGroup">
             <div w-class="btnBox" on-tap="doComment">
                 <img src="../../res/images/commentsGrey.png" w-class="btn"/>
-                <span w-class="time">{{it.commentCount>0?(it.commentCount>99?'99+':it.commentCount):"评论"}}</span>
+                <span w-class="time">{{it.commentCount>0?(it.commentCount>99?'99+':it.commentCount):"0"}}</span>
             </div>
             <div w-class="btnBox" on-tap="likeBtn">
                 <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
-                <span w-class="time">{{it.likeCount>0?(it.likeCount>99?'99+':it.likeCount):"点赞"}}</span>
+                <span w-class="time">{{it.likeCount>0?(it.likeCount>99?'99+':it.likeCount):"0"}}</span>
             </div>
        </div>
     </div>

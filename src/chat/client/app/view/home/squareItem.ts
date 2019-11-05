@@ -11,6 +11,8 @@ import { buildupImgPath, complaintUser, judgeFollowed, timestampFormat } from '.
 import { popNewMessage } from '../../logic/tools';
 import { delPost, follow, sendUserMsg } from '../../net/rpc';
 
+const imgSize = 180;// 多个图片的显示大小
+const imgInterval = 17;// 图片的间隔
 interface Props {
     key:any;   // 帖子ID及社区编号
     username:string;
@@ -27,12 +29,14 @@ interface Props {
     imgs:string[];  // 图片列表
     offical:boolean;  // 官方
     isPublic:boolean; // 公众号文章
-    gender:number;  // 性别 0 男 1 女
+    gender:number;  // 性别 0 女 1 男
     isMine:boolean;  // 是否本人发的帖
     timeFormat:any;  // 时间处理
     fgStatus:boolean;// 关注动画
     buildupImgPath:any;  // 组装图片路径
     publicName:string;// 公众号名字
+    imgWidth:number;// 一张图片的宽
+    imgHeight:number;// 一张图片的高
 }
 /**
  * 广场帖子
@@ -57,12 +61,14 @@ export class SquareItem extends Widget {
         isPublic:false,
         imgs:[],
         offical:false,
-        gender:1,   // 性别 0男 1女
+        gender:2,   // 性别 0女 1男
         isMine:false,
         timeFormat:timestampFormat,
         fgStatus:false,
         buildupImgPath:buildupImgPath,
-        publicName:''
+        publicName:'',
+        imgWidth:0,
+        imgHeight:0
     };
 
     public setProps(props:any) {
@@ -75,12 +81,13 @@ export class SquareItem extends Widget {
         const uid = getStore('uid',0);
         this.props.isMine = this.props.owner === uid;
         this.props.followed = judgeFollowed(this.props.key.num);
+        this.calcImg();
     }
 
     public attach() {
         super.attach();
         const content = getRealNode(this.tree).querySelector('div.content');
-        if (content && content.clientHeight > 120) {
+        if (content && content.clientHeight > 110) {
             (<any>content).style.display = '-webkit-box';
             content.querySelector('span').style.display = 'block';
         }
@@ -209,18 +216,67 @@ export class SquareItem extends Widget {
      * 查看大图
      */
     public showBigImg(ind:number) {
-        // const val:any = this.props.imgs[ind];
-        // popNew3('chat-client-app-widget1-bigImage-bigImage',{
-        //     img: buildupImgPath(val.compressImg),
-        //     originalImg: buildupImgPath(val.originalImg)
-        // });
+        // 判断是否查看过原图
+        const key = this.props.key.id;
+        let value = [];
+        this.props.imgs.forEach(v => {
+            value.push(false);
+        });
+        const originalImage = getStore('originalImage');
+        if (!originalImage.get(key)) {
+            originalImage.set(key,value);
+        } else {
+            value = originalImage.get(key);
+        }
         const val = [];
+        const icon = [];
         this.props.imgs.forEach((v:any) => {
+            icon.push(buildupImgPath(v.compressImg));
             val.push(buildupImgPath(v.originalImg));
         });
         popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
             list:val,
-            activeIndex:ind + 1
+            thumbnail:icon,
+            activeIndex:ind + 1,
+            showOrg:value,
+            key
         });
+    }
+
+    /**
+     * 计算一张图片宽高
+     */
+    public calcImg() {
+        if (this.props.imgs.length !== 1) {
+            return;
+        }
+        const src = buildupImgPath(this.props.imgs[0].compressImg);
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+            const width = img.width;
+            const height = img.height;
+            const ratio = width / height;
+            // 图片显示规则
+            if (ratio < 0.5) {
+                // 1.如果图片 宽 / 高 < 0.5（如微博长图） 宽度最小占二格1/3（包括间距），高最多占二栏，
+
+                this.props.imgWidth = (imgSize * 2 + imgInterval * 2) / 3;
+                this.props.imgHeight = imgSize * 2 + imgInterval * 2;
+
+            } else if (ratio >= 0.5 && ratio <= 2) {
+                // 2.如果图片 0.5 <= 宽 / 高 <= 2 图片限定4个格子的大小内（包括间距）
+
+                this.props.imgWidth = imgSize * 2 + imgInterval * 2;
+                this.props.imgHeight = imgSize * 2 + imgInterval * 2;
+            } else {
+                // 3.如果图片 宽 / 高 > 2（如全景图） 宽最多占三格 高最多占一格（包括间距），最小占二格1/3（包括间距）
+
+                this.props.imgWidth = imgSize * 3 + imgInterval * 2;
+                this.props.imgHeight = imgSize + imgInterval; 
+            }
+            this.paint();
+        };
+        
     }
 }

@@ -5,12 +5,10 @@
 // ================================ 导入
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
-import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
 import { rippleShow } from '../../logic/logic';
-import { showPost } from '../../net/rpc';
 import { TAB } from './contact';
 import { TagList } from './square';
 

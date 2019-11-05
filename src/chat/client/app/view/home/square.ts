@@ -1,5 +1,4 @@
 import { popNew3 } from '../../../../../app/utils/tools';
-import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, register } from '../../data/store';
@@ -62,15 +61,6 @@ export class Square extends Widget {
                 return v !== user.comm_num;
             });
         } 
-    }
-
-    // 切换tag
-    public changeTag(ind:number,e:any) {
-        this.props.showTag = false;
-        this.props.active = ind;
-        this.init(ind);
-        this.paint();
-        notify(e.node,'ev-square-change',{ value:ind });
     }
 
     // 管理我关注的公众号 其他账号
@@ -195,4 +185,10 @@ register('laudPostList',r => {
 register('postList',r => {
     State.postList = r;
     forelet.paint(State);
+});
+register('offLine',(r) => {
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    if (r && w) {
+        showPost(w.props.active + 1);
+    }
 });

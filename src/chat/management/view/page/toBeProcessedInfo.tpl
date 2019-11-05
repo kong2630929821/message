@@ -1,141 +1,142 @@
 <div w-class="page">
     <div w-class="cancle" on-tap="exit">返回上一页</div>
-    {{if it.state===3||it.state==4||it.state==5}}
+    {{if it.state===1}}
     <div w-class="deelArtice">
         <div w-class="titleObj">
-            <div style="line-height: 40px;margin-left: 20px;">举报对象</div>
-            <div w-class="deel" on-tap="deelClick" on-down="onShow">{{it.deelObjName}}</div>
-        </div>
-        <div w-class="deelArticeTitle">
-            {{for i,v of it.deelObj}}
-            <div w-class="item">
-                {{v.key}}：{{v.value}}
+            <div style="line-height: 40px;margin-left: 20px;">被举报动态</div>
+            <div style="display: flex;">
+                <div w-class="deel" on-tap="unDeel" on-down="onShow">不处理</div>
+                <div w-class="deel" on-tap="deel" on-down="onShow">撤回</div>
             </div>
-            {{end}}
         </div>
         <div w-class="contentInfo">
-            <div w-class="contentTitle">{{it.dynamic.title}}</div>
-            <div w-class="timeInfo">
-                <div>提交时间：{{it.dynamic.time}}</div>
-                <div style="margin-left: 58px;">
-                    <span>赞 {{it.likeCount}}</span>
-                    <span style="margin-left:20px">评论 {{it.reply}}</span>
-                </div>
-            </div>
-            <div w-class="content">
-                <widget w-tag="pi-ui-html">{{it.dynamic.msg}}</widget>
-            </div>
-            {{if it.dynamic.imgs.length}}
-                {{for i,v of it.dynamic.imgs}}
-                    <img src="{{v}}" alt="" w-class="imgBig"/>
-                {{end}}
-            {{end}}
-        </div>
-    </div>
-    {{end}}
-
-    {{if it.state==1 ||it.state==2}}
-    <div w-class="titleBox">
-        <div w-class="titleObj">
-            <div style="line-height: 40px;margin-left: 20px;">举报对象</div>
-            <div w-class="deel" on-tap="deelClick" on-down="onShow">{{it.deelObjName}}</div>
-        </div>
-        <div w-class="ObjInfo">
-            {{for i,v of it.state==1?it.userName:it.haiHaiName}}
-                <div w-class="item">
-                    {{v.key}}：{{v.value}}
-                    {{if it.state==1}}
-                        {{if v.sex}}
-                        <img src="{{v.sex}}" alt="" w-class="sexImg"/>
-                        {{end}}
-                    {{else}}
-                        {{if v.fg}}
-                            <div w-class="haihaiName">嗨嗨号</div>
-                        {{end}}
-                    {{end}}
-                </div>
-            {{end}}
-        </div>
-    </div>
-    {{end}}
-
-    {{if it.state==1 ||it.state==2}}
-    <div w-class="reportInfo">
-        <div w-class="titleObj">
-            <div style="line-height: 40px;margin-left: 20px;">举报信息</div>
-        </div>
-        <div w-class="reportImg">
-            {{for i,v of it.deelObj}}
-                <div w-class="reportItem">
-                    {{if i==0}}
-                        <div>{{v.key}}：{{v.value.length?'':'无'}}</div>
-                        {{if v.value.length}}
-                            <div w-class="imgGroup">
-                                {{for j,t of v.value}}
-                                    <img src="{{t}}" alt="" w-class="imgInfo"/>
-                                {{end}}
+            <div style="width:700px; margin: 30px auto;">
+                <div w-class="userAvatarBox">
+                    <img src="{{it.dynamic.avatar}}" alt="" w-class="avatar"/>
+                    <div w-class="dynamicDetails">
+                        <div w-class="dynamicTitle">{{it.dynamic.name}}</div>
+                        <div w-class="details">
+                            <div>
+                                <span>赞 {{it.dynamic.like}}</span>
+                                <span style="margin-left:20px">评论 {{it.dynamic.commentCount}}</span>
                             </div>
-                        {{end}}
-                    {{else}}
-                        <div>{{v.key}}：{{v.value}}</div>
-                    {{end}}
+                            <div>发布时间：{{it.dynamic.time}}</div>
+                            <div>被举报次数：{{it.dynamic.count}}</div>
+                        </div>
+                    </div>
                 </div>
-            {{end}}
+                <div w-class="content">
+                    <widget w-tag="pi-ui-html">{{it.dynamic.msg}}</widget>
+                </div>
+                {{if it.dynamic.imgs.length}}
+                    {{for i,v of it.dynamic.imgs}}
+                        <img src="{{v}}" alt="" w-class="imgBig"/>
+                    {{end}}
+                {{end}}
+            </div>
         </div>
     </div>
     {{end}}
 
-    {{if it.state===4}}
     <div w-class="titleBox" style="margin-bottom:20px">
         <div w-class="titleObj">
-            <div style="line-height: 40px;margin-left: 20px;">关联嗨嗨号</div>
-            <div w-class="deel"  on-tap="deelClickHaiHai" on-down="onShow">处理嗨嗨号</div>
-        </div>
-        <div w-class="ObjInfo">
-            {{for i,v of it.haiHaiName}}
-                <div w-class="item">
-                    {{v.key}}：{{v.value}}
-                    {{if v.fg}}
-                        <div w-class="haihaiName">嗨嗨号</div>
-                    {{end}}
+            <div style="line-height: 40px;margin-left: 20px;">被举报人</div>
+            {{if it.state==0}}
+                <div style="display: flex;">
+                    <div w-class="deel" on-tap="unDeel" on-down="onShow">不处理</div>
+                    <div w-class="deel" on-tap="deel" on-down="onShow">处理</div>
                 </div>
             {{end}}
-        </div>
-    </div>
-    {{end}}
-
-    {{if it.state!==1}}
-    <div w-class="titleBox" style="margin-bottom:20px">
-        <div w-class="titleObj">
-            <div style="line-height: 40px;margin-left: 20px;">关联用户</div>
-            <div w-class="deel" on-tap="deelClickUser" on-down="onShow">处理用户</div>
         </div>
         <div w-class="ObjInfo">
             {{for i,v of it.userName}}
                 <div w-class="item">
                     {{v.key}}：{{v.value}}
+                    {{if v.key=='当前惩罚' && v.value!='无'}}
+                        <span style="margin-left: 20px;">查看</span>
+                    {{end}}
                     {{if v.fg}}
                     <img src="{{v.fg}}" alt="" w-class="sexImg"/>
+                    {{end}}
+                </div>
+            {{end}}
+        </div>
+    </div>
+
+
+    {{if it.state==1}}
+    <div>
+        <div w-class="titleObj">
+            <div style="line-height: 40px;margin-left: 20px;">举报人</div>
+        </div>
+        <div w-class="reportdynamicUser">
+            {{for i,v of it.reportInfoList}}
+                <div w-class="userItem">
+                    {{for j,t of v}}
+                    <div style="width: 245px;">{{t.key}}:&nbsp;&nbsp;{{t.value}}
+                        {{if t.fg}}
+                        <img src="{{t.fg}}" alt="" w-class="sexImg"/>
+                        {{end}}
+                    </div>
                     {{end}}
                 </div>
             {{end}}
         </div>
     </div>
     {{end}}
-    <div w-class="titleBox">
-        <div w-class="titleObj">
-            <div style="line-height: 40px;margin-left: 20px;">举报人</div>
+
+
+    {{if it.state==0}}
+    <div w-class="bodyData">
+        {{for index,item of it.reportInfoList}}
+        <div w-class="reportInfo">
+            <div w-class="titleObj">
+                <div style="line-height: 40px;margin-left: 20px;">举报信息</div>
+            </div>
+            <div w-class="reportImg">
+                {{for i,v of item}}
+                    <div w-class="reportItem">
+                        {{if i==0}}
+                            <div>{{v.key}}：{{v.value.length?'':'无'}}</div>
+                            {{if v.value.length}}
+                                <div w-class="imgGroup">
+                                    {{for j,t of v.value}}
+                                        <img src="{{t}}" alt="" w-class="imgInfo"/>
+                                    {{end}}
+                                </div>
+                            {{end}}
+                        {{elseif i==3}}
+                            <div style="display:flex;width:100%;">
+                                <div>{{v.key}}:</div>
+                                <div w-class="reportUserInfo">
+                                    {{for j,t of v.value}}
+                                        <div>{{t.key}}:&nbsp;&nbsp;{{t.value}}
+                                            {{if t.fg}}
+                                            <img src="{{t.fg}}" alt="" w-class="sexImg"/>
+                                            {{end}}
+                                        </div>
+                                    {{end}}
+                                </div>
+                            </div>    
+                        {{else}}
+                            <div>{{v.key}}：&nbsp;&nbsp;{{v.value}}</div>
+                        {{end}}
+                    </div>
+                {{end}}
+            </div>
         </div>
-        <div w-class="ObjInfo">
-            {{for i,v of it.reporterName}}
-                <div w-class="item">
-                    {{v.key}}：{{v.value}}
-                    {{if v.fg}}
-                    <img src="{{v.fg}}" alt="" w-class="sexImg"/>
-                    {{end}}
-                </div>
-            {{end}}
+        {{end}}
+    </div>
+    {{end}}
+
+
+
+
+    <div w-class="ctroller">
+        <div ev-changeCurrent="pageChange" w-class="pagination" ev-perPage="perPage" ev-expand="expand">
+            <widget w-tag="chat-management-components-pagination">{pages:{{Math.ceil(it.sum/ it.perPage)}},filterShow:true,currentIndex:{{it.currentIndex}},expand:{{it.expandIndex}},numberCheckActiveIndex:{{it.perPageIndex}} }</widget>
         </div>
     </div>
-    <div w-class="btn" on-tap="invalid" on-down="onShow">投诉不成立</div>
+
+
 </div>

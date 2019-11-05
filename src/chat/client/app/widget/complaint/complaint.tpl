@@ -11,6 +11,8 @@
                     <div w-class="userName">@ {{it.title}}</div>
                     {{if it.sex!=2}}
                     <img src="{{it.sex==0?'../../res/images/boy.png':'../../res/images/girl.png'}}" alt="" w-class="sexImg"/>
+                    {{else}}
+                    <img src="../../res/images/neutral.png" alt="" w-class="sexImg"/>
                     {{end}}
                 </div>
                 <div w-class="contentBox">
@@ -33,7 +35,7 @@
             {{else}}
                 <div w-class="imgBox">
                     <pi-ui-html style="display:inline-block;margin: 5px;">{{it.imgs[i]}}</pi-ui-html>
-                    <img src="../../res/images/close_blue.png" w-class="close" on-tap="delImage({{i}})"/>
+                    <img src="../../res/images/remove.png" w-class="close" on-tap="delImage({{i}})"/>
                 </div>
             {{end}}
             
