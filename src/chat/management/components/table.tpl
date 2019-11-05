@@ -53,7 +53,7 @@
 
                         {{if it.btnGroup.length}}
                             <div w-class="btn {{it.color?'btnColor':''}}" style="margin-left:10px;" on-tap="goDetail(e,{{i}},1)" on-down="onShow">{{it.btnGroup[i]}}</div>
-                        {{}}
+                        {{end}}
                        
                     </td>
                     {{end}}
