@@ -50,6 +50,10 @@
                         {{if it.inlineBtn3}}
                         <div w-class="btn" style="color:#222;padding: 0 10px;" on-tap="goDetail(e,{{i}},3)" on-down="onShow">{{it.inlineBtn3}}</div>
                         {{end}}
+
+                        {{if it.btnGroup.length}}
+                            <div w-class="btn {{it.color?'btnColor':''}}" style="margin-left:10px;" on-tap="goDetail(e,{{i}},1)" on-down="onShow">{{it.btnGroup[i]}}</div>
+                        {{}}
                        
                     </td>
                     {{end}}

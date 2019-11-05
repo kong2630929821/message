@@ -18,7 +18,8 @@ interface Props {
 }
 const PAGE = {
     articleReview:'articleReview',// 文章审核
-    toBeProcessed:'toBeProcessed'// 待处理
+    toBeProcessed:'toBeProcessed',// 待处理
+    processed:'processed'// 已处理
 };
 
 // tslint:disable-next-line:completed-docs
@@ -33,11 +34,7 @@ export class Home extends Widget {
                     { name:'文章审核',page:PAGE.articleReview }],
                     show:true 
                 },
-                { name: '投诉管理', page: PAGE.toBeProcessed, img:'chart.png',children:[
-                    { name:'待处理',page:PAGE.toBeProcessed }
-                ],
-                    show:false 
-                }
+                { name: '投诉管理', page: PAGE.toBeProcessed, img:'chart.png', show:false }
             ],
             activePage: {},
             rightBox:true

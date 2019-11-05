@@ -1,23 +1,24 @@
 import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
-import { buildupImgPath } from '../../../client/app/logic/logic';
-import { EMOJIS_MAP } from '../../../client/app/widget1/emoji/emoji';
-import { REPORT_PERSON, REPORT_PUBLIC } from '../../../server/data/constant';
-import { penaltyText, REPORT, REPORTTITLE, timestampFormat } from '../../utils/logic';
+import { perPage } from '../../components/pagination';
+import { getAllReportInfo } from '../../net/rpc';
 import { rippleShow } from '../../utils/tools';
 
 interface Props {
     data:any;// 处理的数据
+    userName:any;// 被举报人
     state:number;// 处理的类型
-    deelObj:any;// 处理对象
-    deelObjName:string;// 处理对象的按钮
+    reportInfoList:any;// 举报信息列表
+    sum:number;// 数据条数
+    perPage:number;// 每页显示多少条数据
+    currentIndex:number;// 当前页数
+    expandIndex:boolean;// 控制分页显示隐藏
+    perPageIndex:number;// 每页显示多少个的下标
+    showDataList:any[];// 当前页展示的数据
     dynamic:any;// 动态文章评论详情
-    haiHaiName:any;// 关联的嗨嗨号
-    userName:any;// 关联用户
-    reporterName:any;// 举报人
-    reply:number;// 评论数
-    likeCount:number;// 点赞数
+    key:string;// 惩罚所需要key
+
 }
 
 /**
@@ -27,19 +28,26 @@ export class ToBeProcessedInfo extends Widget {
     public props:Props = {
         data:[],
         state:0,
-        deelObj:[],
-        deelObjName:'',
-        dynamic:{
-            title:'',
-            msg:'',
-            imgs:[],
-            time:''
-        },
-        haiHaiName:[],
         userName:[],
-        reporterName:[],
-        reply:0,
-        likeCount:0
+// ==================================================
+        reportInfoList:[],
+        sum:20,
+        perPage:perPage[0],
+        currentIndex:0,
+        expandIndex:false,
+        perPageIndex:0,
+        showDataList:[],
+        dynamic:{
+            avatar:'',
+            name:'',
+            like:0,
+            commentCount:0,
+            time:'',
+            count:0,
+            msg:'',
+            imgs:[]
+        },
+        key:''
     };
 
     public setProps(props:any) {
@@ -53,258 +61,74 @@ export class ToBeProcessedInfo extends Widget {
 
     // 初始化数据
     public initData() {
-        const key = this.props.data.report_info.key.split('%');
-        this.props.state = JSON.parse(key[0]);
-        const state = this.props.state;
-        const data = this.props.data;
-        if (state === 1) {
-            // 处理用户
-            this.reportUser(state);
-        } else if (state === 2) {
-            // 处理用户
-            this.reportUser(state);
-            // 处理嗨嗨号
-            this.deelHaiHai();
-        } else {
-            // 处理内容
-            this.reportContent(data,state);
-        }
-    }
-
-    // 举报内容
-    public reportContent(data:any,state:number) {
-        // 处理内容
-        const reportInfo = JSON.parse(data.report_info.reason);
-        let reportInfos = null;
-        if (reportInfo.type) {
-            reportInfos = JSON.parse(reportInfo.type).join(',');
-        } else {
-            reportInfos = reportInfo.join(',');
-        }
-        this.props.deelObj = [
-            {
-                key:'举报原因',
-                value:reportInfos
-            },
-            {
-                key:'被举报次数总计',
-                value:data.reported_content.reported_count
-            }
-        ];
-        this.props.deelObjName = `处理${REPORTTITLE[REPORT[state]]}`;
-        // 文章动态评论内容
-        const evidence = JSON.parse(data.report_info.evidence);
-        const imgs = [];
-        if (state === 5) {
-            if (JSON.parse(evidence.msg).img) {
-                imgs.push(buildupImgPath(JSON.parse(evidence.msg).img.originalImg));
-            }
-            this.props.likeCount = evidence.likeCount;
-            this.props.reply = evidence.reply;
-        } else {
-            if (state !== 4) {
-                JSON.parse(evidence.body).imgs.forEach(v => {
-                    imgs.push(buildupImgPath(v.originalImg));
-                });
-            } 
-           
-            this.props.likeCount = evidence.likeCount;
-            this.props.reply = evidence.commentCount;
-        }
-        let msg = '';
-        if (state === 5) {
-            msg = parseManagementEmoji(JSON.parse(evidence.msg).msg); 
-        } else if (state === 4) {
-            msg = evidence.body;
-        } else {
-            msg = parseManagementEmoji(JSON.parse(evidence.body).msg);
-        }
-        this.props.dynamic = {
-            title:state === 4 ? evidence.title  :'',
-            msg,
-            imgs:imgs,
-            time:timestampFormat(JSON.parse(evidence.createtime))
-        };
-    
-        // 处理被举报用户
-        this.deelReported();
-        // 处理举报人
-        this.deelInformer();
-        // 处理嗨嗨号
-        if (state === 4) {
-            this.deelHaiHai();
-        }
-    }
-
-    // 举报用户
-    public reportUser(state:number) {
-        // 处理举报详细图片
-        this.deelReportImg(state);
-        // 处理被举报用户
-        this.deelReported();
-         // 处理举报人
-        this.deelInformer();
-    }
-
-    // 处理被举报人
-    public deelReported() {
-        const reportPeople = this.props.data.reported_user;
-        let sex = '';
-        if (reportPeople.user_info.sex === 0) {
-            sex = '../../res/images/boy.png';
-        } else if (reportPeople.user_info.sex === 1) {
-            sex = '../../res/images/girl.png';
-        } else {
-            sex = '';
-        }
-        this.props.userName = [
-            { key:'好嗨ID',value:reportPeople.user_info.acc_id },
-            { key:'用户昵称',value:reportPeople.user_info.name,fg:sex },
-            { key:'手机号',value:reportPeople.user_info.tel ? reportPeople.user_info.tel :'无' },
-            { key:'被举报次数总计',value:reportPeople.reported_list.length },
-            { key:'被惩罚次数总计',value:reportPeople.punish_history_list.length },
-            { key:'举报次数总计',value:reportPeople.report_list.length },
-            { key:'当前惩罚',value:reportPeople.punish_list.length ? penaltyText(reportPeople.punish_list,'用户') :'无' }
-        ];
-    }
-
-    // 处理举报人
-    public deelInformer() {
-        const haihaiList = this.props.data.report_user;
-        const reportPeople = this.props.data.report_user;
-        let sex = '';
-        if (reportPeople.user_info.sex === 0) {
-            sex = '../../res/images/boy.png';
-        } else if (reportPeople.user_info.sex === 1) {
-            sex = '../../res/images/girl.png';
-        } else {
-            sex = '';
-        }
-        this.props.reporterName = [
-            { key:'好嗨ID',value:haihaiList.user_info.acc_id },
-            { key:'用户昵称',value:haihaiList.user_info.name,fg:sex },
-            { key:'手机号',value:haihaiList.user_info.tel ? haihaiList.user_info.tel :'无' },
-            { key:'被举报次数总计',value:haihaiList.reported_list.length },
-            { key:'被惩罚次数总计',value:haihaiList.punish_history_list.length },
-            { key:'举报次数总计',value:haihaiList.report_list.length }
-        ];
-    }
-
-    // 处理嗨嗨号
-    public deelHaiHai() {
-        const reportPeople = this.props.data.reported_user;
-        const reportPublic = this.props.data.reported_public;
-        this.props.haiHaiName = [
-                { key:'嗨嗨号ID',value:reportPublic.num },
-                { key:'嗨嗨号昵称',value:reportPublic.name,fg:true },
-                { key:'手机号',value:reportPeople.user_info.tel ? reportPeople.user_info.tel :'无' },
-                { key:'被举报次数总计',value:reportPublic.reported_list.length },
-                { key:'被惩罚次数总计',value:reportPublic.punish_history_list.length },
-                { key:'当前惩罚',value:reportPublic.punish_list.length ? penaltyText(reportPublic.punish_list,'嗨嗨号') :'无' }
-        ];
-    }
-
-    // 处理举报图片
-    public deelReportImg(state:number) {
-        const reportInfo = JSON.parse(this.props.data.report_info.reason);
-        let reportInfos = null;
-        if (reportInfo.type) {
-            reportInfos = JSON.parse(reportInfo.type).join(',');
-        } else {
-            reportInfos = reportInfo.join(',');
-        }
-        const imgs = [];
-        JSON.parse(reportInfo.img).forEach(v => {
-            imgs.push(buildupImgPath(v));
-        });
-        this.props.deelObj = [
-            {
-                key:'上传截图',
-                value:imgs
-            },
-            {
-                key:'举报原因',
-                value:reportInfos
-            },
-            {
-                key:'举报描述',
-                value:reportInfo.msg
-            }
-        ];
-        this.props.deelObjName = `处理${REPORTTITLE[REPORT[state]]}`;
-    }
-    // 点击处理对象
-    public deelClick(e:any) {
-        if (this.props.state === 1) {
-            this.deelClickUser(e);
-        } else if (this.props.state === 2) {
-            this.deelClickHaiHai(e);
-        } else if (this.props.state === 3) {
-            popNew('chat-management-components-confirmBox',{ title:'撤回动态',content:'撤回相关内容和评论等',prompt:'发送惩罚通知',id:this.props.data.report_info.id,key:this.props.data.report_info.key },() => {
-                notify(e.node,'ev-ok',null);
-            });
-        } else if (this.props.state === 4) {
-            popNew('chat-management-components-confirmBox',{ title:'撤回文章',content:'撤回相关内容和评论等',prompt:'发送惩罚通知',id:this.props.data.report_info.id,key:this.props.data.report_info.key },() => {
-                notify(e.node,'ev-ok',null);
-            });
-        } else {
-            popNew('chat-management-components-confirmBox',{ title:'撤回回复',content:'撤回相关内容和评论等',prompt:'发送惩罚通知',id:this.props.data.report_info.id,key:this.props.data.report_info.key },() => {
-                notify(e.node,'ev-ok',null);
-            });
-        }
-    }
-
-    // 处理用户
-    public deelClickUser(e:any) {
-        const data = this.props.data;
-        const user = data.reported_user.user_info;
-        let sex = '';
-        if (user.sex === 0) {
-            sex = '../../res/images/boy.png';
-        } else if (user.sex === 1) {
-            sex = '../../res/images/girl.png';
-        } else {
-            sex = '';
-        }
-        const userInfo = {
-            id:user.acc_id,
-            name:user.name,
-            sex,
-            report_id:data.report_info.id,
-            key:`${REPORT_PERSON}%${user.uid}`,
-            isPublic:false,
-            uid:user.uid
-        };
-        popNew('chat-management-components-reportBox',{ userInfo },() => {
-            notify(e.node,'ev-ok',null);
+        getAllReportInfo(this.props.data,this.props.state).then(r => {
+            this.props.dynamic = r[0];
+            this.props.userName = r[1];
+            this.props.reportInfoList = r[2];
+            this.props.key = r[3];
+            this.props.showDataList = this.props.reportInfoList.slice(0,this.props.perPage);
+            this.paint();
         });
     }
+    // 重置页面的展开状态
+    public close() {
+        this.props.expandIndex = false;
+        this.paint();
+    }
 
-    // 处理嗨嗨号
-    public deelClickHaiHai(e:any) {
-        const data = this.props.data;
-        const publicInfo = data.reported_public;
-        const userInfo = {
-            id:data.reported_public.num,
-            name:data.reported_public.name,
-            sex:'',
-            report_id:data.report_info.id,
-            key:`${REPORT_PUBLIC}%${publicInfo.num}`,
-            isPublic:true,
-            uid:data.reported_user.user_info.uid
-        };
-        popNew('chat-management-components-reportBox',{ userInfo,state:1 },() => {
-            notify(e.node,'ev-ok',null);
-        });
+    // 分页变化
+    public pageChange(e:any) {
+        this.close();
+        this.props.currentIndex = e.value;
+        this.props.showDataList = this.props.reportInfoList.slice(e.value * this.props.perPage,(e.value + 1) * this.props.perPage);
+        this.paint();
+    }
+
+    // 过滤器
+    public expand(e:any) {
+        this.close();
+        this.props.expandIndex = e.value;
+        this.paint();
+    }
+
+    // 每页展示多少数据
+    public perPage(e:any) {
+        this.props.perPage = e.value;
+        this.props.perPageIndex = e.index;
+        this.props.expandIndex = false;
+        this.pageChange({ value:0 });   
+        this.paint();  
     }
 
     // 投诉不成立
-    public invalid(e:any) {
-        popNew('chat-management-components-confirmBox',{ title:'投诉不成立',content:'不处理',invalid:true,id:this.props.data.report_info.id },() => {
+    public unDeel(e:any) {
+        popNew('chat-management-components-confirmBox',{ title:'不处理',content:'投诉没有问题，不做惩罚处理',invalid:1,key:this.props.key },() => {
             notify(e.node,'ev-ok',null);
         });
     }
 
+    // 点击处理
+    public deel(e:any) {
+        if (this.props.state === 0) {
+            // 处理用户
+            const userInfo = {
+                id:this.props.userName[0].value,
+                name:this.props.userName[1].value,
+                sex:this.props.userName[1].fg,
+                key:this.props.key
+            };
+            const punishment = this.props.userName[6];
+            popNew('chat-management-components-reportBox',{ userInfo,punishment },() => {
+                notify(e.node,'ev-ok',null);
+            });
+        } else if (this.props.state === 1) {
+            // 撤回动态
+            popNew('chat-management-components-confirmBox',{ title:'撤回动态',content:'撤回所有相关内容和评论',prompt:'处理结果将通过客服通知用户',invalid:0,key:this.props.key },() => {
+                notify(e.node,'ev-ok',null);
+            });
+        }
+        
+    }
     // 返回
     public exit(e:any) {
         notify(e.node,'ev-exit',null);
@@ -315,23 +139,3 @@ export class ToBeProcessedInfo extends Widget {
         rippleShow(e);
     }
 }
-// 转换文字中的链接
-const httpHtml = (str:string) => {
-    const reg = /(http:\/\/|https:\/\/)((\w|=|\?|\.|\/|&|-|:|#)+)/g;
-    
-    return str.replace(reg, '<a href="javascript:;" class="linkMsg">$1$2</a>');
-};
-// 转换表情包
-export const parseManagementEmoji = (msg:any) => {    
-    msg = httpHtml(msg);
-    msg = msg.replace(/\[(\S+?)\]/ig, (match, capture) => {
-        const url = EMOJIS_MAP.get(capture) || undefined;
-        if (url) {
-            return `<img src="../../../chat/client/app/res/emoji/${url}" alt="${capture}" class='emojiMsg'></img>`;
-        } else {
-            return match;
-        }
-    });
-
-    return msg;
-};

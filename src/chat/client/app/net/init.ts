@@ -7,7 +7,6 @@ declare var pi_modules;
 
 // ================================================ 导入
 import { chatLogicIp, chatLogicPort } from '../../../../app/public/config';
-import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, structMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
@@ -21,7 +20,7 @@ import { SendMsg } from '../../../server/data/rpc/message.s';
 import { genUuid, getGidFromGuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
-import { exitGroup } from '../logic/tools';
+import { exitGroup, popNewMessage } from '../logic/tools';
 import * as subscribedb from '../net/subscribedb';
 import { walletSignIn } from './init_1';
 import { initPush } from './receive';
