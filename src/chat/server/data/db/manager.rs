@@ -59,6 +59,7 @@ struct ReportIndex {
     last_user_name: String,     //最近一次举报的用户名
     last_time: String,          //最近一次举报的时间
     report_ids: &[u32],         //举报id列表
+    now_publish: Option<Punish>,  //当前惩罚
 }
 
 /**
