@@ -213,6 +213,7 @@ winit.initNext = function () {
 			 */
 			html.checkWebpFeature(function (r) {
 				flags.webp = flags.webp || r;
+				loadPiSdk();
 				loadChatApp();
 			});
 
@@ -225,7 +226,7 @@ winit.initNext = function () {
 	//加载APP部分代码，实际项目中会分的更细致
 	var loadChatApp = function () {
 		var sourceList  = [
-			"chat/client/app/net/login.js",	
+			"chat/client/app/net/init.js",
 			"chat/client/app/view/index.js",
 			"chat/client/app/view/chat/chat.tpl",
 			"chat/client/app/view/chat/chat.js",
@@ -258,7 +259,8 @@ winit.initNext = function () {
 			root.cfg.height = 1334;
 			root.cfg.hscale = 0.25;
 			root.cfg.wscale = 0;
-			loadPiSdk();
+			enterChat();
+
 		}, function (r) {
 			alert("加载目录失败, " + r.error + ":" + r.reason);
 		}, dirProcess.handler);
@@ -273,22 +275,26 @@ winit.initNext = function () {
 			// 关闭读取界面
 			document.body.removeChild(document.getElementById('rcmj_loading_log'));
 		});
-		pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.registerRpcStruct(fm);
-		pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports.initClient();
+		const init = pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports;
+		init.registerRpcStruct(fm);
+		init.initClient();
 		
 		loadEmoji();
 		// firstStageLoaded();
 	}
 
-	// 加载VM所需文件
+	// 加载pisdk初始化及登录
 	var loadPiSdk = function(){
-		util.loadDir(["pi_sdk/"], flags, fm, undefined, function (fileMap) {
+		util.loadDir(["pi_sdk/","chat/client/app/net/login.js"], flags, fm, undefined, function (fileMap) {
 			console.time('pisdk init complete');
 			pi_sdk.setWebviewManager("pi/browser/webview");
-			pi_sdk.piSdkInit((res)=>{
+			pi_sdk.piSdkInit({
+				appid: '101',            // 应用ID 由好嗨唯一分配
+				webviewName: 'wallet',   // 应用名字 由好嗨唯一分配
+				isHorizontal: false,      // 是否横屏 由游戏决定
+			},(res)=>{
 				console.timeEnd('pisdk init complete');
 				console.log('bind vm success', res);
-				enterChat();
 				loadLeftChatSource();
 				
 				// 登录
