@@ -63,13 +63,13 @@
 }
 .arrow{
     height: 0;
-    border-bottom: 8px solid #fff;
+    border-bottom: 8px solid #000;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     margin-left: 10px;
 }
 .arrow1{
-    border-top: 8px solid #fff;
+    border-top: 8px solid #000;
     border-bottom: none;
 }
 .utilList{
@@ -133,3 +133,4 @@
     justify-content: center;
     align-items: center;
 }
+

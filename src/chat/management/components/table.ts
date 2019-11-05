@@ -18,6 +18,7 @@ interface Props {
     color:boolean;
     auto:boolean;
     img:boolean;
+    btnGroup:any;
 }
 // tslint:disable-next-line:completed-docs
 export class Table extends Widget {
@@ -35,7 +36,8 @@ export class Table extends Widget {
         inputFile:'',
         color:false,
         auto:false,
-        img:false
+        img:false,
+        btnGroup:[]
     };
     
     public setProps(props:any) {
