@@ -9,7 +9,7 @@ interface Props {
     prompt:string;// 提示
     btn1:string;// 按钮1
     btn2:string;// 按钮2
-    invalid:boolean;// 投诉不成立
+    invalid:number;// 投诉不成立
     id:number;// 投诉的ID
     key:string;
 }
@@ -26,7 +26,7 @@ export class ConfirmBox extends Widget {
         prompt:'',
         btn1:'取消',
         btn2:'确认',
-        invalid:false,
+        invalid:0,
         id:0,
         key:''
     };
@@ -46,9 +46,14 @@ export class ConfirmBox extends Widget {
 
     // 确认
     public btnOk() {
+        if (this.props.invalid === -1) {
+            this.ok && this.ok();
+
+            return ;
+        }
         if (this.props.invalid) {
-            setReportHandled(this.props.id).then((r:any) => {
-                if (!isNaN(r)) {
+            setReportHandled(this.props.key).then((r:any) => {
+                if (this.props.key === r) {
                     popNewMessage('操作成功');
                     this.ok && this.ok();
                 } else {
@@ -58,12 +63,21 @@ export class ConfirmBox extends Widget {
         } else {
             const punish = PENALTY.DELETE_CONTENT;
             const key = this.props.key;
-            setPunish(key,this.props.id,punish,0).then((r:any) => {
+            setPunish(key,punish,0).then((r:any) => {
                 if (!isNaN(r)) {
-                    popNewMessage('处理成功');
-                    this.ok && this.ok();
+                    setReportHandled(this.props.key).then((r:any) => {
+                        if (this.props.key === r) {
+                            popNewMessage('处理成功');
+                            this.ok && this.ok();
+                        } else {
+                            popNewMessage('处理失败');
+                            this.ok && this.ok();
+                        }
+                    });
+                    
                 } else {
                     popNewMessage('处理失败');
+                    this.ok && this.ok();
                 }
             });
         }

@@ -29,7 +29,7 @@ interface Props {
     imgs:string[];  // 图片列表
     offical:boolean;  // 官方
     isPublic:boolean; // 公众号文章
-    gender:number;  // 性别 0 男 1 女
+    gender:number;  // 性别 0 女 1 男
     isMine:boolean;  // 是否本人发的帖
     timeFormat:any;  // 时间处理
     fgStatus:boolean;// 关注动画
@@ -61,7 +61,7 @@ export class SquareItem extends Widget {
         isPublic:false,
         imgs:[],
         offical:false,
-        gender:1,   // 性别 0男 1女
+        gender:2,   // 性别 0女 1男
         isMine:false,
         timeFormat:timestampFormat,
         fgStatus:false,

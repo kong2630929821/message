@@ -1,11 +1,11 @@
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { PostKey } from '../../server/data/db/community.s';
-import { HandleApplyPublicArg, handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { createRoot, getApplyPublicList, getPostList, getReportList, handleApplyPublic, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
-import { deelReportList, timestampFormat } from '../utils/logic';
+import { createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
+import { deelReportList, deelReportListInfo, timestampFormat } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -105,11 +105,22 @@ export const getAllReport = (state:number,report_type:number) => {
     });
 };
 
+// 获取举报列表信息
+export const getAllReportInfo = (ids:any,state:number) => {
+    const arg = new ReportDetailListArg();
+    arg.report_ids = ids;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getReportDetailList,arg,(r:string) => {
+            const data = JSON.parse(r);
+            res(deelReportListInfo(data,state));
+        });
+    });
+};
 // 惩罚指定对象
-export const setPunish = (key:string,report_id:number,punish_type:number,time:number) => {
+export const setPunish = (key:string,punish_type:number,time:number) => {
     const arg = new PunishArg();
     arg.key = key;
-    arg.report_id = report_id;
     arg.punish_type = punish_type;
     arg.time = time;
 
@@ -121,7 +132,7 @@ export const setPunish = (key:string,report_id:number,punish_type:number,time:nu
 }; 
 
 // 投诉不成立
-export const setReportHandled = (id:number) => {
+export const setReportHandled = (id:string) => {
     const arg = id;
 
     return new Promise((res,rej) => {

@@ -138,7 +138,10 @@ export class ModalBox extends Widget {
         }
         const imagePicker = selectImage((width, height, url) => {
             console.log('选择的图片',width,height,url);
-    
+            if (!url) {
+
+                return;
+            }
             // tslint:disable-next-line:no-this-assignment
             const this1 = this;
             const len = this.props.uploadLoding.length;
@@ -146,9 +149,8 @@ export class ModalBox extends Widget {
             imagePicker.getContent({
                 quality:10,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,(res) => {
+                    imgResize(buffer,0.8,1024,(res) => {
                         const url = `<div style="background-image:url(${res.base64});height: 220px;width: 220px;" class="previewImg"></div>`;
-                        this1.props.uploadLoding[len] = false;
                         this1.props.imgs[len] = url;
                         this1.paint();
 
@@ -166,6 +168,8 @@ export class ModalBox extends Widget {
                                         console.log('上传原图',imgurl);
                                         image.originalImg = imgurl;
                                         this1.props.saveImgs[len] = image;
+                                        this1.props.uploadLoding[len] = false;
+                                        this1.paint();
                                         if (this1.props.isUploading) {
                                             this1.props.isUploading = false;
                                             this1.okBtnClick(e);
