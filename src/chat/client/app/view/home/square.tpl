@@ -26,7 +26,16 @@
             {{end}}
         </div>
         {{end}}
-        
-    
+
+        {{if it.refresh}}
+        <div w-class="loadAnimation">
+            {{if it.loadAnimation}}
+                <div>已经到底了~</div>
+            {{else}}
+                <img src="../../res/images/loading.gif" alt=""/>
+                <div>加载中···</div>
+            {{end}}
+        </div>
+        {{end}}
     </div>
 </div>

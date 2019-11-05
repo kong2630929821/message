@@ -1,10 +1,10 @@
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { PostKey } from '../../server/data/db/community.s';
-import { HandleApplyPublicArg, handleArticleArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
+import { createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
 import { deelReportList, deelReportListInfo, timestampFormat } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
@@ -165,6 +165,20 @@ export const setHandleApplyPublic = (result:boolean,reason:string,id:number) => 
 
     return new Promise((res,rej) => {
         clientRpcFunc(handleApplyPublic,arg,(r:boolean) => {
+            res(r);
+        });
+    });
+};
+
+// 解除处罚
+export const modifyPunishTime = (id:number,uid:number,time:number) => {
+    const arg = new ModifyPunishArg();
+    arg.id = id; // 惩罚id
+    arg.uid = uid; // 用户id
+    arg.rest_time = time; // 惩罚剩余时间
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(modifyPunish,arg,(r:any) => {
             res(r);
         });
     });

@@ -15,6 +15,7 @@ interface Props {
     expandItem:number;  // 当前展开工具栏的帖子下标
     dealData:any;  // 组装数据
     refresh:boolean; // 是否可以请求更多数据
+    loadAnimation:boolean;// 是否到底了
 }
 export const TagList = ['广场','关注','公众号','热门'];
 /**
@@ -29,7 +30,8 @@ export class Square extends Widget {
         follows:0,
         expandItem:-1,
         dealData:this.dealData,
-        refresh:true
+        refresh:true,
+        loadAnimation:false
     };
     public setProps(props:any) {
         this.props = {
@@ -141,13 +143,28 @@ export class Square extends Widget {
         this.pageClick();
         const page = document.getElementById('squarePage');
         const contain = document.getElementById('squareContain');
-        if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.state.postList.length % 5 === 0) {
+        const fg = this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.state.postList.length % 20 === 0;   
+        if (this.state.postList.length % 20 !== 0) {
+            setTimeout(() => {
+                this.props.loadAnimation = true;
+                setTimeout(() => {
+                    this.props.refresh = false;
+                   
+                    this.paint();
+                },1000);
+                this.paint();
+            },2000);
+        }
+        if (fg) {
             this.props.refresh = false;
             const list = this.state.postList;
+            this.paint();
             showPost(this.props.active + 1,list[list.length - 1].key.num,list[list.length - 1].key.id).then(r => {
                 this.props.refresh = true;
+                this.paint();
             });
         }
+        this.paint();
     }
 }
 const State = {
