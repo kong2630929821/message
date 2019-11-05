@@ -2,7 +2,7 @@
  * 项目入口
  */
 // ============================== 导入
-import { getWebviewName } from '../../../../app/api/thirdApi';
+import { getWebviewName } from '../../../../app/api/walletApi';
 import { getGameItem } from '../../../../app/view/play/home/gameConfig';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { popNew } from '../../../../pi/ui/root';
@@ -11,9 +11,9 @@ import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
 import { getStore } from '../data/store';
 
 // ============================== 导出
-export const run = (cb) => {
+export const run = async (cb) => {
     addWidget(document.body, 'pi-ui-root');
-    const webviewName = getWebviewName();
+    const webviewName = await getWebviewName();
     console.log('webviewName ',webviewName);
     if (webviewName) {
         const item:any = getGameItem(webviewName);
