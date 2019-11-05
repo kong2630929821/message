@@ -142,7 +142,8 @@ export const initStore = () => {
         conmentList:[],
         fabulousList:[],
         messageData: [[],[],[],[]],
-        accIdToUid:new Map()
+        accIdToUid:new Map(),
+        originalImage:new Map()
     };
 };
 
@@ -268,6 +269,7 @@ export interface Store {
     fabulousList:any;// 点赞消息列表
     messageData:any;// 消息通知列表
     accIdToUid:Map<string,number>;// accID转uid
+    originalImage:Map<number,boolean>;// 原图查看记录
 }
 
 /**

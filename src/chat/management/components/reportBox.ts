@@ -107,7 +107,7 @@ export class ReportBox extends Widget {
     public punishUser(time:number) {
         let punish = 0;
         if (this.props.checkedList === 0) {
-            punish = PENALTY.BAN_MESAAGE ;
+            punish = PENALTY.FREEZE ;
         } else if (this.props.checkedList === 1) {
             punish = PENALTY.FREEZE;
         }

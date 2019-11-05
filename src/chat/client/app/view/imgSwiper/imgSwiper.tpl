@@ -19,7 +19,7 @@
                 {{end}}
                 {{:fg = true}}
                 {{if fg}}
-                <div w-class="btn" style="right:50px;" on-tap="download">下载</div>
+                <div w-class="btn" style="right:50px;" on-tap="download({{i}})">下载</div>
                 {{end}}
             </div>
             

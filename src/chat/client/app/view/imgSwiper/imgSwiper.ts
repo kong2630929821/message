@@ -1,6 +1,7 @@
 
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { getStore } from '../../data/store';
 import { saveImage } from '../../logic/native';
 import { popNewMessage } from '../../logic/tools';
 import { Swiper } from '../../res/js/swiper.min';
@@ -11,6 +12,7 @@ interface Props {
     showOrg:any;// 是否展示原图
     thumbnail:any;// 缩略图
     isLoad:boolean[];// 是否在加载
+    key:number;// 原动态的key
 }
 /**
  * 轮播图组件
@@ -23,7 +25,8 @@ export class ImgSwiper extends Widget {
         activeIndex:1,
         showOrg:[],
         thumbnail:[],
-        isLoad:[]
+        isLoad:[],
+        key:0
     };
 
     public setProps(props:any) {
@@ -34,7 +37,6 @@ export class ImgSwiper extends Widget {
         super.setProps(this.props);
         this.props.list.forEach(v => {
             this.props.isLoad.push(false);
-            this.props.showOrg.push(false);
         });
         console.log('ImgSwiper ====',this.props);
     }
@@ -91,12 +93,14 @@ export class ImgSwiper extends Widget {
     // 查看原图
     public showOriginal(index:number) {
         this.props.showOrg[index] = true;
+        const originalImage = getStore('originalImage');
+        originalImage.set(this.props.key,this.props.showOrg);
         this.paint();
     }
     
     // 下载图片
-    public download() {
-        saveImage(this.props.list[this.props.activeIndex],() => {
+    public download(index:number) {
+        saveImage(this.props.list[index],() => {
             popNewMessage('保存成功');
         });
     }

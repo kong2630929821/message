@@ -216,11 +216,18 @@ export class SquareItem extends Widget {
      * 查看大图
      */
     public showBigImg(ind:number) {
-        // const val:any = this.props.imgs[ind];
-        // popNew3('chat-client-app-widget1-bigImage-bigImage',{
-        //     img: buildupImgPath(val.compressImg),
-        //     originalImg: buildupImgPath(val.originalImg)
-        // });
+        // 判断是否查看过原图
+        const key = this.props.key.id;
+        let value = [];
+        this.props.imgs.forEach(v => {
+            value.push(false);
+        });
+        const originalImage = getStore('originalImage');
+        if (!originalImage.get(key)) {
+            originalImage.set(key,value);
+        } else {
+            value = originalImage.get(key);
+        }
         const val = [];
         const icon = [];
         this.props.imgs.forEach((v:any) => {
@@ -230,7 +237,9 @@ export class SquareItem extends Widget {
         popNew3('chat-client-app-view-imgSwiper-imgSwiper',{
             list:val,
             thumbnail:icon,
-            activeIndex:ind + 1
+            activeIndex:ind + 1,
+            showOrg:value,
+            key
         });
     }
 

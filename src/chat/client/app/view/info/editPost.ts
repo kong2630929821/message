@@ -329,8 +329,8 @@ export class EditPost extends Widget {
                         this.ok && this.ok();
                     } else {
                         r.list.forEach(v => {
-                            if (v.punish_type === PENALTY.BAN_POST) {
-                                popNewMessage('禁止发动态');
+                            if (v.punish_type === PENALTY.FREEZE) {
+                                popNewMessage('您已被禁言');
 
                                 return;
                             }
