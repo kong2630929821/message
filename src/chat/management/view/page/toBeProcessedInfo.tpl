@@ -57,11 +57,9 @@
                     {{end}}
                 </div>
             {{else}}
-                {{if it.isShowBtn}}
                 <div style="display: flex;">
-                    <div w-class="deel" on-tap="freed" on-down="onShow">解除处罚</div>
+                    <div w-class="deel" on-tap="freedPost" on-down="onShow">放出动态</div>
                 </div>
-                {{end}}
             {{end}}
         </div>
         <div w-class="ObjInfo">

@@ -93,13 +93,13 @@ export class Contact extends SpecialWidget {
         this.initDate();
     }
 
-    // public setProps(props: Props) {
-    //     this.props = {
-    //         ...this.props,
-    //         ...props
-    //     };
-    //     super.setProps(this.props);
-    // }
+    public setProps(props: Props) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+    }
 
     public initDate() {
         const uid = store.getStore('uid', 0);

@@ -183,3 +183,16 @@ export const modifyPunishTime = (id:number,uid:number,time:number) => {
         });
     });
 };
+
+// 释放动态
+export const reversePosts = (id:number,num:string) => {
+    const arg = new PostKey();
+    arg.id = id;
+    arg.num = num;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(reversePost,arg,(r:any) => {
+            res(r);
+        });
+    });
+};

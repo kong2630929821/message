@@ -162,4 +162,9 @@ export class ToBeProcessedInfo extends Widget {
             }
         });
     }
+
+    // 是否动态
+    public freedPost(e:any) {
+        
+    }
 }
