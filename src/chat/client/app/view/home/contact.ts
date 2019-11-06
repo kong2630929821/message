@@ -6,6 +6,7 @@
 import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
 import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
 import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offlineTip';
+import { getStore } from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -17,7 +18,6 @@ import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
 import { getUsersBasicInfo, showPost } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
-import { TagList } from './square';
 
 // ================================================ 导出
 export const forelet = new Forelet();
@@ -79,8 +79,12 @@ export class Contact extends SpecialWidget {
             //     components:'chat-client-app-view-contactList-contactList'
             // }
         ],
-        tagList:TagList
+        tagList:[]
     };
+    constructor() {
+        super();
+        this.props.tagList = store.getStore('tagList',[]);
+    }
 
     public create() {
         super.create();
@@ -199,7 +203,7 @@ export class Contact extends SpecialWidget {
     }
 
     // 切换tab
-    public changeTab(e:any) {
+    public changeTab(e:any) {        
         this.closeMore();
         this.props.activeTab = e.activeTab;
         this.props.showTag = e.showTag;
@@ -211,12 +215,12 @@ export class Contact extends SpecialWidget {
         this.props.acTag = ind;
         this.paint();
     }
-    // 切换tag
-    public changeTag(e:any) {
-        this.props.showTag = false;
-        this.props.acTag = e.value;
-        this.paint();
-    }
+    // // 切换tag
+    // public changeTag(e:any) {
+    //     this.props.showTag = false;
+    //     this.props.acTag = e.value;
+    //     this.paint();
+    // }
 
     // 聊天通知点击
     public evChat() {

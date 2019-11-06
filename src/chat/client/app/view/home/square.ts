@@ -1,67 +1,84 @@
+// tslint:disable-next-line:missing-jsdoc
 import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getStore, register } from '../../data/store';
+import { getStore,PostItem, register } from '../../data/store';
 import { postLaud, showPost } from '../../net/rpc';
 
 export const forelet = new Forelet();
 export const WIDGET_NAME = module.id.replace(/\//g, '-');
 
-interface Props {
-    showTag:boolean;  // 显示标签列表
-    tagList:string[];  // 标签列表
-    active:number;  // 当前显示的标签
-    follows:number;  // 关注人数
-    expandItem:number;  // 当前展开工具栏的帖子下标
-    dealData:any;  // 组装数据
-    refresh:boolean; // 是否可以请求更多数据
-    loadAnimation:boolean;// 是否到底了
+interface PostListForShow {
+    expandItem:number;
+    postList:PostItem[];
+    // canRequest:boolean;// 是否可以发送请求
+    isLoading:boolean;// 
+    // isShowAnimation:boolean;    
 }
-export const TagList = ['广场','关注','公众号','热门'];
-/**
- * 广场
- */
+
+type PostPage = [string, PostListForShow];
+
+interface Props  {
+    postView:PostPage[];
+    active:number;
+    follows:any[];
+    dealData:any;
+}
+
+// tslint:disable-next-line:completed-docs
 export class Square extends Widget {
-    public state:any;
-    public props:Props = {
-        showTag:false,
-        tagList:TagList,
+    public state:State;
+    public props:Props = {        
+        postView:[],
         active:0,
-        follows:0,
-        expandItem:-1,
-        dealData:this.dealData,
-        refresh:true,
-        loadAnimation:false
-    };
+        follows:[],
+        dealData:this.dealData        
+    };    
+
+    constructor() {
+        super();                
+        getStore(`tagList`,[]).forEach((tag) => {
+            this.props.postView.push([tag, {
+                expandItem:-1,
+                postList:[],
+                // canRequest:true,
+                isLoading:false
+                // isShowAnimation:false
+            }]);
+        });        
+    }
+    
     public setProps(props:any) {
+        if (this.props.active !== props.active) {
+            showPost(props.active + 1);
+        }
         this.props = {
             ...this.props,
             ...props
-        };
-        super.setProps(this.props);
-        State.postList = [];
-        this.state = State;
-        this.init(this.props.active);
-        showPost(this.props.active + 1);
+        };        
+        this.init(this.props.active);        
     }
     public firstPaint() {
         super.firstPaint();
         register('uid',() => {  // 聊天用户登陆成功
-            this.setProps(this.props);
+            // this.setProps(this.props);
+            showPost(this.props.active + 1);
         });
     }
     public init(ind:number) {
+        // TODO:
         if (ind === 2) {
             const pubNum = getStore('pubNum', 0);
-            this.props.follows = this.state.followList.public_list.filter(v => {
+            
+            this.state ? this.props.follows = this.state.followList.public_list.filter(v => {
 
                 return v !== pubNum;
-            }); 
+            }) : this.props.follows = []; 
         } else {
             const user = getStore(`userInfoMap/${getStore('uid')}`, {});
-            this.props.follows = this.state.followList.person_list.filter(v => {
+            this.state ? this.props.follows = this.state.followList.person_list.filter(v => {
                 return v !== user.comm_num;
-            });
+            }) : this.props.follows = [];
         } 
     }
 
@@ -71,58 +88,82 @@ export class Square extends Widget {
     }
 
     /**
-     * 点赞
+     * reload setState
      */
-    public likeBtn(i:number) {
-        const v = this.state.postList[i];
-        v.likeActive = !v.likeActive;
-        v.likeCount += v.likeActive ? 1 :-1;
-        this.paint();
-        postLaud(v.key.num, v.key.id, () => {
-            // 失败了则撤销点赞或取消点赞操作
-            v.likeActive = !v.likeActive;
-            v.likeCount += v.likeActive ? 1 :-1;
-            this.paint();
-        });
+    public setState(state:JSON) {
+        super.setState(state);
+        if (!this.state) {
+            return;
+        }
+        if (this.state.postReturn.id === 0 && this.state.postReturn.num === '') {
+            this.props.postView[this.state.postReturn.tagType - 1][1].expandItem = -1;
+            this.props.postView[this.state.postReturn.tagType - 1][1].postList = this.state.postReturn.postList;
+            // this.props.postView[this.state.postReturn.tagType - 1][1].canRequest = true;
+            this.props.postView[this.state.postReturn.tagType - 1][1].isLoading = false;
+            // this.props.postView[this.state.postReturn.tagType - 1][1].isShowAnimation = false;        
+        } else {
+            this.props.postView[this.state.postReturn.tagType - 1][1].expandItem = -1;
+            this.props.postView[this.state.postReturn.tagType - 1][1].postList = 
+                this.props.postView[this.state.postReturn.tagType - 1][1].postList.concat(this.state.postReturn.postList);
+            // this.props.postView[this.state.postReturn.tagType - 1][1].canRequest = true;
+            this.props.postView[this.state.postReturn.tagType - 1][1].isLoading = false;
+            // this.props.postView[this.state.postReturn.tagType - 1][1].isShowAnimation = false;        
+        }
     }
+    
+    // /**
+    //  * 点赞
+    //  */
+    // public likeBtn(i:number) {
+    //     const v = this.state.postList[i];
+    //     v.likeActive = !v.likeActive;
+    //     v.likeCount += v.likeActive ? 1 :-1;
+    //     this.paint();
+    //     postLaud(v.key.num, v.key.id, () => {
+    //         // 失败了则撤销点赞或取消点赞操作
+    //         v.likeActive = !v.likeActive;
+    //         v.likeCount += v.likeActive ? 1 :-1;
+    //         this.paint();
+    //     });
+    // }
 
-    /**
-     * 评论
-     */
-    public commentBtn(i:number) {
-        const v = this.state.postList[i];
-        popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
-            v.commentCount ++;
-            this.paint();
-            popNew3('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
-        });
-    }
+    // /**
+    //  * 评论
+    //  */
+    // public commentBtn(i:number) {
+    //     const v = this.state.postList[i];
+    //     popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
+    //         v.commentCount ++;
+    //         this.paint();
+    //         popNew3('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
+    //     });
+    // }
 
-    /**
-     * 删除
-     */
-    public delPost(i:number) {
-        this.state.postList.splice(i,1);
-        this.paint();
-    }
+    // /**
+    //  * 删除
+    //  */
+    // public delPost(i:number) {
+    //     this.state.postList.splice(i,1);
+    //     this.paint();
+    // }
 
-    /**
-     * 查看详情
-     */
-    public goDetail(i:number) {
-        popNew3('chat-client-app-view-info-postDetail',{ ...this.state.postList[i],showAll:true });
-    }
+    // /**
+    //  * 查看详情
+    //  */
+    // public goDetail(i:number) {
+    //     popNew3('chat-client-app-view-info-postDetail',{ ...this.state.postList[i],showAll:true });
+    // }
 
-    /**
-     * 展示操作
-     */
-    public expandTools(e:any,i:number) {
-        this.props.expandItem = e.value ? i :-1;
-        this.paint();
-    }
+    // /**
+    //  * 展示操作
+    //  */
+    // public expandTools(e:any,i:number) {
+    //     this.props.expandItem = e.value ? i :-1;
+    //     this.paint();
+    // }
 
     public pageClick() {
-        this.props.expandItem = -1;
+        this.props.postView[this.props.active][1].expandItem = -1;
         this.paint();
     }
 
@@ -140,72 +181,90 @@ export class Square extends Widget {
      * 滚动加载更多帖子
      */
     public scrollPage() {
-        this.pageClick();
+
+        // console.log('123');
+        this.props.postView[this.props.active][1].expandItem = -1;
         const page = document.getElementById('squarePage');
         const contain = document.getElementById('squareContain');
-        const fg = this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.state.postList.length % 20 === 0;   
-        if (this.state.postList.length % 20 !== 0) {
-            setTimeout(() => {
-                this.props.loadAnimation = true;
-                setTimeout(() => {
-                    this.props.refresh = false;
-                   
-                    this.paint();
-                },1000);
-                this.paint();
-            },2000);
-        }
+        const fg = !this.props.postView[this.props.active][1].isLoading && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150;           
         if (fg) {
-            this.props.refresh = false;
-            const list = this.state.postList;
-            this.paint();
-            showPost(this.props.active + 1,list[list.length - 1].key.num,list[list.length - 1].key.id).then(r => {
-                this.props.refresh = true;
-                this.paint();
+            this.props.postView[this.props.active][1].isLoading = true;
+            const list = this.props.postView[this.props.active][1].postList;
+            showPost(this.props.active + 1,list[list.length - 1].key.num,list[list.length - 1].key.id).then(() => {
+                this.props.postView[this.props.active][1].isLoading = false;
+                this.paint();                
+            }).catch(() => {                
+                this.props.postView[this.props.active][1].isLoading = false;
+                this.paint();                
             });
-        }
+        }        
         this.paint();
     }
 }
-const State = {
+
+type FollwList = {
+    person_list:any[];
+    public_list:any[];
+};
+
+type postReturn = {
+    id:number;
+    num:string;
+    tagType:number;
+    postList:any[];
+};
+
+interface State {
+    followList:FollwList;
+    likeList:any[];
+    postReturn:postReturn;
+}
+
+const state:State = {
     followList:{
         person_list:[],
         public_list:[]
     },
     likeList:[],
-    postList:[]  // 帖子列表
+    postReturn:{
+        id:-1,
+        num:'',
+        tagType:-1,
+        postList:[]
+    }
 };
-// 关注列表
-register('followNumList',r => {
-    for (const value of r.values()) {
-        State.followList = value;
-        const list = value.person_list.concat(value.public_list);
-        State.postList.forEach((v,i) => {
-            State.postList[i].followed = list.indexOf(v.key.num) > -1;
-        });
-    }
+
+// // 关注列表
+// register('followNumList',r => {
+//     for (const value of r.values()) {
+//         state.followList = value;
+//         const list = value.person_list.concat(value.public_list);
+//         state.postList.forEach((v,i) => {
+//             state.postList[i].followed = list.indexOf(v.key.num) > -1;
+//         });
+//     }
    
-    forelet.paint(State);
-});
-// 点赞列表
-register('laudPostList',r => {
-    for (const value of r.values()) {
-        State.likeList = value.list;
-        State.postList.forEach((v,i) => {
-            State.postList[i].likeActive = State.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
-        });
-    }
+//     forelet.paint(state);
+// });
+// // 点赞列表
+// register('laudPostList',r => {
+//     for (const value of r.values()) {
+//         state.likeList = value.list;
+//         state.postList.forEach((v,i) => {
+//             state.postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
+//         });
+//     }
     
-    forelet.paint(State);
-});
+//     forelet.paint(state);
+// });
 // 帖子数据
-register('postList',r => {
-    State.postList = r;
-    forelet.paint(State);
+register('postReturn',r => {
+    state.postReturn = r;    
+    forelet.paint(state);
 });
-register('offLine',(r) => {
-    const w:any = forelet.getWidget(WIDGET_NAME);
-    if (r && w) {
-        showPost(w.props.active + 1);
-    }
-});
+// register('offLine',(r) => {
+//     const w:any = forelet.getWidget(WIDGET_NAME);
+//     if (r && w) {
+//         showPost(w.props.active + 1);
+//     }
+// });

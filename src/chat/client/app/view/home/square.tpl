@@ -1,4 +1,3 @@
-
 <div w-class="auto" on-tap="pageClick" id="squarePage" on-scroll="scrollPage">
     <div id="squareContain" style="background: white;">
 
@@ -15,7 +14,7 @@
         </div>
         {{end}}
 
-        {{for i,v of it1.postList}}
+        {{for i,v of it.postView[it.active][1].postList}}
         <div ev-goDetail="goDetail({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-closeTools="pageClick">
             {{if v.isPublic}}
             <widget w-tag="chat-client-app-view-home-pubPostItem">{{v}}</widget>
@@ -27,15 +26,16 @@
         </div>
         {{end}}
 
-        {{if it.refresh}}
-        <div w-class="loadAnimation">
-            {{if it.loadAnimation}}
-                <div>已经到底了~</div>
-            {{else}}
+                         
+            <div w-class="loadAnimation">
+                {{if it.postView[it.active][1].isLoading}}  
                 <img src="../../res/images/loading.gif" alt=""/>
-                <div>加载中···</div>
-            {{end}}
-        </div>
-        {{end}}
+                    <div>加载中···</div> 
+                    
+                {{else}}
+                <div>已经到底了~</div>
+                {{end}}
+            </div>            
+            
     </div>
 </div>
