@@ -183,6 +183,13 @@ struct FansIndex{
     list: &[String]           // 粉丝社区编号列表
 }
 
+// 标签索引表
+#[primary=label,db=file,dbMonitor=true]
+struct LabelIndex{
+    label: String,              // 标签
+    list: &[PostKey]           // 帖子KEY
+}
+
 // 公众号名索引表
 #[primary=name,db=file,dbMonitor=true]
 struct PublicNameIndex{
