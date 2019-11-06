@@ -12,7 +12,7 @@ enum SEXY {
 
 enum GENERATOR_TYPE {
     USER = "user",   //个人
-    GROUP = "group" //群组
+    GROUP = "group", //群组
 }
 
 enum VIP_LEVEL {

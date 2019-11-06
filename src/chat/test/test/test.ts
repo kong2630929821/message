@@ -12,8 +12,8 @@ import { AddRobotArg, CommonComment, CommonCommentList, RobotActiveSet, RobotUse
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { Result, UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow, getLabelPost, getLabelPostCount } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList, IterLabelPostArg } from '../../server/data/rpc/community.s';
 import { cancelGmAccount, createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setGmAccount } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
@@ -77,10 +77,10 @@ export const setGM = () => {
 // 写帖子
 export const addPostPortTest = () => {
     const addPostArg = new AddPostArg();
-    addPostArg.num = '23';
+    addPostArg.num = '1';
     addPostArg.post_type = 0;
     addPostArg.title = 'Vakanda Forever';
-    addPostArg.body = 'test1';
+    addPostArg.body = 'test1#一代掌门#';
     clientRpcFunc(addPostPort, addPostArg, (r: PostKey) => {
         console.log(r);
     });
@@ -757,6 +757,26 @@ const props = {
         {
             name: '社区信息',
             func: () => { getUserInfoByCommTest(); }
+        },
+        {
+            name: '获取标签对应的帖子',
+            func: () => { 
+                const arg = new IterLabelPostArg();
+                arg.label = '一代掌门';
+                arg.count = 20;
+                arg.id = 0;
+                arg.num = '';
+                clientRpcFunc(getLabelPost, arg, (r: PostArr) => {
+                    console.log(r);
+                }); }
+        },
+        {
+            name: '获取标签对应的数量',
+            func: () => { 
+                const label = '一代掌门';
+                clientRpcFunc(getLabelPostCount, label, (r: number) => {
+                    console.log(r);
+                }); }
         }
     ] // 按钮数组
 };
