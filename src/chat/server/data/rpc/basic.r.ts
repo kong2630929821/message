@@ -17,6 +17,7 @@ import { AnnouceFragment, AnnouceIds, AnnounceHistoryArray, FriendLinkArray, Get
 import { createCommNum } from './community.r';
 import { CommType } from './community.s';
 import { getUid } from './group.r';
+import { getUserPunishing } from './manager.r';
 import { getRealUid, getSUID, sendFirstWelcomeMessage } from './user.r';
 
 declare var env: Env;
@@ -94,6 +95,7 @@ export const registerUser = (registerInfo: UserRegister): UserInfo => {
  * 登陆
  */
 // #[rpc=rpcServer]
+// tslint:disable-next-line:max-func-body-length
 export const login = (user: UserType): UserInfo => {
     console.log('user try to login with uid: ', user);
     const userInfoBucket = new Bucket('file', CONSTANT.USER_INFO_TABLE);
@@ -140,6 +142,13 @@ export const login = (user: UserType): UserInfo => {
 
             return userInfo;
         }
+    }
+    // 被封禁则无法登陆
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${loginReq.uid}`, CONSTANT.BAN_MESAAGE);
+    if (punishList.list.length > 0) {
+        userInfo.note = 'ban_account';
+
+        return userInfo;
     }
     console.log('3333333333333333333333');
     // FIXME: constant time equality check

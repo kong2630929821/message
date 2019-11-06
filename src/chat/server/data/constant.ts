@@ -114,6 +114,7 @@ export const DELETE_CONTENT = 1;    // 删除内容
 export const BAN_MESAAGE = 2;       // 禁言
 export const BAN_POST = 3;          // 禁止发动态
 export const FREEZE = 4;            // 冻结
+export const BAN_ACCOUNT = 5;         // 封禁(无法登录)
 
 // 惩罚状态
 export const PUNISH_LAST = 0; // 惩罚中
