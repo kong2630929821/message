@@ -2,14 +2,14 @@ import { Env } from '../../../../pi/lang/env';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import * as CONSTANT from '../constant';
-import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex } from '../db/community.s';
+import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex, LabelIndex } from '../db/community.s';
 import { ApplyPublic, UserApplyPublic } from '../db/manager.s';
 import { UserInfo } from '../db/user.s';
 import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
+import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData, IterLabelPostArg } from './community.s';
 import { getUid } from './group.r';
 import { addManagerPostIndex, getUserPunishing } from './manager.r';
 import { getIndexId } from './message.r';
@@ -1133,6 +1133,7 @@ export const addPost = (uid: number, arg: AddPostArg, key: PostKey, comm_type: n
             postCount.commentList = [];
             postCount.forwardList = [];
             if (postCountBucket.put(key, postCount)) {
+                addLabel(key, arg.body);
 
                 return key;
             }
@@ -1141,6 +1142,26 @@ export const addPost = (uid: number, arg: AddPostArg, key: PostKey, comm_type: n
     key.num = '';
 
     return key;
+};
+
+/**
+ * 写入帖子标签
+ */
+export const addLabel = (postKey: PostKey, body: string): boolean => {
+    const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
+    // 检查内容中是否包含标签
+    const labelArr = getLable(/\#([^#]*)\#/gm, body);
+    for(let i = 0; i < labelArr.length; i++){
+        let labelList = labelIndexBucket.get<string, LabelIndex[]>(labelArr[i])[0];
+        labelList.list = labelList? labelList.list : [];
+        labelList.list.push(postKey);
+        if(!labelIndexBucket.put(labelList.label, labelList)){
+
+            return false;
+        };
+    }
+
+    return true;
 };
 
 /**
@@ -1256,6 +1277,58 @@ export const addComment = (uid: number, arg: AddCommentArg): CommentKey => {
     key.num = '';
     
     return key;
+};
+
+/**
+ *  获取标签对应的帖子
+ */
+// #[rpc=rpcServer]
+export const getLabelPost = (arg: IterLabelPostArg) :PostArr => {
+    // 获取标签对应的帖子key
+    const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
+    let labelIndex = labelIndexBucket.get<string, LabelIndex[]>(arg.label)[0];
+    let post_id_list = labelIndex ? labelIndex.list : [];
+    console.log('!!!!!!!!!!!!!!!!!!!!!!post_id_list', post_id_list);
+    let index = -1;
+    for (let i = 0; i < post_id_list.length; i++) {
+        if (post_id_list[i].id === arg.id && post_id_list[i].num === arg.num) {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0) {
+        post_id_list.splice(index, post_id_list.length - index + 1);
+    }
+    post_id_list.reverse();
+    const postArr = new PostArr();
+    postArr.list = [];
+    let count = 0;
+    // 获取帖子内容
+    for (let i = 0; i < post_id_list.length; i++) {
+        if (count >= arg.count) break;
+        const postData = getPostInfoById(post_id_list[i]);
+        if (!postData) continue;
+        postArr.list.push(postData);
+        count ++;
+    }
+
+    return postArr;
+};
+
+/**
+ *  获取标签对应的帖子数量
+ */
+// #[rpc=rpcServer]
+export const getLabelPostCount = (label: string) :number => {
+    // 获取标签对应的帖子key
+    const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
+    const labelIndex = labelIndexBucket.get<string, LabelIndex[]>(label)[0];
+    if(!labelIndex) {
+        
+        return 0;
+    }
+
+    return labelIndex.list.length;
 };
 
 /**
@@ -1651,4 +1724,24 @@ export const get_day  = (timestamps: number):number => {
     console.log('timestamps !!!!!!!!!!!!!!!', time);
 
     return Math.floor(time / (1000 * 60 * 60 * 24));
+};
+
+// 通过正则获取标签
+const getLable = (p, str: string):string[] =>  {
+    // 最多有10个标签组
+    let i = 10;
+    const vList:string[] = [];
+    do {
+        i = i - 1;
+        const v = p.exec(str);
+        if (v !== null) {
+            if (v !== '') {
+                vList.push(v[1]);
+            }
+        } else {
+            i = -1;
+        }
+    } while (i < 0);
+
+    return vList;
 };
