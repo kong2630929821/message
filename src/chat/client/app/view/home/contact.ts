@@ -90,23 +90,16 @@ export class Contact extends SpecialWidget {
         super.create();
         this.state = STATE;
         this.state.pubNum = store.getStore('pubNum',0);
-        // 判断是否从钱包项目进入
-        // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        // getStoreData('wallet').then((wallet) => {
-        //     this.props.hasWallet = !!wallet;
-        // });
-            
-        // }
-    }
-
-    public setProps(props: Props) {
-        this.props = {
-            ...this.props,
-            ...props
-        };
-        super.setProps(this.props);
         this.initDate();
     }
+
+    // public setProps(props: Props) {
+    //     this.props = {
+    //         ...this.props,
+    //         ...props
+    //     };
+    //     super.setProps(this.props);
+    // }
 
     public initDate() {
         const uid = store.getStore('uid', 0);

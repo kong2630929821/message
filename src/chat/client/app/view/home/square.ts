@@ -10,10 +10,8 @@ export const WIDGET_NAME = module.id.replace(/\//g, '-');
 
 interface PostListForShow {
     expandItem:number;
-    postList:PostItem[];
-    // canRequest:boolean;// 是否可以发送请求
-    isLoading:boolean;// 
-    // isShowAnimation:boolean;    
+    postList:PostItem[];    
+    isLoading:boolean;//     
 }
 
 type PostPage = [string, PostListForShow];
@@ -27,7 +25,7 @@ interface Props  {
 
 // tslint:disable-next-line:completed-docs
 export class Square extends Widget {
-    public state:State;
+    public state:State = state;
     public props:Props = {        
         postView:[],
         active:0,
@@ -111,56 +109,56 @@ export class Square extends Widget {
         }
     }
     
-    // /**
-    //  * 点赞
-    //  */
-    // public likeBtn(i:number) {
-    //     const v = this.state.postList[i];
-    //     v.likeActive = !v.likeActive;
-    //     v.likeCount += v.likeActive ? 1 :-1;
-    //     this.paint();
-    //     postLaud(v.key.num, v.key.id, () => {
-    //         // 失败了则撤销点赞或取消点赞操作
-    //         v.likeActive = !v.likeActive;
-    //         v.likeCount += v.likeActive ? 1 :-1;
-    //         this.paint();
-    //     });
-    // }
+    /**
+     * 点赞
+     */
+    public likeBtn(i:number) {
+        const v = this.props.postView[this.state.postReturn.tagType - 1][1].postList[i];
+        v.likeActive = !v.likeActive;
+        v.likeCount += v.likeActive ? 1 :-1;
+        this.paint();
+        postLaud(v.key.num, v.key.id, () => {
+            // 失败了则撤销点赞或取消点赞操作
+            v.likeActive = !v.likeActive;
+            v.likeCount += v.likeActive ? 1 :-1;
+            this.paint();
+        });
+    }
 
-    // /**
-    //  * 评论
-    //  */
-    // public commentBtn(i:number) {
-    //     const v = this.state.postList[i];
-    //     popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
-    //         v.commentCount ++;
-    //         this.paint();
-    //         popNew3('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
-    //     });
-    // }
+    /**
+     * 评论
+     */
+    public commentBtn(i:number) {
+        const v = this.props.postView[this.state.postReturn.tagType - 1][1].postList[i];
+        popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
+            v.commentCount ++;
+            this.paint();
+            popNew3('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
+        });
+    }
 
-    // /**
-    //  * 删除
-    //  */
-    // public delPost(i:number) {
-    //     this.state.postList.splice(i,1);
-    //     this.paint();
-    // }
+    /**
+     * 删除
+     */
+    public delPost(i:number) {
+        this.props.postView[this.state.postReturn.tagType - 1][1].postList.splice(i,1);
+        this.paint();
+    }
 
-    // /**
-    //  * 查看详情
-    //  */
-    // public goDetail(i:number) {
-    //     popNew3('chat-client-app-view-info-postDetail',{ ...this.state.postList[i],showAll:true });
-    // }
+    /**
+     * 查看详情
+     */
+    public goDetail(i:number) {
+        popNew3('chat-client-app-view-info-postDetail',{ ... this.props.postView[this.state.postReturn.tagType - 1][1].postList[i],showAll:true });
+    }
 
-    // /**
-    //  * 展示操作
-    //  */
-    // public expandTools(e:any,i:number) {
-    //     this.props.expandItem = e.value ? i :-1;
-    //     this.paint();
-    // }
+    /**
+     * 展示操作
+     */
+    public expandTools(e:any,i:number) {
+        this.props.postView[this.props.active][1].expandItem = e.value ? i :-1;
+        this.paint();
+    }
 
     public pageClick() {
         this.props.postView[this.props.active][1].expandItem = -1;
@@ -234,37 +232,33 @@ const state:State = {
     }
 };
 
-// // 关注列表
-// register('followNumList',r => {
-//     for (const value of r.values()) {
-//         state.followList = value;
-//         const list = value.person_list.concat(value.public_list);
-//         state.postList.forEach((v,i) => {
-//             state.postList[i].followed = list.indexOf(v.key.num) > -1;
-//         });
-//     }
+// 关注列表
+register('followNumList',r => {
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    for (const value of r.values()) {
+        state.followList = value;
+        const list = value.person_list.concat(value.public_list);
+        w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
+            w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].followed = list.indexOf(v.key.num) > -1;
+        });
+    }
    
-//     forelet.paint(state);
-// });
-// // 点赞列表
-// register('laudPostList',r => {
-//     for (const value of r.values()) {
-//         state.likeList = value.list;
-//         state.postList.forEach((v,i) => {
-//             state.postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
-//         });
-//     }
+    forelet.paint(state);
+});
+// 点赞列表
+register('laudPostList',r => {
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    for (const value of r.values()) {
+        state.likeList = value.list;
+        w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
+            w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
+        });
+    }
     
-//     forelet.paint(state);
-// });
+    forelet.paint(state);
+});
 // 帖子数据
 register('postReturn',r => {
     state.postReturn = r;    
     forelet.paint(state);
 });
-// register('offLine',(r) => {
-//     const w:any = forelet.getWidget(WIDGET_NAME);
-//     if (r && w) {
-//         showPost(w.props.active + 1);
-//     }
-// });

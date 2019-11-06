@@ -27,15 +27,14 @@
         {{end}}
 
                          
-            <div w-class="loadAnimation">
-                {{if it.postView[it.active][1].isLoading}}  
-                <img src="../../res/images/loading.gif" alt=""/>
-                    <div>加载中···</div> 
-                    
-                {{else}}
-                <div>已经到底了~</div>
-                {{end}}
-            </div>            
+        <div w-class="loadAnimation">
+            {{if it.postView[it.active][1].isLoading}}  
+            <img src="../../res/images/loading.gif" alt=""/>
+                <div>加载中···</div> 
+            {{else}}
+            <div>已经到底了~</div>
+            {{end}}
+        </div>            
             
     </div>
 </div>
