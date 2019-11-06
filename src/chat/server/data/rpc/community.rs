@@ -131,6 +131,14 @@ struct IterSquarePostArg {
     square_type: u32      //广场分类
 }
 
+//迭代标签帖子参数
+struct IterLabelPostArg {
+    label: String,  //标签
+    count: u32,     //获取数量
+    id: u32,     //指定key进行遍历
+    num: String,       //社区编号
+}
+
 //迭代评论参数
 struct IterCommentArg {
     count: u32,     //获取数量
