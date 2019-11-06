@@ -62,6 +62,7 @@ export const getReportList = (reportArg: ReportListArg): string => {
     const reportListTabBucket = new Bucket(CONSTANT.WARE_NAME, ReportListTab._$info.name);
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
+    const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
     const reportIndexList = new ReportIndexList();
     reportIndexList.list = [];
     const reportListTab = reportListTabBucket.get<number, ReportListTab[]>(reportArg.report_type)[0];
@@ -87,6 +88,11 @@ export const getReportList = (reportArg: ReportListArg): string => {
                     reportIndex.last_time = lastReport.time;
                     reportIndex.last_resaon = lastReport.reason;
                     reportIndex.report_ids = reportIds;
+                    const punishCount = getUserPunish(lastReport.key);
+                    if (punishCount.now_publish !== 0) {
+                        const nowPunish = punishBucket.get<number, Punish[]>(punishCount.now_publish)[0];
+                        reportIndex.now_publish = nowPunish;
+                    }
                     reportIndexList.list.push(reportIndex);
                 }
             }

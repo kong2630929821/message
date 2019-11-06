@@ -2,11 +2,11 @@ import { deepCopy } from '../../../../app/store/memstore';
 import { Widget } from '../../../../pi/widget/widget';
 import { perPage } from '../../components/pagination';
 import { getAllReport } from '../../net/rpc';
-import { PENALTY } from '../../utils/logic';
+import { REPORT } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';
 
 interface Props {
-    sum:number;// 总页数
+    sum:number;// 数据条数
     perPage:number;// 每页显示多少条数据
     currentIndex:number;// 当前页数
     expandIndex:boolean;// 控制分页显示隐藏
@@ -15,11 +15,13 @@ interface Props {
     showDataList:any;// 表格内容
     showTitleList:any;// 表格标题
     status:boolean;// true列表页面 false详情页面
-    dataList:any;// 表格原始数据
+    reportDataListId:any;// 表格原始数据
     reportDataList:any;// 举报当前原始数据
-    allList:any;// 举报全部原始数据
+    allList:any;// 举报全部数据
     allId:any;// 举报全部的ID
-    currentData:any;// 当前处理的数据
+    currentDataId:any;// 当前处理的数据ID
+    returnDeel:number;// 0待处理  1已处理
+    btnGroup:any;// 按钮组
 }
 /**
  * 文章审核
@@ -35,46 +37,74 @@ export class ToBeProcessed extends Widget {
         showDataList:[],
         showTitleList:['被举报人','类别','举报原因','被举报次数','举报时间','举报人'],
         status:true,
-        dataList:[],
+        reportDataListId:[],
         reportDataList:[],
         allId:[[],[]],
         allList:[[],[]],
-        currentData:[]
+        currentDataId:[],
+        returnDeel:0,
+        btnGroup:[]
     };
 
     public create() {
         super.create();
-        this.initData();
+        this.props.allList.forEach((v,i) => {
+            this.initData(i);
+        });
     }
 
     /**
      * 初始化数据
      */
-    public initData() {
-        getAllReport(0,PENALTY.DELETE_CONTENT).then((r:any) => {
-            this.props.allList[0] = r[0];
-            this.props.allId[0] = r[1];
-            // this.props.dataList = this.props.list[this.props.returnStatus];
-            // this.props.reportDataList = this.props.allList[this.props.returnStatus];
-            // this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
-            // this.paint();
+    public initData(i:number) {
+        let dataType = 0;
+        switch (i) {
+            case 0:
+                // 玩家
+                dataType = REPORT.REPORT_PERSON;
+                break;
+            case 1:
+                // 动态
+                dataType = REPORT.REPORT_POST;
+                break;
+            default:
+        }
+        getAllReport(this.props.returnDeel,dataType).then((r:any) => {
+            this.props.allList[i] = r[0];
+            this.props.allId[i] = r[1];
+            if (i === this.props.returnStatus) {
+                this.props.reportDataListId = this.props.allId[i];
+                this.props.reportDataList = this.props.allList[i];
+                this.props.showDataList = this.props.reportDataList.slice(0,this.props.perPage);
+                this.props.sum = this.props.showDataList.length;
+            }
+            this.paint();
         });
+        
     }
 
     // 切换tab
     public checkType(index:number) {
         this.props.returnStatus = index;
-        this.props.dataList = this.props.list[this.props.returnStatus];
         this.props.reportDataList = this.props.allList[this.props.returnStatus];
+        this.props.reportDataListId = this.props.allId[this.props.returnStatus];
+        this.props.sum = this.props.reportDataList.length;
         this.pageChange({ value:this.props.currentIndex });   
         this.paint();
     }
 
+    // 切换待处理  已处理
+    public checkDeel(index:number) {
+        this.props.returnDeel = index;
+        this.props.allList.forEach((v,i) => {
+            this.initData(i);
+        });
+    }
     // 表格查看详情
     public goDetail(e:any) {
         const index = e.num;
         this.props.status = false;
-        this.props.currentData = deepCopy(this.props.reportDataList[this.props.currentIndex * this.props.perPage + index]);
+        this.props.currentDataId = deepCopy(this.props.reportDataListId[this.props.currentIndex * this.props.perPage + index]);
         this.paint();
     }
     // 重置页面的展开状态
@@ -87,7 +117,7 @@ export class ToBeProcessed extends Widget {
     public pageChange(e:any) {
         this.close();
         this.props.currentIndex = e.value;
-        this.props.showDataList = this.props.dataList.slice(e.value * this.props.perPage,(e.value + 1) * this.props.perPage);
+        this.props.showDataList = this.props.reportDataList.slice(e.value * this.props.perPage,(e.value + 1) * this.props.perPage);
         this.paint();
     }
 
@@ -120,6 +150,8 @@ export class ToBeProcessed extends Widget {
     // 刷新页面
     public ok() {
         this.props.status = true;
-        this.initData();
+        this.props.allList.forEach((v,i) => {
+            this.initData(i);
+        });
     }
 }

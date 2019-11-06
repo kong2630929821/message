@@ -26,9 +26,8 @@
     box-sizing: border-box;
 }
 .contentInfo{
-    height: 354px;
+    height: 268px;
     overflow: auto;
-    text-align: center;
 }
 .contentTitle{
     font-size:20px;
@@ -57,6 +56,7 @@
 .imgBig{
     width: 500px;
     height: 800px;
+    margin-top: 20px;
 }
 .titleBox{
     height: 140px;
@@ -97,7 +97,7 @@
     align-items: center;
 }
 .item{
-    width: 350px;
+    width: 400px;
     max-width: 445px;
     font-size:14px;
     font-family:SourceHanSansCN;
@@ -112,7 +112,7 @@
     margin-left: 10px;
 }
 .reportInfo{
-    height: 270px;
+    height: 345px;
     border:1px solid rgba(204,204,204,1);
     box-sizing: border-box;
     display: flex;
@@ -124,7 +124,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    padding: 0 0 0 20px;
+    padding: 4px 0 10px 20px;
 }
 .reportItem{
     display: flex;
@@ -161,4 +161,70 @@
     line-height: 16px;
     margin-left: 10px;
     padding: 2px;
+}
+.reportUserInfo{
+    flex: 1;
+    height:56px;
+    background:rgba(242,242,242,1);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin: 0 30px;
+}
+.ctroller{
+    height: 48px;
+    margin-top: 20px;
+    display: flex;
+    position: relative;
+}
+.pagination{
+    position: absolute;
+    top: -9px;
+    right: 50px;
+}
+.bodyData{
+    height: 645px;
+    overflow: auto;
+}
+.userAvatarBox{
+    width: 700px;
+    height: 80px;
+    display: flex;
+}
+.avatar{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+.dynamicDetails{
+    flex: 1;
+    text-align: left;
+}
+.dynamicTitle{
+    font-size:24px;
+    font-family:SourceHanSansCN-Medium,SourceHanSansCN;
+    font-weight:500;
+    color:rgba(53,64,82,1);
+    margin: 16px 0 0 20px;
+}
+.details{
+    display: flex;
+    margin-left: 20px;
+    justify-content: space-between;
+    line-height: 30px;
+}
+.reportdynamicUser{
+    height: 280px;
+    overflow: auto;
+}
+.userItem{
+    box-sizing: border-box;
+    height: 56px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-bottom: 1px solid rgba(204,204,204,1);
+    border-left: 1px solid rgba(204,204,204,1);
+    border-right: 1px solid rgba(204,204,204,1);
+    padding: 0 20px;
 }

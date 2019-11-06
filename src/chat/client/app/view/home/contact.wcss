@@ -61,3 +61,27 @@
     border-bottom: 3px solid;
     box-sizing: content-box;
 }
+.title{
+    height:24px;
+    font-size:24px;
+    font-weight:300;
+    color:rgba(136,136,136,1);
+    line-height:25px;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+.tagList{
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10px;
+}
+.tag{
+    width:160px;
+    height:60px;
+    background:rgba(242,242,242,1);
+    margin: 10px;
+    text-align: center;
+    line-height: 60px;
+    font-size: 28px;
+    color: #222;
+}

@@ -17,6 +17,7 @@ import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
 import { getUsersBasicInfo, showPost } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
+import { TagList } from './square';
 
 // ================================================ 导出
 export const forelet = new Forelet();
@@ -35,6 +36,7 @@ interface Props {
     acTag:number;   // 当前活跃的广场标签下标
     showTag:boolean;  // 展示广场下拉
     tabBarList:any;
+    tagList:any;
 }
 export const TAB = {
     message:'message',
@@ -76,7 +78,8 @@ export class Contact extends SpecialWidget {
             //     modulName:'friend',
             //     components:'chat-client-app-view-contactList-contactList'
             // }
-        ]
+        ],
+        tagList:TagList
     };
 
     public create() {
@@ -202,7 +205,12 @@ export class Contact extends SpecialWidget {
         this.props.showTag = e.showTag;
         this.paint();
     }
-
+    // 切换tag
+    public changeTagItem(ind:number) {
+        this.props.showTag = false;
+        this.props.acTag = ind;
+        this.paint();
+    }
     // 切换tag
     public changeTag(e:any) {
         this.props.showTag = false;
