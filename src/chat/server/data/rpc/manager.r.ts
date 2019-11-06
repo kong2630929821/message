@@ -15,7 +15,7 @@ import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
 import { PostData } from './community.s';
-import { getRealUid, setOfficialAccount } from './user.r';
+import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
 
 /**
@@ -224,6 +224,10 @@ export const punish = (arg: PunishArg): string => {
     }
     punishCount.now_publish = punish.id;
     punishCountBucket.put(punishCount.key, punishCount);
+    // 好嗨客服通知
+    const punishStr = getPunishStr(arg.punish_type);
+    const timeStr = formatDuring(arg.time);
+    sendFirstWelcomeMessage(`您已受到${punishStr}处罚，时长${timeStr}`,uid);
     // 推送惩罚信息
     send(uid, CONSTANT.SEND_PUNISH, JSON.stringify(punish));
 
@@ -466,6 +470,22 @@ export const modifyPunish = (arg: ModifyPunishArg): number => {
     punish.end_time = end_time.toString();
     punishBucket.put(punish.id, punish);
     if (end_time <= Date.now()) endPunish(`${CONSTANT.REPORT_PERSON}%${arg.uid}`, arg.id);
+
+    return CONSTANT.RESULT_SUCCESS;
+};
+
+/**
+ * 恢复已删除帖子
+ */
+// #[rpc=rpcServer]
+export const reversePost = (postKey: PostKey): number => {
+    if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
+    const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
+    const post = postBucket.get<PostKey, Post[]>(postKey)[0];
+    if (!post) return ERROR_NUM.POST_NOT_EXIST;
+    post.state = CONSTANT.NORMAL_STATE;
+    if (!postBucket.put(postKey, post)) return ERROR_NUM.DB_ERROR;
+    addManagerPostIndex(post.state, post.key, true);
 
     return CONSTANT.RESULT_SUCCESS;
 };
@@ -788,7 +808,7 @@ const deletePost = (postKey: PostKey): number => {
     if (!post) return ERROR_NUM.POST_NOT_EXIST;
     post.state = CONSTANT.DELETE_STATE;
     if (!postBucket.put(postKey, post)) return ERROR_NUM.DB_ERROR;
-    addManagerPostIndex(post.state, post.key, true);
+    addManagerPostIndex(post.state, post.key, false);
 
     return CONSTANT.RESULT_SUCCESS;
 };
@@ -972,4 +992,30 @@ export const getIndexId = (name: string) : number => {
     indexBucket.put(name, accountGenerator);
 
     return accountGenerator.currentIndex;
+};
+
+export const getPunishStr = (punishType: number) => {
+    switch (punishType) {
+        case CONSTANT.DELETE_CONTENT:
+            return '删除发表内容';
+        case CONSTANT.BAN_MESAAGE:
+            return '禁言';
+        case CONSTANT.BAN_POST:
+            return '禁止发动态';
+        case CONSTANT.FREEZE:
+            return '禁言/禁止发动态';
+        case CONSTANT.BAN_ACCOUNT:
+            return '封禁';
+        default:
+            return '';
+    }
+};
+
+export const formatDuring = (mss: number) => {
+    const days = Math.floor(mss / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((mss % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = (mss % (1000 * 60)) / 1000;
+    
+    return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
 };
