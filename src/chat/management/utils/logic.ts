@@ -408,13 +408,15 @@ export enum PENALTY {
     DELETE_CONTENT= 1,
     BAN_MESAAGE,
     BAN_POST,
-    FREEZE= 4
+    FREEZE,
+    BAN_ACCOUNT = 5
 }
 export enum PENALTYTEXT {
     DELETE_CONTENT= '删除内容',
     BAN_MESAAGE= '禁言',
     BAN_POST= '禁止发动态',
-    FREEZE= '禁言'
+    FREEZE= '禁言',
+    BAN_ACCOUNT = '冻结'
 }
 // 处理处罚文字
 export const penaltyText = (res:any,str:string) => {

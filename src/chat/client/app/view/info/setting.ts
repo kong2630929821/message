@@ -64,6 +64,7 @@ export class Setting extends Widget {
             ...props
         };
         super.setProps(this.props);
+        debugger;
         // 判断是否是好友
         const friends = getFriendsInfo().friends;
         if (this.props.noticeSet !== 1) {
@@ -328,7 +329,7 @@ export class Setting extends Widget {
      */
     public complaint() {
         const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
-        const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
+        const avatar = this.props.userInfo.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
         const key = `${REPORT_PERSON}%${this.props.uid}`;
         complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg,REPORT_PERSON,key);
     }

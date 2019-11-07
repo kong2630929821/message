@@ -109,7 +109,7 @@ export class ReportBox extends Widget {
         if (this.props.checkedList === 0) {
             punish = PENALTY.FREEZE ;
         } else if (this.props.checkedList === 1) {
-            punish = PENALTY.FREEZE;
+            punish = PENALTY.BAN_ACCOUNT;
         }
         const key = this.props.userInfo.key;
         setPunish(key,punish,time).then((r:any) => {
