@@ -178,7 +178,7 @@ export class ToBeProcessedInfo extends Widget {
     }
 
     // 查看大图
-    public bigImg(src:any) {
-        popNew('chat-management-components-imgBox');
+    public bigImg(src:string) {
+        popNew('chat-management-components-imgBox',{ src });
     }
 }

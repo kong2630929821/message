@@ -242,6 +242,9 @@ const state:State = {
 // 关注列表
 register('followNumList',r => {
     const w:any = forelet.getWidget(WIDGET_NAME);
+    if (w.state.postReturn.tagType === -1) {
+        return;
+    }
     for (const value of r.values()) {
         state.followList = value;
         const list = value.person_list.concat(value.public_list);
@@ -255,6 +258,9 @@ register('followNumList',r => {
 // 点赞列表
 register('laudPostList',r => {
     const w:any = forelet.getWidget(WIDGET_NAME);
+    if (w.state.postReturn.tagType === -1) {
+        return;
+    }
     for (const value of r.values()) {
         state.likeList = value.list;
         w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {

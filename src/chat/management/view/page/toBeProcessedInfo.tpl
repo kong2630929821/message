@@ -18,7 +18,7 @@
         <div w-class="contentInfo">
             <div style="width:700px; margin: 30px auto;">
                 <div w-class="userAvatarBox">
-                    <img src="{{it.dynamic.avatar}}" alt="" w-class="avatar" on-tap="bigImg('11')"/>
+                    <img src="{{it.dynamic.avatar}}" alt="" w-class="avatar"/>
                     <div w-class="dynamicDetails">
                         <div w-class="dynamicTitle">{{it.dynamic.name}}</div>
                         <div w-class="details">
@@ -36,7 +36,7 @@
                 </div>
                 {{if it.dynamic.imgs.length}}
                     {{for i,v of it.dynamic.imgs}}
-                        <img src="{{v}}" alt="" w-class="imgBig" on-tap="bigImg('1111111')"/>
+                        <img src="{{v}}" alt="" w-class="imgBig" on-tap="bigImg('{{v}}')"/>
                     {{end}}
                 {{end}}
             </div>
@@ -111,7 +111,7 @@
                             {{if v.value.length}}
                                 <div w-class="imgGroup">
                                     {{for j,t of v.value}}
-                                        <img src="{{t}}" alt="" w-class="imgInfo" on-tap="bigImg({{v.value}})"/>
+                                        <img src="{{t}}" alt="" w-class="imgInfo" on-tap="bigImg('{{t}}')"/>
                                     {{end}}
                                 </div>
                             {{end}}
