@@ -297,8 +297,8 @@ winit.initNext = function () {
 				console.log('bind vm success', res);
 				loadLeftChatSource();
 				
-				// 登录
-				pi_modules.commonjs.exports.relativeGet("chat/client/app/net/login").exports.chatLogin();	
+				// 聊天授权
+				pi_modules.commonjs.exports.relativeGet("chat/client/app/net/login").exports.checkAccount();	
 			});
 		}, function (r) {
 			alert("加载目录失败, " + r.error + ":" + r.reason);
