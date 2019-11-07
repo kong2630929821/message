@@ -321,7 +321,6 @@ export class EditPost extends Widget {
                 imgs:this.props.saveImgs
             };
             if (!this.props.isUploading) {  // 图片上传完成
-                debugger;
                 addPost(this.props.titleInput,JSON.stringify(value),this.props.num).then((r:any) => {
                     if (!isNaN(r)) {
                         popNewMessage('发布成功');
