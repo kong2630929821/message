@@ -9,11 +9,17 @@
     <div style="visibility: {{v.modulName == it.activeTab ? 'visible' : 'hidden'}}; z-index:{{v.modulName == it.activeTab ? 0 :-1}}; position:absolute;top:157px;bottom: 110px; width:100%;">
         <widget  w-tag={{v.components}}>{isActive:{{v.modulName == it.activeTab}},active:{{it.acTag}},newApply:{{show}} }</widget>
         {{if it.showTag && i===0}}
-        <div w-props="hello" style="background:#fff;padding-bottom: 20px;position: absolute;top:0;margin-top:-4px;">
-            <div w-class="title">标签分类</div>
+        <div w-props="hello" style="background:#fff;width:100%;padding-bottom: 20px;position: absolute;top:0;margin-top:-4px;">
+            <div w-class="title">分类标签</div>
             <div w-class="tagList">
-                {{for i,v of it.tagList}}
+                {{for i,v of it.tagList.slice(0,2)}}
                 <div w-class="tag" on-tap="changeTagItem({{i}},e)">{{v}}</div>
+                {{end}}
+            </div>
+            <div w-class="title">游戏标签</div>
+            <div w-class="tagList">
+                {{for i,v of it.tagList.slice(2)}}
+                <div w-class="tag" on-tap="changeTagItem({{i+2}},e)">{{v}}</div>
                 {{end}}
             </div>
         </div>

@@ -67,3 +67,76 @@
     justify-content: center;
     align-items: center;
 }
+.gameTag{
+    width: 100%;
+    height: 200px;
+    position: relative;
+}
+.gameBgBox{
+    width: 100%;
+    height: 200px;
+    position: absolute;
+    top: 0;
+}
+.imgBg{
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.opacityBox{
+    width: 100%;
+    height: 200px;
+    background: rgba(0,0,0,0.5);
+    position: absolute;
+    top: 0;
+}
+.gameInfo{
+    width: 100%;
+    height: 200px;
+    display: flex;
+    padding: 30px;
+    position: absolute;
+}
+.gameIcon{
+    width: 140px;
+    height: 140px;
+}
+.contentInfo{
+    margin-left: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.gameName{
+    font-size:36px;
+    font-family:SourceHanSansCN-Medium,SourceHanSansCN;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+}
+.postNum{
+    font-size:24px;
+    font-family:SourceHanSansCN-Normal,SourceHanSansCN;
+    font-weight:400;
+    color:rgba(255,255,255,1);
+}
+.gotoGame{
+    height: 50px;
+    display: flex;
+}
+.gameHaihai{
+    display: flex;
+    background: black;
+    font-size:24px;
+    font-family:SourceHanSansCN-Normal,SourceHanSansCN;
+    font-weight:400;
+    color:rgba(255,255,255,1);
+    align-items: center;
+    padding:0 9px;
+    border-radius:6px;
+}
+.rightIcon{
+    width: 18px;
+    height: 18px;
+    margin-left: 9px;
+}

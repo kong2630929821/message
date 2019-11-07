@@ -2,7 +2,7 @@
     <div id="squareContain" style="background: white;">
 
         {{%=============1:关注  2:公众号===================}}
-        {{if it.active==1 || it.active==2}}
+        {{if it.active==1}}
         <div w-class="setting" on-tap="goManage">
             <img src="../../res/images/setting.png" w-class="img"/>
             <span style="flex:1 0 0;">我已关注 {{it.follows.length}}人
@@ -12,6 +12,32 @@
             </span>
             <img src="../../res/images/arrowRight.png" w-class="img"/>
         </div>
+        {{end}}
+        
+        {{if it.active>=2}}
+            <div w-class="gameTag">
+                <div w-class="gameBgBox">
+                    <div w-class="imgBg" style="background:url(app/res/image/game/xianzhixiadaoBg1.png)center"></div>
+                    <div w-class="opacityBox"></div>
+                </div>
+                <div w-class="gameInfo">
+                    <img src="app/res/image/game/yidaizhangmen.png" alt="" w-class="gameIcon"/>
+                    <div w-class="contentInfo">
+                        <div w-class="gameName">一代掌门</div>
+                        <div w-class="postNum">帖子 21</div>
+                        <div w-class="gotoGame">
+                            <div w-class="gameHaihai">
+                                官方嗨嗨号
+                                <img src="../../res/images/whiteRight.png" alt="" w-class="rightIcon"/>
+                            </div>
+                            <div w-class="gameHaihai" style="margin-left:30px;">
+                                玩游戏
+                                <img src="../../res/images/whiteRight.png" alt="" w-class="rightIcon"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         {{end}}
 
         {{for i,v of it.postView[it.active][1].postList}}

@@ -130,6 +130,7 @@ export class Contact extends SpecialWidget {
         });
         store.register('uid',() => {  // 聊天用户登陆成功
             this.setProps(this.props);
+            this.props.isLogin = true;
         });
         store.register('flags/logout',() => { // 退出钱包时刷新页面
             this.setProps(this.props);
