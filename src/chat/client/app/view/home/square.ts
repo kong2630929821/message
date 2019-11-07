@@ -28,7 +28,7 @@ export class Square extends Widget {
     public state:State = state;
     public props:Props = {        
         postView:[],
-        active:0,
+        active:-1,
         follows:[],
         dealData:this.dealData        
     };    
@@ -45,9 +45,12 @@ export class Square extends Widget {
             }]);
         });        
     }
-    
-    public setProps(props:any) {        
-        if (this.props.active !== props.active) {
+    public create() {
+        super.create();
+        this.state = state;
+    }
+    public setProps(props:any) {               
+        if (this.props.active !== props.active) {            
             showPost(props.active + 1);
         }
         this.props = {
@@ -55,16 +58,16 @@ export class Square extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.state = state;        
+        // this.state = state;        
         this.init(this.props.active);        
     }
-    public firstPaint() {
-        super.firstPaint();
-        register('uid',() => {  // 聊天用户登陆成功
-            // this.setProps(this.props);
-            showPost(this.props.active + 1);
-        });
-    }
+    // public firstPaint() {
+    //     super.firstPaint();
+    //     register('uid',() => {  // 聊天用户登陆成功
+    //         // this.setProps(this.props);
+    //         showPost(this.props.active + 1);
+    //     });
+    // }
     public init(ind:number) {
         // TODO:
         if (ind === 2) {
@@ -92,7 +95,9 @@ export class Square extends Widget {
      */
     public setState(state:JSON) {
         super.setState(state);
-        if (!this.state) {
+        if (!this.state) {            
+            // alert(`the state is : ${JSON.stringify(this.state)}`);
+
             return;
         }
         if (this.state.postReturn.id === 0 && this.state.postReturn.num === '') {
@@ -230,37 +235,38 @@ const state:State = {
         id:-1,
         num:'',
         tagType:-1,
-        postList:[]
+        postList:[]  
     }
 };
 
-// // 关注列表
-// register('followNumList',r => {
-//     const w:any = forelet.getWidget(WIDGET_NAME);
-//     for (const value of r.values()) {
-//         state.followList = value;
-//         const list = value.person_list.concat(value.public_list);
-//         w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
-//             w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].followed = list.indexOf(v.key.num) > -1;
-//         });
-//     }
+// 关注列表
+register('followNumList',r => {
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    for (const value of r.values()) {
+        state.followList = value;
+        const list = value.person_list.concat(value.public_list);
+        w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
+            w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].followed = list.indexOf(v.key.num) > -1;
+        });
+    }
    
-//     forelet.paint(state);
-// });
-// // 点赞列表
-// register('laudPostList',r => {
-//     const w:any = forelet.getWidget(WIDGET_NAME);
-//     for (const value of r.values()) {
-//         state.likeList = value.list;
-//         w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
-//             w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
-//         });
-//     }
+    forelet.paint(state);
+});
+// 点赞列表
+register('laudPostList',r => {
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    for (const value of r.values()) {
+        state.likeList = value.list;
+        w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
+            w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
+        });
+    }
     
-//     forelet.paint(state);
-// });
+    forelet.paint(state);
+});
 // 帖子数据
-register('postReturn',r => {
+register('postReturn',r => {    
     state.postReturn = r;    
     forelet.paint(state);
+
 });

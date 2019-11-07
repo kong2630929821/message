@@ -2,14 +2,14 @@ import { Env } from '../../../../pi/lang/env';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import * as CONSTANT from '../constant';
-import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex, LabelIndex } from '../db/community.s';
+import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LabelIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex } from '../db/community.s';
 import { ApplyPublic, UserApplyPublic } from '../db/manager.s';
 import { UserInfo } from '../db/user.s';
 import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData, IterLabelPostArg } from './community.s';
+import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
 import { getUid } from './group.r';
 import { addManagerPostIndex, getUserPunishing } from './manager.r';
 import { getIndexId } from './message.r';
@@ -521,7 +521,8 @@ export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
 
             return;
     }
-
+    console.log(`tangmin postArr ${JSON.stringify(postArr)}`);
+    
     return postArr;
 };
 
@@ -1159,10 +1160,10 @@ export const addLabel = (postKey: PostKey, body: string): boolean => {
     const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
     // 检查内容中是否包含标签
     const labelArr = getLable(/\#([^#]*)\#/gm, body);
-    for(let i = 0; i < labelArr.length; i++){
+    for (let i = 0; i < labelArr.length; i++) {
         const labelList = labelIndexBucket.get<string, LabelIndex[]>(labelArr[i])[0];
         let list :PostKey[];
-        if(!labelList){
+        if (!labelList) {
             list = [];
         } else {
             list = labelList.list;
@@ -1171,7 +1172,7 @@ export const addLabel = (postKey: PostKey, body: string): boolean => {
         const labelList2 = new LabelIndex();
         labelList2.label = labelArr[i];
         labelList2.list = list;
-        if(!labelIndexBucket.put(labelList2.label, labelList2)){
+        if (!labelIndexBucket.put(labelList2.label, labelList2)) {
 
             return false;
         }
