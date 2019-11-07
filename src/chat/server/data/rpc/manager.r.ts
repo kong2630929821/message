@@ -605,13 +605,13 @@ export const getReportData = (report: Report): ReportData => {
 
     if (report.report_type === CONSTANT.REPORT_ARTICLE) { // 举报文章
         // 获取帖子信息
-        const reportContentInfo = getReportContentInfo(report.key);
-        reportData.reported_content = reportContentInfo;
         const postKey1: PostKey = JSON.parse(report.key.split('%')[1]);
         const postKey = new PostKey();
         postKey.num = postKey1.num;
         postKey.id = postKey1.id;
         const postData = getPostInfoById(postKey);
+        const reportContentInfo = getReportContentInfo(report.key);
+        reportData.reported_content = reportContentInfo;
         report.evidence = JSON.stringify(postData);
         // 获取公众号信息
         const publicKey = `${CONSTANT.REPORT_PUBLIC}%${postData.key.num}`;
@@ -939,6 +939,7 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     postData.avatar = userinfo.avatar;
     postData.gender = userinfo.sex;
     postData.comm_type = commBase.comm_type;
+    postData.state = post.state;
     // 公众号的帖子返回公众号信息
     if (commBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
         postData.username = commBase.name;

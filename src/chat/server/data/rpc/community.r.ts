@@ -1589,6 +1589,7 @@ export const getPostInfo = (postKey: PostKey, post: Post): PostData => {
     postData.avatar = userinfo.avatar;
     postData.gender = userinfo.sex;
     postData.comm_type = commBase.comm_type;
+    postData.state = post.state;
     // 公众号的帖子返回公众号信息
     if (commBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
         postData.username = commBase.name;
@@ -1630,6 +1631,7 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     postData.avatar = userinfo.avatar;
     postData.gender = userinfo.sex;
     postData.comm_type = commBase.comm_type;
+    postData.state = post.state;
     // 公众号的帖子返回公众号信息
     if (commBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
         postData.username = commBase.name;

@@ -144,7 +144,7 @@ export const login = (user: UserType): UserInfo => {
         }
     }
     // 被封禁则无法登陆
-    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${loginReq.uid}`, CONSTANT.BAN_MESAAGE);
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${loginReq.uid}`, CONSTANT.BAN_ACCOUNT);
     if (punishList.list.length > 0) {
         userInfo.note = 'ban_account';
 
