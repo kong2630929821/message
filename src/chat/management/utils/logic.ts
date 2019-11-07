@@ -198,7 +198,7 @@ export const deelReportListInfo = (r:any,state:number) => {
     let dynamic = {};// 动态信息
     const reportInfo = [];// 举报信息
     const key = list[0].report_info.key;// 处罚的KEY
-    const id = `${list[0].reported_user.punish_list.length ? list[0].reported_user.punish_list[0].id :0}%${list[0].reported_user.user_info.uid}`;
+    let id = null;// 重置处罚
     if (state === 0) {
         // 被举报人信息处理
         userInfo = (deelReportedUser(list[0].reported_user));
@@ -206,6 +206,7 @@ export const deelReportListInfo = (r:any,state:number) => {
         // 处理举报信息
             reportInfo.push(deelUserReportInfo(v.report_info,v.report_user));
         });
+        id = `${list[0].reported_user.punish_list.length ? list[0].reported_user.punish_list[0].id :0}%${list[0].reported_user.user_info.uid}`;
         
     } else if (state === 1) {
         dynamic = deelDynamic(list[0].report_info,list.length)[0];
@@ -214,6 +215,7 @@ export const deelReportListInfo = (r:any,state:number) => {
             // 处理举报信息
             reportInfo.push(deelDynamicReport(v.report_info,v.report_user));
         });
+        id = `${JSON.parse(list[0].report_info.evidence).state === 1 ? 0 :JSON.parse(list[0].report_info.evidence).state}%${JSON.stringify(JSON.parse(list[0].report_info.evidence).key)}`;
     }
 
     return [dynamic,userInfo,reportInfo,key,id];
@@ -421,7 +423,12 @@ export const penaltyText = (res:any,str:string) => {
         const penType = PENALTYTEXT[PENALTY[r.punish_type]];
         const lastTime = (JSON.parse(r.end_time) - Date.now()) / 1000 / 60 / 60;
         const time = (JSON.parse(r.end_time) - JSON.parse(r.start_time)) / (60 * 60 * 1000);
-        data.push(`${penType}${str}${time}小时 （剩余${lastTime.toFixed(2)}小时）`);
+        if (r.punish_type === PENALTY.DELETE_CONTENT) {
+            data.push(`${penType}`);
+        } else {
+            data.push(`${penType}${str}${time}小时 （剩余${lastTime.toFixed(2)}小时）`);
+        }
+       
     });
     
     return data.join(',');

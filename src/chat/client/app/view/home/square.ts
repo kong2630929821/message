@@ -46,14 +46,16 @@ export class Square extends Widget {
         });        
     }
     
-    public setProps(props:any) {
+    public setProps(props:any) {        
         if (this.props.active !== props.active) {
             showPost(props.active + 1);
         }
         this.props = {
             ...this.props,
             ...props
-        };        
+        };
+        super.setProps(this.props);
+        this.state = state;        
         this.init(this.props.active);        
     }
     public firstPaint() {
@@ -232,31 +234,31 @@ const state:State = {
     }
 };
 
-// 关注列表
-register('followNumList',r => {
-    const w:any = forelet.getWidget(WIDGET_NAME);
-    for (const value of r.values()) {
-        state.followList = value;
-        const list = value.person_list.concat(value.public_list);
-        w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
-            w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].followed = list.indexOf(v.key.num) > -1;
-        });
-    }
+// // 关注列表
+// register('followNumList',r => {
+//     const w:any = forelet.getWidget(WIDGET_NAME);
+//     for (const value of r.values()) {
+//         state.followList = value;
+//         const list = value.person_list.concat(value.public_list);
+//         w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
+//             w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].followed = list.indexOf(v.key.num) > -1;
+//         });
+//     }
    
-    forelet.paint(state);
-});
-// 点赞列表
-register('laudPostList',r => {
-    const w:any = forelet.getWidget(WIDGET_NAME);
-    for (const value of r.values()) {
-        state.likeList = value.list;
-        w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
-            w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
-        });
-    }
+//     forelet.paint(state);
+// });
+// // 点赞列表
+// register('laudPostList',r => {
+//     const w:any = forelet.getWidget(WIDGET_NAME);
+//     for (const value of r.values()) {
+//         state.likeList = value.list;
+//         w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
+//             w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
+//         });
+//     }
     
-    forelet.paint(state);
-});
+//     forelet.paint(state);
+// });
 // 帖子数据
 register('postReturn',r => {
     state.postReturn = r;    

@@ -11,11 +11,11 @@
         {{if it.showTag && i===0}}
         <div w-props="hello" style="background:#fff;padding-bottom: 20px;position: absolute;top:0;margin-top:-4px;">
             <div w-class="title">标签分类</div>
-            <dv w-class="tagList">
+            <div w-class="tagList">
                 {{for i,v of it.tagList}}
                 <div w-class="tag" on-tap="changeTagItem({{i}},e)">{{v}}</div>
                 {{end}}
-            </dv>
+            </div>
         </div>
         {{end}}
     </div>

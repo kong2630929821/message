@@ -2,7 +2,7 @@ import { popNew } from '../../../../pi/ui/root';
 import { notify } from '../../../../pi/widget/event';
 import { Widget } from '../../../../pi/widget/widget';
 import { perPage } from '../../components/pagination';
-import { getAllReportInfo, modifyPunishTime } from '../../net/rpc';
+import { getAllReportInfo, modifyPunishTime, reversePosts } from '../../net/rpc';
 import { popNewMessage } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';
 
@@ -74,7 +74,8 @@ export class ToBeProcessedInfo extends Widget {
             this.props.reportInfoList = r[2];
             this.props.key = r[3];
             this.props.id = r[4];
-            if (JSON.parse(r[4].split('%')[0]) === 0) {
+            // 判断是否显示操作按钮
+            if (JSON.parse(r[4].split('%')[0]) === 0 && this.props.returnDeel === 1) {
                 this.props.isShowBtn = false;
             }
             this.props.showDataList = this.props.reportInfoList.slice(0,this.props.perPage);
@@ -165,6 +166,19 @@ export class ToBeProcessedInfo extends Widget {
 
     // 是否动态
     public freedPost(e:any) {
-        
+        const key = JSON.parse(this.props.id.split('%')[1]);
+        reversePosts(key.id,key.num).then(r => {
+            if (r) {
+                popNewMessage('放出动态成功');
+                notify(e.node,'ev-ok',null);
+            } else {
+                popNewMessage('放出动态失败');
+            }
+        });
+    }
+
+    // 查看大图
+    public bigImg(src:any) {
+        popNew('chat-management-components-imgBox');
     }
 }

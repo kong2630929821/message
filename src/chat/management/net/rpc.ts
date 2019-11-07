@@ -4,7 +4,8 @@ import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, P
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin } from '../../server/data/rpc/manager.p';
+import { createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin } from '../../server/data/rpc/manager.p';
+import { getReportListR } from '../../server/data/rpc/message.s';
 import { deelReportList, deelReportListInfo, timestampFormat } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
@@ -98,8 +99,13 @@ export const getAllReport = (state:number,report_type:number) => {
     arg.report_state = state;
 
     return new Promise((res,rej) => {
-        clientRpcFunc(getReportList,arg,(r:string) => {
-            const data = JSON.parse(r);
+        clientRpcFunc(getReportList,arg,(r:getReportListR) => {
+            let data = null;
+            if (!r.msg) {
+                data = { list:[] };
+            } else {
+                data = JSON.parse(r.msg);
+            }
             res(deelReportList(data,report_type));
         });
     });

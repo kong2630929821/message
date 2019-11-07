@@ -100,7 +100,7 @@ export const  setUserInfo = async () => {
     r.name = user.info.nickName;
     r.avatar = user.info.avatar;
     r.tel = user.info.phoneNumber;
-    r.acc_id = user.info.acc_id;
+    r.acc_id = user.acc_id;
     r.wallet_addr = user.id;
     const uid = store.getStore('uid');
     if (!uid) {

@@ -29,7 +29,7 @@ interface Props {
     isUtilVisible: boolean;
     utilList: any[];
     userInfo:any; 
-    netClose: boolean; // 网络链接是否断开
+    netClose: boolean; // 网络链接是否断开    
     isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
     activeTab:string;  // 当前活跃的tab
@@ -37,6 +37,7 @@ interface Props {
     showTag:boolean;  // 展示广场下拉
     tabBarList:any;
     tagList:any;
+    labelList:any;
 }
 export const TAB = {
     message:'message',
@@ -79,11 +80,13 @@ export class Contact extends SpecialWidget {
             //     components:'chat-client-app-view-contactList-contactList'
             // }
         ],
-        tagList:[]
+        tagList:[],
+        labelList:[]
     };
     constructor() {
         super();
         this.props.tagList = store.getStore('tagList',[]);
+        this.props.labelList = store.getStore('labelList',[]);
     }
 
     public create() {
@@ -98,7 +101,6 @@ export class Contact extends SpecialWidget {
             ...this.props,
             ...props
         };
-        super.setProps(this.props);
     }
 
     public initDate() {
