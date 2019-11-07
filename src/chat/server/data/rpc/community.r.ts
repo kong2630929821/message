@@ -492,6 +492,7 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
 export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
     const uid = getUid();
     let postArr: PostArr;
+    postArr.list = [];
     const iterArg = new IterPostArg();
     iterArg.count = arg.count;
     iterArg.id = arg.id;
@@ -1151,11 +1152,19 @@ export const addLabel = (postKey: PostKey, body: string): boolean => {
     const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
     // 检查内容中是否包含标签
     const labelArr = getLable(/\#([^#]*)\#/gm, body);
-    for(let i = 0; i < labelArr.length; i++) {
-        let labelList = labelIndexBucket.get<string, LabelIndex[]>(labelArr[i])[0];
-        labelList.list = labelList? labelList.list : [];
-        labelList.list.push(postKey);
-        if(!labelIndexBucket.put(labelList.label, labelList)) {
+    for(let i = 0; i < labelArr.length; i++){
+        const labelList = labelIndexBucket.get<string, LabelIndex[]>(labelArr[i])[0];
+        let list :PostKey[];
+        if(!labelList){
+            list = [];
+        } else {
+            list = labelList.list;
+        }
+        list.push(postKey);
+        const labelList2 = new LabelIndex();
+        labelList2.label = labelArr[i];
+        labelList2.list = list;
+        if(!labelIndexBucket.put(labelList2.label, labelList2)){
 
             return false;
         }
