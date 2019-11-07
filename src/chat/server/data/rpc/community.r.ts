@@ -490,8 +490,7 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
  */
 // #[rpc=rpcServer]
 export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
-    const uid = getUid();
-    let postArr: PostArr;
+    let postArr: PostArr = new PostArr();
     postArr.list = [];
     const iterArg = new IterPostArg();
     iterArg.count = arg.count;
@@ -1752,7 +1751,7 @@ const getLable = (p, str: string):string[] =>  {
         } else {
             i = -1;
         }
-    } while (i < 0);
+    } while (i > 0);
 
     return vList;
 };
