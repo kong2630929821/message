@@ -78,6 +78,7 @@ export const SQUARE_ALL = 1; // 所有
 export const SQUARE_FOLLOW = 2; // 关注
 export const SQUARE_PUBLIC = 3; // 公众号
 export const SQUARE_HOT = 4; // 热门
+export const SQUARE_LABEL = 5; // 标签
 
 // 帖子状态
 export const NORMAL_STATE = 1;  // 正常状态
@@ -114,6 +115,7 @@ export const DELETE_CONTENT = 1;    // 删除内容
 export const BAN_MESAAGE = 2;       // 禁言
 export const BAN_POST = 3;          // 禁止发动态
 export const FREEZE = 4;            // 冻结
+export const BAN_ACCOUNT = 5;         // 封禁(无法登录)
 
 // 惩罚状态
 export const PUNISH_LAST = 0; // 惩罚中

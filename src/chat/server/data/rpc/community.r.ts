@@ -490,8 +490,8 @@ export const showPostPort = (arg: IterPostArg) :PostArr => {
  */
 // #[rpc=rpcServer]
 export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
-    const uid = getUid();
-    let postArr: PostArr;
+    let postArr: PostArr = new PostArr();
+    postArr.list = [];
     const iterArg = new IterPostArg();
     iterArg.count = arg.count;
     iterArg.id = arg.id;
@@ -508,6 +508,14 @@ export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
             break;
         case CONSTANT.SQUARE_HOT: // 热门
             postArr = getHotPost(iterArg);
+            break;
+        case CONSTANT.SQUARE_LABEL: // 标签
+            const labelArg = new IterLabelPostArg();
+            labelArg.count = arg.count;
+            labelArg.id = arg.id;
+            labelArg.num = arg.num;
+            labelArg.label = arg.label;
+            postArr = getLabelPost(labelArg);
             break;
         default:
 
@@ -1152,13 +1160,21 @@ export const addLabel = (postKey: PostKey, body: string): boolean => {
     // 检查内容中是否包含标签
     const labelArr = getLable(/\#([^#]*)\#/gm, body);
     for(let i = 0; i < labelArr.length; i++){
-        let labelList = labelIndexBucket.get<string, LabelIndex[]>(labelArr[i])[0];
-        labelList.list = labelList? labelList.list : [];
-        labelList.list.push(postKey);
-        if(!labelIndexBucket.put(labelList.label, labelList)){
+        const labelList = labelIndexBucket.get<string, LabelIndex[]>(labelArr[i])[0];
+        let list :PostKey[];
+        if(!labelList){
+            list = [];
+        } else {
+            list = labelList.list;
+        }
+        list.push(postKey);
+        const labelList2 = new LabelIndex();
+        labelList2.label = labelArr[i];
+        labelList2.list = list;
+        if(!labelIndexBucket.put(labelList2.label, labelList2)){
 
             return false;
-        };
+        }
     }
 
     return true;
@@ -1282,12 +1298,11 @@ export const addComment = (uid: number, arg: AddCommentArg): CommentKey => {
 /**
  *  获取标签对应的帖子
  */
-// #[rpc=rpcServer]
 export const getLabelPost = (arg: IterLabelPostArg) :PostArr => {
     // 获取标签对应的帖子key
     const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
-    let labelIndex = labelIndexBucket.get<string, LabelIndex[]>(arg.label)[0];
-    let post_id_list = labelIndex ? labelIndex.list : [];
+    const labelIndex = labelIndexBucket.get<string, LabelIndex[]>(arg.label)[0];
+    const post_id_list = labelIndex ? labelIndex.list : [];
     console.log('!!!!!!!!!!!!!!!!!!!!!!post_id_list', post_id_list);
     let index = -1;
     for (let i = 0; i < post_id_list.length; i++) {
@@ -1323,7 +1338,7 @@ export const getLabelPostCount = (label: string) :number => {
     // 获取标签对应的帖子key
     const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
     const labelIndex = labelIndexBucket.get<string, LabelIndex[]>(label)[0];
-    if(!labelIndex) {
+    if (!labelIndex) {
         
         return 0;
     }
@@ -1580,6 +1595,7 @@ export const getPostInfo = (postKey: PostKey, post: Post): PostData => {
     postData.avatar = userinfo.avatar;
     postData.gender = userinfo.sex;
     postData.comm_type = commBase.comm_type;
+    postData.state = post.state;
     // 公众号的帖子返回公众号信息
     if (commBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
         postData.username = commBase.name;
@@ -1621,6 +1637,7 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     postData.avatar = userinfo.avatar;
     postData.gender = userinfo.sex;
     postData.comm_type = commBase.comm_type;
+    postData.state = post.state;
     // 公众号的帖子返回公众号信息
     if (commBase.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
         postData.username = commBase.name;
@@ -1741,7 +1758,7 @@ const getLable = (p, str: string):string[] =>  {
         } else {
             i = -1;
         }
-    } while (i < 0);
+    } while (i > 0);
 
     return vList;
 };

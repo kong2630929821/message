@@ -170,6 +170,7 @@ export const getSquarePostTest = () => {
     arg.num = '5';
     arg.id = 0;
     arg.square_type = 1;
+    arg.label = '';
     clientRpcFunc(getSquarePost, arg, (r: PostArr) => {
         console.log(r);
     });
@@ -761,14 +762,17 @@ const props = {
         {
             name: '获取标签对应的帖子',
             func: () => { 
-                const arg = new IterLabelPostArg();
-                arg.label = '一代掌门';
-                arg.count = 20;
-                arg.id = 0;
+                const arg = new IterSquarePostArg();
+                arg.count = 10;
                 arg.num = '';
-                clientRpcFunc(getLabelPost, arg, (r: PostArr) => {
+                arg.id = 0;
+                arg.square_type = 5;
+                arg.label = '一代掌门';
+                clientRpcFunc(getSquarePost, arg, (r: PostArr) => {
                     console.log(r);
-                }); }
+                });
+            
+            }
         },
         {
             name: '获取标签对应的数量',
