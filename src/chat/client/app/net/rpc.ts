@@ -588,53 +588,52 @@ export const showUserFollow = (num_type:number = 1) => {
 };
 
 /**
- * 获取最新的帖子
+ * 获取最新的帖子  
  */
-export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 5) => {
+export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 5, label:string= '') => {
     const arg = new IterSquarePostArg();
     arg.count = count;
     arg.id = id;
     arg.num = num;
     arg.square_type = square_type;
+    arg.label = label;
 
     return new Promise((res,rej) => {
-        clientRpcFunc(getSquarePost,arg,(r:PostArr) => {
-            console.log('showPost=============',r);
-            let postList = store.getStore('postList',[]);
-            if (r && r.list && r.list.length) {
-                const data:any = r.list;
 
-                data.forEach((res,i) => {
-                    data[i].offcial = res.comm_type === CommType.official;
-                    data[i].isPublic = res.comm_type === CommType.publicAcc;
-                    data[i].followed = judgeFollowed(res.key.num);
-                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
-                    if (data[i].isPublic) {
-                        data[i].content = res.body;
-                        data[i].imgs = '';
-                    } else {
-                        const body = JSON.parse(res.body);
-                        data[i].content = parseEmoji(body.msg);
-                        data[i].imgs = body.imgs;
+        clientRpcFunc(getSquarePost,arg,((id, num, square_type) => {
+            const requestid = id;
+            const requestNum = num;
+            const tagType = square_type;
+            
+            return (r:PostArr) => {
+                console.log('showPost=============',r);
+                // let postList = store.getStore('postList',[]);
+                if (r && r.list && r.list.length) {
+                    const data:any = r.list;
+                    data.forEach((res,i) => {
+                        data[i].offcial = res.comm_type === CommType.official;
+                        data[i].isPublic = res.comm_type === CommType.publicAcc;
+                        data[i].followed = judgeFollowed(res.key.num);
+                        data[i].likeActive = judgeLiked(res.key.num,res.key.id);
+                        if (data[i].isPublic) {
+                            data[i].content = res.body;
+                            data[i].imgs = '';
+                        } else {
+                            const body = JSON.parse(res.body);
+                            data[i].content = parseEmoji(body.msg);
+                            data[i].imgs = body.imgs;
                         
-                    }
-                   
-                });
-
-                // 最后一条帖子ID作为查询条件，并且返回了新一页的帖子
-                if (postList.length && id && postList[postList.length - 1].key.id !== data[0].key.id) {
-                    postList = postList.concat(data); // 拼接下一页的数据
+                        }
+                
+                    });           
+                    store.setStore('postReturn',{ id:requestid, num:requestNum, tagType, postList:data });
+                    res(data);
                 } else {
-                    postList = data;
+                    // TODO;                
+                    rej();
                 }
-                store.setStore('postList',postList);
-                res(postList);
-            } else {
-                rej();
-            }
-        });
+            };})(id, num, square_type));
     });
-    
 };
 
 /**

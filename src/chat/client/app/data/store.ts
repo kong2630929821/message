@@ -131,7 +131,15 @@ export const initStore = () => {
         isLogin:true,
         offLine:false,
         flags:{},
-        postList:[],
+        postReturn: {
+            id:-1,
+            num:'',
+            tagType:-1,
+            postList:[]
+        },
+        labelList: [['一代掌门','app/res/image/game/yidaizhangmen.png','app/res/image/game/xianzhixiadaoBg1.png'],['仙之侠道','app/res/image/game/xianzhixiadao.png','app/res/image/game/xianzhixiadaoBg.png']],// 应该从后端获取
+        // tagList: ['广场','关注','公众号','热门','一代掌门','仙之侠道'],// 应该从后端获取
+        tagList: ['广场','关注','一代掌门','仙之侠道'],// 应该从后端获取
         followNumList:new Map(),
         laudPostList:new Map(),
         postDraft:null,
@@ -211,6 +219,11 @@ const registerDataChange = () => {
     
 };
 
+enum POST_TYPE  {
+    OFFICAL= 0, // 官方
+    PUBLIC= 1// 公众号文章
+}
+
 // 帖子内容
 export interface PostItem {
     key:any;   // 帖子ID及社区编号
@@ -223,10 +236,10 @@ export interface PostItem {
     likeActive:boolean;  // 点赞
     followed:boolean;  // 已关注
     imgs:string[];  // 图片列表
-    offical:boolean;  // 官方
-    isPublic:boolean; // 公众号文章
+    postType:POST_TYPE; // 文章类型
     gender:number;  // 性别 0 男 1 女
     comm_type:number; // 社区类型
+    label:string; // 对应的是哪一款游戏，可以为空
 }
 
 /**
@@ -257,7 +270,14 @@ export interface Store {
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
     flags:any; // 标记信息
-    postList:PostItem[];   // 广场帖子
+    postReturn: {
+        id:number;
+        num:string;
+        tagType:number;
+        postList:PostItem[];
+    };// 广场帖子    
+    tagList:string[];// tag名字
+    labelList:[string,string,string][]; // 标签名,小标签，大图
     followNumList:Map<number,AttentionIndex>; // 关注的社区账号
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
     postDraft:any;   // 普通帖子草稿
@@ -270,6 +290,7 @@ export interface Store {
     messageData:any;// 消息通知列表
     accIdToUid:Map<string,number>;// accID转uid
     originalImage:Map<number,boolean>;// 原图查看记录
+
 }
 
 /**

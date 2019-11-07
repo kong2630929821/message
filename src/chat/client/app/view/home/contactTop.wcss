@@ -1,7 +1,6 @@
 .topBar{
     width: 100%;
     position: relative;
-    z-index: 1;
 }
 .topBar-content{
     display: flex;
@@ -52,7 +51,7 @@
     position: relative;
 }
 .tab{
-    width: 150px;
+    width: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,5 +131,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1;
 }
 

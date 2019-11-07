@@ -15,6 +15,7 @@ import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
 import { PostData } from './community.s';
+import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
 
@@ -56,9 +57,15 @@ export const rootLogin = (user: RootUser): number => {
  * 举报信息列表
  */
 // #[rpc=rpcServer]
-export const getReportList = (reportArg: ReportListArg): string => {
+export const getReportList = (reportArg: ReportListArg): getReportListR => {
     console.log('============getReportList:', reportArg);
-    if (!getSession('root')) return 'not login';
+    const r = new getReportListR();
+    r.msg = '';
+    if (!getSession('root')) {
+        r.msg = 'not login';
+
+        return r;
+    }
     const reportListTabBucket = new Bucket(CONSTANT.WARE_NAME, ReportListTab._$info.name);
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
@@ -67,7 +74,7 @@ export const getReportList = (reportArg: ReportListArg): string => {
     reportIndexList.list = [];
     const reportListTab = reportListTabBucket.get<number, ReportListTab[]>(reportArg.report_type)[0];
     console.log('============reportListTab:', reportListTab);
-    if (!reportListTab) return '';
+    if (!reportListTab) return r;
     console.log('============reportListTab11111111111111:', reportListTab);
     // 获取最近一条举报信息
     for (let i = 0; i < reportListTab.key_list.length; i++) {
@@ -98,8 +105,9 @@ export const getReportList = (reportArg: ReportListArg): string => {
             }
         }
     }
-
-    return JSON.stringify(reportIndexList);
+    r.msg = JSON.stringify(reportIndexList);
+    
+    return r;
 };
 
 /**

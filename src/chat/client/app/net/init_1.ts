@@ -20,7 +20,7 @@ import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { deelNotice } from '../logic/logic';
 import * as init2 from './init';
-import { getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting } from './rpc';
+import { getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting, showPost } from './rpc';
 
 // ================================================ 导出
 
@@ -51,6 +51,7 @@ export const walletSignIn = (openid) => {
                 store.setStore('isLogin',true);
                 getSetting();   // 获取设置信息
                 getLaudPost();  // 获取赞过帖子列表
+                showPost(1); // 获取最新帖子
                 init2.init(r.uid);
                 
                 init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {
@@ -100,7 +101,7 @@ export const  setUserInfo = async () => {
     r.name = user.info.nickName;
     r.avatar = user.info.avatar;
     r.tel = user.info.phoneNumber;
-    r.acc_id = user.info.acc_id;
+    r.acc_id = user.acc_id;
     r.wallet_addr = user.id;
     const uid = store.getStore('uid');
     if (!uid) {
