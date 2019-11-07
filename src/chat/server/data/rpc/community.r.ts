@@ -509,6 +509,14 @@ export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
         case CONSTANT.SQUARE_HOT: // 热门
             postArr = getHotPost(iterArg);
             break;
+        case CONSTANT.SQUARE_LABEL: // 标签
+            const labelArg = new IterLabelPostArg();
+            labelArg.count = arg.count;
+            labelArg.id = arg.id;
+            labelArg.num = arg.num;
+            labelArg.label = arg.label;
+            postArr = getLabelPost(labelArg);
+            break;
         default:
 
             return;
@@ -1290,7 +1298,6 @@ export const addComment = (uid: number, arg: AddCommentArg): CommentKey => {
 /**
  *  获取标签对应的帖子
  */
-// #[rpc=rpcServer]
 export const getLabelPost = (arg: IterLabelPostArg) :PostArr => {
     // 获取标签对应的帖子key
     const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
