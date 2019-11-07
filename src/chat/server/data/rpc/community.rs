@@ -70,6 +70,7 @@ struct PostData {
     username: String,   //用户名
     avatar: String,     //用户头像
     gender: u8,         //性别
+    state: u8,          //帖子状态
 }
 
 //帖子列表
