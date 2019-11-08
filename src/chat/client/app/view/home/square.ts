@@ -3,7 +3,7 @@ import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register } from '../../data/store';
-import { postLaud, showPost } from '../../net/rpc';
+import { gameLabelNum, postLaud, showPost } from '../../net/rpc';
 
 export const forelet = new Forelet();
 export const WIDGET_NAME = module.id.replace(/\//g, '-');
@@ -21,6 +21,7 @@ interface Props  {
     active:number;
     follows:any[];
     dealData:any;
+    gameLabel:any;
 }
 
 // tslint:disable-next-line:completed-docs
@@ -30,7 +31,13 @@ export class Square extends Widget {
         postView:[],
         active:-1,
         follows:[],
-        dealData:this.dealData        
+        dealData:this.dealData,
+        gameLabel:{
+            name:'',
+            icon:'',
+            bg:'',
+            num:0
+        }    
     };    
 
     constructor() {
@@ -43,15 +50,31 @@ export class Square extends Widget {
                 isLoading:false
                 // isShowAnimation:false
             }]);
-        });        
+        });    
     }
     public create() {
         super.create();
         this.state = state;
     }
     public setProps(props:any) {               
-        if (this.props.active !== props.active) {            
-            showPost(props.active + 1);
+        if (this.props.active !== props.active) {
+            if (props.active >= 2) {
+                const label = getStore(`tagList`)[props.active];
+                const game = getStore('labelList');
+                showPost(5,label);
+                gameLabelNum(label).then(r => {
+                    this.props.gameLabel = {
+                        name:label,
+                        icon:game[props.active - 2][1],
+                        bg:game[props.active - 2][2],
+                        num:r === -1 ? 0 :r
+                    };
+                    this.paint();
+                });
+            } else {
+                showPost(props.active + 1,'');
+            }            
+            
         }
         this.props = {
             ...this.props,
@@ -195,7 +218,8 @@ export class Square extends Widget {
         if (fg) {
             this.props.postView[this.props.active][1].isLoading = true;
             const list = this.props.postView[this.props.active][1].postList;
-            showPost(this.props.active + 1,list[list.length - 1].key.num,list[list.length - 1].key.id).then(() => {
+            const typeNum = this.props.active >= 2 ? 5 :this.props.active + 1;
+            showPost(typeNum,getStore(`tagList`)[this.props.active],list[list.length - 1].key.num,list[list.length - 1].key.id).then(() => {
                 this.props.postView[this.props.active][1].isLoading = false;
                 this.paint();                
             }).catch(() => {                

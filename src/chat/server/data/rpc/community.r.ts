@@ -341,7 +341,7 @@ export const addPostPort = (arg: AddPostArg): PostKey => {
     if (punishList.list.length > 0) {
         key.num = JSON.stringify(punishList);
         console.log('!!!!!!!!!!!!!!!!!!key',key);
-        
+
         return key;
     }
     // 如果是公众号发帖判断公众号是否被禁止发动态
@@ -1340,10 +1340,9 @@ export const getLabelPostCount = (label: string) :number => {
     const labelIndexBucket = new Bucket(CONSTANT.WARE_NAME, LabelIndex._$info.name);
     const labelIndex = labelIndexBucket.get<string, LabelIndex[]>(label)[0];
     if (!labelIndex) {
-        
-        return 0;
+        return -1;
     }
-
+    
     return labelIndex.list.length;
 };
 

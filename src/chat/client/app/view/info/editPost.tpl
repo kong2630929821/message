@@ -14,7 +14,7 @@
             <div contenteditable="true" w-class="editBox" id="editBox" class="editor" on-input="editBoxChange" on-keydown="editorTap" on-paste="onpaste" ></div>
         </div>
         {{else}}
-        <div w-class="content" ev-input-change="contentChange">
+        <div w-class="content" ev-input-change="contentChange" on-tap="inputClick">
             <widget w-tag="chat-client-app-widget1-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>
         </div>  
         {{end}}
@@ -37,7 +37,23 @@
             {{end}}
         </div>
         {{end}}
+
+        {{if !it.label.name}}
+            <div w-class="postLabel" style="width:161px;" on-tap="addLabel">
+                <img src="../../res/images/add_white.png" alt="" w-class="addLabel"/>
+                <div style="margin-right: 5px;">游戏标签</div>
+            </div>
+        {{else}}
+            <div w-class="postLabel" style="width:200px;" on-tap="addLabel">
+                <img src="{{it.label.icon}}" alt="" w-class="addLabel"/>
+                <div w-class="labelName">{{it.label.name}}</div>
+                <img src="../../res/images/unLabel.png" alt="" w-class="closeLabel" on-tap="closeLabel"/>
+            </div>
+        {{end}}
+        
+      
     </div>
+
 
     <div w-class="tools" ev-emoji-click="pickEmoji" >
         <div>

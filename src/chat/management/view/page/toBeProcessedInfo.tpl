@@ -62,9 +62,6 @@
             {{for i,v of it.userName}}
                 <div w-class="item">
                     {{v.key}}：{{v.value}}
-                    {{if v.key=='当前惩罚' && v.value!='无'}}
-                        <span style="margin-left: 20px;">查看</span>
-                    {{end}}
                     {{if v.fg}}
                     <img src="{{v.fg}}" alt="" w-class="sexImg"/>
                     {{end}}
