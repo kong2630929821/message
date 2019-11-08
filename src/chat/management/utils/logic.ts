@@ -215,7 +215,7 @@ export const deelReportListInfo = (r:any,state:number) => {
             // 处理举报信息
             reportInfo.push(deelDynamicReport(v.report_info,v.report_user));
         });
-        id = `${JSON.parse(list[0].report_info.evidence).state === 1 ? 0 :JSON.parse(list[0].report_info.evidence).state}%${JSON.stringify(JSON.parse(list[0].report_info.evidence).key)}`;
+        id = `${JSON.parse(list[0].report_info.evidence).state === 1 ? 0 :1}%${JSON.stringify(JSON.parse(list[0].report_info.evidence).key)}`;
     }
 
     return [dynamic,userInfo,reportInfo,key,id];
@@ -428,7 +428,7 @@ export const penaltyText = (res:any,str:string) => {
         if (r.punish_type === PENALTY.DELETE_CONTENT) {
             data.push(`${penType}`);
         } else {
-            data.push(`${penType}${str}${time}小时 （剩余${lastTime.toFixed(2)}小时）`);
+            data.push(`${penType}${str}${time}小时 （剩余${(lastTime >= 0 ? lastTime.toFixed(2) :0)}小时）`);
         }
        
     });

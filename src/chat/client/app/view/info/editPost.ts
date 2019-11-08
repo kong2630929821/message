@@ -1,5 +1,6 @@
 import { sourceIp } from '../../../../../app/public/config';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -29,6 +30,7 @@ interface Props {
     editorText:string;// 富文本框内容
     // isEditor:boolean;// 是否开启富文本框模式
     showType:boolean[];// 0表情 1相册 2相机
+    label:any;// 动态标签
 }
 // const editorTextNum = 10;
 /**
@@ -51,7 +53,11 @@ export class EditPost extends Widget {
         // placeHolderInfo:editorTextNum,
         editorText:'',
         // isEditor:true,
-        showType:[true,true,true]
+        showType:[true,true,true],
+        label:{
+            name:'',
+            icon:''
+        }
     };
     
     public setProps(props:any) {
@@ -101,6 +107,11 @@ export class EditPost extends Widget {
         this.props.contentInput = e.value;
     }
 
+    // 修复点开表情再编辑字出现标签和键盘同时存在
+    public inputClick() {
+        this.props.isOnEmoji = false;
+        this.paint();
+    }
     /**
      * 选择图片
      */
@@ -316,8 +327,9 @@ export class EditPost extends Widget {
 
                 return;
             }
+            const msg = this.props.label.name ? `#${this.props.label.name}#` :'';
             const value = {
-                msg:this.props.contentInput,
+                msg:`${this.props.contentInput}${msg}`,
                 imgs:this.props.saveImgs
             };
             if (!this.props.isUploading) {  // 图片上传完成
@@ -390,6 +402,23 @@ export class EditPost extends Widget {
         } else {
             this.props.showType[index] = false;
         }
+        this.paint();
+    }
+
+    // 添加游戏标签
+    public addLabel() {
+        popNew3('chat-client-app-view-info-gameLabel',{},(label:any) => {
+            this.props.label = label;
+            this.paint();
+        });
+    }
+
+    // 删除游戏标签
+    public closeLabel() {
+        this.props.label = {
+            name:'',
+            icon:''
+        };
         this.paint();
     }
 }

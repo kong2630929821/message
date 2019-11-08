@@ -37,6 +37,7 @@ interface Props {
     publicName:string;// 公众号名字
     imgWidth:number;// 一张图片的宽
     imgHeight:number;// 一张图片的高
+    gameLabel:any;// 游戏标签
 }
 /**
  * 广场帖子
@@ -68,7 +69,11 @@ export class SquareItem extends Widget {
         buildupImgPath:buildupImgPath,
         publicName:'',
         imgWidth:0,
-        imgHeight:0
+        imgHeight:0,
+        gameLabel:{
+            name:'',
+            icon:''
+        }
     };
 
     public setProps(props:any) {
@@ -81,6 +86,15 @@ export class SquareItem extends Widget {
         const uid = getStore('uid',0);
         this.props.isMine = this.props.owner === uid;
         this.props.followed = judgeFollowed(this.props.key.num);
+        if (props.label) {
+            const list =  getStore('tagList');
+            const index = list.indexOf(props.label);
+            const gameList = getStore('labelList');
+            this.props.gameLabel = {
+                name:gameList[index - 2][0],
+                icon:gameList[index - 2][1]
+            };
+        }
         this.calcImg();
     }
 

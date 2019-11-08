@@ -11,7 +11,7 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { addCommentPost, addPostPort, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, ChangeCommunity, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
@@ -590,7 +590,7 @@ export const showUserFollow = (num_type:number = 1) => {
 /**
  * 获取最新的帖子  
  */
-export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 5, label:string= '') => {
+export const showPost = (square_type:number, label:string= '',num:string = '', id:number = 0, count:number = 5) => {
     const arg = new IterSquarePostArg();
     arg.count = count;
     arg.id = id;
@@ -619,14 +619,22 @@ export const showPost = (square_type:number, num:string = '', id:number = 0, cou
                             data[i].content = res.body;
                             data[i].imgs = '';
                         } else {
+                            const reg = /\#([^#]*)\#/gm;
                             const body = JSON.parse(res.body);
-                            data[i].content = parseEmoji(body.msg);
+                            data[i].content = parseEmoji(body.msg).replace(reg,'');
                             data[i].imgs = body.imgs;
-                        
+                            data[i].label = body.msg.match(reg) ? body.msg.match(reg)[0].substring(1, body.msg.match(reg)[0].length - 1) :'';
                         }
                 
-                    });           
-                    store.setStore('postReturn',{ id:requestid, num:requestNum, tagType, postList:data });
+                    });
+                    let index = null;
+                    if (tagType === 5) {
+                        const list =  store.getStore('tagList');
+                        index = list.indexOf(data[0].label) + 1;
+                    } else {
+                        index = tagType;
+                    }           
+                    store.setStore('postReturn',{ id:requestid, num:requestNum, tagType:index, postList:data });
                     res(data);
                 } else {
                     // TODO;                
@@ -993,6 +1001,15 @@ export const complaintType = (key:string,status:number,reason:string) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(report,arg,(r:number) => {
+            res(r);
+        });
+    });
+};
+
+// 获取游戏标签帖子数量
+export const gameLabelNum = (label:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getLabelPostCount,label,(r:number) => {
             res(r);
         });
     });

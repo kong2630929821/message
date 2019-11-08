@@ -140,3 +140,24 @@
   min-height: 131px;
   border-radius: 12px;
 }
+.gameLabel{
+  width: 161px;
+  max-width: 270px;
+  height:60px;
+  background:rgba(242,242,242,1);
+  border-radius:6px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size:24px;
+  font-family:SourceHanSansCN-Normal,SourceHanSansCN;
+  font-weight:400;
+  color:rgba(34,34,34,1);
+  margin: 0 0 5px 125px;;
+}
+.labelImg{
+  width: 40px;
+  height: 40px;
+  margin-right: 5px;
+}

@@ -6,13 +6,13 @@
 import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
 import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
 import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offlineTip';
-import { getStore } from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { getStore } from '../../data/store';
 import { deelNotice, rippleShow } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
@@ -156,8 +156,24 @@ export class Contact extends SpecialWidget {
         // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
             if (this.props.activeTab === TAB.square && !this.state.pubNum) {
-                popNew3('chat-client-app-view-info-editPost',{ isPublic:false },() => {
-                    showPost(this.props.acTag + 1);
+                let label = {
+                    name:'',
+                    icon:''
+                };
+                if (this.props.acTag >= 2) {
+                    let index = null;
+                    this.props.labelList.forEach((v,i) => {
+                        if (v[0] === this.props.tagList[this.props.acTag]) {
+                            index = i;
+                        }
+                    });
+                    label = {
+                        name:this.props.tagList[this.props.acTag],
+                        icon:this.props.labelList[index][1]
+                    };
+                }
+                popNew3('chat-client-app-view-info-editPost',{ isPublic:false,label },() => {
+                    showPost(this.props.acTag + 1,getStore('tagList')[this.props.acTag]);
                 });
             } else {
                 this.props.isUtilVisible = !this.props.isUtilVisible;

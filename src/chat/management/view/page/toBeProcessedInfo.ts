@@ -154,26 +154,31 @@ export class ToBeProcessedInfo extends Widget {
     // 释放
     public freed(e:any) {
         const id = this.props.id.split('%');
-        modifyPunishTime(JSON.parse(id[0]),JSON.parse(id[1]),0).then(r => {
-            if (r) {
-                popNewMessage('解除处罚成功');
-                notify(e.node,'ev-ok',null);
-            } else {
-                popNewMessage('解除处罚失败');
-            }
+        popNew('chat-management-components-confirmBox',{ title:'解除惩罚',invalid:-1 },() => {
+            modifyPunishTime(JSON.parse(id[0]),JSON.parse(id[1]),0).then(r => {
+                if (r) {
+                    popNewMessage('解除处罚成功');
+                    notify(e.node,'ev-ok',null);
+                } else {
+                    popNewMessage('解除处罚失败');
+                }
+            });
         });
     }
 
     // 是否动态
     public freedPost(e:any) {
         const key = JSON.parse(this.props.id.split('%')[1]);
-        reversePosts(key.id,key.num).then(r => {
-            if (r) {
-                popNewMessage('放出动态成功');
-                notify(e.node,'ev-ok',null);
-            } else {
-                popNewMessage('放出动态失败');
-            }
+
+        popNew('chat-management-components-confirmBox',{ title:'放出动态',invalid:-1 },() => {
+            reversePosts(key.id,key.num).then(r => {
+                if (r) {
+                    popNewMessage('放出动态成功');
+                    notify(e.node,'ev-ok',null);
+                } else {
+                    popNewMessage('放出动态失败');
+                }
+            });
         });
     }
 

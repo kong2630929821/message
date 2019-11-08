@@ -17,14 +17,14 @@
         {{if it.active>=2}}
             <div w-class="gameTag">
                 <div w-class="gameBgBox">
-                    <div w-class="imgBg" style="background:url(app/res/image/game/xianzhixiadaoBg1.png)center"></div>
+                    <div w-class="imgBg" style="background:url({{it.gameLabel.bg}})center"></div>
                     <div w-class="opacityBox"></div>
                 </div>
                 <div w-class="gameInfo">
-                    <img src="app/res/image/game/yidaizhangmen.png" alt="" w-class="gameIcon"/>
+                    <img src="{{it.gameLabel.icon}}" alt="" w-class="gameIcon"/>
                     <div w-class="contentInfo">
-                        <div w-class="gameName">一代掌门</div>
-                        <div w-class="postNum">帖子 21</div>
+                        <div w-class="gameName">{{it.gameLabel.name}}</div>
+                        <div w-class="postNum">帖子 {{it.gameLabel.num}}</div>
                         <div w-class="gotoGame">
                             <div w-class="gameHaihai">
                                 官方嗨嗨号
