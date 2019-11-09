@@ -38,6 +38,7 @@ interface Props {
     tabBarList:any;
     tagList:any;
     labelList:any;
+    gameName:string;   // 从游戏跳到广场对应的标签
 }
 export const TAB = {
     message:'message',
@@ -81,7 +82,8 @@ export class Contact extends SpecialWidget {
             // }
         ],
         tagList:[],
-        labelList:[]
+        labelList:[],
+        gameName:''
     };
     constructor() {
         super();
@@ -97,6 +99,12 @@ export class Contact extends SpecialWidget {
     }
 
     public setProps(props: Props) {
+        if (props.gameName) {
+            let index:number =  this.props.tagList.indexOf(props.gameName);
+            index = index >= 0 ? index :0;
+            props.acTag = index;
+            this.props.activeTab = TAB.square;
+        }
         this.props = {
             ...this.props,
             ...props
