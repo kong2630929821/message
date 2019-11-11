@@ -95,6 +95,10 @@ export class SquareItem extends Widget {
                 icon:gameList[index - 2][1]
             };
         }
+        // 动态详情中隐藏工具栏
+        if (props.expandItemTop !== undefined) {
+            this.props.showUtils = false;
+        }
         this.calcImg();
     }
 

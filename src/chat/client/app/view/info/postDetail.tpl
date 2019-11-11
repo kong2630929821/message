@@ -14,7 +14,7 @@
                     <div w-class="tab {{it.active=='like'? 'activeTab':''}}" on-tap="changeTab('like')">赞&nbsp;{{it.likeCount}}</div>
                 </div>
                 {{if it.active == 'comment'}}
-                <div id="commentBox">
+                <div id="commentBox" on-tap="pageClick">
                     {{for i,v of it.commentList}}
                     <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-close="pageClick">
                         <widget w-tag="chat-client-app-view-info-commentItem">{{it.dealData(v,it.expandItem == i)}}</widget>
@@ -22,7 +22,7 @@
                     {{end}}
                 </div>
                 {{else}}
-                <div>
+                <div on-tap="pageClick">
                     {{for i,v of it.likeList}}
                     <div w-class="likeItem">
                         <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>

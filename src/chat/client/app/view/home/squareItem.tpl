@@ -93,7 +93,6 @@
        </div>
     </div>
     {{end}}
-
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
         {{if it.isMine}}
         <div w-class="option" on-tap="delPost">删除</div>

@@ -27,6 +27,7 @@ interface Props {
     refresh:boolean; // 是否可以请求更多数据
     expandItem:number;// 动态详情工具展示
     dealData:any;  // 组装数据
+    expandItemTop:boolean;
 }
 const TAB = {
     comment: 'comment',
@@ -60,7 +61,8 @@ export class PostDetail extends Widget {
         timeFormat:timestampFormat,
         refresh:true,
         expandItem:-1,
-        dealData:this.dealData
+        dealData:this.dealData,
+        expandItemTop:false
     };
 
     public setProps(props: any) {
@@ -284,6 +286,7 @@ export class PostDetail extends Widget {
 
     public pageClick() {
         this.props.expandItem = -1;
+        this.props.expandItemTop = !this.props.expandItemTop;
         this.paint();
     }
 
