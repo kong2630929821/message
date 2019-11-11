@@ -25,9 +25,8 @@
             {{else}}
             <div w-class="follow" on-tap="followUser">关注</div>
             {{end}}
-        {{else}}
-        <img src="../../res/images/greyDown.png" w-class="btn" on-tap="showTools"/>
         {{end}}
+        <img src="../../res/images/greyDown.png" w-class="btn" on-tap="showTools"/>
     </div>
 
     {{if it.showAll}}
