@@ -12,11 +12,10 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getStore } from '../../data/store';
-import { deelNotice, rippleShow } from '../../logic/logic';
+import { deelNotice } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
-import { getUsersBasicInfo, showPost } from '../../net/rpc';
+import { showPost } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出
@@ -104,6 +103,7 @@ export class Contact extends SpecialWidget {
             index = index >= 0 ? index :0;
             props.acTag = index;
             this.props.activeTab = TAB.square;
+            // console.log('contact props----- 12345',props);
         }
         this.props = {
             ...this.props,
@@ -168,6 +168,7 @@ export class Contact extends SpecialWidget {
                     name:'',
                     icon:''
                 };
+
                 if (this.props.acTag >= 2) {
                     let index = null;
                     this.props.labelList.forEach((v,i) => {
@@ -181,7 +182,7 @@ export class Contact extends SpecialWidget {
                     };
                 }
                 popNew3('chat-client-app-view-info-editPost',{ isPublic:false,label },() => {
-                    showPost(this.props.acTag + 1,getStore('tagList')[this.props.acTag]);
+                    showPost(this.props.acTag + 1,store.getStore('tagList')[this.props.acTag]);
                 });
             } else {
                 this.props.isUtilVisible = !this.props.isUtilVisible;

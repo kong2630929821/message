@@ -280,7 +280,7 @@ winit.initNext = function () {
 		init.initClient();
 		
 		loadEmoji();
-		// firstStageLoaded();
+		firstStageLoaded();
 	}
 
 	// 加载pisdk初始化及登录
@@ -305,6 +305,16 @@ winit.initNext = function () {
 		}, dirProcess.handler);
 	}
 
+	// 加载剩余的聊天资源
+	var loadLeftChatSource = function(){
+		util.loadDir([ ], flags, fm, undefined, function (fileMap) {
+			pi_modules.commonjs.exports.relativeGet("app/store/memstore").exports.setStore('flags/level_3_page_loaded',true);
+			
+		}, function (r) {
+			console.log("加载目录失败, " + r.url + ", " + r.error + ":" + r.reason);
+		}, function(){});
+	}
+
 	// 加载表情包图库
 	var loadEmoji = function() {
 		util.loadDir(["chat/client/app/res/emoji/"],flags,fm,undefined,function(fileMap,mods){
@@ -321,17 +331,6 @@ winit.initNext = function () {
 
 	// ===============================加载钱包流程===================================
 
-
-	// 进入钱包首页面
-	var enterApp = function(){
-		pi_modules.commonjs.exports.relativeGet("app/view/base/sourceLoaded").exports.init(flags,fm,suffixCfg);
-		// 钱包登录
-		pi_modules.commonjs.exports.relativeGet("app/net/login").exports.walletLogin();	
-		// 活动注册
-		pi_modules.commonjs.exports.relativeGet("earn/client/app/net/init").exports.registerRpcStruct(fm);
-		// 活动登录
-		pi_modules.commonjs.exports.relativeGet("earn/client/app/net/login").exports.earnLogin();
-	}
 
 	// 进入钱包首页所需资源
 	var firstStageLoaded = function(){
@@ -352,50 +351,52 @@ winit.initNext = function () {
 			"app/api/",
 			"app/res/css/",
 
-			'earn/client/app/res/css/',
-			'earn/xlsx/item.c.js',
-			'earn/xlsx/item.s.js',
-			'earn/xlsx/awardCfg.c.js',
-			'earn/xlsx/awardCfg.s.js',
+			"earn/client/app/net/init.js",
+			"earn/xlsx/item.c.js",
+			"earn/xlsx/item.s.js",
+			"earn/xlsx/awardCfg.c.js",
+			"earn/xlsx/awardCfg.s.js",
 			"earn/client/app/components/noviceTaskAward/",
-			"earn/client/app/view/home/",
-			"earn/client/app/net/login.js",
-
-			"chat/client/app/view/home/",
-			"chat/client/app/net/login.js",
-			"chat/client/app/data/store.js",
-			"chat/client/app/view/contactList/contactList.tpl",
-			"chat/client/app/view/contactList/contactList.js",
-			"chat/client/app/view/contactList/contactList.wcss",
-			"chat/client/app/view/contactList/contactItem.tpl",
-			"chat/client/app/view/contactList/contactItem.js",
-			"chat/client/app/view/contactList/contactItem.wcss",
-			"chat/client/app/widget1/imgShow/"
+			"earn/client/app/res/css/",
+			"earn/client/app/view/home/"
 		];
 		util.loadDir(sourceList, flags, fm, suffixCfg, function (fileMap) {
 			console.timeEnd("firstStageLoaded success");
 			pi_modules.commonjs.exports.relativeGet("chat/client/app/data/store").exports.setStore('flags/firstStageLoaded',true);
-			enterApp();
+			pi_modules.commonjs.exports.relativeGet("app/view/base/sourceLoaded").exports.init(flags,fm,suffixCfg);
+			// 钱包登录
+			pi_modules.commonjs.exports.relativeGet("app/net/login").exports.walletLogin();	
+			// 活动注册
+			pi_modules.commonjs.exports.relativeGet("earn/client/app/net/init").exports.registerRpcStruct(fm);
+			// 活动登录
+			pi_modules.commonjs.exports.relativeGet("earn/client/app/net/login").exports.earnLogin();
 
 			var tab = util.loadCssRes(fileMap);
 			tab.timeout = 90000;
 			tab.release();
+			loadLeftWalletSource();
 			
 		}, function (r) {
 			alert("加载目录失败, " + r.error + ":" + r.reason);
 		}, dirProcess.handler);
 	}
+	
 
-	// 加载剩余的聊天资源
-	var loadLeftChatSource = function(){
-		util.loadDir([ "chat/client/app/view/","chat/client/app/widget/","chat/client/app/widget1/"], flags, fm, undefined, function (fileMap) {
+	// 加载剩余所有资源
+	var loadLeftWalletSource = function(){
+		util.loadDir([ 
+			"app/components/",
+			"app/view/",
+			
+			"chat/client/app/view/",
+			"chat/client/app/widget/"
+		], flags, fm, undefined, function (fileMap) {
 			pi_modules.commonjs.exports.relativeGet("app/store/memstore").exports.setStore('flags/level_3_page_loaded',true);
 			
 		}, function (r) {
 			console.log("加载目录失败, " + r.url + ", " + r.error + ":" + r.reason);
 		}, function(){});
 	}
-
 };
 
 /**
