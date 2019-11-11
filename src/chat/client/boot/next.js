@@ -295,7 +295,6 @@ winit.initNext = function () {
 			},(res)=>{
 				console.timeEnd('pisdk init complete');
 				console.log('bind vm success', res);
-				loadLeftChatSource();
 				
 				// 聊天授权
 				pi_modules.commonjs.exports.relativeGet("chat/client/app/net/login").exports.checkAccount();	
@@ -303,16 +302,6 @@ winit.initNext = function () {
 		}, function (r) {
 			alert("加载目录失败, " + r.error + ":" + r.reason);
 		}, dirProcess.handler);
-	}
-
-	// 加载剩余的聊天资源
-	var loadLeftChatSource = function(){
-		util.loadDir([ ], flags, fm, undefined, function (fileMap) {
-			pi_modules.commonjs.exports.relativeGet("app/store/memstore").exports.setStore('flags/level_3_page_loaded',true);
-			
-		}, function (r) {
-			console.log("加载目录失败, " + r.url + ", " + r.error + ":" + r.reason);
-		}, function(){});
 	}
 
 	// 加载表情包图库

@@ -1,7 +1,6 @@
 /**
  * 最近会话列表
  */
-
 // ================================================ 导入
 import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
 import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
@@ -103,7 +102,7 @@ export class Contact extends SpecialWidget {
             index = index >= 0 ? index :0;
             props.acTag = index;
             this.props.activeTab = TAB.square;
-            // console.log('contact props----- 12345',props);
+            console.log('contact props-----',props);
         }
         this.props = {
             ...this.props,
