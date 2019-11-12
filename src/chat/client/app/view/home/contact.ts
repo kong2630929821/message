@@ -13,10 +13,10 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { deelNotice, rippleShow } from '../../logic/logic';
+import { deelNotice } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
-import { getUsersBasicInfo, showPost } from '../../net/rpc';
+import { showPost } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
 
 // ================================================ 导出
