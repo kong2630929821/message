@@ -1,5 +1,5 @@
 // tslint:disable-next-line:missing-jsdoc
-import { getStore as walletStore } from '../../../../../app/store/memstore';
+import { getStore as walletGetStore,setStore as walletSetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -62,7 +62,7 @@ export class Square extends Widget {
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
                 const label = getStore(`tagList`)[props.active];
-                const game = walletStore('game/allGame');
+                const game = walletGetStore('game/allGame');
                 showPost(5,label);
                 gameLabelNum(label).then(r => {
                     let index = null;
@@ -242,13 +242,16 @@ export class Square extends Widget {
      * 玩游戏
      */
     public goGame() {
-        const gameList = walletStore('game/allGame');
+        const gameList = walletGetStore('game/allGame');
         gameList.forEach(v => {
             if (v.title === this.props.gameLabel.name) {
                 // 打开游戏
-                debugger;
                 openGame(v.url,v.title,v.webviewName,v.screenMode,() => {
-                    
+                    const game = walletGetStore('game');
+                    if (game.oftenGame.findIndex(item => item.appid === v.appid) === -1) {
+                        game.oftenGame.push(v);
+                    }
+                    walletSetStore('game',game);
                 });
             }
         });
