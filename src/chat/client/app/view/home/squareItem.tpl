@@ -65,7 +65,7 @@
     </div>
 
     {{% ===========================游戏标签========================}}
-    {{if it.gameLabel.name}}
+    {{if it.gameLabel.name!=''}}
     <div w-class="gameLabel" on-tap="goLabel">
         <img src="{{it.gameLabel.icon}}" alt="" w-class="labelImg"/>
         <div>{{it.gameLabel.name}}</div>
