@@ -1,3 +1,4 @@
+import { getStore as walletGetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { popModalBoxs } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
@@ -87,12 +88,16 @@ export class SquareItem extends Widget {
         this.props.isMine = this.props.owner === uid;
         this.props.followed = judgeFollowed(this.props.key.num);
         if (props.label) {
-            const list =  getStore('tagList');
-            const index = list.indexOf(props.label);
-            const gameList = getStore('labelList');
+            const gameList = walletGetStore('game/allGame');
+            let index = null;
+            gameList.forEach((v,i) => {
+                if (v.title === props.label) {
+                    index = i;
+                }
+            });
             this.props.gameLabel = {
-                name:gameList[index - 2][0],
-                icon:gameList[index - 2][1]
+                name:gameList[index].title,
+                icon:gameList[index].img[0]
             };
         }
         // 动态详情中隐藏工具栏
@@ -201,13 +206,17 @@ export class SquareItem extends Widget {
         if (this.props.followed) {
             popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
                 follow(this.props.key.num);
+                this.props.followed = false;
+                this.paint();
             });
         } else {
             this.props.fgStatus = true;
             this.paint();
             setTimeout(() => {
                 this.props.fgStatus = false;
+                this.props.followed = true;
                 popNewMessage('关注成功');
+                this.paint();
                 follow(this.props.key.num);
             },400);
             

@@ -1,5 +1,7 @@
 // tslint:disable-next-line:missing-jsdoc
+import { getStore as walletStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register } from '../../data/store';
@@ -60,13 +62,19 @@ export class Square extends Widget {
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
                 const label = getStore(`tagList`)[props.active];
-                const game = getStore('labelList');
+                const game = walletStore('game/allGame');
                 showPost(5,label);
                 gameLabelNum(label).then(r => {
+                    let index = null;
+                    game.forEach((v,i) => {
+                        if (v.title === label) {
+                            index = i;
+                        }
+                    });
                     this.props.gameLabel = {
                         name:label,
-                        icon:game[props.active - 2][1],
-                        bg:game[props.active - 2][2],
+                        icon:game[index].img[0],
+                        bg:game[index].img[1],
                         num:r === -1 ? 0 :r
                     };
                     this.paint();
@@ -229,6 +237,22 @@ export class Square extends Widget {
         }        
         this.paint();
     }
+
+    /**
+     * 玩游戏
+     */
+    public goGame() {
+        const gameList = walletStore('game/allGame');
+        gameList.forEach(v => {
+            if (v.title === this.props.gameLabel.name) {
+                // 打开游戏
+                debugger;
+                openGame(v.url,v.title,v.webviewName,v.screenMode,() => {
+                    
+                });
+            }
+        });
+    }
 }
 
 type FollwList = {
@@ -302,5 +326,4 @@ register('laudPostList',r => {
 register('postReturn',r => {    
     state.postReturn = r;    
     forelet.paint(state);
-
 });

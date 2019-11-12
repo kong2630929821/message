@@ -524,13 +524,19 @@ export const postLaud = (num: string, id: number, fail?:any) => {
     const arg = new PostKey();
     arg.num = num;
     arg.id = id;
-    clientRpcFunc(postLaudPost,arg,(r:boolean) => {
-        if (r) {
-            console.log('postLaudPost=======',r);
-        } else {
-            fail && fail();
-        }
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(postLaudPost,arg,(r:boolean) => {
+            if (r) {
+                console.log('postLaudPost=======',r);
+                resolve();
+            } else {
+                fail && fail();
+                reject();
+            }
+        });
     });
+    
 };
 
 /**

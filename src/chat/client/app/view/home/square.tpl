@@ -30,7 +30,7 @@
                                 官方嗨嗨号
                                 <img src="../../res/images/whiteRight.png" alt="" w-class="rightIcon"/>
                             </div>
-                            <div w-class="gameHaihai" style="margin-left:30px;">
+                            <div w-class="gameHaihai" style="margin-left:30px;" on-tap="goGame">
                                 玩游戏
                                 <img src="../../res/images/whiteRight.png" alt="" w-class="rightIcon"/>
                             </div>
