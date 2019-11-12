@@ -181,7 +181,12 @@ export class Contact extends SpecialWidget {
                     };
                 }
                 popNew3('chat-client-app-view-info-editPost',{ isPublic:false,label },() => {
-                    showPost(this.props.acTag + 1,store.getStore('tagList')[this.props.acTag]);
+                    if (this.props.acTag < 2) {
+                        showPost(this.props.acTag + 1);
+                    } else {
+                        showPost(5,store.getStore('tagList')[this.props.acTag]);
+                    }
+                    
                 });
             } else {
                 this.props.isUtilVisible = !this.props.isUtilVisible;
