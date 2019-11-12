@@ -1,10 +1,12 @@
 /**
  * 最近会话列表
  */
+
 // ================================================ 导入
 import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
 import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
 import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offlineTip';
+import { getStore } from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -86,7 +88,7 @@ export class Contact extends SpecialWidget {
     constructor() {
         super();
         this.props.tagList = store.getStore('tagList',[]);
-        this.props.labelList = store.getStore('labelList',[]);
+        this.props.labelList = getStore('game/allGame',[]);
     }
 
     public create() {
@@ -102,7 +104,6 @@ export class Contact extends SpecialWidget {
             index = index >= 0 ? index :0;
             props.acTag = index;
             this.props.activeTab = TAB.square;
-            console.log('contact props-----',props);
         }
         this.props = {
             ...this.props,
@@ -167,21 +168,25 @@ export class Contact extends SpecialWidget {
                     name:'',
                     icon:''
                 };
-
                 if (this.props.acTag >= 2) {
                     let index = null;
                     this.props.labelList.forEach((v,i) => {
-                        if (v[0] === this.props.tagList[this.props.acTag]) {
+                        if (v.title === this.props.tagList[this.props.acTag]) {
                             index = i;
                         }
                     });
                     label = {
                         name:this.props.tagList[this.props.acTag],
-                        icon:this.props.labelList[index][1]
+                        icon:this.props.labelList[index].img[0]
                     };
                 }
                 popNew3('chat-client-app-view-info-editPost',{ isPublic:false,label },() => {
-                    showPost(this.props.acTag + 1,store.getStore('tagList')[this.props.acTag]);
+                    if (this.props.acTag < 2) {
+                        showPost(this.props.acTag + 1);
+                    } else {
+                        showPost(5,store.getStore('tagList')[this.props.acTag]);
+                    }
+                    
                 });
             } else {
                 this.props.isUtilVisible = !this.props.isUtilVisible;
@@ -245,6 +250,11 @@ export class Contact extends SpecialWidget {
     // 聊天通知点击
     public evChat() {
         this.closeMore();
+    }
+
+    public labelChangeTag(e:any) {
+        this.props.acTag = e.value;
+        this.paint();
     }
 
 }

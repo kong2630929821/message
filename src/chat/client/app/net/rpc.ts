@@ -524,13 +524,19 @@ export const postLaud = (num: string, id: number, fail?:any) => {
     const arg = new PostKey();
     arg.num = num;
     arg.id = id;
-    clientRpcFunc(postLaudPost,arg,(r:boolean) => {
-        if (r) {
-            console.log('postLaudPost=======',r);
-        } else {
-            fail && fail();
-        }
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(postLaudPost,arg,(r:boolean) => {
+            if (r) {
+                console.log('postLaudPost=======',r);
+                resolve();
+            } else {
+                fail && fail();
+                reject();
+            }
+        });
     });
+    
 };
 
 /**
@@ -741,10 +747,12 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
                     data[i].offcial = res.comm_type === CommType.official;
                     data[i].isPublic = res.comm_type === CommType.publicAcc;
                     const body = JSON.parse(res.body);
-                    data[i].content = parseEmoji(body.msg);
                     data[i].imgs = body.imgs;
                     data[i].followed = judgeFollowed(res.key.num);
                     data[i].likeActive = judgeLiked(res.key.num,res.key.id);
+                    const reg = /\#([^#]*)\#/gm;
+                    data[i].content = parseEmoji(body.msg).replace(reg,'');
+                    data[i].label = body.msg.match(reg) ? body.msg.match(reg)[0].substring(1, body.msg.match(reg)[0].length - 1) :'';
                 });
                 res({ list:data, total: r.total });
             } else {

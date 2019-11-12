@@ -1,11 +1,11 @@
 <div class="new-page" w-class="page" ev-back-click="goBack"  on-tap="pageClick">
     <chat-client-app-widget1-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="contain" id="postPage" on-scroll="scrollPage">
-        <div style="margin: 20px 0;" id="postContain">
+        <div style="margin: 20px 0;" id="postContain" ev-change-tag="changeTag">
             {{if it.isPublic}}
             <div w-class="title">{{it.title}}</div>
             {{end}}
-            <widget w-tag="chat-client-app-view-home-squareItem">{{it}}</widget>
+            <widget w-tag="chat-client-app-view-home-squareItem" style="padding-bottom: 20px;">{{it}}</widget>
 
 
             <div w-class="postBottom">
@@ -14,7 +14,7 @@
                     <div w-class="tab {{it.active=='like'? 'activeTab':''}}" on-tap="changeTab('like')">赞&nbsp;{{it.likeCount}}</div>
                 </div>
                 {{if it.active == 'comment'}}
-                <div id="commentBox">
+                <div id="commentBox" on-tap="pageClick">
                     {{for i,v of it.commentList}}
                     <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-close="pageClick">
                         <widget w-tag="chat-client-app-view-info-commentItem">{{it.dealData(v,it.expandItem == i)}}</widget>
@@ -22,7 +22,7 @@
                     {{end}}
                 </div>
                 {{else}}
-                <div>
+                <div on-tap="pageClick">
                     {{for i,v of it.likeList}}
                     <div w-class="likeItem">
                         <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>

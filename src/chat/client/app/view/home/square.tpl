@@ -30,7 +30,7 @@
                                 官方嗨嗨号
                                 <img src="../../res/images/whiteRight.png" alt="" w-class="rightIcon"/>
                             </div>
-                            <div w-class="gameHaihai" style="margin-left:30px;">
+                            <div w-class="gameHaihai" style="margin-left:30px;" on-tap="goGame">
                                 玩游戏
                                 <img src="../../res/images/whiteRight.png" alt="" w-class="rightIcon"/>
                             </div>
@@ -46,7 +46,7 @@
             <widget w-tag="chat-client-app-view-home-pubPostItem">{{v}}</widget>
             {{else}}
             <div ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})" ev-delBtn="delPost({{i}})">
-                <widget w-tag="chat-client-app-view-home-squareItem">{{it.dealData(v,it.expandItem == i)}}</widget>
+                <widget w-tag="chat-client-app-view-home-squareItem">{{it.dealData(v,it.postView[it.active][1].expandItem == i)}}</widget>
             </div>
             {{end}}
         </div>

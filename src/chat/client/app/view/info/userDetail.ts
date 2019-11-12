@@ -1,4 +1,5 @@
 import { getUserRecentGame } from '../../../../../app/net/pull';
+import { gotoChat } from '../../../../../app/view/base/app';
 import { getAllMedal } from '../../../../../earn/client/app/net/rpc';
 import { getMedalList } from '../../../../../earn/client/app/utils/util';
 import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
@@ -38,7 +39,7 @@ interface Props {
  * 联系人详细信息
  */
 export class UserDetail extends Widget {
-    public ok: () => void;
+    public ok: (value?:string) => void;
     public props: Props = {
         uid: null,
         num:'',
@@ -119,7 +120,6 @@ export class UserDetail extends Widget {
             this.props.numList[1][0] = this.props.followList.length;
         }
         this.paint();
-
         getUserPostList(this.props.num).then((r:any) => {
             this.props.postList = r.list;  // 动态
             this.props.numList[0][0] = r.total;
@@ -148,11 +148,13 @@ export class UserDetail extends Widget {
 
         // 获取全部勋章
         getAllMedal().then(r => {
-            this.props.medalList = r.medals;
-            this.paint();
+            if (r.medals) {
+                this.props.medalList = r.medals;
+                this.paint();
+            }
+           
         });
         getUserRecentGame(this.props.userInfo.acc_id,5).then(r => {
-
             this.props.gameList = r;   // 游戏
             this.paint();
         });
@@ -285,7 +287,11 @@ export class UserDetail extends Widget {
      * 查看详情
      */
     public goDetail(i:number) {
-        popNew('chat-client-app-view-info-postDetail',{ ...this.props.postList[i],showAll:true });
+        popNew('chat-client-app-view-info-postDetail',{ ...this.props.postList[i],showAll:true },(value) => {
+            if (value !== undefined) {
+                this.ok && this.ok(value);
+            }
+        });
     }
 
     /**
@@ -355,6 +361,15 @@ export class UserDetail extends Widget {
     // 去聊天
     public goChat() {
         popNew('chat-client-app-view-chat-chat', { id: this.props.userInfo.uid, chatType: GENERATOR_TYPE.USER });
+    }
+
+    /**
+     * 点击游戏标签回到对应标签页
+     */
+    public changeTag(e:any) {
+        const tagList = getStore('tagList');
+        // 判断当前的标签页
+        this.ok && this.ok(tagList[e.value]);
     }
 }
 
