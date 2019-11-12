@@ -1,11 +1,11 @@
 <div class="new-page" w-class="page" ev-back-click="goBack"  on-tap="pageClick">
     <chat-client-app-widget1-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="contain" id="postPage" on-scroll="scrollPage">
-        <div style="margin: 20px 0;" id="postContain">
+        <div style="margin: 20px 0;" id="postContain" ev-change-tag="changeTag">
             {{if it.isPublic}}
             <div w-class="title">{{it.title}}</div>
             {{end}}
-            <widget w-tag="chat-client-app-view-home-squareItem">{{it}}</widget>
+            <widget w-tag="chat-client-app-view-home-squareItem" style="padding-bottom: 20px;">{{it}}</widget>
 
 
             <div w-class="postBottom">

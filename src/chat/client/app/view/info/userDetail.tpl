@@ -80,7 +80,7 @@
                     <span w-class="mark"></span>
                     <span style="flex:1 0 0;">个人动态</span>
                 </div>
-                <div ev-closeTools="pageClick">
+                <div ev-closeTools="pageClick" ev-change-tag="changeTag">
                     {{for i,v of it.postList}}
                     <div ev-goDetail="goDetail({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})" ev-delBtn="delPost({{i}})">
                         <widget w-tag="chat-client-app-view-home-squareItem" style="margin-top:20px;">{{it.dealData(v,it.expandItem == i,it.followed)}}</widget>

@@ -1,5 +1,6 @@
 import { getStore as walletGetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { gotoChat } from '../../../../../app/view/base/app';
 import { popModalBoxs } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
@@ -8,7 +9,7 @@ import { REPORT_ARTICLE, REPORT_POST } from '../../../../server/data/constant';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
 import { getStore } from '../../data/store';
-import { buildupImgPath, complaintUser, judgeFollowed, timestampFormat } from '../../logic/logic';
+import { buildupImgPath, complaintUser, judgeFollowed, judgeLiked, timestampFormat } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
 import { delPost, follow, sendUserMsg } from '../../net/rpc';
 
@@ -170,7 +171,11 @@ export class SquareItem extends Widget {
         if (this.props.isPublic) {
             popNew3('chat-client-app-view-person-publicHome', { uid: this.props.owner, pubNum: this.props.key.num });
         } else {
-            popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num });
+            popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num },(value) => {
+                if (value !== undefined) {
+                    gotoChat(value);
+                }
+            });
         }
     }
 
@@ -305,5 +310,15 @@ export class SquareItem extends Widget {
             this.paint();
         };
         
+    }
+
+    /**
+     * 去标签页
+     */
+    public goLabel(e:any) {
+        const tagList = getStore('tagList');
+        // 判断当前的标签页
+        const index = tagList.indexOf(this.props.gameLabel.name);
+        notify(e.node,'ev-change-tag',{ value:index });
     }
 }

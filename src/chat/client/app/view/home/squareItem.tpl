@@ -63,12 +63,15 @@
             {{end}}
         {{end}}
     </div>
+
+    {{% ===========================游戏标签========================}}
     {{if it.gameLabel.name}}
-    <div w-class="gameLabel">
+    <div w-class="gameLabel" on-tap="goLabel">
         <img src="{{it.gameLabel.icon}}" alt="" w-class="labelImg"/>
         <div>{{it.gameLabel.name}}</div>
     </div>
     {{end}}
+
     {{if it.showAll && it.isPublic}}
     {{% =================帖子详情页可分享=======================}}
     <div w-class="shareBtn" on-tap="shareArt">

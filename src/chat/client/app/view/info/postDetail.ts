@@ -1,4 +1,5 @@
 import { popNew } from '../../../../../pi/ui/root';
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
 import { getStore, setStore } from '../../data/store';
@@ -37,7 +38,7 @@ const TAB = {
  * 广场帖子详情
  */
 export class PostDetail extends Widget {
-    public ok: () => void;
+    public ok: (value?:string) => void;
     public props: Props = {
         key: {
             num: '',
@@ -305,8 +306,13 @@ export class PostDetail extends Widget {
         };
     }
 
-    public test() {
-        console.log(this.props.likeList);
+    /**
+     * 点击游戏标签回到对应标签页
+     */
+    public changeTag(e:any) {
+        const tagList = getStore('tagList');
+        // 判断当前的标签页
+        this.ok && this.ok(tagList[e.value]);
     }
 
 }

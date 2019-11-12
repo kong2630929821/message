@@ -247,6 +247,11 @@ export class Contact extends SpecialWidget {
         this.closeMore();
     }
 
+    public labelChangeTag(e:any) {
+        this.props.acTag = e.value;
+        this.paint();
+    }
+
 }
 
 // ================================================ 本地

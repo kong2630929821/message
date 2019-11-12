@@ -1,7 +1,9 @@
 // tslint:disable-next-line:missing-jsdoc
 import { getStore as walletGetStore,setStore as walletSetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { gotoChat } from '../../../../../app/view/base/app';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
+import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register } from '../../data/store';
@@ -151,7 +153,7 @@ export class Square extends Widget {
      * 点赞
      */
     public likeBtn(i:number) {
-        const v = this.props.postView[this.state.postReturn.tagType - 1][1].postList[i];
+        const v = this.props.postView[this.props.active][1].postList[i];
         v.likeActive = !v.likeActive;
         v.likeCount += v.likeActive ? 1 :-1;
         this.paint();
@@ -167,7 +169,7 @@ export class Square extends Widget {
      * 评论
      */
     public commentBtn(i:number) {
-        const v = this.props.postView[this.state.postReturn.tagType - 1][1].postList[i];
+        const v = this.props.postView[this.props.active][1].postList[i];
         popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
             v.commentCount ++;
             this.paint();
@@ -179,7 +181,7 @@ export class Square extends Widget {
      * 删除
      */
     public delPost(i:number) {
-        this.props.postView[this.state.postReturn.tagType - 1][1].postList.splice(i,1);
+        this.props.postView[this.props.active][1].postList.splice(i,1);
         this.paint();
     }
 
@@ -187,7 +189,11 @@ export class Square extends Widget {
      * 查看详情
      */
     public goDetail(i:number) {
-        popNew3('chat-client-app-view-info-postDetail',{ ... this.props.postView[this.state.postReturn.tagType - 1][1].postList[i],showAll:true });
+        popNew3('chat-client-app-view-info-postDetail',{ ... this.props.postView[this.props.active][1].postList[i],showAll:true },(value) => {
+            if (value !== undefined) {
+                gotoChat(value);
+            }
+        });
     }
 
     /**
