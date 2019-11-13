@@ -1,6 +1,6 @@
 import { getStore as walletGetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
-import { gotoChat } from '../../../../../app/view/base/app';
+import { gotoSquare } from '../../../../../app/view/base/app';
 import { popModalBoxs } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
@@ -173,7 +173,7 @@ export class SquareItem extends Widget {
         } else {
             popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num },(value) => {
                 if (value !== undefined) {
-                    gotoChat(value);
+                    gotoSquare(value);
                 }
             });
         }

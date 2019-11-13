@@ -1,13 +1,9 @@
 import { getUserRecentGame } from '../../../../../app/net/pull';
-import { gotoChat } from '../../../../../app/view/base/app';
 import { getAllMedal } from '../../../../../earn/client/app/net/rpc';
-import { getMedalList } from '../../../../../earn/client/app/utils/util';
-import { CoinType } from '../../../../../earn/client/app/xls/dataEnum.s';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
-import { CommType } from '../../../../server/data/rpc/community.s';
 import { genUuid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
 import { getFriendAlias, getUserAvatar } from '../../logic/logic';

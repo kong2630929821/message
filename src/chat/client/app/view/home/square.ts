@@ -1,7 +1,7 @@
 // tslint:disable-next-line:missing-jsdoc
 import { getStore as walletGetStore,setStore as walletSetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
-import { gotoChat } from '../../../../../app/view/base/app';
+import { gotoSquare } from '../../../../../app/view/base/app';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
@@ -191,7 +191,7 @@ export class Square extends Widget {
     public goDetail(i:number) {
         popNew3('chat-client-app-view-info-postDetail',{ ... this.props.postView[this.props.active][1].postList[i],showAll:true },(value) => {
             if (value !== undefined) {
-                gotoChat(value);
+                gotoSquare(value);
             }
         });
     }

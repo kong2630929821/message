@@ -104,6 +104,7 @@ export class Contact extends SpecialWidget {
             index = index >= 0 ? index :0;
             props.acTag = index;
             this.props.activeTab = TAB.square;
+            console.log('tagList',this.props.tagList,'index',index);
         }
         this.props = {
             ...this.props,
@@ -119,7 +120,7 @@ export class Contact extends SpecialWidget {
         if (this.props.isLogin) {   // 聊天已登录成功
             getStoreData('user',{ info:{},id:'' }).then(wUser => {
                 // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
-                if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.info.acc_id !== cUser.acc_id || wUser.info.sex !== cUser.sex || wUser.info.phoneNumber !== cUser.tel || wUser.info.note !== cUser.note) {
+                if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id || wUser.info.sex !== cUser.sex || wUser.info.phoneNumber !== cUser.tel || wUser.info.note !== cUser.note) {
                     if (this.props.isLogin && wUser.info.nickName) { // 钱包和聊天都已登陆
                         setUserInfo();
                     } else if (cUser.uid) {  // 聊天已登录
