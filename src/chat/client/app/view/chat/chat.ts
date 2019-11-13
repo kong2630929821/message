@@ -47,8 +47,10 @@ export class Chat extends Widget {
 
         if (this.props.accId) {
             getChatUid(this.props.accId).then((res:number) => {
+                this.props.id = res;
                 this.props.hid = genUserHid(this.props.sid, res);
                 this.initUser();
+                this.firstPaint();
             }).catch(err => {
                 console.log('获取游戏客服失败',err);
             });
@@ -56,6 +58,7 @@ export class Chat extends Widget {
             applyToGroup(this.props.gid).then((res:number) => {
                 this.props.hid = genGroupHid(res);
                 this.initGroup();
+                this.firstPaint();
             }).catch(err => {
                 console.log('获取游戏客服失败',err);
             });
