@@ -64,7 +64,6 @@ export class Setting extends Widget {
             ...props
         };
         super.setProps(this.props);
-        debugger;
         // 判断是否是好友
         const friends = getFriendsInfo().friends;
         if (this.props.noticeSet !== 1) {

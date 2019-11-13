@@ -1,5 +1,9 @@
 // tslint:disable-next-line:missing-jsdoc
+import { getStore as walletGetStore,setStore as walletSetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { gotoChat } from '../../../../../app/view/base/app';
+import { openGame } from '../../../../../app/view/play/home/gameConfig';
+import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register } from '../../data/store';
@@ -60,13 +64,19 @@ export class Square extends Widget {
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
                 const label = getStore(`tagList`)[props.active];
-                const game = getStore('labelList');
+                const game = walletGetStore('game/allGame');
                 showPost(5,label);
                 gameLabelNum(label).then(r => {
+                    let index = null;
+                    game.forEach((v,i) => {
+                        if (v.title === label) {
+                            index = i;
+                        }
+                    });
                     this.props.gameLabel = {
                         name:label,
-                        icon:game[props.active - 2][1],
-                        bg:game[props.active - 2][2],
+                        icon:game[index].img[0],
+                        bg:game[index].img[1],
                         num:r === -1 ? 0 :r
                     };
                     this.paint();
@@ -143,7 +153,7 @@ export class Square extends Widget {
      * 点赞
      */
     public likeBtn(i:number) {
-        const v = this.props.postView[this.state.postReturn.tagType - 1][1].postList[i];
+        const v = this.props.postView[this.props.active][1].postList[i];
         v.likeActive = !v.likeActive;
         v.likeCount += v.likeActive ? 1 :-1;
         this.paint();
@@ -159,7 +169,7 @@ export class Square extends Widget {
      * 评论
      */
     public commentBtn(i:number) {
-        const v = this.props.postView[this.state.postReturn.tagType - 1][1].postList[i];
+        const v = this.props.postView[this.props.active][1].postList[i];
         popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
             v.commentCount ++;
             this.paint();
@@ -171,7 +181,7 @@ export class Square extends Widget {
      * 删除
      */
     public delPost(i:number) {
-        this.props.postView[this.state.postReturn.tagType - 1][1].postList.splice(i,1);
+        this.props.postView[this.props.active][1].postList.splice(i,1);
         this.paint();
     }
 
@@ -179,7 +189,11 @@ export class Square extends Widget {
      * 查看详情
      */
     public goDetail(i:number) {
-        popNew3('chat-client-app-view-info-postDetail',{ ... this.props.postView[this.state.postReturn.tagType - 1][1].postList[i],showAll:true });
+        popNew3('chat-client-app-view-info-postDetail',{ ... this.props.postView[this.props.active][1].postList[i],showAll:true },(value) => {
+            if (value !== undefined) {
+                gotoChat(value);
+            }
+        });
     }
 
     /**
@@ -228,6 +242,25 @@ export class Square extends Widget {
             });
         }        
         this.paint();
+    }
+
+    /**
+     * 玩游戏
+     */
+    public goGame() {
+        const gameList = walletGetStore('game/allGame');
+        gameList.forEach(v => {
+            if (v.title === this.props.gameLabel.name) {
+                // 打开游戏
+                openGame(v.url,v.title,v.webviewName,v.screenMode,() => {
+                    const game = walletGetStore('game');
+                    if (game.oftenGame.findIndex(item => item.appid === v.appid) === -1) {
+                        game.oftenGame.push(v);
+                    }
+                    walletSetStore('game',game);
+                });
+            }
+        });
     }
 }
 
@@ -302,5 +335,4 @@ register('laudPostList',r => {
 register('postReturn',r => {    
     state.postReturn = r;    
     forelet.paint(state);
-
 });

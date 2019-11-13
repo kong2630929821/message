@@ -25,9 +25,8 @@
             {{else}}
             <div w-class="follow" on-tap="followUser">关注</div>
             {{end}}
-        {{else}}
-        <img src="../../res/images/greyDown.png" w-class="btn" on-tap="showTools"/>
         {{end}}
+        <img src="../../res/images/greyDown.png" w-class="btn" on-tap="showTools"/>
     </div>
 
     {{if it.showAll}}
@@ -64,12 +63,15 @@
             {{end}}
         {{end}}
     </div>
-    {{if it.gameLabel.name}}
-    <div w-class="gameLabel">
+
+    {{% ===========================游戏标签========================}}
+    {{if it.gameLabel.name!=''}}
+    <div w-class="gameLabel" on-tap="goLabel">
         <img src="{{it.gameLabel.icon}}" alt="" w-class="labelImg"/>
         <div>{{it.gameLabel.name}}</div>
     </div>
     {{end}}
+
     {{if it.showAll && it.isPublic}}
     {{% =================帖子详情页可分享=======================}}
     <div w-class="shareBtn" on-tap="shareArt">
@@ -94,7 +96,6 @@
        </div>
     </div>
     {{end}}
-
     <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
         {{if it.isMine}}
         <div w-class="option" on-tap="delPost">删除</div>

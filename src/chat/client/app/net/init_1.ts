@@ -81,7 +81,14 @@ export const walletSignIn = (openid) => {
                 const beInvited = await getStore('inviteUsers/convert_invite',[]);
                 invite.length && deelNotice(invite,store.GENERATORTYPE.NOTICE_1);
                 beInvited.length && deelNotice([beInvited],store.GENERATORTYPE.NOTICE_2);
-                
+                // 获取全部游戏
+                const gameList = await getStore('game/allGame');
+                const tagList = ['全部','关注'];
+                gameList.forEach(v => {
+                    tagList.push(v.title);
+
+                });
+                store.setStore('tagList',tagList);
             } else {
                 popNewMessage('钱包登陆失败');
             }

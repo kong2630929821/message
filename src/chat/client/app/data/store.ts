@@ -137,8 +137,6 @@ export const initStore = () => {
             tagType:-1,
             postList:[]
         },
-        labelList: [['一代掌门','app/res/image/game/yidaizhangmen.png','app/res/image/game/xianzhixiadaoBg1.png'],['仙之侠道','app/res/image/game/xianzhixiadao.png','app/res/image/game/xianzhixiadaoBg.png']],// 应该从后端获取
-        // tagList: ['广场','关注','公众号','热门','一代掌门','仙之侠道'],// 应该从后端获取
         tagList: ['全部','关注','一代掌门','仙之侠道'],// 应该从后端获取
         followNumList:new Map(),
         laudPostList:new Map(),
@@ -277,7 +275,6 @@ export interface Store {
         postList:PostItem[];
     };// 广场帖子    
     tagList:string[];// tag名字
-    labelList:[string,string,string][]; // 标签名,小标签，大图
     followNumList:Map<number,AttentionIndex>; // 关注的社区账号
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
     postDraft:any;   // 普通帖子草稿
