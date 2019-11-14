@@ -9,6 +9,7 @@ import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offl
 import { getStore } from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
@@ -103,7 +104,6 @@ export class Contact extends SpecialWidget {
             let index:number =  this.props.tagList.indexOf(props.gameName);
             index = index >= 0 ? index :0;
             props.acTag = index;
-            this.props.activeTab = TAB.square;
             console.log('tagList',this.props.tagList,'index',index);
         }
         this.props = {
@@ -234,6 +234,7 @@ export class Contact extends SpecialWidget {
         this.props.activeTab = e.activeTab;
         this.props.showTag = e.showTag;
         this.paint();
+        notify(e.node,'ev-chat-square-change-tab',{ activeTab:this.props.activeTab });
     }
     // 切换tag
     public changeTagItem(ind:number) {

@@ -485,7 +485,7 @@
 
 
 		var u8ArrayToStr = function (arr) {
-			const decoder = new TextDecoder('utf-8');
+			var decoder = new TextDecoder('utf-8');
 			return decoder.decode(arr);
 		}
 
@@ -651,12 +651,12 @@
 	/**
 	 * 自适应
 	 */
-	 function browserAdaptive () {
+	function browserAdaptive () {
 		var cfg = {
 			width: 750, height: 1334, wscale: 0, hscale: 0.25, full: false
 		};
-		const clientWidth = document.documentElement.clientWidth;
-		const clientHeight = document.documentElement.clientHeight;
+		var clientWidth = document.documentElement.clientWidth;
+		var clientHeight = document.documentElement.clientHeight;
 		var rootWidth = cfg.width;
 		var rootHeight = cfg.height;
 		var scaleW = clientWidth / rootWidth;
@@ -679,11 +679,11 @@
 			}
 			scaleH = scaleW;
 		}
-		const rootX = (clientWidth - rootWidth) / 2;
-		const rootY = (clientHeight - rootHeight) / 2;
+		var rootX = (clientWidth - rootWidth) / 2;
+		var rootY = (clientHeight - rootHeight) / 2;
 	
 		// tslint:disable-next-line:max-line-length
-		return `left:${rootX}px;top: ${rootY}px;width:${rootWidth}px;height:${rootHeight}px;-webkit-transform:scale(${scaleW},${scaleH});-moz-transform:scale(${scaleW},${scaleH});-ms-transform:scale(${scaleW},${scaleH});transform:scale(${scaleW},${scaleH});`;
+		return "left:"+rootX+"px;top:"+rootY+"px;width:"+rootWidth+"px;height:"+rootHeight+"px;-webkit-transform:scale("+scaleW+","+scaleH+");-moz-transform:scale("+scaleW+","+scaleH+");-ms-transform:scale("+scaleW+","+scaleH+");transform:scale("+scaleW+","+scaleH+");";
 	};
 	
 	document.querySelector('#rcmj_loading_log').setAttribute('style',browserAdaptive());

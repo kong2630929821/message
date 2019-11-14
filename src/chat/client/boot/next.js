@@ -165,9 +165,9 @@ winit.initNext = function () {
 					console.log("update progress: ", e);
 					pi_update.updateProgress(e);
 				}, function () {
-					setTimeout(()=>{
+					setTimeout(function(){
 						pi_update.closePop();
-						console.log(`更新重启location.pathname is ${location.pathname}`);
+						console.log("更新重启location.pathname is ",location.pathname);
 						// 重启
 						h5UpdateMod.reload('/wallet/chat/client/boot/index.html');
 					},200);
@@ -259,6 +259,8 @@ winit.initNext = function () {
 			root.cfg.height = 1334;
 			root.cfg.hscale = 0.25;
 			root.cfg.wscale = 0;
+
+			window.isChatLoadSuccess = true;
 			enterChat();
 
 		}, function (r) {
@@ -269,13 +271,16 @@ winit.initNext = function () {
 
 	// 进入聊天界面
 	var enterChat = function(){
+		if(!window.isChatLoadSuccess || !window.isVMBindSuccess){
+			return;
+		}
 		// 加载根组件
 		var index = pi_modules.commonjs.exports.relativeGet("chat/client/app/view/index").exports;
 		index.run(function(){
 			// 关闭读取界面
 			document.body.removeChild(document.getElementById('rcmj_loading_log'));
 		});
-		const init = pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports;
+		var init = pi_modules.commonjs.exports.relativeGet("chat/client/app/net/init").exports;
 		init.registerRpcStruct(fm);
 		init.initClient();
 		
@@ -292,9 +297,16 @@ winit.initNext = function () {
 				appid: '101',            // 应用ID 由好嗨唯一分配
 				webviewName: 'wallet',   // 应用名字 由好嗨唯一分配
 				isHorizontal: false,      // 是否横屏 由游戏决定
-			},(res)=>{
+			},function(res){
 				console.timeEnd('pisdk init complete');
 				console.log('bind vm success', res);
+				if(!res){
+					window.isVMBindSuccess = true;
+					enterChat();
+				}else{
+					alert('vm 绑定失败，请退出后重试');
+				}
+				
 				
 				// 聊天授权
 				pi_modules.commonjs.exports.relativeGet("chat/client/app/net/login").exports.checkAccount();	
@@ -410,58 +422,65 @@ function updateUiInit(){
 			$updateItemInnerHtml += $item;
 		}
 
-		var newVersion = option.version ? `：V${option.version}` : "";
+		var newVersion = option.version ? "：V"+option.version : "";
 		var errorTips = "正在连接服务器";
 		if(option.updateError){
-			$root.innerHTML = `
-			<div class="pi-mask">
-				<div class="pi-update-box animated bounceInUp">
-					<img src="../res/image/rocket.png" class="pi-update-rocket" />
-					<div class="pi-update-content">
-					<div class="pi-update-title">发现新版本<span id="pi-version">${newVersion}</span></div>
-					<div class="pi-update-items">
-						${$updateItemInnerHtml}
-					</div>
-					</div>
-					<div class="pi-update-bottom">
-						<div class="pi-update-btns">
-							<div class="pi-update-cancel-btn">${option.confirmCancel}</div>
-							<div class="pi-update-ok-btn">${option.confirmOk}</div>
-						</div>
-						<div class="pi-update-progress-container">
-							${errorTips}
-						</div>
-						<div class="pi-update-complete-btn"></div>
-					</div>
-				</div>
-			</div>`;
+			$root.innerHTML = '<div class="pi-mask">'+
+				'<div class="pi-update-box animated bounceInUp">'+
+					'<img src="../res/image/rocket.png" class="pi-update-rocket" />'+
+					'<div class="pi-update-content">'+
+					'<div class="pi-update-title">发现新版本<span id="pi-version">${newVersion}</span></div>'+
+					'<div class="pi-update-items">'+
+						$updateItemInnerHtml
+					'</div>'+
+					'</div>'+
+					'<div class="pi-update-bottom">'+
+						'<div class="pi-update-btns">'+
+							'<div class="pi-update-cancel-btn">'+
+								option.confirmCancel
+							'</div>'+
+							'<div class="pi-update-ok-btn">'+
+								option.confirmOk
+							'</div>'+
+						'</div>'+
+						'<div class="pi-update-progress-container">'+
+							errorTips
+						'</div>'+
+						'<div class="pi-update-complete-btn"></div>'+
+					'</div>'+
+				'</div>'+
+			'</div>';
 		}else{
-			$root.innerHTML = `
-			<div class="pi-mask">
-				<div class="pi-update-box animated bounceInUp">
-					<img src="../res/image/rocket.png" class="pi-update-rocket" />
-					<div class="pi-update-content">
-					<div class="pi-update-title">发现新版本<span id="pi-version">${newVersion}</span></div>
-					<div class="pi-update-items">
-						${$updateItemInnerHtml}
-					</div>
-					</div>
-					<div class="pi-update-bottom">
-						<div class="pi-update-btns">
-							<div class="pi-update-cancel-btn">${option.confirmCancel}</div>
-							<div class="pi-update-ok-btn">${option.confirmOk}</div>
-						</div>
-						<div class="pi-update-progress-container">
-							<div class="pi-update-progress-bg">
-								<div class="pi-update-progress"></div>
-							</div>
-							<div class="pi-update-progress-text">0%</div>
-						</div>
-						<div class="pi-update-complete-btn"></div>
-					</div>
-				</div>
-			</div>
-			`;
+			$root.innerHTML = '<div class="pi-mask">'+
+				'<div class="pi-update-box animated bounceInUp">'+
+					'<img src="../res/image/rocket.png" class="pi-update-rocket" />'+
+					'<div class="pi-update-content">'+
+					'<div class="pi-update-title">发现新版本<span id="pi-version">'+
+						newVersion
+					'</span></div>'+
+					'<div class="pi-update-items">'+
+						$updateItemInnerHtml
+					'</div>'+
+					'</div>'+
+					'<div class="pi-update-bottom">'+
+						'<div class="pi-update-btns">'+
+							'<div class="pi-update-cancel-btn">'+
+								option.confirmCancel
+							'</div>'+
+							'<div class="pi-update-ok-btn">'+
+								option.confirmOk
+							'</div>'+
+						'</div>'+
+						'<div class="pi-update-progress-container">'+
+							'<div class="pi-update-progress-bg">'+
+								'<div class="pi-update-progress"></div>'+
+							'</div>'+
+							'<div class="pi-update-progress-text">0%</div>'+
+						'</div>'+
+						'<div class="pi-update-complete-btn"></div>'+
+					'</div>'+
+				'</div>'+
+			'</div>';
 		}
 		
 		var $body = document.querySelector("body");
@@ -471,14 +490,13 @@ function updateUiInit(){
 		if(option.updateError){
 			var container = document.querySelector(".pi-update-progress-container");
 			var dots = ["."];
-			setInterval(()=>{
+			setInterval(function(){
 				if(dots.length >= 3) dots = [];
 				dots.push(".");
 				container.innerHTML = errorTips + dots.join("");
 			},1000);
 		}
 	}
-
 
 	// 确定弹框
 	pi_update.confirm = function(option,callback){
@@ -559,11 +577,11 @@ function getUpdateContent(){
 		"androidUpdateContent":["接入了新的支付","支持游戏悬浮窗","支持手机号注册","修复了部分bug"],
 		"iosUpdateContent":["ios底层修复1","ios底层修复2","ios底层修复3","ios底层修复4"],
 	};
-	const updateJsonStr = localStorage.getItem("updateJson");
+	var updateJsonStr = localStorage.getItem("updateJson");
 	pi_update.updateJson = updateJsonStr ? JSON.parse(updateJsonStr) : defaultUpdateJson;
 	var ajax = pi_modules.ajax.exports;
-	const url = winit.appURL + "/update.json";
-	const timeout = 1000;
+	var url = winit.appURL + "/update.json";
+	var timeout = 1000;
 	ajax.get(url + "?" + Math.random(), {}, undefined, undefined, timeout, function (updateJson) {
 		localStorage.setItem("updateJson",updateJson);
 		pi_update.updateJson = JSON.parse(updateJson);
