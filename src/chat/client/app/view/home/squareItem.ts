@@ -7,10 +7,10 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { REPORT_ARTICLE, REPORT_POST } from '../../../../server/data/constant';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
-import { getStore } from '../../data/store';
+import { getStore, setStore } from '../../data/store';
 import { buildupImgPath, complaintUser, judgeFollowed, judgeLiked, timestampFormat } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
-import { delPost, follow, sendUserMsg } from '../../net/rpc';
+import { delPost, follow, postLaud, sendUserMsg } from '../../net/rpc';
 
 const imgSize = 180;// 多个图片的显示大小
 const imgInterval = 17;// 图片的间隔
@@ -87,6 +87,7 @@ export class SquareItem extends Widget {
         const uid = getStore('uid',0);
         this.props.isMine = this.props.owner === uid;
         this.props.followed = judgeFollowed(this.props.key.num);
+        this.props.likeActive = judgeLiked(this.props.key.num,this.props.key.id);
         const gameList = getStore('gameList');
         if (props.label && gameList.length) {
             const currentItem = gameList.find(item => item.title === props.label);
@@ -133,7 +134,23 @@ export class SquareItem extends Widget {
      */
     public likeBtn(e:any) {
         this.closeUtils(e);
-        notify(e.node,'ev-likeBtn',{ value:this.props.key });
+        postLaud(this.props.key.num, this.props.key.id).then(() => {
+            if (this.props.likeActive) {
+                this.props.likeCount -= 1;
+                this.props.likeActive = false;
+            } else {
+                this.props.likeCount += 1;
+                this.props.likeActive = true;
+            }
+            const list =  getStore('postReturn');
+            const postList = list.postList ? list.postList :list;
+            const current = postList.find(item => JSON.stringify(item.key) === JSON.stringify(this.props.key));
+            if (current) {
+                current.likeCount = this.props.likeCount;
+            }
+            setStore('postReturn',list);
+            this.paint();
+        });
     }
 
     /**
@@ -220,7 +237,6 @@ export class SquareItem extends Widget {
             },400);
             
         }
-        
     }
 
     /**

@@ -232,8 +232,6 @@ export interface PostItem {
     likeCount:number;   // 点赞数量
     createtime:string;      // 创建时间
     content:string;     // 内容
-    likeActive:boolean;  // 点赞
-    followed:boolean;  // 已关注
     imgs:string[];  // 图片列表
     postType:POST_TYPE; // 文章类型
     gender:number;  // 性别 0 男 1 女

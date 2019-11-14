@@ -521,7 +521,7 @@ export const addPost = (title: string, body: string, num:string, post_type: numb
 /**
  * 帖子点赞或取消点赞
  */
-export const postLaud = (num: string, id: number, fail?:any) => {
+export const postLaud = (num: string, id: number) => {
     const arg = new PostKey();
     arg.num = num;
     arg.id = id;
@@ -532,7 +532,6 @@ export const postLaud = (num: string, id: number, fail?:any) => {
                 console.log('postLaudPost=======',r);
                 resolve();
             } else {
-                fail && fail();
                 reject();
             }
         });
@@ -620,8 +619,6 @@ export const showPost = (square_type:number, label:string= '',num:string = '', i
                     data.forEach((res,i) => {
                         data[i].offcial = res.comm_type === CommType.official;
                         data[i].isPublic = res.comm_type === CommType.publicAcc;
-                        data[i].followed = judgeFollowed(res.key.num);
-                        data[i].likeActive = judgeLiked(res.key.num,res.key.id);
                         if (data[i].isPublic) {
                             data[i].content = res.body;
                             data[i].imgs = '';
@@ -749,8 +746,6 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
                     data[i].isPublic = res.comm_type === CommType.publicAcc;
                     const body = JSON.parse(res.body);
                     data[i].imgs = body.imgs;
-                    data[i].followed = judgeFollowed(res.key.num);
-                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
                     const reg = /\#([^#]*)\#/gm;
                     data[i].content = parseEmoji(body.msg).replace(reg,'');
                     data[i].label = body.msg.match(reg) ? body.msg.match(reg)[0].substring(1, body.msg.match(reg)[0].length - 1) :'';
@@ -1056,7 +1051,7 @@ export const getAllGameInfo = (ids:string) => {
                     apkDownloadUrl:shareDownload
                 });
             });
-            
+
             return gameList;
         }). catch (e => {
             return [];

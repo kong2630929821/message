@@ -6,6 +6,7 @@ import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register } from '../../data/store';
+import { judgeLiked } from '../../logic/logic';
 import { gameLabelNum, postLaud, showPost } from '../../net/rpc';
 
 export const forelet = new Forelet();
@@ -149,22 +150,6 @@ export class Square extends Widget {
     }
     
     /**
-     * 点赞
-     */
-    public likeBtn(i:number) {
-        const v = this.props.postView[this.props.active][1].postList[i];
-        v.likeActive = !v.likeActive;
-        v.likeCount += v.likeActive ? 1 :-1;
-        this.paint();
-        postLaud(v.key.num, v.key.id, () => {
-            // 失败了则撤销点赞或取消点赞操作
-            v.likeActive = !v.likeActive;
-            v.likeCount += v.likeActive ? 1 :-1;
-            this.paint();
-        });
-    }
-
-    /**
      * 评论
      */
     public commentBtn(i:number) {
@@ -277,7 +262,6 @@ type postReturn = {
 
 interface State {
     followList:FollwList;
-    likeList:any[];
     postReturn:postReturn;
 }
 
@@ -286,7 +270,6 @@ const state:State = {
         person_list:[],
         public_list:[]
     },
-    likeList:[],
     postReturn:{
         id:-1,
         num:'',
@@ -309,34 +292,17 @@ register('followNumList',r => {
                 w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].followed = list.indexOf(v.key.num) > -1;
             });
         }
-   
         forelet.paint(state);
     }
 });
-// 点赞列表
-register('laudPostList',r => {
-    const w:any = forelet.getWidget(WIDGET_NAME);
-    if (w) {
-        if (w.state.postReturn.tagType === -1) {
-            return;
-        }
-        for (const value of r.values()) {
-            state.likeList = value.list;
-            w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
-                w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
-            });
-        }
-        
-        forelet.paint(state);
-    }
-});
+
 // 帖子数据
 register('postReturn',r => {    
     state.postReturn = r;    
     forelet.paint(state);
 });
 
-// 帖子数据
+// 监听游戏标签变化
 register('tagList',r => {   
     const w:any = forelet.getWidget(WIDGET_NAME);
     if (w) {
