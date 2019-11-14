@@ -3,7 +3,6 @@ import { getStore as walletGetStore,setStore as walletSetStore } from '../../../
 import { popNew3 } from '../../../../../app/utils/tools';
 import { gotoSquare } from '../../../../../app/view/base/app';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
-import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register } from '../../data/store';
@@ -45,7 +44,7 @@ export class Square extends Widget {
     };    
 
     constructor() {
-        super();                
+        super();
         getStore(`tagList`,[]).forEach((tag) => {
             this.props.postView.push([tag, {
                 expandItem:-1,
@@ -91,7 +90,7 @@ export class Square extends Widget {
             ...props
         };
         super.setProps(this.props);
-        // this.state = state;        
+        // this.state = state;  
         this.init(this.props.active);        
     }
     // public firstPaint() {
@@ -335,4 +334,22 @@ register('laudPostList',r => {
 register('postReturn',r => {    
     state.postReturn = r;    
     forelet.paint(state);
+});
+
+// 帖子数据
+register('tagList',r => {   
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    if (w) {
+        w.props.postView = [];
+        r.forEach((tag) => {
+            w.props.postView.push([tag, {
+                expandItem:-1,
+                postList:[],
+                // canRequest:true,
+                isLoading:false
+                // isShowAnimation:false
+            }]);
+        }); 
+        w.paint(); 
+    } 
 });

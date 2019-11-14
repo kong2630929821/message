@@ -137,7 +137,7 @@ export const initStore = () => {
             tagType:-1,
             postList:[]
         },
-        tagList: ['全部','关注','一代掌门','仙之侠道'],// 应该从后端获取
+        tagList: ['全部','关注'],
         followNumList:new Map(),
         laudPostList:new Map(),
         postDraft:null,
