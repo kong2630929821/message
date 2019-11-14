@@ -77,8 +77,8 @@ export const walletSignIn = (openid) => {
 
                 });
                 // 获取邀请人数 被邀请
-                const invite = await getStore('inviteUsers/invite_success',[]);
-                const beInvited = await getStore('inviteUsers/convert_invite',[]);
+                const invite = getStore('inviteUsers/invite_success',[]);
+                const beInvited = getStore('inviteUsers/convert_invite',[]);
                 invite.length && deelNotice(invite,store.GENERATORTYPE.NOTICE_1);
                 beInvited.length && deelNotice([beInvited],store.GENERATORTYPE.NOTICE_2);
                 // 获取全部游戏
