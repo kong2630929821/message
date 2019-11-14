@@ -293,7 +293,7 @@ export class UserDetail extends Widget {
      */
     public dealData(v:any,r:boolean,t:boolean) {
         return { 
-            ...v,
+            postItem:v,
             showUtils: r,
             followed: t
         };

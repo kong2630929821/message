@@ -301,7 +301,7 @@ export class PostDetail extends Widget {
      */
     public dealData(v:any,r:boolean) {
         return { 
-            ...v,
+            postItem:v,
             showUtils: r 
         };
     }

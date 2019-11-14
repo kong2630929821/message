@@ -87,10 +87,9 @@ export const walletSignIn = (openid) => {
                         const appId = JSON.stringify(r);
                         getAllGameInfo(appId).then(r => {
                             store.setStore('gameList',r);
-                            const tagList = store.getStore('tagList');
+                            const tagList = store.tagListStore;
                             r.forEach(v => {
                                 tagList.push(v.title);
-            
                             });
                             store.setStore('tagList',tagList);
                         });

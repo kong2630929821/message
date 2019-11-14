@@ -13,7 +13,7 @@
     {{if it.activeTab == 0}}
         {{% =================动态====================}}
         {{for i,v of it.postList}}
-        <widget w-tag="chat-client-app-view-home-squareItem">{{v}}</widget>
+        <widget w-tag="chat-client-app-view-home-squareItem">{postItem:{{v}}}</widget>
         {{end}}
 
         {{if it.isMine}}

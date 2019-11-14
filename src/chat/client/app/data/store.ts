@@ -99,6 +99,7 @@ export const unregister = (keyName: string, cb: Function): void => {
     handlerMap.remove(keyName, <any>cb);
 };
 
+export const tagListStore = ['全部','关注'];
 /**
  * store初始化
  */
@@ -137,7 +138,7 @@ export const initStore = () => {
             tagType:-1,
             postList:[]
         },
-        tagList: ['全部','关注'],
+        tagList: tagListStore,
         followNumList:new Map(),
         laudPostList:new Map(),
         postDraft:null,
@@ -237,6 +238,7 @@ export interface PostItem {
     gender:number;  // 性别 0 男 1 女
     comm_type:number; // 社区类型
     label:string; // 对应的是哪一款游戏，可以为空
+    owner:number;
 }
 
 /**
