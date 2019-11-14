@@ -88,7 +88,7 @@ export class Contact extends SpecialWidget {
     constructor() {
         super();
         this.props.tagList = store.getStore('tagList',[]);
-        this.props.labelList = getStore('game/allGame',[]);
+        this.props.labelList = store.getStore('gameList',[]);
     }
 
     public create() {

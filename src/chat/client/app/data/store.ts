@@ -149,7 +149,8 @@ export const initStore = () => {
         fabulousList:[],
         messageData: [[],[],[],[]],
         accIdToUid:new Map(),
-        originalImage:new Map()
+        originalImage:new Map(),
+        gameList:[]
     };
 };
 
@@ -287,6 +288,7 @@ export interface Store {
     messageData:any;// 消息通知列表
     accIdToUid:Map<string,number>;// accID转uid
     originalImage:Map<number,boolean>;// 原图查看记录
+    gameList:any;// 游戏列表
 
 }
 

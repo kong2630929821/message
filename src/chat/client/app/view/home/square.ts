@@ -64,7 +64,7 @@ export class Square extends Widget {
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
                 const label = getStore(`tagList`)[props.active];
-                const game = walletGetStore('game/allGame');
+                const game = getStore(`gameList`);
                 showPost(5,label);
                 gameLabelNum(label).then(r => {
                     let index = null;
@@ -248,7 +248,7 @@ export class Square extends Widget {
      * 玩游戏
      */
     public goGame() {
-        const gameList = walletGetStore('game/allGame');
+        const gameList = getStore(`gameList`);
         gameList.forEach(v => {
             if (v.title === this.props.gameLabel.name) {
                 // 打开游戏

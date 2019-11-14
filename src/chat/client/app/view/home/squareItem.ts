@@ -1,4 +1,3 @@
-import { getStore as walletGetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { gotoSquare } from '../../../../../app/view/base/app';
 import { popModalBoxs } from '../../../../../pi/ui/root';
@@ -89,7 +88,7 @@ export class SquareItem extends Widget {
         this.props.isMine = this.props.owner === uid;
         this.props.followed = judgeFollowed(this.props.key.num);
         if (props.label) {
-            const gameList = walletGetStore('game/allGame');
+            const gameList = getStore('gameList');
             let index = null;
             gameList.forEach((v,i) => {
                 if (v.title === props.label) {

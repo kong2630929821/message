@@ -2,6 +2,7 @@
  * 调用rpc接口
  */
 // ================================================ 导入
+import { erlangLogicIp, getGameImgUrl, shareDownload } from '../../../../app/public/config';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { CommentKey, PostKey } from '../../../server/data/db/community.s';
 import { GroupInfo } from '../../../server/data/db/group.s';
@@ -1020,5 +1021,46 @@ export const gameLabelNum = (label:string) => {
         clientRpcFunc(getLabelPostCount,label,(r:number) => {
             res(r);
         });
+    });
+};
+
+// 获取全部游戏
+export const getAllGameList = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 获取全部游戏详情
+export const getAllGameInfo = (ids:string) => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
+        return res.json().then(r => {
+            const res = r.app_details;
+            const gameList = [];
+            res.forEach(v => {
+                const name = v[0];
+                const img = JSON.parse(v[1]);
+                const desc = JSON.parse(v[2]);
+                const url = v[3];
+                gameList.push({
+                    ...desc,
+                    title:name,
+                    desc:desc.desc,
+                    img:[`${getGameImgUrl}${img.icon}`,`${getGameImgUrl}${img.bg}`],
+                    url,
+                    apkDownloadUrl:shareDownload
+                });
+            });
+            
+            return gameList;
+        }). catch (e => {
+            return [];
+        });
+      
     });
 };
