@@ -197,6 +197,7 @@ export class Square extends Widget {
      * 组装squareItem的数据
      */
     public dealData(v:any,r:boolean) {
+        debugger;
         return { 
             postItem:v,
             showUtils: r 

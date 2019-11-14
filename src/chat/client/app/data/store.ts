@@ -224,22 +224,50 @@ enum POST_TYPE  {
     PUBLIC= 1// 公众号文章
 }
 
+interface PostKey{
+    id:number;
+    num:string;
+}
+
 // 帖子内容
 export interface PostItem {
-    key:any;   // 帖子ID及社区编号
-    username:string; // 用户名
-    avatar:string; // 头像
-    commentCount:number;  // 评论数量
-    likeCount:number;   // 点赞数量
-    createtime:string;      // 创建时间
-    content:string;     // 内容
-    imgs:string[];  // 图片列表
-    postType:POST_TYPE; // 文章类型
-    gender:number;  // 性别 0 男 1 女
-    comm_type:number; // 社区类型
-    label:string; // 对应的是哪一款游戏，可以为空
-    owner:number;
+    // key:any;   // 帖子ID及社区编号
+    // username:string; // 用户名
+    // avatar:string; // 头像
+    // commentCount:number;  // 评论数量
+    // likeCount:number;   // 点赞数量
+    // createtime:string;      // 创建时间
+    // content:string;     // 内容
+    // imgs:string[];  // 图片列表
+    // postType:POST_TYPE; // 文章类型
+    // gender:number;  // 性别 0 男 1 女
+    // comm_type:number; // 社区类型
+    // label:string; // 对应的是哪一款游戏，可以为空
+    // owner:number;
+    avatar: string;
+    body: string;
+    collectCount: number;
+    comm_type: number;
+    commentCount: number;
+    content: string;
+    createtime: number;
+    forwardCount: number;
+    gender: number;
+    imgs: Array<string>;
+    isPublic: boolean;
+    key: PostKey;
+    label: string;
+    likeCount: number;
+    offcial: boolean;
+    owner: number;
+    post_type: number;
+    state: number;
+    title: string;
+    username: string;
+
 }
+
+
 
 /**
  * Store的声明

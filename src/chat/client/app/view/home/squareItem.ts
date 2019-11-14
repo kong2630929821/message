@@ -79,14 +79,14 @@ export class SquareItem extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.props.postItem.avatar = buildupImgPath(props.postItem.avatar);
+        this.props.postItem.avatar = buildupImgPath(props.avatar);
         const uid = getStore('uid',0);
         this.props.isMine = this.props.postItem.owner === uid;
         this.props.followed = judgeFollowed(this.props.postItem.key.num);
         this.props.likeActive = judgeLiked(this.props.postItem.key.num,this.props.postItem.key.id);
         const gameList = getStore('gameList');
-        if (props.postItem.label && gameList.length) {
-            const currentItem = gameList.find(item => item.title === props.postItem.label);
+        if (props.label && gameList.length) {
+            const currentItem = gameList.find(item => item.title === props.label);
             this.props.gameLabel = {
                 name:currentItem.title,
                 icon:currentItem.img[0]

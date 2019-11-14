@@ -67,7 +67,7 @@ export const clientRpcFunc = (name: string, req: any, callback: Function, timeou
         }
     }
     if (mqtt && !mqtt.getState()) {
-        popNewMessage(`网络连接中！！！！`);
+        popNewMessage(`网络连接中`);
 
         return;
     }

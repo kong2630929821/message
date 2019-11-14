@@ -593,6 +593,9 @@ export const showUserFollow = (num_type:number = 1) => {
     });
 };
 
+
+
+
 /**
  * 获取最新的帖子  
  */
@@ -615,7 +618,7 @@ export const showPost = (square_type:number, label:string= '',num:string = '', i
                 console.log('showPost=============',r);
                 // let postList = store.getStore('postList',[]);
                 if (r && r.list && r.list.length) {
-                    const data:any = r.list;
+                    const data:PostItem = r.list;//TODO:
                     data.forEach((res,i) => {
                         data[i].offcial = res.comm_type === CommType.official;
                         data[i].isPublic = res.comm_type === CommType.publicAcc;
@@ -740,7 +743,7 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
         clientRpcFunc(getUserPost,param,(r) => {
             console.log('getUserPost=============',r);
             if (r && r.list) {
-                const data:any = r.list;
+                const data:PostItem = r.list;
                 
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;

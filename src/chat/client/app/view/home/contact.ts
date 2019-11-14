@@ -86,6 +86,11 @@ export class Contact extends SpecialWidget {
         labelList:[],
         gameName:''
     };
+    constructor() {
+        super();
+        this.props.tagList = store.getStore('tagList',[]);
+        this.props.labelList = getStore('game/allGame',[]);
+    }
 
     public create() {
         super.create();
@@ -105,8 +110,6 @@ export class Contact extends SpecialWidget {
             ...this.props,
             ...props
         };
-        this.props.tagList = store.getStore('tagList',[]);
-        this.props.labelList = store.getStore('gameList',[]);
     }
 
     public initDate() {
