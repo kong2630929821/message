@@ -85,11 +85,6 @@ export class Contact extends SpecialWidget {
         labelList:[],
         gameName:''
     };
-    constructor() {
-        super();
-        this.props.tagList = store.getStore('tagList',[]);
-        this.props.labelList = store.getStore('gameList',[]);
-    }
 
     public create() {
         super.create();
@@ -110,6 +105,8 @@ export class Contact extends SpecialWidget {
             ...this.props,
             ...props
         };
+        this.props.tagList = store.getStore('tagList',[]);
+        this.props.labelList = store.getStore('gameList',[]);
     }
 
     public initDate() {
@@ -170,15 +167,10 @@ export class Contact extends SpecialWidget {
                     icon:''
                 };
                 if (this.props.acTag >= 2) {
-                    let index = null;
-                    this.props.labelList.forEach((v,i) => {
-                        if (v.title === this.props.tagList[this.props.acTag]) {
-                            index = i;
-                        }
-                    });
+                    const currentItem = this.props.labelList.find(item => item.title === this.props.tagList[this.props.acTag]);
                     label = {
                         name:this.props.tagList[this.props.acTag],
-                        icon:this.props.labelList[index].img[0]
+                        icon:currentItem.img[0]
                     };
                 }
                 popNew3('chat-client-app-view-info-editPost',{ isPublic:false,label },() => {

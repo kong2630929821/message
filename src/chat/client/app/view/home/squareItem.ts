@@ -87,17 +87,12 @@ export class SquareItem extends Widget {
         const uid = getStore('uid',0);
         this.props.isMine = this.props.owner === uid;
         this.props.followed = judgeFollowed(this.props.key.num);
-        if (props.label) {
-            const gameList = getStore('gameList');
-            let index = null;
-            gameList.forEach((v,i) => {
-                if (v.title === props.label) {
-                    index = i;
-                }
-            });
+        const gameList = getStore('gameList');
+        if (props.label && gameList.length) {
+            const currentItem = gameList.find(item => item.title === props.label);
             this.props.gameLabel = {
-                name:gameList[index].title,
-                icon:gameList[index].img[0]
+                name:currentItem.title,
+                icon:currentItem.img[0]
             };
         }
         // 动态详情中隐藏工具栏
