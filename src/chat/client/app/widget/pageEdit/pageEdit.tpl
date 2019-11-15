@@ -1,6 +1,6 @@
 <div class="new-page" w-class="new-page">
     <div ev-back-click="goBack" ev-next-click="completeEdit" w-class="topBar">
-        <chat-client-app-widget1-topBar-topBar>{title:{{it.title}},nextImg:"complete_blue.png"}</chat-client-app-widget1-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar>{title:{{it.title}},nextImg:{{it.contentInput?'complete_blue.png':'complete_gray.png'}}}</chat-client-app-widget1-topBar-topBar>
     </div>
     {{if it.needTitle}}
     <div ev-input-change="inputChange" w-class="title-wrap">
