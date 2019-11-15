@@ -295,9 +295,11 @@ export class PostDetail extends Widget {
         this.paint();
     }
 
-    public pageClick() {
+    public pageClick(isShow:boolean= true) {
         this.props.expandItem = -1;
-        this.props.expandItemTop = !this.props.expandItemTop;
+        if (isShow) {
+            this.props.expandItemTop = !this.props.expandItemTop;
+        }
         this.paint();
     }
 

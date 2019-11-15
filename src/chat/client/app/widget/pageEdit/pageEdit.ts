@@ -26,7 +26,7 @@ export class PageEdit extends Widget {
     public setProps(props:any) {
         super.setProps(props);
         this.props.count = 0;
-        this.props.placeholder = props.contentInput || '内容（必填）15-500字';
+        this.props.placeholder = props.contentInput || '内容 0-140字';
     }
 
     public goBack() {
