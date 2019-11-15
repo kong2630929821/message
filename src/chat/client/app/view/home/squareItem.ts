@@ -190,6 +190,7 @@ export class SquareItem extends Widget {
                 }
             });
         }
+        notify(e.node,'ev-close-expand',null);
     }
 
     /**

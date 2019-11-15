@@ -5,8 +5,9 @@
             {{if it.postItem.isPublic}}
             <div w-class="title">{{it.postItem.title}}</div>
             {{end}}
-            <widget w-tag="chat-client-app-view-home-squareItem" style="padding-bottom: 20px;">{{it}}</widget>
-
+            <div ev-close-expand="pageClick" ev-tools-expand ="pageClick" >
+                <widget w-tag="chat-client-app-view-home-squareItem" style="padding-bottom: 20px;">{{it}}</widget>
+            </div>
 
             <div w-class="postBottom">
                 <div w-class="tabs">

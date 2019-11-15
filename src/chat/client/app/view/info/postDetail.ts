@@ -1,9 +1,7 @@
 import { popNew } from '../../../../../pi/ui/root';
-import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
-import { GroupInfo } from '../../../../server/data/db/group.s';
 import { getStore, PostItem, setStore } from '../../data/store';
-import { buildupImgPath, getUserAvatar, judgeLiked, timestampFormat } from '../../logic/logic';
+import { buildupImgPath, judgeLiked, timestampFormat } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
 import { getCommentLaudList, getPostDetile, postLaud, showComment, showLikeList } from '../../net/rpc';
 
@@ -126,6 +124,7 @@ export class PostDetail extends Widget {
 
     // 切换tab
     public changeTab(tab: string) {
+        this.pageClick();
         this.props.active = tab;
         this.paint();
     }
