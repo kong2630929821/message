@@ -8,7 +8,7 @@
     {{for i, v of it.tabBarList}}
     <div ev-change-tag="labelChangeTag" style="visibility: {{v.modulName == it.activeTab ? 'visible' : 'hidden'}}; z-index:{{v.modulName == it.activeTab ? 0 :-1}}; position:absolute;top:164px;bottom: 110px; width:100%;">
         <widget  w-tag={{v.components}}>{isActive:{{v.modulName == it.activeTab}},active:{{it.acTag}},newApply:{{show}} }</widget>
-        {{if it.showTag && i===0}}
+        {{if it.showTag && i == 0}}
         <div w-props="hello" style="background:#fff;width:100%;padding-bottom: 20px;position: absolute;top:0;">
             <div w-class="title">分类标签</div>
             <div w-class="tagList">

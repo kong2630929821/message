@@ -121,6 +121,8 @@ export const  setUserInfo = async () => {
         return;
     }
     init2.clientRpcFunc(changeUserInfo, r, async (res) => {
+        console.log('setUserInfo ',res);
+
         if (res && res.uid > 0) {
             const user = await getStoreData('user');
             res.acc_id = user.acc_id;

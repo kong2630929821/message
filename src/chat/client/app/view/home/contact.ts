@@ -9,7 +9,6 @@ import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offl
 import { getStore } from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
-import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
@@ -116,26 +115,34 @@ export class Contact extends SpecialWidget {
         const uid = store.getStore('uid', 0);
         this.props.isLogin = !!uid;
         this.props.activeTab = TAB.square;
-        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         if (this.props.isLogin) {   // 聊天已登录成功
-            getStoreData('user',{ info:{},id:'' }).then(wUser => {
-                // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
-                if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id || wUser.info.sex !== cUser.sex || wUser.info.phoneNumber !== cUser.tel || wUser.info.note !== cUser.note) {
-                    if (this.props.isLogin && wUser.info.nickName) { // 钱包和聊天都已登陆
-                        setUserInfo();
-                    } else if (cUser.uid) {  // 聊天已登录
-                        store.initStore();
-                        this.state.lastChat = []; // 清空记录 lastChat
-                        this.paint();
-                    }
-                } 
-            });
+            this.changeUserinfo();
         }
+    }
+
+    public changeUserinfo() {
+        const uid = store.getStore('uid', 0);
+        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
+     
+        getStoreData('user',{ info:{},id:'' }).then(wUser => {
+            // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
+            if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id || wUser.info.sex !== cUser.sex || wUser.info.phoneNumber !== cUser.tel || wUser.info.note !== cUser.note) {
+                if (this.props.isLogin && wUser.info.nickName) { // 钱包和聊天都已登陆
+                    setUserInfo();
+                } else if (cUser.uid) {  // 聊天已登录
+                    store.initStore();
+                    this.state.lastChat = []; // 清空记录 lastChat
+                    this.paint();
+                }
+            } 
+        });
     }
     public firstPaint() {
         super.firstPaint();
         registerStoreData('user/info',() => { // 钱包用户信息修改
-            this.setProps(this.props);  
+            if (this.props.isLogin) {   // 聊天已登录成功
+                this.changeUserinfo();
+            }
         });
         store.register('uid',() => {  // 聊天用户登陆成功
             this.setProps(this.props);
@@ -227,9 +234,13 @@ export class Contact extends SpecialWidget {
     public changeTab(e:any) {        
         this.closeMore();
         this.props.activeTab = e.activeTab;
-        this.props.showTag = e.showTag;
-        notify(e.node,'ev-chat-square-change-tab',{ activeTab:this.props.activeTab });
+        if (e.activeTab === TAB.square) {
+            this.props.showTag = e.showTag;
+        } else {
+            this.props.showTag = false;
+        }
         this.paint();
+        // notify(e.node,'ev-chat-square-change-tab',{ activeTab:this.props.activeTab });
     }
     // 切换tag
     public changeTagItem(ind:number) {
@@ -251,7 +262,7 @@ export class Contact extends SpecialWidget {
 
     public labelChangeTag(e:any) {
         this.props.acTag = e.value;
-        this.paint();
+        this.paint(true);
     }
 
 }
