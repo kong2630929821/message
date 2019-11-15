@@ -1,4 +1,3 @@
-import { getStore as walletGetStore } from '../../../../../app/store/memstore';
 import { popNew3 } from '../../../../../app/utils/tools';
 import { gotoSquare } from '../../../../../app/view/base/app';
 import { popModalBoxs } from '../../../../../pi/ui/root';
@@ -8,30 +7,18 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { REPORT_ARTICLE, REPORT_POST } from '../../../../server/data/constant';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { updateUserMessage } from '../../data/parse';
-import { getStore } from '../../data/store';
+import { getStore, PostItem, setStore } from '../../data/store';
 import { buildupImgPath, complaintUser, judgeFollowed, judgeLiked, timestampFormat } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
-import { delPost, follow, sendUserMsg } from '../../net/rpc';
+import { delPost, follow, postLaud, sendUserMsg } from '../../net/rpc';
 
 const imgSize = 180;// 多个图片的显示大小
 const imgInterval = 17;// 图片的间隔
 interface Props {
-    key:any;   // 帖子ID及社区编号
-    username:string;
-    avatar:string;
-    owner:number;  // 用户UID
-    commentCount:number;  // 评论数量
-    likeCount:number;   // 点赞数量
-    createtime:string;      // 创建时间
-    content:string;     // 内容
+    postItem:PostItem;
     showAll:boolean;  // 详情页面
     showUtils:boolean;  // 显示操作
     likeActive:boolean;  // 点赞
-    followed:boolean;  // 已关注
-    imgs:string[];  // 图片列表
-    offical:boolean;  // 官方
-    isPublic:boolean; // 公众号文章
-    gender:number;  // 性别 0 女 1 男
     isMine:boolean;  // 是否本人发的帖
     timeFormat:any;  // 时间处理
     fgStatus:boolean;// 关注动画
@@ -40,31 +27,42 @@ interface Props {
     imgWidth:number;// 一张图片的宽
     imgHeight:number;// 一张图片的高
     gameLabel:any;// 游戏标签
+    isUserDetailPage:boolean;// 用户详情页面的postItem
 }
 /**
  * 广场帖子
  */
 export class SquareItem extends Widget {
     public props:Props = {
-        key:{
-            id:0,
-            num:''
+        postItem:{
+            key:{
+                id:0,
+                num:''
+            },  // 帖子ID及社区编号
+            username:'用户名', // 用户名
+            avatar:'', // 头像
+            commentCount:0 , // 评论数量
+            likeCount:0,   // 点赞数量
+            createtime:0,     // 创建时间
+            content:'',     // 内容
+            imgs:[],  // 图片列表
+            post_type:0, // 文章类型
+            gender:2, // 性别 0 男 1 女
+            comm_type:0, // 社区类型
+            owner:0,
+            label:'', // 对应的是哪一款游戏，可以为空，
+            isPublic:false,// 公众号文章
+            followed:false,
+            offcial:false,// 官方
+            body:'',
+            state: 0,
+            title: '',
+            collectCount:0,
+            forwardCount:0
         },
-        username:'用户名',
-        avatar:'',
-        owner:0,
-        commentCount:0,
-        likeCount:15,
-        createtime:'',
-        content:'',
         showAll:false,
         showUtils:false,
         likeActive:false,
-        followed:false,
-        isPublic:false,
-        imgs:[],
-        offical:false,
-        gender:2,   // 性别 0女 1男
         isMine:false,
         timeFormat:timestampFormat,
         fgStatus:false,
@@ -75,7 +73,8 @@ export class SquareItem extends Widget {
         gameLabel:{
             name:'',
             icon:''
-        }
+        },
+        isUserDetailPage:false
     };
 
     public setProps(props:any) {
@@ -84,27 +83,29 @@ export class SquareItem extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.props.avatar = buildupImgPath(props.avatar);
+        this.props.postItem.avatar = buildupImgPath(props.postItem.avatar);
         const uid = getStore('uid',0);
-        this.props.isMine = this.props.owner === uid;
-        this.props.followed = judgeFollowed(this.props.key.num);
-        if (props.label) {
-            const gameList = walletGetStore('game/allGame');
-            let index = null;
-            gameList.forEach((v,i) => {
-                if (v.title === props.label) {
-                    index = i;
-                }
-            });
+        this.props.isMine = this.props.postItem.owner === uid;
+        this.props.postItem.followed = judgeFollowed(this.props.postItem.key.num);
+        this.props.likeActive = judgeLiked(this.props.postItem.key.num,this.props.postItem.key.id);
+        const gameList = getStore('gameList');
+        if (props.postItem.label && gameList.length) {
+            const currentItem = gameList.find(item => item.title === this.props.postItem.label);
             this.props.gameLabel = {
-                name:gameList[index].title,
-                icon:gameList[index].img[0]
+                name:currentItem.title,
+                icon:currentItem.img[0]
             };
+        } else {
+            this.props.gameLabel = {
+                name:'',
+                icon:''
+            }; 
         }
         // 动态详情中隐藏工具栏
-        if (props.expandItemTop !== undefined) {
+        if (!props.expandItemTop) {
             this.props.showUtils = false;
         }
+
         this.calcImg();
     }
 
@@ -139,7 +140,23 @@ export class SquareItem extends Widget {
      */
     public likeBtn(e:any) {
         this.closeUtils(e);
-        notify(e.node,'ev-likeBtn',{ value:this.props.key });
+        postLaud(this.props.postItem.key.num, this.props.postItem.key.id).then(() => {
+            if (this.props.likeActive) {
+                this.props.postItem.likeCount -= 1;
+                this.props.likeActive = false;
+            } else {
+                this.props.postItem.likeCount += 1;
+                this.props.likeActive = true;
+            }
+            const list =  getStore('postReturn');
+            const postList = list.postList ? list.postList :list;
+            const current = postList.find(item => JSON.stringify(item.key) === JSON.stringify(this.props.postItem.key));
+            if (current) {
+                current.likeCount = this.props.postItem.likeCount;
+            }
+            setStore('postReturn',list);
+            this.paint();
+        });
     }
 
     /**
@@ -148,10 +165,10 @@ export class SquareItem extends Widget {
     public doComment(e:any) {
         this.closeUtils(e);
         // 当评论数量大于0则跳转详情
-        if (this.props.commentCount > 0) {
+        if (this.props.postItem.commentCount > 0) {
             this.goDetail(e);
         } else {
-            notify(e.node,'ev-commentBtn',{ value:this.props.key });
+            notify(e.node,'ev-commentBtn',{ value:this.props.postItem.key });
         }
        
     }
@@ -168,15 +185,17 @@ export class SquareItem extends Widget {
      */
     public goUserDetail(e:any) {
         this.closeUtils(e);
-        if (this.props.isPublic) {
-            popNew3('chat-client-app-view-person-publicHome', { uid: this.props.owner, pubNum: this.props.key.num });
+        if (this.props.postItem.isPublic) {
+            popNew3('chat-client-app-view-person-publicHome', { uid: this.props.postItem.owner, pubNum: this.props.postItem.key.num });
         } else {
-            popNew3('chat-client-app-view-info-userDetail', { uid: this.props.owner, num:this.props.key.num },(value) => {
+            if (this.props.isUserDetailPage) return;
+            popNew3('chat-client-app-view-info-userDetail', { uid: this.props.postItem.owner, num:this.props.postItem.key.num },(value) => {
                 if (value !== undefined) {
                     gotoSquare(value);
                 }
             });
         }
+        notify(e.node,'ev-close-expand',null);
     }
 
     /**
@@ -184,9 +203,9 @@ export class SquareItem extends Widget {
      */
     public complaint(e:any) {
         this.closeUtils(e);
-        const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        const key = `${this.props.isPublic ? REPORT_ARTICLE :REPORT_POST}%${JSON.stringify(this.props.key)}`;
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,this.props.content,this.props.isPublic ? REPORT_ARTICLE :REPORT_POST,key);
+        const avatar = this.props.postItem.avatar ? buildupImgPath(this.props.postItem.avatar) :'../../res/images/user_avatar.png';
+        const key = `${this.props.postItem.isPublic ? REPORT_ARTICLE :REPORT_POST}%${JSON.stringify(this.props.postItem.key)}`;
+        complaintUser(`${this.props.postItem.username} 的内容`,this.props.postItem.gender,avatar,this.props.postItem.content,this.props.postItem.isPublic ? REPORT_ARTICLE :REPORT_POST,key);
     }
 
     /**
@@ -195,8 +214,8 @@ export class SquareItem extends Widget {
     public delPost(e:any) {
         this.closeUtils(e);
         popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除',content:'确定删除该动态或文章？' },() => {
-            delPost(this.props.key.num,this.props.key.id).then(r => {
-                notify(e.node,'ev-delBtn',{ value:this.props.key });
+            delPost(this.props.postItem.key.num,this.props.postItem.key.id).then(r => {
+                notify(e.node,'ev-delBtn',{ value:this.props.postItem.key });
                 this.paint();
             });
         });
@@ -208,10 +227,10 @@ export class SquareItem extends Widget {
      */
     public followUser(e:any) {
         this.closeUtils(e);
-        if (this.props.followed) {
+        if (this.props.postItem.followed) {
             popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'取消关注',content:'确定取消关注？' },() => {
-                follow(this.props.key.num);
-                this.props.followed = false;
+                follow(this.props.postItem.key.num);
+                this.props.postItem.followed = false;
                 this.paint();
             });
         } else {
@@ -219,14 +238,13 @@ export class SquareItem extends Widget {
             this.paint();
             setTimeout(() => {
                 this.props.fgStatus = false;
-                this.props.followed = true;
+                this.props.postItem.followed = true;
                 popNewMessage('关注成功');
                 this.paint();
-                follow(this.props.key.num);
+                follow(this.props.postItem.key.num);
             },400);
             
         }
-        
     }
 
     /**
@@ -249,9 +267,9 @@ export class SquareItem extends Widget {
      */
     public showBigImg(ind:number) {
         // 判断是否查看过原图
-        const key = this.props.key.id;
+        const key = this.props.postItem.key.id;
         let value = [];
-        this.props.imgs.forEach(v => {
+        this.props.postItem.imgs.forEach(v => {
             value.push(false);
         });
         const originalImage = getStore('originalImage');
@@ -262,7 +280,7 @@ export class SquareItem extends Widget {
         }
         const val = [];
         const icon = [];
-        this.props.imgs.forEach((v:any) => {
+        this.props.postItem.imgs.forEach((v:any) => {
             icon.push(buildupImgPath(v.compressImg));
             val.push(buildupImgPath(v.originalImg));
         });
@@ -279,10 +297,10 @@ export class SquareItem extends Widget {
      * 计算一张图片宽高
      */
     public calcImg() {
-        if (this.props.imgs.length !== 1) {
+        if (this.props.postItem.imgs.length !== 1) {
             return;
         }
-        const src = buildupImgPath(this.props.imgs[0].compressImg);
+        const src = buildupImgPath(this.props.postItem.imgs[0].compressImg);
         const img = new Image();
         img.src = src;
         img.onload = () => {

@@ -3,7 +3,6 @@ import { getStore as walletGetStore,setStore as walletSetStore } from '../../../
 import { popNew3 } from '../../../../../app/utils/tools';
 import { gotoSquare } from '../../../../../app/view/base/app';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
-import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register } from '../../data/store';
@@ -45,7 +44,7 @@ export class Square extends Widget {
     };    
 
     constructor() {
-        super();                
+        super();
         getStore(`tagList`,[]).forEach((tag) => {
             this.props.postView.push([tag, {
                 expandItem:-1,
@@ -64,7 +63,7 @@ export class Square extends Widget {
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
                 const label = getStore(`tagList`)[props.active];
-                const game = walletGetStore('game/allGame');
+                const game = getStore(`gameList`);
                 showPost(5,label);
                 gameLabelNum(label).then(r => {
                     let index = null;
@@ -83,16 +82,15 @@ export class Square extends Widget {
                 });
             } else {
                 showPost(props.active + 1,'');
-            }            
-            
+            } 
         }
         this.props = {
             ...this.props,
             ...props
         };
         super.setProps(this.props);
-        // this.state = state;        
-        this.init(this.props.active);        
+        // this.state = state;  
+        this.init(this.props.active);     
     }
     // public firstPaint() {
     //     super.firstPaint();
@@ -133,13 +131,19 @@ export class Square extends Widget {
 
             return;
         }
+        // 加载第一页
         if (this.state.postReturn.id === 0 && this.state.postReturn.num === '') {
             this.props.postView[this.state.postReturn.tagType - 1][1].expandItem = -1;
             this.props.postView[this.state.postReturn.tagType - 1][1].postList = this.state.postReturn.postList;
             // this.props.postView[this.state.postReturn.tagType - 1][1].canRequest = true;
             this.props.postView[this.state.postReturn.tagType - 1][1].isLoading = false;
             // this.props.postView[this.state.postReturn.tagType - 1][1].isShowAnimation = false;        
+            
+            // 回滚到顶部
+            const  squarePage = document.querySelector('#squarePage');     
+            squarePage ? squarePage.scrollTop = 0 :'';
         } else {
+        // 加载第2页数据
             this.props.postView[this.state.postReturn.tagType - 1][1].expandItem = -1;
             this.props.postView[this.state.postReturn.tagType - 1][1].postList = 
                 this.props.postView[this.state.postReturn.tagType - 1][1].postList.concat(this.state.postReturn.postList);
@@ -147,24 +151,9 @@ export class Square extends Widget {
             this.props.postView[this.state.postReturn.tagType - 1][1].isLoading = false;
             // this.props.postView[this.state.postReturn.tagType - 1][1].isShowAnimation = false;        
         }
+       
     }
     
-    /**
-     * 点赞
-     */
-    public likeBtn(i:number) {
-        const v = this.props.postView[this.props.active][1].postList[i];
-        v.likeActive = !v.likeActive;
-        v.likeCount += v.likeActive ? 1 :-1;
-        this.paint();
-        postLaud(v.key.num, v.key.id, () => {
-            // 失败了则撤销点赞或取消点赞操作
-            v.likeActive = !v.likeActive;
-            v.likeCount += v.likeActive ? 1 :-1;
-            this.paint();
-        });
-    }
-
     /**
      * 评论
      */
@@ -173,7 +162,7 @@ export class Square extends Widget {
         popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
             v.commentCount ++;
             this.paint();
-            popNew3('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
+            popNew3('chat-client-app-view-info-postDetail',{ postItem:v,showAll:true });
         });
     }
 
@@ -189,7 +178,7 @@ export class Square extends Widget {
      * 查看详情
      */
     public goDetail(i:number) {
-        popNew3('chat-client-app-view-info-postDetail',{ ... this.props.postView[this.props.active][1].postList[i],showAll:true },(value) => {
+        popNew3('chat-client-app-view-info-postDetail',{ postItem:this.props.postView[this.props.active][1].postList[i],showAll:true },(value) => {
             if (value !== undefined) {
                 gotoSquare(value);
             }
@@ -214,7 +203,7 @@ export class Square extends Widget {
      */
     public dealData(v:any,r:boolean) {
         return { 
-            ...v,
+            postItem:v,
             showUtils: r 
         };
     }
@@ -248,7 +237,7 @@ export class Square extends Widget {
      * 玩游戏
      */
     public goGame() {
-        const gameList = walletGetStore('game/allGame');
+        const gameList = getStore(`gameList`);
         gameList.forEach(v => {
             if (v.title === this.props.gameLabel.name) {
                 // 打开游戏
@@ -278,7 +267,6 @@ type postReturn = {
 
 interface State {
     followList:FollwList;
-    likeList:any[];
     postReturn:postReturn;
 }
 
@@ -287,7 +275,6 @@ const state:State = {
         person_list:[],
         public_list:[]
     },
-    likeList:[],
     postReturn:{
         id:-1,
         num:'',
@@ -296,7 +283,7 @@ const state:State = {
     }
 };
 
-// 关注列表
+// 关注列表  用于维护该用户的所有帖子是否关注，而不是当前这一个
 register('followNumList',r => {
     const w:any = forelet.getWidget(WIDGET_NAME);
     if (w) {
@@ -310,29 +297,30 @@ register('followNumList',r => {
                 w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].followed = list.indexOf(v.key.num) > -1;
             });
         }
-   
         forelet.paint(state);
     }
 });
-// 点赞列表
-register('laudPostList',r => {
-    const w:any = forelet.getWidget(WIDGET_NAME);
-    if (w) {
-        if (w.state.postReturn.tagType === -1) {
-            return;
-        }
-        for (const value of r.values()) {
-            state.likeList = value.list;
-            w.props.postView[w.state.postReturn.tagType - 1][1].postList.forEach((v,i) => {
-                w.props.postView[w.state.postReturn.tagType - 1][1].postList[i].likeActive = state.likeList.findIndex(r => r.num === v.key.num && r.id === v.key.id) > -1;
-            });
-        }
-        
-        forelet.paint(state);
-    }
-});
+
 // 帖子数据
 register('postReturn',r => {    
     state.postReturn = r;    
     forelet.paint(state);
+});
+
+// 监听游戏标签变化
+register('tagList',r => {   
+    const w:any = forelet.getWidget(WIDGET_NAME);
+    if (w) {
+        w.props.postView = [];
+        r.forEach((tag) => {
+            w.props.postView.push([tag, {
+                expandItem:-1,
+                postList:[],
+                // canRequest:true,
+                isLoading:false
+                // isShowAnimation:false
+            }]);
+        }); 
+        w.paint(); 
+    } 
 });

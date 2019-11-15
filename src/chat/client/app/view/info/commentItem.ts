@@ -134,7 +134,7 @@ export class CommentItem extends Widget {
         this.closeUtils(e);
         // 复制未解析的评论文字
         const val = this.props.msg ? JSON.parse(this.props.msg) :{ msg:'',img:'' };  
-        copyToClipboard(val);
+        copyToClipboard(val.msg);
         popNewMessage('复制成功');
     }
 

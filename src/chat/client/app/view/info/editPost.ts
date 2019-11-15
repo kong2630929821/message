@@ -105,6 +105,7 @@ export class EditPost extends Widget {
     // 内容
     public contentChange(e:any) {
         this.props.contentInput = e.value;
+        this.paint();
     }
 
     // 修复点开表情再编辑字出现标签和键盘同时存在

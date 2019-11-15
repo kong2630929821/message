@@ -193,8 +193,10 @@ export class OpenPublic extends Widget {
 registerStoreData('user/info', () => {
     getUserInfo().then(userInfo => {
         STATE.phone = userInfo.phoneNumber;
-        const str = String(userInfo.tel).substr(3, 6);
-        STATE.phone = userInfo.tel.replace(str, '******');
+        if (userInfo.tel) {
+            const str = String(userInfo.tel).substr(3, 6);
+            STATE.phone = userInfo.tel.replace(str, '******');
+        }
         forelet.paint(STATE);
     });
 });
