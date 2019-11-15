@@ -231,42 +231,44 @@ interface PostKey{
 
 // 帖子内容
 export interface PostItem {
-    // key:any;   // 帖子ID及社区编号
-    // username:string; // 用户名
-    // avatar:string; // 头像
-    // commentCount:number;  // 评论数量
-    // likeCount:number;   // 点赞数量
-    // createtime:string;      // 创建时间
-    // content:string;     // 内容
-    // imgs:string[];  // 图片列表
-    // postType:POST_TYPE; // 文章类型
-    // gender:number;  // 性别 0 男 1 女
-    // comm_type:number; // 社区类型
-    // label:string; // 对应的是哪一款游戏，可以为空
-    // owner:number;
-    avatar: string;
+    avatar: string; // 头像
     body: string;
     collectCount: number;
-    comm_type: number;
-    commentCount: number;
-    content: string;
-    createtime: number;
+    comm_type: number;// 社区类型
+    commentCount: number;// 评论数量
+    content: string;// 内容
+    createtime: number; // 创建时间
     forwardCount: number;
-    gender: number;
-    imgs: Array<string>;
+    gender: number; // 性别 0 男 1 女
+    imgs: Array<string>;// 图片列表
     isPublic: boolean;
-    key: PostKey;
-    label: string;
-    likeCount: number;
+    key: PostKey; // 帖子ID及社区编号
+    label: string;// 对应的是哪一款游戏，可以为空
+    likeCount: number;// 点赞数量
     offcial: boolean;
-    owner: number;
-    post_type: number;
+    owner: number;//发帖的用户ID
+    post_type: number;// 文章类型
     state: number;
     title: string;
-    username: string;
-
+    username: string;// 用户名
+    followed:boolean;//是否关注
 }
 
+interface GameList{
+    usePi:boolean,
+    title:string,//游戏名
+    desc:string,//游戏描述
+    img:Array<string>,//游戏图片
+    url:string,//游戏路径
+    apkDownloadUrl:string,
+    webviewName:string,
+    buttonMod:number,   // 当前按钮模式
+    accId:string,
+    groupId:number,
+    appid:string,
+    screenMode:string// 横屏
+    htmlUrl:string
+}
 
 
 /**
@@ -316,7 +318,7 @@ export interface Store {
     messageData:any;// 消息通知列表
     accIdToUid:Map<string,number>;// accID转uid
     originalImage:Map<number,boolean>;// 原图查看记录
-    gameList:any;// 游戏列表
+    gameList:GameList;// 游戏列表
 
 }
 

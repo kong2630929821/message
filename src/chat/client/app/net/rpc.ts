@@ -623,6 +623,7 @@ export const showPost = (square_type:number, label:string= '',num:string = '', i
                         data[i].offcial = res.comm_type === CommType.official;
                         data[i].isPublic = res.comm_type === CommType.publicAcc;
                         data[i].owner = res.owner;
+                        data[i].followed = judgeFollowed(res.key.num);
                         if (data[i].isPublic) {
                             data[i].content = res.body;
                             data[i].imgs = '';
@@ -753,6 +754,7 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
                     const reg = /\#([^#]*)\#/gm;
                     data[i].content = parseEmoji(body.msg).replace(reg,'');
                     data[i].owner = res.owner;
+                    data[i].followed = judgeFollowed(res.key.num);
                     data[i].label = body.msg.match(reg) ? body.msg.match(reg)[0].substring(1, body.msg.match(reg)[0].length - 1) :'';
                 });
                 res({ list:data, total: r.total });

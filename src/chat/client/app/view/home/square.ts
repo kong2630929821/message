@@ -197,7 +197,6 @@ export class Square extends Widget {
      * 组装squareItem的数据
      */
     public dealData(v:any,r:boolean) {
-        debugger;
         return { 
             postItem:v,
             showUtils: r 
@@ -279,7 +278,7 @@ const state:State = {
     }
 };
 
-// 关注列表
+// 关注列表  用于维护该用户的所有帖子是否关注，而不是当前这一个
 register('followNumList',r => {
     const w:any = forelet.getWidget(WIDGET_NAME);
     if (w) {
