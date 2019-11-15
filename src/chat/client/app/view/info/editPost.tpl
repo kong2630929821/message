@@ -3,7 +3,7 @@
     <div w-class="topBar">
         <div w-class="topBarItem" on-tap="close">取消</div>
         <div w-class="topBarItem">{{it.title}}</div>
-        <div w-class="topBarItem" style="color:#4285F4" on-tap="send">发布</div>
+        <div w-class="topBarItem" style="color:{{it.contentInput?'#4285F4':'#EEE'}}" on-tap="send">发布</div>
     </div>
     <div w-class="contain">
         {{if it.isPublic}}
