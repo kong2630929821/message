@@ -219,12 +219,12 @@ const registerDataChange = () => {
     
 };
 
-enum POST_TYPE  {
-    OFFICAL= 0, // 官方
-    PUBLIC= 1// 公众号文章
-}
+// enum POST_TYPE  {
+//     OFFICAL= 0, // 官方
+//     PUBLIC= 1// 公众号文章
+// }
 
-interface PostKey{
+interface PostKey {
     id:number;
     num:string;
 }
@@ -240,36 +240,38 @@ export interface PostItem {
     createtime: number; // 创建时间
     forwardCount: number;
     gender: number; // 性别 0 男 1 女
-    imgs: Array<string>;// 图片列表
+    imgs: {
+        compressImg:string;
+        originalImg:string;
+    }[];// 图片列表
     isPublic: boolean;
     key: PostKey; // 帖子ID及社区编号
     label: string;// 对应的是哪一款游戏，可以为空
     likeCount: number;// 点赞数量
     offcial: boolean;
-    owner: number;//发帖的用户ID
+    owner: number;// 发帖的用户ID
     post_type: number;// 文章类型
     state: number;
     title: string;
     username: string;// 用户名
-    followed:boolean;//是否关注
+    followed:boolean;// 是否关注
 }
 
-interface GameList{
-    usePi:boolean,
-    title:string,//游戏名
-    desc:string,//游戏描述
-    img:Array<string>,//游戏图片
-    url:string,//游戏路径
-    apkDownloadUrl:string,
-    webviewName:string,
-    buttonMod:number,   // 当前按钮模式
-    accId:string,
-    groupId:number,
-    appid:string,
-    screenMode:string// 横屏
-    htmlUrl:string
+interface GameItem {
+    usePi:boolean;
+    title:string;// 游戏名
+    desc:string;// 游戏描述
+    img:string[];// 游戏图片
+    url:string;// 游戏路径
+    apkDownloadUrl:string;
+    webviewName:string;
+    buttonMod:number;   // 当前按钮模式
+    accId:string;
+    groupId:number;
+    appid:string;
+    screenMode:string;// 横屏
+    htmlUrl:string;
 }
-
 
 /**
  * Store的声明
@@ -318,7 +320,7 @@ export interface Store {
     messageData:any;// 消息通知列表
     accIdToUid:Map<string,number>;// accID转uid
     originalImage:Map<number,boolean>;// 原图查看记录
-    gameList:GameList;// 游戏列表
+    gameList:GameItem[];// 游戏列表
 
 }
 

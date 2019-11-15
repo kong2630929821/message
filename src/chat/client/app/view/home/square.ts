@@ -6,7 +6,6 @@ import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register } from '../../data/store';
-import { judgeLiked } from '../../logic/logic';
 import { gameLabelNum, postLaud, showPost } from '../../net/rpc';
 
 export const forelet = new Forelet();
@@ -83,8 +82,7 @@ export class Square extends Widget {
                 });
             } else {
                 showPost(props.active + 1,'');
-            }            
-            
+            } 
         }
         this.props = {
             ...this.props,
@@ -92,7 +90,7 @@ export class Square extends Widget {
         };
         super.setProps(this.props);
         // this.state = state;  
-        this.init(this.props.active);        
+        this.init(this.props.active);     
     }
     // public firstPaint() {
     //     super.firstPaint();
@@ -133,13 +131,19 @@ export class Square extends Widget {
 
             return;
         }
+        // 加载第一页
         if (this.state.postReturn.id === 0 && this.state.postReturn.num === '') {
             this.props.postView[this.state.postReturn.tagType - 1][1].expandItem = -1;
             this.props.postView[this.state.postReturn.tagType - 1][1].postList = this.state.postReturn.postList;
             // this.props.postView[this.state.postReturn.tagType - 1][1].canRequest = true;
             this.props.postView[this.state.postReturn.tagType - 1][1].isLoading = false;
             // this.props.postView[this.state.postReturn.tagType - 1][1].isShowAnimation = false;        
+            
+            // 回滚到顶部
+            const  squarePage = document.querySelector('#squarePage');     
+            squarePage ? squarePage.scrollTop = 0 :'';
         } else {
+        // 加载第2页数据
             this.props.postView[this.state.postReturn.tagType - 1][1].expandItem = -1;
             this.props.postView[this.state.postReturn.tagType - 1][1].postList = 
                 this.props.postView[this.state.postReturn.tagType - 1][1].postList.concat(this.state.postReturn.postList);
@@ -147,6 +151,7 @@ export class Square extends Widget {
             this.props.postView[this.state.postReturn.tagType - 1][1].isLoading = false;
             // this.props.postView[this.state.postReturn.tagType - 1][1].isShowAnimation = false;        
         }
+       
     }
     
     /**
