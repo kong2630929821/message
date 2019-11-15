@@ -228,8 +228,8 @@ export class Contact extends SpecialWidget {
         this.closeMore();
         this.props.activeTab = e.activeTab;
         this.props.showTag = e.showTag;
-        this.paint();
         notify(e.node,'ev-chat-square-change-tab',{ activeTab:this.props.activeTab });
+        this.paint();
     }
     // 切换tag
     public changeTagItem(ind:number) {

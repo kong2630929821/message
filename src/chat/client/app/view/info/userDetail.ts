@@ -252,7 +252,7 @@ export class UserDetail extends Widget {
         popNew('chat-client-app-view-info-editComment',{ key:v.key },() => {
             v.commentCount ++;
             this.paint();
-            popNew('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
+            popNew('chat-client-app-view-info-postDetail',{ postItem:v,showAll:true });
         });
     }
 
@@ -268,7 +268,7 @@ export class UserDetail extends Widget {
      * 查看详情
      */
     public goDetail(i:number) {
-        popNew('chat-client-app-view-info-postDetail',{ ...this.props.postList[i],showAll:true },(value) => {
+        popNew('chat-client-app-view-info-postDetail',{ postItem:this.props.postList[i],showAll:true },(value) => {
             if (value !== undefined) {
                 this.ok && this.ok(value);
             }
@@ -295,7 +295,8 @@ export class UserDetail extends Widget {
         return { 
             postItem:v,
             showUtils: r,
-            followed: t
+            followed: t,
+            isUserDetailPage:true
         };
     }
 

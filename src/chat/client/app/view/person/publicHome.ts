@@ -128,7 +128,7 @@ export class PublicHome extends Widget {
      */
     public goDetail(i:number) {
         this.closeUtils();
-        popNew('chat-client-app-view-info-postDetail',{ ...this.props.postList[i],showAll:true });
+        popNew('chat-client-app-view-info-postDetail',{ postItem:this.props.postList[i],showAll:true });
     }
 
     /**
