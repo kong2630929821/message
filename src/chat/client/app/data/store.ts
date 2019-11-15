@@ -99,7 +99,7 @@ export const unregister = (keyName: string, cb: Function): void => {
     handlerMap.remove(keyName, <any>cb);
 };
 
-export const tagListStore = ['全部','关注'];
+export const tagListStore = ['广场','关注'];
 /**
  * store初始化
  */
