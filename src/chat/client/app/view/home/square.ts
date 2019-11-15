@@ -60,13 +60,6 @@ export class Square extends Widget {
         this.state = state;
     }
 
-    public paint(reset?: boolean): void {
-
-        debugger;
-        
-        super.paint(reset);
-
-    }
     public setProps(props:any) {               
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
