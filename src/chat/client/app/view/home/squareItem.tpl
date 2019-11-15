@@ -10,7 +10,7 @@
                 <div w-class="offical">官方</div>
                 {{else}}
                     {{if it.postItem.gender!=2}}
-                        <img src="../../res/images/{{it.postItem.gender===0?'girl.png':'boy.png'}}"/>
+                        <img src="../../res/images/{{it.postItem.gender===1?'girl.png':'boy.png'}}"/>
                     {{else}}
                         <img src="../../res/images/neutral.png"/>
                     {{end}}
