@@ -102,7 +102,7 @@ export class SquareItem extends Widget {
             }; 
         }
         // 动态详情中隐藏工具栏
-        if (props.expandItemTop !== undefined) {
+        if (!props.expandItemTop) {
             this.props.showUtils = false;
         }
 
