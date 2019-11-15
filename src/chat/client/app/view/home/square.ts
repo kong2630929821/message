@@ -162,7 +162,7 @@ export class Square extends Widget {
         popNew3('chat-client-app-view-info-editComment',{ key:v.key },() => {
             v.commentCount ++;
             this.paint();
-            popNew3('chat-client-app-view-info-postDetail',{ ...v,showAll:true });
+            popNew3('chat-client-app-view-info-postDetail',{ postItem:v,showAll:true });
         });
     }
 
@@ -178,7 +178,7 @@ export class Square extends Widget {
      * 查看详情
      */
     public goDetail(i:number) {
-        popNew3('chat-client-app-view-info-postDetail',{ ... this.props.postView[this.props.active][1].postList[i],showAll:true },(value) => {
+        popNew3('chat-client-app-view-info-postDetail',{ postItem:this.props.postView[this.props.active][1].postList[i],showAll:true },(value) => {
             if (value !== undefined) {
                 gotoSquare(value);
             }

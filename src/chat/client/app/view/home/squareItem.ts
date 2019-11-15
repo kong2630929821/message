@@ -27,6 +27,7 @@ interface Props {
     imgWidth:number;// 一张图片的宽
     imgHeight:number;// 一张图片的高
     gameLabel:any;// 游戏标签
+    isUserDetailPage:boolean;// 用户详情页面的postItem
 }
 /**
  * 广场帖子
@@ -72,7 +73,8 @@ export class SquareItem extends Widget {
         gameLabel:{
             name:'',
             icon:''
-        }
+        },
+        isUserDetailPage:false
     };
 
     public setProps(props:any) {
@@ -81,7 +83,7 @@ export class SquareItem extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.props.postItem.avatar = buildupImgPath(props.avatar);
+        this.props.postItem.avatar = buildupImgPath(props.postItem.avatar);
         const uid = getStore('uid',0);
         this.props.isMine = this.props.postItem.owner === uid;
         this.props.postItem.followed = judgeFollowed(this.props.postItem.key.num);
@@ -181,6 +183,7 @@ export class SquareItem extends Widget {
         if (this.props.postItem.isPublic) {
             popNew3('chat-client-app-view-person-publicHome', { uid: this.props.postItem.owner, pubNum: this.props.postItem.key.num });
         } else {
+            if (this.props.isUserDetailPage) return;
             popNew3('chat-client-app-view-info-userDetail', { uid: this.props.postItem.owner, num:this.props.postItem.key.num },(value) => {
                 if (value !== undefined) {
                     gotoSquare(value);

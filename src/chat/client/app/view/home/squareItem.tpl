@@ -17,7 +17,7 @@
                 {{end}}
             </div>
         </div>
-        {{if !it.followed}}
+        {{if !it.isMine && !it.followed}}
             {{if it.fgStatus}}
             <div w-class="followIng">
                 <img src="../../res/images/loading.gif" alt="" style="width: 42px;height: 42px;"/>

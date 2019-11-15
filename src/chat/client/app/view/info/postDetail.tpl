@@ -1,17 +1,17 @@
 <div class="new-page" w-class="page" ev-back-click="goBack"  on-tap="pageClick">
-    <chat-client-app-widget1-topBar-topBar>{title:"详情",nextImg:"{{it.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget1-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:"详情",nextImg:"{{it.postItem.isPublic?'../../res/images/more-dot-blue.png':''}}"}</chat-client-app-widget1-topBar-topBar>
     <div w-class="contain" id="postPage" on-scroll="scrollPage">
         <div style="margin: 20px 0;" id="postContain" ev-change-tag="changeTag">
-            {{if it.isPublic}}
-            <div w-class="title">{{it.title}}</div>
+            {{if it.postItem.isPublic}}
+            <div w-class="title">{{it.postItem.title}}</div>
             {{end}}
             <widget w-tag="chat-client-app-view-home-squareItem" style="padding-bottom: 20px;">{{it}}</widget>
 
 
             <div w-class="postBottom">
                 <div w-class="tabs">
-                    <div w-class="tab {{it.active=='comment'? 'activeTab':''}}" on-tap="changeTab('comment')">评论&nbsp;{{it.commentCount}}</div>
-                    <div w-class="tab {{it.active=='like'? 'activeTab':''}}" on-tap="changeTab('like')">赞&nbsp;{{it.likeCount}}</div>
+                    <div w-class="tab {{it.active=='comment'? 'activeTab':''}}" on-tap="changeTab('comment')">评论&nbsp;{{it.postItem.commentCount}}</div>
+                    <div w-class="tab {{it.active=='like'? 'activeTab':''}}" on-tap="changeTab('like')">赞&nbsp;{{it.postItem.likeCount}}</div>
                 </div>
                 {{if it.active == 'comment'}}
                 <div id="commentBox" on-tap="pageClick">
@@ -52,11 +52,11 @@
     <div w-class="btns">
         <div style="display:flex;align-items: center" on-tap="doComment">
             <img src="../../res/images/comment.png" w-class="btn"/>
-            <span w-class="time">{{it.commentCount>0 ? it.commentCount:""}}</span>
+            <span w-class="time">{{it.postItem.commentCount>0 ? it.postItem.commentCount:""}}</span>
         </div>
         <div style="display:flex;align-items: center" on-tap="likeBtn">
             <img src="../../res/images/{{it.likeActive?'like_active.png':'likeGrey.png'}}" w-class="btn" />
-            <span w-class="time">{{it.likeCount>0 ? it.likeCount:""}}</span>
+            <span w-class="time">{{it.postItem.likeCount>0 ? it.postItem.likeCount:""}}</span>
         </div>
     </div>
 </div>

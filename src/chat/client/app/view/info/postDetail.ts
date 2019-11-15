@@ -2,23 +2,14 @@ import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { getStore, setStore } from '../../data/store';
+import { getStore, PostItem, setStore } from '../../data/store';
 import { buildupImgPath, getUserAvatar, judgeLiked, timestampFormat } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
 import { getCommentLaudList, getPostDetile, postLaud, showComment, showLikeList } from '../../net/rpc';
 
 interface Props {
-    key: any;
-    username: string;
-    avatar: string;
-    title: string;     // 标题
-    createtime: string;
-    content: string;
     active: string;
-    commentCount: number;   // 评论数量
-    likeCount: number;  // 点赞数量
     likeActive: boolean;  // 点赞
-    isPublic: boolean;   // 是否是公众号发布的帖子
     showAll: boolean;    // 展示详情，子组件需要
     commentList: any[];  // 评论列表
     likeList: any[]; // 点赞记录
@@ -29,6 +20,7 @@ interface Props {
     expandItem:number;// 动态详情工具展示
     dealData:any;  // 组装数据
     expandItemTop:boolean;
+    postItem:PostItem;
 }
 const TAB = {
     comment: 'comment',
@@ -40,20 +32,34 @@ const TAB = {
 export class PostDetail extends Widget {
     public ok: (value?:string) => void;
     public props: Props = {
-        key: {
-            num: '',
-            id: 0
+        postItem:{
+            key:{
+                id:0,
+                num:''
+            },  // 帖子ID及社区编号
+            username:'用户名', // 用户名
+            avatar:'', // 头像
+            commentCount:0 , // 评论数量
+            likeCount:0,   // 点赞数量
+            createtime:0,     // 创建时间
+            content:'',     // 内容
+            imgs:[],  // 图片列表
+            post_type:0, // 文章类型
+            gender:2, // 性别 0 男 1 女
+            comm_type:0, // 社区类型
+            owner:0,
+            label:'', // 对应的是哪一款游戏，可以为空，
+            isPublic:false,// 公众号文章
+            followed:false,
+            offcial:false,// 官方
+            body:'',
+            state: 0,
+            title: '',
+            collectCount:0,
+            forwardCount:0
         },
-        username: '用户名',
-        avatar: '../../res/images/user_avatar.png',
-        title: '详情',
-        createtime: '',
-        content: '',
         active: TAB.comment,
-        commentCount: 0,
-        likeCount: 15,
         likeActive: false,
-        isPublic: true,
         showAll: true,
         commentList: [],
         likeList: [],
@@ -72,8 +78,8 @@ export class PostDetail extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.props.likeActive = judgeLiked(this.props.key.num,this.props.key.id);
-        getCommentLaudList(this.props.key.num,this.props.key.id).then((r:number[]) => {
+        this.props.likeActive = judgeLiked(this.props.postItem.key.num,this.props.postItem.key.id);
+        getCommentLaudList(this.props.postItem.key.num,this.props.postItem.key.id).then((r:number[]) => {
             this.props.commentList = this.props.commentList.map(v => {
                 v.likeActive = r.indexOf(v.key.id) > -1;
 
@@ -82,7 +88,7 @@ export class PostDetail extends Widget {
             this.props.commentLikeList = r;
             this.paint();
         });
-        showComment(this.props.key.num, this.props.key.id).then((r: any) => {
+        showComment(this.props.postItem.key.num, this.props.postItem.key.id).then((r: any) => {
             this.props.commentList = r.map(v => {
                 v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
 
@@ -90,7 +96,7 @@ export class PostDetail extends Widget {
             });
             this.paint();
         });
-        showLikeList(this.props.key.num,this.props.key.id).then((r: any) => {
+        showLikeList(this.props.postItem.key.num,this.props.postItem.key.id).then((r: any) => {
             this.props.likeList = r.map(v => {
                 v.avatar = buildupImgPath(v.avatar);
                 
@@ -98,16 +104,16 @@ export class PostDetail extends Widget {
             });
             this.paint();
         });
-        getPostDetile(this.props.key.num,this.props.key.id).then((r:any) => {
-            this.props.likeCount = r[0].likeCount;
-            this.props.commentCount = r[0].commentCount;
+        getPostDetile(this.props.postItem.key.num,this.props.postItem.key.id).then((r:any) => {
+            this.props.postItem.likeCount = r[0].likeCount;
+            this.props.postItem.commentCount = r[0].commentCount;
             this.paint();
             // 刷新广场数据
             const postlist = getStore('postReturn',[]);
-            const ind = postlist.postList.findIndex(r => r.key.num === this.props.key.num && r.key.id === this.props.key.id);
+            const ind = postlist.postList.findIndex(r => r.key.num === this.props.postItem.key.num && r.key.id === this.props.postItem.key.id);
             if (ind > -1) {
-                postlist.postList[ind].commentCount = this.props.commentCount;
-                postlist.postList[ind].likeCount = this.props.likeCount;
+                postlist.postList[ind].commentCount = this.props.postItem.commentCount;
+                postlist.postList[ind].likeCount = this.props.postItem.likeCount;
                 setStore('postReturn',postlist);
             }
         });
@@ -129,9 +135,9 @@ export class PostDetail extends Widget {
      */
     public async likeBtn() {
         this.props.likeActive = !this.props.likeActive;
-        this.props.likeCount += this.props.likeActive ? 1 : -1;
+        this.props.postItem.likeCount += this.props.likeActive ? 1 : -1;
         try {
-            await postLaud(this.props.key.num, this.props.key.id);
+            await postLaud(this.props.postItem.key.num, this.props.postItem.key.id);
             const uid = getStore('uid',0);
             if (this.props.likeActive) {
 
@@ -144,7 +150,7 @@ export class PostDetail extends Widget {
                 //     gender:userInfo.sex
                 // }); 
             } else {
-                const ind = this.props.likeList.findIndex(r => r.key.uid === this.props.key.num === uid);
+                const ind = this.props.likeList.findIndex(r => r.key.uid === this.props.postItem.key.num === uid);
                 ind > -1 && this.props.likeList.splice(ind,1);
             }
             this.paint();
@@ -152,16 +158,16 @@ export class PostDetail extends Widget {
             const postlist = getStore('postReturn/postList',[]);
 
             const ind = postlist.findIndex((r) => {
-                return r.key.num === this.props.key.num && r.key.id === this.props.key.id;
+                return r.key.num === this.props.postItem.key.num && r.key.id === this.props.postItem.key.id;
             });
             if (ind > -1) {
                 postlist[ind].likeActive = this.props.likeActive;
-                postlist[ind].likeCount = this.props.likeCount;
+                postlist[ind].likeCount = this.props.postItem.likeCount;
                 setStore('postReturn/postList',postlist);
             }
         } catch (r) {
             this.props.likeActive = !this.props.likeActive;
-            this.props.likeCount += this.props.likeActive ? 1 : -1;
+            this.props.postItem.likeCount += this.props.likeActive ? 1 : -1;
             this.paint();
             console.log('error ',r);
             popNewMessage('点赞失败了');
@@ -172,7 +178,7 @@ export class PostDetail extends Widget {
      * 评论
      */
     public doComment() {
-        popNew('chat-client-app-view-info-editComment', { key:this.props.key }, (r) => {
+        popNew('chat-client-app-view-info-editComment', { key:this.props.postItem.key }, (r) => {
             const uid = getStore('uid');
             const userinfo = getStore(`userInfoMap/${uid}`,{});
             this.props.commentList.unshift({
@@ -185,7 +191,7 @@ export class PostDetail extends Widget {
                 gender: userinfo.sex,
                 owner:uid
             });
-            this.props.commentCount++;
+            this.props.postItem.commentCount++;
             this.paint();
             this.updateComment();
         });
@@ -209,7 +215,7 @@ export class PostDetail extends Widget {
             orgName: e.username,
             orgMess: e.mess
         });
-        this.props.commentCount++;
+        this.props.postItem.commentCount++;
         this.paint();
         this.updateComment();
     }
@@ -219,7 +225,7 @@ export class PostDetail extends Widget {
      */
     public deleteComment(i:number) {
         this.props.commentList.splice(i,1);
-        this.props.commentCount--;
+        this.props.postItem.commentCount--;
         this.paint();
         this.updateComment();
     }
@@ -228,10 +234,10 @@ export class PostDetail extends Widget {
     public updateComment() {
         const postlist = getStore('postReturn/postList',[]);
         const ind = postlist.findIndex((r:any) => {
-            return r.key.num === this.props.key.num && r.key.id === this.props.key.id;
+            return r.key.num === this.props.postItem.key.num && r.key.id === this.props.postItem.key.id;
         });
         if (ind > -1) {
-            postlist[ind].commentCount = this.props.commentCount;
+            postlist[ind].commentCount = this.props.postItem.commentCount;
             setStore('postReturn/postList',postlist);
         }
     }
@@ -249,7 +255,7 @@ export class PostDetail extends Widget {
             
             if (this.props.active === TAB.comment) {
                 let list = this.props.commentList;
-                showComment(this.props.key.num, this.props.key.id,list[list.length - 1].key.id).then((r: any) => {
+                showComment(this.props.postItem.key.num, this.props.postItem.key.id,list[list.length - 1].key.id).then((r: any) => {
                     if (list[list.length - 1].key.id !== r[0].key.id) {
                         r = r.map(v => {
                             v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
@@ -264,7 +270,7 @@ export class PostDetail extends Widget {
 
             } else {
                 let list = this.props.likeList;
-                showLikeList(this.props.key.num, this.props.key.id,list[list.length - 1].key.uid).then((r: any) => {
+                showLikeList(this.props.postItem.key.num, this.props.postItem.key.id,list[list.length - 1].key.uid).then((r: any) => {
                     if (list[list.length - 1].key.uid !== r[0].key.uid) {
                         r = r.map(v => {
                             v.avatar = buildupImgPath(v.avatar);
@@ -301,7 +307,7 @@ export class PostDetail extends Widget {
      */
     public dealData(v:any,r:boolean) {
         return { 
-            postItem:v,
+            ...v,
             showUtils: r 
         };
     }
