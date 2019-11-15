@@ -6,7 +6,7 @@ import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
 import { genUuid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
-import { getFriendAlias, getUserAvatar } from '../../logic/logic';
+import { getFriendAlias, getUserAvatar, judgeLiked } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
 import { applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo, postLaud } from '../../net/rpc';
 
@@ -243,21 +243,6 @@ export class UserDetail extends Widget {
             });
         });
     }
-    /**
-     * 点赞
-     */
-    public likeBtn(i:number) {
-        const v = this.props.postList[i];
-        v.likeActive = !v.likeActive;
-        v.likeCount += v.likeActive ? 1 :-1;
-        this.paint();
-        postLaud(v.key.num, v.key.id, () => {
-            // 失败了则撤销点赞或取消点赞操作
-            v.likeActive = !v.likeActive;
-            v.likeCount += v.likeActive ? 1 :-1;
-            this.paint();
-        });
-    }
 
     /**
      * 评论
@@ -308,7 +293,7 @@ export class UserDetail extends Widget {
      */
     public dealData(v:any,r:boolean,t:boolean) {
         return { 
-            ...v,
+            postItem:v,
             showUtils: r,
             followed: t
         };

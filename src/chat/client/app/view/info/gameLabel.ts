@@ -1,5 +1,5 @@
-import { getStore } from '../../../../../app/store/memstore';
 import { Widget } from '../../../../../pi/widget/widget';
+import { getStore } from '../../data/store';
 
 interface Props {
     gameLabelList:any;// 游戏标签
@@ -31,7 +31,7 @@ export class GameLabel extends Widget {
     // 获取游戏标签
     public initDate() {
         this.props.gameLabelList = [];
-        const list = getStore('game/allGame',[]);
+        const list = getStore('gameList',[]);
         list.forEach(v => {
             this.props.gameLabelList.push({
                 name:v.title,

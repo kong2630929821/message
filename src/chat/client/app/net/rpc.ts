@@ -2,6 +2,7 @@
  * 调用rpc接口
  */
 // ================================================ 导入
+import { erlangLogicIp, getGameImgUrl, shareDownload } from '../../../../app/public/config';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { CommentKey, PostKey } from '../../../server/data/db/community.s';
 import { GroupInfo } from '../../../server/data/db/group.s';
@@ -520,7 +521,7 @@ export const addPost = (title: string, body: string, num:string, post_type: numb
 /**
  * 帖子点赞或取消点赞
  */
-export const postLaud = (num: string, id: number, fail?:any) => {
+export const postLaud = (num: string, id: number) => {
     const arg = new PostKey();
     arg.num = num;
     arg.id = id;
@@ -531,7 +532,6 @@ export const postLaud = (num: string, id: number, fail?:any) => {
                 console.log('postLaudPost=======',r);
                 resolve();
             } else {
-                fail && fail();
                 reject();
             }
         });
@@ -593,6 +593,9 @@ export const showUserFollow = (num_type:number = 1) => {
     });
 };
 
+
+
+
 /**
  * 获取最新的帖子  
  */
@@ -615,12 +618,12 @@ export const showPost = (square_type:number, label:string= '',num:string = '', i
                 console.log('showPost=============',r);
                 // let postList = store.getStore('postList',[]);
                 if (r && r.list && r.list.length) {
-                    const data:any = r.list;
+                    const data:PostItem = r.list;//TODO:
                     data.forEach((res,i) => {
                         data[i].offcial = res.comm_type === CommType.official;
                         data[i].isPublic = res.comm_type === CommType.publicAcc;
+                        data[i].owner = res.owner;
                         data[i].followed = judgeFollowed(res.key.num);
-                        data[i].likeActive = judgeLiked(res.key.num,res.key.id);
                         if (data[i].isPublic) {
                             data[i].content = res.body;
                             data[i].imgs = '';
@@ -741,17 +744,17 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
         clientRpcFunc(getUserPost,param,(r) => {
             console.log('getUserPost=============',r);
             if (r && r.list) {
-                const data:any = r.list;
+                const data:PostItem = r.list;
                 
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;
                     data[i].isPublic = res.comm_type === CommType.publicAcc;
                     const body = JSON.parse(res.body);
                     data[i].imgs = body.imgs;
-                    data[i].followed = judgeFollowed(res.key.num);
-                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
                     const reg = /\#([^#]*)\#/gm;
                     data[i].content = parseEmoji(body.msg).replace(reg,'');
+                    data[i].owner = res.owner;
+                    data[i].followed = judgeFollowed(res.key.num);
                     data[i].label = body.msg.match(reg) ? body.msg.match(reg)[0].substring(1, body.msg.match(reg)[0].length - 1) :'';
                 });
                 res({ list:data, total: r.total });
@@ -1020,5 +1023,46 @@ export const gameLabelNum = (label:string) => {
         clientRpcFunc(getLabelPostCount,label,(r:number) => {
             res(r);
         });
+    });
+};
+
+// 获取全部游戏
+export const getAllGameList = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 获取全部游戏详情
+export const getAllGameInfo = (ids:string) => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
+        return res.json().then(r => {
+            const res = r.app_details;
+            const gameList = [];
+            res.forEach(v => {
+                const name = v[0];
+                const img = JSON.parse(v[1]);
+                const desc = JSON.parse(v[2]);
+                const url = v[3];
+                gameList.push({
+                    ...desc,
+                    title:name,
+                    desc:desc.desc,
+                    img:[`${getGameImgUrl}${img.icon}`,`${getGameImgUrl}${img.bg}`],
+                    url,
+                    apkDownloadUrl:shareDownload
+                });
+            });
+
+            return gameList;
+        }). catch (e => {
+            return [];
+        });
+      
     });
 };

@@ -20,7 +20,7 @@ import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { deelNotice } from '../logic/logic';
 import * as init2 from './init';
-import { getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting, showPost } from './rpc';
+import { getAllGameInfo, getAllGameList, getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting, showPost } from './rpc';
 
 // ================================================ 导出
 
@@ -77,18 +77,24 @@ export const walletSignIn = (openid) => {
 
                 });
                 // 获取邀请人数 被邀请
-                const invite = await getStore('inviteUsers/invite_success',[]);
-                const beInvited = await getStore('inviteUsers/convert_invite',[]);
+                const invite = getStore('inviteUsers/invite_success',[]);
+                const beInvited = getStore('inviteUsers/convert_invite',[]);
                 invite.length && deelNotice(invite,store.GENERATORTYPE.NOTICE_1);
                 beInvited.length && deelNotice([beInvited],store.GENERATORTYPE.NOTICE_2);
                 // 获取全部游戏
-                const gameList = await getStore('game/allGame');
-                const tagList = ['全部','关注'];
-                gameList.forEach(v => {
-                    tagList.push(v.title);
-
+                getAllGameList().then(r => {
+                    if (r.length) {
+                        const appId = JSON.stringify(r);
+                        getAllGameInfo(appId).then(r => {
+                            store.setStore('gameList',r);
+                            const tagList = store.tagListStore;
+                            r.forEach(v => {
+                                tagList.push(v.title);
+                            });
+                            store.setStore('tagList',tagList);
+                        });
+                    }
                 });
-                store.setStore('tagList',tagList);
             } else {
                 popNewMessage('钱包登陆失败');
             }
