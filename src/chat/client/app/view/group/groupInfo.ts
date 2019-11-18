@@ -154,6 +154,12 @@ export class GroupInfos extends Widget {
                                 });
                             });
                         });
+
+                        imagePicker.close({
+                            success:res => {
+                                console.log('imagePicker close',res);
+                            }
+                        });
                     }
                 });
             });
@@ -357,7 +363,7 @@ export class GroupInfos extends Widget {
 
     // 点击查看大图头像
     public showBigImg() {
-        popNew('chat-client-app-widget1-bigImage-bigImage',{ img: this.props.avatar });
+        popNew('chat-client-app-widget-bigImage-bigImage',{ img: this.props.avatar });
     }
 }
 

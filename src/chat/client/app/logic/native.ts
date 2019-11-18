@@ -6,7 +6,7 @@ import { AudioRecorder } from '../../../../pi/browser/audio_recorder';
 import { CameraPicker } from '../../../../pi/browser/cameraPicker';
 import { ImagePicker } from '../../../../pi/browser/imagePicker';
 import { QRCode } from '../../../../pi/browser/qrcode';
-import { WebViewManager } from '../../../../pi/browser/webview';
+import { screenMode, WebViewManager } from '../../../../pi/browser/webview';
 
 /**
  * 选择图片
@@ -76,7 +76,7 @@ export const doScanQrCode = (ok?,cancel?) => {
  * 打开新网页
  */
 export const openNewActivity = (url:string,title:string= '') => {
-    WebViewManager.open(title, `${url}?${Math.random()}`, title, '');
+    WebViewManager.open(title, `${url}?${Math.random()}`, title, '', screenMode.portrait);
 };
 
 /**
@@ -133,5 +133,10 @@ export const saveImage = (url:string, cb?:any) => {
         },
         imgName: `${Date.now()}.png`,
         saveImg: url
+    });
+    image.close({
+        success:res => {
+            console.log('saveImage close',res);
+        }
     });
 };

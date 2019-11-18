@@ -8,7 +8,7 @@ import { PENALTY } from '../../../../management/utils/logic';
 import { getStore, register, setStore } from '../../data/store';
 import { openCamera, selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
-import { arrayBuffer2File, base64ToFile, imgResize, uploadFile } from '../../net/upload';
+import { base64ToFile, imgResize, uploadFile } from '../../net/upload';
 export const forelet = new Forelet();
 export const WIDGET_NAME = module.id.replace(/\//g, '-');
 interface IMAGE {
@@ -164,11 +164,20 @@ export class EditPost extends Widget {
                                                 if (this1.props.isUploading) {
                                                     this1.props.isUploading = false;
                                                 }
+                                            }).catch(err => {
+                                                console.log('上传图片失败',err);
                                             });
                                         });
                                         
+                                        imagePicker.close({
+                                            success:res => {
+                                                console.log('imagePicker close',res);
+                                            }
+                                        });
                                     }
                                 });
+                            }).catch(err => {
+                                console.log('上传图片失败',err);
                             });
                         }
                         
@@ -229,11 +238,20 @@ export class EditPost extends Widget {
                                                 if (this1.props.isUploading) {
                                                     this1.props.isUploading = false;
                                                 }
+                                            }).catch(err => {
+                                                console.log('上传图片失败',err);
                                             });
                                         });
-                                        
+
+                                        camera.close({
+                                            success:res => {
+                                                console.log('imagePicker close',res);
+                                            }
+                                        });
                                     }
                                 });
+                            }).catch(err => {
+                                console.log('上传图片失败',err);
                             });
                         }
                     });
