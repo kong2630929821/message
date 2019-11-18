@@ -152,7 +152,6 @@ export class Square extends Widget {
             this.props.postView[this.state.postReturn.tagType - 1][1].isLoading = false;
             // this.props.postView[this.state.postReturn.tagType - 1][1].isShowAnimation = false;        
         }
-       
     }
     
     /**

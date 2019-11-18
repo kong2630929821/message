@@ -31,6 +31,7 @@ interface Props {
     // isEditor:boolean;// 是否开启富文本框模式
     showType:boolean[];// 0表情 1相册 2相机
     label:any;// 动态标签
+    isShowSend:boolean;// 是否可以发送
 }
 // const editorTextNum = 10;
 /**
@@ -57,7 +58,8 @@ export class EditPost extends Widget {
         label:{
             name:'',
             icon:''
-        }
+        },
+        isShowSend:false
     };
     
     public setProps(props:any) {
@@ -157,8 +159,8 @@ export class EditPost extends Widget {
                                                 console.log('上传原图',imgurl);
                                                 image.originalImg = imgurl;
                                                 this1.props.uploadLoding[len] = false;
-                                                this1.paint();
                                                 this1.props.saveImgs[len] = image;
+                                                this1.paint();
                                                 if (this1.props.isUploading) {
                                                     this1.props.isUploading = false;
                                                 }
