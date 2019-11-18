@@ -131,8 +131,8 @@ export class SquareItem extends Widget {
      */
     public showTools(e:any) {
         this.props.showUtils = !this.props.showUtils;
-        this.paint();
         notify(e.node,'ev-tools-expand',{ value:this.props.showUtils });
+        this.paint();
     }
 
     /**

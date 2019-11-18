@@ -18,18 +18,20 @@
 .follow {
   width: 140px;
   height: 60px;
-  background:rgba(66,133,244,1);
   border-radius: 30px;
   font-size: 28px;
   font-weight: 500;
-  color:rgba(255,255,255,1);
+  color:#4285F4;
   line-height: 60px;
   text-align: center;
   margin-right: 20px;
+  background:rgba(255,255,255,1);
+  border:1px dashed rgba(66,133,244,1);
 }
 .followIng {
   width: 140px;
   height: 60px;
+  margin-right: 20px;
   background: rgb(204, 204, 204);
   border-radius:30px;
   display: flex;
