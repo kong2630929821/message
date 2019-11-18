@@ -311,16 +311,22 @@ register('postReturn',r => {
 // 监听游戏标签变化
 register('tagList',r => {   
     const w:any = forelet.getWidget(WIDGET_NAME);
+
     if (w) {
-        w.props.postView = [];
-        r.forEach((tag) => {
-            w.props.postView.push([tag, {
-                expandItem:-1,
-                postList:[],
-                // canRequest:true,
-                isLoading:false
-                // isShowAnimation:false
-            }]);
+        // w.props.postView = [];        
+        
+        r.forEach((tag) => {            
+            if(w.props.postView.findIndex((e)=>{
+                return e[0] === tag
+            }) < 0 ){
+                w.props.postView.push([tag, {
+                    expandItem:-1,
+                    postList:[],
+                    // canRequest:true,
+                    isLoading:false
+                    // isShowAnimation:false
+                }]);    
+            }            
         }); 
         w.paint(); 
     } 
