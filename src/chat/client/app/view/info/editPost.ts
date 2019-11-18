@@ -111,6 +111,7 @@ export class EditPost extends Widget {
     // 修复点开表情再编辑字出现标签和键盘同时存在
     public inputClick() {
         this.props.isOnEmoji = false;
+        this.props.showType = [true,true,true];
         this.paint();
     }
     /**
