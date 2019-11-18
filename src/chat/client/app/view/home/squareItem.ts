@@ -28,6 +28,7 @@ interface Props {
     imgHeight:number;// 一张图片的高
     gameLabel:any;// 游戏标签
     isUserDetailPage:boolean;// 用户详情页面的postItem
+    expandItemTop:boolean;
 }
 /**
  * 广场帖子
@@ -74,7 +75,8 @@ export class SquareItem extends Widget {
             name:'',
             icon:''
         },
-        isUserDetailPage:false
+        isUserDetailPage:false,
+        expandItemTop:false
     };
 
     public setProps(props:any) {
@@ -102,7 +104,7 @@ export class SquareItem extends Widget {
             }; 
         }
         // 动态详情中隐藏工具栏
-        if (!props.expandItemTop) {
+        if (props.expandItemTop) {
             this.props.showUtils = false;
         }
 
@@ -131,8 +133,8 @@ export class SquareItem extends Widget {
      */
     public showTools(e:any) {
         this.props.showUtils = !this.props.showUtils;
-        notify(e.node,'ev-tools-expand',{ value:this.props.showUtils });
         this.paint();
+        notify(e.node,'ev-tools-expand',{ value:this.props.showUtils });
     }
 
     /**
