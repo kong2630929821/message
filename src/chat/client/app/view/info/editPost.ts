@@ -363,9 +363,11 @@ export class EditPost extends Widget {
     public openEmoji() {
         this.reaset(0);
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight() + 90}px`;
-        this.props.isOnEmoji = !this.props.isOnEmoji;
-        this.paint();
-        
+        // 加上100毫秒的延迟能防止用户看到表情库从软键盘上面掉下来的动画
+        setTimeout(() => {
+            this.props.isOnEmoji = !this.props.isOnEmoji;
+            this.paint();
+        },100);
     }
 
     /**
