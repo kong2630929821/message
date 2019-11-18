@@ -3,9 +3,9 @@
  */
 
 // ================================================ 导入
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import { saveImage } from '../../logic/native';
+import { popNewMessage } from '../../logic/tools';
 
 interface Props {
     img: string;  // 图片

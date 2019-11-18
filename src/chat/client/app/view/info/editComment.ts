@@ -155,6 +155,12 @@ export class EditComment extends Widget {
                                             }
                                         });
                                     });
+
+                                    imagePicker.close({
+                                        success:res => {
+                                            console.log('imagePicker close',res);
+                                        }
+                                    });
                                 }
                             });
                         });

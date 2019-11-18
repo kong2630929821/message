@@ -175,6 +175,12 @@ export class ModalBox extends Widget {
                                             this1.okBtnClick(e);
                                         }
                                     });
+
+                                    imagePicker.close({
+                                        success:res => {
+                                            console.log('imagePicker close',res);
+                                        }
+                                    });
                                 }
                             });
                         });

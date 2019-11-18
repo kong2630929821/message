@@ -75,6 +75,12 @@ export class SetGroupChat extends Widget {
                             loading.callback(loading.widget);
                         });
                     });
+
+                    imagePicker.close({
+                        success:res => {
+                            console.log('imagePicker close',res);
+                        }
+                    });
                 }
             });
         });

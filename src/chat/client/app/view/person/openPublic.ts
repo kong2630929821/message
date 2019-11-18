@@ -89,6 +89,12 @@ export class OpenPublic extends Widget {
                     imgResize(buffer,(res) => {
                         uploadFile(res.base64);
                     });
+
+                    imagePicker.close({
+                        success:res => {
+                            console.log('imagePicker close',res);
+                        }
+                    });
                 }
             });
         });
