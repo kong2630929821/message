@@ -28,7 +28,6 @@ interface Props {
     imgHeight:number;// 一张图片的高
     gameLabel:any;// 游戏标签
     isUserDetailPage:boolean;// 用户详情页面的postItem
-    expandItemTop:boolean;
 }
 /**
  * 广场帖子
@@ -75,8 +74,7 @@ export class SquareItem extends Widget {
             name:'',
             icon:''
         },
-        isUserDetailPage:false,
-        expandItemTop:false
+        isUserDetailPage:false
     };
 
     public setProps(props:any) {
@@ -104,10 +102,9 @@ export class SquareItem extends Widget {
             }; 
         }
         // 动态详情中隐藏工具栏  postDetail页面
-        if (props.expandItemTop) {
+        if (typeof props.expandItemTop === 'boolean') {
             this.props.showUtils = false;
         }
-
         this.calcImg();
     }
 
