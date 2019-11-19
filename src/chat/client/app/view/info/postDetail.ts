@@ -200,6 +200,7 @@ export class PostDetail extends Widget {
      * 回复评论
      */
     public replyComment(e:any) {
+        this.pageClick();
         const uid = getStore('uid');
         const userinfo = getStore(`userInfoMap/${uid}`,{});
         this.props.commentList.unshift({
@@ -295,11 +296,13 @@ export class PostDetail extends Widget {
         this.paint();
     }
 
-    public pageClick(isShow:boolean= true) {
+    public toolsExpand() {
         this.props.expandItem = -1;
-        if (isShow) {
-            this.props.expandItemTop = !this.props.expandItemTop;
-        }
+        this.paint();
+    }
+    public pageClick() {
+        this.props.expandItem = -1;
+        this.props.expandItemTop = !this.props.expandItemTop;
         this.paint();
     }
 

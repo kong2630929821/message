@@ -21,22 +21,16 @@
             {{end}}
         </div>
         <div style="width:90px;"></div>
-        {{if it.activeTab!='square'}}
-            <div style="position:absolute;right:0;" on-down="onShow">
-                <img on-tap="goNext" src="../../res/images/add_white.png" w-class="btn" />
-            </div>
-        {{else}}
-            <div w-class="editPost" on-tap="editPost(e,false)" on-down="onShow">
-                <img src="../../res/images/editPost.png" alt="" style="width:50px;height:50px;"/>
-            </div>
-        {{end}}
+        <div style="position:absolute;right:25px;" on-down="onShow">
+            <img on-tap="goNext" src="../../res/images/{{it.activeTab=='square'?'squareBlue.png':'add_white.png'}}" w-class="btn" />
+        </div>
     </div>
 
     {{if it.showUtils && it.activeTab=="square"}}
-    {{%<!-- <div w-class="utilList">
+    <div w-class="utilList">
         <div w-class="util" on-tap="editPost(e,false)" on-down="onShow">写动态</div>
         <div on-tap="editPost(e,true)" on-down="onShow">发公众号消息</div>
-    </div> -->}}
+    </div>
     {{elseif it.showUtils}}
     <div w-class="utilList1" style="">
         {{for i, v of it.utilList}}

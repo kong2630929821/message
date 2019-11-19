@@ -31,6 +31,7 @@ interface Props {
     // isEditor:boolean;// 是否开启富文本框模式
     showType:boolean[];// 0表情 1相册 2相机
     label:any;// 动态标签
+    isShowSend:boolean;// 是否可以发送
 }
 // const editorTextNum = 10;
 /**
@@ -57,7 +58,8 @@ export class EditPost extends Widget {
         label:{
             name:'',
             icon:''
-        }
+        },
+        isShowSend:false
     };
     
     public setProps(props:any) {
@@ -111,6 +113,7 @@ export class EditPost extends Widget {
     // 修复点开表情再编辑字出现标签和键盘同时存在
     public inputClick() {
         this.props.isOnEmoji = false;
+        this.props.showType = [true,true,true];
         this.paint();
     }
     /**
@@ -156,8 +159,8 @@ export class EditPost extends Widget {
                                                 console.log('上传原图',imgurl);
                                                 image.originalImg = imgurl;
                                                 this1.props.uploadLoding[len] = false;
-                                                this1.paint();
                                                 this1.props.saveImgs[len] = image;
+                                                this1.paint();
                                                 if (this1.props.isUploading) {
                                                     this1.props.isUploading = false;
                                                 }
@@ -381,9 +384,11 @@ export class EditPost extends Widget {
     public openEmoji() {
         this.reaset(0);
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight() + 90}px`;
-        this.props.isOnEmoji = !this.props.isOnEmoji;
-        this.paint();
-        
+        // 加上100毫秒的延迟能防止用户看到表情库从软键盘上面掉下来的动画
+        setTimeout(() => {
+            this.props.isOnEmoji = !this.props.isOnEmoji;
+            this.paint();
+        },100);
     }
 
     /**
