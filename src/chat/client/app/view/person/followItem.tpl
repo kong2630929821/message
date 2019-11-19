@@ -29,6 +29,8 @@
                 <img src="../../res/images/comment.png" alt="" w-class="chat"/>
             {{elseif it.status==3}}
                 <div w-class="blackBtn">放出</div>
+            {{elseif it.status==4}}
+                <img src="../../res/images/{{it.checked?'checked.png':'check.png'}}" alt="" w-class="chat" on-tap="check"/>
             {{end}}
         {{else}}
             {{if !it.isMine}}

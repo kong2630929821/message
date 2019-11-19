@@ -1,4 +1,5 @@
 import { popModalBoxs } from '../../../../../pi/ui/root';
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { CommType } from '../../../../server/data/rpc/community.s';
 import { getStore } from '../../data/store';
@@ -13,6 +14,8 @@ interface Props {
     isMine:boolean;   // 是否本人
     status:number;// 0 我的关注 1我的粉丝 2我的群组 3黑名单
     data:any;
+    checked:boolean;// 是否选中
+    index:number;// 当前下标
 }
 
 /**
@@ -38,7 +41,9 @@ export class FoolowItem extends Widget {
         offical:false,
         isPublic:false,
         isMine:false,
-        status:-1
+        status:-1,
+        checked:false,
+        index:-1
     };
 
     public setProps(props:any) {
@@ -53,6 +58,7 @@ export class FoolowItem extends Widget {
         this.props.isPublic = this.props.data.comm_info.comm_type === CommType.publicAcc;
         this.props.offical = this.props.data.comm_info.comm_type === CommType.official;
         this.props.isMine = this.props.data.user_info.uid === sid;
+        this.props.checked = this.props.isMine ? true :false;
     }
 
     /**
@@ -73,5 +79,12 @@ export class FoolowItem extends Widget {
             });
         }
         
+    }
+
+    public check(e:any) {
+        if (this.props.isMine)return;
+        this.props.checked = !this.props.checked; 
+        this.paint();
+        notify(e.node,'ev-checked',{ value:this.props.index,fg:this.props.checked }); 
     }
 }
