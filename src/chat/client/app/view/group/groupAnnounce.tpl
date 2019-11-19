@@ -1,6 +1,6 @@
 <div class="new-page">
     <div ev-back-click="goBack" ev-next-click="editGroupAnnounce">
-        <chat-client-app-widget1-topBar-topBar>{title:"群公告",nextImg:{{it.isOwner ? "edit.png" : ""}} }</chat-client-app-widget1-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar3>{leftText:"取消",title:"群公告",rightText:{{it.isOwner?'新公告':''}},style:"#4285F4" }</chat-client-app-widget1-topBar-topBar3>
     </div>
     <div w-class="outter">
         <div w-class="inner">

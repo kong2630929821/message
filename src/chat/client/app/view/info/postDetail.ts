@@ -177,6 +177,7 @@ export class PostDetail extends Widget {
      * 评论
      */
     public doComment() {
+        this.pageClick();
         popNew('chat-client-app-view-info-editComment', { key:this.props.postItem.key }, (r) => {
             const uid = getStore('uid');
             const userinfo = getStore(`userInfoMap/${uid}`,{});
@@ -200,7 +201,6 @@ export class PostDetail extends Widget {
      * 回复评论
      */
     public replyComment(e:any) {
-        this.pageClick();
         const uid = getStore('uid');
         const userinfo = getStore(`userInfoMap/${uid}`,{});
         this.props.commentList.unshift({

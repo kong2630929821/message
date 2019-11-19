@@ -1,29 +1,23 @@
 <div w-class="newPage" class="new-page">
-    <div w-class="top-main-wrap" ev-next-click="completeClick" ev-back-click="back">
-        <chat-client-app-widget1-topBar-topBar>{title:"创建群聊({{it.inviteMembers.length}}/500)",nextImg:"{{it.isSelect?'complete_blue.png':'complete_gray.png'}}"}</chat-client-app-widget1-topBar-topBar>
+    <app-publicComponents-blankDiv-topDiv></app-publicComponents-blankDiv-topDiv>
+    <div w-class="topBar">
+        <div w-class="createGroup" on-tap="back">取消</div>
+        <div w-class="pageTitle">创建群</div>
+        <div w-class="createGroup" on-tap="completeClick">创建</div>
     </div>
+
     <div w-class="group-info-wrap">
-        <div w-class="group-avatar-wrap" on-tap="selectImageClick">
-            {{if it.avatarHtml}}
-            <widget w-tag="pi-ui-html" style="width:120px">{{it.avatarHtml}}</widget>
-            {{else}}
-            <img w-class="group-camera" src="../../res/images/group_camera.png" />
-            {{end}}
-        </div>
-        <div w-class="groupName" ev-input-change="inputName">
-            <chat-client-app-widget1-input-input>{placeHolder:"群名",input:{{it.name}},style:"width:500px;padding:20px 0;border-bottom:solid #318DE6 1px;"}</chat-client-app-widget1-input-input>
-        </div>
+        {{for i,v of it.checkedList}}
+            <div style="margin-left:20px;">
+                <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar">{imgURL:{{v.user_info.avatar}}, width:"120px;"}</widget>
+            </div>
+        {{end}}
     </div>
     
     <div w-class="userList" ev-changeSelect="changeSelect">
-        <div w-class="a">
-            {{for i,v of it1.friends}}
-                {{if it.userInfos.get(v.toString()).level != 5}}
-                {{% =============不能邀请客服账号入群==========}}
-                <div ev-addMember="addMember" style="position:relative;">
-                    <chat-client-app-widget-selectUser-selectUser>{id:{{v}}, chatType: "user"}</chat-client-app-widget-selectUser-selectUser>
-                </div>
-                {{end}}
+        <div w-class="a" ev-checked="checked">
+            {{for i,v of it.followData}}
+            <widget w-tag="chat-client-app-view-person-followItem">{data:{{v}},status:4,index:{{i}} }</widget>
             {{end}}
         </div>
     </div>
