@@ -2,12 +2,16 @@ import { getUserRecentGame } from '../../../../../app/net/pull';
 import { getAllMedal } from '../../../../../earn/client/app/net/rpc';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { REPORT_PERSON } from '../../../../server/data/constant';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
-import { UserArray } from '../../../../server/data/rpc/basic.s';
+import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
+import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
+import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUuid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
-import { getFriendAlias, getUserAvatar, judgeLiked } from '../../logic/logic';
+import { buildupImgPath, complaintUser, getFriendAlias, getUserAvatar, judgeLiked } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
+import { clientRpcFunc } from '../../net/init';
 import { applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo, postLaud } from '../../net/rpc';
 
 interface Props {
@@ -29,6 +33,7 @@ interface Props {
     expandItem:number;  // 当前展开工具栏的帖子下标
     dealData:any;  // 组装数据
     refresh:boolean; // 是否可以请求更多数据
+    showUtils:boolean;// 个人主页更多
 }
 
 /**
@@ -58,7 +63,8 @@ export class UserDetail extends Widget {
         gameList:[],
         expandItem:-1,
         dealData:this.dealData,
-        refresh:true
+        refresh:true,
+        showUtils:false
     };
     public bindUpdate:any = this.updateData.bind(this);
 
@@ -116,11 +122,16 @@ export class UserDetail extends Widget {
             this.props.numList[1][0] = this.props.followList.length;
         }
         this.paint();
-        getUserPostList(this.props.num).then((r:any) => {
-            this.props.postList = r.list;  // 动态
-            this.props.numList[0][0] = r.total;
-            this.paint();
-        });
+
+        // 自己主页加载动态
+        if (this.props.isOwner) {
+            getUserPostList(this.props.num).then((r:any) => {
+                this.props.postList = r.list;  // 动态
+                this.props.numList[0][0] = r.total;
+                this.paint();
+            });
+        }
+       
         getFansList(this.props.num).then((r:string[]) => {
             this.props.fansList = r;  // 粉丝
             this.props.numList[2][0] = r.length;
@@ -168,15 +179,6 @@ export class UserDetail extends Widget {
 
     public goBack() {
         this.ok && this.ok();
-    }
-
-    // 设置
-    public goSetting() {
-        if (this.props.isOwner) {
-            popNew('app-view-mine-account-home');
-        } else {
-            popNew('chat-client-app-view-info-setting',{ uid:this.props.uid });
-        }
     }
 
     // 动态 粉丝 关注列表
@@ -285,9 +287,15 @@ export class UserDetail extends Widget {
 
     public pageClick() {
         this.props.expandItem = -1;
+        this.props.showUtils = false;
         this.paint();
     }
 
+    // 更多
+    public goSetting() {
+        this.props.showUtils = !this.props.showUtils;
+        this.paint();
+    }
     /**
      * 组装squareItem的数据
      */
@@ -310,6 +318,7 @@ export class UserDetail extends Widget {
      * 滚动加载更多帖子
      */
     public scrollPage() {
+        if (!this.props.isOwner) return;
         const page = document.getElementById('userDetailPage');
         const contain = document.getElementById('userDetailContain');
         if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.props.postList.length % 20 === 0) {
@@ -352,6 +361,60 @@ export class UserDetail extends Widget {
         const tagList = getStore('tagList');
         // 判断当前的标签页
         this.ok && this.ok(tagList[e.value]);
+    }
+
+    // 更多工具选项点击
+    public toolOperation(index:number) {
+        this.pageClick();
+        switch (index) {
+            case 0:
+                // 认证官方账号
+                break;
+            case 1:
+                // 修改备注
+                this.changeAlias();
+                break;
+            case 2:
+                // 举报玩家
+                this.complaint();
+                break;
+            default:
+        }
+    }
+
+    /**
+     * 举报用户
+     */
+    public complaint() {
+        const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
+        const avatar = this.props.userInfo.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
+        const key = `${REPORT_PERSON}%${this.props.uid}`;
+        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg,REPORT_PERSON,key);
+    }
+
+    /**
+     * 修改备注
+     */
+    public changeAlias() {
+        popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'修改备注', contentInput:this.props.alias,maxLength:10 },(res:any) => {
+            const friend = new FriendAlias();
+            friend.rid = this.props.uid;
+            friend.alias = res.content;
+            clientRpcFunc(changeFriendAlias, friend, (r: Result) => {
+                if (r.r === 1) {
+                    const sid = getStore('uid');
+                    const friendlink = getStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, {});
+                    friendlink.alias = friend.alias;
+                    this.props.alias = friend.alias;
+                    setStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, friendlink);
+                    this.paint();
+                    popNewMessage('修改好友备注成功');
+
+                } else {
+                    popNewMessage('修改好友备注失败');
+                }
+            });
+        });
     }
 }
 

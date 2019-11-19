@@ -18,6 +18,8 @@ interface Props {
     centerTitle:boolean;
     background:string;
     text:string;
+    textCenter:string;
+    borderStyle:boolean;
 }
 
 // ================================ 导出
