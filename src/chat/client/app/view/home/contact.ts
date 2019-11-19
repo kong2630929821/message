@@ -75,11 +75,11 @@ export class Contact extends SpecialWidget {
             {
                 modulName:'message',
                 components:'chat-client-app-view-home-contactNotice'
+            },
+            {
+                modulName:'friend',
+                components:'chat-client-app-view-contactList-contactList'
             }
-            // {
-            //     modulName:'friend',
-            //     components:'chat-client-app-view-contactList-contactList'
-            // }
         ],
         tagList:[],
         labelList:[],

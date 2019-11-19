@@ -105,5 +105,5 @@ export class ContactTop extends Widget {
         }
         notify(e.node,'ev-util-click',{});
     }
-
+    // <div w-class="tab {{it.activeTab=='friend'?'activeTab':''}}" on-tap="changeTab(e,'friend')">好友</div>
 }

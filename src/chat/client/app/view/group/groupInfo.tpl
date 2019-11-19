@@ -1,10 +1,5 @@
-<div class="new-page" w-class="page">
-    <app-publicComponents-blankDiv-topDiv></app-publicComponents-blankDiv-topDiv>
-    <div w-class="topBar">
-        <img src="../../res/images/left_arrow_blue.png" w-class="back" on-tap="goBack"/>
-        <div w-class="pageTitle">群资料</div>
-        <div w-class="createGroup" on-tap="createGroup"></div>
-    </div>
+<div class="new-page" w-class="page" ev-back-click="goBack" ev-next-click="createGroup">
+    <chat-client-app-widget1-topBar-topBar3>{leftImg:"left_arrow_blue.png",title:"群资料",rightText:"" }</chat-client-app-widget1-topBar-topBar3>
     <div w-class="avatarBox">
         <div>
             {{for i, v of it.members}}
@@ -30,7 +25,7 @@
             {"zh_Hans":"退出群","zh_Hant":"退出群","en":""}        
 
             ] }}
-            <app-components-basicItem-basicItem>{name:{{itemTitle[0]}},img:true,chooseImage:{{it.chooseImage}},avatarHtml:{{it.avatarHtml}},avatar:{{it.avatar}} }</app-components-basicItem-basicItem>
+            <app-components-basicItem-basicItem>{name:{{itemTitle[0]}},img:true,chooseImage:{{it.chooseImage}},avatarHtml:{{it.avatarHtml}},avatar:{{it.avatar?it.avatar:'../../res/images/groups.png'}} }</app-components-basicItem-basicItem>
         </div>
         <div on-tap="changeGroupAlias" on-down="onShow">
             <app-components-basicItem-basicItem>{name:{{itemTitle[1]}},describe:{{it.groupInfo.name}} }</app-components-basicItem-basicItem>
@@ -39,7 +34,7 @@
 
     <div w-class="other">
         <div on-tap="openGroupAnnounce" on-down="onShow">
-            <app-components-basicItem-basicItem>{name:{{itemTitle[2]}},describe:{{it.lastAnnounce.title}} }</app-components-basicItem-basicItem>
+            <app-components-basicItem-basicItem>{name:{{itemTitle[2]}},describe:{{it.lastAnnounce.content}} }</app-components-basicItem-basicItem>
         </div>
         <div on-tap="openGroupManage" on-down="onShow">
             <app-components-basicItem-basicItem>{name:{{itemTitle[3]}} }</app-components-basicItem-basicItem>

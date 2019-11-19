@@ -1,11 +1,5 @@
-<div class="new-page" ev-back-click="goBack">
-    <chat-client-app-widget1-topBar-topBar>{title:"群公告"}</chat-client-app-widget1-topBar-topBar>
-    <div w-class="title-wrap">
-        {{if !it.aIncId}}
-        <span w-class="topping">置顶</span>
-        {{end}}
-        <span>{{it.title}}</span>
-    </div>
+<div class="new-page" ev-back-click="goBack" style="background-color: #fff">
+    <chat-client-app-widget1-topBar-topBar3>{leftImg:"left_arrow_blue.png",title:"群公告",rightText:"" }</chat-client-app-widget1-topBar-topBar3>
     <div w-class="content-wrap">
         {{it.content}}
     </div>
