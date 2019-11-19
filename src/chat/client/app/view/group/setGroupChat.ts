@@ -68,7 +68,7 @@ export class SetGroupChat extends Widget {
             imagePicker.getContent({
                 quality:70,
                 success(buffer:ArrayBuffer) {
-                    imgResize(buffer,(res) => {
+                    imgResize(buffer,0.8,1024,(res) => {
                         uploadFile(arrayBuffer2File(res.ab),(url) => {
                             popNewMessage('图片上传成功');
                             avatarUrl = url;

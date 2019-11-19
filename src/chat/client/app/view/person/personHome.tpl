@@ -23,13 +23,13 @@
     {{elseif it.activeTab == 1}}
         {{% =================关注====================}}
         {{for i,v of it.followData}}
-        <widget w-tag="chat-client-app-view-person-followItem">{{v}}</widget>
+        <widget w-tag="chat-client-app-view-person-followItem">{data:{{v}} }</widget>
         {{end}}
 
     {{else}}
         {{% =================粉丝====================}}
         {{for i,v of it.fansData}}
-        <widget w-tag="chat-client-app-view-person-followItem">{{v}}</widget>
+        <widget w-tag="chat-client-app-view-person-followItem">{data:{{v}} }</widget>
         {{end}}
     {{end}}
     </div>

@@ -192,7 +192,9 @@ export class Contact extends SpecialWidget {
                     
                 });
             } else {
-                this.props.isUtilVisible = !this.props.isUtilVisible;
+                // 通讯录
+                popNew3('chat-client-app-view-person-addressBook');
+                
             }
             this.paint();
         } else {

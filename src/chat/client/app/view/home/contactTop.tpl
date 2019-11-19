@@ -22,7 +22,7 @@
         </div>
         <div style="width:90px;"></div>
         <div style="position:absolute;right:25px;" on-down="onShow">
-            <img on-tap="goNext" src="../../res/images/{{it.activeTab=='square'?'squareBlue.png':'add_white.png'}}" w-class="btn" />
+            <img on-tap="goNext" src="../../res/images/{{it.activeTab=='square'?'squareBlue.png':'addressBook.png'}}" w-class="btn" />
         </div>
     </div>
 
@@ -30,17 +30,6 @@
     <div w-class="utilList">
         <div w-class="util" on-tap="editPost(e,false)" on-down="onShow">写动态</div>
         <div on-tap="editPost(e,true)" on-down="onShow">发公众号消息</div>
-    </div>
-    {{elseif it.showUtils}}
-    <div w-class="utilList1" style="">
-        {{for i, v of it.utilList}}
-            <div w-class="liItem" on-tap="utilClick(e,{{i}})" on-down="onShow">
-                {{if v.iconPath}}
-                    <img style="margin-right:20px;" src="../../res/images/{{v.iconPath}}" />
-                {{end}}
-                <span>{{v.utilText}}</span>
-            </div>
-        {{end}}    
     </div>
     {{end}}
 </div>
