@@ -66,14 +66,12 @@ export const json2Map = (data:JSON) => {
 };
 
 /**
- * 获取好友的别名(关注列表)TODO
+ * 获取关注用户的别名
  */
-export const getFriendAlias = (rid:number) => {
-    const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
+export const getUserAlias = (rid:number) => {
+    const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());    
 
-    return {
-        name: user.name
-    };
+    return user.name;
 };
 
 // 复制到剪切板
@@ -330,14 +328,6 @@ export const getFriendsInfo = () => {
     const groupList = store.getStore('groupInfoMap',[]);
     const gId = contact.group || [];
     const groups = new Map();
-    // const friends = new Map();
-    // const userInfos = store.getStore('userInfoMap',[]);
-    // const fId = contact.friends || [];
-    // for (const [key,value] of userInfos) {
-    //     if (fId.indexOf(value.uid) !== -1) {
-    //         friends.set(key,value);
-    //     }
-    // }
     for (const [key,value] of groupList) {
         if (gId.indexOf(value.uid) !== -1) {
             groups.set(key,value);

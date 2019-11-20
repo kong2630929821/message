@@ -1,4 +1,3 @@
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { REPORT_PERSON } from '../../../../server/data/constant';
@@ -8,10 +7,10 @@ import { setData } from '../../../../server/data/rpc/basic.p';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { addToBlackList, changeFriendAlias, removeFromBlackList } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
-import { genUserHid, genUuid } from '../../../../utils/util';
+import { genUserHid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { buildupImgPath, complaintUser, getFriendAlias, getFriendsInfo,  getUserAvatar, NOTICESET } from '../../logic/logic';
+import { buildupImgPath, complaintUser, getUserAlias,  getUserAvatar, NOTICESET } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
@@ -21,7 +20,6 @@ interface Props {
     setList:any[][];
     uid: number;
     userInfo: any;
-    isFriend: boolean; // 是否是好友
     avatar:string; // 头像
     setting:any; // 额外设置，免打扰|置顶
     msgTop:boolean; // 置顶
@@ -49,7 +47,6 @@ export class Setting extends Widget {
         ],
         uid: null,
         userInfo: {},
-        isFriend: true,
         avatar:'',
         setting:null,
         msgAvoid:false,
@@ -64,21 +61,16 @@ export class Setting extends Widget {
             ...props
         };
         super.setProps(this.props);
-        // 判断是否是好友
-        const friends = getFriendsInfo().friends;
-        if (this.props.noticeSet !== 1) {
-            if (!friends.get(`${this.props.uid}`)) {
-                this.props.noticeSet = 2;
-            }
-        }
         // 好友设置
         if (this.props.noticeSet === 0) {
             this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
         
-            this.props.setList[0][2] = this.props.userAlias = getFriendAlias(this.props.uid).name;
-            this.props.isFriend = getFriendAlias(this.props.uid).isFriend;
+            this.props.setList[0][2] = this.props.userAlias = getUserAlias(this.props.uid).name;            
             if (!this.props.userAlias) {
                 this.getUserData(this.props.uid);
+            }
+            if (getUserAlias(this.props.uid).isFollowed) {
+                this.props.noticeSet = 2;
             }
             this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';
             
@@ -140,15 +132,12 @@ export class Setting extends Widget {
         switch (i) {
             case 0:  // 修改备注
                 popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'修改备注', contentInput:this.props.userAlias,maxLength:10 },(res:any) => {
+                    // TODO修改关注列表备注
                     const friend = new FriendAlias();
                     friend.rid = this.props.uid;
                     friend.alias = res.content;
                     clientRpcFunc(changeFriendAlias, friend, (r: Result) => {
                         if (r.r === 1) {
-                            const sid = store.getStore('uid');
-                            const friendlink = store.getStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, {});
-                            friendlink.alias = friend.alias;
-                            store.setStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, friendlink);
                             this.props.setList[0][2] = this.props.userAlias = friend.alias;
                             this.paint();
                             popNewMessage('修改好友备注成功');

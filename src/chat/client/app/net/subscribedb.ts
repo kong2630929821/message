@@ -8,9 +8,9 @@ import { ab2hex } from '../../../../pi/util/util';
 import { DEFAULT_ERROR_NUMBER, DEFAULT_ERROR_STR, WARE_NAME } from '../../../server/data/constant';
 import { AttentionIndex, FansIndex, LaudPostIndex } from '../../../server/data/db/community.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
-import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../server/data/db/message.s';
-import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { watchAccountGenerator, watchAnnounceHistory, watchCommNum, watchContact, watchFansNum, watchFriendLink, watchGroupHistory,watchGroupInfo, watchGroupUserLink, watchLaudPost, watchMsgLock, watchUserCredential, watchUserHistory, watchUserInfo } from '../../../server/data/rpc/dbWatcher.p';
+import { AnnounceHistory, GroupHistory, UserHistory } from '../../../server/data/db/message.s';
+import { Contact, UserInfo } from '../../../server/data/db/user.s';
+import { watchAnnounceHistory, watchCommNum, watchContact, watchFansNum, watchGroupHistory,watchGroupInfo, watchGroupUserLink, watchLaudPost, watchUserHistory, watchUserInfo } from '../../../server/data/rpc/dbWatcher.p';
 import * as store from '../data/store';
 import { clientRpcFunc, subscribe, unSubscribe } from './init';
 
@@ -80,14 +80,6 @@ export const unSubscribeUserInfo = (uid: number) => {
 };
 
 /**
- * 好友链接信息
- * @param uuid user:user
- */
-export const subscribeFriendLink = (uuid: string, cb) => {
-    subscribeTable(watchFriendLink,'uuid',uuid,DEFAULT_ERROR_STR,FriendLink,'friendLinkMap',cb);            
-};
-
-/**
  * 联系人信息
  * @param uid uid
  */
@@ -100,7 +92,7 @@ export const subscribeContact = (uid: number, cb, diffcb) => {
  * @param uid uid
  */
 export const subscribeLaudPost = (uid: number, cb) => {
-    subscribeTable(watchLaudPost,'laudPost',uid,DEFAULT_ERROR_NUMBER,LaudPostIndex,'laudPostList',cb);    
+    subscribeTable(watchLaudPost,'uid',uid,DEFAULT_ERROR_NUMBER,LaudPostIndex,'laudPostList',cb);    
 };
 
 /**
@@ -108,7 +100,7 @@ export const subscribeLaudPost = (uid: number, cb) => {
  * @param uid uid
  */
 export const subscribeCommNum = (uid: number,cb) => {
-    subscribeTable(watchCommNum,'commNum',uid,DEFAULT_ERROR_NUMBER,AttentionIndex,'followNumList',cb);    
+    subscribeTable(watchCommNum,'uid',uid,DEFAULT_ERROR_NUMBER,AttentionIndex,'followNumList',cb);    
 };
 
 /**
@@ -116,7 +108,7 @@ export const subscribeCommNum = (uid: number,cb) => {
  * @param num 社区ID
  */
 export const subscribeFansNum = (num: string,cb) => {
-    subscribeTable(watchFansNum,'fansNum',num,DEFAULT_ERROR_NUMBER,FansIndex,'fansNumList',cb);    
+    subscribeTable(watchFansNum,'num',num,DEFAULT_ERROR_STR,FansIndex,'fansNumList',cb);    
 };
 
 // ================================================================= 本地

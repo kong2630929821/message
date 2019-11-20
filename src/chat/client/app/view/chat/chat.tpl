@@ -7,17 +7,6 @@
     </div>
     {{end}}
 
-    {{if it.temporary || it.groupId}}
-    <div w-class="temporaryBox">
-        <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar">{imgURL:{{it.avatar}},width:"80px;"}</widget>
-        <div style="flex:1;">
-            <div>{{it.name}}</div>
-            <div style="font-size: 24px;color: #888888;">你们还不是好友</div>
-        </div>
-        <div w-class="addUser" on-tap="addUser">+好友</div>
-    </div>
-    {{end}}
-
     <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="playRadio" ev-delelte-user="goBack" id="chatMessageBox" on-scroll="scrollMessBox" ev-recall="openMessageRecall">
         {{for i,v of it.showHincIdArray}}
             <chat-client-app-widget1-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playAudio: {{it.activeAudio && v == it.activeAudio.hIncId ? it.activeAudio.playAudio : false}}, recallBtn:{{it.activeMessId == v}} }</chat-client-app-widget1-messageItem-messageItem>

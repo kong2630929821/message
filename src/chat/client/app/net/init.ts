@@ -12,19 +12,19 @@ import { Struct, structMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
 import { AttentionIndex, FansIndex } from '../../../server/data/db/community.s';
 import { GroupUserLink } from '../../../server/data/db/group.s';
-import { Contact, FriendLink, UserInfo } from '../../../server/data/db/user.s';
-import { getFriendLinks, getGroupsInfo } from '../../../server/data/rpc/basic.p';
-import { FriendLinkArray, GetFriendLinksReq, GetGroupInfoReq, GroupArray, GroupUserLinkArray } from '../../../server/data/rpc/basic.s';
+import { Contact, UserInfo } from '../../../server/data/db/user.s';
+import { getGroupsInfo } from '../../../server/data/rpc/basic.p';
+import { GetGroupInfoReq, GroupArray, GroupUserLinkArray } from '../../../server/data/rpc/basic.s';
 import { getGroupUserLink } from '../../../server/data/rpc/group.p';
 import { SendMsg } from '../../../server/data/rpc/message.s';
-import { genUuid, getGidFromGuid } from '../../../utils/util';
+import { getGidFromGuid } from '../../../utils/util';
 import * as store from '../data/store';
 import { AutoLoginMgr, UserType } from '../logic/autologin';
 import { exitGroup, popNewMessage } from '../logic/tools';
 import * as subscribedb from '../net/subscribedb';
 import { walletSignIn } from './init_1';
 import { initPush } from './receive';
-import { getFriendHistory, getMyGroupHistory, getUserInfoByNum } from './rpc';
+import { getMyGroupHistory } from './rpc';
 
 // ================================================ 导出
 
@@ -149,11 +149,12 @@ export const unSubscribe = (platerTopic: string) => {
 /**
  * 登录成功获取各种数据表的变化
  * @param uid user id
+ * @param num 社区 id
  */
-export const init = (uid: number) => {
+export const init = (uid: number,num:string) => {
     subscribedb.subscribeContact(uid, (r: Contact) => {
         if (r && r.uid === uid) {
-            updateUsers(r, uid);
+            updateUsers(r);
         }
     }, (r: Contact) => {
         if (r && r.uid === uid) {
@@ -165,8 +166,8 @@ export const init = (uid: number) => {
             // updatePubNum(r,uid);
         }
     });
-    subscribe.subscribeFansNum(num,(r:FansIndex) => {
-        
+    subscribedb.subscribeFansNum(num,(r:FansIndex) => {
+        // TODO
     });
 };
 
@@ -236,26 +237,7 @@ const updateGroup = (r: Contact, uid: number) => {
  * @param r 联系人列表
  * @param uid 当前用户id
  */
-const updateUsers = (r: Contact, uid: number) => {
-    // const info = new GetFriendLinksReq();
-    // info.uuid = [];
-    // r.friends.forEach((rid: number) => {
-    //     info.uuid.push(genUuid(uid, rid));
-    //     getFriendHistory(rid);  // 获取好友发送的离线消息
-    // });
-    // if (info.uuid.length > 0) {
-    //     console.log(info.uuid);
-    //     // 获取friendlink
-    //     clientRpcFunc(getFriendLinks, info, (r: FriendLinkArray) => {
-    //         if (r && r.arr && r.arr.length > 0) {
-    //             r.arr.forEach((e: FriendLink) => {
-    //                 store.setStore(`friendLinkMap/${e.uuid}`, e);
-    //             });
-    //         }
-
-    //     });
-
-    // }
+const updateUsers = (r: Contact) => {
     const uids = r.temp_chat.concat(r.blackList, r.applyUser);
     if (uids.length > 0) {
         uids.forEach(elem => {

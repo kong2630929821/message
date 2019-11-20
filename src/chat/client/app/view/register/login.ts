@@ -53,7 +53,7 @@ export class Login extends Widget {
             if (r.uid > 0) {
                 store.setStore(`uid`, r.uid);
                 store.setStore(`userInfoMap/${r.uid}`, r);
-                init(r.uid);
+                init(r.uid,r.comm_num);
                 popNew('chat-client-app-view-home-contact', { sid: this.props.uid });
                 subscribeMsg(this.props.uid.toString(), SendMsg, (v: SendMsg) => {   // 订阅发送给我的消息
                     if (v.code === 1) {

@@ -1,5 +1,4 @@
 import { popNew3 } from '../../../../../app/utils/tools';
-import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
@@ -17,7 +16,6 @@ export class ContactNotice extends Widget {
     public create() {
         super.create();
         this.state = STATE;
-        this.bscroll = null;
     }
 
     public setProps(props:any) {

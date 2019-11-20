@@ -46,7 +46,6 @@ export const initAccount = () => {
         getFile(`${sid}-userInfoMap`, (value) => {
             if (!value) return;
             store.setStore('userInfoMap', value.userInfoMap || new Map(), false);
-            store.setStore('friendLinkMap', value.friendLinkMap || new Map(), false);
             const data  = value.userInfoMap;
             const accIdToUid = store.getStore('accIdToUid',[]);
             for (const [key,value] of data) {
@@ -140,7 +139,6 @@ export const friendChange = () => {
         if (!value) {
             value = {};
         }
-        value.friendLinkMap = store.getStore('friendLinkMap'); // 好友链接
         value.userInfoMap = store.getStore('userInfoMap');  // 用户信息
         writeFile(`${id}-userInfoMap`, value);
     }, () => {
