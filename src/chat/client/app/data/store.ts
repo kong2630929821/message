@@ -4,11 +4,11 @@
 
 // ============================================ 导入
 import { HandlerMap } from '../../../../pi/util/event';
-import { AttentionIndex, CommunityBase, LaudPostIndex } from '../../../server/data/db/community.s';
+import { AttentionIndex, CommunityBase, FansIndex, LaudPostIndex } from '../../../server/data/db/community.s';
 import { AddressInfo } from '../../../server/data/db/extra.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
-import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
+import { AccountGenerator, Contact, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
 // tslint:disable-next-line:max-line-length
 import { conmentListChange, fabulousListChange, flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, lastReadNotice, settingChange, userChatChange } from './initStore';
 
@@ -113,13 +113,8 @@ export const initStore = () => {
         userHistoryMap:new Map(),
         groupHistoryMap: new Map(),
         announceHistoryMap: new Map(),
-        msgLockMap: new Map(),
         userInfoMap: new Map(),
-        userCredentialMap: new Map(), 
-        accountGeneratorMap: new Map(),
-        friendLinkMap: new Map(),
         contactMap: new Map(),
-        addressInfoMap: new Map(),
         userChatMap:new Map(),
         groupChatMap:new Map(),
         lastRead:new Map(),
@@ -140,9 +135,8 @@ export const initStore = () => {
         },
         tagList: tagListStore,
         followNumList:new Map(),
+        fansNumList:new Map(),
         laudPostList:new Map(),
-        postDraft:null,
-        pubPostDraft:null,
         pubNum:0,
         noticeList:[],
         lastReadNotice:[],
@@ -284,34 +278,27 @@ export interface Store {
     userHistoryMap: Map<string, UserMsg>;// hidinc
     groupHistoryMap: Map<string, GroupMsg>;// hidinc
     announceHistoryMap: Map<string, AnnounceHistory>;// aidinc
-    msgLockMap: Map<number, MsgLock>;// LOCK,前端暂时没用到
     userInfoMap: Map<number, UserInfo>;// uid
-    userCredentialMap: Map<number, UserCredential>; // todo,前端暂时没用到
-    accountGeneratorMap: Map<string, AccountGenerator>;// todo,前端暂时没用到
-    friendLinkMap: Map<string, FriendLink>;// uuid
     contactMap: Map<number, Contact>;// uid
-    addressInfoMap: Map<number, AddressInfo>;// uid,暂时没用到
     userChatMap:Map<string, string[]>;// hid,hidinc,递增存储
     groupChatMap:Map<string, string[]>;// hid,hidinc
     communityInfoMap:Map<string,CommunityBase>; // num 公众号信息
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
-    // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
     lastRead:Map<string,LastReadMsgId>;// hid
     setting:any; // 额外设置，免打扰|置顶
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
     flags:any; // 标记信息
-    postReturn: {
+    postReturn: {  // 广场帖子  
         id:number;
         num:string;
         tagType:number;
         postList:PostItem[];
-    };// 广场帖子    
+    };  
     tagList:string[];// tag名字
-    followNumList:Map<number,AttentionIndex>; // 关注的社区账号
+    followNumList:Map<number,AttentionIndex>; // uid 关注的社区账号
+    fansNumList:Map<string,FansIndex>; // num 粉丝社区账号
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
-    postDraft:any;   // 普通帖子草稿
-    pubPostDraft:any;  // 公众号文章草稿
     noticeList:any;// 消息列表
     lastReadNotice:any;// 已读消息
     pubNum:number;  // 公众号ID

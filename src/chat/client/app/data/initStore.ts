@@ -95,7 +95,10 @@ export const initAccount = () => {
             console.log('read fabulousList error');
         });
         
+    }).catch(err => {
+        console.log('初始化本地数据失败',err);
     });
+    
     getLocalStorage(`${sid}-flags`,(value) => {
         if (!value) return;
         store.setStore('flags/noGroupRemind',value.noGroupRemind);

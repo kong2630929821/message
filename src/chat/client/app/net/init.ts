@@ -10,7 +10,7 @@ import { chatLogicIp, chatLogicPort } from '../../../../app/public/config';
 import { Client } from '../../../../pi/net/mqtt_c';
 import { Struct, structMgr } from '../../../../pi/struct/struct_mgr';
 import { BonBuffer } from '../../../../pi/util/bon';
-import { AttentionIndex } from '../../../server/data/db/community.s';
+import { AttentionIndex, FansIndex } from '../../../server/data/db/community.s';
 import { GroupUserLink } from '../../../server/data/db/group.s';
 import { Contact, FriendLink, UserInfo } from '../../../server/data/db/user.s';
 import { getFriendLinks, getGroupsInfo } from '../../../server/data/rpc/basic.p';
@@ -165,6 +165,9 @@ export const init = (uid: number) => {
             // updatePubNum(r,uid);
         }
     });
+    subscribe.subscribeFansNum(num,(r:FansIndex) => {
+        
+    });
 };
 
 /**
@@ -234,26 +237,26 @@ const updateGroup = (r: Contact, uid: number) => {
  * @param uid 当前用户id
  */
 const updateUsers = (r: Contact, uid: number) => {
-    const info = new GetFriendLinksReq();
-    info.uuid = [];
-    r.friends.forEach((rid: number) => {
-        info.uuid.push(genUuid(uid, rid));
-        getFriendHistory(rid);  // 获取好友发送的离线消息
-    });
-    if (info.uuid.length > 0) {
-        console.log(info.uuid);
-        // 获取friendlink
-        clientRpcFunc(getFriendLinks, info, (r: FriendLinkArray) => {
-            if (r && r.arr && r.arr.length > 0) {
-                r.arr.forEach((e: FriendLink) => {
-                    store.setStore(`friendLinkMap/${e.uuid}`, e);
-                });
-            }
+    // const info = new GetFriendLinksReq();
+    // info.uuid = [];
+    // r.friends.forEach((rid: number) => {
+    //     info.uuid.push(genUuid(uid, rid));
+    //     getFriendHistory(rid);  // 获取好友发送的离线消息
+    // });
+    // if (info.uuid.length > 0) {
+    //     console.log(info.uuid);
+    //     // 获取friendlink
+    //     clientRpcFunc(getFriendLinks, info, (r: FriendLinkArray) => {
+    //         if (r && r.arr && r.arr.length > 0) {
+    //             r.arr.forEach((e: FriendLink) => {
+    //                 store.setStore(`friendLinkMap/${e.uuid}`, e);
+    //             });
+    //         }
 
-        });
+    //     });
 
-    }
-    const uids = r.friends.concat(r.temp_chat, r.blackList, r.applyUser);
+    // }
+    const uids = r.temp_chat.concat(r.blackList, r.applyUser);
     if (uids.length > 0) {
         uids.forEach(elem => {
             subscribedb.subscribeUserInfo(elem, null);
@@ -265,15 +268,15 @@ const updateUsers = (r: Contact, uid: number) => {
 /**
  * 更新公众号信息
  */
-const updatePubNum = (r:AttentionIndex) => {
-    getUserInfoByNum(r.public_list).then((res:any) => {
-        const val = store.getStore('communityInfoMap',new Map());
-        res.forEach(v => {
-            val.set(v.comm_info.num, v);
-        });
-        store.setStore('communityInfoMap',val);
-    });
-};
+// const updatePubNum = (r:AttentionIndex) => {
+//     getUserInfoByNum(r.public_list).then((res:any) => {
+//         const val = store.getStore('communityInfoMap',new Map());
+//         res.forEach(v => {
+//             val.set(v.comm_info.num, v);
+//         });
+//         store.setStore('communityInfoMap',val);
+//     });
+// };
 
 /**
  * 主动断开mqtt连接

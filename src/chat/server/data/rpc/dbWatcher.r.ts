@@ -8,7 +8,7 @@ import { ab2hex } from '../../../../pi/util/util';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
-import { AttentionIndex, LaudPostIndex } from '../db/community.s';
+import { AttentionIndex, FansIndex, LaudPostIndex } from '../db/community.s';
 import { AddressInfo } from '../db/extra.s';
 import { GroupInfo, GroupUserLink } from '../db/group.s';    
 import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../db/message.s';
@@ -141,6 +141,15 @@ export const watchLaudPost = (uid: number): LaudPostIndex => {
 // #[rpc=rpcServer]
 export const watchCommNum = (uid: number): AttentionIndex => {
     return watchInfo('commNum', uid, AttentionIndex, -1);
+};
+
+/**
+ * 粉丝列表索引
+ * @param uid user id 
+ */
+// #[rpc=rpcServer]
+export const watchFansNum = (num: string): FansIndex => {
+    return watchInfo('fansNum', num, FansIndex, -1);
 };
 
 // ================================================================= 本地

@@ -113,7 +113,7 @@ export class Search extends Widget {
     public searchFriend() {
         const searchItem = this.props.search;
         const uid = store.getStore('uid');
-        const friends = getFriendsInfo().friends;
+        const friends = []; // 没有好友列表
         this.props.friendList = [];
         this.props.friendAdd = [];
         // 是否支持搜索全部用户

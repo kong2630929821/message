@@ -321,20 +321,18 @@ registerStoreData('inviteUsers/convert_invite',(r) => {
 // 更新邀请好友记录
 const updateInviteUsers = (ans) => {
     const userInfoMap = store.getStore('userInfoMap',new Map());
-    if (STATE.contactMap.friends.length > 0) {
-        for (const v of STATE.contactMap.friends) {
-            const user = userInfoMap.get(v.toString());
-            if (user) {
-                // const index = ans.indexOf(user.acc_id); 
-                // index > -1 && ans.splice(index,1);
-                let index = null;
-                ans.forEach((v,i) => {
-                    if (v[0] === user.acc_id) {
-                        index = i;
-                    }
-                });
-                index > -1 && ans.splice(index,1);
-            }
+    for (const v of STATE.contactMap.friends) {
+        const user = userInfoMap.get(v.toString());
+        if (user) {
+            // const index = ans.indexOf(user.acc_id); 
+            // index > -1 && ans.splice(index,1);
+            let index = null;
+            ans.forEach((v,i) => {
+                if (v[0] === user.acc_id) {
+                    index = i;
+                }
+            });
+            index > -1 && ans.splice(index,1);
         }
     }
 
