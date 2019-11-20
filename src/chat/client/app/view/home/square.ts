@@ -59,6 +59,7 @@ export class Square extends Widget {
         super.create();
         this.state = state;
     }
+
     public setProps(props:any) {               
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
@@ -151,7 +152,6 @@ export class Square extends Widget {
             this.props.postView[this.state.postReturn.tagType - 1][1].isLoading = false;
             // this.props.postView[this.state.postReturn.tagType - 1][1].isShowAnimation = false;        
         }
-       
     }
     
     /**
@@ -310,14 +310,9 @@ register('postReturn',r => {
 // 监听游戏标签变化
 register('tagList',r => {   
     const w:any = forelet.getWidget(WIDGET_NAME);
-
     if (w) {
-        // w.props.postView = [];        
-        
         r.forEach((tag) => {            
-            if(w.props.postView.findIndex((e)=>{
-                return e[0] === tag
-            }) < 0 ){
+            if (w.props.postView.findIndex(item => item[0] === tag) === -1) {
                 w.props.postView.push([tag, {
                     expandItem:-1,
                     postList:[],

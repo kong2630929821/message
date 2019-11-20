@@ -75,11 +75,11 @@ export class Contact extends SpecialWidget {
             {
                 modulName:'message',
                 components:'chat-client-app-view-home-contactNotice'
+            },
+            {
+                modulName:'friend',
+                components:'chat-client-app-view-contactList-contactList'
             }
-            // {
-            //     modulName:'friend',
-            //     components:'chat-client-app-view-contactList-contactList'
-            // }
         ],
         tagList:[],
         labelList:[],
@@ -192,7 +192,9 @@ export class Contact extends SpecialWidget {
                     
                 });
             } else {
-                this.props.isUtilVisible = !this.props.isUtilVisible;
+                // 通讯录
+                popNew3('chat-client-app-view-person-addressBook');
+                
             }
             this.paint();
         } else {

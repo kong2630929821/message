@@ -177,6 +177,7 @@ export class PostDetail extends Widget {
      * 评论
      */
     public doComment() {
+        this.pageClick();
         popNew('chat-client-app-view-info-editComment', { key:this.props.postItem.key }, (r) => {
             const uid = getStore('uid');
             const userinfo = getStore(`userInfoMap/${uid}`,{});
@@ -295,11 +296,13 @@ export class PostDetail extends Widget {
         this.paint();
     }
 
-    public pageClick(isShow:boolean= true) {
+    public toolsExpand() {
         this.props.expandItem = -1;
-        if (isShow) {
-            this.props.expandItemTop = !this.props.expandItemTop;
-        }
+        this.paint();
+    }
+    public pageClick() {
+        this.props.expandItem = -1;
+        this.props.expandItemTop = !this.props.expandItemTop;
         this.paint();
     }
 

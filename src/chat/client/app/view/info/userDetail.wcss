@@ -135,3 +135,21 @@
     display: flex;
     width: 410px;
 }
+.utils {
+    width: 400px;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0px 0px 10px 0px rgba(34, 34, 34, 0.2);
+    border-radius: 6px;
+    position: absolute;
+    right: 20px;
+    top: 154px;
+    z-index: 1;
+  }
+  .option {
+    font-size: 28px;
+    font-weight: 500;
+    color: rgba(34, 34, 34, 1);
+    line-height: 98px;
+    border-bottom: 2px solid #f2f2f2;
+    text-align: center;
+  }

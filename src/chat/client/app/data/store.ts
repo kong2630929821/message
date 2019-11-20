@@ -38,6 +38,7 @@ export const getStore = (path: string, defaultValue = undefined) => {
  * 更新store并通知
  */
 export const setStore = (path: string, data: any, notified = true) => {
+    // todo: 只有store的值变化了才通知，没有变化不用通知
     const path2value = (...args) => {
         let returnValue = <any>store;
         for (let i = 0; i < args[0].length; i++) {

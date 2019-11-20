@@ -3,7 +3,6 @@
  */
 
 // ================================================ 导入
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { DEFAULT_ERROR_STR } from '../../../../server/data/constant';
@@ -12,6 +11,7 @@ import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
 import { depCopy, getGidFromHincid } from '../../../../utils/util';
 import * as store from '../../data/store';
+import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出

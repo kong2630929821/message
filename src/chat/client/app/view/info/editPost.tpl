@@ -3,7 +3,7 @@
     <div w-class="topBar">
         <div w-class="topBarItem" on-tap="close">取消</div>
         <div w-class="topBarItem">{{it.title}}</div>
-        <div w-class="topBarItem" style="color:{{it.contentInput?'#4285F4':'#EEE'}}" on-tap="send">发布</div>
+        <div w-class="topBarItem" style="color:{{it.contentInput||it.saveImgs.length?'#4285F4':'#EEE'}}" on-tap="send">发布</div>
     </div>
     <div w-class="contain">
         {{if it.isPublic}}
@@ -14,7 +14,7 @@
             <div contenteditable="true" w-class="editBox" id="editBox" class="editor" on-input="editBoxChange" on-keydown="editorTap" on-paste="onpaste" ></div>
         </div>
         {{else}}
-        <div w-class="content" ev-input-change="contentChange" on-tap="inputClick">
+        <div w-class="content" ev-input-change="contentChange" ev-input-focus="inputClick">
             <widget w-tag="chat-client-app-widget1-input-textarea">{placeHolder:"内容", style:"max-height:none;min-height:300px;font-size:28px;", input:{{it.contentInput}},maxLength:{{it.isPublic ? 1000:400}} }</widget>
         </div>  
         {{end}}
