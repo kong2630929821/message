@@ -195,3 +195,10 @@ struct CommUserInfoList{
 struct PostKeyList{
     list: &[PostKey]
 }
+
+// 申请公众号
+struct ApplyPublicArg {
+    name: String,   // 公众号名称
+    avatar: Option<String>,  //头像
+    desc: String,   //描述
+}

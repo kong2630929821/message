@@ -87,6 +87,17 @@ export const NOT_REVIEW_STATE = 2; // 待审核
 export const REVIEW_PASS = 3;      // 审核通过
 export const REVIEW_REFUSE = 4;    // 审核驳回
 
+// 钱包服务器地址
+export const WALLET_SERVER_URL = 'http://127.0.0.1:8099';
+// appid
+export const WALLET_APPID = '10';
+// 私钥
+export const WALLET_SERVER_KEY = '0a15c4dbca88fa93ccf43a49b3496208edff35a4185ac967389ffd9878d5c405';
+// 创建应用
+export const WALLET_API_ADD_APP = '/oAuth/add_app';
+// 编辑推荐应用
+export const WALLET_API_SET_APP_CONFIG = '/oAuth/set_app_config';
+
 // 爬虫服务地址
 export const WEIBO_SPIDER_HOST = 'http://39.98.48.66:9999/'; // 爬虫服务器地址
 export const SPIDER_USER_INFO = 'user_spider.py'; // 爬取用户信息
