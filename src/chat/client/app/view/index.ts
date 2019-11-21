@@ -3,7 +3,6 @@
  */
 // ============================== 导入
 import { getWebviewName } from '../../../../app/api/walletApi';
-import { getGameItem } from '../../../../app/view/play/home/gameConfig';
 import { WebViewManager } from '../../../../pi/browser/webview';
 import { popNew } from '../../../../pi/ui/root';
 import { addWidget } from '../../../../pi/widget/util';
@@ -27,4 +26,22 @@ export const run = async (cb) => {
     setTimeout(() => {
         cb && cb();
     }, 100);
+};
+
+/**
+ * 获取指定webviewName的所有值
+ */
+export const getGameItem = (webviewName:string) => {
+    const gameList = getStore('gameList');
+    const index = gameList.findIndex((item) => {
+        return item.webviewName === webviewName;
+    });
+    
+    const gameItem = localStorage.getItem('officialService') ? JSON.parse(localStorage.getItem('officialService')).gameList[index] :{}; 
+    console.log('获取游戏配置信息', gameList[index], gameItem);
+
+    return {
+        ...gameList[index],
+        ...gameItem
+    };
 };

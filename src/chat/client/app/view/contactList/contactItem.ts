@@ -9,7 +9,7 @@ import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE, UserInfo, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { depCopy, genUuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getFriendAlias, getGroupAvatar, getUserAvatar, rippleShow } from '../../logic/logic';
+import { getUserAlias, getGroupAvatar, getUserAvatar, rippleShow } from '../../logic/logic';
 import { getUsersBasicInfo } from '../../net/rpc';
 
 // ================================================ 导出
@@ -34,7 +34,7 @@ export class ContactItem extends Widget {
         if (!this.props.text) {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
                 if (this.props.id !== store.getStore('uid')) {
-                    this.props.name = getFriendAlias(this.props.id).name;
+                    this.props.name = getUserAlias(this.props.id).name;
                     if (!this.props.name) { 
                         getUsersBasicInfo([this.props.id]).then((r:any) => {
                             store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
@@ -66,11 +66,6 @@ export class ContactItem extends Widget {
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             store.register(`userInfoMap/${this.props.id}`,this.bindUpdate);
             console.log('contactItem firstPaint',`userInfoMap/${this.props.id}`);
-            const sid = store.getStore(`uid`, 0);
-            if (sid !== this.props.id) {
-                store.register(`friendLinkMap/${genUuid(sid,this.props.id)}`,this.bindUpdate);
-                console.log('contactItem firstPaint',`friendLinkMap/${genUuid(sid,this.props.id)}`);
-            }
         } else if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             store.register(`groupInfoMap/${this.props.id}`,this.bindUpdate);
         }
@@ -84,10 +79,6 @@ export class ContactItem extends Widget {
 
     public destroy() {
         super.destroy();
-        const sid = store.getStore(`uid`,0);
-        if (sid !== this.props.id) {
-            store.unregister(`friendLinkMap/${genUuid(sid,this.props.id)}`,this.bindUpdate);
-        }
         store.unregister(`groupInfoMap/${this.props.id}`,this.bindUpdate);
         store.unregister(`userInfoMap/${this.props.id}`,this.bindUpdate);
 

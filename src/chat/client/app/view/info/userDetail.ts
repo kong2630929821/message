@@ -7,12 +7,11 @@ import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
-import { genUuid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
-import { buildupImgPath, complaintUser, getFriendAlias, getUserAvatar, judgeLiked } from '../../logic/logic';
+import { buildupImgPath, complaintUser, getUserAlias, getUserAvatar } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
-import { applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo, postLaud } from '../../net/rpc';
+import { applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
 
 interface Props {
     uid: number;
@@ -23,7 +22,6 @@ interface Props {
     avatar:string; // 头像
     numList:any[][];
     isOwner:boolean;  // 当前用户
-    isFriend: boolean; // 是否是好友
     followed:boolean;  // 是否关注
     medalList:any[];  // 勋章列表
     postList:any[];  // 发布的帖子列表
@@ -54,7 +52,6 @@ export class UserDetail extends Widget {
             [0,'粉丝']
         ],
         isOwner:false,
-        isFriend:true,
         followed:true,
         medalList:[],
         postList:[],
@@ -107,9 +104,8 @@ export class UserDetail extends Widget {
         this.props.followed = followList.indexOf(this.props.num) > -1;
         
         if (!this.props.isOwner) {
-            const v = getFriendAlias(this.props.uid);
+            const v = getUserAlias(this.props.uid);
             this.props.alias = v.name;
-            this.props.isFriend = v.isFriend;
             getFollowList(this.props.uid).then((r:string[]) => {
                 this.props.followList = r;  // 关注
                 this.props.numList[1][0] = r.length;
@@ -154,7 +150,7 @@ export class UserDetail extends Widget {
         // });
 
         // 获取全部勋章
-        getAllMedal().then(r => {
+        getAllMedal().then((r:any) => {
             if (r.medals) {
                 this.props.medalList = r.medals;
                 this.paint();
@@ -171,7 +167,6 @@ export class UserDetail extends Widget {
         super.firstPaint();
         const sid = getStore(`uid`, 0);
         if (sid !== this.props.uid) {
-            register(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.bindUpdate);
             register(`followNumList/${sid}`,this.bindUpdate);
         }
         
@@ -337,7 +332,6 @@ export class UserDetail extends Widget {
         super.destroy();
         const sid = getStore(`uid`);
         if (sid !== this.props.uid) {
-            unregister(`friendLinkMap/${genUuid(sid,this.props.uid)}`,this.bindUpdate);
             unregister(`followNumList/${sid}`,this.bindUpdate);
         }
 
@@ -400,14 +394,9 @@ export class UserDetail extends Widget {
             const friend = new FriendAlias();
             friend.rid = this.props.uid;
             friend.alias = res.content;
+            // TODO修改关注列表备注
             clientRpcFunc(changeFriendAlias, friend, (r: Result) => {
                 if (r.r === 1) {
-                    const sid = getStore('uid');
-                    const friendlink = getStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, {});
-                    friendlink.alias = friend.alias;
-                    this.props.alias = friend.alias;
-                    setStore(`friendLinkMap/${genUuid(sid, this.props.uid)}`, friendlink);
-                    this.paint();
                     popNewMessage('修改好友备注成功');
 
                 } else {

@@ -4,6 +4,7 @@
 
 import { getSession } from '../../../../pi_pt/util/autologin.r';
 import { Bucket } from '../../../utils/db';
+import { add_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
@@ -15,6 +16,7 @@ import * as ERROR_NUM from '../errorNum';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
 import { PostData } from './community.s';
+import { AddAppArg, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
 import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
@@ -466,6 +468,36 @@ export const cancelGmAccount = (accId: string): number => {
 };
 
 /**
+ * 获取官方账号列表
+ */
+// #[rpc=rpcServer]
+export const getOfficialAcc = (appid: string): OfficialAccList => {
+    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const iter = officialBucket.iter(null, true);
+    const list = new OfficialAccList();
+    list.list = [];
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const officialUsers: OfficialUsers = v[1];
+        officialUsers.uids.forEach((uid) => {
+            const officialUserInfo =  new OfficialUserInfo();
+            const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
+            officialUserInfo.user_info = userInfo;
+            // 获取社区注册时间
+            const communityBase = communityBaseBucket.get<string, CommunityBase[]>(userInfo.comm_num)[0];
+            officialUserInfo.create_time = communityBase.createtime;
+            officialUserInfo.app_id = officialUsers.appId;
+            list.list.push(officialUserInfo);
+        });
+    } while (iter);
+    
+    return list;
+};
+
+/**
  * 调整用户惩罚时间
  */
 // #[rpc=rpcServer]
@@ -480,6 +512,35 @@ export const modifyPunish = (arg: ModifyPunishArg): number => {
     if (end_time <= Date.now()) endPunish(`${CONSTANT.REPORT_PERSON}%${arg.uid}`, arg.id);
 
     return CONSTANT.RESULT_SUCCESS;
+};
+
+/**
+ * 添加应用
+ */
+// #[rpc=rpcServer]
+export const addApp = (arg: AddAppArg): number => {
+    console.log('addApp!!!!!!!!!!!!!!arg:', arg);
+    // if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
+    const r = add_app(arg.appid, arg.name, arg.imgs, arg.desc, arg.url, arg.pk, arg.mch_id, arg.notify_url);
+    if (r) {
+        return CONSTANT.RESULT_SUCCESS;
+    } else {
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
+};
+
+/**
+ * 编辑推荐应用
+ */
+// #[rpc=rpcServer]
+export const setAppConfig = (arg: SetAppConfig): number => {
+    // if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
+    const r = set_app_config(arg.cfg_type, arg.appids);
+    if (r) {
+        return CONSTANT.RESULT_SUCCESS;
+    } else {
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
 };
 
 /**

@@ -89,16 +89,11 @@
     </div>
 
     <div w-class="btns">
-        {{if !it.isFriend}}
-        <div w-class="btn" on-tap="addUser">+好友</div>
-        {{elseif !it.isOwner}}
+        {{if !it.isOwner}}
         <div w-class="btn" on-tap="goChat">聊天</div>
         {{end}}
         {{if !it.followed}}
         <div w-class="btn" on-tap="followUser">关注</div>
-        {{end}}
-        {{if it.isMine}}
-        <div w-class="btn" on-tap="sendPost">+好友</div>
         {{end}}
     </div>
 

@@ -8,11 +8,10 @@ import { ab2hex } from '../../../../pi/util/util';
 import { setMqttTopic } from '../../../../pi_pt/rust/pi_serv/js_net';
 import { Bucket } from '../../../utils/db';
 import * as CONSTANT from '../constant';
-import { AttentionIndex, LaudPostIndex } from '../db/community.s';
-import { AddressInfo } from '../db/extra.s';
+import { AttentionIndex, FansIndex, LaudPostIndex } from '../db/community.s';
 import { GroupInfo, GroupUserLink } from '../db/group.s';    
 import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../db/message.s';
-import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../db/user.s';
+import { Contact, UserInfo } from '../db/user.s';
 
 declare var env: Env;
 // ================================================================= 导出
@@ -81,33 +80,6 @@ export const watchUserInfo = (uid: number): UserInfo => {
 };
 
 /**
- * User credential table
- * @param uid user id
- */
-// #[rpc=rpcServer]
-export const watchUserCredential = (uid: number): UserCredential => {
-    return watchInfo('uid', uid, UserCredential, -1);
-};
-
-/**
- * User account generator
- * @param index index
- */
-// #[rpc=rpcServer]
-export const watchAccountGenerator = (index: String): AccountGenerator => {
-    return watchInfo('index', index, UserCredential, '-1');
-};
-
-/**
- * 好友链接信息
- * @param uuid uid:uid
- */
-// #[rpc=rpcServer]
-export const watchFriendLink = (uuid: string): FriendLink => {
-    return watchInfo('uuid', uuid, FriendLink, '-1');
-};
-
-/**
  * 联系人信息
  * @param uid user id 
  */
@@ -117,21 +89,12 @@ export const watchContact = (uid: number): Contact => {
 };
 
 /**
- * 地址信息
- * @param uid uid user id
- */
-// #[rpc=rpcServer]
-export const watchAddressInfo = (uid: number): AddressInfo => {
-    return watchInfo('uid', uid, AddressInfo, -1);
-};
-
-/**
  * 点赞帖子索引
  * @param uid user id 
  */
 // #[rpc=rpcServer]
 export const watchLaudPost = (uid: number): LaudPostIndex => {
-    return watchInfo('laudPost', uid, LaudPostIndex, -1);
+    return watchInfo('uid', uid, LaudPostIndex, -1);
 };
 
 /**
@@ -140,7 +103,16 @@ export const watchLaudPost = (uid: number): LaudPostIndex => {
  */
 // #[rpc=rpcServer]
 export const watchCommNum = (uid: number): AttentionIndex => {
-    return watchInfo('commNum', uid, AttentionIndex, -1);
+    return watchInfo('uid', uid, AttentionIndex, -1);
+};
+
+/**
+ * 粉丝列表索引
+ * @param uid user id 
+ */
+// #[rpc=rpcServer]
+export const watchFansNum = (num: string): FansIndex => {
+    return watchInfo('num', num, FansIndex, '-1');
 };
 
 // ================================================================= 本地

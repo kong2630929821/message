@@ -70,10 +70,10 @@ export class EditPost extends Widget {
         super.setProps(this.props);
         let data = null;
         if (props.isPublic) {
-            data = getStore('postDraft', null);
+            data = getStore('flags', {}).postDraft;
             this.props.title = '发布公众号消息';
         } else {
-            data = getStore('pubPostDraft', null);
+            data = getStore('flags', {}).pubPostDraft;
         }
         // 有草稿则赋值
         if (data) this.props = data;
@@ -264,32 +264,32 @@ export class EditPost extends Widget {
     // 关闭
     public close() {
         // 有内容时提醒保存草稿
-        if (this.props.titleInput || this.props.contentInput || this.props.imgs.length > 0 || this.props.placeHolderInfo === 0) {
+        if (this.props.titleInput || this.props.contentInput || this.props.imgs.length > 0) {
             popNew('chat-client-app-widget-modalBox-modalBox',{ content:'保留此次编辑' },() => {
                 if (this.props.isPublic) {
                      // 编辑的div
                     const editor = document.querySelector('#editBox');
                     this.props.editorText = editor.innerHTML;
-                    setStore('postDraft',this.props);
+                    setStore('flags/pubPostDraft',this.props);
                 } else {
-                    setStore('pubPostDraft',this.props);
+                    setStore('flags/postDraft',this.props);
                 }
                 this.cancel && this.cancel();
 
             },() => {
                 if (this.props.isPublic) {
-                    setStore('postDraft',null);
+                    setStore('flags/pubPostDraft',null);
                 } else {
-                    setStore('pubPostDraft',null);
+                    setStore('flags/postDraft',null);
                 }
                 this.cancel && this.cancel();
             });
 
         } else {
             if (this.props.isPublic) {
-                setStore('postDraft',null);
+                setStore('flags/pubPostDraft',null);
             } else {
-                setStore('pubPostDraft',null);
+                setStore('flags/postDraft',null);
             }
             this.cancel && this.cancel();
         }
@@ -321,7 +321,7 @@ export class EditPost extends Widget {
                 if (!isNaN(r)) {
                     popNewMessage('发布成功');
                     // 初始化草稿箱
-                    setStore('postDraft',null);
+                    setStore('flags/pubPostDraft',null);
                     this.ok && this.ok();
                 } else {
                     r.list.forEach(v => {
@@ -359,7 +359,7 @@ export class EditPost extends Widget {
                     if (!isNaN(r)) {
                         popNewMessage('发布成功');
                         // 初始化草稿箱
-                        setStore('pubPostDraft',null);
+                        setStore('flags/postDraft',null);
                         this.ok && this.ok();
                     } else {
                         r.list.forEach(v => {

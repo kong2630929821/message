@@ -38,7 +38,7 @@ struct UserInfo {
     wallet_addr: String, //钱包地址
     acc_id:String,        // 钱包账户ID
     level:u32,            // 用户权限等级
-    comm_num:String,      // 社区账号
+    comm_num:String,      // 社区账号   用户注册时间等于社区创建时间
 }
 
 /**

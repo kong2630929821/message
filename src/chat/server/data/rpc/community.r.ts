@@ -9,7 +9,7 @@ import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST,
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
 import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg,  ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
+import { AddCommentArg, AddPostArg,  ApplyPublicArg, ChangeCommunity, CommentArr, CommentData, CommentIDList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
 import { getUid } from './group.r';
 import { addManagerPostIndex, getUserPunishing } from './manager.r';
 import { getIndexId } from './message.r';
@@ -137,6 +137,18 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
         return num;
     } 
 
+};
+
+/**
+ * 申请公众号
+ */
+// #[rpc=rpcServer]
+export const applyPublicC = (arg: ApplyPublicArg): string => {
+    const uid = getUid();
+    // 生成社区账号
+    const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
+    
+    return applyPublicComm(uid, num, arg.name, arg.avatar, arg.desc);
 };
 
 /**
