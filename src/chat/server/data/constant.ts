@@ -42,7 +42,7 @@ export const CHAT_APPID = '10';  // 聊天的APP ID
 // ---------------------- 权限等级 ---------------------
 // 普通用户 VIP0
 export const VIP0_FRIENDS_LIMIT = 500; // 好友上限
-export const VIP0_GROUPS_LIMIT = 5; // 群上限
+export const VIP0_GROUPS_LIMIT = 50; // 群上限
 export const VIP0_GROUP_MEMBERS_LIMIT = 500; // 普通群的成员上限
 // 官方账号 VIP5
 export const VIP5_FRIENDS_LIMIT = 2000; // 好友上限

@@ -1,5 +1,5 @@
 <div w-class="page" class="new-page" on-tap="pageClick" ev-back-click="goBack" ev-next-click="goSetting" >
-    <chat-client-app-widget1-topBar-topBar>{title:"",nextImg:"setting.png"}</chat-client-app-widget1-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{textCenter:{{it.userInfo.name}},nextImg:"more-dot-blue.png",background:"#fff"}</chat-client-app-widget1-topBar-topBar>
     
     <div w-class="contain" id="userDetailPage" on-scroll="scrollPage">
         <div id="userDetailContain">
@@ -15,13 +15,8 @@
                             </div>
                             {{end}}
                         </div>
-                        {{if it.isOwner}}
-                        <div w-class="followBtn" on-tap="goPublic">{{it.pubNum ? "我的公众号":"申请公众号"}}</div>
-                        {{else}}
+                        {{if !it.isOwner}}
                         <div w-class="friendsPub">
-                            {{if it.followed}}
-                                <div w-class="followBtn" on-tap="goHisPublic">{{"公众号"}}</div>
-                            {{end}}
                             <div w-class="{{it.followed ? 'cancelBtn':'followBtn'}}" on-tap="followUser">{{it.followed ? "取消关注":"关注ta"}}</div>
                         </div>
                         {{end}}
@@ -76,6 +71,7 @@
                 </div>
 
                 {{%===================个人动态============================}}
+                {{if it.isOwner}}
                 <div w-class="title">
                     <span w-class="mark"></span>
                     <span style="flex:1 0 0;">个人动态</span>
@@ -87,21 +83,26 @@
                     </div>
                     {{end}}
                 </div>
+                {{end}}
             </div>
         </div>
     </div>
 
     <div w-class="btns">
-        {{if !it.isFriend}}
-        <div w-class="btn" on-tap="addUser">+好友</div>
-        {{elseif !it.isOwner}}
+        {{if !it.isOwner}}
         <div w-class="btn" on-tap="goChat">聊天</div>
         {{end}}
         {{if !it.followed}}
         <div w-class="btn" on-tap="followUser">关注</div>
         {{end}}
-        {{if it.isMine}}
-        <div w-class="btn" on-tap="sendPost">+好友</div>
+    </div>
+
+    <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
+        {{if it.isOwner}}
+        <div w-class="option" on-tap="toolOperation(0)">认证官方账号</div>
+        {{else}}
+        <div w-class="option" on-tap="toolOperation(1)">修改备注</div>
+        <div w-class="option" on-tap="toolOperation(2)">举报玩家</div>
         {{end}}
     </div>
 </div>

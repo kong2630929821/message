@@ -46,7 +46,6 @@ export const initAccount = () => {
         getFile(`${sid}-userInfoMap`, (value) => {
             if (!value) return;
             store.setStore('userInfoMap', value.userInfoMap || new Map(), false);
-            store.setStore('friendLinkMap', value.friendLinkMap || new Map(), false);
             const data  = value.userInfoMap;
             const accIdToUid = store.getStore('accIdToUid',[]);
             for (const [key,value] of data) {
@@ -95,7 +94,10 @@ export const initAccount = () => {
             console.log('read fabulousList error');
         });
         
+    }).catch(err => {
+        console.log('初始化本地数据失败',err);
     });
+    
     getLocalStorage(`${sid}-flags`,(value) => {
         if (!value) return;
         store.setStore('flags/noGroupRemind',value.noGroupRemind);
@@ -137,7 +139,6 @@ export const friendChange = () => {
         if (!value) {
             value = {};
         }
-        value.friendLinkMap = store.getStore('friendLinkMap'); // 好友链接
         value.userInfoMap = store.getStore('userInfoMap');  // 用户信息
         writeFile(`${id}-userInfoMap`, value);
     }, () => {

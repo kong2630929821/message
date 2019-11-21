@@ -1,6 +1,6 @@
 <div class="new-page" w-class="new-page">
     <div ev-back-click="goBack" ev-next-click="completeEdit" w-class="topBar">
-        <chat-client-app-widget1-topBar-topBar>{title:{{it.title}},nextImg:{{it.contentInput?'complete_blue.png':'complete_gray.png'}}}</chat-client-app-widget1-topBar-topBar>
+        <chat-client-app-widget1-topBar-topBar3>{leftText:"取消",title:{{it.title}},rightText:"发布",style:{{it.contentInput?'#4285F4':'#888'}} }</chat-client-app-widget1-topBar-topBar3>
     </div>
     {{if it.needTitle}}
     <div ev-input-change="inputChange" w-class="title-wrap">

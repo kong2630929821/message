@@ -12,10 +12,10 @@ import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { UserHistory } from '../../../../server/data/db/message.s';
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
-import { depCopy, genGroupHid, genUserHid, genUuid, getIndexFromHIncId } from '../../../../utils/util';
+import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { getFriendAlias, getUserAvatar, INFLAG, timestampFormat } from '../../logic/logic';
+import { getUserAlias, getUserAvatar, INFLAG, timestampFormat } from '../../logic/logic';
 import { openNewActivity } from '../../logic/native';
 import { popNewMessage } from '../../logic/tools';
 import { applyToGroup, applyUserFriend, getChatUid, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
@@ -37,7 +37,6 @@ export class Chat extends Widget {
 
     public setProps(props:any) {
         super.setProps(props);
-        console.log('aaaaaaaaaaaaaaaaaaaaaaaa');
         this.props.sid = store.getStore('uid');
         this.props.inputMessage = '';
         this.props.newMsg = null;
@@ -79,9 +78,9 @@ export class Chat extends Widget {
         const level = store.getStore(`userInfoMap/${this.props.id}`,{ level:0 }).level;  // 对方的等级
         const myLevel = store.getStore(`userInfoMap/${this.props.sid}`,{ level:0 }).level;  // 当前用户的等级
         if (!this.props.temporary) { // 如果是临时聊天会传名字 不是临时聊天需要获取用户名
-            this.props.name = getFriendAlias(this.props.id).name;
+            this.props.name = getUserAlias(this.props.id).name;
             this.props.avatar = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
-            this.props.temporary = level !== VIP_LEVEL.VIP5 && !getFriendAlias(this.props.id).isFriend;  // 不是官方客服且不是好友则是临时聊天
+            this.props.temporary = level !== VIP_LEVEL.VIP5;  // 不是官方客服且不是好友则是临时聊天
         } 
         if (!this.props.name) {  // 获取不到用户名
             getUsersBasicInfo([this.props.id]).then((r: UserArray) => {
@@ -157,10 +156,6 @@ export class Chat extends Widget {
             store.register(`groupUserlinkMap`,this.bindCB);
         } else {
             store.register(`userChatMap/${this.props.hid}`,this.bindCB);
-            store.register(`friendLinkMap/${genUuid(this.props.sid,this.props.id)}`,(r) => {
-                this.props.name = r.alias;
-                this.paint();
-            });
         }
         
     }
@@ -380,12 +375,8 @@ export class Chat extends Widget {
      * 获取滚动区元素
      */
     public getScrollElem() {
-        if (this.props.temporary || this.props.groupId) { // 临时聊天会多一个div
-            return getRealNode((<any>this.tree).children[2]);
-
-        } else {
-            return getRealNode((<any>this.tree).children[1]);
-        }
+       
+        return getRealNode((<any>this.tree).children[1]);
     }
 
     /**
@@ -515,7 +506,6 @@ interface Props {
     newMsg:any; // 我发布的一条新消息
     isOnTools:boolean; // 是否打开更多功能
     activeAudio:any; // 当前点击的语音消息
-    temporary:boolean;  // 是否是临时聊天
     groupId:number; // 当前群聊ID 群主可与成员私聊
     okCB:any;  // 游戏中进入携带的参数
     avatar:string; // 头像
