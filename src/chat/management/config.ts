@@ -23,3 +23,8 @@ export const wsUrl = `ws://${serverIp}:${serverPort}`;
 
 // 获取图片路径
 export const serverFilePath = `http://${sourceIp}:${sourcePort}/service/get_file?sid=`;
+
+/**
+ * maxSize图片最大 2M
+ */
+export const maxSize = 2097152;
