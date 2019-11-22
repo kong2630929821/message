@@ -1,25 +1,31 @@
 import { Widget } from '../../../pi/widget/widget';
+import { buildupImgPath } from '../../client/app/logic/logic';
+import { ListItem } from '../view/page/application/thirdApplication';
 
 interface Props {
-    name:string;// 游戏名
-    desc:string;// 游戏描述
-    icon:string;// 游戏图标
-    customerId:string;// 客服id
-    appId:string;// 应用ID
-    time:string;// 添加时间
+    item:ListItem;
+    buildupImgPath:any;
 }
-
 /**
  * 游戏列表item
  */
 export class ApplicationItem extends Widget {
     public props:Props = {
-        name:'',
-        desc:'',
-        icon:'',
-        customerId:'',
-        appId:'',
-        time:''
+        item:{
+            accId: '',
+            appid: '',
+            buttonMod: 1,
+            desc: '',
+            groupId: '',
+            img: ['','','',''],
+            screenMode: '',
+            subtitle:'' ,
+            title:'',
+            url:'',
+            webviewName: '',
+            time:''
+        },
+        buildupImgPath:buildupImgPath
     };
 
     public setProps(props:any) {

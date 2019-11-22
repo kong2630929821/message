@@ -10,6 +10,7 @@ export class RecommendApplication extends Widget {
      * 添加一个推荐
      */
     public addApp() {
+        
         popNew('chat-management-components-addApplicationModule');
     }
 }

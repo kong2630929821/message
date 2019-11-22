@@ -1,43 +1,64 @@
 import { Widget } from '../../../pi/widget/widget';
-import { rippleShow } from '../../client/app/logic/logic';
+import { buildupImgPath, rippleShow } from '../../client/app/logic/logic';
+import { getStore } from '../store/memstore';
+import { popNewMessage } from '../utils/logic';
+import { ListItem } from '../view/page/application/thirdApplication';
 
 interface Props {
     title:string;
     input:string;
-    appItem:AppItem;
+    appItem:ListItem;
     checked:boolean;
-}
-
-interface AppItem {
-    iocn:string;
-    name:string;
-    desc:string;
-    id:string;
+    appList:ListItem[];
+    buildupImgPath:any;  // 组装图片路径
 }
 /**
  * 搜索应用
  */
 export class AddApplicationModule extends Widget {
-    public ok:() => void;
+    public ok:(appId?:string) => void;
     public cancel:() => void;
     public props:Props = {
         title:'添加推荐应用',
         input:'',
         appItem:{
-            iocn:'../res/images/xianzhixiadao.png',
-            name:'仙之侠道',
-            desc:'2019最热奇幻手游',
-            id:'123456'
+            accId: '',
+            appid: '',
+            buttonMod: 1,
+            desc: '',
+            groupId: '',
+            img: ['','','',''],
+            screenMode: '',
+            subtitle:'' ,
+            title:'',
+            url:'',
+            webviewName: '',
+            time:''
         },
-        checked:false
+        checked:false,
+        appList:[
+            {
+                accId: '',
+                appid: '',
+                buttonMod: 1,
+                desc: '',
+                groupId: '',
+                img: ['','','',''],
+                screenMode: '',
+                subtitle:'' ,
+                title:'',
+                url:'',
+                webviewName: '',
+                time:''
+            }
+        ],
+        buildupImgPath:buildupImgPath
     };
 
-    public setProps(props:any) {
-        this.props = {
-            ...this.props,
-            ...props
-        };
-        super.setProps(this.props);
+    public create() {
+        super.create();
+        const appList = getStore('appList',[]);
+        this.props.appList = appList;
     }
 
     public exitBtn() {
@@ -45,7 +66,13 @@ export class AddApplicationModule extends Widget {
     }
 
     public okBtn() {
-        this.ok && this.ok();
+        const appId = this.props.appItem.appid;
+        if (!this.props.checked) {
+            popNewMessage('请选择一个应用');
+            
+            return;
+        } 
+        this.ok && this.ok(appId);
     }
 
     public inputChange(e:any) {
@@ -55,7 +82,11 @@ export class AddApplicationModule extends Widget {
      * 搜索
      */
     public search() {
-        
+        const arr:ListItem = this.props.appList.find(item => item.title === this.props.input || item.appid === this.props.input);
+        if (arr) {
+            this.props.appItem = arr ;
+        }
+        this.paint();
     }
     // 动画效果执行
     public onShow(e:any) {

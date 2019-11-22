@@ -92,7 +92,7 @@ export const add_app = (appid: string, name: string, imgs: string, desc: string,
     console.log('add_app!!!!!!!!!!!r:', JSON.stringify(r));
     if (r.ok) {
         const json = JSON.parse(r.ok);
-        if (json.return_code === 1) {
+        if (json.result === 1) {
             return true;
         } 
     }
@@ -106,7 +106,7 @@ export const set_app_config = (type: number, app_ids: string): Boolean => {
     console.log('set_app_config!!!!!!!!!!!r:', JSON.stringify(r));
     if (r.ok) {
         const json = JSON.parse(r.ok);
-        if (json.return_code === 1) {
+        if (json.result === 1) {
             return true;
         } 
     }

@@ -4,9 +4,11 @@ import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, P
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin } from '../../server/data/rpc/manager.p';
+import { addApp, createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin } from '../../server/data/rpc/manager.p';
+import { AddAppArg } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
-import { deelReportList, deelReportListInfo, timestampFormat } from '../utils/logic';
+import { erlangLogicIp } from '../config';
+import { deelReportList, deelReportListInfo, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -200,5 +202,57 @@ export const reversePosts = (id:number,num:string) => {
         clientRpcFunc(reversePost,arg,(r:any) => {
             res(r);
         });
+    });
+};
+
+// 添加应用
+export const addApplication = (arg:AddAppArg) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(addApp,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+// 获取全部游戏
+export const getAllGameList = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 获取全部游戏详情
+export const getAllGameInfo = (ids:string) => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
+        return res.json().then(r => {
+            const res = r.app_details;
+            const gameList = [];
+            res.forEach(v => {
+                const name = unicode2ReadStr(v[0]);
+                const img = JSON.parse(v[1]);
+                const desc = JSON.parse(v[2]);
+                const url = v[3];
+                desc.desc = unicode2ReadStr(desc.desc);
+                desc.subtitle = unicode2ReadStr(desc.subtitle);
+                gameList.push({
+                    ...desc,
+                    title:name,
+                    subtitle:desc.subtitle,
+                    img:[img.icon,img.rowImg,img.colImg,img.downLoadImg],
+                    url,
+                    time:timestampFormat(JSON.parse(desc.time))
+                });
+            });
+
+            return gameList;
+        }). catch (e => {
+            return [];
+        });
+      
     });
 };

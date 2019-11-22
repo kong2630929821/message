@@ -1,4 +1,5 @@
 import { HandlerMap } from '../../../pi/util/event';
+import { ListItem } from '../view/page/application/thirdApplication';
 
 /**
  * 判断是否是对象
@@ -101,12 +102,32 @@ export const unregister = (keyName: string, cb: Function): void => {
  */
 const handlerMap: HandlerMap = new HandlerMap();
 
+// tslint:disable-next-line:no-single-line-block-comment
 /******************************store初始化**********************************/
+
 // 海龟一号store
 interface Store {
+    appList:ListItem[];
     flags:any;
+
 }
 // 全局内存数据库
 const store:Store = {
+    appList:[
+        {
+            accId: '',
+            appid: '',
+            buttonMod: 1,
+            desc: '',
+            groupId: '',
+            img: ['','','',''],
+            screenMode: '',
+            subtitle:'' ,
+            title:'',
+            url:'',
+            webviewName: '',
+            time:''
+        }
+    ],
     flags:{}
 };

@@ -1,6 +1,7 @@
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
-import { createRootTest, managementLogin } from '../../net/rpc';
+import { createRootTest, getAllGameInfo, getAllGameList, managementLogin } from '../../net/rpc';
+import { setStore } from '../../store/memstore';
 import { popNewMessage } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';
 /**
@@ -31,7 +32,7 @@ export class Login extends Widget {
         if (this.props.name && this.props.pwd) {
             managementLogin(this.props.name,this.props.pwd).then(r => {
                 if (r === 1) {
-                    popNew('chat-management-view-base-home');
+                    this.loginSuccess();
                 } else {
                     popNewMessage('账号密码错误');
                 }
@@ -63,5 +64,21 @@ export class Login extends Widget {
     // 动画效果执行
     public onShow(e:any) {
         rippleShow(e);
+    }
+
+    /**
+     * 登录成功
+     */
+    public loginSuccess() {
+        // 获取全部游戏
+        getAllGameList().then(r => {
+            if (r.length) {
+                const appId = JSON.stringify(r);
+                getAllGameInfo(appId).then(r => {
+                    setStore('appList',r);
+                });
+            }
+        });
+        popNew('chat-management-view-base-home');
     }
 }

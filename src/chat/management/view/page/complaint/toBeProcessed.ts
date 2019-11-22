@@ -1,8 +1,7 @@
-import { deepCopy } from '../../../../../app/store/memstore';
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
 import { getAllReport } from '../../../net/rpc';
-import { REPORT } from '../../../utils/logic';
+import { deepCopy, REPORT } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {

@@ -26,7 +26,7 @@ import { SetOfficial, UserAgree, UserInfoList } from '../../../server/data/rpc/u
 import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
-import { judgeFollowed, judgeLiked } from '../logic/logic';
+import { judgeFollowed, judgeLiked, timestampFormat, unicode2ReadStr } from '../logic/logic';
 import { parseEmoji } from '../logic/tools';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
@@ -1042,17 +1042,19 @@ export const getAllGameInfo = (ids:string) => {
             const res = r.app_details;
             const gameList = [];
             res.forEach(v => {
-                const name = v[0];
+                const name = unicode2ReadStr(v[0]);
                 const img = JSON.parse(v[1]);
                 const desc = JSON.parse(v[2]);
                 const url = v[3];
+                desc.desc = unicode2ReadStr(desc.desc);
+                desc.subtitle = unicode2ReadStr(desc.subtitle);
                 gameList.push({
                     ...desc,
                     title:name,
-                    desc:desc.desc,
-                    img:[img.icon,img.bg],
+                    subtitle:desc.subtitle,
+                    img:[img.icon,img.rowImg,img.colImg,img.downLoadImg],
                     url,
-                    apkDownloadUrl:shareDownload
+                    time:timestampFormat(JSON.parse(desc.time))
                 });
             });
 

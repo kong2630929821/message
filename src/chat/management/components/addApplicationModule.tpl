@@ -9,19 +9,22 @@
             <div w-class="searchBtn" on-down="onShow" on-tap="search">搜索</div>
         </div>
 
+        {{if it.appItem.accId}}
         <div w-class="searchItem" on-tap="check" on-down="onShow">
             <div w-class="iconBox">
-                <img src="{{it.appItem.iocn}}" alt="" w-class="itemIcon"/>
+                <img src="{{it.buildupImgPath(it.appItem.img[0])}}" alt="" w-class="itemIcon"/>
                 <div w-class="info">
-                    <div w-class="infoName">{{it.appItem.name}}</div>
-                    <div w-class="infoDesc">{{it.appItem.desc}}</div>
+                    <div w-class="infoName">{{it.appItem.title}}</div>
+                    <div w-class="infoDesc">{{it.appItem.subtitle}}</div>
                 </div>
             </div>
             <div w-class="checkBox">
-                <div w-class="id">ID：{{it.appItem.id}}</div>
+                <div w-class="id">ID：{{it.appItem.appid}}</div>
                 <img src="../res/images/{{it.checked?'icon_right2.png':'icon_right.png'}}" alt="" w-class="checkIcon"/>
             </div>
         </div>
+        {{end}}
+
         <div w-class="btnGroup">
             <div w-class="searchBtn" on-tap="exitBtn" on-down="onShow">取消</div>
             <div w-class="searchBtn" style="margin-left: 30px;" on-tap="okBtn" on-down="onShow">确认</div>

@@ -57,6 +57,20 @@ export const unicode2Str = (infos:any) => {
     return str;
 };
 
+/**
+ * string转unicode
+ */
+export const  encodeUnicode = (str) => {
+    const res = [];
+    for (let i = 0; i < str.length; i++) {
+        // tslint:disable-next-line:prefer-template
+        res[i] = ('00' + str.charCodeAt(i).toString(16)).slice(-4);
+    }
+    
+    // tslint:disable-next-line:prefer-template
+    return '\\u' + res.join('\\u');
+};
+
 // 价格格式化
 export const priceFormat = (price:number) => {
     return (price / 100).toFixed(2);
@@ -135,17 +149,10 @@ export const transitTimeStamp = (time:any) => {
 /**
  * 将Unicode字符串转成可读字符串
  */
-export const unicode2ReadStr = (item:any) => {
-    try {
-        if (item && typeof(item) === 'string') {
-            return unicode2Str(JSON.parse(item));
-        }
-    
-        return unicode2Str(item);
-        
-    } catch (e) {
-        return item;
-    }
+export const unicode2ReadStr = (item:string) => {
+    item = item.replace(/\\/g, '%'); 
+
+    return unescape(item);  
     
 };
 
@@ -434,4 +441,32 @@ export const penaltyText = (res:any,str:string) => {
     });
     
     return data.join(',');
+};
+
+/**
+ * 判断是否是对象
+ */
+const isObject = (value: any) => {
+    const vtype = typeof value;
+
+    return value !== null && (vtype === 'object' || vtype === 'function');
+};
+
+/**
+ * 数据深拷贝
+ */
+export const deepCopy = (v: any): any => {
+    if (!v || v instanceof Promise || !isObject(v)) return v;
+    if (v instanceof Map) {
+        return v;  // TODO 暂不对map做处理
+
+        // return new Map(JSON.parse(JSON.stringify(v)));
+    }
+
+    const newobj = v.constructor === Array ? [] : {};
+    for (const i in v) {
+        newobj[i] = isObject(v[i]) ? deepCopy(v[i]) : v[i];
+    }
+
+    return newobj;
 };
