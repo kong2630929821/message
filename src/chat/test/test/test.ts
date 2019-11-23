@@ -12,9 +12,10 @@ import { AddRobotArg, CommonComment, CommonCommentList, RobotActiveSet, RobotUse
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { Result, UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow, getLabelPost, getLabelPostCount } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList, IterLabelPostArg } from '../../server/data/rpc/community.s';
-import { cancelGmAccount, createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setGmAccount } from '../../server/data/rpc/manager.p';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPost, getLabelPostCount, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
+import { addApp, cancelGmAccount, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setAppConfig, setGmAccount } from '../../server/data/rpc/manager.p';
+import { AddAppArg, OfficialAccList, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
 import { addCommonCommernt, closeRobot, getCommonCommernt, getRobotSet, getRobotUserInfo, getRobotWeiboInfo, initRobotSet, modifyRobotSet, startRobot } from '../../server/data/rpc/robot.p';
@@ -781,6 +782,43 @@ const props = {
                 clientRpcFunc(getLabelPostCount, label, (r: number) => {
                     console.log(r);
                 }); }
+        },
+        {
+            name: '添加应用(游戏)',
+            func: () => { 
+                const arg = new AddAppArg();
+                arg.appid = '102';
+                arg.name = encodeUnicode('仙之侠道');
+                arg.imgs = '{"icon":"app/res/image/game/xianzhixiadao.png","bg":"app/res/image/game/xianzhixiadaoBg.png"}';
+                arg.desc = `{"usePi":false,"desc":"2019${encodeUnicode('最热唯美奇幻手游')}","webviewName":"fairyChivalry","buttonMod":3,"accId":"268828","groupId":10001,"appid":"102","screenMode":"portrait", "htmlUrl": "http://ysxzxd.17youx.cn/dst/boot/yineng/yineng.html"}`;
+                arg.url = 'http://ysxzxd.17youx.cn/dst/boot/yineng/yineng.html';
+                arg.pk = '';
+                arg.mch_id = '';
+                arg.notify_url = '';
+                clientRpcFunc(addApp, arg, (r: number) => {
+                    console.log(r);
+                }); 
+            }
+        },
+        {
+            name: '编辑热门游戏和推荐游戏',
+            func: () => { 
+                const arg = new SetAppConfig();
+                arg.cfg_type = 1; // 1表示热门推荐，2表示编辑推荐
+                arg.appids = '["102","103"]';
+                clientRpcFunc(setAppConfig, arg, (r: number) => {
+                    console.log(r);
+                }); 
+            }
+        },
+        {
+            name: '获取官方账号列表',
+            func: () => { 
+                const appid = '';
+                clientRpcFunc(getOfficialAcc, appid, (r: OfficialAccList) => {
+                    console.log(r);
+                }); 
+            }
         }
     ] // 按钮数组
 };
@@ -799,3 +837,12 @@ export class Test extends Widget {
 }
 
 // ================================================ 本地
+
+const  encodeUnicode = (str) => {
+    const res = [];
+    for (let i = 0; i < str.length; i++) {
+        res[i] = ('00' + str.charCodeAt(i).toString(16)).slice(-4);
+    }
+    
+    return '\\u' + res.join('\\u');
+};
