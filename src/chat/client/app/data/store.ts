@@ -100,6 +100,37 @@ export const unregister = (keyName: string, cb: Function): void => {
 };
 
 export const tagListStore = ['广场','关注'];
+const GameList = [{
+    accId: "268828",
+    apkDownloadUrl: "http://39.98.200.23/browser/phoneRedEnvelope/download.html?0.11389282017378854",
+    appid: "103",
+    buttonMod: 2,
+    desc: "2019最热唯美奇幻手游",
+    groupId: 10001,
+    htmlUrl: "http://gcydzm.17youx.cn:8777/client/boot/haohai.html",
+    img: ["app/res/image/game/yidaizhangmen.png", "app/res/image/game/yidaizhangmenBg.png"],
+    screenMode: "landscape",
+    title: "一代掌门",
+    url: "http://gcydzm.17youx.cn:8088/client/boot/haohai.html",
+    usePi: true,
+    webviewName: "chairMan"
+},{
+    accId: "268828",
+    apkDownloadUrl: "http://39.98.200.23/browser/phoneRedEnvelope/download.html?0.11389282017378854",
+    appid: "102",
+    buttonMod: 3,
+    desc: "2019最热唯美奇幻手游",
+    groupId: 10001,
+    htmlUrl: "http://ysxzxd.17youx.cn/dst/boot/yineng/yineng.html",
+    img: ["app/res/image/game/xianzhixiadao.png", "app/res/image/game/xianzhixiadaoBg.png"],
+    screenMode: "portrait",
+    title: "仙之侠道",
+    url: "http://ysxzxd.17youx.cn/dst/boot/yineng/yineng.html",
+    usePi: false,
+    webviewName: "fairyChivalry"
+
+}];
+
 /**
  * store初始化
  */
@@ -138,7 +169,7 @@ export const initStore = () => {
             tagType:-1,
             postList:[]
         },
-        tagList: tagListStore,
+        tagList: tagListStore.concat(['一代掌门','仙之侠道']),
         followNumList:new Map(),
         laudPostList:new Map(),
         postDraft:null,
@@ -151,7 +182,7 @@ export const initStore = () => {
         messageData: [[],[],[],[]],
         accIdToUid:new Map(),
         originalImage:new Map(),
-        gameList:[]
+        gameList:GameList
     };
 };
 

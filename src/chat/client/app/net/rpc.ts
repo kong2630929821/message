@@ -612,7 +612,7 @@ export const showPost = (square_type:number, label:string= '',num:string = '', i
             const tagType = square_type;
             
             return (r:PostArr) => {
-                console.log('showPost=============',r);
+                console.log(`showPost=============square_type: ${square_type}, r: ${r}`);
                 // let postList = store.getStore('postList',[]);
                 if (r && r.list && r.list.length) {
                     const data:store.PostItem[] = r.list;// TODO:

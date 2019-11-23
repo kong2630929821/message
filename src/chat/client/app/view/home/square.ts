@@ -5,7 +5,7 @@ import { gotoSquare } from '../../../../../app/view/base/app';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getStore,PostItem, register } from '../../data/store';
+import { getStore,PostItem, register, setStore } from '../../data/store';
 import { gameLabelNum, postLaud, showPost } from '../../net/rpc';
 
 export const forelet = new Forelet();
@@ -59,11 +59,14 @@ export class Square extends Widget {
         super.create();
         this.state = state;
     }
-    public setProps(props:any) {               
+    public setProps(props:any) {   
+        console.log('square props: ',props)            
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
                 const label = getStore(`tagList`)[props.active];
                 const game = getStore(`gameList`);
+                
+                setStore('flags/nowSquareType',{squareType:5,label})
                 showPost(5,label);
                 gameLabelNum(label).then(r => {
                     let index = null;
