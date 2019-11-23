@@ -8,7 +8,7 @@
             <div w-class="detail-wrap">
                 {{for i,v of it.groupInfo.applyUser}}
                 <div ev-agree-joinGroup="agreeJoinGroup">
-                    <chat-client-app-view-contactList-applyUser>{id: {{v}}, chatType: "group", isActiveToGroup: true, activeToGGid:{{it.gid}}}</chat-client-app-view-contactList-applyUser>
+                    <chat-client-app-widget-applyUser-applyUser>{id: {{v}}, chatType: "group", isActiveToGroup: true, activeToGGid:{{it.gid}}}</chat-client-app-widget-applyUser-applyUser>
                 </div>
                 {{end}}
                 

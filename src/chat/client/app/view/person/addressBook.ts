@@ -9,7 +9,7 @@ interface Props {
     activeTab:number;
     followData:any[];  // 关注用户信息
     fansData:any[];   // 粉丝用户信息
-    isMine:boolean;  // 是否本人
+    groupList:string[]; // 群组
     blackList:any[];// 黑名单
 }
 
@@ -24,7 +24,7 @@ export class AddressBook extends Widget {
         activeTab:0,
         followData:[],
         fansData:[],
-        isMine:false,
+        groupList:[],
         blackList:[]
     };
 
@@ -34,12 +34,16 @@ export class AddressBook extends Widget {
         const userinfo = getStore(`userInfoMap/${sid}`, {});
         const numsList = getStore(`followNumList/${sid}`,{ person_list:[],public_list:[]  });
         const fansList = getStore(`fansNumList/${userinfo.comm_num}`,{ list:[] });
+        
+        // 获取关注列表
         getUserInfoByNum(numsList.person_list).then((r:any[]) => {
             this.props.followData = r.filter(v => v.comm_info.num !== userinfo.comm_num);
             this.paint();
         }).catch(err => {
             // 
         });
+
+        // 获取粉丝列表
         getUserInfoByNum(fansList.list).then((res:string[]) => {
             this.props.fansData = res;  // 粉丝
             this.paint();
@@ -47,9 +51,10 @@ export class AddressBook extends Widget {
             // 
         });
 
+        const contact = getStore(`contactMap/${sid}`,{ blackList:[],group:[] });
+        this.props.groupList = contact.group;
         // 获取黑名单数据
-        const data = getStore('contactMap',[]);
-        const blackList = data.size ? data.get(`${sid}`).blackList :[];
+        const blackList = contact.blackList;
         blackList.forEach(v => {
             const user = getStore(`userInfoMap/${v}`, {});
             this.props.blackList.push({

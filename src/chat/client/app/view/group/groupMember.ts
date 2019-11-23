@@ -33,7 +33,6 @@ export class GroupMember extends Widget {
             isAdmin:false,
             spaceLen:[]
         };
-        this.bindCB = this.updateInfo.bind(this);
     }
 
     public setProps(props:any) {        
@@ -41,9 +40,6 @@ export class GroupMember extends Widget {
         this.props.groupInfo = this.getGroupInfo();
         this.props.deleteBtn = this.props.deleteBtn || false;
         const uid = store.getStore('uid');
-        if (this.props.groupInfo.adminids.indexOf(uid) > -1) {  // 当前用户是管理员
-            this.props.isAdmin = true;
-        }
         if (this.props.groupInfo.memberids.indexOf(uid) < 0) {
             popNewMessage('您已被移除该群');
             this.ok();
@@ -51,21 +47,12 @@ export class GroupMember extends Widget {
             popNewMessage('该群已被解散');
             this.ok();
         }
-        this.props.spaceLen = [];
-        let len = this.props.groupInfo.adminids.length; 
-        len = this.props.isAdmin ? 4 - (len + 1) % 4 :4 - len % 4; // 管理员多一个元素
-        for (let i = 0;i < len;i++) {
-            this.props.spaceLen.push(i);
-        }
         
     }
     public goBack() {
         this.ok();
     }
-    public firstPaint() {
-        super.firstPaint();
-        store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
-    }
+
     // 获取群组信息
     public getGroupInfo() {
         const ginfo = store.getStore(`groupInfoMap/${this.props.gid}`);
@@ -73,15 +60,13 @@ export class GroupMember extends Widget {
 
         return ginfo;
     }
-    // 打开邀请成员
-    public inviteMember() {
-        popNew('chat-client-app-view-group-inviteMember',{ gid : this.props.gid });
-    }
+
     // 进入移除成员操作状态
     public deleteMember() {
         this.props.deleteBtn = true;
         this.paint();
     }
+    
     // 移除成员
     public removeMember(uid:number) {
         const guid = genGuid(this.props.gid,uid);
@@ -90,22 +75,11 @@ export class GroupMember extends Widget {
         });
     }
 
-    // 群组信息变化更新
-    public updateInfo() {
-        this.setProps(this.props);
-        this.paint();
-    }
-
     public goDetail(uid:number) {
         const own = this.props.groupInfo.ownerid;
         popNew('chat-client-app-view-info-userDetail',{ uid:uid, groupId:own ? this.props.gid :null });
     }
 
-    public destroy() {
-        store.unregister(`groupInfoMap/${this.props.gid}`,this.bindCB);
-
-        return super.destroy();
-    }
 }
 
 // ================================================ 本地

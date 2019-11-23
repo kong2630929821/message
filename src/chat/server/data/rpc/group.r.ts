@@ -330,14 +330,14 @@ export const inviteUsers = (invites: InviteArray): Result => {
     }
         
     // 判断当前登录用户是否和被邀请的用户是好友
-    const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
-    logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
-    logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);
-    invites.arr = invites.arr.filter((ele: Invite) => {
+    // const currentUserInfo = contactBucket.get<number, [Contact]>(uid)[0];
+    // logger.debug(`before filter invites is : ${JSON.stringify(invites.arr)}`);
+    // logger.debug(`currentUserInfo.friends is : ${JSON.stringify(currentUserInfo.friends)}`);
+    // invites.arr = invites.arr.filter((ele: Invite) => {
 
-        // 无法邀请不是好友的用户
-        return currentUserInfo.friends.findIndex(item => item === ele.rid) !== -1;
-    });
+    //     // 无法邀请不是好友的用户
+    //     return currentUserInfo.friends.findIndex(item => item === ele.rid) !== -1;
+    // });
 
     logger.debug(`after filter invites is : ${JSON.stringify(invites.arr)}`);
     for (let i = 0; i < invites.arr.length; i++) {
@@ -348,11 +348,18 @@ export const inviteUsers = (invites: InviteArray): Result => {
             logger.debug('be invited user: ', rid, 'is exist in this group:', gid);
             continue;
         }
-        cInfo.applyGroup.indexOf(genGuid(gid, uid)) === -1 && cInfo.applyGroup.push(genGuid(gid, uid));
+
+        // cInfo.applyGroup.indexOf(genGuid(gid, uid)) === -1 && cInfo.applyGroup.push(genGuid(gid, uid));
+
+        // 无需同意直接入群
+        cInfo.group.indexOf(gid) === -1 && cInfo.group.push(gid);
         contactBucket.put(rid, cInfo);
         logger.debug('Invite user: ', rid, 'to group: ', gid);
-            
+
+        gInfo.memberids.push(rid);
+
     }
+    groupInfoBucket.put(gid,gInfo);
         
     res.r = 1;
 

@@ -24,7 +24,7 @@ export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
-export class ManageItem extends Widget {
+export class GroupManage extends Widget {
     public ok:() => void;
     public props:Props = {
         gid : null,

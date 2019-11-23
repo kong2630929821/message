@@ -28,7 +28,11 @@
         {{end}}
 
     {{elseif it.activeTab == 2}}
+
         {{% =================群====================}}
+        {{for i,v of it.groupList}}
+        <widget w-tag="chat-client-app-widget-groupItem-groupItem">{gid:{{v}} }</widget>
+        {{end}}
 
     {{elseif it.activeTab == 3}}
 
