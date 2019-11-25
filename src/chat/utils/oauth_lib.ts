@@ -87,8 +87,8 @@ export const oauth_send = (uri: string, body) => {
 };
 
 // 添加app
-export const add_app = (appid: string, name: string, imgs: string, desc: string, url: string, pk: string, mch_id: string, notify_url: string): Boolean => {
-    const r = oauth_send(WALLET_API_ADD_APP, { appid, name, imgs, desc, url, pk, mch_id, notify_url });
+export const add_app = (gid: string, name: string, imgs: string, desc: string, url: string, pk: string, mch_id: string, notify_url: string): Boolean => {
+    const r = oauth_send(WALLET_API_ADD_APP, { gid, name, imgs, desc, url, pk, mch_id, notify_url });
     console.log('add_app!!!!!!!!!!!r:', JSON.stringify(r));
     if (r.ok) {
         const json = JSON.parse(r.ok);

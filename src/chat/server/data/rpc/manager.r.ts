@@ -6,6 +6,7 @@ import { getSession } from '../../../../pi_pt/util/autologin.r';
 import { Bucket } from '../../../utils/db';
 import { add_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
+import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
@@ -13,9 +14,11 @@ import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArti
 import { Report, ReportCount, ReportListTab } from '../db/message.s';
 import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
+import { getIndexID } from '../util';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
-import { PostData } from './community.s';
+import { addPost } from './community.r';
+import { AddPostArg, PostData } from './community.s';
 import { AddAppArg, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
 import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
@@ -372,6 +375,24 @@ export const getApplyPublicList = (arg: PublicApplyListArg): string => {
 };
 
 /**
+ * 发文章
+ */
+// #[rpc=rpcServer]
+export const sendPost = (arg: AddPostArg): PostKey => {
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
+    const community = communityBaseBucket.get<string, CommunityBase[]>(arg.num)[0];
+    console.log('!!!!!!!!!!!!!!!!!!addPostPort communityBase',arg,community);
+    let key = new PostKey();
+    key.id = 0;
+    key.num = arg.num;
+    
+    key.id = getIndexID(CONSTANT.POST_INDEX, 1);
+    key = addPost(community.owner, arg, key, community.comm_type);
+
+    return key;
+};
+
+/**
  * 处理公众号申请
  */
 // #[rpc=rpcServer]
@@ -397,6 +418,11 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     applyPublicBucket.put(arg.id, applyPublic);
     // 添加公众号
     addPublicComm(applyPublic.name, applyPublic.num, applyPublic.avatar, applyPublic.desc, applyPublic.uid, applyPublic.time);
+    // 创建管理端账号
+    const user = new RootUser();
+    user.user = applyPublic.num;
+    user.pwd = randomWord(false, 6);
+    createRoot(user);
     // 推送结果
     send(applyPublic.uid, CONSTANT.SEND_PUBLIC_APPLY, JSON.stringify(arg));
 
