@@ -79,7 +79,7 @@ export class AddApplication extends Widget {
             },
             customer:data ? data.accId :'',
             webViewName:data ? data.webviewName :'',
-            appId:data ? data.accId :'',
+            appId:data ? data.appid :'',
             upLoadIng:[false,false,false,false],
             buildupImgPath:buildupImgPath,
             status:data ? true :false,

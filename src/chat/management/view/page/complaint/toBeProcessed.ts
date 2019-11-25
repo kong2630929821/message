@@ -51,7 +51,7 @@ export class ToBeProcessed extends Widget {
         returnDeel:0,
         allBtnGroup:[],
         btnGroup:[],
-        showDataBtn:[]  
+        showDataBtn:[]
     };
 
     public create() {

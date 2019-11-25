@@ -1,6 +1,6 @@
 import { Widget } from '../../../pi/widget/widget';
 import { buildupImgPath, rippleShow } from '../../client/app/logic/logic';
-import { getStore } from '../store/memstore';
+import { deepCopy, getStore } from '../store/memstore';
 import { popNewMessage } from '../utils/logic';
 import { ListItem } from '../view/page/application/thirdApplication';
 
@@ -62,6 +62,15 @@ export class AddApplicationModule extends Widget {
         };
         super.setProps(this.props);
         const appList = getStore('appList',[]);
+        const hotApp = getStore('hotApp',[]);
+        const recommend = getStore('recommendApp',[]);
+        const used = [...hotApp,...recommend];// 已经使用的app
+        const lave  = deepCopy(appList);// 剩余app
+        lave.forEach((v,i) => {
+            if (used.find(item => item.appid === v.appid)) {
+                appList.splice(i,1);
+            }
+        });
         this.props.appList = appList;
     }
 

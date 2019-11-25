@@ -25,7 +25,7 @@ export class NewArticle extends Widget {
     };
 
     /**
-     * 应用名
+     * 文章标题
      */
     public inputChangeName(e:any) {
         this.props.title = e.value;
@@ -100,7 +100,20 @@ export class NewArticle extends Widget {
      */
     public send() {
         const editer = document.querySelector('#editBox');
-        if (!editer.innerHTML) {
+        const msg = editer.innerHTML;
+        if (!this.props.title) {
+            popNewMessage('标题不能为空');
+
+            return;
+        }
+
+        if (!this.props.bannerImg) {
+            popNewMessage('请上传banner图');
+
+            return;
+        }
+        
+        if (!msg) {
             popNewMessage('内容不能为空');
 
             return;

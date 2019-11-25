@@ -804,7 +804,7 @@ const props = {
             name: '编辑热门游戏和推荐游戏',
             func: () => { 
                 const arg = new SetAppConfig();
-                arg.cfg_type = 1; // 1表示热门推荐，2表示编辑推荐
+                arg.cfg_type = 2; // 1表示热门推荐，2表示编辑推荐
                 arg.appids = '["102","103"]';
                 clientRpcFunc(setAppConfig, arg, (r: number) => {
                     console.log(r);

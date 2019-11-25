@@ -45,7 +45,7 @@
             </div>
         {{else}}
             <div w-class="postLabel" style="width:200px;" on-tap="addLabel">
-                <img src="{{it.label.icon}}" alt="" w-class="addLabel"/>
+                <img src="{{it.buildupImgPath(it.label.icon)}}" alt="" w-class="addLabel"/>
                 <div w-class="labelName">{{it.label.name}}</div>
                 <img src="../../res/images/unLabel.png" alt="" w-class="closeLabel" on-tap="closeLabel"/>
             </div>

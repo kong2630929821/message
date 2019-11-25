@@ -36,22 +36,7 @@ export interface ListItem {
  */
 export class ThirdApplication extends Widget {
     public props:Props = {
-        dataList:[
-            {
-                accId: '',
-                appid: '',
-                buttonMod: 1,
-                desc: '',
-                groupId: '',
-                img: ['','','',''],
-                screenMode: '',
-                subtitle:'' ,
-                title:'',
-                url:'',
-                webviewName: '',
-                time:''
-            }
-        ],
+        dataList:[],
         sum:20,
         perPage:perPage[0],
         currentIndex:0,
@@ -87,6 +72,7 @@ export class ThirdApplication extends Widget {
             }
         });
     }
+    
     // 重置页面的展开状态
     public close() {
         this.props.expandIndex = false;

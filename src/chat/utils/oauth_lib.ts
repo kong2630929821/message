@@ -101,8 +101,8 @@ export const add_app = (gid: string, name: string, imgs: string, desc: string, u
 };
 
 // 编辑推荐游戏
-export const set_app_config = (type: number, app_ids: string): Boolean => {
-    const r = oauth_send(WALLET_API_SET_APP_CONFIG, { type, app_ids });
+export const set_app_config = (type1: number, app_ids: string): Boolean => {
+    const r = oauth_send(WALLET_API_SET_APP_CONFIG, { type: type1, app_ids });
     console.log('set_app_config!!!!!!!!!!!r:', JSON.stringify(r));
     if (r.ok) {
         const json = JSON.parse(r.ok);

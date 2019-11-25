@@ -107,27 +107,16 @@ const handlerMap: HandlerMap = new HandlerMap();
 
 // 海龟一号store
 interface Store {
-    appList:ListItem[];
+    appList:ListItem[];// 全部游戏
+    hotApp:ListItem[];// 热门游戏
+    recommendApp:ListItem[];// 推荐游戏
     flags:any;
 
 }
 // 全局内存数据库
 const store:Store = {
-    appList:[
-        {
-            accId: '',
-            appid: '',
-            buttonMod: 1,
-            desc: '',
-            groupId: '',
-            img: ['','','',''],
-            screenMode: '',
-            subtitle:'' ,
-            title:'',
-            url:'',
-            webviewName: '',
-            time:''
-        }
-    ],
+    appList:[],
+    hotApp:[],
+    recommendApp:[],
     flags:{}
 };

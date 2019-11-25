@@ -1,37 +1,47 @@
 <div w-class="page">
     <div w-class="recommendTop" style="margin-top: 30px;">HOT游戏（最多添加8个）</div>
     <div w-class="addHot">
+        {{for i,v of it.hotApp}}
         <div w-class="hotItem">
-            <img src="../../../res/images/xianzhixiadao.png" alt="" w-class="iocn"/>
-            <div w-class="name">仙之侠道</div>
+            <img src="{{it.buildupImgPath(v.img[0])}}" alt="" w-class="iocn"/>
+            <div w-class="name">{{v.title}}</div>
             <img src="../../../res/images/remove.png" alt="" w-class="closeIcon"/>
         </div>
-        <div w-class="hotItem">
-            <div w-class="add" on-tap="addApp(1)">
-                <img src="../../../res/images/add_black.png" alt="" w-class="addIcon"/>
+        {{end}}
+
+        {{if it.hotApp.length < 8 }}
+            <div w-class="hotItem">
+                <div w-class="add" on-tap="addApp(1)">
+                    <img src="../../../res/images/add_black.png" alt="" w-class="addIcon"/>
+                </div>
+                <div w-class="name"></div>
             </div>
-            <div w-class="name"></div>
-        </div>
+        {{end}}
     </div>
     <div w-class="recommendTop">编辑推荐（最多添加3个）</div>
     <div w-class="addRecommend">
-        <div w-class="recommendItem">
-            <img src="../../../res/images/xianzhixiadao.png" alt="" w-class="rowIcon"/>
-            <div w-class="recommendInfo">
-                <img src="../../../res/images/xianzhixiadao.png" alt="" w-class="infoIcon"/>
-                <div w-class="info">
-                    <div w-class="infoName">仙之侠道</div>
-                    <div w-class="infoDesc">2019LPL春季赛常规赛</div>
+
+        {{for i,v of it.recommendApp}}
+            <div w-class="recommendItem">
+                <img src="{{it.buildupImgPath(v.img[1])}}" alt="" w-class="rowIcon"/>
+                <div w-class="recommendInfo">
+                    <img src="{{it.buildupImgPath(v.img[0])}}" alt="" w-class="infoIcon"/>
+                    <div w-class="info">
+                        <div w-class="infoName">{{v.title}}</div>
+                        <div w-class="infoDesc">{{v.subtitle}}</div>
+                    </div>
+                </div>
+                <img src="../../../res/images/remove.png" alt="" w-class="closeIcon"/>
+            </div>
+        {{end}}
+
+        {{if it.recommendApp.length < 3}}
+            <div w-class="recommendItem">
+                <div w-class="addRecommendItem" on-tap="addApp(2)">
+                    <img src="../../../res/images/add_black.png" alt="" w-class="addIcon"/>
                 </div>
             </div>
-            <img src="../../../res/images/remove.png" alt="" w-class="closeIcon"/>
-        </div>
-
-        <div w-class="recommendItem">
-            <div w-class="addRecommendItem" on-tap="addApp(2)">
-                <img src="../../../res/images/add_black.png" alt="" w-class="addIcon"/>
-            </div>
-        </div>
+        {{end}}
     </div>
 
 </div>

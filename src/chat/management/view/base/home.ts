@@ -31,7 +31,7 @@ const PAGE = {
     draft:'myArticle-draft',// 草稿
     published:'myArticle-published',// 已发布
     notReviewed:'myArticle-notReviewed',// 未过审
-    articleInfo:'myArticle-articleInfo'// 文章详情
+    userInfo:'user-userInfo'// 文章详情
 };
 
 // tslint:disable-next-line:completed-docs
@@ -47,7 +47,7 @@ export class Home extends Widget {
                 { name: '官方账号认证', page: PAGE.official, img:'chart.png', show:false },
                 { name: '用户管理', page: PAGE.queryUser, img:'chart.png', show:false,children:[
                     { name:'查询用户',page:PAGE.queryUser },
-                    { name:'官方账号列表',page:PAGE.officialUser },
+                    { name:'官方账号列表',page:PAGE.userInfo },
                     { name:'客服管理',page:PAGE.customerService }
                 ] },
                 {name:'第三方应用管理',page:PAGE.application,img:'chart.png',show:false,children:[
@@ -59,7 +59,7 @@ export class Home extends Widget {
                 {name:'我的文章',page:PAGE.newArticle,img:'chart.png',show:false,children:[
                     { name:'新文章',page:PAGE.newArticle },
                     { name:'草稿',page:PAGE.draft },
-                    { name:'已发布',page:PAGE.articleInfo },
+                    { name:'已发布',page:PAGE.published },
                     { name:'未过审',page:PAGE.notReviewed }
 
                 ]}

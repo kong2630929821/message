@@ -1,6 +1,6 @@
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
-import { createRootTest, getAllGameInfo, getAllGameList, managementLogin } from '../../net/rpc';
+import { createRootTest, getAllGameInfo, getAllGameList, getHotApp, getRecommendApp, managementLogin } from '../../net/rpc';
 import { setStore } from '../../store/memstore';
 import { popNewMessage } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';
@@ -80,6 +80,28 @@ export class Login extends Widget {
                 });
             }
         });
+
+        // 获取热门游戏
+        getHotApp().then(r => {
+            if (r) {
+                getAllGameInfo(r).then(res => {
+                    setStore('hotApp',res);
+                    console.log('获取热门游戏',res);
+                });
+            }
+        });
+
+        // 获取推荐游戏
+        getRecommendApp().then(r => {
+            if (r) {
+                getAllGameInfo(r).then(res => {
+                    setStore('recommendApp',res);
+                    console.log('获取推荐游戏',res);
+                });
+            }
+        });
+
+        // 进入管理端
         popNew('chat-management-view-base-home');
     }
 }

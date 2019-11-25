@@ -226,6 +226,30 @@ export const getAllGameList = () => {
     });
 };
 
+// 获取热门
+export const getHotApp = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_hot_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 获取推荐
+export const getRecommendApp = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_recommend_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
 // 获取全部游戏详情
 export const getAllGameInfo = (ids:string) => {
     return fetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
