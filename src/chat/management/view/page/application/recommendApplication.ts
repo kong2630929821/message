@@ -3,11 +3,19 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { setAppHot } from '../../../net/rpc';
 import { popNewMessage } from '../../../utils/logic';
 
+interface Props {
+    hotApp:any[];// 热门
+    recommend:any[];// 推荐
+}
 /**
  * 推荐应用
  */
 export class RecommendApplication extends Widget {
 
+    public props:Props = {
+        hotApp:[],
+        recommend:[]
+    };
     /**
      * 添加一个推荐
      */

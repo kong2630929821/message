@@ -194,12 +194,13 @@
         {{if it.status}}
             {{if !it.isChange}}
                 <div w-class="btn2" on-tap="changeApp">修改应用</div>
+                <div w-class="btn1" style="margin-left:40px;" on-tap="delApp">删除应用</div>
             {{else}}
                 <div w-class="btn1" on-tap="cancleChange">取消修改</div>
                 <div w-class="btn2" on-tap="addApp">保存修改</div>
             {{end}}
         {{else}}
-        <div w-class="btn2" on-tap="addApp">添加应用</div>
+            <div w-class="btn2" on-tap="addApp">添加应用</div>
         {{end}}
     </div>
 </div>

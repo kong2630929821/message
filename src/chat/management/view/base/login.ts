@@ -75,6 +75,7 @@ export class Login extends Widget {
             if (r.length) {
                 const appId = JSON.stringify(r);
                 getAllGameInfo(appId).then(r => {
+                    console.log(`全部应用========appId==${appId}================`,r);
                     setStore('appList',r);
                 });
             }

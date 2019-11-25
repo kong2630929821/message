@@ -5,7 +5,8 @@ import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { uploadFile } from '../../../../client/app/net/upload';
 import { AddAppArg } from '../../../../server/data/rpc/manager.s';
 import { maxSize } from '../../../config';
-import { addApplication } from '../../../net/rpc';
+import { addApplication, getAllGameInfo, getAllGameList } from '../../../net/rpc';
+import { setStore } from '../../../store/memstore';
 import { encodeUnicode, popNewMessage } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
@@ -338,8 +339,17 @@ export class AddApplication extends Widget {
                     popNewMessage('修改成功');
                     this.goBack(true,e);
                 } else {
-                    popNewMessage('添加成功');
+                    popNewMessage('添加成功'); 
                     this.init();
+                     // 获取全部游戏
+                    getAllGameList().then(r => {
+                        if (r.length) {
+                            const appId = JSON.stringify(r);
+                            getAllGameInfo(appId).then(r => {
+                                setStore('appList',r);
+                            });
+                        }
+                    });
                 }
             }
         });
