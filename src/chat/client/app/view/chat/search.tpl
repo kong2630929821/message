@@ -33,7 +33,7 @@
                 {{for i,v of it.chatHistory}}
                     {{if i < 3}}
                     <div w-class="content" on-tap="goTo(0,{{i}})" on-down="onShow">
-                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},msg:{{v.msg}} }</widget>
+                        <widget w-tag="chat-client-app-widget-userItem-userItem">{text:{{v.text}}, img:{{v.img}},msg:{{v.msg}} }</widget>
                     </div>
                     {{end}}
                 {{end}}
@@ -48,7 +48,7 @@
                 </div>
                 {{for i,v of it.friendList}}
                     <div w-class="content" ev-addType="addFriend({{i}})" on-down="onShow" on-tap="goTo(1,{{i}})">
-                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.friendAdd[i]?'加好友':'已申请'))}} }</widget>
+                        <widget w-tag="chat-client-app-widget-userItem-userItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.friendAdd[i]?'加好友':'已申请'))}} }</widget>
                     </div>
                 {{end}}
             </div>
@@ -62,7 +62,7 @@
                 </div> 
                 {{for i,v of it.groupList}}
                     <div w-class="content" ev-addType="addGroup({{i}})" on-down="onShow" on-tap="goTo(2,{{i}})">
-                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.groupAdd[i]?'加群聊':'已申请'))}}  }</widget>
+                        <widget w-tag="chat-client-app-widget-userItem-userItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.groupAdd[i]?'加群聊':'已申请'))}}  }</widget>
                     </div>
                 {{end}}    
             </div>
@@ -76,7 +76,7 @@
                 </div>
                 {{for i,v of it.postList}}
                     <div w-class="content" ev-addType="addPost({{i}})" on-down="onShow" on-tap="goTo(3,{{i}})">
-                        <widget w-tag="chat-client-app-view-contactList-contactItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.postAdd[i]?'+关注':''))}}  }</widget>
+                        <widget w-tag="chat-client-app-widget-userItem-userItem">{text:{{v.text}}, img:{{v.img}},addType:{{v.myself?'':(v.friend?'':(it.postAdd[i]?'+关注':''))}}  }</widget>
                     </div>
                 {{end}}
             </div>

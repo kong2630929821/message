@@ -7,13 +7,13 @@ import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { GENERATOR_TYPE, UserInfo, VIP_LEVEL } from '../../../../server/data/db/user.s';
-import { depCopy, genUuid } from '../../../../utils/util';
+import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getUserAlias, getGroupAvatar, getUserAvatar, rippleShow } from '../../logic/logic';
+import { getGroupAvatar, getUserAlias, getUserAvatar, rippleShow } from '../../logic/logic';
 import { getUsersBasicInfo } from '../../net/rpc';
 
 // ================================================ 导出
-export class ContactItem extends Widget {
+export class UserItem extends Widget {
     public props: Props = {
         id:null,
         name:'',

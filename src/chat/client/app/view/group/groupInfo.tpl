@@ -9,8 +9,8 @@
             {{end}}
         </div>
         <div>
-            <img src="../../res/images/add_group_user.png" alt="" w-class="add" on-tap="openGroupMember"/>    
-            <img src="../../res/images/del_group_user.png" alt="" w-class="add"/>    
+            <img src="../../res/images/add_group_user.png" alt="" w-class="add"/>    
+            <img src="../../res/images/del_group_user.png" alt="" w-class="add" on-tap="openGroupMember"/>    
         </div>
     </div>
 
