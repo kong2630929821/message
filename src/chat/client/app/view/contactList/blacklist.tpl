@@ -9,7 +9,7 @@
     <div w-class="blackList">
         {{for i,v of it.blackList}}
         <div w-class="content" ev-addType="remove({{i}})" on-tap="goTo({{i}})" on-down="onShow">
-            <widget w-tag="chat-client-app-view-contactList-contactItem" style="width:100%;">{text:{{v.text}}, img:{{v.img}},addType:{{it.addType}},msg:{{v.msg}},sex:{{v.sex}},time:{{v.time}}  }</widget>
+            <widget w-tag="chat-client-app-widget-userItem-userItem" style="width:100%;">{text:{{v.text}}, img:{{v.img}},addType:{{it.addType}},msg:{{v.msg}},sex:{{v.sex}},time:{{v.time}}  }</widget>
         </div>
         {{end}}
     </div>

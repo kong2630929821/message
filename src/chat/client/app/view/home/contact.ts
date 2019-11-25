@@ -9,6 +9,7 @@ import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offl
 import { getStore } from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
@@ -76,10 +77,6 @@ export class Contact extends SpecialWidget {
                 modulName:'message',
                 components:'chat-client-app-view-home-contactNotice'
             }
-            // {
-            //     modulName:'friend',
-            //     components:'chat-client-app-view-contactList-contactList'
-            // }
         ],
         tagList:[],
         labelList:[],
@@ -242,7 +239,7 @@ export class Contact extends SpecialWidget {
             this.props.showTag = false;
         }
         this.paint();
-        // notify(e.node,'ev-chat-square-change-tab',{ activeTab:this.props.activeTab });
+        notify(e.node,'ev-chat-square-change-tab',{ activeTab:this.props.activeTab });
     }
     // 切换tag
     public changeTagItem(ind:number) {

@@ -7,14 +7,11 @@
             <div w-class="offical">公众号</div>
             {{elseif it.offical}}
             <div w-class="offical">官方</div>
-            {{else}}
 
-            {{if it.data.user_info.sex!=2}}
+            {{elseif it.data.user_info.sex!=2}}
                 <img src="../../res/images/{{it.data.user_info.sex===1?'girl.png':'boy.png'}}"/>
             {{else}}
                 <img src="../../res/images/neutral.png"/>
-            {{end}}
-            
             {{end}}
         </div>
         <div w-class="desc">{{it.data.user_info.note || "简介"}}</div>

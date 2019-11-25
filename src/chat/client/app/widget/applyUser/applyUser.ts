@@ -72,13 +72,13 @@ export class ApplyUser extends Widget {
         // 查看申请详细信息 
     public viewApplyDetail() {
         if (this.props.chatType === GENERATOR_TYPE.USER) {
-            popNew('chat-client-app-view-contactList-newFriendApply',{ ...this.props,title:'新的朋友' });
+            popNew('chat-client-app-widget-newFriendApply-newFriendApply',{ ...this.props,title:'新的朋友' });
         }
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {
             if (this.props.isActiveToGroup) { // 主动申请加群
-                popNew('chat-client-app-view-contactList-newFriendApply',{ ...this.props,title:'申请入群' });
+                popNew('chat-client-app-widget-newFriendApply-newFriendApply',{ ...this.props,title:'申请入群' });
             } else { // 被动进群
-                popNew('chat-client-app-view-contactList-newFriendApply',{ ...this.props,title:'邀请入群' });
+                popNew('chat-client-app-widget-newFriendApply-newFriendApply',{ ...this.props,title:'邀请入群' });
             }
             
         }
