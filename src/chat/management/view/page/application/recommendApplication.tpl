@@ -6,7 +6,7 @@
             <div w-class="name">仙之侠道</div>
             <img src="../../../res/images/remove.png" alt="" w-class="closeIcon"/>
         </div>
-        <div w-class="hotItem" on-tap="addApp">
+        <div w-class="hotItem" on-tap="addApp(1)">
             <div w-class="add">
                 <img src="../../../res/images/add_black.png" alt="" w-class="addIcon"/>
             </div>
@@ -27,7 +27,7 @@
             <img src="../../../res/images/remove.png" alt="" w-class="closeIcon"/>
         </div>
 
-        <div w-class="recommendItem">
+        <div w-class="recommendItem" on-tap="addApp(2)">
             <div w-class="addRecommendItem">
                 <img src="../../../res/images/add_black.png" alt="" w-class="addIcon"/>
             </div>

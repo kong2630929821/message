@@ -55,8 +55,12 @@ export class AddApplicationModule extends Widget {
         buildupImgPath:buildupImgPath
     };
 
-    public create() {
-        super.create();
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
         const appList = getStore('appList',[]);
         this.props.appList = appList;
     }
@@ -69,7 +73,7 @@ export class AddApplicationModule extends Widget {
         const appId = this.props.appItem.appid;
         if (!this.props.checked) {
             popNewMessage('请选择一个应用');
-            
+
             return;
         } 
         this.ok && this.ok(appId);

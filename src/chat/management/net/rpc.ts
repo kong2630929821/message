@@ -4,8 +4,8 @@ import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, P
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { addApp, createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin } from '../../server/data/rpc/manager.p';
-import { AddAppArg } from '../../server/data/rpc/manager.s';
+import { addApp, createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig } from '../../server/data/rpc/manager.p';
+import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { erlangLogicIp } from '../config';
 import { deelReportList, deelReportListInfo, timestampFormat, unicode2ReadStr } from '../utils/logic';
@@ -254,5 +254,18 @@ export const getAllGameInfo = (ids:string) => {
             return [];
         });
       
+    });
+};
+
+// 编辑热门游戏和推荐游戏
+export const setAppHot = (appId:string,setType:number) => {
+    const arg = new SetAppConfig();
+    arg.cfg_type = setType; // 1表示热门推荐，2表示编辑推荐
+    arg.appids = appId;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(setAppConfig,arg,(r:any) => {
+            res(r);
+        });
     });
 };
