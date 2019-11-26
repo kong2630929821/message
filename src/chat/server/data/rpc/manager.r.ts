@@ -498,29 +498,49 @@ export const cancelGmAccount = (accId: string): number => {
  */
 // #[rpc=rpcServer]
 export const getOfficialAcc = (appid: string): OfficialAccList => {
-    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
     const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
-    const iter = officialBucket.iter(null, true);
+    const iter = publicNameIndexBucket.iter(null, true);
     const list = new OfficialAccList();
     list.list = [];
+    const map = getUidAppMap();
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const publicNameIndex: PublicNameIndex = v[1];
+        const num = publicNameIndex.num;
+        const officialUserInfo =  new OfficialUserInfo();
+        // 获取社区注册时间
+        const communityBase = communityBaseBucket.get<string, CommunityBase[]>(num)[0];
+        officialUserInfo.create_time = communityBase.createtime;
+        const uid = communityBase.owner;
+        const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
+        officialUserInfo.user_info = userInfo;
+        officialUserInfo.app_id = map.get(uid);
+        list.list.push(officialUserInfo);
+    } while (iter);
+    
+    return list;
+};
+
+/**
+ * 获取官方账号绑定的应用
+ */
+export const getUidAppMap = (): Map<number, string> => {
+    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const iter = officialBucket.iter(null, true);
+    const map = new Map();
     do {
         const v = iter.next();
         if (!v) break;
         const officialUsers: OfficialUsers = v[1];
         officialUsers.uids.forEach((uid) => {
-            const officialUserInfo =  new OfficialUserInfo();
-            const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
-            officialUserInfo.user_info = userInfo;
-            // 获取社区注册时间
-            const communityBase = communityBaseBucket.get<string, CommunityBase[]>(userInfo.comm_num)[0];
-            officialUserInfo.create_time = communityBase.createtime;
-            officialUserInfo.app_id = officialUsers.appId;
-            list.list.push(officialUserInfo);
+            map.set(uid, officialUsers.appId);
         });
     } while (iter);
-    
-    return list;
+
+    return map;
 };
 
 /**
