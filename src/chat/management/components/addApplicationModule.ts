@@ -65,13 +65,13 @@ export class AddApplicationModule extends Widget {
         const hotApp = getStore('hotApp',[]);
         const recommend = getStore('recommendApp',[]);
         const used = [...hotApp,...recommend];// 已经使用的app
-        const lave  = deepCopy(appList);// 剩余app
-        lave.forEach((v,i) => {
-            if (used.find(item => item.appid === v.appid)) {
-                appList.splice(i,1);
+        const lave  = [];// 剩余app
+        appList.forEach(v => {
+            if (used.findIndex(item => item.appid === v.appid) === -1) {
+                lave.push(v);
             }
         });
-        this.props.appList = appList;
+        this.props.appList = used.length ? lave :appList;
     }
 
     public exitBtn() {

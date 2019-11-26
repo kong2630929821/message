@@ -5,13 +5,13 @@
         <div w-class="hotItem">
             <img src="{{it.buildupImgPath(v.img[0])}}" alt="" w-class="iocn"/>
             <div w-class="name">{{v.title}}</div>
-            <img src="../../../res/images/remove.png" alt="" w-class="closeIcon"/>
+            <img src="../../../res/images/remove.png" alt="" w-class="closeIcon" on-tap="delApp(2,{{i}})"/>
         </div>
         {{end}}
 
         {{if it.hotApp.length < 8 }}
             <div w-class="hotItem">
-                <div w-class="add" on-tap="addApp(1)">
+                <div w-class="add" on-tap="addApp(2)">
                     <img src="../../../res/images/add_black.png" alt="" w-class="addIcon"/>
                 </div>
                 <div w-class="name"></div>
@@ -31,13 +31,13 @@
                         <div w-class="infoDesc">{{v.subtitle}}</div>
                     </div>
                 </div>
-                <img src="../../../res/images/remove.png" alt="" w-class="closeIcon"/>
+                <img src="../../../res/images/remove.png" alt="" w-class="closeIcon" on-tap="delApp(1,{{i}})"/>
             </div>
         {{end}}
 
         {{if it.recommendApp.length < 3}}
             <div w-class="recommendItem">
-                <div w-class="addRecommendItem" on-tap="addApp(2)">
+                <div w-class="addRecommendItem" on-tap="addApp(1)">
                     <img src="../../../res/images/add_black.png" alt="" w-class="addIcon"/>
                 </div>
             </div>
