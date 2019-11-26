@@ -1,5 +1,6 @@
 <div w-class="page" class="new-page" on-tap="pageClick" ev-back-click="goBack" ev-next-click="goSetting" >
-    <chat-client-app-widget1-topBar-topBar>{title:"",nextImg:"setting.png"}</chat-client-app-widget1-topBar-topBar>
+    <chat-client-app-widget1-topBar-topBar>{title:""}</chat-client-app-widget1-topBar-topBar>
+    {{% nextImg:"setting.png" ---------右上角设置按钮}}
     
     <div w-class="contain" id="userDetailPage" on-scroll="scrollPage">
         <div id="userDetailContain">
@@ -22,7 +23,7 @@
 
                         {{if !it.isOwner}}
                         <div w-class="friendsPub">
-                            {{if it.followed}}
+                            {{if it.followed && 1==0}}
                                 <div w-class="followBtn" on-tap="goHisPublic">{{"公众号"}}</div>
                             {{end}}
                             <div w-class="{{it.followed ? 'cancelBtn':'followBtn'}}" on-tap="followUser">{{it.followed ? "取消关注":"关注ta"}}</div>
@@ -95,15 +96,19 @@
     </div>
 
     <div w-class="btns">
-        {{if !it.isFriend}}
-        <div w-class="btn" on-tap="addUser">+好友</div>
-        {{elseif !it.isOwner}}
-        <div w-class="btn" on-tap="goChat">聊天</div>
+        {{if 1==0}}
+            {{if !it.isFriend}}
+            <div w-class="btn" on-tap="addUser">+好友</div>
+            {{elseif !it.isOwner}}
+            <div w-class="btn" on-tap="goChat">聊天</div>
+            {{end}}
         {{end}}
+
         {{if !it.followed}}
         <div w-class="btn" on-tap="followUser">关注</div>
         {{end}}
-        {{if it.isMine}}
+
+        {{if it.isMine && 1==0}}
         <div w-class="btn" on-tap="sendPost">+好友</div>
         {{end}}
     </div>
