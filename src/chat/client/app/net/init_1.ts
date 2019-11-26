@@ -11,6 +11,7 @@ import { getStore } from '../../../../app/store/memstore';
 import { piFetch } from '../../../../app/utils/pureUtils';
 // tslint:disable-next-line:no-duplicate-imports
 import { popNewMessage } from '../../../../app/utils/pureUtils';
+import { deepCopy } from '../../../../pi/util/util';
 import { UserInfo } from '../../../server/data/db/user.s';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { changeUserInfo } from '../../../server/data/rpc/user.p';
@@ -90,7 +91,7 @@ export const walletSignIn = (openid) => {
                         getAllGameInfo(appId).then(r => {
                             console.log('获取全部游戏',r);
                             store.setStore('gameList',r);
-                            const tagList = store.tagListStore;
+                            const tagList = deepCopy(store.tagListStore);
                             r.forEach(v => {
                                 tagList.push(v.title);
                             });
