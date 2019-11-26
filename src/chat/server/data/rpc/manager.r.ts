@@ -400,6 +400,7 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     console.log('============handleApplyPublic:', arg);
     if (!getSession('root')) return 'not login';
     const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
+    const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
     const applyPublic = applyPublicBucket.get<number, ApplyPublic[]>(arg.id)[0];
     if (!applyPublic) return 'error id';
     if (applyPublic.state !== CONSTANT.PUBLIC_APPLYING) return 'error state';
@@ -408,10 +409,14 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     if (arg.result) {
         // 同意
         applyPublic.state = CONSTANT.PUBLIC_APPLY_SUCCESS;
+        // 添加公众号名称索引（公众号申请没有添加名称索引）
+        const publicNameIndex = new PublicNameIndex();
+        publicNameIndex.name = applyPublic.name;
+        publicNameIndex.num = applyPublic.num;
+        publicNameIndexBucket.put(publicNameIndex.name, publicNameIndex);
     } else {
         // 拒绝时清除公众号名索引
         applyPublic.state = CONSTANT.PUBLIC_APPLY_REFUSED;
-        const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
         const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(applyPublic.name)[0];
         if (publicNameIndex) publicNameIndexBucket.delete(applyPublic.name);
     }
@@ -505,8 +510,10 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
     const list = new OfficialAccList();
     list.list = [];
     const map = getUidAppMap();
+    console.log('getOfficialAcc!!!!!!!!!map:', JSON.stringify(map));
     do {
         const v = iter.next();
+        console.log('getOfficialAcc!!!!!!!!!v:', JSON.stringify(v));
         if (!v) break;
         const publicNameIndex: PublicNameIndex = v[1];
         const num = publicNameIndex.num;
@@ -520,6 +527,8 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
         officialUserInfo.app_id = map.get(uid);
         list.list.push(officialUserInfo);
     } while (iter);
+
+    console.log('getOfficialAcc!!!!!!!!!list:', JSON.stringify(list));
     
     return list;
 };

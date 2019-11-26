@@ -104,7 +104,7 @@ export class OfficialCertification extends Widget {
 
     // 返回
     public goBack(e:any) {
-        debugger;
+        // fg判斷是否需要刷新頁面數據
         if (e.fg) {
             this.initData();
         }

@@ -24,14 +24,14 @@ const PAGE = {
     queryUser:'user-queryUser',// 查询用户
     officialUser:'user-officialUser',// 官方账号列表
     customerService:'user-customerService',// 客服管理
+    changePassword:'user-changePassword',// 修改密码
     application:'application-thirdApplication',// 第三方应用管理
     recommendApplication:'application-recommendApplication',// 推荐应用
     addApplication:'application-addApplication',// 添加应用
     newArticle:'myArticle-newArticle',// 新文章
     draft:'myArticle-draft',// 草稿
     published:'myArticle-published',// 已发布
-    notReviewed:'myArticle-notReviewed',// 未过审
-    userInfo:'user-userInfo'// 文章详情
+    notReviewed:'myArticle-notReviewed'// 未过审
 };
 
 // tslint:disable-next-line:completed-docs
@@ -47,8 +47,9 @@ export class Home extends Widget {
                 { name: '官方账号认证', page: PAGE.official, img:'chart.png', show:false },
                 { name: '用户管理', page: PAGE.queryUser, img:'chart.png', show:false,children:[
                     { name:'查询用户',page:PAGE.queryUser },
-                    { name:'官方账号列表',page:PAGE.userInfo },
-                    { name:'客服管理',page:PAGE.customerService }
+                    { name:'官方账号列表',page:PAGE.officialUser },
+                    { name:'客服管理',page:PAGE.customerService },
+                    { name:'修改密码',page:PAGE.changePassword }
                 ] },
                 {name:'第三方应用管理',page:PAGE.application,img:'chart.png',show:false,children:[
                     { name:'应用列表',page:PAGE.application },
