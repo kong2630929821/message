@@ -52,7 +52,7 @@ export const walletSignIn = (openid) => {
                 getSetting();   // 获取设置信息
                 getLaudPost();  // 获取赞过帖子列表
 
-                const square= getStore('flags',{}).nowSquareType || {squareType:1,label:''};
+                const square = getStore('flags',{}).nowSquareType || { squareType:1,label:'' };
                 showPost(square.squareType, square.label); // 获取最新帖子
                 init2.init(r.uid);
                 
@@ -88,6 +88,7 @@ export const walletSignIn = (openid) => {
                     if (r.length) {
                         const appId = JSON.stringify(r);
                         getAllGameInfo(appId).then(r => {
+                            console.log('获取全部游戏',r);
                             store.setStore('gameList',r);
                             const tagList = store.tagListStore;
                             r.forEach(v => {
@@ -109,15 +110,15 @@ export const walletSignIn = (openid) => {
  * 改变用户信息
  */
 export const  setUserInfo = async () => {
-    const user = await getStoreData('user',{ info:{},id:'' });
+    const user = await getStoreData('user',{ info:{} });
     const r = new UserChangeInfo();
-    r.note = user.info.note;
-    r.sex = user.info.sex;
-    r.name = user.info.nickName;
-    r.avatar = user.info.avatar;
-    r.tel = user.info.phoneNumber;
-    r.acc_id = user.acc_id;
-    r.wallet_addr = user.id;
+    r.note = user.info.note || '';
+    r.sex = user.info.sex || 2;
+    r.name = user.info.nickName || '';
+    r.avatar = user.info.avatar || '';
+    r.tel = user.info.phoneNumber || '';
+    r.acc_id = user.acc_id || '';
+    r.wallet_addr = '';
     const uid = store.getStore('uid');
     if (!uid) {
         return;

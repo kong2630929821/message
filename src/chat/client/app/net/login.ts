@@ -5,7 +5,6 @@ import { getStoreData } from '../../../../app/api/walletApi';
 import { logoutWallet } from '../../../../app/utils/tools';
 import * as store from '../data/store';
 import { disconnect, initClient } from './init';
-import { getAllGameList, getAllGameInfo } from './rpc';
 
 /**
  * 登录聊天

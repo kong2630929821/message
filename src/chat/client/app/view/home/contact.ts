@@ -9,8 +9,8 @@ import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offl
 import { getStore } from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
-import { Forelet } from '../../../../../pi/widget/forelet';
 import { notify } from '../../../../../pi/widget/event';
+import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
@@ -37,7 +37,6 @@ interface Props {
     acTag:number;   // 当前活跃的广场标签下标
     showTag:boolean;  // 展示广场下拉
     tabBarList:any;
-    tagList:any;
     labelList:any;
     gameName:string;   // 从游戏跳到广场对应的标签
 }
@@ -82,13 +81,11 @@ export class Contact extends SpecialWidget {
             //     components:'chat-client-app-view-contactList-contactList'
             // }
         ],
-        tagList:[],
         labelList:[],
         gameName:''
     };
     constructor() {
         super();
-        this.props.tagList = store.getStore('tagList',[]);
         this.props.labelList = getStore('game/allGame',[]);
     }
 
@@ -96,26 +93,27 @@ export class Contact extends SpecialWidget {
         super.create();
         this.state = STATE;
         this.state.pubNum = store.getStore('pubNum',0);
-        this.initDate();
+        this.state.tagList = store.getStore('tagList',[]);
+        // this.initDate();
     }
 
     public setProps(props: Props) {
         if (props.gameName) {
-            let index:number =  this.props.tagList.indexOf(props.gameName);
+            let index:number =  this.state.tagList.indexOf(props.gameName);
             index = index >= 0 ? index :0;
             props.acTag = index;
-            console.log('tagList',this.props.tagList,'index',index);
+            console.log('tagList',this.state.tagList,'index',index);
         }
         this.props = {
             ...this.props,
             ...props
         };
+        this.initDate();
     }
 
     public initDate() {
         const uid = store.getStore('uid', 0);
         this.props.isLogin = !!uid;
-        this.props.activeTab = TAB.square;
         if (this.props.isLogin) {   // 聊天已登录成功
             this.changeUserinfo();
         }
@@ -178,9 +176,9 @@ export class Contact extends SpecialWidget {
                     icon:''
                 };
                 if (this.props.acTag >= 2) {
-                    const currentItem = this.props.labelList.find(item => item.title === this.props.tagList[this.props.acTag]);
+                    const currentItem = this.props.labelList.find(item => item.title === this.state.tagList[this.props.acTag]);
                     label = {
-                        name:this.props.tagList[this.props.acTag],
+                        name:this.state.tagList[this.props.acTag],
                         icon:currentItem.img[0]
                     };
                 }
@@ -188,7 +186,7 @@ export class Contact extends SpecialWidget {
                     if (this.props.acTag < 2) {
                         showPost(this.props.acTag + 1);
                     } else {
-                        showPost(5,store.getStore('tagList')[this.props.acTag]);
+                        showPost(5,this.state.tagList[this.props.acTag]);
                     }
                     
                 });
@@ -279,7 +277,8 @@ const STATE = {
     inviteUsers:[],
     convertUser:[],
     notice:[],
-    pubNum:0
+    pubNum:0,
+    tagList:[]
 };
 
 store.register('contactMap', (r) => {
@@ -322,20 +321,18 @@ registerStoreData('inviteUsers/convert_invite',(r) => {
 // 更新邀请好友记录
 const updateInviteUsers = (ans) => {
     const userInfoMap = store.getStore('userInfoMap',new Map());
-    if (STATE.contactMap.friends.length > 0) {
-        for (const v of STATE.contactMap.friends) {
-            const user = userInfoMap.get(v.toString());
-            if (user) {
-                // const index = ans.indexOf(user.acc_id); 
-                // index > -1 && ans.splice(index,1);
-                let index = null;
-                ans.forEach((v,i) => {
-                    if (v[0] === user.acc_id) {
-                        index = i;
-                    }
-                });
-                index > -1 && ans.splice(index,1);
-            }
+    for (const v of STATE.contactMap.friends) {
+        const user = userInfoMap.get(v.toString());
+        if (user) {
+            // const index = ans.indexOf(user.acc_id); 
+            // index > -1 && ans.splice(index,1);
+            let index = null;
+            ans.forEach((v,i) => {
+                if (v[0] === user.acc_id) {
+                    index = i;
+                }
+            });
+            index > -1 && ans.splice(index,1);
         }
     }
 
@@ -378,5 +375,10 @@ store.register(`conmentList`, (r:any) => {
 // 监听公众号变化
 store.register(`pubNum`,(r:number) => {
     STATE.pubNum = r;
+    forelet.paint(STATE);
+});
+
+store.register('tagList',(r) => {
+    STATE.tagList = r;
     forelet.paint(STATE);
 });

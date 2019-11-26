@@ -15,9 +15,12 @@
                             </div>
                             {{end}}
                         </div>
-                        {{if it.isOwner}}
+                        {{% ===================屏蔽公众号=================}}
+                        {{if 1==0}}
                         <div w-class="followBtn" on-tap="goPublic">{{it.pubNum ? "我的公众号":"申请公众号"}}</div>
-                        {{else}}
+                        {{end}}
+
+                        {{if !it.isOwner}}
                         <div w-class="friendsPub">
                             {{if it.followed}}
                                 <div w-class="followBtn" on-tap="goHisPublic">{{"公众号"}}</div>
