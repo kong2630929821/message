@@ -13,6 +13,10 @@
                         {{if it.inlineBtn1 || it.inlineBtn2 || it.inputFile}}
                         <th w-class="th th1 {{it.auto?'autoTh':''}}">操作</th>
                         {{end}}
+
+                        {{if it.btnGroup.length}}
+                        <th w-class="th th1 {{it.auto?'autoTh':''}}">处理结果</th>
+                        {{end}}
                     </tr>
             </thead>
             <tbody>
@@ -30,7 +34,7 @@
                     </td>
                     {{end}}
 
-                    {{if it.inlineBtn1 || it.inlineBtn2 || it.inputFile}}
+                    {{if it.inlineBtn1 || it.inlineBtn2 || it.inputFile ||it.btnGroup.length}}
                     <td w-class="td td1 {{it.auto?'autoTd':''}}">
                         {{if it.inputFile}}
                         <div w-class="exportFile">
@@ -52,7 +56,7 @@
                         {{end}}
 
                         {{if it.btnGroup.length}}
-                            <div w-class="btn {{it.color?'btnColor':''}}" style="margin-left:10px;" on-tap="goDetail(e,{{i}},1)" on-down="onShow">{{it.btnGroup[i]}}</div>
+                            <div w-class="btn {{it.color?'btnColor':''}}" style="margin-left:10px;text-decoration: underline" on-tap="goDetail(e,{{i}},1)" on-down="onShow">{{it.btnGroup[i]}}</div>
                         {{end}}
                        
                     </td>

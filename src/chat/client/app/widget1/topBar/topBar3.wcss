@@ -1,0 +1,31 @@
+.topBar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.back{
+    width: 50px;
+    border: 20px solid transparent;
+}
+.pageTitle{
+    font-size:40px;
+    font-family:SourceHanSansCN-Medium,SourceHanSansCN;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+}
+.createGroup{
+    font-size:32px;
+    font-family:SourceHanSansCN-Normal,SourceHanSansCN;
+    font-weight:400;
+    color:rgba(34,34,34,1);
+    border: 20px solid transparent;
+}
+.avatarBox{
+    height:120px; 
+    background:rgba(255,255,255,1); 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding: 0 20px;
+}

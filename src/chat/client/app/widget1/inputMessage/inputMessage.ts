@@ -254,7 +254,7 @@ export const sendImage = (e:any) => {
                     originalImg:''
                 };
 
-                imgResize(buffer,(res) => {  // 压缩图片
+                imgResize(buffer, 0.8, 400, (res) => {  // 压缩图片
                     value.compressImg = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
                     // 预览图片
                     notify(e.node,'ev-send-before',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) });
@@ -273,11 +273,17 @@ export const sendImage = (e:any) => {
                                     value.originalImg = imgUrlSuf1;
                                     notify(e.node,'ev-send',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) });
                                 });
+
+                                imagePicker.close({
+                                    success:res => {
+                                        console.log('imagePicker close',res);
+                                    }
+                                });
                             }
                         });
         
                     });
-                },400);
+                });
                     
             }
         });
@@ -299,7 +305,7 @@ export const sendPicture = (e:any) => {
                     compressImg:'',
                     originalImg:''
                 };
-                imgResize(buffer,(res) => {
+                imgResize(buffer, 0.8, 400, (res) => {
                     value.compressImg = `<div style="background-image:url(${res.base64});height: 230px;width: 230px;" class="previewImg"></div>`;
                     // 预览图片
                     notify(e.node,'ev-send-before',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) }); 
@@ -317,11 +323,17 @@ export const sendPicture = (e:any) => {
                                     value.originalImg = imgUrlSuf1;
                                     notify(e.node,'ev-send',{ msgType:MSG_TYPE.IMG, value:JSON.stringify(value) });
                                 });
+
+                                camera.close({
+                                    success:res => {
+                                        console.log('imagePicker close',res);
+                                    }
+                                });
                             }
                         });
         
                     });
-                },400);
+                });
                 
             }
         });

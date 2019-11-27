@@ -4,7 +4,6 @@
 
 // ================================================ 导入
 import { Widget } from '../../../../../pi/widget/widget';
-import { Announcement } from '../../../../server/data/db/message.s';
 import { Logger } from '../../../../utils/logger';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
@@ -30,7 +29,7 @@ export class AnnounceItem extends Widget {
         this.props.announce = announce;
         if (announce) {
             const notice = depCopy(announce.msg);
-            this.props.noticeTitle = JSON.parse(notice).title;
+            this.props.noticeTitle = JSON.parse(notice).content;
             this.props.time = timestampFormat(announce.time,3);
         }
         logger.debug('====this.props.announce',announce);

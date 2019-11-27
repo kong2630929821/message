@@ -3,7 +3,6 @@
  */
 
 // ================================================ 导入
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
@@ -14,6 +13,7 @@ import { Logger } from '../../../../utils/logger';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { timestampFormat } from '../../logic/logic';
+import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
@@ -54,7 +54,7 @@ export class GroupAnnounce extends Widget {
 
     // 编辑群公告
     public editGroupAnnounce() {
-        popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'编辑群公告',needTitle:true,maxLength:150 },(r:any) => {
+        popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'新公告',needTitle:false,maxLength:150 },(r:any) => {
             const message = new GroupSend();
             message.gid = this.props.gid;
             message.msg = JSON.stringify(r);

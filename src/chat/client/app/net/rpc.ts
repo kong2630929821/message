@@ -2,6 +2,7 @@
  * 调用rpc接口
  */
 // ================================================ 导入
+import { erlangLogicIp, shareDownload } from '../../../../app/public/config';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { CommentKey, PostKey } from '../../../server/data/db/community.s';
 import { GroupInfo } from '../../../server/data/db/group.s';
@@ -11,7 +12,7 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { addCommentPost, addPostPort, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, ChangeCommunity, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
@@ -520,17 +521,22 @@ export const addPost = (title: string, body: string, num:string, post_type: numb
 /**
  * 帖子点赞或取消点赞
  */
-export const postLaud = (num: string, id: number, fail?:any) => {
+export const postLaud = (num: string, id: number) => {
     const arg = new PostKey();
     arg.num = num;
     arg.id = id;
-    clientRpcFunc(postLaudPost,arg,(r:boolean) => {
-        if (r) {
-            console.log('postLaudPost=======',r);
-        } else {
-            fail && fail();
-        }
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(postLaudPost,arg,(r:boolean) => {
+            if (r) {
+                console.log('postLaudPost=======',r);
+                resolve();
+            } else {
+                reject();
+            }
+        });
     });
+    
 };
 
 /**
@@ -588,53 +594,60 @@ export const showUserFollow = (num_type:number = 1) => {
 };
 
 /**
- * 获取最新的帖子
+ * 获取最新的帖子  
  */
-export const showPost = (square_type:number, num:string = '', id:number = 0, count:number = 5) => {
+export const showPost = (square_type:number, label:string= '',num:string = '', id:number = 0, count:number = 5) => {
     const arg = new IterSquarePostArg();
     arg.count = count;
     arg.id = id;
     arg.num = num;
     arg.square_type = square_type;
+    arg.label = label;
 
     return new Promise((res,rej) => {
-        clientRpcFunc(getSquarePost,arg,(r:PostArr) => {
-            console.log('showPost=============',r);
-            let postList = store.getStore('postList',[]);
-            if (r && r.list && r.list.length) {
-                const data:any = r.list;
 
-                data.forEach((res,i) => {
-                    data[i].offcial = res.comm_type === CommType.official;
-                    data[i].isPublic = res.comm_type === CommType.publicAcc;
-                    data[i].followed = judgeFollowed(res.key.num);
-                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
-                    if (data[i].isPublic) {
-                        data[i].content = res.body;
-                        data[i].imgs = '';
+        clientRpcFunc(getSquarePost,arg,((id, num, square_type) => {
+            const requestid = id;
+            const requestNum = num;
+            const tagType = square_type;
+            
+            return (r:PostArr) => {
+                console.log('showPost=============',r);
+                // let postList = store.getStore('postList',[]);
+                if (r && r.list && r.list.length) {
+                    const data:store.PostItem[] = r.list;// TODO:
+                    data.forEach((res,i) => {
+                        data[i].offcial = res.comm_type === CommType.official;
+                        data[i].isPublic = res.comm_type === CommType.publicAcc;
+                        data[i].owner = res.owner;
+                        data[i].followed = judgeFollowed(res.key.num);
+                        if (data[i].isPublic) {
+                            data[i].content = res.body;
+                            data[i].imgs = [];
+                        } else {
+                            const reg = /\#([^#]*)\#/gm;
+                            const body = JSON.parse(res.body);
+                            data[i].content = parseEmoji(body.msg).replace(reg,'');
+                            data[i].imgs = body.imgs;
+                            data[i].label = body.msg.match(reg) ? body.msg.match(reg)[0].substring(1, body.msg.match(reg)[0].length - 1) :'';
+                        }
+                
+                    });
+                    let index = null;
+                    if (tagType === 5) {
+                        const list =  store.getStore('tagList');
+                        index = list.indexOf(data[0].label) + 1;
                     } else {
-                        const body = JSON.parse(res.body);
-                        data[i].content = parseEmoji(body.msg);
-                        data[i].imgs = body.imgs;
-                        
-                    }
-                   
-                });
-
-                // 最后一条帖子ID作为查询条件，并且返回了新一页的帖子
-                if (postList.length && id && postList[postList.length - 1].key.id !== data[0].key.id) {
-                    postList = postList.concat(data); // 拼接下一页的数据
+                        index = tagType;
+                    }           
+                    store.setStore('postReturn',{ id:requestid, num:requestNum, tagType:index, postList:data });
+                    res(data);
                 } else {
-                    postList = data;
+                    // TODO;                
+                    rej();
                 }
-                store.setStore('postList',postList);
-                res(postList);
-            } else {
-                rej();
-            }
-        });
+            };})(id, num, square_type));
     });
-    
 };
 
 /**
@@ -726,18 +739,20 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(getUserPost,param,(r) => {
-            console.log('getUserPost=============',r);
+            console.log('getUserPost===========',r);
             if (r && r.list) {
-                const data:any = r.list;
+                const data:store.PostItem = r.list;
                 
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;
                     data[i].isPublic = res.comm_type === CommType.publicAcc;
                     const body = JSON.parse(res.body);
-                    data[i].content = parseEmoji(body.msg);
                     data[i].imgs = body.imgs;
+                    const reg = /\#([^#]*)\#/gm;
+                    data[i].content = parseEmoji(body.msg).replace(reg,'');
+                    data[i].owner = res.owner;
                     data[i].followed = judgeFollowed(res.key.num);
-                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
+                    data[i].label = body.msg.match(reg) ? body.msg.match(reg)[0].substring(1, body.msg.match(reg)[0].length - 1) :'';
                 });
                 res({ list:data, total: r.total });
             } else {
@@ -996,5 +1011,55 @@ export const complaintType = (key:string,status:number,reason:string) => {
         clientRpcFunc(report,arg,(r:number) => {
             res(r);
         });
+    });
+};
+
+// 获取游戏标签帖子数量
+export const gameLabelNum = (label:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getLabelPostCount,label,(r:number) => {
+            res(r);
+        });
+    });
+};
+
+// 获取全部游戏
+export const getAllGameList = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 获取全部游戏详情
+export const getAllGameInfo = (ids:string) => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
+        return res.json().then(r => {
+            const res = r.app_details;
+            const gameList = [];
+            res.forEach(v => {
+                const name = v[0];
+                const img = JSON.parse(v[1]);
+                const desc = JSON.parse(v[2]);
+                const url = v[3];
+                gameList.push({
+                    ...desc,
+                    title:name,
+                    desc:desc.desc,
+                    img:[img.icon,img.bg],
+                    url,
+                    apkDownloadUrl:shareDownload
+                });
+            });
+
+            return gameList;
+        }). catch (e => {
+            return [];
+        });
+      
     });
 };

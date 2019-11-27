@@ -12,7 +12,7 @@ interface Props {
     userInfo:any;// 用户信息
     state:number;// 0用户 1嗨嗨号
     msg:string;// 客服回复的话
-    punishment:string;// 当前惩罚
+    punishment:any;// 当前惩罚
 
 }
 
@@ -35,7 +35,7 @@ export class ReportBox extends Widget {
         },
         state:0,
         msg:'',
-        punishment:''
+        punishment:null
     };
 
     public setProps(props:any) {
@@ -88,8 +88,10 @@ export class ReportBox extends Widget {
         }
         if (this.props.state === 0) {
             // 惩罚用户
-            if (this.props.punishment === '无') {
-                this.punishUser(time);
+            if (this.props.punishment.value === '无') {
+                popNew('chat-management-components-confirmBox',{ title:'确认惩罚该用户？',invalid:-1 },() => {
+                    this.punishUser(time);
+                });
             } else {
                 // 覆盖当前惩罚
                 popNew('chat-management-components-confirmBox',{ title:'对方正在被惩罚',content:'确认处理会覆盖之前的惩罚',invalid:-1 },() => {
@@ -109,7 +111,7 @@ export class ReportBox extends Widget {
         if (this.props.checkedList === 0) {
             punish = PENALTY.FREEZE ;
         } else if (this.props.checkedList === 1) {
-            punish = PENALTY.FREEZE;
+            punish = PENALTY.BAN_ACCOUNT;
         }
         const key = this.props.userInfo.key;
         setPunish(key,punish,time).then((r:any) => {

@@ -6,18 +6,19 @@
 import { getStoreData, setStoreData } from '../../../../../app/api/walletApi';
 import { registerStoreData } from '../../../../../app/postMessage/listenerStore';
 import { OfflienType } from '../../../../../app/publicComponents/offlineTip/offlineTip';
+import { getStore } from '../../../../../app/store/memstore';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../../app/utils/tools';
+import { notify } from '../../../../../pi/widget/event';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { GENERATOR_TYPE, UserInfo } from '../../../../server/data/db/user.s';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { deelNotice, rippleShow } from '../../logic/logic';
+import { deelNotice } from '../../logic/logic';
 import { doScanQrCode } from '../../logic/native';
 import { setUserInfo } from '../../net/init_1';
-import { getUsersBasicInfo, showPost } from '../../net/rpc';
+import { showPost } from '../../net/rpc';
 import { SpecialWidget } from '../specialWidget';
-import { TagList } from './square';
 
 // ================================================ 导出
 export const forelet = new Forelet();
@@ -29,7 +30,7 @@ interface Props {
     isUtilVisible: boolean;
     utilList: any[];
     userInfo:any; 
-    netClose: boolean; // 网络链接是否断开
+    netClose: boolean; // 网络链接是否断开    
     isLogin:boolean; // 聊天是否已经登陆
     hasWallet:boolean; // 本地是否已经创建钱包
     activeTab:string;  // 当前活跃的tab
@@ -37,6 +38,8 @@ interface Props {
     showTag:boolean;  // 展示广场下拉
     tabBarList:any;
     tagList:any;
+    labelList:any;
+    gameName:string;   // 从游戏跳到广场对应的标签
 }
 export const TAB = {
     message:'message',
@@ -74,63 +77,73 @@ export class Contact extends SpecialWidget {
                 modulName:'message',
                 components:'chat-client-app-view-home-contactNotice'
             }
-            // {
-            //     modulName:'friend',
-            //     components:'chat-client-app-view-contactList-contactList'
-            // }
         ],
-        tagList:TagList
+        tagList:[],
+        labelList:[],
+        gameName:''
     };
+    constructor() {
+        super();
+        this.props.tagList = store.getStore('tagList',[]);
+        this.props.labelList = getStore('game/allGame',[]);
+    }
 
     public create() {
         super.create();
         this.state = STATE;
         this.state.pubNum = store.getStore('pubNum',0);
-        // 判断是否从钱包项目进入
-        // if (navigator.userAgent.indexOf('YINENG_ANDROID') > -1 || navigator.userAgent.indexOf('YINENG_IOS') > -1) {  
-        // getStoreData('wallet').then((wallet) => {
-        //     this.props.hasWallet = !!wallet;
-        // });
-            
-        // }
+        this.initDate();
     }
 
     public setProps(props: Props) {
+        if (props.gameName) {
+            let index:number =  this.props.tagList.indexOf(props.gameName);
+            index = index >= 0 ? index :0;
+            props.acTag = index;
+            console.log('tagList',this.props.tagList,'index',index);
+        }
         this.props = {
             ...this.props,
             ...props
         };
-        super.setProps(this.props);
-        this.initDate();
     }
 
     public initDate() {
         const uid = store.getStore('uid', 0);
         this.props.isLogin = !!uid;
         this.props.activeTab = TAB.square;
-        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
         if (this.props.isLogin) {   // 聊天已登录成功
-            getStoreData('user',{ info:{},id:'' }).then(wUser => {
-                // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
-                if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.info.acc_id !== cUser.acc_id || wUser.info.sex !== cUser.sex || wUser.info.phoneNumber !== cUser.tel || wUser.info.note !== cUser.note) {
-                    if (this.props.isLogin && wUser.info.nickName) { // 钱包和聊天都已登陆
-                        setUserInfo();
-                    } else if (cUser.uid) {  // 聊天已登录
-                        store.initStore();
-                        this.state.lastChat = []; // 清空记录 lastChat
-                        this.paint();
-                    }
-                } 
-            });
+            this.changeUserinfo();
         }
+    }
+
+    public changeUserinfo() {
+        const uid = store.getStore('uid', 0);
+        const cUser = store.getStore(`userInfoMap/${uid}`, new UserInfo());  // 聊天
+     
+        getStoreData('user',{ info:{},id:'' }).then(wUser => {
+            // 钱包修改了姓名、头像等，或钱包退出登陆 切换账号
+            if (wUser.info.nickName !== cUser.name || wUser.info.avatar !== cUser.avatar || wUser.acc_id !== cUser.acc_id || wUser.info.sex !== cUser.sex || wUser.info.phoneNumber !== cUser.tel || wUser.info.note !== cUser.note) {
+                if (this.props.isLogin && wUser.info.nickName) { // 钱包和聊天都已登陆
+                    setUserInfo();
+                } else if (cUser.uid) {  // 聊天已登录
+                    store.initStore();
+                    this.state.lastChat = []; // 清空记录 lastChat
+                    this.paint();
+                }
+            } 
+        });
     }
     public firstPaint() {
         super.firstPaint();
         registerStoreData('user/info',() => { // 钱包用户信息修改
-            this.setProps(this.props);  
+            if (this.props.isLogin) {   // 聊天已登录成功
+                this.changeUserinfo();
+            }
         });
         store.register('uid',() => {  // 聊天用户登陆成功
             this.setProps(this.props);
+            this.props.isLogin = true;
         });
         store.register('flags/logout',() => { // 退出钱包时刷新页面
             this.setProps(this.props);
@@ -156,11 +169,29 @@ export class Contact extends SpecialWidget {
         // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
             if (this.props.activeTab === TAB.square && !this.state.pubNum) {
-                popNew3('chat-client-app-view-info-editPost',{ isPublic:false },() => {
-                    showPost(this.props.acTag + 1);
+                let label = {
+                    name:'',
+                    icon:''
+                };
+                if (this.props.acTag >= 2) {
+                    const currentItem = this.props.labelList.find(item => item.title === this.props.tagList[this.props.acTag]);
+                    label = {
+                        name:this.props.tagList[this.props.acTag],
+                        icon:currentItem.img[0]
+                    };
+                }
+                popNew3('chat-client-app-view-info-editPost',{ isPublic:false,label },() => {
+                    if (this.props.acTag < 2) {
+                        showPost(this.props.acTag + 1);
+                    } else {
+                        showPost(5,store.getStore('tagList')[this.props.acTag]);
+                    }
+                    
                 });
             } else {
-                this.props.isUtilVisible = !this.props.isUtilVisible;
+                // 通讯录
+                popNew3('chat-client-app-view-person-addressBook');
+                
             }
             this.paint();
         } else {
@@ -199,11 +230,16 @@ export class Contact extends SpecialWidget {
     }
 
     // 切换tab
-    public changeTab(e:any) {
+    public changeTab(e:any) {        
         this.closeMore();
         this.props.activeTab = e.activeTab;
-        this.props.showTag = e.showTag;
+        if (e.activeTab === TAB.square) {
+            this.props.showTag = e.showTag;
+        } else {
+            this.props.showTag = false;
+        }
         this.paint();
+        notify(e.node,'ev-chat-square-change-tab',{ activeTab:this.props.activeTab });
     }
     // 切换tag
     public changeTagItem(ind:number) {
@@ -211,16 +247,21 @@ export class Contact extends SpecialWidget {
         this.props.acTag = ind;
         this.paint();
     }
-    // 切换tag
-    public changeTag(e:any) {
-        this.props.showTag = false;
-        this.props.acTag = e.value;
-        this.paint();
-    }
+    // // 切换tag
+    // public changeTag(e:any) {
+    //     this.props.showTag = false;
+    //     this.props.acTag = e.value;
+    //     this.paint();
+    // }
 
     // 聊天通知点击
     public evChat() {
         this.closeMore();
+    }
+
+    public labelChangeTag(e:any) {
+        this.props.acTag = e.value;
+        this.paint(true);
     }
 
 }
@@ -279,20 +320,18 @@ registerStoreData('inviteUsers/convert_invite',(r) => {
 // 更新邀请好友记录
 const updateInviteUsers = (ans) => {
     const userInfoMap = store.getStore('userInfoMap',new Map());
-    if (STATE.contactMap.friends.length > 0) {
-        for (const v of STATE.contactMap.friends) {
-            const user = userInfoMap.get(v.toString());
-            if (user) {
-                // const index = ans.indexOf(user.acc_id); 
-                // index > -1 && ans.splice(index,1);
-                let index = null;
-                ans.forEach((v,i) => {
-                    if (v[0] === user.acc_id) {
-                        index = i;
-                    }
-                });
-                index > -1 && ans.splice(index,1);
-            }
+    for (const v of STATE.contactMap.friends) {
+        const user = userInfoMap.get(v.toString());
+        if (user) {
+            // const index = ans.indexOf(user.acc_id); 
+            // index > -1 && ans.splice(index,1);
+            let index = null;
+            ans.forEach((v,i) => {
+                if (v[0] === user.acc_id) {
+                    index = i;
+                }
+            });
+            index > -1 && ans.splice(index,1);
         }
     }
 

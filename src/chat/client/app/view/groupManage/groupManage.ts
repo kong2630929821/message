@@ -24,7 +24,7 @@ export const forelet = new Forelet();
 const WIDGET_NAME = module.id.replace(/\//g, '-');
 const logger = new Logger(WIDGET_NAME);
 
-export class ManageItem extends Widget {
+export class GroupManage extends Widget {
     public ok:() => void;
     public props:Props = {
         gid : null,
@@ -43,7 +43,8 @@ export class ManageItem extends Widget {
         this.props.manageList = [
             { title : '设置管理员', quantity : `${this.props.adminNum}/5` },
             { title : '转让群主',quantity : '' },
-            { title : '入群申请',quantity : `${this.props.applyUserNum}` }
+            { title : '入群申请',quantity : `${this.props.applyUserNum}` },
+            { title : '解散群',quantity : '' }
         ];
         this.props.groupSets = [
             { title:'开启进群审核',content:'关闭后，进群不需要经过群主或管理员审核',showSwitch:true }

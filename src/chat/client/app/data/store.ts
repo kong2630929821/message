@@ -4,11 +4,10 @@
 
 // ============================================ 导入
 import { HandlerMap } from '../../../../pi/util/event';
-import { AttentionIndex, CommunityBase, LaudPostIndex } from '../../../server/data/db/community.s';
-import { AddressInfo } from '../../../server/data/db/extra.s';
+import { AttentionIndex, CommunityBase, FansIndex, LaudPostIndex } from '../../../server/data/db/community.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
-import { AnnounceHistory, GroupMsg, MsgLock, UserMsg } from '../../../server/data/db/message.s';
-import { AccountGenerator, Contact, FriendLink, GENERATOR_TYPE, UserCredential, UserInfo } from '../../../server/data/db/user.s';
+import { AnnounceHistory, GroupMsg, UserMsg } from '../../../server/data/db/message.s';
+import { Contact, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
 // tslint:disable-next-line:max-line-length
 import { conmentListChange, fabulousListChange, flagsChange, friendChange, groupChatChange, groupUserLinkChange, initAccount, lastChatChange, lastReadChange, lastReadNotice, settingChange, userChatChange } from './initStore';
 
@@ -38,6 +37,7 @@ export const getStore = (path: string, defaultValue = undefined) => {
  * 更新store并通知
  */
 export const setStore = (path: string, data: any, notified = true) => {
+    // todo: 只有store的值变化了才通知，没有变化不用通知
     const path2value = (...args) => {
         let returnValue = <any>store;
         for (let i = 0; i < args[0].length; i++) {
@@ -99,6 +99,7 @@ export const unregister = (keyName: string, cb: Function): void => {
     handlerMap.remove(keyName, <any>cb);
 };
 
+export const tagListStore = ['广场','关注'];
 /**
  * store初始化
  */
@@ -112,13 +113,8 @@ export const initStore = () => {
         userHistoryMap:new Map(),
         groupHistoryMap: new Map(),
         announceHistoryMap: new Map(),
-        msgLockMap: new Map(),
         userInfoMap: new Map(),
-        userCredentialMap: new Map(), 
-        accountGeneratorMap: new Map(),
-        friendLinkMap: new Map(),
         contactMap: new Map(),
-        addressInfoMap: new Map(),
         userChatMap:new Map(),
         groupChatMap:new Map(),
         lastRead:new Map(),
@@ -131,11 +127,16 @@ export const initStore = () => {
         isLogin:true,
         offLine:false,
         flags:{},
-        postList:[],
+        postReturn: {
+            id:-1,
+            num:'',
+            tagType:-1,
+            postList:[]
+        },
+        tagList: tagListStore,
         followNumList:new Map(),
+        fansNumList:new Map(),
         laudPostList:new Map(),
-        postDraft:null,
-        pubPostDraft:null,
         pubNum:0,
         noticeList:[],
         lastReadNotice:[],
@@ -143,7 +144,8 @@ export const initStore = () => {
         fabulousList:[],
         messageData: [[],[],[],[]],
         accIdToUid:new Map(),
-        originalImage:new Map()
+        originalImage:new Map(),
+        gameList:[]
     };
 };
 
@@ -164,10 +166,6 @@ const registerDataChange = () => {
     });
     
     register('userInfoMap',() => {
-        friendChange();  // 好友数据更新
-    });
-
-    register('friendLinkMap',() => {
         friendChange();  // 好友数据更新
     });
 
@@ -211,22 +209,58 @@ const registerDataChange = () => {
     
 };
 
+// enum POST_TYPE  {
+//     OFFICAL= 0, // 官方
+//     PUBLIC= 1// 公众号文章
+// }
+
+interface PostKey {
+    id:number;
+    num:string;
+}
+
 // 帖子内容
 export interface PostItem {
-    key:any;   // 帖子ID及社区编号
-    username:string; // 用户名
-    avatar:string; // 头像
-    commentCount:number;  // 评论数量
-    likeCount:number;   // 点赞数量
-    createtime:string;      // 创建时间
-    content:string;     // 内容
-    likeActive:boolean;  // 点赞
-    followed:boolean;  // 已关注
-    imgs:string[];  // 图片列表
-    offical:boolean;  // 官方
-    isPublic:boolean; // 公众号文章
-    gender:number;  // 性别 0 男 1 女
-    comm_type:number; // 社区类型
+    avatar: string; // 头像
+    body: string;
+    collectCount: number;
+    comm_type: number;// 社区类型
+    commentCount: number;// 评论数量
+    content: string;// 内容
+    createtime: number; // 创建时间
+    forwardCount: number;
+    gender: number; // 性别 0 男 1 女
+    imgs: {
+        compressImg:string;
+        originalImg:string;
+    }[];// 图片列表
+    isPublic: boolean;
+    key: PostKey; // 帖子ID及社区编号
+    label: string;// 对应的是哪一款游戏，可以为空
+    likeCount: number;// 点赞数量
+    offcial: boolean;
+    owner: number;// 发帖的用户ID
+    post_type: number;// 文章类型
+    state: number;
+    title: string;
+    username: string;// 用户名
+    followed:boolean;// 是否关注
+}
+
+interface GameItem {
+    usePi:boolean;
+    title:string;// 游戏名
+    desc:string;// 游戏描述
+    img:string[];// 游戏图片
+    url:string;// 游戏路径
+    apkDownloadUrl:string;
+    webviewName:string;
+    buttonMod:number;   // 当前按钮模式
+    accId:string;
+    groupId:number;
+    appid:string;
+    screenMode:string;// 横屏
+    htmlUrl:string;
 }
 
 /**
@@ -240,36 +274,36 @@ export interface Store {
     userHistoryMap: Map<string, UserMsg>;// hidinc
     groupHistoryMap: Map<string, GroupMsg>;// hidinc
     announceHistoryMap: Map<string, AnnounceHistory>;// aidinc
-    msgLockMap: Map<number, MsgLock>;// LOCK,前端暂时没用到
     userInfoMap: Map<number, UserInfo>;// uid
-    userCredentialMap: Map<number, UserCredential>; // todo,前端暂时没用到
-    accountGeneratorMap: Map<string, AccountGenerator>;// todo,前端暂时没用到
-    friendLinkMap: Map<string, FriendLink>;// uuid
     contactMap: Map<number, Contact>;// uid
-    addressInfoMap: Map<number, AddressInfo>;// uid,暂时没用到
     userChatMap:Map<string, string[]>;// hid,hidinc,递增存储
     groupChatMap:Map<string, string[]>;// hid,hidinc
     communityInfoMap:Map<string,CommunityBase>; // num 公众号信息
     lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
-    // 其实time没啥意义，不一定是最近发信息的50条，比如有人离线了，很早就发送了信息，他的信息也会出现在这里
     lastRead:Map<string,LastReadMsgId>;// hid
-    setting:any; // 额外设置，免打扰|置顶
+    setting:object; // 额外设置，免打扰|置顶
     isLogin:boolean; // 是否登陆成功
     offLine:boolean; // 是否离线
-    flags:any; // 标记信息
-    postList:PostItem[];   // 广场帖子
-    followNumList:Map<number,AttentionIndex>; // 关注的社区账号
+    flags:object; // 标记信息
+    postReturn: {  // 广场帖子  
+        id:number;
+        num:string;
+        tagType:number;
+        postList:PostItem[];
+    };  
+    tagList:string[];// tag名字
+    followNumList:Map<number,AttentionIndex>; // uid 关注的社区账号
+    fansNumList:Map<string,FansIndex>; // num 粉丝社区账号
     laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
-    postDraft:any;   // 普通帖子草稿
-    pubPostDraft:any;  // 公众号文章草稿
-    noticeList:any;// 消息列表
-    lastReadNotice:any;// 已读消息
+    noticeList:object;// 消息列表
+    lastReadNotice:object;// 已读消息
     pubNum:number;  // 公众号ID
-    conmentList:any;// 评论消息列表
-    fabulousList:any;// 点赞消息列表
-    messageData:any;// 消息通知列表
+    conmentList:object;// 评论消息列表
+    fabulousList:object;// 点赞消息列表
+    messageData:object;// 消息通知列表
     accIdToUid:Map<string,number>;// accID转uid
     originalImage:Map<number,boolean>;// 原图查看记录
+    gameList:GameItem[];// 游戏列表
 }
 
 /**

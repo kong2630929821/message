@@ -6,11 +6,11 @@
 import { BonBuffer } from '../../../../pi/util/bon';
 import { ab2hex } from '../../../../pi/util/util';
 import { DEFAULT_ERROR_NUMBER, DEFAULT_ERROR_STR, WARE_NAME } from '../../../server/data/constant';
-import { AttentionIndex, LaudPostIndex } from '../../../server/data/db/community.s';
+import { AttentionIndex, FansIndex, LaudPostIndex } from '../../../server/data/db/community.s';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
-import { AnnounceHistory, GroupHistory, MsgLock, UserHistory } from '../../../server/data/db/message.s';
-import { AccountGenerator, Contact, FriendLink, UserCredential, UserInfo } from '../../../server/data/db/user.s';
-import { watchAccountGenerator, watchAnnounceHistory, watchCommNum,watchContact, watchFriendLink, watchGroupHistory, watchGroupInfo,watchGroupUserLink, watchLaudPost, watchMsgLock, watchUserCredential, watchUserHistory, watchUserInfo } from '../../../server/data/rpc/dbWatcher.p';
+import { AnnounceHistory, GroupHistory, UserHistory } from '../../../server/data/db/message.s';
+import { Contact, UserInfo } from '../../../server/data/db/user.s';
+import { watchAnnounceHistory, watchCommNum, watchContact, watchFansNum, watchGroupHistory,watchGroupInfo, watchGroupUserLink, watchLaudPost, watchUserHistory, watchUserInfo } from '../../../server/data/rpc/dbWatcher.p';
 import * as store from '../data/store';
 import { clientRpcFunc, subscribe, unSubscribe } from './init';
 
@@ -64,14 +64,6 @@ export const subscribeAnnounceHistory = (aIncId: string,cb) => {
 };
 
 /**
- * 消息锁
- * @param hid history increament id
- */
-export const subscribeMsgLock = (hid: string, cb) => {
-    subscribeTable(watchMsgLock,'hid',hid,DEFAULT_ERROR_NUMBER,MsgLock,'msgLockMap',cb);    
-};
-
-/**
  * 用户本人的基本信息
  * @param uid user id
  */
@@ -88,30 +80,6 @@ export const unSubscribeUserInfo = (uid: number) => {
 };
 
 /**
- * User credential table
- * @param uid user id
- */
-export const subscribeUserCredential = (uid: number, cb) => {
-    subscribeTable(watchUserCredential,'uid',uid,DEFAULT_ERROR_NUMBER,UserCredential,'userCredentialMap',cb);        
-};
-
-/**
- * User account generator
- * @param index index
- */
-export const subscribeAccountGenerator = (index: String,cb) => {
-    subscribeTable(watchAccountGenerator,'index',index,DEFAULT_ERROR_STR,AccountGenerator,'accountGeneratorMap',cb);            
-};
-
-/**
- * 好友链接信息
- * @param uuid user:user
- */
-export const subscribeFriendLink = (uuid: string, cb) => {
-    subscribeTable(watchFriendLink,'uuid',uuid,DEFAULT_ERROR_STR,FriendLink,'friendLinkMap',cb);            
-};
-
-/**
  * 联系人信息
  * @param uid uid
  */
@@ -124,15 +92,23 @@ export const subscribeContact = (uid: number, cb, diffcb) => {
  * @param uid uid
  */
 export const subscribeLaudPost = (uid: number, cb) => {
-    subscribeTable(watchLaudPost,'laudPost',uid,DEFAULT_ERROR_NUMBER,LaudPostIndex,'laudPostList',cb);    
+    subscribeTable(watchLaudPost,'uid',uid,DEFAULT_ERROR_NUMBER,LaudPostIndex,'laudPostList',cb);    
 };
 
 /**
- * 关注公众号索引
+ * 关注列表索引
  * @param uid uid
  */
 export const subscribeCommNum = (uid: number,cb) => {
-    subscribeTable(watchCommNum,'commNum',uid,DEFAULT_ERROR_NUMBER,AttentionIndex,'followNumList',cb);    
+    subscribeTable(watchCommNum,'uid',uid,DEFAULT_ERROR_NUMBER,AttentionIndex,'followNumList',cb);    
+};
+
+/**
+ * 粉丝列表索引
+ * @param num 社区ID
+ */
+export const subscribeFansNum = (num: string,cb) => {
+    subscribeTable(watchFansNum,'num',num,DEFAULT_ERROR_STR,FansIndex,'fansNumList',cb);    
 };
 
 // ================================================================= 本地

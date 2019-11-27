@@ -20,7 +20,7 @@ import * as store from '../data/store';
 import { UserType } from '../logic/autologin';
 import { deelNotice } from '../logic/logic';
 import * as init2 from './init';
-import { getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting } from './rpc';
+import { getAllGameInfo, getAllGameList, getChatUid, getFriendHistory, getLaudPost, getMyPublicNum, getSetting, showPost } from './rpc';
 
 // ================================================ 导出
 
@@ -51,7 +51,8 @@ export const walletSignIn = (openid) => {
                 store.setStore('isLogin',true);
                 getSetting();   // 获取设置信息
                 getLaudPost();  // 获取赞过帖子列表
-                init2.init(r.uid);
+                showPost(1,''); // 获取最新帖子
+                init2.init(r.uid,r.comm_num);
                 
                 init2.subscribe(`${r.uid}_sendMsg`, SendMsg, (v: SendMsg) => {
                     if (v.code === 1) {
@@ -76,11 +77,24 @@ export const walletSignIn = (openid) => {
 
                 });
                 // 获取邀请人数 被邀请
-                const invite = await getStore('inviteUsers/invite_success',[]);
-                const beInvited = await getStore('inviteUsers/convert_invite',[]);
+                const invite = getStore('inviteUsers/invite_success',[]);
+                const beInvited = getStore('inviteUsers/convert_invite',[]);
                 invite.length && deelNotice(invite,store.GENERATORTYPE.NOTICE_1);
                 beInvited.length && deelNotice([beInvited],store.GENERATORTYPE.NOTICE_2);
-                
+                // 获取全部游戏
+                getAllGameList().then(r => {
+                    if (r.length) {
+                        const appId = JSON.stringify(r);
+                        getAllGameInfo(appId).then(r => {
+                            store.setStore('gameList',r);
+                            const tagList = store.tagListStore;
+                            r.forEach(v => {
+                                tagList.push(v.title);
+                            });
+                            store.setStore('tagList',tagList);
+                        });
+                    }
+                });
             } else {
                 popNewMessage('钱包登陆失败');
             }
@@ -100,13 +114,15 @@ export const  setUserInfo = async () => {
     r.name = user.info.nickName;
     r.avatar = user.info.avatar;
     r.tel = user.info.phoneNumber;
-    r.acc_id = user.info.acc_id;
+    r.acc_id = user.acc_id;
     r.wallet_addr = user.id;
     const uid = store.getStore('uid');
     if (!uid) {
         return;
     }
     init2.clientRpcFunc(changeUserInfo, r, async (res) => {
+        console.log('setUserInfo ',res);
+
         if (res && res.uid > 0) {
             const user = await getStoreData('user');
             res.acc_id = user.acc_id;

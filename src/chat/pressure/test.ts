@@ -35,7 +35,7 @@ export class Test {
                 responseTime(this, login, time);
                 store.setStore(`uid`, r.uid);
                 store.setStore(`userInfoMap/${r.uid}`, r);
-                net_init.init(r.uid);
+                net_init.init(r.uid,r.comm_num);
                 net_init.subscribe(r.uid.toString(), SendMsg, (v: SendMsg) => {
                     if (v.code === 1) {
                         getFriendHistory(v.rid);

@@ -52,3 +52,8 @@ struct ReportArg {
     reason: String,      //举报原因
     evidence: String,    //证据
 }
+
+//获取举报列表
+struct getReportListR {
+    msg: String,    //json字符串
+}

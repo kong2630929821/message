@@ -89,7 +89,8 @@
 }
 .imageList{
     border-bottom:2px solid #F2F2F2;
-    padding-bottom: 20px;
+    padding: 20px 15px;
+    box-sizing: border-box;
 }
 .imgBox{
     position: relative;

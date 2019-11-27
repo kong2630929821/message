@@ -10,7 +10,6 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
 import { rippleShow } from '../../logic/logic';
 import { TAB } from './contact';
-import { TagList } from './square';
 
 interface Props {
     avatar:string;  // 用户头像
@@ -25,12 +24,17 @@ interface Props {
 }
 
 // ================================ 导出
+
 export class ContactTop extends Widget {
     public props:Props;
 
     public setProps(props:any) {
         super.setProps(props);
-        this.props.showAcTag = TagList[props.acTag];
+        // const activeTab = localStorage.getItem('activeTab');
+        // if (activeTab) {
+        //     this.props.activeTab = activeTab;
+        // }
+        this.props.showAcTag = getStore('tagList',[])[this.props.acTag];
         this.props.utilList = [
             { iconPath: 'search.png', utilText: '搜索' },
             { iconPath: 'add-blue.png', utilText: '添加好友' },
@@ -65,6 +69,7 @@ export class ContactTop extends Widget {
             this.props.showTag = !this.props.showTag;
         }
         this.props.activeTab = tab;
+        // localStorage.setItem('activeTab',tab);
         notify(e.node,'ev-contactTop-tab',{ activeTab:tab, showTag:this.props.showTag });
         this.paint();
     }
@@ -100,5 +105,5 @@ export class ContactTop extends Widget {
         }
         notify(e.node,'ev-util-click',{});
     }
-
+    // <div w-class="tab {{it.activeTab=='friend'?'activeTab':''}}" on-tap="changeTab(e,'friend')">好友</div>
 }

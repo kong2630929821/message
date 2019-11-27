@@ -19,18 +19,20 @@
    padding:20px;
    height: 721px;
    border-radius: 12px;
-   background-color: #fff;
-   box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
    font-size: 32px;
    word-break: break-all;
 }
 .delete{
-   margin: 30px 20px;
-   height: 80px;
-   line-height:80px;
+   line-height:100px;
    text-align:center;
-   border-radius: 6px;
-   background-color: #fff;  
+   border-radius:50px;
    font-size: 32px;
-   border:1px solid #CCCCCC;
+   width:630px;
+   height:100px;
+   background:rgba(66,133,244,1);
+   position: absolute;
+   bottom: 84px;
+   left: 50%;
+   transform: translateX(-50%);
+   color: #fff;
 }

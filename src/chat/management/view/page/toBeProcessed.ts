@@ -21,8 +21,15 @@ interface Props {
     allId:any;// 举报全部的ID
     currentDataId:any;// 当前处理的数据ID
     returnDeel:number;// 0待处理  1已处理
+    allBtnGroup:any;// 按钮组全部
     btnGroup:any;// 按钮组
+    showDataBtn:any;// 当前按钮组
 }
+
+const title = [
+    ['被举报人','类别','举报原因','被举报次数','举报时间','举报人'],
+    ['关联用户','类别','举报原因','被举报次数','举报时间','举报人']
+];
 /**
  * 文章审核
  */
@@ -35,7 +42,7 @@ export class ToBeProcessed extends Widget {
         perPageIndex:0,
         returnStatus:0,
         showDataList:[],
-        showTitleList:['被举报人','类别','举报原因','被举报次数','举报时间','举报人'],
+        showTitleList:title[0],
         status:true,
         reportDataListId:[],
         reportDataList:[],
@@ -43,7 +50,9 @@ export class ToBeProcessed extends Widget {
         allList:[[],[]],
         currentDataId:[],
         returnDeel:0,
-        btnGroup:[]
+        allBtnGroup:[],
+        btnGroup:[],
+        showDataBtn:[]  
     };
 
     public create() {
@@ -72,10 +81,14 @@ export class ToBeProcessed extends Widget {
         getAllReport(this.props.returnDeel,dataType).then((r:any) => {
             this.props.allList[i] = r[0];
             this.props.allId[i] = r[1];
+            this.props.allBtnGroup[i] = r[2];
+            this.props.showTitleList = title[this.props.returnDeel];
             if (i === this.props.returnStatus) {
                 this.props.reportDataListId = this.props.allId[i];
                 this.props.reportDataList = this.props.allList[i];
+                this.props.btnGroup = this.props.allBtnGroup[i];
                 this.props.showDataList = this.props.reportDataList.slice(0,this.props.perPage);
+                this.props.showDataBtn = this.props.btnGroup.slice(0,this.props.perPage);
                 this.props.sum = this.props.showDataList.length;
             }
             this.paint();
@@ -88,6 +101,7 @@ export class ToBeProcessed extends Widget {
         this.props.returnStatus = index;
         this.props.reportDataList = this.props.allList[this.props.returnStatus];
         this.props.reportDataListId = this.props.allId[this.props.returnStatus];
+        this.props.btnGroup = this.props.allBtnGroup[this.props.returnStatus];
         this.props.sum = this.props.reportDataList.length;
         this.pageChange({ value:this.props.currentIndex });   
         this.paint();
@@ -118,6 +132,7 @@ export class ToBeProcessed extends Widget {
         this.close();
         this.props.currentIndex = e.value;
         this.props.showDataList = this.props.reportDataList.slice(e.value * this.props.perPage,(e.value + 1) * this.props.perPage);
+        this.props.showDataBtn = this.props.btnGroup.slice(e.value * this.props.perPage,(e.value + 1) * this.props.perPage);
         this.paint();
     }
 

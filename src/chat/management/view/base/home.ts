@@ -30,16 +30,16 @@ export class Home extends Widget {
         super();
         this.props = {
             pageList: [
-                { name: '文章管理', page: PAGE.articleReview, img:'chart.png',children:[
-                    { name:'文章审核',page:PAGE.articleReview }],
-                    show:true 
-                },
+                // { name: '文章管理', page: PAGE.articleReview, img:'chart.png',children:[
+                //     { name:'文章审核',page:PAGE.articleReview }],
+                //     show:true 
+                // },
                 { name: '投诉管理', page: PAGE.toBeProcessed, img:'chart.png', show:false }
             ],
             activePage: {},
             rightBox:true
         };
-        this.props.activePage = this.props.pageList[1];
+        this.props.activePage = this.props.pageList[0];
     }
 
     // 切换默认过滤器页面

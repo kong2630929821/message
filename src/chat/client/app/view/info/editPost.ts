@@ -1,5 +1,6 @@
 import { sourceIp } from '../../../../../app/public/config';
 import { popNewMessage } from '../../../../../app/utils/pureUtils';
+import { popNew3 } from '../../../../../app/utils/tools';
 import { getKeyBoardHeight, popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -7,7 +8,7 @@ import { PENALTY } from '../../../../management/utils/logic';
 import { getStore, register, setStore } from '../../data/store';
 import { openCamera, selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
-import { arrayBuffer2File, base64ToFile, imgResize, uploadFile } from '../../net/upload';
+import { base64ToFile, imgResize, uploadFile } from '../../net/upload';
 export const forelet = new Forelet();
 export const WIDGET_NAME = module.id.replace(/\//g, '-');
 interface IMAGE {
@@ -29,6 +30,8 @@ interface Props {
     editorText:string;// 富文本框内容
     // isEditor:boolean;// 是否开启富文本框模式
     showType:boolean[];// 0表情 1相册 2相机
+    label:any;// 动态标签
+    isShowSend:boolean;// 是否可以发送
 }
 // const editorTextNum = 10;
 /**
@@ -51,7 +54,12 @@ export class EditPost extends Widget {
         // placeHolderInfo:editorTextNum,
         editorText:'',
         // isEditor:true,
-        showType:[true,true,true]
+        showType:[true,true,true],
+        label:{
+            name:'',
+            icon:''
+        },
+        isShowSend:false
     };
     
     public setProps(props:any) {
@@ -62,10 +70,10 @@ export class EditPost extends Widget {
         super.setProps(this.props);
         let data = null;
         if (props.isPublic) {
-            data = getStore('postDraft', null);
+            data = getStore('flags', {}).postDraft;
             this.props.title = '发布公众号消息';
         } else {
-            data = getStore('pubPostDraft', null);
+            data = getStore('flags', {}).pubPostDraft;
         }
         // 有草稿则赋值
         if (data) this.props = data;
@@ -99,8 +107,15 @@ export class EditPost extends Widget {
     // 内容
     public contentChange(e:any) {
         this.props.contentInput = e.value;
+        this.paint();
     }
 
+    // 修复点开表情再编辑字出现标签和键盘同时存在
+    public inputClick() {
+        this.props.isOnEmoji = false;
+        this.props.showType = [true,true,true];
+        this.paint();
+    }
     /**
      * 选择图片
      */
@@ -144,16 +159,25 @@ export class EditPost extends Widget {
                                                 console.log('上传原图',imgurl);
                                                 image.originalImg = imgurl;
                                                 this1.props.uploadLoding[len] = false;
-                                                this1.paint();
                                                 this1.props.saveImgs[len] = image;
+                                                this1.paint();
                                                 if (this1.props.isUploading) {
                                                     this1.props.isUploading = false;
                                                 }
+                                            }).catch(err => {
+                                                console.log('上传图片失败',err);
                                             });
                                         });
                                         
+                                        imagePicker.close({
+                                            success:res => {
+                                                console.log('imagePicker close',res);
+                                            }
+                                        });
                                     }
                                 });
+                            }).catch(err => {
+                                console.log('上传图片失败',err);
                             });
                         }
                         
@@ -214,11 +238,20 @@ export class EditPost extends Widget {
                                                 if (this1.props.isUploading) {
                                                     this1.props.isUploading = false;
                                                 }
+                                            }).catch(err => {
+                                                console.log('上传图片失败',err);
                                             });
                                         });
-                                        
+
+                                        camera.close({
+                                            success:res => {
+                                                console.log('imagePicker close',res);
+                                            }
+                                        });
                                     }
                                 });
+                            }).catch(err => {
+                                console.log('上传图片失败',err);
                             });
                         }
                     });
@@ -231,32 +264,32 @@ export class EditPost extends Widget {
     // 关闭
     public close() {
         // 有内容时提醒保存草稿
-        if (this.props.titleInput || this.props.contentInput || this.props.imgs.length > 0 || this.props.placeHolderInfo === 0) {
+        if (this.props.titleInput || this.props.contentInput || this.props.imgs.length > 0) {
             popNew('chat-client-app-widget-modalBox-modalBox',{ content:'保留此次编辑' },() => {
                 if (this.props.isPublic) {
                      // 编辑的div
                     const editor = document.querySelector('#editBox');
                     this.props.editorText = editor.innerHTML;
-                    setStore('postDraft',this.props);
+                    setStore('flags/pubPostDraft',this.props);
                 } else {
-                    setStore('pubPostDraft',this.props);
+                    setStore('flags/postDraft',this.props);
                 }
                 this.cancel && this.cancel();
 
             },() => {
                 if (this.props.isPublic) {
-                    setStore('postDraft',null);
+                    setStore('flags/pubPostDraft',null);
                 } else {
-                    setStore('pubPostDraft',null);
+                    setStore('flags/postDraft',null);
                 }
                 this.cancel && this.cancel();
             });
 
         } else {
             if (this.props.isPublic) {
-                setStore('postDraft',null);
+                setStore('flags/pubPostDraft',null);
             } else {
-                setStore('pubPostDraft',null);
+                setStore('flags/postDraft',null);
             }
             this.cancel && this.cancel();
         }
@@ -288,7 +321,7 @@ export class EditPost extends Widget {
                 if (!isNaN(r)) {
                     popNewMessage('发布成功');
                     // 初始化草稿箱
-                    setStore('postDraft',null);
+                    setStore('flags/pubPostDraft',null);
                     this.ok && this.ok();
                 } else {
                     r.list.forEach(v => {
@@ -316,8 +349,9 @@ export class EditPost extends Widget {
 
                 return;
             }
+            const msg = this.props.label.name ? `#${this.props.label.name}#` :'';
             const value = {
-                msg:this.props.contentInput,
+                msg:`${this.props.contentInput}${msg}`,
                 imgs:this.props.saveImgs
             };
             if (!this.props.isUploading) {  // 图片上传完成
@@ -325,7 +359,7 @@ export class EditPost extends Widget {
                     if (!isNaN(r)) {
                         popNewMessage('发布成功');
                         // 初始化草稿箱
-                        setStore('pubPostDraft',null);
+                        setStore('flags/postDraft',null);
                         this.ok && this.ok();
                     } else {
                         r.list.forEach(v => {
@@ -350,9 +384,11 @@ export class EditPost extends Widget {
     public openEmoji() {
         this.reaset(0);
         document.getElementById('emojiMap').style.height = `${getKeyBoardHeight() + 90}px`;
-        this.props.isOnEmoji = !this.props.isOnEmoji;
-        this.paint();
-        
+        // 加上100毫秒的延迟能防止用户看到表情库从软键盘上面掉下来的动画
+        setTimeout(() => {
+            this.props.isOnEmoji = !this.props.isOnEmoji;
+            this.paint();
+        },100);
     }
 
     /**
@@ -390,6 +426,23 @@ export class EditPost extends Widget {
         } else {
             this.props.showType[index] = false;
         }
+        this.paint();
+    }
+
+    // 添加游戏标签
+    public addLabel() {
+        popNew3('chat-client-app-view-info-gameLabel',{},(label:any) => {
+            this.props.label = label;
+            this.paint();
+        });
+    }
+
+    // 删除游戏标签
+    public closeLabel() {
+        this.props.label = {
+            name:'',
+            icon:''
+        };
         this.paint();
     }
 }

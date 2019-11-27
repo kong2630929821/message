@@ -4,10 +4,16 @@
     <div w-class="deelArtice">
         <div w-class="titleObj">
             <div style="line-height: 40px;margin-left: 20px;">被举报动态</div>
-            <div style="display: flex;">
-                <div w-class="deel" on-tap="unDeel" on-down="onShow">不处理</div>
-                <div w-class="deel" on-tap="deel" on-down="onShow">撤回</div>
-            </div>
+            {{if it.isShowBtn}}
+                <div style="display: flex;">
+                    {{if it.returnDeel===0}}
+                        <div w-class="deel" on-tap="unDeel" on-down="onShow">不处理</div>
+                        <div w-class="deel" on-tap="deel" on-down="onShow">撤回</div>
+                    {{else}}
+                    <div w-class="deel" on-tap="freedPost" on-down="onShow">放出动态</div>
+                    {{end}}
+                </div>
+            {{end}}
         </div>
         <div w-class="contentInfo">
             <div style="width:700px; margin: 30px auto;">
@@ -30,7 +36,7 @@
                 </div>
                 {{if it.dynamic.imgs.length}}
                     {{for i,v of it.dynamic.imgs}}
-                        <img src="{{v}}" alt="" w-class="imgBig"/>
+                        <img src="{{v}}" alt="" w-class="imgBig" on-tap="bigImg('{{v}}')"/>
                     {{end}}
                 {{end}}
             </div>
@@ -41,10 +47,14 @@
     <div w-class="titleBox" style="margin-bottom:20px">
         <div w-class="titleObj">
             <div style="line-height: 40px;margin-left: 20px;">被举报人</div>
-            {{if it.state==0}}
+            {{if it.isShowBtn && it.state==0}}
                 <div style="display: flex;">
-                    <div w-class="deel" on-tap="unDeel" on-down="onShow">不处理</div>
-                    <div w-class="deel" on-tap="deel" on-down="onShow">处理</div>
+                    {{if it.returnDeel===0}}
+                        <div w-class="deel" on-tap="unDeel" on-down="onShow">不处理</div>
+                        <div w-class="deel" on-tap="deel" on-down="onShow">处理</div>
+                    {{else}}
+                        <div w-class="deel" on-tap="freed" on-down="onShow">解除处罚</div>
+                    {{end}}
                 </div>
             {{end}}
         </div>
@@ -52,9 +62,6 @@
             {{for i,v of it.userName}}
                 <div w-class="item">
                     {{v.key}}：{{v.value}}
-                    {{if v.key=='当前惩罚' && v.value!='无'}}
-                        <span style="margin-left: 20px;">查看</span>
-                    {{end}}
                     {{if v.fg}}
                     <img src="{{v.fg}}" alt="" w-class="sexImg"/>
                     {{end}}
@@ -101,7 +108,7 @@
                             {{if v.value.length}}
                                 <div w-class="imgGroup">
                                     {{for j,t of v.value}}
-                                        <img src="{{t}}" alt="" w-class="imgInfo"/>
+                                        <img src="{{t}}" alt="" w-class="imgInfo" on-tap="bigImg('{{t}}')"/>
                                     {{end}}
                                 </div>
                             {{end}}

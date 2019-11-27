@@ -42,7 +42,7 @@ export const CHAT_APPID = '10';  // 聊天的APP ID
 // ---------------------- 权限等级 ---------------------
 // 普通用户 VIP0
 export const VIP0_FRIENDS_LIMIT = 500; // 好友上限
-export const VIP0_GROUPS_LIMIT = 5; // 群上限
+export const VIP0_GROUPS_LIMIT = 50; // 群上限
 export const VIP0_GROUP_MEMBERS_LIMIT = 500; // 普通群的成员上限
 // 官方账号 VIP5
 export const VIP5_FRIENDS_LIMIT = 2000; // 好友上限
@@ -78,6 +78,7 @@ export const SQUARE_ALL = 1; // 所有
 export const SQUARE_FOLLOW = 2; // 关注
 export const SQUARE_PUBLIC = 3; // 公众号
 export const SQUARE_HOT = 4; // 热门
+export const SQUARE_LABEL = 5; // 标签
 
 // 帖子状态
 export const NORMAL_STATE = 1;  // 正常状态
@@ -85,6 +86,17 @@ export const DELETE_STATE = 0; // 标记删除
 export const NOT_REVIEW_STATE = 2; // 待审核
 export const REVIEW_PASS = 3;      // 审核通过
 export const REVIEW_REFUSE = 4;    // 审核驳回
+
+// 钱包服务器地址
+export const WALLET_SERVER_URL = 'http://127.0.0.1:8099';
+// appid
+export const WALLET_APPID = '10';
+// 私钥
+export const WALLET_SERVER_KEY = '0a15c4dbca88fa93ccf43a49b3496208edff35a4185ac967389ffd9878d5c405';
+// 创建应用
+export const WALLET_API_ADD_APP = '/oAuth/add_app';
+// 编辑推荐应用
+export const WALLET_API_SET_APP_CONFIG = '/oAuth/set_app_config';
 
 // 爬虫服务地址
 export const WEIBO_SPIDER_HOST = 'http://39.98.48.66:9999/'; // 爬虫服务器地址

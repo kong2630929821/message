@@ -4,7 +4,9 @@
 
 import { getSession } from '../../../../pi_pt/util/autologin.r';
 import { Bucket } from '../../../utils/db';
+import { add_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
+import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
@@ -12,9 +14,13 @@ import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArti
 import { Report, ReportCount, ReportListTab } from '../db/message.s';
 import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
+import { getIndexID } from '../util';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
-import { PostData } from './community.s';
+import { addPost } from './community.r';
+import { AddPostArg, PostData } from './community.s';
+import { AddAppArg, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
+import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
 
@@ -56,9 +62,15 @@ export const rootLogin = (user: RootUser): number => {
  * 举报信息列表
  */
 // #[rpc=rpcServer]
-export const getReportList = (reportArg: ReportListArg): string => {
+export const getReportList = (reportArg: ReportListArg): getReportListR => {
     console.log('============getReportList:', reportArg);
-    if (!getSession('root')) return 'not login';
+    const r = new getReportListR();
+    r.msg = '';
+    if (!getSession('root')) {
+        r.msg = 'not login';
+
+        return r;
+    }
     const reportListTabBucket = new Bucket(CONSTANT.WARE_NAME, ReportListTab._$info.name);
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
@@ -67,7 +79,7 @@ export const getReportList = (reportArg: ReportListArg): string => {
     reportIndexList.list = [];
     const reportListTab = reportListTabBucket.get<number, ReportListTab[]>(reportArg.report_type)[0];
     console.log('============reportListTab:', reportListTab);
-    if (!reportListTab) return '';
+    if (!reportListTab) return r;
     console.log('============reportListTab11111111111111:', reportListTab);
     // 获取最近一条举报信息
     for (let i = 0; i < reportListTab.key_list.length; i++) {
@@ -98,8 +110,9 @@ export const getReportList = (reportArg: ReportListArg): string => {
             }
         }
     }
-
-    return JSON.stringify(reportIndexList);
+    r.msg = JSON.stringify(reportIndexList);
+    
+    return r;
 };
 
 /**
@@ -374,6 +387,24 @@ export const getApplyPublicList = (arg: PublicApplyListArg): string => {
 };
 
 /**
+ * 发文章
+ */
+// #[rpc=rpcServer]
+export const sendPost = (arg: AddPostArg): PostKey => {
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
+    const community = communityBaseBucket.get<string, CommunityBase[]>(arg.num)[0];
+    console.log('!!!!!!!!!!!!!!!!!!addPostPort communityBase',arg,community);
+    let key = new PostKey();
+    key.id = 0;
+    key.num = arg.num;
+    
+    key.id = getIndexID(CONSTANT.POST_INDEX, 1);
+    key = addPost(community.owner, arg, key, community.comm_type);
+
+    return key;
+};
+
+/**
  * 处理公众号申请
  */
 // #[rpc=rpcServer]
@@ -399,6 +430,11 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     applyPublicBucket.put(arg.id, applyPublic);
     // 添加公众号
     addPublicComm(applyPublic.name, applyPublic.num, applyPublic.avatar, applyPublic.desc, applyPublic.uid, applyPublic.time);
+    // 创建管理端账号
+    const user = new RootUser();
+    user.user = applyPublic.num;
+    user.pwd = randomWord(false, 6);
+    createRoot(user);
     // 推送结果
     send(applyPublic.uid, CONSTANT.SEND_PUBLIC_APPLY, JSON.stringify(arg));
 
@@ -470,6 +506,56 @@ export const cancelGmAccount = (accId: string): number => {
 };
 
 /**
+ * 获取官方账号列表
+ */
+// #[rpc=rpcServer]
+export const getOfficialAcc = (appid: string): OfficialAccList => {
+    const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const iter = publicNameIndexBucket.iter(null, true);
+    const list = new OfficialAccList();
+    list.list = [];
+    const map = getUidAppMap();
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const publicNameIndex: PublicNameIndex = v[1];
+        const num = publicNameIndex.num;
+        const officialUserInfo =  new OfficialUserInfo();
+        // 获取社区注册时间
+        const communityBase = communityBaseBucket.get<string, CommunityBase[]>(num)[0];
+        officialUserInfo.create_time = communityBase.createtime;
+        const uid = communityBase.owner;
+        const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
+        officialUserInfo.user_info = userInfo;
+        officialUserInfo.app_id = map.get(uid);
+        list.list.push(officialUserInfo);
+    } while (iter);
+    
+    return list;
+};
+
+/**
+ * 获取官方账号绑定的应用
+ */
+export const getUidAppMap = (): Map<number, string> => {
+    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const iter = officialBucket.iter(null, true);
+    const map = new Map();
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const officialUsers: OfficialUsers = v[1];
+        officialUsers.uids.forEach((uid) => {
+            map.set(uid, officialUsers.appId);
+        });
+    } while (iter);
+
+    return map;
+};
+
+/**
  * 调整用户惩罚时间
  */
 // #[rpc=rpcServer]
@@ -484,6 +570,35 @@ export const modifyPunish = (arg: ModifyPunishArg): number => {
     if (end_time <= Date.now()) endPunish(`${CONSTANT.REPORT_PERSON}%${arg.uid}`, arg.id);
 
     return CONSTANT.RESULT_SUCCESS;
+};
+
+/**
+ * 添加应用
+ */
+// #[rpc=rpcServer]
+export const addApp = (arg: AddAppArg): number => {
+    console.log('addApp!!!!!!!!!!!!!!arg:', arg);
+    // if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
+    const r = add_app(arg.appid, arg.name, arg.imgs, arg.desc, arg.url, arg.pk, arg.mch_id, arg.notify_url);
+    if (r) {
+        return CONSTANT.RESULT_SUCCESS;
+    } else {
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
+};
+
+/**
+ * 编辑推荐应用
+ */
+// #[rpc=rpcServer]
+export const setAppConfig = (arg: SetAppConfig): number => {
+    // if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
+    const r = set_app_config(arg.cfg_type, arg.appids);
+    if (r) {
+        return CONSTANT.RESULT_SUCCESS;
+    } else {
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
 };
 
 /**

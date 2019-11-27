@@ -167,12 +167,14 @@ export enum REPORTTITLE {
 export const deelReportList = (r:any,report_type:number) => {
     const list = r.list;
     if (list.length === 0) {
-        return [[],[]];
+        return [[],[],[]];
     }
     const dataList = [];// 表格数据
     const idList = [];// 详情ID
+    const processResult = [];// 处理结果
     list.forEach((v,i) => {
         const reportType = JSON.parse(JSON.parse(v.last_resaon).type).join(',');
+        processResult.push((v.now_publish ? penaltyText([v.now_publish],'用户') :'不惩罚').split(' ')[0]);
         dataList.push([
             v.user_name, // 被举报人
             REPORTTITLE[REPORT[report_type]],// 举报类型
@@ -184,7 +186,7 @@ export const deelReportList = (r:any,report_type:number) => {
         idList.push(v.report_ids);
     });
    
-    return [dataList,idList];
+    return [dataList,idList,processResult];
 };
 
 export const deelReportListInfo = (r:any,state:number) => {
@@ -196,6 +198,7 @@ export const deelReportListInfo = (r:any,state:number) => {
     let dynamic = {};// 动态信息
     const reportInfo = [];// 举报信息
     const key = list[0].report_info.key;// 处罚的KEY
+    let id = null;// 重置处罚
     if (state === 0) {
         // 被举报人信息处理
         userInfo = (deelReportedUser(list[0].reported_user));
@@ -203,6 +206,7 @@ export const deelReportListInfo = (r:any,state:number) => {
         // 处理举报信息
             reportInfo.push(deelUserReportInfo(v.report_info,v.report_user));
         });
+        id = `${list[0].reported_user.punish_list.length ? list[0].reported_user.punish_list[0].id :0}%${list[0].reported_user.user_info.uid}`;
         
     } else if (state === 1) {
         dynamic = deelDynamic(list[0].report_info,list.length)[0];
@@ -211,9 +215,10 @@ export const deelReportListInfo = (r:any,state:number) => {
             // 处理举报信息
             reportInfo.push(deelDynamicReport(v.report_info,v.report_user));
         });
+        id = `${JSON.parse(list[0].report_info.evidence).state === 1 ? 0 :1}%${JSON.stringify(JSON.parse(list[0].report_info.evidence).key)}`;
     }
 
-    return [dynamic,userInfo,reportInfo,key];
+    return [dynamic,userInfo,reportInfo,key,id];
 };
 
 export const deelDynamicReport = (reportInfo:any,reportedUser:any) => {
@@ -403,13 +408,15 @@ export enum PENALTY {
     DELETE_CONTENT= 1,
     BAN_MESAAGE,
     BAN_POST,
-    FREEZE= 4
+    FREEZE,
+    BAN_ACCOUNT = 5
 }
 export enum PENALTYTEXT {
     DELETE_CONTENT= '删除内容',
     BAN_MESAAGE= '禁言',
     BAN_POST= '禁止发动态',
-    FREEZE= '冻结'
+    FREEZE= '禁言',
+    BAN_ACCOUNT = '冻结'
 }
 // 处理处罚文字
 export const penaltyText = (res:any,str:string) => {
@@ -418,7 +425,12 @@ export const penaltyText = (res:any,str:string) => {
         const penType = PENALTYTEXT[PENALTY[r.punish_type]];
         const lastTime = (JSON.parse(r.end_time) - Date.now()) / 1000 / 60 / 60;
         const time = (JSON.parse(r.end_time) - JSON.parse(r.start_time)) / (60 * 60 * 1000);
-        data.push(`${penType}${str}${time}小时 （剩余${lastTime.toFixed(2)}小时）`);
+        if (r.punish_type === PENALTY.DELETE_CONTENT) {
+            data.push(`${penType}`);
+        } else {
+            data.push(`${penType}${str}${time}小时 （剩余${(lastTime >= 0 ? lastTime.toFixed(2) :0)}小时）`);
+        }
+       
     });
     
     return data.join(',');

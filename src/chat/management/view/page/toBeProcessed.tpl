@@ -13,7 +13,7 @@
     <div ev-table-detail="goDetail" style="margin-top:37px;">
         <div w-class="tableTitle">数据列表</div>
         {{if it.returnDeel}}
-            <widget w-tag="chat-management-components-table" style="max-height:550px;">{datas: {{it.showDataList}},title:{{it.showTitleList}},needCheckBox:false,btnGroup:{{it.btnGroup}}}</widget>
+            <widget w-tag="chat-management-components-table" style="max-height:550px;">{datas: {{it.showDataList}},title:{{it.showTitleList}},needCheckBox:false,btnGroup:{{it.showDataBtn}}}</widget>
         {{else}}
             <widget w-tag="chat-management-components-table" style="max-height:550px;">{datas: {{it.showDataList}},title:{{it.showTitleList}},needCheckBox:false,inlineBtn2:"查看详情"}</widget>
         {{end}}
@@ -25,7 +25,7 @@
     </div>
     {{else}}
         <div style="height:100%" ev-exit="exit" ev-ok="ok">
-            <widget w-tag="chat-management-view-page-toBeProcessedInfo">{data:{{it.currentDataId}},state:{{it.returnStatus}}}</widget>
+            <widget w-tag="chat-management-view-page-toBeProcessedInfo">{data:{{it.currentDataId}},state:{{it.returnStatus}},returnDeel:{{it.returnDeel}} }</widget>
         </div>
     {{end}}
 </div>

@@ -3,9 +3,9 @@
  */
 
 // ================================================ 导入
-import { popNewMessage } from '../../../../../app/utils/tools';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { popNewMessage } from '../../logic/tools';
 
 // ================================================ 导出
 
@@ -26,7 +26,7 @@ export class PageEdit extends Widget {
     public setProps(props:any) {
         super.setProps(props);
         this.props.count = 0;
-        this.props.placeholder = props.contentInput || '内容（必填）15-500字';
+        this.props.placeholder = props.contentInput || '内容 0-140字';
     }
 
     public goBack() {
@@ -40,6 +40,7 @@ export class PageEdit extends Widget {
     public textAreaChange(e:any) {
         this.props.contentInput = e.value;
         this.props.count = e.value.length;
+        this.paint();
     }
     // 完成编辑
     public completeEdit() {

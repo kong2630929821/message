@@ -5,12 +5,11 @@
 import { uploadFileUrlPrefix } from '../../../../app/public/config';
 import { popNewMessage } from '../../../../app/utils/pureUtils';
 import { popNew3 } from '../../../../app/utils/tools';
-import { popNew } from '../../../../pi/ui/root';
 import { getRealNode } from '../../../../pi/widget/painter';
 import { GroupInfo, GroupUserLink } from '../../../server/data/db/group.s';
 import { MSG_TYPE, UserHistory } from '../../../server/data/db/message.s';
-import { Contact, FriendLink, GENERATOR_TYPE, UserInfo } from '../../../server/data/db/user.s';
-import { depCopy, genGroupHid, genGuid, genUuid } from '../../../utils/util';
+import { UserInfo } from '../../../server/data/db/user.s';
+import { depCopy, genGuid } from '../../../utils/util';
 import { updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
 import { sendUserMsg } from '../net/rpc';
@@ -67,19 +66,12 @@ export const json2Map = (data:JSON) => {
 };
 
 /**
- * 获取好友的别名
+ * 获取关注用户的别名
  */
-export const getFriendAlias = (rid:number) => {
-    const sid = store.getStore('uid');
-    const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());
-    const friend = store.getStore(`friendLinkMap/${genUuid(sid,rid)}`,new FriendLink());
-    const contact = store.getStore(`contactMap/${sid}`,new Contact());
-    const isFriend = contact.friends && contact.friends.findIndex(item => item === rid) > -1;
+export const getUserAlias = (rid:number) => {
+    const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());    
 
-    return {
-        name: friend.alias || user.name,
-        isFriend: isFriend
-    };
+    return user.name;
 };
 
 // 复制到剪切板
@@ -170,20 +162,6 @@ export const rippleShow = (e:any) => {
     setTimeout(() => {
         getRealNode(e.node).classList.remove('ripple');
     }, 500);
-};
-
-// 获取当前用户的所有好友ID
-export const getAllFriendIDs = () => {
-    const uid = store.getStore('uid');
-    const friends = store.getStore(`contactMap/${uid}`,{ friends:[] }).friends;
-    const accIds = [];
-    for (const v of friends) {
-        const acc_id = store.getStore(`userInfoMap/${v}`,new UserInfo()).acc_id;
-        acc_id && accIds.push(acc_id);
-    }
-    console.log('==========getAllFriendIDs',accIds);
-
-    return accIds;
 };
 
 // 从某个页面进入标记
@@ -346,23 +324,15 @@ export const NOTICESET = 'noticeSet';// 消息通知设置标志
 // 获取好友群聊信息
 export const getFriendsInfo = () => {
     const uid = store.getStore('uid');
-    const userInfos = store.getStore('userInfoMap',[]);
-    const friendIdList = store.getStore('contactMap',[]);
+    const contact = store.getStore(`contactMap/${uid}`,[]);
     const groupList = store.getStore('groupInfoMap',[]);
-    const fId = friendIdList.size ? friendIdList.get(`${uid}`).friends :[];
-    const gId = friendIdList.size ? friendIdList.get(`${uid}`).group :[];
-    const friends = new Map();
+    const gId = contact.group || [];
     const groups = new Map();
-    for (const [key,value] of userInfos) {
-        if (fId.indexOf(value.uid) !== -1) {
-            friends.set(key,value);
-        }
-    }
     for (const [key,value] of groupList) {
         if (gId.indexOf(value.uid) !== -1) {
             groups.set(key,value);
         }
     }
 
-    return { friends,groups };
+    return { groups };
 };

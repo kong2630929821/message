@@ -3,7 +3,7 @@
  */
 
 // ================================================ 导入
-import { popNewLoading, popNewMessage } from '../../../../../app/utils/tools';
+import { popNewLoading } from '../../../../../app/utils/pureUtils';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo, GroupUserLink } from '../../../../server/data/db/group.s';
@@ -17,6 +17,7 @@ import { depCopy, genGroupHid } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { getGroupAvatar, getGroupUserAvatar, INFLAG, rippleShow } from '../../logic/logic';
 import { selectImage } from '../../logic/native';
+import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc, unSubscribe } from '../../net/init';
 import { applyToGroup } from '../../net/rpc';
 import { arrayBuffer2File, imgResize, uploadFile } from '../../net/upload';
@@ -50,7 +51,8 @@ export class GroupInfos extends Widget {
             inFlag:INFLAG.contactList,
             avatar:'',
             avatarHtml:'',
-            lastAnnounce:''
+            lastAnnounce:'',
+            chooseImage:false
         };
         this.bindCB = this.updateInfo.bind(this);
     }
@@ -121,20 +123,21 @@ export class GroupInfos extends Widget {
     }
 
     // 重新上传群头像
-    public selectAvatar() {
+    public uploadAvatar() {
         if (this.props.isAdmin) {
             
             const imagePicker = selectImage((width, height, url) => {
                 console.log('selectImage url = ',url);
                 // tslint:disable-next-line:max-line-length
-                this.props.avatarHtml = `<div style="background-image: url(${url});width: 190px;height: 190px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
+                this.props.avatarHtml = `<div style="background-image: url(${url});width: 80px;height: 80px;background-size: cover;background-position: center;background-repeat: no-repeat;border-radius:50%"></div>`;
+                this.props.chooseImage = true;
                 this.paint();
 
                 const loading = popNewLoading('图片上传中');
                 imagePicker.getContent({
                     quality:70,
                     success(buffer:ArrayBuffer) {
-                        imgResize(buffer,(res) => {
+                        imgResize(buffer,0.8,1204,(res) => {
                             uploadFile(arrayBuffer2File(res.ab),(url) => {
                                 popNewMessage('图片上传成功');
                                 loading.callback(loading.widget);
@@ -154,6 +157,12 @@ export class GroupInfos extends Widget {
                                 });
                             });
                         });
+
+                        imagePicker.close({
+                            success:res => {
+                                console.log('imagePicker close',res);
+                            }
+                        });
                     }
                 });
             });
@@ -168,36 +177,6 @@ export class GroupInfos extends Widget {
         this.paint();
     }
 
-    // 点击群信息更多操作列表项
-    public utilClick(ind:number) {
-        this.props.showUtils = false;
-        this.paint();
-        switch (ind) {
-            case 0:  // 清空聊天记录
-                popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' },() => {
-                    store.setStore(`groupChatMap/${genGroupHid(this.props.gid)}`,[]);
-                });
-                break;
-            case 1: // 退出群
-                popModalBoxs('chat-client-app-widget-modalBox-modalBox', { content:'退出后，将不再接收此群任何消息',style:'color:#F7931A' },() => {
-                    unSubscribe(`ims/group/msg/${this.props.gid}`);  // 退订群聊消息
-        
-                    clientRpcFunc(userExitGroup,this.props.gid,(r) => {
-                        console.log('========deleteGroup',r);
-                        if (r.r === 1) { // 退出成功关闭当前页面
-                            popNewMessage('退出群组成功');
-                            this.goBack(true);
-                        } else {
-                            popNewMessage('群主不能退出');
-                        }
-                    });
-                });
-                break;
-            default:
-        }
-        
-    }
-
     // 页面点击
     public pageClick() {
         this.props.editable = false;
@@ -205,32 +184,26 @@ export class GroupInfos extends Widget {
         this.paint();
     }
 
-    // 点击后可编辑群别名
-    public editGroupAlias() {
-        this.props.editable = true;
-        this.props.showUtils = false;
-        this.paint();
-    }
-    
-    // 修改群名
-    public groupAliasChange(e:any) {
-        this.props.groupAlias = e.value;
-    }
-
     // 修改群名请求
     public changeGroupAlias() {
-        const newGroup = new NewGroup();
-        newGroup.gid = this.props.gid;
-        newGroup.name = this.props.groupAlias || this.props.groupInfo.name;
-        newGroup.avatar = this.props.groupInfo.avatar;
-        newGroup.note = '';
-        clientRpcFunc(updateGroupInfo, newGroup, (r: Result) => {
-            if (r.r === 1) {
-                this.props.groupInfo.name = this.props.groupAlias; 
+         // tslint:disable-next-line:max-line-length
+        popNew('chat-client-app-widget-pageEdit-pageEdit',{ title:'修改昵称', contentInput: this.props.groupInfo.name,maxLength:10 },async (res:any) => {
+            const newGroup = new NewGroup();
+            newGroup.gid = this.props.gid;
+            newGroup.name = res.content;
+            newGroup.avatar = this.props.groupInfo.avatar;
+            newGroup.note = '';
+            clientRpcFunc(updateGroupInfo, newGroup, (r: Result) => {
+                if (r.r === 1) {
+                    this.props.groupInfo.name = this.props.groupAlias; 
                 
-                store.setStore(`groupInfoMap/${this.props.gid}`,this.props.groupInfo);
-                logger.debug('==========修改群名成功',this.props.groupAlias);
-            }
+                    store.setStore(`groupInfoMap/${this.props.gid}`,this.props.groupInfo);
+                    popNewMessage('修改昵称成功');
+
+                    logger.debug('==========修改群名成功',this.props.groupAlias);
+                    this.paint();
+                }
+            });
         });
         
     }
@@ -357,7 +330,31 @@ export class GroupInfos extends Widget {
 
     // 点击查看大图头像
     public showBigImg() {
-        popNew('chat-client-app-widget1-bigImage-bigImage',{ img: this.props.avatar });
+        popNew('chat-client-app-widget-bigImage-bigImage',{ img: this.props.avatar });
+    }
+
+    // 清空聊天记录
+    public clearChat() {
+        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'清空聊天记录',content:'确定清空聊天记录吗' },() => {
+            store.setStore(`groupChatMap/${genGroupHid(this.props.gid)}`,[]);
+        });
+    }
+
+    // 退出群
+    public exitGroup() {
+        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { content:'退出后，将不再接收此群任何消息',style:'color:#F7931A' },() => {
+            unSubscribe(`ims/group/msg/${this.props.gid}`);  // 退订群聊消息
+
+            clientRpcFunc(userExitGroup,this.props.gid,(r) => {
+                console.log('========deleteGroup',r);
+                if (r.r === 1) { // 退出成功关闭当前页面
+                    popNewMessage('退出群组成功');
+                    this.goBack(true);
+                } else {
+                    popNewMessage('群主不能退出');
+                }
+            });
+        });
     }
 }
 
@@ -384,6 +381,7 @@ interface Props {
     avatar:string; // 群头像
     avatarHtml:string; // 新群头像展示
     lastAnnounce:any; // 最新一条群公告
+    chooseImage:boolean;
 }
 
 const MAX_DURING = 600;
