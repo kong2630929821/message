@@ -103,6 +103,18 @@ export const getReportList = (reportArg: ReportListArg): string => {
 };
 
 /**
+ * 获取指定用户举报详情
+ */
+// #[rpc=rpcServer]
+export const getReportDetail = (uid: number): string => {
+    // 拼接举报对象主键
+    const key = `1%${uid}`;
+    const userReportDetail = getReportUserInfo(key, uid);
+
+    return JSON.stringify(userReportDetail);
+};
+
+/**
  * 获取指定举报对象举报详情列表
  */
 // #[rpc=rpcServer]
