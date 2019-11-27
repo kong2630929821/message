@@ -14,10 +14,10 @@ import { login } from '../../server/data/rpc/basic.p';
 import { Result, UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
 import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPost, getLabelPostCount, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
 import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
-import { addApp, cancelGmAccount, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setAppConfig, setGmAccount } from '../../server/data/rpc/manager.p';
+import { addApp, cancelGmAccount, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setAppConfig, setGmAccount, getReportDetail } from '../../server/data/rpc/manager.p';
 import { AddAppArg, OfficialAccList, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { report } from '../../server/data/rpc/message.p';
-import { ReportArg } from '../../server/data/rpc/message.s';
+import { ReportArg, getReportListR } from '../../server/data/rpc/message.s';
 import { addCommonCommernt, closeRobot, getCommonCommernt, getRobotSet, getRobotUserInfo, getRobotWeiboInfo, initRobotSet, modifyRobotSet, startRobot } from '../../server/data/rpc/robot.p';
 import { applyFriend, changeUserInfo, searchFriend, set_gmAccount, testDB } from '../../server/data/rpc/user.p';
 import { SetOfficial, UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
@@ -31,7 +31,7 @@ import { SetOfficial, UserChangeInfo, UserInfoList } from '../../server/data/rpc
 // 聊天登陆
 export const chatLogin = () => {
     const walletLoginReq = new WalletLoginReq();
-    walletLoginReq.openid = '1001';
+    walletLoginReq.openid = '1002';
     walletLoginReq.sign = 'test';
     const userType = new UserType();
     userType.enum_type = UserType_Enum.WALLET;
@@ -209,7 +209,7 @@ export const getUserPostTest = () => {
 
 // 获取关注
 export const getFollowIdTest = () => {
-    const uid = 10002;
+    const uid = 10134;
     clientRpcFunc(getFollowId, uid, (r: CommunityNumList) => {
         console.log(r);
     });
@@ -408,10 +408,11 @@ export const rootLoginTest = () => {
 // 举报
 export const reportTest = () => {
     const arg = new ReportArg();
-    arg.key = '1%10002';
+    arg.key = '1%10134';
     arg.evidence = '';
     arg.report_type = 1;
     arg.reason = '涉嫌诈骗';
+    arg.reported_uid = 10134;
     clientRpcFunc(report, arg, (r: number) => {
         console.log(r);
     });
@@ -442,7 +443,7 @@ export const getReportListTest = () => {
 // 惩罚指定对象
 export const punishTest = () => {
     const arg = new PunishArg();
-    arg.key = '1%10002';
+    arg.key = '1%10134';
     arg.punish_type = 4;
     arg.time = 300000;
     clientRpcFunc(punish, arg, (r: string) => {
@@ -452,7 +453,7 @@ export const punishTest = () => {
 
 // 举报受理完成
 export const reportHandledTest = () => {
-    const arg = '1%10002';
+    const arg = '1%10134';
     clientRpcFunc(reportHandled, arg, (r: string) => {
         console.log(r);
     });
@@ -551,6 +552,14 @@ export const getUserDetalTest = () => {
     });
 };
 
+// 用户被举报详情
+export const getUserReportDetalTest = () => {
+    const uid = 10134;
+    clientRpcFunc(getReportDetail, uid, (r: getReportListR) => {
+        console.log(r);
+    });
+};
+
 // 调整惩罚时间
 export const modifyPunishTest = () => {
     const arg = new ModifyPunishArg();
@@ -603,6 +612,10 @@ const props = {
         {
             name: '用户详情',
             func: () => { getUserDetalTest(); }
+        },
+        {
+            name: '用户举报详情',
+            func: () => { getUserReportDetalTest(); }
         },
         {
             name: '调整惩罚时间',
