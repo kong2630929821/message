@@ -9,6 +9,7 @@ import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import { delValueFromArray, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import * as CONSTANT from '../constant';
+import { MessageReply } from '../db/manager.s';
 import { MSG_TYPE, MsgLock, UserHistory, UserHistoryCursor, UserMsg } from '../db/message.s';
 import { Contact, FriendLink, OfficialUsers, UserFind, UserInfo, VIP_LEVEL } from '../db/user.s';
 import { APPLY_FRIENDS_OVERLIMIT, FRIENDS_NUM_OVERLIMIT } from '../errorNum';
@@ -17,7 +18,6 @@ import { getUid } from './group.r';
 import { getUserHistoryCursor, sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
 import { FriendAlias, SetOfficial, UserAgree, UserChangeInfo, UserInfoList } from './user.s';
-import { MessageReply } from '../db/manager.s';
 
 declare var env: Env;
 
@@ -148,12 +148,16 @@ export const applyFriend = (user: string): Result => {
 
         const officialBucket = new Bucket('file',OfficialUsers._$info.name);
         const official = officialBucket.get<string,OfficialUsers>(CONSTANT.CHAT_APPID)[0]; // 好嗨客服账号
+        console.log('send msg!!!!!!!!!!official', JSON.stringify(official));
         // 其他客服发送的第一条欢迎消息
         if (official && official.uids && official.uids[0] !== uid) {
+            console.log('send msg!!!!!!!!!!');
             // 获取自动回复消息
             const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
             const msgReply = messageReplyBucket.get<string, MessageReply>(CONSTANT.MESSAGE_TYPE_WELCOME)[0];
-            const sendMsg = msgReply.msg ? msgReply.msg: `您好，我是${userinfo.name}，很高兴为您服务`;
+            console.log('send msg!!!!!!!!!!', msgReply.msg);
+            const sendMsg = msgReply.msg ? msgReply.msg : `您好，我是${userinfo.name}，很高兴为您服务`;
+            console.log('send msg!!!!!!!!!!', sendMsg);
             sendFirstWelcomeMessage(sendMsg, uid);
         } 
         

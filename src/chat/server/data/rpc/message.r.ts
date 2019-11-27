@@ -17,12 +17,12 @@ import { AccountGenerator, Contact, OnlineUsers, UserInfo, VIP_LEVEL } from '../
 import { Env } from '../../../../pi/lang/env';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GROUP_STATE, GroupInfo } from '../db/group.s';
+import { MessageReply } from '../db/manager.s';
 import { NOT_GROUP_OWNNER, NOTIN_SAME_GROUP } from '../errorNum';
 import * as http from '../http_client';
 import { getUid } from './group.r';
 import { getUserPunishing } from './manager.r';
 import { sendFirstWelcomeMessage } from './user.r';
-import { MessageReply } from '../db/manager.s';
 
 declare var env: Env;
 
@@ -624,7 +624,7 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
         // 获取自动回复消息
         const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
         const msgReply = messageReplyBucket.get<string, MessageReply>(CONSTANT.MESSAGE_TYPE_NOTICE)[0];
-        const sendMsg = msgReply.msg ? msgReply.msg: '收到您的举报，好嗨将会尽快核实并给予处理';
+        const sendMsg = msgReply.msg ? msgReply.msg : '收到您的举报，好嗨将会尽快核实并给予处理';
         sendFirstWelcomeMessage(sendMsg, message.rid);
     }
 };

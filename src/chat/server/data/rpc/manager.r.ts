@@ -507,7 +507,7 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     addPublicComm(applyPublic.name, applyPublic.num, applyPublic.avatar, applyPublic.desc, applyPublic.uid, applyPublic.time);
     // 创建管理端账号
     const user = new RootUser();
-    user.user = `${applyPublic}@${applyPublic.num}`;
+    user.user = `${applyPublic.uid}@${applyPublic.num}`;
     user.pwd = randomWord(false, 6);
     console.log('public acc user:', JSON.stringify(user));
     createRoot(user);
