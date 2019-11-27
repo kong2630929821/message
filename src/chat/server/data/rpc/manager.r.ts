@@ -20,13 +20,14 @@ import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
 import { addPost } from './community.r';
 import { AddPostArg, PostData } from './community.s';
-import { AddAppArg, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
+import { AddAppArg, OfficialAccList, OfficialUserInfo, SetAppConfig, MgrUserList } from './manager.s';
 import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
 
 /**
  * 创建管理员
+ * 账号格式为 xx@xx表示公众号用户 "number":为好嗨客服
  */
 // #[rpc=rpcServer]
 export const createRoot = (user: RootUser): number => {
@@ -39,6 +40,28 @@ export const createRoot = (user: RootUser): number => {
         return CONSTANT.DEFAULT_ERROR_NUMBER;
     }
 };
+
+/**
+ * 获取所有用户
+ */
+// #[rpc=rpcServer]
+export const showUsers = (arg: string): MgrUserList => {
+    let userList = new MgrUserList();
+    userList.list = [];
+    const rootUserBucket = new Bucket(CONSTANT.WARE_NAME, RootUser._$info.name);
+    const iter = rootUserBucket.iter(null, true);
+    const publicApplyList = new PublicApplyList();
+    publicApplyList.list = [];
+    publicApplyList.total = 0;
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const rootUser: RootUser = v[1];
+        userList.list.push(rootUser);
+    } while (iter);
+
+    return userList;
+}
 
 /**
  * 设置好嗨客服
@@ -67,6 +90,25 @@ export const setMsgReply = (arg: MessageReply): number => {
 
     return CONSTANT.DEFAULT_ERROR_NUMBER;
 };
+
+/**
+ * 获取自动消息回复
+ */
+// #[rpc=rpcServer]
+export const getMsgReply = (key: string): MessageReply => {
+    const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
+    let r = new MessageReply();
+    r.key = key;
+    r.msg = '';
+    let messageReply = messageReplyBucket.get<string, MessageReply>(key)[0];
+    if(messageReply){
+        r.msg = messageReply.msg;
+    }
+
+    return r;
+};
+
+
 
 /**
  * 管理员登陆
