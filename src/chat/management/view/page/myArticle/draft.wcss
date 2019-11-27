@@ -1,0 +1,56 @@
+.page{
+    background: white;
+    padding: 20px 60px;
+    color:#354052;
+    height: 100%;
+    overflow: auto;
+}
+.list{
+    display: flex;
+    flex-wrap: wrap;
+}
+.draft{
+    width:450px;
+    height:331px;
+    background:rgba(255,255,255,1);
+    border:1px solid rgba(204,204,204,1);
+    margin: 40px 40px 0 0;
+}
+.banner{
+    width:450px;
+    height:220px;
+}
+.info{
+    height: 111px;
+}
+.title{
+    font-size:18px;
+    font-family:SourceHanSansCN-Medium,SourceHanSansCN;
+    font-weight:600;
+    color:rgba(34,34,34,1);
+    margin: 10px;
+}
+.time{
+    display: flex;
+    justify-content: space-between;
+    font-size:14px;
+    font-family:SourceHanSansCN-Normal,SourceHanSansCN;
+    font-weight:400;
+    color:rgba(34,34,34,1);
+    margin: 0 10px;
+}
+.btnGroup{
+    display: flex;
+    cursor: pointer;
+}
+
+.ctroller{
+    height: 48px;
+    display: flex;
+    position: relative;
+}
+.pagination{
+    position: absolute;
+    top: -9px;
+    right: 50px;
+}

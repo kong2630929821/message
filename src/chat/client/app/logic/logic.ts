@@ -336,3 +336,13 @@ export const getFriendsInfo = () => {
 
     return { groups };
 };
+
+/**
+ * 将Unicode字符串转成可读字符串
+ */
+export const unicode2ReadStr = (item:string) => {
+    item = item.replace(/\\/g, '%'); 
+    
+    return unescape(item);  
+    
+};

@@ -1,5 +1,6 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore } from '../../data/store';
+import { buildupImgPath } from '../../logic/logic';
 
 interface Props {
     gameLabelList:any;// 游戏标签
@@ -35,7 +36,7 @@ export class GameLabel extends Widget {
         list.forEach(v => {
             this.props.gameLabelList.push({
                 name:v.title,
-                icon:v.img[0]
+                icon:buildupImgPath(v.img[0])
             });
         });
     }

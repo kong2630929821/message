@@ -1,9 +1,8 @@
-import { deepCopy } from '../../../../app/store/memstore';
-import { Widget } from '../../../../pi/widget/widget';
-import { perPage } from '../../components/pagination';
-import { getAllReport } from '../../net/rpc';
-import { REPORT } from '../../utils/logic';
-import { rippleShow } from '../../utils/tools';
+import { Widget } from '../../../../../pi/widget/widget';
+import { perPage } from '../../../components/pagination';
+import { getAllReport } from '../../../net/rpc';
+import { deepCopy, REPORT } from '../../../utils/logic';
+import { rippleShow } from '../../../utils/tools';
 
 interface Props {
     sum:number;// 数据条数
@@ -52,7 +51,7 @@ export class ToBeProcessed extends Widget {
         returnDeel:0,
         allBtnGroup:[],
         btnGroup:[],
-        showDataBtn:[]  
+        showDataBtn:[]
     };
 
     public create() {
