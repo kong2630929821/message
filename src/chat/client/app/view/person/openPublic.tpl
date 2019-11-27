@@ -9,13 +9,6 @@
             {{end}}
             <div w-class="upLoadAvatar">上传头像</div>
         </div>
-        <div w-class="bindPhone" on-tap="changePhone" on-down="onShow">
-            <div w-class="phone">手机号码</div>
-            <div w-class="bindStatus">
-                <div w-class="status">{{it1.phone?it1.phone:'未绑定'}}</div>
-                <img src="../../res/images/more-gray.png" alt="" w-class="more"/>
-            </div>
-        </div>
         <div w-class="pubInfo">嗨嗨号资料</div>
         <div w-class="name-box" ev-input-change="publicNameChange">
             <widget w-tag="app-components1-input-input" style="flex: 1;">{input:{{it.publicName}},maxLength:12,placeHolder:"名称"}</widget> 

@@ -3,20 +3,21 @@
         <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead" on-tap="goUserDetail">{imgURL:{{it.postItem.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
         <div w-class="topCenter">
             <div style="display:flex;align-items:center;">
-                <span>{{it.postItem.username}}&nbsp;</span>
+                <span style="font-size: 32px; font-weight: 500;">{{it.postItem.username}}&nbsp;</span>
                 {{if it.isPublic}}
                 <div w-class="offical">公众号</div>
                 {{elseif it.offical}}
                 <div w-class="offical">官方</div>
                 {{else}}
                     {{if it.postItem.gender!=2}}
-                        <img src="../../res/images/{{it.postItem.gender===1?'girl.png':'boy.png'}}"/>
+                        <img style="margin-left: 10px;" src="../../res/images/{{it.postItem.gender===1?'girl.png':'boy.png'}}"/>
                     {{else}}
-                        <img src="../../res/images/neutral.png"/>
+                        <img style="margin-left: 10px;" src="../../res/images/neutral.png"/>
                     {{end}}
                 {{end}}
             </div>
         </div>
+        <div></div> 
         {{if !it.isMine && !it.postItem.followed}}
             {{if it.fgStatus}}
             <div w-class="followIng">
@@ -41,13 +42,13 @@
         {{if it.postItem.content}}
         <div w-class="content" on-tap="goDetail" class="content">
             <widget w-tag="pi-ui-html">{{it.postItem.content}}</widget>
-            <span w-class="allBtn">...<span style="color:#2A56C6">【全文】</span></span>
+            <span w-class="allBtn">···<span style="color:#2A56C6">【全文】</span></span>
         </div>
         {{end}}
     {{end}}
 
     {{% =====================图片区域========================}}
-    <div style="margin:20px 15px 20px 125px;" on-tap="goDetail">
+    <div style="margin:0px 50px 10px 125px;" on-tap="goDetail">
         {{for i,v of it.postItem.imgs}}
             {{if v}}
                 {{if it.postItem.imgs.length==1}}

@@ -3,6 +3,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { uploadFile } from '../../../../client/app/net/upload';
 import { maxSize } from '../../../config';
+import { sendActicle } from '../../../net/rpc';
 import { popNewMessage } from '../../../utils/logic';
 
 interface Props {
@@ -118,5 +119,38 @@ export class NewArticle extends Widget {
 
             return;
         }
+        const value = {
+            msg,
+            imgs:[this.props.bannerImg]
+        };
+        sendActicle(this.props.title, 0, this.props.title,JSON.stringify(value)).then((res:any) => {
+            debugger;
+        });
+        
+    }
+    /**
+     * 保存草稿
+     */
+    public saveAsDraft() {
+        const editer = document.querySelector('#editBox');
+        const msg = editer.innerHTML;
+        if (!this.props.title) {
+            popNewMessage('标题不能为空');
+
+            return;
+        }
+
+        if (!this.props.bannerImg) {
+            popNewMessage('请上传banner图');
+
+            return;
+        }
+        
+        if (!msg) {
+            popNewMessage('内容不能为空');
+
+            return;
+        }
+        
     }
 }

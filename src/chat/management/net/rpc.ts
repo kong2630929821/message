@@ -4,7 +4,8 @@ import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, P
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { addApp, createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig } from '../../server/data/rpc/manager.p';
+import { AddPostArg } from '../../server/data/rpc/community.s';
+import { addApp, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { erlangLogicIp } from '../config';
@@ -150,34 +151,6 @@ export const setReportHandled = (id:string) => {
     });
 };
 
-// 获取所有公众号审核列表
-export const getAllApplyPublicList = (count:number,state:number,id:number) => {
-    const arg = new PublicApplyListArg();
-    arg.state = state;
-    arg.count = count;
-    arg.id = id;
-
-    return new Promise((res,rej) => {
-        clientRpcFunc(getApplyPublicList,arg,(r:string) => {
-            res(r);
-        });
-    });
-};
-
-// 审核公众号
-export const setHandleApplyPublic = (result:boolean,reason:string,id:number) => {
-    const arg = new HandleApplyPublicArg();
-    arg.result = result;
-    arg.reason = reason;
-    arg.id = id;
-
-    return new Promise((res,rej) => {
-        clientRpcFunc(handleApplyPublic,arg,(r:boolean) => {
-            res(r);
-        });
-    });
-};
-
 // 解除处罚
 export const modifyPunishTime = (id:number,uid:number,time:number) => {
     const arg = new ModifyPunishArg();
@@ -289,6 +262,60 @@ export const setAppHot = (appId:string,setType:number) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(setAppConfig,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+// 待审核官方账号列表
+export const reviewOfficial = (id:number,count:number,state:number) => {
+    const arg = new PublicApplyListArg();
+    arg.id = id;
+    arg.count = count;
+    arg.state = state;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getApplyPublicList,arg,(r:any) => {
+            res(JSON.parse(r));
+        });
+    });
+};
+
+/**
+ * 处理待审核官方账号列表
+ */
+export const deelOfficial = (id:number,result:boolean,reason:string) => {
+    const arg = new HandleApplyPublicArg();
+    arg.id = id;
+    arg.result = result;
+    arg.reason = reason;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(handleApplyPublic,arg,(r:any) => {
+            res(JSON.parse(r));
+        });
+    });
+};
+
+// 获取官方账号列表
+export const getOfficialList = (appid:string = '') => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getOfficialAcc,appid,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+// 管理端发文章
+export const sendActicle = (num: string, postType: number, title: string, body: string) => {
+    const arg = new AddPostArg();
+    arg.num = num;
+    arg.post_type = postType;
+    arg.title = title;
+    arg.body = body;
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(sendPost,arg,(r:any) => {
             res(r);
         });
     });

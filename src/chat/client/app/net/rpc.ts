@@ -12,8 +12,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, ChangeCommunity, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, applyPublicC, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, ApplyPublicArg, ChangeCommunity, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GroupInfoList, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -971,14 +971,13 @@ export const searchAllArticle = (article:string) => {
 
 // 申请公众号
 export const openPublic = (name:string,desc:string,avatar:string) => {
-    const arg = new CreateCommunity();
+    const arg = new ApplyPublicArg();
     arg.name = name;
-    arg.comm_type = 2;
     arg.desc = desc;
     arg.avatar = avatar;
 
     return new Promise((res,rej) => {
-        clientRpcFunc(createCommunityNum,arg,(r:string) => {
+        clientRpcFunc(applyPublicC,arg,(r:string) => {
             res(r);
         });
     });

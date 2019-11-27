@@ -46,7 +46,8 @@
     </div>
 
     <div w-class="btnGroup">
-        <div w-class="btn1">保存到草稿</div>
+        <div w-class="btn1" on-tap="saveAsDraft
+        ">保存到草稿</div>
         <div w-class="btn2" on-tap="send">提交审核</div>
     </div>
 </div>
