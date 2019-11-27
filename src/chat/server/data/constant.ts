@@ -136,3 +136,7 @@ export const PUNISH_END = 1; // 惩罚结束
 export const PUBLIC_APPLYING = 0;    // 申请中
 export const PUBLIC_APPLY_SUCCESS = 1; // 申请成功
 export const PUBLIC_APPLY_REFUSED = 2; // 申请驳回
+
+// 自动回复消息key
+export const MESSAGE_TYPE_WELCOME = 'welcome';    // 首次登陆客服回复
+export const MESSAGE_TYPE_NOTICE = 'notice'; // 举报内容回复
