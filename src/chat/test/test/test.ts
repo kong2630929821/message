@@ -1,24 +1,24 @@
+import { piFetch } from '../../../app/utils/pureUtils';
 import { GroupInfo } from '../../../chat/server/data/db/group.s';
 import { createGroup, searchGroup } from '../../../chat/server/data/rpc/group.p';
 import { GroupCreate, GroupInfoList } from '../../../chat/server/data/rpc/group.s';
-import { popNew } from '../../../pi/ui/root';
 import { Widget } from '../../../pi/widget/widget';
 import { clientRpcFunc } from '../../client/app/net/init';
 import { initPush } from '../../client/app/net/receive';
-import { SPIDER_USER_INFO, SPIDER_WEIBO_IMG, SPIDER_WEIBO_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
+import { SPIDER_USER_INFO, WEIBO_SPIDER_HOST } from '../../server/data/constant';
 import { CommentKey, PostKey } from '../../server/data/db/community.s';
-import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, RootUser, UserReportDetail } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportIndex, ReportIndexList, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { AddRobotArg, CommonComment, CommonCommentList, RobotActiveSet, RobotUserInfo } from '../../server/data/db/robot.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { Result, UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow, getLabelPost, getLabelPostCount } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList, IterLabelPostArg } from '../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
 import { cancelGmAccount, createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setGmAccount } from '../../server/data/rpc/manager.p';
 import { report } from '../../server/data/rpc/message.p';
 import { ReportArg } from '../../server/data/rpc/message.s';
-import { addCommonCommernt, closeRobot, getCommonCommernt, getRobotSet, getRobotUserInfo, getRobotWeiboInfo, initRobotSet, modifyRobotSet, startRobot } from '../../server/data/rpc/robot.p';
-import { applyFriend, changeUserInfo, searchFriend, set_gmAccount, testDB } from '../../server/data/rpc/user.p';
+import { addCommonCommernt, closeRobot, getCommonCommernt, getRobotSet, getRobotUserInfo, initRobotSet, modifyRobotSet, startRobot } from '../../server/data/rpc/robot.p';
+import { applyFriend, changeUserInfo, searchFriend, testDB } from '../../server/data/rpc/user.p';
 import { SetOfficial, UserChangeInfo, UserInfoList } from '../../server/data/rpc/user.s';
 
 /**
@@ -306,7 +306,7 @@ export const getRobotUserInfoTest = () => {
     console.log('==========开始爬取用户数据==========');
     const imageSrc = 'https://picsum.photos/200/200';
 
-    return fetch(src).then(res => {
+    return piFetch(src).then(res => {
         return res.json().then(r => {
             console.log('r =====',r);
             const user_infos = r.user_list;
@@ -321,7 +321,7 @@ export const getRobotUserInfoTest = () => {
                     robotInfo.avatar = '';
                     robotInfo.sex = parseInt(user_infos[i].sex, 10);
                     // 获取随机用户头像
-                    fetch(imageSrc).then(image => {
+                    piFetch(imageSrc).then(image => {
                         robotInfo.avatar = image.url;
                     });
                     arg.list.push(robotInfo);

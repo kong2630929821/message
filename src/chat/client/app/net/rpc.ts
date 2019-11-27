@@ -30,6 +30,7 @@ import { judgeFollowed, judgeLiked } from '../logic/logic';
 import { parseEmoji } from '../logic/tools';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
+import { piFetch } from '../../../../app/utils/pureUtils';
 
 // ================================================ 导出
 
@@ -1025,7 +1026,7 @@ export const gameLabelNum = (label:string) => {
 
 // 获取全部游戏
 export const getAllGameList = () => {
-    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
+    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
         return res.json().then(r => {
             return r.app_ids;
         }). catch (e => {
@@ -1037,7 +1038,7 @@ export const getAllGameList = () => {
 
 // 获取全部游戏详情
 export const getAllGameInfo = (ids:string) => {
-    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
+    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
         return res.json().then(r => {
             const res = r.app_details;
             const gameList = [];

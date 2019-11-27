@@ -107,11 +107,11 @@ const GameList = [{
     buttonMod: 2,
     desc: '2019最热唯美奇幻手游',
     groupId: 10001,
-    htmlUrl: 'http://gcydzm.17youx.cn:8777/client/boot/haohai.html',
+    htmlUrl: 'http://gcydzm.17youx.cn:6888/client/boot/haohai.html',
     img: ['app/res/image/game/yidaizhangmen.png', 'app/res/image/game/yidaizhangmenBg.png'],
     screenMode: 'landscape',
     title: '一代掌门',
-    url: 'http://gcydzm.17youx.cn:8088/client/boot/haohai.html',
+    url: 'http://gcydzm.17youx.cn:6888/client/boot/haohai.html',
     usePi: true,
     webviewName: 'chairMan'
 },{
