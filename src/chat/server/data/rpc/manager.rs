@@ -1,6 +1,11 @@
 #[path=../db/]
 use user.s::{UserInfo};
+use manager.s::{RootUser};
 
+// 管理端用户列表
+struct MgrUserList {
+    list: &[RootUser],
+}
 
 // 官方账号列表
 struct OfficialUserInfo {
