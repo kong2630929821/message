@@ -116,6 +116,18 @@ export const getReportList = (reportArg: ReportListArg): getReportListR => {
 };
 
 /**
+ * 获取指定用户举报详情
+ */
+// #[rpc=rpcServer]
+export const getReportDetail = (uid: number): string => {
+    // 拼接举报对象主键
+    const key = `1%${uid}`;
+    const userReportDetail = getReportUserInfo(key, uid);
+
+    return JSON.stringify(userReportDetail);
+};
+
+/**
  * 获取指定举报对象举报详情列表
  */
 // #[rpc=rpcServer]
@@ -425,8 +437,9 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     addPublicComm(applyPublic.name, applyPublic.num, applyPublic.avatar, applyPublic.desc, applyPublic.uid, applyPublic.time);
     // 创建管理端账号
     const user = new RootUser();
-    user.user = applyPublic.num;
+    user.user = `${applyPublic}@${applyPublic.num}`;
     user.pwd = randomWord(false, 6);
+    console.log('public acc user:', JSON.stringify(user));
     createRoot(user);
     // 推送结果
     send(applyPublic.uid, CONSTANT.SEND_PUBLIC_APPLY, JSON.stringify(arg));
