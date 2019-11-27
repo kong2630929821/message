@@ -12,6 +12,7 @@ interface Props {
     expandIndex:boolean;// 控制分页显示隐藏
     perPageIndex:number;// 每页显示多少个的下标
     showDataList:any[];
+    list:any[];// 原始数据
 }
 
 /**
@@ -28,18 +29,23 @@ export class OfficalUser extends Widget {
         currentIndex:0,
         expandIndex:false,
         perPageIndex:0,
-        showDataList:[]
+        showDataList:[],
+        list:[]
     };
 
     public create() {
         super.create();
         this.initData();
-        this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+        
     }
 
     public initData() {
-        getOfficialList().then(r => {
-            debugger;
+        this.props.dataList = [];
+        getOfficialList().then((r:any) => {
+            this.props.list = r.data;
+            this.props.dataList = r.tableData;
+            this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+            this.paint();
         });
     }
 

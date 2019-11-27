@@ -5,6 +5,7 @@ import { uploadFileUrlPrefix } from '../../../app/public/config';
 import { popNew } from '../../../pi/ui/root';
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { EMOJIS_MAP } from '../../client/app/widget1/emoji/emoji';
+import { getStore } from '../store/memstore';
 
 /**
  * 弹窗提示
@@ -469,4 +470,20 @@ export const deepCopy = (v: any): any => {
     }
 
     return newobj;
+};
+
+/**
+ * 处理官方账号列表
+ */
+export const deelGetOfficialList = (r:any) => {
+    const data = [];
+    r.list.forEach(v => {
+        // 查找应用名
+        const appList =  getStore('appList');
+        const item = appList.find(item => item.appid === v.app_id); 
+        const appName = item ? item.title :'无';
+        data.push([v.user_info.name,v.user_info.acc_id,v.user_info.tel ? v.user_info.tel :'无',timestampFormat(JSON.parse(v.create_time)),appName]);
+    });
+
+    return { data:r.list,tableData:data };
 };

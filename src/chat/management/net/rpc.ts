@@ -8,7 +8,7 @@ import { addApp, createRoot, getApplyPublicList, getOfficialAcc, getPostList, ge
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { erlangLogicIp } from '../config';
-import { deelReportList, deelReportListInfo, timestampFormat, unicode2ReadStr } from '../utils/logic';
+import { deelGetOfficialList, deelReportList, deelReportListInfo, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -300,7 +300,7 @@ export const deelOfficial = (id:number,result:boolean,reason:string) => {
 export const getOfficialList = (appid:string = '') => {
     return new Promise((res,rej) => {
         clientRpcFunc(getOfficialAcc,appid,(r:any) => {
-            res(r);
+            res(deelGetOfficialList(r));
         });
     });
 };
