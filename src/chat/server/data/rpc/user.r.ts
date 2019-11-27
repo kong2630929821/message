@@ -17,6 +17,7 @@ import { getUid } from './group.r';
 import { getUserHistoryCursor, sendUserMessage } from './message.r';
 import { SendMsg, UserSend } from './message.s';
 import { FriendAlias, SetOfficial, UserAgree, UserChangeInfo, UserInfoList } from './user.s';
+import { MessageReply } from '../db/manager.s';
 
 declare var env: Env;
 
@@ -149,7 +150,11 @@ export const applyFriend = (user: string): Result => {
         const official = officialBucket.get<string,OfficialUsers>(CONSTANT.CHAT_APPID)[0]; // 好嗨客服账号
         // 其他客服发送的第一条欢迎消息
         if (official && official.uids && official.uids[0] !== uid) {
-            sendFirstWelcomeMessage(`您好，我是${userinfo.name}，很高兴为您服务`,uid);
+            // 获取自动回复消息
+            const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
+            const msgReply = messageReplyBucket.get<string, MessageReply>(CONSTANT.MESSAGE_TYPE_WELCOME)[0];
+            const sendMsg = msgReply.msg ? msgReply.msg: `您好，我是${userinfo.name}，很高兴为您服务`;
+            sendFirstWelcomeMessage(sendMsg, uid);
         } 
         
         result.r = 1;
