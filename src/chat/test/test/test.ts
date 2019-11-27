@@ -306,38 +306,36 @@ export const getRobotUserInfoTest = () => {
     console.log('==========开始爬取用户数据==========');
     const imageSrc = 'https://picsum.photos/200/200';
 
-    return piFetch(src).then(res => {
-        return res.json().then(r => {
-            console.log('r =====',r);
-            const user_infos = r.user_list;
-            console.log('user_infos =====',user_infos);
-            if (user_infos && user_infos.length !== 0) {
-                const arg = new AddRobotArg();
-                arg.list = [];
-                for (let i = 0; i < user_infos.length; i++) {
-                    const robotInfo = new RobotUserInfo();
-                    robotInfo.weibo_id = user_infos[i].uid;
-                    robotInfo.name = user_infos[i].name;
-                    robotInfo.avatar = '';
-                    robotInfo.sex = parseInt(user_infos[i].sex, 10);
-                    // 获取随机用户头像
-                    piFetch(imageSrc).then(image => {
-                        robotInfo.avatar = image.url;
-                    });
-                    arg.list.push(robotInfo);
-                }
-                console.log('==========开始生成虚拟用户=========', arg);
-                clientRpcFunc(getRobotUserInfo, arg, (r: number) => {
-                    console.log(r);
+    return piFetch(src).then(r => {
+        console.log('r =====',r);
+        const user_infos = r.user_list || [];
+        console.log('user_infos =====',user_infos);
+        if (user_infos && user_infos.length !== 0) {
+            const arg = new AddRobotArg();
+            arg.list = [];
+            for (let i = 0; i < user_infos.length; i++) {
+                const robotInfo = new RobotUserInfo();
+                robotInfo.weibo_id = user_infos[i].uid;
+                robotInfo.name = user_infos[i].name;
+                robotInfo.avatar = '';
+                robotInfo.sex = parseInt(user_infos[i].sex, 10);
+                // 获取随机用户头像
+                piFetch(imageSrc).then(image => {
+                    robotInfo.avatar = image.url;
+                }).catch(err => {
+                    console.log('获取随机头像失败：',err);
                 });
-
+                arg.list.push(robotInfo);
             }
+            console.log('==========开始生成虚拟用户=========', arg);
+            clientRpcFunc(getRobotUserInfo, arg, (r: number) => {
+                console.log(r);
+            });
+
+        }
     
-            return user_infos;
-        }). catch (e => {
-            return [];
-        });
-      
+        return user_infos;
+        
     });
     
 };

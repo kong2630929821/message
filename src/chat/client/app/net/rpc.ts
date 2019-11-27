@@ -3,6 +3,7 @@
  */
 // ================================================ 导入
 import { erlangLogicIp, shareDownload } from '../../../../app/public/config';
+import { piFetch } from '../../../../app/utils/pureUtils';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { CommentKey, PostKey } from '../../../server/data/db/community.s';
 import { GroupInfo } from '../../../server/data/db/group.s';
@@ -30,7 +31,6 @@ import { judgeFollowed, judgeLiked } from '../logic/logic';
 import { parseEmoji } from '../logic/tools';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
-import { piFetch } from '../../../../app/utils/pureUtils';
 
 // ================================================ 导出
 
@@ -1027,40 +1027,30 @@ export const gameLabelNum = (label:string) => {
 // 获取全部游戏
 export const getAllGameList = () => {
     return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
-        return res.json().then(r => {
-            return r.app_ids;
-        }). catch (e => {
-            return [];
-        });
-      
+        return res.app_ids || [];    
     });
 };
 
 // 获取全部游戏详情
 export const getAllGameInfo = (ids:string) => {
-    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
-        return res.json().then(r => {
-            const res = r.app_details;
-            const gameList = [];
-            res.forEach(v => {
-                const name = v[0];
-                const img = JSON.parse(v[1]);
-                const desc = JSON.parse(v[2]);
-                const url = v[3];
-                gameList.push({
-                    ...desc,
-                    title:name,
-                    desc:desc.desc,
-                    img:[img.icon,img.bg],
-                    url,
-                    apkDownloadUrl:shareDownload
-                });
+    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(r => {
+        const res = r.app_details;
+        const gameList = [];
+        res.forEach(v => {
+            const name = v[0];
+            const img = JSON.parse(v[1]);
+            const desc = JSON.parse(v[2]);
+            const url = v[3];
+            gameList.push({
+                ...desc,
+                title:name,
+                desc:desc.desc,
+                img:[img.icon,img.bg],
+                url,
+                apkDownloadUrl:shareDownload
             });
-
-            return gameList;
-        }). catch (e => {
-            return [];
         });
-      
+
+        return gameList;
     });
 };
