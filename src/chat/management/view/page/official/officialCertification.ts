@@ -46,6 +46,7 @@ export class OfficialCertification extends Widget {
      * 初始化数据
      */
     public initData() {
+        this.props.dataList = [];
         reviewOfficial(0,1,0).then((r:any) => {
             const count = r.total;
             reviewOfficial(0,count,0).then((r:any) => {
@@ -103,6 +104,7 @@ export class OfficialCertification extends Widget {
 
     // 返回
     public goBack(e:any) {
+        // fg判斷是否需要刷新頁面數據
         if (e.fg) {
             this.initData();
         }

@@ -33,3 +33,9 @@ export const serverFilePath = `http://${sourceIp}:${sourcePort}/service/get_file
  * maxSize图片最大 2M
  */
 export const maxSize = 2097152;
+
+ // 首次登陆客服回复
+export const WELCOME = 'welcome';
+
+// 举报内容回复
+export const REPORTREPLY = 'notice';

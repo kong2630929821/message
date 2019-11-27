@@ -3,7 +3,8 @@ import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { perPage } from '../../../components/pagination';
-import { timestampFormat } from '../../../utils/logic';
+import { deelOfficial } from '../../../net/rpc';
+import { popNewMessage, timestampFormat } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -31,7 +32,7 @@ export class CertificationDetails extends Widget {
         expandIndex:false,
         perPageIndex:0,
         showDataList:[],
-        showTitleList:['申请用户','描述','申请时间','处理时间','驳回原因'],
+        showTitleList:['昵称','描述','申请时间','处理时间','驳回原因'],
         dataList:[],
         currentData:{},
         userInfo:{},
@@ -47,7 +48,9 @@ export class CertificationDetails extends Widget {
         // 用户信息
         this.props.userInfo = { ...props.currentData.user_info,time:timestampFormat(JSON.parse(props.currentData.apply_info.time)) };
         // 申请记录
-        this.props.dataList = props.currentData.apply_list;
+        props.currentData.apply_list.forEach(v => {
+            this.props.dataList.push([v.name,v.desc,timestampFormat(JSON.parse(v.time)),timestampFormat(JSON.parse(v.handle_time)),v.reason]);
+        });
         this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
     }
 
@@ -93,12 +96,29 @@ export class CertificationDetails extends Widget {
     /**
      * 通过认证
      */
-    public certified(fg:boolean) {
+    public certified(fg:boolean,e:any) {
+        const id = this.props.currentData.apply_info.id;
         if (fg) {
-
+            popNew('chat-management-components-confirmBox',{ title:'通过官方认证',prompt:'将其认证为官方账号',invalid:-1 },() => {
+                deelOfficial(id,fg,'').then(r => {
+                    if (typeof r === 'number') {
+                        popNewMessage('认证成功');
+                        this.goBack(true,e);
+                    } else {
+                        popNewMessage('认证失败');
+                    }
+                });
+            });
         } else {
             popNew('chat-management-components-turnDown',null,(input:string) => {
-                debugger;
+                deelOfficial(id,fg,input).then(r => {
+                    if (typeof r === 'number') {
+                        popNewMessage('驳回成功');
+                        this.goBack(true,e);
+                    } else {
+                        popNewMessage('驳回失败');
+                    }
+                });
             }); 
         }
     }

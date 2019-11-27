@@ -35,6 +35,17 @@
     margin-top: 25px;
     padding: 10px;
 }
+.inputBox{
+    width:400px;
+    margin-top:10px;
+    display: flex;
+}
+.inputTitle{
+    max-width: 180px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
 .btnGroup{
     width: 100%;
     display: flex;
@@ -48,7 +59,7 @@
     font-size:14px;
     font-family:SourceHanSansCN;
     font-weight:400;
-    color:rgba(53,64,82,1);
+    color: white;
     text-align: center;
     line-height: 36px;
     cursor: pointer;

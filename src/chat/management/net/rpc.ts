@@ -1,15 +1,15 @@
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { PostKey } from '../../server/data/db/community.s';
-import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
 import { AddPostArg } from '../../server/data/rpc/community.s';
-import { addApp, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig } from '../../server/data/rpc/manager.p';
+import { addApp, createHighAcc, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig, setMsgReply } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { erlangLogicIp } from '../config';
-import { deelReportList, deelReportListInfo, timestampFormat, unicode2ReadStr } from '../utils/logic';
+import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -301,6 +301,45 @@ export const deelOfficial = (id:number,result:boolean,reason:string) => {
 export const getOfficialList = (appid:string = '') => {
     return new Promise((res,rej) => {
         clientRpcFunc(getOfficialAcc,appid,(r:any) => {
+            res(deelGetOfficialList(r));
+        });
+    });
+};
+
+// 获取用户信息
+export const getUserInfo = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getReportDetail,uid,(r:any) => {
+            res(deelUserInfo(JSON.parse(r)));
+        });
+    });
+};
+
+/**
+ * 设置好嗨客服
+ */
+export const setHaoHaiAcc = (user:string,pwd:string) => {
+    const arg = new RootUser();
+    arg.user = user;
+    arg.pwd = pwd;
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(createHighAcc,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
+ * 设置好嗨客服自动回复
+ */
+export const setAccMsgReply = (key:string,msg:string) => {
+    const arg = new MessageReply();
+    arg.key = key;
+    arg.msg = msg;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(setMsgReply,arg,(r:any) => {
             res(r);
         });
     });

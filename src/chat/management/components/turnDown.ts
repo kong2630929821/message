@@ -27,6 +27,10 @@ export class TurnDown extends Widget {
         super.setProps(this.props);
     }
 
+    public inputChange(e:any) {
+        this.props.input = e.value;
+        this.paint();
+    }
     public btnCancel() {
         this.cancel && this.cancel();
     }

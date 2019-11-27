@@ -4,8 +4,8 @@
         <div w-class="userInfoTitle">
             <div>认证信息</div>
             <div w-class="btnGroup">
-                <div w-class="btn" on-tap="certified(false)" on-down="onShow">驳回</div>
-                <div w-class="btn" style="margin-left:10px;" on-tap="certified(true)" on-down="onShow">通过认证</div>
+                <div w-class="btn" on-tap="certified(false,e)" on-down="onShow">驳回</div>
+                <div w-class="btn" style="margin-left:10px;" on-tap="certified(true,e)" on-down="onShow">通过认证</div>
             </div>
         </div>
         <div w-class="userInfo">

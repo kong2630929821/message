@@ -51,6 +51,7 @@
     text-align: center;
     line-height: 42px;
     margin-left: 20px;
+    cursor: pointer;
 }
 .cusInput{
     display: flex;
