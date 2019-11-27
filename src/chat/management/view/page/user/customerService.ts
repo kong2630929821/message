@@ -1,4 +1,7 @@
 import { Widget } from '../../../../../pi/widget/widget';
+import { REPORTREPLY, WELCOME } from '../../../config';
+import { setAccMsgReply, setHaoHaiAcc } from '../../../net/rpc';
+import { popNewMessage } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -52,16 +55,48 @@ export class CustomerService extends Widget {
      */
     public saveChange(index:number) {
         if (index === 0) {
-            // 好嗨客服
+            // 好嗨客服设置
             this.props.isHaveCus = 1;
-        } else if (index === 1) {
-            // 举报
-            this.props.userStatus = true;
+            this.paint();
         } else {
-            // 新用户
-            this.props.reportStatus = true;
+            // 好嗨客服回复内容设置
+            let key = '';
+            let input = '';
+            if (index === 1) {
+                 // 新用户回复
+                if (!this.props.newUserInput) {
+                    popNewMessage('请输入新用户自动回复内容');
+    
+                    return;
+                }
+                key = WELCOME;
+                input = this.props.newUserInput;
+                
+            } else {
+               // 举报
+                if (!this.props.reportInput) {
+                    popNewMessage('请输入举报回复内容');
+
+                    return;
+                }
+                key = REPORTREPLY;
+                input = this.props.reportInput;
+            }
+            setAccMsgReply(key,input).then(r => {
+                if (r === 1) {
+                    popNewMessage('设置成功');
+                    if (index === 1) {
+                        this.props.userStatus = true;
+                    } else {
+                        this.props.reportStatus = true;
+                    }
+                    this.paint();
+                } else {
+                    popNewMessage('设置失败');
+                }
+            });
+
         }
-        this.paint();
     }
 
     /**
@@ -86,8 +121,34 @@ export class CustomerService extends Widget {
      * @param index 0添加好嗨客服 1修改好嗨客服
      */
     public isHaveCusChange(index:number) {
-        this.props.isHaveCus = index ? 2 :1;
-        this.paint();
+        if (index === 0) {
+            // 添加
+            if (!this.props.haohaiId) {
+                popNewMessage('请输入好嗨ID');
+
+                return;
+            }
+
+            if (!this.props.haoHaiPass) {
+                popNewMessage('请输入客服密码');
+
+                return;
+            }
+
+            setHaoHaiAcc(this.props.haohaiId,this.props.haoHaiPass).then(r => {
+                if (r === 1) {
+                    popNewMessage('设置成功');
+                    this.props.isHaveCus = 1;
+                    this.paint();
+                } else {
+                    popNewMessage('设置失败');
+                }
+            });
+        } else {
+            this.props.isHaveCus = 2;
+            this.paint();
+        }
+        
     }
     public userChange(e:any) {
         this.props.newUserInput = e.value;
