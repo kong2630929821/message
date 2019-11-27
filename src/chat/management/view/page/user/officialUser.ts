@@ -1,6 +1,7 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
 import { getOfficialList } from '../../../net/rpc';
+import { deepCopy } from '../../../store/memstore';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -13,6 +14,9 @@ interface Props {
     perPageIndex:number;// 每页显示多少个的下标
     showDataList:any[];
     list:any[];// 原始数据
+    status:boolean;// 是否展示二级页面
+    official:string;// 官方
+    uid:number;
 }
 
 /**
@@ -30,7 +34,10 @@ export class OfficalUser extends Widget {
         expandIndex:false,
         perPageIndex:0,
         showDataList:[],
-        list:[]
+        list:[],
+        status:false,
+        official:'',
+        uid:0
     };
 
     public create() {
@@ -82,5 +89,25 @@ export class OfficalUser extends Widget {
         this.props.expandIndex = false;
         this.pageChange({ value:0 });   
         this.paint();  
+    }
+
+    // 表格查看详情
+    public goDetail(e:any) {
+        const index = e.num;
+        this.props.status = true;
+        const currentData = deepCopy(this.props.dataList[this.props.currentIndex * this.props.perPage + index]);
+        this.props.official = currentData[currentData.length - 1] === '无' ? '' :currentData[currentData.length - 1];
+        this.props.uid = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]).user_info.uid;
+        this.paint();
+    }
+
+    // 返回
+    public goBack(e:any) {
+    // fg判斷是否需要刷新頁面數據
+        if (e.fg) {
+            this.initData();
+        }
+        this.props.status = false;
+        this.paint();
     }
 }

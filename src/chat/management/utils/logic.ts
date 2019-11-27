@@ -487,3 +487,7 @@ export const deelGetOfficialList = (r:any) => {
 
     return { data:r.list,tableData:data };
 };
+
+export const deelUserInfo = (r:any) => {
+    debugger;
+};

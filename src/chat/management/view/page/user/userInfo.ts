@@ -1,5 +1,7 @@
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
+import { getUserInfo } from '../../../net/rpc';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -11,6 +13,8 @@ interface Props {
     showDataList:any;// 表格内容
     showTitleList:any;// 表格标题
     dataList:any;// 全部数据
+    official:string;// 官方
+    uid:number;
 }
 
 /**
@@ -25,12 +29,26 @@ export class UserInfo extends Widget {
         perPageIndex:0,
         showDataList:[],
         showTitleList:['被投诉类别','被投诉原因','处理时间','处理结果'],
-        dataList:[['','','','']]
+        dataList:[['','','','']],
+        official:'',
+        uid:0
     };
 
-    public create() {
-        super.create();
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+        this.initData(props.official);
         this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+    }
+
+    // 初始化数据
+    public initData(official?:string) {
+        getUserInfo(this.props.uid).then(r => {
+            debugger;
+        });
     }
 
     // 重置页面的展开状态
@@ -66,5 +84,9 @@ export class UserInfo extends Widget {
         this.pageChange({ value:0 });   
         this.paint();  
     }
-
+    
+    // 返回
+    public goBack(fg:boolean,e:any) {
+        notify(e.node,'ev-goBack',{ fg });
+    }
 }

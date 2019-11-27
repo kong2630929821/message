@@ -4,11 +4,11 @@ import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, P
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { addApp, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig } from '../../server/data/rpc/manager.p';
+import { addApp, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { erlangLogicIp } from '../config';
-import { deelGetOfficialList, deelReportList, deelReportListInfo, timestampFormat, unicode2ReadStr } from '../utils/logic';
+import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -301,6 +301,15 @@ export const getOfficialList = (appid:string = '') => {
     return new Promise((res,rej) => {
         clientRpcFunc(getOfficialAcc,appid,(r:any) => {
             res(deelGetOfficialList(r));
+        });
+    });
+};
+
+// 获取用户信息
+export const getUserInfo = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getReportDetail,uid,(r:any) => {
+            res(deelUserInfo(JSON.parse(r)));
         });
     });
 };

@@ -1,5 +1,5 @@
 <div w-class="page">
-    <div w-class="goBack">返回上一页</div>
+    <div w-class="goBack(false,e)">返回上一页</div>
     <div w-class="userInfoBox">
         <div w-class="userInfoTitle">用户信息</div>
         <div w-class="userInfo">
