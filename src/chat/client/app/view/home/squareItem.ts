@@ -93,7 +93,7 @@ export class SquareItem extends Widget {
             const currentItem = gameList.find(item => item.title === this.props.postItem.label);
             this.props.gameLabel = {
                 name:currentItem.title,
-                icon:currentItem.img[0]
+                icon:buildupImgPath(currentItem.img[0])
             };
         } else {
             this.props.gameLabel = {

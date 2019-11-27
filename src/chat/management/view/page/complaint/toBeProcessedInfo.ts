@@ -1,10 +1,10 @@
-import { popNew } from '../../../../pi/ui/root';
-import { notify } from '../../../../pi/widget/event';
-import { Widget } from '../../../../pi/widget/widget';
-import { perPage } from '../../components/pagination';
-import { getAllReportInfo, modifyPunishTime, reversePosts } from '../../net/rpc';
-import { popNewMessage } from '../../utils/logic';
-import { rippleShow } from '../../utils/tools';
+import { popNew } from '../../../../../pi/ui/root';
+import { notify } from '../../../../../pi/widget/event';
+import { Widget } from '../../../../../pi/widget/widget';
+import { perPage } from '../../../components/pagination';
+import { getAllReportInfo, modifyPunishTime, reversePosts } from '../../../net/rpc';
+import { popNewMessage } from '../../../utils/logic';
+import { rippleShow } from '../../../utils/tools';
 
 interface Props {
     data:any;// 处理的数据

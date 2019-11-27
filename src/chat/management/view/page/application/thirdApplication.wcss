@@ -1,0 +1,28 @@
+.page{
+    background: white;
+    padding: 20px 60px;
+    color:#354052;
+    height: 100%;
+    overflow: auto;
+}
+.body{
+    height: 850px;
+    overflow: auto;
+}
+.item{
+    display: inline-block;
+    cursor: pointer;
+    height: 170px;
+    margin: 0 50px 20px 0;
+}
+
+.ctroller{
+    height: 48px;
+    display: flex;
+    position: relative;
+}
+.pagination{
+    position: absolute;
+    top: -9px;
+    right: 50px;
+}

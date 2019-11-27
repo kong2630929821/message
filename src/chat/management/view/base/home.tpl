@@ -18,8 +18,13 @@
             {{end}}
         </div>
 
-        <div w-class="right">
+        <div w-class="right" ev-goBackPage="showSecondaryPage">
             <div w-class="topLogin">
+                {{if it.secondaryPage}}
+                <div w-class="exit" on-down="onShow" on-tap="goBack">返回上一页</div>
+                {{else}}
+                <div w-class="exit"></div>
+                {{end}}
                 <div w-class="exit" on-tap="exit" on-down="onShow">退出登录</div>
             </div>
             <widget w-tag="chat-management-view-page-{{it.activePage.page}}"></widget>

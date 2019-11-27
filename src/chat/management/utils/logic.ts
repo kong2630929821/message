@@ -5,6 +5,7 @@ import { uploadFileUrlPrefix } from '../../../app/public/config';
 import { popNew } from '../../../pi/ui/root';
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { EMOJIS_MAP } from '../../client/app/widget1/emoji/emoji';
+import { getStore } from '../store/memstore';
 
 /**
  * 弹窗提示
@@ -55,6 +56,20 @@ export const unicode2Str = (infos:any) => {
     }
 
     return str;
+};
+
+/**
+ * string转unicode
+ */
+export const  encodeUnicode = (str) => {
+    const res = [];
+    for (let i = 0; i < str.length; i++) {
+        // tslint:disable-next-line:prefer-template
+        res[i] = ('00' + str.charCodeAt(i).toString(16)).slice(-4);
+    }
+    
+    // tslint:disable-next-line:prefer-template
+    return '\\u' + res.join('\\u');
 };
 
 // 价格格式化
@@ -135,17 +150,10 @@ export const transitTimeStamp = (time:any) => {
 /**
  * 将Unicode字符串转成可读字符串
  */
-export const unicode2ReadStr = (item:any) => {
-    try {
-        if (item && typeof(item) === 'string') {
-            return unicode2Str(JSON.parse(item));
-        }
-    
-        return unicode2Str(item);
-        
-    } catch (e) {
-        return item;
-    }
+export const unicode2ReadStr = (item:string) => {
+    item = item.replace(/\\/g, '%'); 
+
+    return unescape(item);  
     
 };
 
@@ -434,4 +442,52 @@ export const penaltyText = (res:any,str:string) => {
     });
     
     return data.join(',');
+};
+
+/**
+ * 判断是否是对象
+ */
+const isObject = (value: any) => {
+    const vtype = typeof value;
+
+    return value !== null && (vtype === 'object' || vtype === 'function');
+};
+
+/**
+ * 数据深拷贝
+ */
+export const deepCopy = (v: any): any => {
+    if (!v || v instanceof Promise || !isObject(v)) return v;
+    if (v instanceof Map) {
+        return v;  // TODO 暂不对map做处理
+
+        // return new Map(JSON.parse(JSON.stringify(v)));
+    }
+
+    const newobj = v.constructor === Array ? [] : {};
+    for (const i in v) {
+        newobj[i] = isObject(v[i]) ? deepCopy(v[i]) : v[i];
+    }
+
+    return newobj;
+};
+
+/**
+ * 处理官方账号列表
+ */
+export const deelGetOfficialList = (r:any) => {
+    const data = [];
+    r.list.forEach(v => {
+        // 查找应用名
+        const appList =  getStore('appList');
+        const item = appList.find(item => item.appid === v.app_id); 
+        const appName = item ? item.title :'无';
+        data.push([v.user_info.name,v.user_info.acc_id,v.user_info.tel ? v.user_info.tel :'无',timestampFormat(JSON.parse(v.create_time)),appName]);
+    });
+
+    return { data:r.list,tableData:data };
+};
+
+export const deelUserInfo = (r:any) => {
+    debugger;
 };

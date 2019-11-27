@@ -8,9 +8,10 @@ import { add_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
 import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
+import { CHAT_APPID } from '../constant';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
-import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail, UserReportIndex, UserReportIndexList } from '../db/manager.s';
+import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail, UserReportIndex, UserReportIndexList, MessageReply } from '../db/manager.s';
 import { Report, ReportCount, ReportListTab, UserReportKeyTab } from '../db/message.s';
 import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
@@ -19,13 +20,14 @@ import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
 import { addPost } from './community.r';
 import { AddPostArg, PostData } from './community.s';
-import { AddAppArg, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
+import { AddAppArg, MgrUserList, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
 import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
 
 /**
  * 创建管理员
+ * 账号格式为 xx@xx表示公众号用户 "number":为好嗨客服
  */
 // #[rpc=rpcServer]
 export const createRoot = (user: RootUser): number => {
@@ -37,6 +39,74 @@ export const createRoot = (user: RootUser): number => {
     } else {
         return CONSTANT.DEFAULT_ERROR_NUMBER;
     }
+};
+
+/**
+ * 获取所有用户
+ */
+// #[rpc=rpcServer]
+export const showUsers = (arg: string): MgrUserList => {
+    const userList = new MgrUserList();
+    userList.list = [];
+    const rootUserBucket = new Bucket(CONSTANT.WARE_NAME, RootUser._$info.name);
+    const iter = rootUserBucket.iter(null, true);
+    const publicApplyList = new PublicApplyList();
+    publicApplyList.list = [];
+    publicApplyList.total = 0;
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const rootUser: RootUser = v[1];
+        rootUser.pwd = '******';
+        userList.list.push(rootUser);
+    } while (iter);
+
+    return userList;
+};
+
+/**
+ * 设置好嗨客服
+ */
+// #[rpc=rpcServer]
+export const createHighAcc = (user: RootUser): number => {
+    const r:Result = setOfficialAccount(user.user, CHAT_APPID);
+    if (r.r === CONSTANT.RESULT_SUCCESS) {
+        
+        return createRoot(user);
+    }
+
+    return r.r;
+};
+
+/**
+ * 设置自动回复消息
+ */
+// #[rpc=rpcServer]
+export const setMsgReply = (arg: MessageReply): number => {
+    const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
+    if (messageReplyBucket.put(arg.key, arg)) {
+        
+        return CONSTANT.RESULT_SUCCESS;
+    }
+
+    return CONSTANT.DEFAULT_ERROR_NUMBER;
+};
+
+/**
+ * 获取自动消息回复
+ */
+// #[rpc=rpcServer]
+export const getMsgReply = (key: string): MessageReply => {
+    const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
+    const r = new MessageReply();
+    r.key = key;
+    r.msg = '';
+    const messageReply = messageReplyBucket.get<string, MessageReply>(key)[0];
+    if (messageReply) {
+        r.msg = messageReply.msg;
+    }
+
+    return r;
 };
 
 /**
@@ -414,6 +484,7 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     console.log('============handleApplyPublic:', arg);
     if (!getSession('root')) return 'not login';
     const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
+    const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
     const applyPublic = applyPublicBucket.get<number, ApplyPublic[]>(arg.id)[0];
     if (!applyPublic) return 'error id';
     if (applyPublic.state !== CONSTANT.PUBLIC_APPLYING) return 'error state';
@@ -422,10 +493,14 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     if (arg.result) {
         // 同意
         applyPublic.state = CONSTANT.PUBLIC_APPLY_SUCCESS;
+        // 添加公众号名称索引（公众号申请没有添加名称索引）
+        const publicNameIndex = new PublicNameIndex();
+        publicNameIndex.name = applyPublic.name;
+        publicNameIndex.num = applyPublic.num;
+        publicNameIndexBucket.put(publicNameIndex.name, publicNameIndex);
     } else {
         // 拒绝时清除公众号名索引
         applyPublic.state = CONSTANT.PUBLIC_APPLY_REFUSED;
-        const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
         const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(applyPublic.name)[0];
         if (publicNameIndex) publicNameIndexBucket.delete(applyPublic.name);
     }
@@ -434,8 +509,9 @@ export const handleApplyPublic = (arg: HandleApplyPublicArg): string => {
     addPublicComm(applyPublic.name, applyPublic.num, applyPublic.avatar, applyPublic.desc, applyPublic.uid, applyPublic.time);
     // 创建管理端账号
     const user = new RootUser();
-    user.user = applyPublic.num;
+    user.user = `${applyPublic.uid}@${applyPublic.num}`;
     user.pwd = randomWord(false, 6);
+    console.log('public acc user:', JSON.stringify(user));
     createRoot(user);
     // 推送结果
     send(applyPublic.uid, CONSTANT.SEND_PUBLIC_APPLY, JSON.stringify(arg));
@@ -519,8 +595,10 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
     const list = new OfficialAccList();
     list.list = [];
     const map = getUidAppMap();
+    console.log('getOfficialAcc!!!!!!!!!map:', JSON.stringify(map));
     do {
         const v = iter.next();
+        console.log('getOfficialAcc!!!!!!!!!v:', JSON.stringify(v));
         if (!v) break;
         const publicNameIndex: PublicNameIndex = v[1];
         const num = publicNameIndex.num;
@@ -534,6 +612,8 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
         officialUserInfo.app_id = map.get(uid);
         list.list.push(officialUserInfo);
     } while (iter);
+
+    console.log('getOfficialAcc!!!!!!!!!list:', JSON.stringify(list));
     
     return list;
 };

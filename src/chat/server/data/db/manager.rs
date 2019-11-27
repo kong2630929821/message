@@ -11,6 +11,15 @@ struct RootUser {
 }
 
 /**
+*自动回复消息设置
+*/
+#[primary=key,db=file,dbMonitor=true]
+struct MessageReply {
+    key: String,
+    msg: String
+}
+
+/**
 *惩罚
 */
 #[primary=id,db=file,dbMonitor=true]

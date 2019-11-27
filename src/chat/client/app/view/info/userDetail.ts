@@ -363,6 +363,10 @@ export class UserDetail extends Widget {
         switch (index) {
             case 0:
                 // 认证官方账号
+                popNew('chat-client-app-view-person-openPublic',{ chooseImage:false ,userInfo:this.props.userInfo },(r) => {
+                    this.props.pubNum = r;
+                    this.paint();
+                });
                 break;
             case 1:
                 // 修改备注

@@ -25,7 +25,7 @@
     </div>
     {{else}}
         <div style="height:100%" ev-exit="exit" ev-ok="ok">
-            <widget w-tag="chat-management-view-page-toBeProcessedInfo">{data:{{it.currentDataId}},state:{{it.returnStatus}},returnDeel:{{it.returnDeel}} }</widget>
+            <widget w-tag="chat-management-view-page-complaint-toBeProcessedInfo">{data:{{it.currentDataId}},state:{{it.returnStatus}},returnDeel:{{it.returnDeel}} }</widget>
         </div>
     {{end}}
 </div>

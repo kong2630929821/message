@@ -1,8 +1,8 @@
-import { popNew } from '../../../../pi/ui/root';
-import { Widget } from '../../../../pi/widget/widget';
-import { perPage } from '../../components/pagination';
-import { getAllPostList } from '../../net/rpc';
-import { rippleShow } from '../../utils/tools';
+import { popNew } from '../../../../../pi/ui/root';
+import { Widget } from '../../../../../pi/widget/widget';
+import { perPage } from '../../../components/pagination';
+import { getAllPostList } from '../../../net/rpc';
+import { rippleShow } from '../../../utils/tools';
 
 interface Props {
     sum:number;// 总页数

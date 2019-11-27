@@ -1,12 +1,14 @@
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { PostKey } from '../../server/data/db/community.s';
-import { HandleApplyPublicArg, handleArticleArg, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
+import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { createRoot, getApplyPublicList, getPostList, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin } from '../../server/data/rpc/manager.p';
+import { addApp, createHighAcc, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setMsgReply } from '../../server/data/rpc/manager.p';
+import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
-import { deelReportList, deelReportListInfo, timestampFormat } from '../utils/logic';
+import { erlangLogicIp } from '../config';
+import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -148,34 +150,6 @@ export const setReportHandled = (id:string) => {
     });
 };
 
-// 获取所有公众号审核列表
-export const getAllApplyPublicList = (count:number,state:number,id:number) => {
-    const arg = new PublicApplyListArg();
-    arg.state = state;
-    arg.count = count;
-    arg.id = id;
-
-    return new Promise((res,rej) => {
-        clientRpcFunc(getApplyPublicList,arg,(r:string) => {
-            res(r);
-        });
-    });
-};
-
-// 审核公众号
-export const setHandleApplyPublic = (result:boolean,reason:string,id:number) => {
-    const arg = new HandleApplyPublicArg();
-    arg.result = result;
-    arg.reason = reason;
-    arg.id = id;
-
-    return new Promise((res,rej) => {
-        clientRpcFunc(handleApplyPublic,arg,(r:boolean) => {
-            res(r);
-        });
-    });
-};
-
 // 解除处罚
 export const modifyPunishTime = (id:number,uid:number,time:number) => {
     const arg = new ModifyPunishArg();
@@ -198,6 +172,173 @@ export const reversePosts = (id:number,num:string) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(reversePost,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+// 添加应用
+export const addApplication = (arg:AddAppArg) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(addApp,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+// 获取全部游戏
+export const getAllGameList = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 获取热门
+export const getHotApp = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_hot_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 获取推荐
+export const getRecommendApp = () => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_recommend_app`).then(res => {
+        return res.json().then(r => {
+            return r.app_ids;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 获取全部游戏详情
+export const getAllGameInfo = (ids:string) => {
+    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
+        return res.json().then(r => {
+            const res = r.app_details;
+            const gameList = [];
+            res.forEach(v => {
+                const name = unicode2ReadStr(v[0]);
+                const img = JSON.parse(v[1]);
+                const desc = JSON.parse(v[2]);
+                const url = v[3];
+                desc.desc = unicode2ReadStr(desc.desc);
+                desc.subtitle = unicode2ReadStr(desc.subtitle);
+                gameList.push({
+                    ...desc,
+                    title:name,
+                    subtitle:desc.subtitle,
+                    img:[img.icon,img.rowImg,img.colImg,img.downLoadImg],
+                    url,
+                    time:timestampFormat(JSON.parse(desc.time))
+                });
+            });
+
+            return gameList;
+        }). catch (e => {
+            return [];
+        });
+      
+    });
+};
+
+// 编辑热门游戏和推荐游戏
+export const setAppHot = (appId:string,setType:number) => {
+    const arg = new SetAppConfig();
+    arg.cfg_type = setType; // 1表示热门推荐，2表示编辑推荐
+    arg.appids = appId;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(setAppConfig,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+// 待审核官方账号列表
+export const reviewOfficial = (id:number,count:number,state:number) => {
+    const arg = new PublicApplyListArg();
+    arg.id = id;
+    arg.count = count;
+    arg.state = state;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getApplyPublicList,arg,(r:any) => {
+            res(JSON.parse(r));
+        });
+    });
+};
+
+/**
+ * 处理待审核官方账号列表
+ */
+export const deelOfficial = (id:number,result:boolean,reason:string) => {
+    const arg = new HandleApplyPublicArg();
+    arg.id = id;
+    arg.result = result;
+    arg.reason = reason;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(handleApplyPublic,arg,(r:any) => {
+            res(JSON.parse(r));
+        });
+    });
+};
+
+// 获取官方账号列表
+export const getOfficialList = (appid:string = '') => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getOfficialAcc,appid,(r:any) => {
+            res(deelGetOfficialList(r));
+        });
+    });
+};
+
+// 获取用户信息
+export const getUserInfo = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getReportDetail,uid,(r:any) => {
+            res(deelUserInfo(JSON.parse(r)));
+        });
+    });
+};
+
+/**
+ * 设置好嗨客服
+ */
+export const setHaoHaiAcc = (user:string,pwd:string) => {
+    const arg = new RootUser();
+    arg.user = user;
+    arg.pwd = pwd;
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(createHighAcc,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
+ * 设置好嗨客服自动回复
+ */
+export const setAccMsgReply = (key:string,msg:string) => {
+    const arg = new MessageReply();
+    arg.key = key;
+    arg.msg = msg;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(setMsgReply,arg,(r:any) => {
             res(r);
         });
     });

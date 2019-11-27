@@ -17,11 +17,11 @@
         {{if it.active>=2}}
             <div w-class="gameTag">
                 <div w-class="gameBgBox">
-                    <div w-class="imgBg" style="background:url({{it.gameLabel.bg}})center"></div>
+                    <div w-class="imgBg" style="background:url({{it.buildupImgPath(it.gameLabel.bg) }})center"></div>
                     <div w-class="opacityBox"></div>
                 </div>
                 <div w-class="gameInfo">
-                    <img src="{{it.gameLabel.icon}}" alt="" w-class="gameIcon"/>
+                    <img src="{{it.buildupImgPath(it.gameLabel.icon)}}" alt="" w-class="gameIcon"/>
                     <div w-class="contentInfo">
                         <div w-class="gameName">{{it.gameLabel.name}}</div>
                         <div w-class="postNum">帖子 {{it.gameLabel.num}}</div>

@@ -48,11 +48,12 @@
 .btn{
     width:86px;
     height:36px;
-    border:1px solid rgba(0,0,0,0.1);
+    background: #1991EB;
+    border-radius: 4px;
     font-size:14px;
     font-family:SourceHanSansCN;
     font-weight:400;
-    color:rgba(53,64,82,1);
+    color: white;
     text-align: center;
     line-height: 36px;
     cursor: pointer;
