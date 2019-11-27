@@ -1,5 +1,6 @@
 #[path=../db/]
 use user.s::{UserInfo};
+#[path=../db/]
 use manager.s::{RootUser};
 
 // 管理端用户列表

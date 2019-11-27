@@ -8,8 +8,8 @@ import { add_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
 import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
-import * as CONSTANT from '../constant';
 import { CHAT_APPID } from '../constant';
+import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
 import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, MessageReply, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail } from '../db/manager.s';
 import { Report, ReportCount, ReportListTab } from '../db/message.s';
@@ -20,7 +20,7 @@ import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
 import { addPost } from './community.r';
 import { AddPostArg, PostData } from './community.s';
-import { AddAppArg, OfficialAccList, OfficialUserInfo, SetAppConfig, MgrUserList } from './manager.s';
+import { AddAppArg, MgrUserList, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
 import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
@@ -46,7 +46,7 @@ export const createRoot = (user: RootUser): number => {
  */
 // #[rpc=rpcServer]
 export const showUsers = (arg: string): MgrUserList => {
-    let userList = new MgrUserList();
+    const userList = new MgrUserList();
     userList.list = [];
     const rootUserBucket = new Bucket(CONSTANT.WARE_NAME, RootUser._$info.name);
     const iter = rootUserBucket.iter(null, true);
@@ -57,11 +57,12 @@ export const showUsers = (arg: string): MgrUserList => {
         const v = iter.next();
         if (!v) break;
         const rootUser: RootUser = v[1];
+        rootUser.pwd = '******';
         userList.list.push(rootUser);
     } while (iter);
 
     return userList;
-}
+};
 
 /**
  * 设置好嗨客服
@@ -83,7 +84,7 @@ export const createHighAcc = (user: RootUser): number => {
 // #[rpc=rpcServer]
 export const setMsgReply = (arg: MessageReply): number => {
     const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
-    if(messageReplyBucket.put(arg.key, arg)){
+    if (messageReplyBucket.put(arg.key, arg)) {
         
         return CONSTANT.RESULT_SUCCESS;
     }
@@ -97,18 +98,16 @@ export const setMsgReply = (arg: MessageReply): number => {
 // #[rpc=rpcServer]
 export const getMsgReply = (key: string): MessageReply => {
     const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
-    let r = new MessageReply();
+    const r = new MessageReply();
     r.key = key;
     r.msg = '';
-    let messageReply = messageReplyBucket.get<string, MessageReply>(key)[0];
-    if(messageReply){
+    const messageReply = messageReplyBucket.get<string, MessageReply>(key)[0];
+    if (messageReply) {
         r.msg = messageReply.msg;
     }
 
     return r;
 };
-
-
 
 /**
  * 管理员登陆
