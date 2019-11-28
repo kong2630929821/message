@@ -36,3 +36,11 @@ struct SetAppConfig {
     appids: String,     // 应用ID列表 "[\"1\", \"2\"]"
 }
 
+// 获取指定类型的文章
+struct GetpostTypeArg {
+    count: u32,     //获取数量
+    id: u32,       //指定key进行遍历
+    num: String,    // 社区编号
+    post_type: u32, //帖子类型
+}
+

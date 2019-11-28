@@ -543,6 +543,14 @@ export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
  */
 // #[rpc=rpcServer]
 export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
+    
+    return getUserPostHandle(arg, CONSTANT.NORMAL_STATE);
+};
+
+/**
+ * 获取指定社区编号的帖子
+ */
+export const getUserPostHandle = (arg: IterPostArg, postType: number): PostArrWithTotal => {
     // 获取的帖子id
     const postArrWithTotal = new PostArrWithTotal();
     postArrWithTotal.list = [];
@@ -560,7 +568,7 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
         postKey.id = communityPost.id_list[i];
         postKey.num = communityPost.num;
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
-        if (post.state !== CONSTANT.NORMAL_STATE) continue; // 帖子已删除
+        if (post.state !== postType) continue; // 排除非指定类型
         post_id_list.push(postKey);
         postArrWithTotal.total ++;
     }

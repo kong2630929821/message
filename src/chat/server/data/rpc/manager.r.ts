@@ -4,7 +4,7 @@
 
 import { getSession } from '../../../../pi_pt/util/autologin.r';
 import { Bucket } from '../../../utils/db';
-import { add_app, set_app_config, del_app } from '../../../utils/oauth_lib';
+import { add_app, del_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
 import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
@@ -18,9 +18,9 @@ import * as ERROR_NUM from '../errorNum';
 import { getIndexID } from '../util';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
-import { addPost } from './community.r';
-import { AddPostArg, PostData } from './community.s';
-import { AddAppArg, MgrUserList, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
+import { addPost, getUserPostHandle } from './community.r';
+import { AddPostArg, IterPostArg, PostArrWithTotal, PostData } from './community.s';
+import { AddAppArg, GetpostTypeArg, MgrUserList, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
 import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
@@ -412,6 +412,19 @@ export const getPostList = (arg: PostListArg): string => {
     postList.total = managerPostList.list.length;
 
     return JSON.stringify(postList);
+};
+
+/**
+ * 获取指定类型的文章
+ */
+// #[rpc=rpcServer]
+export const getPostType = (arg: GetpostTypeArg): PostArrWithTotal => {
+    const iterPostArg = new IterPostArg();
+    iterPostArg.id = arg.id;
+    iterPostArg.count = arg.count;
+    iterPostArg.num = arg.num;
+    
+    return getUserPostHandle(iterPostArg, arg.post_type);
 };
 
 /**
