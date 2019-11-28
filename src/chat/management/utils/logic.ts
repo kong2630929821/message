@@ -5,6 +5,7 @@ import { uploadFileUrlPrefix } from '../../../app/public/config';
 import { popNew } from '../../../pi/ui/root';
 import { buildupImgPath } from '../../client/app/logic/logic';
 import { EMOJIS_MAP } from '../../client/app/widget1/emoji/emoji';
+import { HAOHAIACC } from '../config';
 import { getStore } from '../store/memstore';
 
 /**
@@ -481,13 +482,32 @@ export const deelGetOfficialList = (r:any) => {
         // 查找应用名
         const appList =  getStore('appList');
         const item = appList.find(item => item.appid === v.app_id); 
-        const appName = item ? item.title :'无';
+        let appName = item ? item.title :'无';
+        if (v.app_id === HAOHAIACC) {
+            appName = '好嗨客服';
+        }
         data.push([v.user_info.name,v.user_info.acc_id,v.user_info.tel ? v.user_info.tel :'无',timestampFormat(JSON.parse(v.create_time)),appName]);
     });
 
     return { data:r.list,tableData:data };
 };
 
-export const deelUserInfo = (r:any) => {
-    debugger;
+/**
+ * 处理用户详情的举报信息
+ */
+export const deelUserInfoReport = (r:any) => {
+    const res = JSON.parse(r.msg).list;
+    const data = [];
+    if (res.length === 0) {
+        return [data,[]];
+    }
+    res.forEach(v => {
+        const reportType = REPORTTITLE[REPORT[JSON.parse(v.key.split('%')[0])]];
+        const reason = JSON.parse(JSON.parse(v.reason).type).join(',');
+        const time = timestampFormat(JSON.parse(v.handle_time));
+        const nowPublish = v.now_publish ? penaltyText([v.now_publish],reportType).split(' ')[0] :'无';
+        data.push([reportType,reason,time,nowPublish]);
+    });
+
+    return [data,res];
 };

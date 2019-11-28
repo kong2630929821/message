@@ -1,7 +1,8 @@
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
-import { getUserInfo } from '../../../net/rpc';
+import { getReportUserInfo } from '../../../net/rpc';
+import { deepCopy } from '../../../store/memstore';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -15,6 +16,11 @@ interface Props {
     dataList:any;// 全部数据
     official:string;// 官方
     uid:number;
+    punish:any;// 当前惩罚
+    status:boolean;// 是否展示2级页面
+    list:any[];// 原始数据
+    reportId:number;// 举报ID
+    reportType:number;// 举报的类型
 }
 
 /**
@@ -31,7 +37,12 @@ export class UserInfo extends Widget {
         showTitleList:['被投诉类别','被投诉原因','处理时间','处理结果'],
         dataList:[['','','','']],
         official:'',
-        uid:0
+        uid:0,
+        punish:{},
+        status:false,
+        list:[],
+        reportId:0,
+        reportType:0
     };
 
     public setProps(props:any) {
@@ -41,13 +52,19 @@ export class UserInfo extends Widget {
         };
         super.setProps(this.props);
         this.initData(props.official);
-        this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
     }
 
     // 初始化数据
     public initData(official?:string) {
-        getUserInfo(this.props.uid).then(r => {
-            debugger;
+
+        // 当前惩罚
+        
+        // 获取被举报信息
+        getReportUserInfo(this.props.uid).then(r => {
+            this.props.dataList = r[0];
+            this.props.list = r[1];
+            this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+            this.paint();
         });
     }
 
@@ -88,5 +105,15 @@ export class UserInfo extends Widget {
     // 返回
     public goBack(fg:boolean,e:any) {
         notify(e.node,'ev-goBack',{ fg });
+    }
+
+    // 表格查看详情
+    public goDetail(e:any) {
+        const index = e.num;
+        this.props.status = true;
+        const currentData = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]);
+        this.props.reportId = currentData.id;
+        this.props.reportType = JSON.parse(currentData.key.split('%')[0]);
+        this.paint();
     }
 }

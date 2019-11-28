@@ -83,6 +83,7 @@ struct ReportIndexList {
 */
 struct UserReportIndex {
     key: String,                //根据举报类型定位到具体的人/公众号/帖子/评论
+    id: u32,                    //举报ID
     user_name: String,          //用户名
     reason: String,             //举报原因
     handle_time: String,        //处理时间

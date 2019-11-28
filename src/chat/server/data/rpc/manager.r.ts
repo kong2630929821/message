@@ -8,7 +8,6 @@ import { add_app, del_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
 import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
-import { CHAT_APPID } from '../constant';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
 import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, MessageReply, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail, UserReportIndex, UserReportIndexList } from '../db/manager.s';
@@ -87,7 +86,7 @@ export const showUsers = (arg: string): MgrUserList => {
  */
 // #[rpc=rpcServer]
 export const createHighAcc = (user: RootUser): number => {
-    const r:Result = setOfficialAccount(user.user, CHAT_APPID);
+    const r:Result = setOfficialAccount(user.user, CONSTANT.CHAT_APPID);
     if (r.r === CONSTANT.RESULT_SUCCESS) {
         
         return createRoot(user);
@@ -233,8 +232,10 @@ export const getReportDetail = (uid: number): getReportListR => {
         console.log('============report:', report);
         if (report) {
             const reportIndex = new UserReportIndex();
+            reportIndex.key = report.key;
             reportIndex.reason = report.reason;
             reportIndex.handle_time = report.handle_time;
+            reportIndex.id = report.id;
             if (report.punish_id !== 0) {
                 const nowPunish = punishBucket.get<number, Punish[]>(report.punish_id)[0];
                 reportIndex.now_publish = nowPunish;
@@ -641,6 +642,7 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
         const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
         officialUserInfo.user_info = userInfo;
         officialUserInfo.app_id = map.get(uid);
+        officialUserInfo.now_publish = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${uid}`, CONSTANT.BAN_ACCOUNT).list;
         list.list.push(officialUserInfo);
     } while (iter);
 
@@ -650,22 +652,31 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
 };
 
 /**
- * 获取官方账号绑定的应用
+ * 搜索用户
  */
-export const getUidAppMap = (): Map<number, string> => {
-    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
-    const iter = officialBucket.iter(null, true);
-    const map = new Map();
-    do {
-        const v = iter.next();
-        if (!v) break;
-        const officialUsers: OfficialUsers = v[1];
-        officialUsers.uids.forEach((uid) => {
-            map.set(uid, officialUsers.appId);
-        });
-    } while (iter);
-
-    return map;
+// #[rpc=rpcServer]
+export const findUser = (user: string): OfficialAccList => {
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const list = new OfficialAccList();
+    list.list = [];
+    const officialUserInfo =  new OfficialUserInfo();
+    // 获取uid绑定的app
+    const map = getUidAppMap();
+    console.log('findUser!!!!!!!!!map:', JSON.stringify(map));
+    const uid = getRealUid(user);
+    if (uid < 0) return list;
+    const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
+    // 获取社区注册时间
+    const communityBase = communityBaseBucket.get<string, CommunityBase[]>(userInfo.comm_num)[0];
+    officialUserInfo.create_time = communityBase.createtime;
+    officialUserInfo.app_id = map.get(uid);
+    officialUserInfo.user_info = userInfo;
+    officialUserInfo.now_publish = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${uid}`, CONSTANT.BAN_ACCOUNT).list;
+    list.list.push(officialUserInfo);
+    console.log('findUser!!!!!!!!!list:', JSON.stringify(list));
+    
+    return list;
 };
 
 /**
@@ -1290,4 +1301,23 @@ export const formatDuring = (mss: number) => {
     const seconds = (mss % (1000 * 60)) / 1000;
     
     return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
+};
+
+/**
+ * 获取官方账号绑定的应用
+ */
+export const getUidAppMap = (): Map<number, string> => {
+    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const iter = officialBucket.iter(null, true);
+    const map = new Map();
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const officialUsers: OfficialUsers = v[1];
+        officialUsers.uids.forEach((uid) => {
+            map.set(uid, officialUsers.appId);
+        });
+    } while (iter);
+
+    return map;
 };
