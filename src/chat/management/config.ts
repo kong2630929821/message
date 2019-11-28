@@ -39,3 +39,6 @@ export const WELCOME = 'welcome';
 
 // 举报内容回复
 export const REPORTREPLY = 'notice';
+
+// 好嗨客服APPid
+export const HAOHAIACC = '10';

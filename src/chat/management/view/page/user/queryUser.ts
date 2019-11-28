@@ -15,6 +15,10 @@ interface Props {
     perPageIndex:number;// 每页显示多少个的下标
     showDataList:any[];
     input:string;// 搜索值
+    list:any[];// 原始数据
+    status:boolean;// 是否展示二级页面
+    official:string;// 官方
+    uid:number;
 }
 
 /**
@@ -32,7 +36,11 @@ export class QueryUser extends Widget {
         expandIndex:false,
         perPageIndex:0,
         showDataList:[],
-        input:''
+        input:'',
+        list:[],
+        status:false,
+        official:'',
+        uid:0
     };
 
     public inputChange(e:any) {
@@ -49,8 +57,11 @@ export class QueryUser extends Widget {
             return;
         }
 
-        queryUser(this.props.input).then(r => {
-            debugger;
+        queryUser(this.props.input).then((r:any) => {
+            this.props.list = r.data;
+            this.props.dataList = r.tableData;
+            this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+            this.paint();
         });
     }
     // 重置页面的展开状态
@@ -91,7 +102,20 @@ export class QueryUser extends Widget {
     // 表格查看详情
     public goDetail(e:any) {
         const index = e.num;
+        this.props.status = true;
         const currentData = deepCopy(this.props.dataList[this.props.currentIndex * this.props.perPage + index]);
+        this.props.official = currentData[currentData.length - 1] === '无' ? '' :currentData[currentData.length - 1];
+        this.props.uid = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]).user_info.uid;
+        this.paint();
+    }
+
+        // 返回
+    public goBack(e:any) {
+            // fg判斷是否需要刷新頁面數據
+        if (e.fg) {
+            this.search();
+        }
+        this.props.status = false;
         this.paint();
     }
 }

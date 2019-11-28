@@ -1,7 +1,6 @@
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
-import { getUserInfo } from '../../../net/rpc';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -46,9 +45,7 @@ export class UserInfo extends Widget {
 
     // 初始化数据
     public initData(official?:string) {
-        getUserInfo(this.props.uid).then(r => {
-            debugger;
-        });
+        debugger;
     }
 
     // 重置页面的展开状态

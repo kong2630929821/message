@@ -4,7 +4,7 @@ import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, 
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { addApp, createHighAcc, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
+import { addApp, createHighAcc, createRoot, findUser, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { searchFriend } from '../../server/data/rpc/user.p';
@@ -367,8 +367,8 @@ export const changePwd = (user:string,pwd:string) => {
  */
 export const queryUser = (user:string) => {
     return new Promise((res,rej) => {
-        clientRpcFunc(searchFriend,user,(r:any) => {
-            res(r);
+        clientRpcFunc(findUser,user,(r:any) => {
+            res(deelGetOfficialList(r));
         });
     });
 };

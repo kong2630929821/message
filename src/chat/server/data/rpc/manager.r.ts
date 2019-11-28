@@ -636,6 +636,33 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
 };
 
 /**
+ * 搜索用户
+ */
+// #[rpc=rpcServer]
+export const findUser = (user: string): OfficialAccList => {
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const list = new OfficialAccList();
+    list.list = [];
+    const officialUserInfo =  new OfficialUserInfo();
+    // 获取uid绑定的app
+    const map = getUidAppMap();
+    console.log('findUser!!!!!!!!!map:', JSON.stringify(map));
+    const uid = getRealUid(user);
+    if (uid < 0) return list;
+    const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
+    // 获取社区注册时间
+    const communityBase = communityBaseBucket.get<string, CommunityBase[]>(userInfo.comm_num)[0];
+    officialUserInfo.create_time = communityBase.createtime;
+    officialUserInfo.app_id = map.get(uid);
+    officialUserInfo.user_info = userInfo;
+    list.list.push(officialUserInfo);
+    console.log('findUser!!!!!!!!!list:', JSON.stringify(list));
+    
+    return list;
+};
+
+/**
  * 调整用户惩罚时间
  */
 // #[rpc=rpcServer]

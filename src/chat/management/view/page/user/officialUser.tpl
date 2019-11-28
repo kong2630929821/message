@@ -1,4 +1,4 @@
-<div w-class="page">
+<div w-class="page" on-tap="close">
     {{if !it.status}}
         <div w-class="table" ev-table-detail="goDetail" style="margin-top:37px;">
             <div w-class="tableTitle">数据列表</div>
