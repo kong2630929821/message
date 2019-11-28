@@ -418,7 +418,7 @@ export const setOfficial = (app_id:string,acc_id:string) => {
 
     return new Promise((res,rej) => {
         clientRpcFunc(setGmAccount,arg,(r:any) => {
-            res(r);
+            res(r.r);
         });
     });
 };

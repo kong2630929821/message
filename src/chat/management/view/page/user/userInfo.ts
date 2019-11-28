@@ -3,8 +3,9 @@ import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { perPage } from '../../../components/pagination';
-import { getReportUserInfo, getUserDetail, setCancelOfficial, setOfficial } from '../../../net/rpc';
-import { deepCopy, getStore } from '../../../store/memstore';
+import { HAOHAIACC } from '../../../config';
+import { getReportUserInfo, getUserDetail, modifyPunishTime, setCancelOfficial, setOfficial } from '../../../net/rpc';
+import { deepCopy, getStore, setStore } from '../../../store/memstore';
 import { popNewMessage } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
@@ -26,6 +27,8 @@ interface Props {
     reportType:number;// 举报的类型
     userInfo:any;// 用户信息
     buildupImgPath:any;  // 组装图片路径
+    appId:string;//
+    key:string;// 处罚的key
 
 }
 
@@ -64,7 +67,9 @@ export class UserInfo extends Widget {
             nowPublish:'',
             id:0
         },
-        buildupImgPath:buildupImgPath
+        buildupImgPath:buildupImgPath,
+        appId:'',
+        key:''
     };
 
     public setProps(props:any) {
@@ -73,15 +78,29 @@ export class UserInfo extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.initData();
+        this.props.appId = deepCopy(this.props.official);
+        this.initData(props.official);
     }
 
     // 初始化数据
-    public initData() {
+    public initData(official?:string) {
+        // 判断官方
+        if (official) {
+            const appList = getStore('appList',[]);
+            appList.forEach(v => {
+                if (v.appid === official) {
+                    this.props.official = v.title;
+                }
+            });
 
+            if (official === HAOHAIACC) {
+                this.props.official = '好嗨客服';
+            }
+        }
         // 用户信息
-        getUserDetail(this.props.uid).then((r:string) => {
-            this.props.userInfo = JSON.parse(r);
+        getUserDetail(this.props.uid).then((r:any) => {
+            this.props.userInfo = r[0];
+            this.props.key = r[1];
             this.paint();
         });
         
@@ -169,9 +188,12 @@ export class UserInfo extends Widget {
                     this.props.official = '';
                     popNewMessage('取消官方认证成功');
                     const appList = getStore('appList',[]);
-                    appList.forEach((v,i)=>{
-                        if(v.appid)
-                    })
+                    appList.forEach((v,i) => {
+                        if (v.appid === this.props.appId) {
+                            appList[i].acc_id = this.props.userInfo.acc_id;
+                        }
+                    });
+                    setStore('appList',appList);
                     this.paint();
                     this.goBack(true,e);
                 } else {
@@ -188,12 +210,47 @@ export class UserInfo extends Widget {
                 if (r === 1) {
                     this.props.official = '';
                     popNewMessage('设置成功');
+                    const appList = getStore('appList',[]);
+                    appList.forEach((v,i) => {
+                        if (v.appid === appId) {
+                            appList[i].acc_id = this.props.userInfo.acc_id;
+                        }
+                    });
+                    setStore('appList',appList);
                     this.paint();
                     this.goBack(true,e);
                 } else {
                     popNewMessage('设置失败');
                 }
             });
+        });
+    }
+
+    // 解除处罚
+    public freed() {
+        popNew('chat-management-components-confirmBox',{ title:'解除惩罚',invalid:-1 },() => {
+            modifyPunishTime(this.props.userInfo.id,this.props.uid,0).then(r => {
+                if (r) {
+                    popNewMessage('解除处罚成功');
+                    this.initData();
+                } else {
+                    popNewMessage('解除处罚失败');
+                }
+            });
+        });
+    }
+
+    // 处理用户
+    public deel() {
+        const userInfo = {
+            id:this.props.userInfo.acc_id,
+            name:this.props.userInfo.name,
+            sex:this.props.userInfo.sex,
+            key:this.props.key
+        };
+        const punishment = { key:'当前惩罚',value:this.props.userInfo.nowPublish };
+        popNew('chat-management-components-reportBox',{ userInfo,punishment },() => {
+            this.initData();
         });
     }
 }

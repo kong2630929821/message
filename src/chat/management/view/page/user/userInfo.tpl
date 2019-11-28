@@ -43,8 +43,8 @@
                     <div w-class="rowItem">
                         <div>当前惩罚：{{it.userInfo.nowPublish?it.userInfo.nowPublish:'无'}}</div>
                         {{if it.userInfo.nowPublish != '' }}
-                            <div w-class="btn">解除惩罚</div>
-                            <div w-class="btn">处理玩家</div>
+                            <div w-class="btn" on-tap="freed">解除惩罚</div>
+                            <div w-class="btn" on-tap="deel">处理玩家</div>
                         {{end}}
                     </div>
                 </div>

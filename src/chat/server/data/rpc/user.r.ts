@@ -527,6 +527,7 @@ export const setOfficialAccount = (accId:string,appId:string): Result => {
     userinfo.level = VIP_LEVEL.VIP5;
     userInfoBucket.put(uid, userinfo);
     result.r = CONSTANT.RESULT_SUCCESS;
+    console.log('==============================set_gmAccount result:',JSON.stringify(result));
 
     return result;
 };
