@@ -1,4 +1,5 @@
 <div w-class="page">
+    {{if !it.status}}
     <div w-class="goBack(false,e)">返回上一页</div>
     <div w-class="userInfoBox">
         <div w-class="userInfoTitle">用户信息</div>
@@ -43,4 +44,9 @@
             <widget w-tag="chat-management-components-pagination">{pages:{{Math.ceil(it.sum/ it.perPage)}},filterShow:true,currentIndex:{{it.currentIndex}},expand:{{it.expandIndex}},numberCheckActiveIndex:{{it.perPageIndex}} }</widget>
         </div>
     </div>
+    {{else}}
+    <div style="height:100%" ev-exit="exit" ev-ok="ok">
+        <widget w-tag="chat-management-view-page-complaint-toBeProcessedInfo">{data:{{it.reportId}},state:{{it.reportType}},returnDeel:1 }</widget>
+    </div>
+    {{end}}
 </div>

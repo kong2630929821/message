@@ -491,3 +491,23 @@ export const deelGetOfficialList = (r:any) => {
 
     return { data:r.list,tableData:data };
 };
+
+/**
+ * 处理用户详情的举报信息
+ */
+export const deelUserInfoReport = (r:any) => {
+    const res = JSON.parse(r.msg).list;
+    const data = [];
+    if (res.length === 0) {
+        return [data,[]];
+    }
+    res.forEach(v => {
+        const reportType = REPORTTITLE[REPORT[JSON.parse(v.key.split('%')[0])]];
+        const reason = JSON.parse(JSON.parse(v.reason).type).join(',');
+        const time = timestampFormat(JSON.parse(v.handle_time));
+        const nowPublish = v.now_publish ? penaltyText([v.now_publish],reportType).split(' ')[0] :'无';
+        data.push([reportType,reason,time,nowPublish]);
+    });
+
+    return [data,res];
+};

@@ -19,6 +19,7 @@ interface Props {
     status:boolean;// 是否展示二级页面
     official:string;// 官方
     uid:number;
+    punish:any;// 当前惩罚
 }
 
 /**
@@ -40,7 +41,8 @@ export class QueryUser extends Widget {
         list:[],
         status:false,
         official:'',
-        uid:0
+        uid:0,
+        punish:{}
     };
 
     public inputChange(e:any) {
@@ -106,12 +108,13 @@ export class QueryUser extends Widget {
         const currentData = deepCopy(this.props.dataList[this.props.currentIndex * this.props.perPage + index]);
         this.props.official = currentData[currentData.length - 1] === '无' ? '' :currentData[currentData.length - 1];
         this.props.uid = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]).user_info.uid;
+        this.props.punish = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]).now_publish;
         this.paint();
     }
 
-        // 返回
+    // 返回
     public goBack(e:any) {
-            // fg判斷是否需要刷新頁面數據
+    // fg判斷是否需要刷新頁面數據
         if (e.fg) {
             this.search();
         }

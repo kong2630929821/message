@@ -7,9 +7,8 @@ import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s
 import { addApp, createHighAcc, createRoot, findUser, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
-import { searchFriend } from '../../server/data/rpc/user.p';
 import { erlangLogicIp } from '../config';
-import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
+import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, deelUserInfoReport, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -126,6 +125,7 @@ export const getAllReportInfo = (ids:any,state:number) => {
         });
     });
 };
+
 // 惩罚指定对象
 export const setPunish = (key:string,punish_type:number,time:number) => {
     const arg = new PunishArg();
@@ -362,6 +362,7 @@ export const changePwd = (user:string,pwd:string) => {
         });
     });
 };
+
 /**
  * 查询用户
  */
@@ -369,6 +370,17 @@ export const queryUser = (user:string) => {
     return new Promise((res,rej) => {
         clientRpcFunc(findUser,user,(r:any) => {
             res(deelGetOfficialList(r));
+        });
+    });
+};
+
+/**
+ * 获取指定用户的举报详情
+ */
+export const getReportUserInfo = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getReportDetail,uid,(r:any) => {
+            res(deelUserInfoReport(r));
         });
     });
 };

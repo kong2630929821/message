@@ -11,6 +11,7 @@ import { genUserHid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
 import { buildupImgPath, complaintUser, getUserAlias,  getUserAvatar, NOTICESET } from '../../logic/logic';
+import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
 import { unSubscribeUserInfo } from '../../net/subscribedb';
@@ -319,7 +320,7 @@ export class Setting extends Widget {
         const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
         const avatar = this.props.userInfo.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
         const key = `${REPORT_PERSON}%${this.props.uid}`;
-        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg,REPORT_PERSON,key);
+        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg,REPORT_PERSON,key,this.props.uid);
     }
 
     /**

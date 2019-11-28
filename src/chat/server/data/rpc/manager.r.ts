@@ -232,8 +232,10 @@ export const getReportDetail = (uid: number): getReportListR => {
         console.log('============report:', report);
         if (report) {
             const reportIndex = new UserReportIndex();
+            reportIndex.key = report.key;
             reportIndex.reason = report.reason;
             reportIndex.handle_time = report.handle_time;
+            reportIndex.id = report.id;
             if (report.punish_id !== 0) {
                 const nowPunish = punishBucket.get<number, Punish[]>(report.punish_id)[0];
                 reportIndex.now_publish = nowPunish;
@@ -627,6 +629,7 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
         const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
         officialUserInfo.user_info = userInfo;
         officialUserInfo.app_id = map.get(uid);
+        officialUserInfo.now_publish = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${uid}`, CONSTANT.BAN_ACCOUNT).list;
         list.list.push(officialUserInfo);
     } while (iter);
 
@@ -656,6 +659,7 @@ export const findUser = (user: string): OfficialAccList => {
     officialUserInfo.create_time = communityBase.createtime;
     officialUserInfo.app_id = map.get(uid);
     officialUserInfo.user_info = userInfo;
+    officialUserInfo.now_publish = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${uid}`, CONSTANT.BAN_ACCOUNT).list;
     list.list.push(officialUserInfo);
     console.log('findUser!!!!!!!!!list:', JSON.stringify(list));
     

@@ -11,7 +11,7 @@
         </div>
     {{else}}
         <div ev-goBack="goBack">
-            <widget w-tag="chat-management-view-page-user-userInfo">{official:{{it.official}},uid:{{it.uid}} }</widget>
+            <widget w-tag="chat-management-view-page-user-userInfo">{official:{{it.official}},uid:{{it.uid}},punish:{{it.punish}} }</widget>
         </div>
     {{end}}
 </div>
