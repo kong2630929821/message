@@ -2,7 +2,7 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, Report, ReportCount, ReportListTab, UserHistory, UserMsg } from '../db/message.s';
+import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, Report, ReportCount, ReportListTab, UserHistory, UserMsg, UserReportKeyTab } from '../db/message.s';
 import { Result } from './basic.s';
 import { GroupSend, HistoryCursor, ReportArg, SendMsg, TempSend, UserSend } from './message.s';
 
@@ -503,6 +503,7 @@ export const report = (arg: ReportArg): number => {
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
     const reportListTabBucket = new Bucket(CONSTANT.WARE_NAME, ReportListTab._$info.name);
+    const userReportKeyTabBucket = new Bucket(CONSTANT.WARE_NAME, UserReportKeyTab._$info.name);
     const uid = getUid();
     // 添加举报记录
     const report = new Report();
@@ -514,7 +515,7 @@ export const report = (arg: ReportArg): number => {
     report.ruid = uid;
     report.time = Date.now().toString(); 
     report.handle_time = '0';
-    report.state = 0;
+    report.punish_id = 0;
     reportBucket.put(report.id, report);
     // 添加被举报人统计信息
     let reportCount = reportCountBucket.get<string, ReportCount[]>(report.key)[0];
@@ -529,6 +530,14 @@ export const report = (arg: ReportArg): number => {
     reportCount.reported.unshift(report.id);
     reportCount.not_handled_reported.unshift(report.id);
     reportCountBucket.put(reportCount.key, reportCount);
+    let userReportKey = userReportKeyTabBucket.get<number, UserReportKeyTab[]>(arg.reported_uid)[0];
+    if (!userReportKey) {
+        userReportKey = new UserReportKeyTab();
+        userReportKey.uid = arg.reported_uid;
+        userReportKey.key_list = [];
+    }
+    userReportKey.key_list.push(report.id);
+    userReportKeyTabBucket.put(arg.reported_uid, userReportKey);
     // 添加举报人统计信息
     let reportCount1 = reportCountBucket.get<string, ReportCount[]>(`${CONSTANT.REPORT_PERSON}%${uid}`)[0];
     if (!reportCount1) {

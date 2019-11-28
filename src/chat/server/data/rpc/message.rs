@@ -51,6 +51,7 @@ struct ReportArg {
     report_type: u8,     //举报类型
     reason: String,      //举报原因
     evidence: String,    //证据
+    reported_uid: u32,   //被举报人uid
 }
 
 //获取举报列表
