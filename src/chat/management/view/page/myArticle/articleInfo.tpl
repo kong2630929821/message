@@ -3,6 +3,7 @@
         <div w-class="leftBox">
             <div w-class="back">返回上一页</div>
             <div w-class="title">多元化的内容生态离不开每一位创作者的直播梦想和辛勤创作。</div>
+            <div>这里是文章内容</div>
             <div w-class="createTime">
                 <div>上次编辑时间：2015-12-12</div>
                 <div w-class="zan">

@@ -1,16 +1,19 @@
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
+import { getFile, initFileStore, writeFile } from '../../../../client/app/data/lcstore';
 import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { uploadFile } from '../../../../client/app/net/upload';
 import { maxSize } from '../../../config';
 import { sendActicle } from '../../../net/rpc';
+import { getStore, setStore } from '../../../store/memstore';
 import { popNewMessage } from '../../../utils/logic';
-
 interface Props {
+    data: any;
     title:string;// 文章标题
     bannerImg:string;// 文章banner
     upLoadIng:boolean;// 正在上传图片
     buildupImgPath:any;// 图片路径
+    draftArry:any[];// 草稿文章数组 
 }
 
 /**
@@ -22,9 +25,38 @@ export class NewArticle extends Widget {
         title:'',
         bannerImg:'',
         upLoadIng:false,
-        buildupImgPath:buildupImgPath
+        buildupImgPath:buildupImgPath,
+        draftArry:[],
+        data:{}
     };
-
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+        const currentData = this.props.data;
+        console.log(currentData);
+        this.init(currentData);
+        
+    }
+    // 初始化数据
+    public init (data?:any) {
+        // const editer = document.querySelector('#editBox');
+        // const msg = editer.innerHTML;
+        // tslint:disable-next-line:no-inner-html
+        // editer.innerHTML = data ? data.msg :'';
+        console.log(data);
+        this.props = {
+            title:data ? data.title : '',
+            bannerImg: data ? data.bannerImg : '',
+            upLoadIng:false,
+            buildupImgPath:buildupImgPath,
+            draftArry:[],
+            data:{}
+        };
+        this.paint();
+    }
     /**
      * 文章标题
      */
@@ -123,8 +155,17 @@ export class NewArticle extends Widget {
             msg,
             imgs:[this.props.bannerImg]
         };
-        sendActicle(this.props.title, 0, this.props.title,JSON.stringify(value)).then((res:any) => {
-            debugger;
+        const num = getStore('flags',{}).num;
+        sendActicle(num, 0, this.props.title,JSON.stringify(value)).then((res:any) => {
+            if (res.num === num) {
+                popNewMessage('提交成功');
+                this.props.title = '';
+                this.props.bannerImg = '';
+                editer.innerHTML = '';
+                this.paint();
+            } else {
+                popNewMessage('提交失败');
+            }
         });
         
     }
@@ -132,6 +173,7 @@ export class NewArticle extends Widget {
      * 保存草稿
      */
     public saveAsDraft() {
+
         const editer = document.querySelector('#editBox');
         const msg = editer.innerHTML;
         if (!this.props.title) {
@@ -151,6 +193,50 @@ export class NewArticle extends Widget {
 
             return;
         }
+        const draft = {
+            title : this.props.title,
+            msg: msg,
+            bannerImg : this.props.bannerImg,
+            time: this.getDate()
+        };
+        // 获取当前indexdb中的草稿内容
+        const tempDraftArray = this.props.draftArry;
+        // 控制数组长度为六
+        while (tempDraftArray.length > 5) {
+            tempDraftArray.pop;
+        }
+        // 放入当前草稿内容
+        tempDraftArray.push(draft);
+        setStore('draft',tempDraftArray);
+        this.props.title = '';
+        this.props.bannerImg = '';
+        editer.innerHTML = '';
+        this.paint();
+    }
+    public const getDate = () => {
+        const date = new Date();
         
+        // 获取当前月份
+        const nowMonth = date.getMonth() + 1;
+
+        // 获取当前是几号
+        const strDate = date.getDate();
+
+        // 添加分隔符“-”
+        const seperator = '-';
+
+        // 对月份进行处理，1-9月在前面添加一个“0”
+        if (nowMonth >= 1 && nowMonth <= 9) {
+            nowMonth = '0' + nowMonth;
+        }
+
+        // 对月份进行处理，1-9号在前面添加一个“0”
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = '0' + strDate;
+        }
+
+        // 最后拼接字符串，得到一个格式为(yyyy-MM-dd)的日期
+
+        return  date.getFullYear() + seperator + nowMonth + seperator + strDate;
     }
 }

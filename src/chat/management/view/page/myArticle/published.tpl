@@ -1,7 +1,8 @@
 <div w-class="page" on-tap="close">
+    {{if !it.isDetail}}
     <div w-class="list">
         {{for i,v of it.showDataList}}
-            <div w-class="draft">
+            <div w-class="draft" on-tap="goDataills({{i}})">
                 <img  src="{{v.banner}}" w-class="banner" />
                 <div w-class="info">
                     <div w-class="title">{{v.title}}</div>
@@ -23,4 +24,9 @@
             <widget w-tag="chat-management-components-pagination">{pages:{{Math.ceil(it.sum/ it.perPage)}},filterShow:true,currentIndex:{{it.currentIndex}},expand:{{it.expandIndex}},numberCheckActiveIndex:{{it.perPageIndex}} }</widget>
         </div>
     </div>
+    {{else}}
+    <div>
+        <widget w-tag ="chat-management-view-page-myArticle-articleInfo">{{it.currentData}}</widget>
+    </div>
+    {{end}}
 </div>

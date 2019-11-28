@@ -1419,6 +1419,7 @@ export const getFollowUserPost = (arg: IterPostArg) :PostArr => {
 /**
  *  获取关注公众号的帖子
  */
+// #[rpc=rpcServer]
 export const getFollowPublicPost = (arg: IterPostArg) :PostArr => {
     const uid = getUid();
     // 获取关注的公众号

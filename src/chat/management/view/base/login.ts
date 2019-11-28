@@ -4,13 +4,14 @@ import { createRootTest, getAllGameInfo, getAllGameList, getHotApp, getRecommend
 import { setStore } from '../../store/memstore';
 import { popNewMessage } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';
+
 /**
  * 登陆
  */
 export class Login extends Widget {
     public props:any = {
-        name:'',
-        pwd:''
+        name:'10018@55',
+        pwd:'6UJVPN'
     };
 
     public nameChange(e:any) {
@@ -103,5 +104,16 @@ export class Login extends Widget {
 
         // 进入管理端
         popNew('chat-management-view-base-home');
+        
+        const num = this.props.name.split('@');
+        // 判断当前登录用户是否为官方账号包含@符号的则为官方账号,将@前面的部分作为uid存进store
+        if (num[1]) {
+            setStore('flags/num',num[1]);
+            setStore('uid',num[0]);
+        } else {
+            setStore('flags/num',0);
+        }
+        
     }
+
 }

@@ -1,5 +1,7 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
+import { getPubActicle } from '../../../net/rpc';
+import { getStore } from '../../../store/memstore';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -115,5 +117,17 @@ export class NotReviewed extends Widget {
         this.props.expandIndex = false;
         this.pageChange({ value:0 });   
         this.paint();  
+    }
+
+    // 获取当前登录账号所发布的所有帖子
+    public getPosts() {
+        const num = getStore('flags/num');
+
+        getPubActicle(10,0,num).then((res:any) => {
+            console.log(res.list[0].title);
+            this.props.dataList = res.list;
+            console.log(this.props.dataList);
+            this.paint();
+        });
     }
 }

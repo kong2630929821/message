@@ -4,7 +4,8 @@ import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, 
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { AddPostArg } from '../../server/data/rpc/community.s';
+import { getFollowPublicPost, getUserPost } from '../../server/data/rpc/community.p';
+import { AddPostArg, IterPostArg } from '../../server/data/rpc/community.s';
 import { addApp, createHighAcc, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig, setMsgReply } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
@@ -357,5 +358,20 @@ export const sendActicle = (num: string, postType: number, title: string, body: 
         clientRpcFunc(sendPost,arg,(r:any) => {
             res(r);
         });
+    });
+};
+
+// 管理端获取当前用户所发文章
+export const getPubActicle = (count:number,id:number,num:string) => {
+    const arg = new IterPostArg();
+    arg.count = count;
+    arg.id = id;
+    arg.num = num;
+    console.log(arg);
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserPost,arg,(r:any) => {
+            res(r);
+        };
     });
 };

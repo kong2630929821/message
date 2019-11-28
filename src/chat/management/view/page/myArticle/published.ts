@@ -1,5 +1,7 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
+import { getPubActicle } from '../../../net/rpc';
+import { getStore } from '../../../store/memstore';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -11,6 +13,8 @@ interface Props {
     expandIndex:boolean;// 控制分页显示隐藏
     perPageIndex:number;// 每页显示多少个的下标
     status:boolean;// true列表 false详情
+    isDetail:boolean; // 是否进入详情页面
+    currentData:{}; // 当前操作的数据
 }
 
 interface DraftItem {
@@ -19,6 +23,7 @@ interface DraftItem {
     time:string;
     commentCount:number;
     likeCount:number;
+    
 }
 /**
  * 草稿
@@ -75,12 +80,17 @@ export class Published extends Widget {
         expandIndex:false,
         perPageIndex:0,
         showDataList:[],
-        status:false
+        status:false,
+        isDetail:false,
+        currentData:{}
+        
     };
 
     public create() {
         super.create();
+        this.getPosts();
         this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+        
     }
 
     // 重置页面的展开状态
@@ -115,5 +125,31 @@ export class Published extends Widget {
         this.props.expandIndex = false;
         this.pageChange({ value:0 });   
         this.paint();  
+    }
+    
+    // 获取当前登录账号所发布的所有帖子
+    public getPosts() {
+        const num = getStore('flags/num');
+
+        getPubActicle(10,0,num).then((res:any) => {
+            console.log(res.list[0].title);
+            this.props.dataList = res.list;
+            console.log(this.props.dataList);
+            this.paint();
+        });
+        
+        setTimeout(() => {
+            console.log(this.props.dataList);  
+            this.paint();
+        },1000);
+    }
+
+    // 进入已发布帖子详情
+    public goDataills(item:any) {
+        console.log('进入帖子详情');
+        this.props.isDetail = !this.props.isDetail;
+        this.props.currentData = this.props.dataList[item];
+        this.paint();
+
     }
 }

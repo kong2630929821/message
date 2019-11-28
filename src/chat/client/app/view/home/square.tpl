@@ -43,7 +43,7 @@
         {{for i,v of it.postView[it.active][1].postList}}
         <div ev-goDetail="goDetail({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-closeTools="pageClick">
             {{if v.isPublic}}
-            <widget w-tag="chat-client-app-view-home-pubPostItem">{{v}}</widget>
+            <widget w-tag="chat-client-app-view-home-pubPostItem">{{it.dealData(v,it.postView[it.active][1].expandItem == i)}}</widget>
             {{else}}
             <div ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})" ev-delBtn="delPost({{i}})">
                 <widget w-tag="chat-client-app-view-home-squareItem">{{it.dealData(v,it.postView[it.active][1].expandItem == i)}}</widget>

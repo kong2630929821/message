@@ -1,4 +1,5 @@
 import { HandlerMap } from '../../../pi/util/event';
+import { getFile, initFileStore, writeFile } from '../../client/app/data/lcstore';
 import { ListItem } from '../view/page/application/thirdApplication';
 
 /**
@@ -111,6 +112,8 @@ interface Store {
     hotApp:ListItem[];// 热门游戏
     recommendApp:ListItem[];// 推荐游戏
     flags:any;
+    draft:ListItem[];
+    uid: Number;
 
 }
 // 全局内存数据库
@@ -118,5 +121,40 @@ const store:Store = {
     appList:[],
     hotApp:[],
     recommendApp:[],
-    flags:{}
+    flags:{},
+    draft: [],
+    uid:-1
+};
+
+const registerDataChange = () => {
+    register('draft',(res) => {
+        saveDraft(res); // 登陆成功后更新当前用户的历史数据
+    });
+    register('uid',() => {
+        getDraft(); // 登陆成功后更新当前用户的历史数据
+    });
+};
+registerDataChange();
+
+// 保存草稿
+const saveDraft = (res) => {
+    const id = getStore('uid');
+    writeFile(`${id}-draft`,res, () => {
+        console.log('写入成功');
+    });
+};
+
+// 获取存入的草稿
+const getDraft = () => {
+    const sid = getStore('uid');
+    initFileStore().then(() => {
+        if (!sid) return;
+        // 获取草稿内容
+        getFile(`${sid}-draft`, (value) => {
+            console.log(value);
+            setStore('draft',value);
+        },() => {
+            console.log('read lastChat error');
+        });
+    };
 };
