@@ -4,11 +4,10 @@
 
 import { getSession } from '../../../../pi_pt/util/autologin.r';
 import { Bucket } from '../../../utils/db';
-import { add_app, set_app_config, del_app } from '../../../utils/oauth_lib';
+import { add_app, del_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
 import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
-import { CHAT_APPID } from '../constant';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
 import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, MessageReply, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail, UserReportIndex, UserReportIndexList } from '../db/manager.s';
@@ -87,7 +86,7 @@ export const showUsers = (arg: string): MgrUserList => {
  */
 // #[rpc=rpcServer]
 export const createHighAcc = (user: RootUser): number => {
-    const r:Result = setOfficialAccount(user.user, CHAT_APPID);
+    const r:Result = setOfficialAccount(user.user, CONSTANT.CHAT_APPID);
     if (r.r === CONSTANT.RESULT_SUCCESS) {
         
         return createRoot(user);
@@ -634,25 +633,6 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
     console.log('getOfficialAcc!!!!!!!!!list:', JSON.stringify(list));
     
     return list;
-};
-
-/**
- * 获取官方账号绑定的应用
- */
-export const getUidAppMap = (): Map<number, string> => {
-    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
-    const iter = officialBucket.iter(null, true);
-    const map = new Map();
-    do {
-        const v = iter.next();
-        if (!v) break;
-        const officialUsers: OfficialUsers = v[1];
-        officialUsers.uids.forEach((uid) => {
-            map.set(uid, officialUsers.appId);
-        });
-    } while (iter);
-
-    return map;
 };
 
 /**
@@ -1277,4 +1257,23 @@ export const formatDuring = (mss: number) => {
     const seconds = (mss % (1000 * 60)) / 1000;
     
     return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
+};
+
+/**
+ * 获取官方账号绑定的应用
+ */
+export const getUidAppMap = (): Map<number, string> => {
+    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const iter = officialBucket.iter(null, true);
+    const map = new Map();
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const officialUsers: OfficialUsers = v[1];
+        officialUsers.uids.forEach((uid) => {
+            map.set(uid, officialUsers.appId);
+        });
+    } while (iter);
+
+    return map;
 };

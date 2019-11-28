@@ -1,7 +1,7 @@
-<div w-class="page">
+<div w-class="page" on-tap="close">
     <div w-class="search">
         <div w-class="input" ev-input-change="inputChange">
-            <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"第三方名称/应用ID"}</widget>
+            <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"手机号,好嗨ID"}</widget>
             <img src="../../../res/images/search-gray.png" alt="" w-class="searchIcon"/>
         </div>
         <div w-class="searchBtn" on-down="onShow" on-tap="search">搜索</div>

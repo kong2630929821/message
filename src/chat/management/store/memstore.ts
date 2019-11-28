@@ -105,13 +105,12 @@ const handlerMap: HandlerMap = new HandlerMap();
 // tslint:disable-next-line:no-single-line-block-comment
 /******************************store初始化**********************************/
 
-// 海龟一号store
+// store
 interface Store {
     appList:ListItem[];// 全部游戏
     hotApp:ListItem[];// 热门游戏
     recommendApp:ListItem[];// 推荐游戏
     flags:any;
-
 }
 // 全局内存数据库
 const store:Store = {
