@@ -1,5 +1,5 @@
 import { Widget } from '../../../pi/widget/widget';
-import { setPunish, setReportHandled } from '../net/rpc';
+import { setPunish } from '../net/rpc';
 import { PENALTY, popNewMessage } from '../utils/logic';
 import { rippleShow } from '../utils/tools';
 
@@ -51,37 +51,23 @@ export class ConfirmBox extends Widget {
 
             return ;
         }
+        let punish = null;
         if (this.props.invalid) {
-            setReportHandled(this.props.key).then((r:any) => {
-                if (this.props.key === r) {
-                    popNewMessage('操作成功');
-                    this.ok && this.ok();
-                } else {
-                    popNewMessage('操作失败');
-                }
-            });
+            punish = 0;
         } else {
-            const punish = PENALTY.DELETE_CONTENT;
-            const key = this.props.key;
-            setPunish(key,punish,0).then((r:any) => {
-                if (!isNaN(r)) {
-                    setReportHandled(this.props.key).then((r:any) => {
-                        if (this.props.key === r) {
-                            popNewMessage('处理成功');
-                            this.ok && this.ok();
-                        } else {
-                            popNewMessage('处理失败');
-                            this.ok && this.ok();
-                        }
-                    });
-                    
-                } else {
-                    popNewMessage('处理失败');
-                    this.ok && this.ok();
-                }
-            });
+            punish = PENALTY.DELETE_CONTENT;
         }
-        // this.ok && this.ok();
+        const key = this.props.key;
+        setPunish(key,punish,0).then((r:any) => {
+            if (!isNaN(r)) {
+                popNewMessage('处理成功');
+                this.ok && this.ok();
+            } else {
+                popNewMessage('处理失败');
+                this.ok && this.ok();
+            }
+        });
+       
     }
 
     // 动画效果执行

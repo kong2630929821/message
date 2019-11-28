@@ -172,6 +172,6 @@ export class PublicHome extends Widget {
         const msg = this.props.publicInfo.desc ? this.props.publicInfo.desc :'没有简介';
         const avatar = this.props.publicInfo.avatar ? buildupImgPath(this.props.publicInfo.avatar) :'../../res/images/user_avatar.png';
         const key = `${REPORT_PUBLIC}%${this.props.publicInfo.num}`;
-        complaintUser(`${this.props.publicInfo.name} 名称`,2,avatar,msg,REPORT_PUBLIC,key);
+        complaintUser(`${this.props.publicInfo.name} 名称`,2,avatar,msg,REPORT_PUBLIC,key,this.props.uid);
     }
 }

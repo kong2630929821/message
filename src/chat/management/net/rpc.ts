@@ -4,11 +4,11 @@ import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, 
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { addApp, createHighAcc, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setMsgReply } from '../../server/data/rpc/manager.p';
+import { addApp, createHighAcc, createRoot, findUser, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { erlangLogicIp } from '../config';
-import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
+import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, deelUserInfoReport, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -125,6 +125,7 @@ export const getAllReportInfo = (ids:any,state:number) => {
         });
     });
 };
+
 // 惩罚指定对象
 export const setPunish = (key:string,punish_type:number,time:number) => {
     const arg = new PunishArg();
@@ -305,15 +306,6 @@ export const getOfficialList = (appid:string = '') => {
     });
 };
 
-// 获取用户信息
-export const getUserInfo = (uid:number) => {
-    return new Promise((res,rej) => {
-        clientRpcFunc(getReportDetail,uid,(r:any) => {
-            res(deelUserInfo(JSON.parse(r)));
-        });
-    });
-};
-
 /**
  * 设置好嗨客服
  */
@@ -340,6 +332,55 @@ export const setAccMsgReply = (key:string,msg:string) => {
     return new Promise((res,rej) => {
         clientRpcFunc(setMsgReply,arg,(r:any) => {
             res(r);
+        });
+    });
+};
+
+/**
+ * 获取所有用户去判断好嗨客服
+ */
+export const getAllUser = () => {
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(showUsers,'',(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
+ * 修改密码
+ */
+export const changePwd = (user:string,pwd:string) => {
+    const arg = new RootUser();
+    arg.user = user;
+    arg.pwd = pwd;
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(mdfPwd,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
+ * 查询用户
+ */
+export const queryUser = (user:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(findUser,user,(r:any) => {
+            res(deelGetOfficialList(r));
+        });
+    });
+};
+
+/**
+ * 获取指定用户的举报详情
+ */
+export const getReportUserInfo = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getReportDetail,uid,(r:any) => {
+            res(deelUserInfoReport(r));
         });
     });
 };

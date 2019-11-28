@@ -1,6 +1,6 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { REPORTREPLY, WELCOME } from '../../../config';
-import { setAccMsgReply, setHaoHaiAcc } from '../../../net/rpc';
+import { getAllUser, setAccMsgReply, setHaoHaiAcc } from '../../../net/rpc';
 import { popNewMessage } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
@@ -15,6 +15,8 @@ interface Props {
     haoHaiPass:string;// 好嗨密码
 }
 
+let user = '';
+let pwd = '';
 /**
  * 客服设置
  */
@@ -30,6 +32,26 @@ export class CustomerService extends Widget {
         haoHaiPass:''
     };
 
+    public create() {
+        super.create();
+        this.initData();
+    }
+
+    public initData() {
+        getAllUser().then((r:any) => {
+            // 全为数字则是好嗨客服
+            r.list.forEach(v => {
+                if (/^[0-9]+$/.test(v.user)) {
+                    this.props.haohaiId = v.user;
+                    user = v.user;
+                    this.props.haoHaiPass = v.pwd;
+                    pwd = v.pwd;
+                    this.props.isHaveCus = 1;
+                    this.paint();
+                }
+            });
+        });
+    }
     /**
      * 切换tab
      */
@@ -56,8 +78,7 @@ export class CustomerService extends Widget {
     public saveChange(index:number) {
         if (index === 0) {
             // 好嗨客服设置
-            this.props.isHaveCus = 1;
-            this.paint();
+            this.isHaveCusChange(0);
         } else {
             // 好嗨客服回复内容设置
             let key = '';
@@ -105,6 +126,8 @@ export class CustomerService extends Widget {
     public cancelChange(index:number) {
         if (index === 0) {
             // 好嗨客服
+            this.props.haohaiId = user;
+            this.props.haoHaiPass = pwd;
             this.props.isHaveCus = 1;
         } else if (index === 1) {
             // 举报
@@ -138,6 +161,8 @@ export class CustomerService extends Widget {
             setHaoHaiAcc(this.props.haohaiId,this.props.haoHaiPass).then(r => {
                 if (r === 1) {
                     popNewMessage('设置成功');
+                    user = this.props.haohaiId;
+                    pwd = this.props.haoHaiPass;
                     this.props.isHaveCus = 1;
                     this.paint();
                 } else {

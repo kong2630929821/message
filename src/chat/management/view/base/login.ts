@@ -9,8 +9,8 @@ import { rippleShow } from '../../utils/tools';
  */
 export class Login extends Widget {
     public props:any = {
-        name:'',
-        pwd:''
+        name:'10002@5',
+        pwd:'10fWdX'
     };
 
     public nameChange(e:any) {
@@ -103,5 +103,11 @@ export class Login extends Widget {
 
         // 进入管理端
         popNew('chat-management-view-base-home');
+
+        // 保存账号
+        setStore('flags/account',this.props.name);
+
+        // 保存密码
+        setStore('flags/pwd',this.props.pwd);
     }
 }
