@@ -3,7 +3,7 @@ import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { perPage } from '../../../components/pagination';
-import { HAOHAIACC } from '../../../config';
+import { HAOHAIAPPID } from '../../../config';
 import { getReportUserInfo, getUserDetail, modifyPunishTime, setCancelOfficial, setOfficial } from '../../../net/rpc';
 import { deepCopy, getStore, setStore } from '../../../store/memstore';
 import { popNewMessage } from '../../../utils/logic';
@@ -93,7 +93,7 @@ export class UserInfo extends Widget {
                 }
             });
 
-            if (official === HAOHAIACC) {
+            if (official === HAOHAIAPPID) {
                 this.props.official = '好嗨客服';
             }
         }

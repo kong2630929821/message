@@ -63,6 +63,7 @@ export class AddApplicationModule extends Widget {
         super.setProps(this.props);
         const appList = getStore('appList',[]);
         if (props.title) {
+            // 用户绑定应用
             const arr = [];
             appList.forEach(v => {
                 if (!v.accId) {
@@ -71,6 +72,7 @@ export class AddApplicationModule extends Widget {
             });
             this.props.appList = arr;
         } else {
+            // 设置热门,推荐应用
             const hotApp = getStore('hotApp',[]);
             const recommend = getStore('recommendApp',[]);
             const used = [...hotApp,...recommend];// 已经使用的app

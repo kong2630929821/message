@@ -41,4 +41,4 @@ export const WELCOME = 'welcome';
 export const REPORTREPLY = 'notice';
 
 // 好嗨客服APPid
-export const HAOHAIACC = '10';
+export const HAOHAIAPPID = '10';
