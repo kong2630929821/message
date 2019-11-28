@@ -239,18 +239,10 @@ export const deelDynamicReport = (reportInfo:any,reportedUser:any) => {
     } else {
         origin = reason.join(',');
     }
-    let sex = '';
-    if (reportedUser.user_info.sex === 0) {
-        sex = 'chat/management/res/images/girl.png';
-    } else if (reportedUser.user_info.sex === 1) {
-        sex = 'chat/management/res/images/boy.png';
-    } else {
-        sex = 'chat/management/res/images/neutral.png';
-    }
 
     return [
         { key:'好嗨ID',value:reportedUser.user_info.acc_id },
-        { key:'用户昵称',value:reportedUser.user_info.name,fg:sex },
+        { key:'用户昵称',value:reportedUser.user_info.name,fg:reportedUser.user_info.sex },
         { key:'手机号',value:userPhone },
         { key:'举报时间',value:timestampFormat(JSON.parse(reportInfo.time)) },
         { key:'举报原因',value:origin },
@@ -331,18 +323,9 @@ const deelDynamic = (reportInfo:any,count:number) => {
 const deelReportedUser = (reportedUser:any) => {
     const userPhone = reportedUser.user_info.tel ? reportedUser.user_info.tel :'无';
     const gruel = reportedUser.punish_list.length ? penaltyText(reportedUser.punish_list,'用户') :'无';
-    let sex = '';
-    if (reportedUser.user_info.sex === 0) {
-        sex = 'chat/management/res/images/girl.png';
-    } else if (reportedUser.user_info.sex === 1) {
-        sex = 'chat/management/res/images/boy.png';
-    } else {
-        sex = 'chat/management/res/images/neutral.png';
-    }
-
     return [
         { key:'好嗨ID',value:reportedUser.user_info.acc_id },
-        { key:'用户昵称',value:reportedUser.user_info.name,fg:sex },
+        { key:'用户昵称',value:reportedUser.user_info.name,fg:reportedUser.user_info.sex },
         { key:'手机号',value:userPhone },
         { key:'被举报次数总计',value:reportedUser.reported_list.length },
         { key:'被惩罚次数总计',value:reportedUser.punish_history_list.length },
@@ -510,4 +493,31 @@ export const deelUserInfoReport = (r:any) => {
     });
 
     return [data,res];
+};
+
+/**
+ * 处理用户详情
+ */
+export const deelGetUserDetail = (r:any) => {
+    const res = JSON.parse(r);
+    const user = res.user_report.user_info;
+    const nowPublish = res.user_report.punish_list.length ? penaltyText(res.user_report.punish_list,'用户') :'';
+    const userInfo = {
+        acc_id:user.acc_id,
+        name:user.name,
+        avatar:user.avatar,
+        sex:user.sex,
+        tel:user.tel,
+        fans:res.person_community.fans_list.length,
+        attention:res.person_community.attention_list.length,
+        post:res.person_community.post_list.length,
+        report:res.user_report.report_list.length,
+        reported:res.user_report.reported_list.length,
+        punish:res.user_report.punish_history_list.length,
+        nowPublish:nowPublish,
+        id:res.user_report.punish_list.length ? res.user_report.punish_list.id :0
+    };
+    const key = res.user_report.reported_list.length ? res.user_report.reported_list[0].key :'';
+    
+    return [userInfo,key];
 };

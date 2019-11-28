@@ -4,9 +4,13 @@
             <div>{{it.state==0?'好嗨ID':'嗨嗨号ID'}}：{{it.userInfo.id}}</div>
             <div style="margin-left:40px; display: flex;">
                 {{it.state==0?'用户昵称':'嗨嗨号昵称'}}：{{it.userInfo.name}}
-                {{if it.userInfo.sex}}
-                    <img src="{{it.userInfo.sex}}" alt="" w-class="sexImg"/>
+ 
+                {{if it.userInfo.sex!=2}}
+                    <img src="../res/images/{{it.userInfo.sex===1?'girl.png':'boy.png'}}" w-class="sexImg"/>
+                {{else}}
+                    <img src="../res/images/neutral.png" w-class="sexImg"/>
                 {{end}}
+
                 {{if it.userInfo.isPublic}}
                     <div w-class="haihaiName">嗨嗨号</div>
                 {{end}}

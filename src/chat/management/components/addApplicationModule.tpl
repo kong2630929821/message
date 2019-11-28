@@ -9,7 +9,7 @@
             <div w-class="searchBtn" on-down="onShow" on-tap="search">搜索</div>
         </div>
 
-        {{if it.appItem.accId}}
+        {{if it.appItem.appid}}
         <div w-class="searchItem" on-tap="check" on-down="onShow">
             <div w-class="iconBox">
                 <img src="{{it.buildupImgPath(it.appItem.img[0])}}" alt="" w-class="itemIcon"/>

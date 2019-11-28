@@ -1,3 +1,4 @@
+import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
@@ -5,7 +6,7 @@ import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { uploadFile } from '../../../../client/app/net/upload';
 import { AddAppArg } from '../../../../server/data/rpc/manager.s';
 import { maxSize } from '../../../config';
-import { addApplication, getAllGameInfo, getAllGameList } from '../../../net/rpc';
+import { addApplication, delGameApp, getAllGameInfo, getAllGameList } from '../../../net/rpc';
 import { setStore } from '../../../store/memstore';
 import { encodeUnicode, popNewMessage } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
@@ -288,12 +289,6 @@ export class AddApplication extends Widget {
             return;
         }
 
-        if (!this.props.customer) {
-            popNewMessage('请填入官方客服');
-            
-            return;
-        }
-
         if (!this.props.webViewName) {
             popNewMessage('请填入应用唯一标识');
 
@@ -341,7 +336,7 @@ export class AddApplication extends Widget {
                 } else {
                     popNewMessage('添加成功'); 
                     this.init();
-                     // 获取全部游戏
+                    // 获取全部游戏
                     getAllGameList().then(r => {
                         if (r.length) {
                             const appId = JSON.stringify(r);
@@ -376,6 +371,22 @@ export class AddApplication extends Widget {
     public cancleChange() {
         this.props.isChange = false;
         this.paint();
+    }
+
+    /**
+     * 删除应用
+     */
+    public delApp(e:any) {
+        popNew('chat-management-components-confirmBox',{ title:'删除第三方应用',invalid:-1 },() => {
+            delGameApp(this.props.appId).then(r => {
+                if (r === 1) {
+                    popNewMessage('删除成功');
+                    this.goBack(true,e);
+                } else {
+                    popNewMessage('删除失败');
+                }
+            });
+        });
     }
     
 }

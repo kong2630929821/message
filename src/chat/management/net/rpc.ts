@@ -4,11 +4,12 @@ import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, 
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { addApp, createHighAcc, createRoot, findUser, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
+import { addApp, cancelGmAccount, createHighAcc, createRoot, delApp, findUser, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
+import { SetOfficial } from '../../server/data/rpc/user.s';
 import { erlangLogicIp } from '../config';
-import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, deelUserInfoReport, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
+import { deelGetOfficialList, deelGetUserDetail, deelReportList, deelReportListInfo, deelUserInfo, deelUserInfoReport, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -381,6 +382,54 @@ export const getReportUserInfo = (uid:number) => {
     return new Promise((res,rej) => {
         clientRpcFunc(getReportDetail,uid,(r:any) => {
             res(deelUserInfoReport(r));
+        });
+    });
+};
+
+/**
+ * 用户详情 
+ */
+export const getUserDetail = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserDetal,uid,(r:any) => {
+            res(deelGetUserDetail(r));
+        });
+    });
+};
+
+/**
+ * 取消官方认证
+ */
+export const setCancelOfficial = (acc_id:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(cancelGmAccount,acc_id,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
+ * 设置官方账号
+ */
+export const setOfficial = (app_id:string,acc_id:string) => {
+    const arg = new SetOfficial();
+    arg.accId = acc_id;
+    arg.appId = app_id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(setGmAccount,arg,(r:any) => {
+            res(r.r);
+        });
+    });
+};
+
+/**
+ * 删除应用
+ */
+export const delGameApp = (appid:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(delApp,appid,(r:any) => {
+            res(r);
         });
     });
 };
