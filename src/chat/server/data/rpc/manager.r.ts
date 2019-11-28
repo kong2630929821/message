@@ -4,14 +4,14 @@
 
 import { getSession } from '../../../../pi_pt/util/autologin.r';
 import { Bucket } from '../../../utils/db';
-import { add_app, set_app_config } from '../../../utils/oauth_lib';
+import { add_app, set_app_config, del_app } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
 import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
 import { CHAT_APPID } from '../constant';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
-import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail, UserReportIndex, UserReportIndexList, MessageReply } from '../db/manager.s';
+import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, MessageReply, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail, UserReportIndex, UserReportIndexList } from '../db/manager.s';
 import { Report, ReportCount, ReportListTab, UserReportKeyTab } from '../db/message.s';
 import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
@@ -37,6 +37,24 @@ export const createRoot = (user: RootUser): number => {
 
         return CONSTANT.RESULT_SUCCESS;
     } else {
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
+};
+
+/**
+ * 修改密码
+ */
+// #[rpc=rpcServer]
+export const mdfPwd = (user: RootUser): number => {
+    const rootUserBucket = new Bucket(CONSTANT.WARE_NAME, RootUser._$info.name);
+    if (user.user && user.pwd) {
+        if (rootUserBucket.get(user.user)[0]) {
+            rootUserBucket.put(user.user, user);
+
+            return CONSTANT.RESULT_SUCCESS;
+        }
+    } else {
+
         return CONSTANT.DEFAULT_ERROR_NUMBER;
     }
 };
@@ -257,7 +275,7 @@ export const punish = (arg: PunishArg): string => {
     if (!getSession('root')) return 'not login';
     // 惩罚类型为0为不惩罚处理 只更新举报状态
     if (arg.punish_type === 0) {
-        const punish_id = 0
+        const punish_id = 0;
         // 更新举报状态
         updateReportInfo(arg.key, punish_id);
 
@@ -662,6 +680,20 @@ export const addApp = (arg: AddAppArg): number => {
     console.log('addApp!!!!!!!!!!!!!!arg:', arg);
     // if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
     const r = add_app(arg.appid, arg.name, arg.imgs, arg.desc, arg.url, arg.pk, arg.mch_id, arg.notify_url);
+    if (r) {
+        return CONSTANT.RESULT_SUCCESS;
+    } else {
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
+};
+
+/**
+ * 删除应用
+ */
+// #[rpc=rpcServer]
+export const delApp = (appid: string): number => {
+    // if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
+    const r = del_app(appid);
     if (r) {
         return CONSTANT.RESULT_SUCCESS;
     } else {
@@ -1165,7 +1197,7 @@ const updateReportInfo = (reportKey, punish_id) => {
     const userReport = reportCountBucket.get<string, ReportCount[]>(reportKey)[0];
     const now = Date.now().toString();
     for (let i = 0; i < userReport.not_handled_reported.length; i++) {
-        const report = reportBucket.get<number, Report[]>(userReport.not_handled_reported[i])[0]
+        const report = reportBucket.get<number, Report[]>(userReport.not_handled_reported[i])[0];
         report.handle_time = now;
         report.punish_id = punish_id;
         reportBucket.put(userReport.not_handled_reported[i], report);
@@ -1173,8 +1205,7 @@ const updateReportInfo = (reportKey, punish_id) => {
     userReport.handled_reported = userReport.not_handled_reported.concat(userReport.handled_reported);
     userReport.not_handled_reported = [];
     reportCountBucket.put(reportKey, userReport);
-}
-
+};
 
 const reportGetUserName = (reportType: number, report: Report): string => {
     let uid = 0;
