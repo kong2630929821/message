@@ -511,3 +511,29 @@ export const deelUserInfoReport = (r:any) => {
 
     return [data,res];
 };
+
+/**
+ * 处理用户详情
+ */
+export const deelGetUserDetail = (r:any) => {
+    const res = JSON.parse(r);
+    const user = res.user_report.user_info;
+    const nowPublish = res.user_report.punish_list.length ? penaltyText(res.user_report.punish_list,'用户').split(' ')[0] :'';
+    const userInfo = {
+        acc_id:user.acc_id,
+        name:user.name,
+        avatar:user.avatar,
+        sex:user.sex,
+        tel:user.tel,
+        fans:res.person_community.fans_list.length,
+        attention:res.person_community.attention_list.length,
+        post:res.person_community.post_list.length,
+        report:res.user_report.report_list.length,
+        reported:res.user_report.reported_list.length,
+        punish:res.user_report.punish_history_list.length,
+        nowPublish:nowPublish,
+        id:res.user_report.punish_list.length ? res.user_report.punish_list.id :0
+    };
+
+    return JSON.stringify(userInfo);
+};

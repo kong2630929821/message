@@ -1,8 +1,11 @@
+import { popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { perPage } from '../../../components/pagination';
-import { getReportUserInfo } from '../../../net/rpc';
-import { deepCopy } from '../../../store/memstore';
+import { getReportUserInfo, getUserDetail, setCancelOfficial, setOfficial } from '../../../net/rpc';
+import { deepCopy, getStore } from '../../../store/memstore';
+import { popNewMessage } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -19,8 +22,11 @@ interface Props {
     punish:any;// 当前惩罚
     status:boolean;// 是否展示2级页面
     list:any[];// 原始数据
-    reportId:number;// 举报ID
+    reportId:number[];// 举报ID
     reportType:number;// 举报的类型
+    userInfo:any;// 用户信息
+    buildupImgPath:any;  // 组装图片路径
+
 }
 
 /**
@@ -41,8 +47,24 @@ export class UserInfo extends Widget {
         punish:{},
         status:false,
         list:[],
-        reportId:0,
-        reportType:0
+        reportId:[],
+        reportType:0,
+        userInfo:{
+            acc_id:'',
+            name:'',
+            avatar:'',
+            sex:2,
+            tel:'',
+            fans:0,
+            attention:0,
+            post:0,
+            report:0,
+            reported:0,
+            punish:0,
+            nowPublish:'',
+            id:0
+        },
+        buildupImgPath:buildupImgPath
     };
 
     public setProps(props:any) {
@@ -51,13 +73,17 @@ export class UserInfo extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.initData(props.official);
+        this.initData();
     }
 
     // 初始化数据
-    public initData(official?:string) {
+    public initData() {
 
-        // 当前惩罚
+        // 用户信息
+        getUserDetail(this.props.uid).then((r:string) => {
+            this.props.userInfo = JSON.parse(r);
+            this.paint();
+        });
         
         // 获取被举报信息
         getReportUserInfo(this.props.uid).then(r => {
@@ -112,8 +138,62 @@ export class UserInfo extends Widget {
         const index = e.num;
         this.props.status = true;
         const currentData = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]);
-        this.props.reportId = currentData.id;
-        this.props.reportType = JSON.parse(currentData.key.split('%')[0]);
+        this.props.reportId = [currentData.id];
+        const id = JSON.parse(currentData.key.split('%')[0]);
+
+        // 对应审核惩罚的列标下标
+        if (id === 1) {
+            this.props.reportType = 0;
+        } else if (id === 3) {
+            this.props.reportType = 1;
+        }
         this.paint();
+    }
+
+    // 返回
+    public exit(fg:boolean,e:any) {
+        if (fg) {
+            this.initData();
+        }
+        this.props.status = false;
+        this.paint();
+    }
+
+    /**
+     * 取消官方认证
+     */
+    public cancelOfficial(e:any) {
+        popNew('chat-management-components-confirmBox',{ title:'确认取消官方身份',prompt:'同时解除第三方绑定关系',invalid:-1 },() => {
+            setCancelOfficial(this.props.userInfo.acc_id).then(r => {
+                if (r === 1) {
+                    this.props.official = '';
+                    popNewMessage('取消官方认证成功');
+                    const appList = getStore('appList',[]);
+                    appList.forEach((v,i)=>{
+                        if(v.appid)
+                    })
+                    this.paint();
+                    this.goBack(true,e);
+                } else {
+                    popNewMessage('取消官方认证失败');
+                }
+            });
+        });
+       
+    }
+
+    public setOfficial(e:any) {
+        popNew('chat-management-components-addApplicationModule',{ title:'绑定第三方应用' },(appId:string) => {
+            setOfficial(appId,this.props.userInfo.acc_id).then(r => {
+                if (r === 1) {
+                    this.props.official = '';
+                    popNewMessage('设置成功');
+                    this.paint();
+                    this.goBack(true,e);
+                } else {
+                    popNewMessage('设置失败');
+                }
+            });
+        });
     }
 }
