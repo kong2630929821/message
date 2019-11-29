@@ -12,7 +12,6 @@ interface Props {
 export class ApplicationItem extends Widget {
     public props:Props = {
         item:{
-            accId: '',
             appid: '',
             buttonMod: 1,
             desc: '',
