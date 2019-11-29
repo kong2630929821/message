@@ -26,7 +26,7 @@
                     {{if it.official}}
                     <div w-class="rowItem">
                         <div>第三方应用：{{it.official}}</div>
-                        <div w-class="btn">修改绑定关系</div>
+                        <div w-class="btn" on-tap="rebind">修改绑定关系</div>
                     </div>
                     {{end}}
                 </div>

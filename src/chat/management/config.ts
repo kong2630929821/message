@@ -42,3 +42,12 @@ export const REPORTREPLY = 'notice';
 
 // 好嗨客服APPid
 export const HAOHAIAPPID = '10';
+
+// 好嗨客服的权限
+export const HAOHAICUSTOMERSERVICE = [1001,1002,1003,1004,1005,1007];// 好嗨客服不能设置好嗨客服
+
+// 管理员的权限
+export const ADMINISTRATOR = [1001,1002,1003,1004,1005,1007];// 管理员可以设置好嗨客服
+
+// 官方账号权限
+export const OFFICIAL = [1006,1007];

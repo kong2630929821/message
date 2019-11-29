@@ -58,7 +58,6 @@ export class QueryUser extends Widget {
 
             return;
         }
-
         queryUser(this.props.input).then((r:any) => {
             this.props.list = r.data;
             this.props.dataList = r.tableData;

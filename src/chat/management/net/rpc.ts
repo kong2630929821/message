@@ -4,7 +4,7 @@ import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, 
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { addApp, cancelGmAccount, createHighAcc, createRoot, delApp, findUser, getApplyPublicList, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
+import { addApp, cancelGmAccount, createHighAcc, createRoot, delApp, findUser, getApplyPublicList, getMsgReply, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
 import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { SetOfficial } from '../../server/data/rpc/user.s';
@@ -429,6 +429,17 @@ export const setOfficial = (app_id:string,acc_id:string) => {
 export const delGameApp = (appid:string) => {
     return new Promise((res,rej) => {
         clientRpcFunc(delApp,appid,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
+ * 获取客服消息自动回复
+ */
+export const getMessageReply = (key:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getMsgReply,key,(r:any) => {
             res(r);
         });
     });

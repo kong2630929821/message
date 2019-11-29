@@ -111,11 +111,15 @@ interface Store {
     hotApp:ListItem[];// 热门游戏
     recommendApp:ListItem[];// 推荐游戏
     flags:any;
+    bindApp:string[];// 绑定的appid
+    officalList:any[];// 官方账号列表
 }
 // 全局内存数据库
 const store:Store = {
     appList:[],
     hotApp:[],
     recommendApp:[],
-    flags:{}
+    flags:{},
+    bindApp:[],
+    officalList:[[],[]]
 };
