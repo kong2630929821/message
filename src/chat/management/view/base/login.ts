@@ -1,6 +1,7 @@
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
-import { createRootTest, getAllGameInfo, getAllGameList, getHotApp, getRecommendApp, managementLogin } from '../../net/rpc';
+import { ADMINISTRATOR, HAOHAICUSTOMERSERVICE, OFFICIAL } from '../../config';
+import { createRootTest, getAllGameInfo, getAllGameList, getHotApp, getOfficialList, getRecommendApp, managementLogin } from '../../net/rpc';
 import { setStore } from '../../store/memstore';
 import { popNewMessage } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';
@@ -70,48 +71,68 @@ export class Login extends Widget {
      * 登录成功
      */
     public loginSuccess() {
-        // 获取全部游戏
-        getAllGameList().then(r => {
-            if (r.length) {
-                const appId = JSON.stringify(r);
-                getAllGameInfo(appId).then(r => {
-                    console.log(`全部应用========appId==${appId}================`,r);
-                    setStore('appList',r);
-                });
-            }
-        });
+        
+        // 保存账号
+        setStore('flags/account',this.props.name);
 
-        // 获取热门游戏
-        getHotApp().then(r => {
-            if (r) {
-                getAllGameInfo(r).then(res => {
-                    setStore('hotApp',res);
-                    console.log('获取热门游戏',res);
-                });
-            }
-        });
+        // 保存密码
+        setStore('flags/pwd',this.props.pwd);
 
-        // 获取推荐游戏
-        getRecommendApp().then(r => {
-            if (r) {
-                getAllGameInfo(r).then(res => {
-                    setStore('recommendApp',res);
-                    console.log('获取推荐游戏',res);
-                });
+        // 判断权限
+        const account = this.props.name.split('@');
+        if (account[1]) {
+
+            // 官方账号
+            setStore('flags/auth',OFFICIAL);
+            setStore('flags/num',account[1]);
+            setStore('uid',account[0]);
+        } else {
+            setStore('flags/num',0);
+            if (/^[0-9]+$/.test(account[0])) {
+                // 好嗨客服
+                setStore('flags/auth',HAOHAICUSTOMERSERVICE);
+            } else {
+                // 管理员
+                setStore('flags/auth',ADMINISTRATOR);
             }
-        });
+
+            // 获取全部游戏
+            getAllGameList().then(r => {
+                if (r.length) {
+                    const appId = JSON.stringify(r);
+                    getAllGameInfo(appId).then(r => {
+                        console.log(`全部应用========appId==${appId}================`,r);
+                        setStore('appList',r);
+                    });
+                }
+            });
+
+            // 获取热门游戏
+            getHotApp().then(r => {
+                if (r) {
+                    getAllGameInfo(r).then(res => {
+                        setStore('hotApp',res);
+                        console.log('获取热门游戏',res);
+                    });
+                }
+            });
+
+            // 获取推荐游戏
+            getRecommendApp().then(r => {
+                if (r) {
+                    getAllGameInfo(r).then(res => {
+                        setStore('recommendApp',res);
+                        console.log('获取推荐游戏',res);
+                    });
+                }
+            });
+            
+            // 获取绑定的appid
+            getOfficialList();
+        }
 
         // 进入管理端
         popNew('chat-management-view-base-home');
-        
-        const num = this.props.name.split('@');
-        // 判断当前登录用户是否为官方账号包含@符号的则为官方账号,将@前面的部分作为uid存进store
-        if (num[1]) {
-            setStore('flags/num',num[1]);
-            setStore('uid',num[0]);
-        } else {
-            setStore('flags/num',0);
-        }
         
     }
 }

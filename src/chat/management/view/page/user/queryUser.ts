@@ -58,7 +58,6 @@ export class QueryUser extends Widget {
 
             return;
         }
-
         queryUser(this.props.input).then((r:any) => {
             this.props.list = r.data;
             this.props.dataList = r.tableData;
@@ -105,10 +104,9 @@ export class QueryUser extends Widget {
     public goDetail(e:any) {
         const index = e.num;
         this.props.status = true;
-        const currentData = deepCopy(this.props.dataList[this.props.currentIndex * this.props.perPage + index]);
-        this.props.official = currentData[currentData.length - 1] === '无' ? '' :currentData[currentData.length - 1];
+        this.props.official =  deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]).app_id;
         this.props.uid = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]).user_info.uid;
-        this.props.punish = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]).now_publish;
+        this.props.punish = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]).now_punish;
         this.paint();
     }
 

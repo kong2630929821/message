@@ -18,7 +18,6 @@ interface Props {
 }
 
 export interface ListItem {
-    accId: string;
     appid: string;
     buttonMod: number;
     desc: string;

@@ -1,7 +1,6 @@
 <div w-class='content'>
     <div>
         <span w-class = 'title'>
-            回复: {{}}
         </span>
     </div>
     <div>

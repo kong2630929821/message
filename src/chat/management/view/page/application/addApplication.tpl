@@ -156,16 +156,16 @@
             <div w-class="info">* 单张图片不超过1M，最小尺寸700*900，建议尺寸720*1280，大小200K以内，JPG、PNG格式</div>
         </div>
     </div>
-
-    <div w-class="addBox">
-        <div w-class="appName">官方客服</div>
-        <div w-class="inputBox">
-            <div w-class="input" ev-input-change="inputChangeCustomer">
-                <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"官方客服",maxLength:10,input:{{it.customer}},disabled:{{it.isChange?'':'true'}} }</widget>
+    {{if 0==1}}
+        <div w-class="addBox">
+            <div w-class="appName">官方客服</div>
+            <div w-class="inputBox">
+                <div w-class="input" ev-input-change="inputChangeCustomer">
+                    <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"官方客服",maxLength:10,input:{{it.customer}},disabled:{{it.isChange?'':'true'}} }</widget>
+                </div>
             </div>
         </div>
-    </div>
-
+    {{end}}
     <div w-class="addBox" style="align-items: center;margin-top:0;">
         <div w-class="appName">悬浮气泡位置</div>
         <div w-class="check" on-tap="checkBubbleType(true)">

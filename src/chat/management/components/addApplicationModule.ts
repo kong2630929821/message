@@ -62,16 +62,30 @@ export class AddApplicationModule extends Widget {
         };
         super.setProps(this.props);
         const appList = getStore('appList',[]);
-        const hotApp = getStore('hotApp',[]);
-        const recommend = getStore('recommendApp',[]);
-        const used = [...hotApp,...recommend];// 已经使用的app
-        const lave  = [];// 剩余app
-        appList.forEach(v => {
-            if (used.findIndex(item => item.appid === v.appid) === -1) {
-                lave.push(v);
-            }
-        });
-        this.props.appList = used.length ? lave :appList;
+        if (props.title) {
+            // 用户绑定应用
+            const arr = [];
+            const bindApp = getStore('bindApp');
+            appList.forEach(v => {
+                if (bindApp.indexOf(v.appid) === -1) {
+                    arr.push(v);
+                }
+            });
+            this.props.appList = arr;
+        } else {
+            // 设置热门,推荐应用
+            const hotApp = getStore('hotApp',[]);
+            const recommend = getStore('recommendApp',[]);
+            const used = [...hotApp,...recommend];// 已经使用的app
+            const lave  = [];// 剩余app
+            appList.forEach(v => {
+                if (used.findIndex(item => item.appid === v.appid) === -1) {
+                    lave.push(v);
+                }
+            });
+            this.props.appList = used.length ? lave :appList;
+        }
+        
     }
 
     public exitBtn() {

@@ -1,7 +1,7 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
 import { getOfficialList } from '../../../net/rpc';
-import { deepCopy } from '../../../store/memstore';
+import { deepCopy, getStore, setStore } from '../../../store/memstore';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -45,12 +45,12 @@ export class OfficalUser extends Widget {
     public create() {
         super.create();
         this.initData();
-        
     }
 
     public initData() {
         this.props.dataList = [];
         getOfficialList().then((r:any) => {
+            setStore('officalList',[r.data,r.tableData]);
             this.props.list = r.data;
             this.props.dataList = r.tableData;
             this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
@@ -97,9 +97,8 @@ export class OfficalUser extends Widget {
     public goDetail(e:any) {
         const index = e.num;
         this.props.status = true;
-        const currentData = deepCopy(this.props.dataList[this.props.currentIndex * this.props.perPage + index]);
         const data = deepCopy(this.props.list[this.props.currentIndex * this.props.perPage + index]);
-        this.props.official = currentData[currentData.length - 1] === '无' ? '' :currentData[currentData.length - 1];
+        this.props.official = data.app_id;
         this.props.uid = data.user_info.uid;
         this.props.punish = data.now_publish;
         this.paint();

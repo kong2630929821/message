@@ -607,8 +607,8 @@ export const cancelGmAccount = (accId: string): number => {
     if (appId === '') {
         return ERROR_NUM.NOT_OFFICIAL_ACCOUNT;
     } else {
-        const official = officialBucket.get(appId)[0];
-        official.splice(index, 1);
+        const official = officialBucket.get<string, OfficialUsers>(appId)[0];
+        official.uids.splice(index, 1);
         officialBucket.put(appId, official);
 
         return CONSTANT.RESULT_SUCCESS;
