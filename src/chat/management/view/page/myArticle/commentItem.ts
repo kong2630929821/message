@@ -81,7 +81,10 @@ export class CommentItem extends Widget {
             this.props.orgIcon = val.img.length ? buildupImgPath(val.img[0].compressImg) :'';
         }
     }
-
+    public create() {
+        super.create();
+        this.props.showUtils = false;
+    }
     /**
      * 展示操作
      */
@@ -110,21 +113,19 @@ export class CommentItem extends Widget {
      */
     public replyComment(e:any) {
         this.closeUtils(e);
-        popNew('chat-client-app-view-info-editComment',{ ...this.props,title:'回复',orgId:true },(r) => {
-            notify(e.node,'ev-comment-reply',{ ...this.props,key:r.key, value:r.value });
-        });
+        popNew('chat-management-components-replyCommet');
     }
 
     /**
      * 删除评论
      */
     public delComment(e:any) {
-        this.closeUtils(e);
-        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除评论',content:'删除评论后，评论下所有的回复都会被删除。' },() => {
-            delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
-                notify(e.node,'ev-comment-delete',{ key:this.props.key });
-            });
-        });
+        // this.closeUtils(e);
+        // popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除评论',content:'删除评论后，评论下所有的回复都会被删除。' },() => {
+        //     delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
+        //         notify(e.node,'ev-comment-delete',{ key:this.props.key });
+        //     });
+        // });
         
     }
 
@@ -137,16 +138,6 @@ export class CommentItem extends Widget {
         const val = this.props.msg ? JSON.parse(this.props.msg) :{ msg:'',img:'' };  
         copyToClipboard(val.msg);
         popNewMessage('复制成功');
-    }
-
-    /**
-     * 举报
-     */
-    public complaint(e:any) {
-        this.closeUtils(e);
-        const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        const key = `${REPORT_COMMENT}%${JSON.stringify(this.props.key)}`;
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,JSON.parse(this.props.msg).msg,REPORT_COMMENT,key,this.props.owner);
     }
 
     // 关闭操作列表

@@ -821,15 +821,19 @@ export const getCommentLaud = (postKey: PostKey): CommentIDList => {
     logKey.post_id = postKey.id;
     if (postCount) {
         console.log('!!!!!!!!!!!!postCount:', postCount);
+        console.log('111111111111111111111111111111',postCount.commentList);
         for (let i = 0; i < postCount.commentList.length; i++) {
+            console.log('22222222222222222222222222222222', postCount.commentList[i]);
             logKey.id = postCount.commentList[i];
             const logR = CommentLaudLogBucket.get(logKey)[0];
+            console.log('3333333333333333333333333333333333', logR);
             if (logR) {
                 commentIdList.list.push(postCount.commentList[i]);
+                console.log('444444444444444444444444444444', commentIdList.list);
             }
         }
     }
-
+    console.log('6555555555555555555555555', commentIdList);
     return commentIdList;
 };
 

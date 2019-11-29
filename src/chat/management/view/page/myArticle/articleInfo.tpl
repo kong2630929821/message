@@ -1,7 +1,7 @@
 <div w-class="page" on-tap="close">
     <div w-class="body">
         <div w-class="leftBox">
-            <div w-class="back">返回上一页</div>
+                <div w-class="goBack" on-tap="goBack(false,e)">返回上一页</div>
             <div w-class="title">{{ it.articleData[0].title }}</div>
             <div w-class="createTime">
                 <div>上次编辑时间：{{ it.articleData[0].time }}</div>

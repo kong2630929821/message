@@ -1,3 +1,4 @@
+import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, setStore } from '../../../../client/app/data/store';
 import { buildupImgPath, judgeLiked } from '../../../../client/app/logic/logic';
@@ -73,16 +74,16 @@ export class ArticleInfo extends Widget {
         super.setProps(this.props);
         const currentData = this.props.data;
         console.log(currentData);
-        getCommentLaudList(currentData.key.num,currentData.key.id).then((r:number[]) => {
-            console.log(r);
-            this.props.commentList = this.props.commentList.map(v => {
-                v.likeActive = r.indexOf(v.key.id) > -1;
+        // getCommentLaudList(currentData.key.num,currentData.key.id).then((r:number[]) => {
+        //     console.log(r);
+        //     this.props.commentList = this.props.commentList.map(v => {
+        //         v.likeActive = r.indexOf(v.key.id) > -1;
 
-                return v;
-            });
-            this.props.commentLikeList = r;
-            this.paint();
-        });
+        //         return v;
+        //     });
+        //     this.props.commentLikeList = r;
+        //     this.paint();
+        // });
         showComment(currentData.key.num, currentData.key.id).then((r: any) => {
             console.log(r);
             this.props.commentList = r.map(v => {
@@ -102,19 +103,19 @@ export class ArticleInfo extends Widget {
             });
             this.paint();
         });
-        getPostDetile(currentData.key.num,currentData.key.id).then((r:any) => {
-            currentData.likeCount = r[0].likeCount;
-            currentData.commentCount = r[0].commentCount;
-            this.paint();
-            // 刷新广场数据
-            const postlist = getStore('postReturn',[]);
-            const ind = postlist.postList.findIndex(r => r.key.num === currentData.key.num && r.key.id === currentData.key.id);
-            if (ind > -1) {
-                postlist.postList[ind].commentCount = currentData.commentCount;
-                postlist.postList[ind].likeCount = currentData.likeCount;
-                setStore('postReturn',postlist);
-            }
-        });
+        // getPostDetile(currentData.key.num,currentData.key.id).then((r:any) => {
+        //     currentData.likeCount = r[0].likeCount;
+        //     currentData.commentCount = r[0].commentCount;
+        //     this.paint();
+        //     // 刷新广场数据
+        //     const postlist = getStore('postReturn',[]);
+        //     const ind = postlist.postList.findIndex(r => r.key.num === currentData.key.num && r.key.id === currentData.key.id);
+        //     if (ind > -1) {
+        //         postlist.postList[ind].commentCount = currentData.commentCount;
+        //         postlist.postList[ind].likeCount = currentData.likeCount;
+        //         setStore('postReturn',postlist);
+        //     }
+        // });
         this.initData(currentData);
     }
     // 初始化数据
@@ -157,6 +158,11 @@ export class ArticleInfo extends Widget {
     public close() {
         this.props.expandIndex = false;
         this.paint();
+    }
+    
+    // 返回
+    public goBack(fg:boolean,e:any) {
+        notify(e.node,'ev-goBack',{ fg });
     }
 
     // 分页变化

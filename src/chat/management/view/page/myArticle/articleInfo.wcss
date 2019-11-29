@@ -96,7 +96,6 @@
 
 .page{
     background: white;
-    padding: 20px 60px;
     color:#354052;
     height: 100%;
     overflow: auto;

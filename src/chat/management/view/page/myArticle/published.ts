@@ -106,14 +106,6 @@ export class Published extends Widget {
                     commentCount : element.commentCount,
                     likeCount : element.likeCount
                 };
-
-                // this.props.tempData = [];
-                // this.props.tempData.bannerImg = (JSON.parse(element.body).imgs).toString();
-                // this.props.tempData.title = element.title;
-                // this.props.tempData.time = timestampFormat(element.createtime);
-                // console.log(this.props.tempData.time);
-                // this.props.tempData.commentCount = element.commentCount;
-                // this.props.tempData.likeCount = element.likeCount;
                 this.props.dataList.push(tempData);
             });
             // this.props.dataList = res.list;
@@ -133,5 +125,14 @@ export class Published extends Widget {
         // this.props.currentData = this.props.dataList[k];
         this.paint();
 
+    }
+    // 返回
+    public goBack(e:any) {
+        // fg判斷是否需要刷新頁面數據
+        if (e.fg) {
+            this.getPosts();
+        }
+        this.props.isDetail = false;
+        this.paint();
     }
 }

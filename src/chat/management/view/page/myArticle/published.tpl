@@ -25,7 +25,8 @@
         </div>
     </div>
     {{else}}
-    <div>
+
+    <div ev-goBack="goBack">
         <widget w-tag ="chat-management-view-page-myArticle-articleInfo">{data:{{it.currentData}} }</widget>
     </div>
     {{end}}

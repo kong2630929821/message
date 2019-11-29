@@ -7,11 +7,12 @@ import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
 import { commentLaudPost, delCommentPost, getCommentLaud, getFollowPublicPost, getPostInfoByIds, getUserPost, showCommentPort, showLaudLog } from '../../server/data/rpc/community.p';
 import { AddPostArg, CommentArr, CommType, IterCommentArg, IterLaudArg, IterPostArg, LaudLogArr, PostArr, PostKeyList } from '../../server/data/rpc/community.s';
-import { addApp, createHighAcc, createRoot, findUser, getApplyPublicList, getOfficialAcc, getPostList, getPostType, getReportDetail, getReportDetailList, getReportList, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
+import { addApp, cancelGmAccount, createHighAcc, createRoot, delApp, findUser, getApplyPublicList, getMsgReply, getOfficialAcc, getPostList, getPostType, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
 import { AddAppArg, GetpostTypeArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
+import { SetOfficial } from '../../server/data/rpc/user.s';
 import { erlangLogicIp } from '../config';
-import { deelGetOfficialList, deelReportList, deelReportListInfo, deelUserInfo, deelUserInfoReport, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
+import { deelGetOfficialList, deelGetUserDetail, deelReportList, deelReportListInfo, deelUserInfo, deelUserInfoReport, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -347,6 +348,7 @@ export const setAccMsgReply = (key:string,msg:string) => {
         });
     });
 };
+
 /**
  * 获取所有用户去判断好嗨客服
  */
@@ -395,6 +397,7 @@ export const getReportUserInfo = (uid:number) => {
         });
     });
 };
+
 // 管理端发文章
 export const sendActicle = (num: string, postType: number, title: string, body: string) => {
     const arg = new AddPostArg();
@@ -427,6 +430,65 @@ export const getPubActicle = (count:number,id:number,num:string,postType:number)
 };
 
 /**
+ * 用户详情 
+ */
+export const getUserDetail = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserDetal,uid,(r:any) => {
+            res(deelGetUserDetail(r));
+        });
+    });
+};
+
+/**
+ * 取消官方认证
+ */
+export const setCancelOfficial = (acc_id:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(cancelGmAccount,acc_id,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
+ * 设置官方账号
+ */
+export const setOfficial = (app_id:string,acc_id:string) => {
+    const arg = new SetOfficial();
+    arg.accId = acc_id;
+    arg.appId = app_id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(setGmAccount,arg,(r:any) => {
+            res(r.r);
+        });
+    });
+};
+
+/**
+ * 删除应用
+ */
+export const delGameApp = (appid:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(delApp,appid,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
+ * 获取客服消息自动回复
+ */
+export const getMessageReply = (key:string) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getMsgReply,key,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+/**
  * 获取最新的评论
  * id=0表示从最新的一条数据获取count条数据
  */
@@ -448,6 +510,7 @@ export const showComment = (num:string, post_id:number, id:number = 0, count:num
         });
     });
 };
+
 /**
  * 获取最新点赞记录
  */
@@ -469,6 +532,7 @@ export const showLikeList = (num:string,post_id:number,uid:number= 0,count:numbe
         }));
     });
 };
+
 /**
  * 获取某条帖子中评论点赞记录
  */
@@ -487,6 +551,7 @@ export const getCommentLaudList = (num:string,id:number) => {
         });
     });
 };
+
 /** 
  * 获取帖子详情
  */
@@ -537,24 +602,7 @@ export const commentLaud = (num: string, post_id: number, id: number,fail?:any) 
         }
     });
 };
+
 /**
  *  删除评论
  */
-export const delComment = (num:string,post_id:number,id:number) => {
-    const arg = new CommentKey();
-    arg.num = num;
-    arg.post_id = post_id;
-    arg.id = id;
-
-    return new Promise((res,rej) => {
-        clientRpcFunc(delCommentPost,arg,(r) => {
-            console.log('delCommentPost=============',r);
-            if (r === 1) {
-                res(r);
-            } else {
-                rej();
-            }
-        });
-    });
-   
-};
