@@ -187,13 +187,10 @@ export class UserInfo extends Widget {
                 if (r === 1) {
                     this.props.official = '';
                     popNewMessage('取消官方认证成功');
-                    const appList = getStore('appList',[]);
-                    appList.forEach((v,i) => {
-                        if (v.appid === this.props.appId) {
-                            appList[i].accId = '';
-                        }
-                    });
-                    setStore('appList',appList);
+                    // 修改绑定信息
+                    const appId = getStore('bindApp');
+                    appId.splice(appId.indexOf(this.props.appId),1);
+                    setStore('bindApp',appId);
                     this.paint();
                     this.goBack(true,e);
                 } else {
@@ -213,13 +210,10 @@ export class UserInfo extends Widget {
                 if (r === 1) {
                     this.props.official = '';
                     popNewMessage('设置成功');
-                    const appList = getStore('appList',[]);
-                    appList.forEach((v,i) => {
-                        if (v.appid === appId) {
-                            appList[i].accId = this.props.userInfo.acc_id;
-                        }
-                    });
-                    setStore('appList',appList);
+                    // 添加一个绑定应用
+                    const appIds = getStore('bindApp');
+                    appIds.push(appId);
+                    setStore('bindApp',appIds);
                     this.paint();
                     this.goBack(true,e);
                 } else {
@@ -229,6 +223,39 @@ export class UserInfo extends Widget {
         });
     }
 
+    /**
+     * 重新绑定app
+     */
+    public rebind(e:any) {
+        popNew('chat-management-components-addApplicationModule',{ title:'更换第三方应用' },(appId:string) => {
+            setCancelOfficial(this.props.userInfo.acc_id).then(r => {
+                if (r === 1) {
+                    this.props.official = '';
+                    popNewMessage('取消官方认证成功');
+                     // 修改绑定信息
+                    const appIds = getStore('bindApp');
+                    appIds.splice(appIds.indexOf(this.props.appId),1);
+                    setStore('bindApp',appIds);
+                    setOfficial(appId,this.props.userInfo.acc_id).then(r => {
+                        if (r === 1) {
+                            this.props.official = '';
+                            popNewMessage('设置成功');
+                             // 添加一个绑定应用
+                            const appIds = getStore('bindApp');
+                            appIds.push(appId);
+                            setStore('bindApp',appIds);
+                            this.paint();
+                            this.goBack(true,e);
+                        } else {
+                            popNewMessage('设置失败');
+                        }
+                    });
+                } else {
+                    popNewMessage('取消官方认证失败');
+                }
+            });
+        });
+    }
     // 解除处罚
     public freed() {
         popNew('chat-management-components-confirmBox',{ title:'解除惩罚',invalid:-1 },() => {
@@ -256,4 +283,5 @@ export class UserInfo extends Widget {
             this.initData();
         });
     }
+
 }

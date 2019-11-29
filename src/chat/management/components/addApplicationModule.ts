@@ -65,8 +65,9 @@ export class AddApplicationModule extends Widget {
         if (props.title) {
             // 用户绑定应用
             const arr = [];
+            const bindApp = getStore('bindApp');
             appList.forEach(v => {
-                if (!v.accId) {
+                if (bindApp.indexOf(v.appid) === -1) {
                     arr.push(v);
                 }
             });
