@@ -190,7 +190,7 @@ export class UserInfo extends Widget {
                     const appList = getStore('appList',[]);
                     appList.forEach((v,i) => {
                         if (v.appid === this.props.appId) {
-                            appList[i].acc_id = this.props.userInfo.acc_id;
+                            appList[i].accId = '';
                         }
                     });
                     setStore('appList',appList);
@@ -204,6 +204,9 @@ export class UserInfo extends Widget {
        
     }
 
+    /**
+     * 设置官方账号
+     */
     public setOfficial(e:any) {
         popNew('chat-management-components-addApplicationModule',{ title:'绑定第三方应用' },(appId:string) => {
             setOfficial(appId,this.props.userInfo.acc_id).then(r => {
@@ -213,7 +216,7 @@ export class UserInfo extends Widget {
                     const appList = getStore('appList',[]);
                     appList.forEach((v,i) => {
                         if (v.appid === appId) {
-                            appList[i].acc_id = this.props.userInfo.acc_id;
+                            appList[i].accId = this.props.userInfo.acc_id;
                         }
                     });
                     setStore('appList',appList);

@@ -1,6 +1,7 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { REPORTREPLY, WELCOME } from '../../../config';
-import { getAllUser, setAccMsgReply, setHaoHaiAcc } from '../../../net/rpc';
+import { getAllUser, getMessageReply, setAccMsgReply, setHaoHaiAcc } from '../../../net/rpc';
+import { getStore } from '../../../store/memstore';
 import { popNewMessage } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
@@ -13,10 +14,13 @@ interface Props {
     isHaveCus:number;// 0没有好嗨客服 1修改好嗨客服 2保存
     haohaiId:string;// 好嗨ID
     haoHaiPass:string;// 好嗨密码
+    isShowHaoHai:boolean;// 判断权限 是否展示添加修改好嗨客服
 }
 
-let user = '';
-let pwd = '';
+let user = '';// 账号
+let pwd = '';// 密码
+let newUserInput = '';// 首次登陆客服回复
+let reportInput = '';// 举报内容回复
 /**
  * 客服设置
  */
@@ -29,7 +33,8 @@ export class CustomerService extends Widget {
         reportStatus:true,
         isHaveCus:0,
         haohaiId:'',
-        haoHaiPass:''
+        haoHaiPass:'',
+        isShowHaoHai:false
     };
 
     public create() {
@@ -38,19 +43,44 @@ export class CustomerService extends Widget {
     }
 
     public initData() {
-        getAllUser().then((r:any) => {
+
+        const account = getStore('flags',{}).account;
+        if (/^[0-9]+$/.test(account)) {
+            // 当前账号是好嗨客服
+            this.props.isShowHaoHai = false;
+        } else {
+            // 当前账号是管理员
+            this.props.isShowHaoHai = true;
+            // 获取好嗨客服
+            getAllUser().then((r:any) => {
             // 全为数字则是好嗨客服
-            r.list.forEach(v => {
-                if (/^[0-9]+$/.test(v.user)) {
-                    this.props.haohaiId = v.user;
-                    user = v.user;
-                    this.props.haoHaiPass = v.pwd;
-                    pwd = v.pwd;
-                    this.props.isHaveCus = 1;
-                    this.paint();
-                }
+                r.list.forEach(v => {
+                    if (/^[0-9]+$/.test(v.user)) {
+                        this.props.haohaiId = v.user;
+                        user = v.user;
+                        this.props.haoHaiPass = v.pwd;
+                        pwd = v.pwd;
+                        this.props.isHaveCus = 1;
+                        this.paint();
+                    }
+                });
             });
+        }
+        
+        // 获取首次登陆客服回复
+        getMessageReply(WELCOME).then((r:any) => {
+            this.props.newUserInput = r.msg;
+            newUserInput = r.msg;
+            this.paint();
         });
+        
+        // 获取举报内容回复
+        getMessageReply(REPORTREPLY).then((r:any) => {
+            this.props.reportInput = r.msg;
+            reportInput = r.msg;
+            this.paint();
+        });
+
     }
     /**
      * 切换tab
@@ -108,8 +138,10 @@ export class CustomerService extends Widget {
                     popNewMessage('设置成功');
                     if (index === 1) {
                         this.props.userStatus = true;
+                        newUserInput = input;
                     } else {
                         this.props.reportStatus = true;
+                        reportInput = input;
                     }
                     this.paint();
                 } else {
@@ -130,11 +162,13 @@ export class CustomerService extends Widget {
             this.props.haoHaiPass = pwd;
             this.props.isHaveCus = 1;
         } else if (index === 1) {
-            // 举报
-            this.props.userStatus = true;
-        } else {
             // 新用户
+            this.props.userStatus = true;
+            this.props.newUserInput = newUserInput;
+        } else {
+            // 举报
             this.props.reportStatus = true;
+            this.props.reportInput = reportInput;
         }
         this.paint();
     }

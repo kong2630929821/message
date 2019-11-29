@@ -1,5 +1,6 @@
 import { popNew } from '../../../../pi/ui/root';
 import { Widget } from '../../../../pi/widget/widget';
+import { ADMINISTRATOR, HAOHAICUSTOMERSERVICE, OFFICIAL } from '../../config';
 import { createRootTest, getAllGameInfo, getAllGameList, getHotApp, getRecommendApp, managementLogin } from '../../net/rpc';
 import { setStore } from '../../store/memstore';
 import { popNewMessage } from '../../utils/logic';
@@ -101,13 +102,29 @@ export class Login extends Widget {
             }
         });
 
-        // 进入管理端
-        popNew('chat-management-view-base-home');
-
         // 保存账号
         setStore('flags/account',this.props.name);
 
         // 保存密码
         setStore('flags/pwd',this.props.pwd);
+
+        // 判断权限
+        const account = this.props.name.split('@');
+        if (account[1]) {
+            // 官方账号
+            setStore('flags/auth',OFFICIAL);
+        } else {
+            if (/^[0-9]+$/.test(account[0])) {
+                // 好嗨客服
+                setStore('flags/auth',HAOHAICUSTOMERSERVICE);
+            } else {
+                // 管理员
+                setStore('flags/auth',ADMINISTRATOR);
+            }
+        }
+
+        // 进入管理端
+        popNew('chat-management-view-base-home');
+
     }
 }

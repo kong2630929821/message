@@ -1,10 +1,12 @@
 <div w-class="page">
     <div w-class="tabar">
+        {{if it.isShowHaoHai}}
         <div w-class="tab {{it.active==0?'activeTab':''}}" on-tap="changeTab(0)" on-down="onShow">好嗨客服设置</div>
+        {{end}}
         <div style="margin-left: 30px;" w-class="tab {{it.active==1?'activeTab':''}}" on-tap="changeTab(1)" on-down="onShow">回复内容设置</div>
     </div>
 
-    {{if it.active==0}}
+    {{if it.active==0 && it.isShowHaoHai}}
         <div w-class="cusInput">
             <div w-class="input" ev-input-change="inputChangeId" style="margin-right:20px;{{it.isHaveCus==1 && it.isHaveCus!==0?'':'border:1px solid rgba(24,134,217,1);'}}">
                 <widget w-tag="chat-management-components-input">{itype:"number",placeHolder:"输入好嗨ID",input:{{it.haohaiId}},disabled:{{it.isHaveCus==1 && it.isHaveCus!==0?'true':''}} }</widget>

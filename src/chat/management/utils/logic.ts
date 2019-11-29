@@ -515,7 +515,7 @@ export const deelGetUserDetail = (r:any) => {
         reported:res.user_report.reported_list.length,
         punish:res.user_report.punish_history_list.length,
         nowPublish:nowPublish,
-        id:res.user_report.punish_list.length ? res.user_report.punish_list.id :0
+        id:res.user_report.punish_list.length ? res.user_report.punish_list[0].id :0
     };
     const key = res.user_report.reported_list.length ? res.user_report.reported_list[0].key :'';
     
