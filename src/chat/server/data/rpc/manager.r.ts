@@ -17,8 +17,8 @@ import * as ERROR_NUM from '../errorNum';
 import { getIndexID } from '../util';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
-import { addPost, getUserPostHandle } from './community.r';
-import { AddPostArg, IterPostArg, PostArrWithTotal, PostData } from './community.s';
+import { addComment, addPost, getUserPostHandle, delComment } from './community.r';
+import { AddCommentArg, AddPostArg, IterPostArg, PostArrWithTotal, PostData } from './community.s';
 import { AddAppArg, GetpostTypeArg, MgrUserList, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
 import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
@@ -793,6 +793,29 @@ export const getCommmunityDetail = (uid: number, num: string): CommunityDetail =
     return communityInfo;
 };
 
+/**
+ * 评论
+ */
+// #[rpc=rpcServer]
+export const addCommentPost = (arg: AddCommentArg): CommentKey => {
+    console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost', arg);
+    const uid = getMgrUid();
+
+    return addComment(uid, arg);
+};
+
+/**
+ * 删除评论
+ */
+// #[rpc=rpcServer]
+export const delCommentPost = (arg: CommentKey): number => {
+    const uid = getMgrUid();
+    
+    return delComment(uid, arg, true);
+};
+
+
+
 // 获取公众号申请详情
 export const getPublicApplyData = (applyPublic: ApplyPublic): PublicApplyData => {
     const applyPublicBucket = new Bucket(CONSTANT.WARE_NAME, ApplyPublic._$info.name);
@@ -1320,4 +1343,14 @@ export const getUidAppMap = (): Map<number, string> => {
     } while (iter);
 
     return map;
+};
+
+// 获取公众号管理员uid
+export const getMgrUid = ():number => {
+    const user = getSession('root');
+    const arr = user.split('@');
+    if (arr.length === 2) {
+
+        return parseInt(arr[0]);
+    }
 };
