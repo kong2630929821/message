@@ -42,20 +42,33 @@ export class NewArticle extends Widget {
     }
     // 初始化数据
     public init (data?:any) {
-        // const editer = document.querySelector('#editBox');
-        // const msg = editer.innerHTML;
-        // tslint:disable-next-line:no-inner-html
-        // editer.innerHTML = data ? data.msg :'';
-        console.log(data);
         this.props = {
             title:data ? data.title : '',
             bannerImg: data ? data.bannerImg : '',
             upLoadIng:false,
             buildupImgPath:buildupImgPath,
             draftArry:[],
-            data:{}
+            data:data
         };
         this.paint();
+        
+    }
+    public attach() {
+        const editer = document.querySelector('#editBox');
+        console.log(this.props.data);
+        // tslint:disable-next-line:no-inner-html
+        // tslint:disable-next-line:triple-equals
+        if (this.props.data.msg != null) {
+            // tslint:disable-next-line:no-inner-html
+            editer.innerHTML = this.props.data ? this.props.data.msg :'';
+            
+        }
+        // tslint:disable-next-line:triple-equals
+        if (this.props.data.body != null) {
+            // tslint:disable-next-line:no-inner-html
+            editer.innerHTML = this.props.data ? JSON.parse(this.props.data.body).msg :'';
+        }
+        
     }
     /**
      * 文章标题
@@ -125,7 +138,8 @@ export class NewArticle extends Widget {
         const editer = document.querySelector('#editBox');
         editer.focus();
         const filePath = src;
-        document.execCommand('insertHTML', false, `<img src ='${filePath}' />`);   
+        document.execCommand('insertHTML', false, `<div></div></div><img src ='${filePath}' />`);
+
     }
 
     /**
@@ -153,7 +167,8 @@ export class NewArticle extends Widget {
         }
         const value = {
             msg,
-            imgs:[this.props.bannerImg]
+            imgs: this.props.bannerImg,
+            date: this.getDate()
         };
         const num = getStore('flags',{}).num;
         sendActicle(num, 0, this.props.title,JSON.stringify(value)).then((res:any) => {

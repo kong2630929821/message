@@ -1,8 +1,9 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore, setStore } from '../../../../client/app/data/store';
 import { buildupImgPath, judgeLiked } from '../../../../client/app/logic/logic';
-import { getCommentLaudList, getPostDetile, showComment, showLikeList } from '../../../../client/app/net/rpc';
 import { perPage } from '../../../components/pagination';
+import { getCommentLaudList, getPostDetile, showComment, showLikeList } from '../../../net/rpc';
+import { timestampFormat } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -22,6 +23,12 @@ interface Props {
     expandIndex:boolean;// 控制分页显示隐藏
     perPageIndex:number;// 每页显示多少个的下标
     status:boolean;// true列表 false详情
+    data: any;
+    articleConent: any; // 文章内容
+    dealData:any;  // 组装数据
+    timeFormat:any; // 时间处理,
+    articleData:any; // 经过处理后的详情内容
+
 }
 
 interface DraftItem {
@@ -49,18 +56,25 @@ export class ArticleInfo extends Widget {
         likeActive: false,   // 是否点赞
         expandItemTop: false,
         expandItem: -1,
-        active: '', // 标签的激活状态
+        active: 'comment', // 标签的激活状态
         postItem: '', // 发布的项
-        commentList: [] // 评论列表
+        commentList: [], // 评论列表
+        data: {}, // 保存父组件传递的值
+        articleConent : '', // 文章内容
+        dealData:this.dealData,
+        timeFormat:timestampFormat,
+        articleData: []
     };
-    public setProps(props: any) {
+    public setProps(props:any) {
         this.props = {
             ...this.props,
             ...props
         };
         super.setProps(this.props);
-        this.props.likeActive = judgeLiked(this.props.postItem.key.num,this.props.postItem.key.id);
-        getCommentLaudList(this.props.postItem.key.num,this.props.postItem.key.id).then((r:number[]) => {
+        const currentData = this.props.data;
+        console.log(currentData);
+        getCommentLaudList(currentData.key.num,currentData.key.id).then((r:number[]) => {
+            console.log(r);
             this.props.commentList = this.props.commentList.map(v => {
                 v.likeActive = r.indexOf(v.key.id) > -1;
 
@@ -69,15 +83,18 @@ export class ArticleInfo extends Widget {
             this.props.commentLikeList = r;
             this.paint();
         });
-        showComment(this.props.postItem.key.num, this.props.postItem.key.id).then((r: any) => {
+        showComment(currentData.key.num, currentData.key.id).then((r: any) => {
+            console.log(r);
             this.props.commentList = r.map(v => {
                 v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
 
                 return v;
             });
+            console.log(this.props.commentList);
             this.paint();
         });
-        showLikeList(this.props.postItem.key.num,this.props.postItem.key.id).then((r: any) => {
+        showLikeList(currentData.key.num,currentData.key.id).then((r: any) => {
+            console.log(r);
             this.props.likeList = r.map(v => {
                 v.avatar = buildupImgPath(v.avatar);
                 
@@ -85,23 +102,55 @@ export class ArticleInfo extends Widget {
             });
             this.paint();
         });
-        getPostDetile(this.props.postItem.key.num,this.props.postItem.key.id).then((r:any) => {
-            this.props.postItem.likeCount = r[0].likeCount;
-            this.props.postItem.commentCount = r[0].commentCount;
+        getPostDetile(currentData.key.num,currentData.key.id).then((r:any) => {
+            currentData.likeCount = r[0].likeCount;
+            currentData.commentCount = r[0].commentCount;
             this.paint();
             // 刷新广场数据
             const postlist = getStore('postReturn',[]);
-            const ind = postlist.postList.findIndex(r => r.key.num === this.props.postItem.key.num && r.key.id === this.props.postItem.key.id);
+            const ind = postlist.postList.findIndex(r => r.key.num === currentData.key.num && r.key.id === currentData.key.id);
             if (ind > -1) {
-                postlist.postList[ind].commentCount = this.props.postItem.commentCount;
-                postlist.postList[ind].likeCount = this.props.postItem.likeCount;
+                postlist.postList[ind].commentCount = currentData.commentCount;
+                postlist.postList[ind].likeCount = currentData.likeCount;
                 setStore('postReturn',postlist);
             }
         });
+        this.initData(currentData);
+    }
+    // 初始化数据
+    public initData(data?:any) {
+        console.log(data);
+        this.props.dataList = [
+            {
+                banner : data ? (JSON.parse(data.body).imgs).toString() : '',
+                title:data ? data.title :'',
+                time:data ? timestampFormat(data.createtime) :'',
+                commentCount: data ? data.commentCount :0,
+                likeCount: data ? data.likeCount :0
+            }
+        ];
+        this.props.articleData = [
+            {
+                banner : data ? (JSON.parse(data.body).imgs).toString() : '',
+                title:data ? data.title :'',
+                body: data ? (JSON.parse(data.body).msg).toString() : '',
+                time:data ? timestampFormat(data.createtime) :'',
+                commentCount: data ? data.commentCount :0,
+                likeCount: data ? data.likeCount :0
+            }
+        ];
+        console.log(this.props.articleData);
+        console.log(this.props.dataList);         
     }
     public create() {
         super.create();
         this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
+    }
+
+    public attach() {
+        const content = document.querySelector('#articleBody');
+        // tslint:disable-next-line:no-inner-html
+        content.innerHTML = this.props.articleData[0].body;
     }
 
     // 重置页面的展开状态
@@ -138,49 +187,17 @@ export class ArticleInfo extends Widget {
         this.paint();  
     }
     /**
-     * 删除评论
+     * 组装squareItem的数据
      */
-    public deleteComment(i:number) {
-        this.props.commentList.splice(i,1);
-        this.props.postItem.commentCount--;
-        this.paint();
-        this.updateComment();
+    public dealData(v:any,r:boolean) {
+        return { 
+            ...v,
+            showUtils: r 
+        };
     }
-    // 更新评论
-    public updateComment() {
-        const postlist = getStore('postReturn/postList',[]);
-        const ind = postlist.findIndex((r:any) => {
-            return r.key.num === this.props.postItem.key.num && r.key.id === this.props.postItem.key.id;
-        });
-        if (ind > -1) {
-            postlist[ind].commentCount = this.props.postItem.commentCount;
-            setStore('postReturn/postList',postlist);
-        }
-    }
-    
-    // 切换tab
-    public changeTab(tab: string) {
-        this.pageClick();
-        this.props.active = tab;
+    // 切换标签
+    public changeTab(tab:any) {
+        this.props.active =  this.props.active === 'comment' ? '' :'comment';
         this.paint();
     }
-    /**
-     * 展示操作
-     */
-    public expandTools(e:any,i:number) {
-        this.pageClick();
-        this.props.expandItem = e.value ? i :-1;
-        this.paint();
-    }
-
-    public toolsExpand() {
-        this.props.expandItem = -1;
-        this.paint();
-    }
-    public pageClick() {
-        this.props.expandItem = -1;
-        this.props.expandItemTop = !this.props.expandItemTop;
-        this.paint();
-    }
-
 }

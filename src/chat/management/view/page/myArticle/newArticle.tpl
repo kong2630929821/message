@@ -3,7 +3,7 @@
         <div w-class="appName">标题</div>
         <div w-class="inputBox">
             <div w-class="input" ev-input-change="inputChangeName">
-                <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"应用名称",maxLength:10}</widget>
+                <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"应用名称",input:{{it.title}},maxLength:10}</widget>
             </div>
             <div w-class="info">* 6-30字</div>
         </div>

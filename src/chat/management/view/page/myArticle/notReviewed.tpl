@@ -1,8 +1,9 @@
 <div w-class="page" on-tap="close">
+    {{if !it.reEdit}}
     <div w-class="list">
         {{for i,v of it.showDataList}}
-            <div w-class="draft">
-                <img  src="{{v.banner}}" w-class="banner" />
+            <div w-class="draft" on-tap="goDetail({{i}})">
+                <img  src="{{it.buildupImgPath(v.bannerImg)}}" w-class="banner" />
                 <div w-class="info">
                     <div w-class="title">{{v.title}}</div>
                     <div w-class="time">
@@ -16,7 +17,12 @@
             </div>
         {{end}}
     </div>
-
+    {{else}}
+    {{%==================查看详情===================}}
+    <div ev-goBack="goBack">
+        <widget w-tag="chat-management-view-page-myArticle-newArticle">{data:{{it.currentData}} }</widget>
+    </div>
+    {{end}}
     
     <div w-class="ctroller">
         <div ev-changeCurrent="pageChange" w-class="pagination" ev-perPage="perPage" ev-expand="expand">

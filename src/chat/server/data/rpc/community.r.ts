@@ -544,6 +544,14 @@ export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
  */
 // #[rpc=rpcServer]
 export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
+    
+    return getUserPostHandle(arg, CONSTANT.NORMAL_STATE);
+};
+
+/**
+ * 获取指定社区编号的帖子
+ */
+export const getUserPostHandle = (arg: IterPostArg, postType: number): PostArrWithTotal => {
     // 获取的帖子id
     const postArrWithTotal = new PostArrWithTotal();
     postArrWithTotal.list = [];
@@ -551,6 +559,7 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
     const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
+    console.log('!!!!!!!!!!!!!getUserPostHandle!!!!!!communityPost:', JSON.stringify(communityPost));
     if (!communityPost) {
         return postArrWithTotal;
     }
@@ -561,10 +570,11 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
         postKey.id = communityPost.id_list[i];
         postKey.num = communityPost.num;
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
-        if (post.state !== CONSTANT.NORMAL_STATE) continue; // 帖子已删除
+        if (post.state !== postType) continue; // 排除非指定类型
         post_id_list.push(postKey);
         postArrWithTotal.total ++;
     }
+    console.log('!!!!!!!!!!!!!getUserPostHandle!!!!!!post_id_list:', JSON.stringify(post_id_list));
     postIdSort(post_id_list, 0, post_id_list.length - 1);
     let index = -1;
     for (let i = 0; i < post_id_list.length; i++) {
@@ -581,7 +591,7 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
     let count = 0;
     for (let i = 0; i < post_id_list.length; i++) {
         if (count >= arg.count) break;
-        const postData = getPostInfoById(post_id_list[i]);
+        const postData = getPostInfoById(post_id_list[i], false);
         if (!postData) continue;
         postArrWithTotal.list.push(postData);
         count ++;
@@ -1623,13 +1633,13 @@ export const getPostInfo = (postKey: PostKey, post: Post): PostData => {
  * 获取指定社区账户帖子信息
  * @ param postKey
  */
-export const getPostInfoById = (postKey: PostKey): PostData => {
+export const getPostInfoById = (postKey: PostKey, fDel: Boolean = true): PostData => {
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
     const post = postBucket.get<PostKey, Post[]>(postKey)[0];
     if (!post) return;
-    if (post.state !== CONSTANT.NORMAL_STATE) return; // 帖子已删除
+    if (post.state !== CONSTANT.NORMAL_STATE && fDel) return; // 帖子已删除
     const user = new GetUserInfoReq();
     user.uids = [post.owner];
     const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息

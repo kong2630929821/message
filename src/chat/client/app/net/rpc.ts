@@ -999,12 +999,13 @@ export const changePublic = (name:string,desc:string,avatar:string,num:string) =
 };
 
 // 举报
-export const complaintType = (key:string,status:number,reason:string) => {
+export const complaintType = (key:string,status:number,reason:string,uid:number) => {
     const arg = new ReportArg();
     arg.key = key;
     arg.evidence = '';
     arg.report_type = status;
     arg.reason = reason;
+    arg.reported_uid = uid;
 
     return new Promise((res,rej) => {
         clientRpcFunc(report,arg,(r:number) => {

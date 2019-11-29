@@ -114,7 +114,6 @@ interface Store {
     flags:any;
     draft:ListItem[];
     uid: Number;
-
 }
 // 全局内存数据库
 const store:Store = {

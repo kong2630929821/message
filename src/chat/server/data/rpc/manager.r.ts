@@ -4,23 +4,22 @@
 
 import { getSession } from '../../../../pi_pt/util/autologin.r';
 import { Bucket } from '../../../utils/db';
-import { add_app, set_app_config } from '../../../utils/oauth_lib';
+import { add_app, del_app, set_app_config } from '../../../utils/oauth_lib';
 import { send } from '../../../utils/send';
 import { randomWord } from '../../../utils/util';
 import { setSession } from '../../rpc/session.r';
-import { CHAT_APPID } from '../constant';
 import * as CONSTANT from '../constant';
 import { AttentionIndex, Comment, CommentKey, CommunityAccIndex, CommunityBase, CommunityPost, FansIndex, Post, PostCount, PostKey, PublicNameIndex } from '../db/community.s';
-import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, MessageReply, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail } from '../db/manager.s';
-import { Report, ReportCount, ReportListTab } from '../db/message.s';
+import { ApplyPublic, Article, CommunityDetail, HandleApplyPublicArg, handleArticleArg, HandleArticleResult, ManagerPostList, MessageReply, ModifyPunishArg, PostList, PostListArg, PublicApplyData, PublicApplyList, PublicApplyListArg, Punish, PunishArg, PunishCount, PunishData, PunishList, ReportContentInfo, ReportData, ReportDetailListArg, ReportIndex, ReportIndexList, ReportList, ReportListArg, ReportPublicInfo, ReportUserInfo, RootUser, UserApplyPublic, UserReportDetail, UserReportIndex, UserReportIndexList } from '../db/manager.s';
+import { Report, ReportCount, ReportListTab, UserReportKeyTab } from '../db/message.s';
 import { AccountGenerator, OfficialUsers, UserInfo } from '../db/user.s';
 import * as ERROR_NUM from '../errorNum';
 import { getIndexID } from '../util';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
-import { addPost } from './community.r';
-import { AddPostArg, PostData } from './community.s';
-import { AddAppArg, MgrUserList, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
+import { addPost, getUserPostHandle } from './community.r';
+import { AddPostArg, IterPostArg, PostArrWithTotal, PostData } from './community.s';
+import { AddAppArg, GetpostTypeArg, MgrUserList, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
 import { getReportListR } from './message.s';
 import { getRealUid, sendFirstWelcomeMessage, setOfficialAccount } from './user.r';
 import { SetOfficial } from './user.s';
@@ -37,6 +36,24 @@ export const createRoot = (user: RootUser): number => {
 
         return CONSTANT.RESULT_SUCCESS;
     } else {
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
+};
+
+/**
+ * 修改密码
+ */
+// #[rpc=rpcServer]
+export const mdfPwd = (user: RootUser): number => {
+    const rootUserBucket = new Bucket(CONSTANT.WARE_NAME, RootUser._$info.name);
+    if (user.user && user.pwd) {
+        if (rootUserBucket.get(user.user)[0]) {
+            rootUserBucket.put(user.user, user);
+
+            return CONSTANT.RESULT_SUCCESS;
+        }
+    } else {
+
         return CONSTANT.DEFAULT_ERROR_NUMBER;
     }
 };
@@ -69,7 +86,7 @@ export const showUsers = (arg: string): MgrUserList => {
  */
 // #[rpc=rpcServer]
 export const createHighAcc = (user: RootUser): number => {
-    const r:Result = setOfficialAccount(user.user, CHAT_APPID);
+    const r:Result = setOfficialAccount(user.user, CONSTANT.CHAT_APPID);
     if (r.r === CONSTANT.RESULT_SUCCESS) {
         
         return createRoot(user);
@@ -186,15 +203,50 @@ export const getReportList = (reportArg: ReportListArg): getReportListR => {
 };
 
 /**
- * 获取指定用户举报详情
+ * 获取指定用户被举报详情(已处理)
  */
 // #[rpc=rpcServer]
-export const getReportDetail = (uid: number): string => {
-    // 拼接举报对象主键
-    const key = `1%${uid}`;
-    const userReportDetail = getReportUserInfo(key, uid);
+export const getReportDetail = (uid: number): getReportListR => {
+    console.log('============getReportList:', uid);
+    const r = new getReportListR();
+    r.msg = '';
+    if (!getSession('root')) {
+        r.msg = 'not login';
 
-    return JSON.stringify(userReportDetail);
+        return r;
+    }
+    const userReportKeyTabBucket = new Bucket(CONSTANT.WARE_NAME, UserReportKeyTab._$info.name);
+    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+    const punishBucket = new Bucket(CONSTANT.WARE_NAME, Punish._$info.name);
+    const reportIndexList = new UserReportIndexList();
+    reportIndexList.list = [];
+    let userReportKey = userReportKeyTabBucket.get<number, UserReportKeyTab[]>(uid)[0];
+    if (!userReportKey) {
+        userReportKey = new UserReportKeyTab();
+        userReportKey.uid = uid;
+        userReportKey.key_list = [];
+    }
+    console.log('============userReportKey:', userReportKey);
+    for (let i = 0; i < userReportKey.key_list.length; i++) {
+        const report = reportBucket.get<number, Report[]>(userReportKey.key_list[i])[0];
+        console.log('============report:', report);
+        if (report) {
+            const reportIndex = new UserReportIndex();
+            reportIndex.key = report.key;
+            reportIndex.reason = report.reason;
+            reportIndex.handle_time = report.handle_time;
+            reportIndex.id = report.id;
+            if (report.punish_id !== 0) {
+                const nowPunish = punishBucket.get<number, Punish[]>(report.punish_id)[0];
+                reportIndex.now_publish = nowPunish;
+            }
+            reportIndexList.list.push(reportIndex);
+        }
+            
+    }
+    r.msg = JSON.stringify(reportIndexList);
+    
+    return r;
 };
 
 /**
@@ -217,52 +269,19 @@ export const getReportDetailList = (arg: ReportDetailListArg): string => {
 };
 
 /**
- * 举报信息列表
- */
-// #[rpc=rpcServer]
-// export const getReportList = (arg: ReportListArg): string => {
-//     if (!getSession('root')) return 'not login';
-//     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
-//     const reportList = new ReportList();
-//     reportList.list = [];
-//     reportList.total = 0;
-//     let reportId: number;
-//     if (arg.id <= 0) {
-//         reportId = null;
-//     } else {
-//         reportId = arg.id - 1;
-//     }
-//     const iter = reportBucket.iter(reportId, true);
-//     let count = 0;
-//     do {
-//         const v = iter.next();
-//         if (!v) break;
-//         const report: Report = v[1];
-//         if (report.state === arg.state) reportList.total ++;
-//         if (count >= arg.count) continue;
-//         console.log('============loop report:', report);
-//         if (report.state === arg.state) { // 匹配举报状态
-//             const reportData = getReportData(report);
-//             reportList.list.push(reportData);
-//             count ++;
-//             continue;
-//         }
-//     } while (iter);
-//     console.log('============reportList:', reportList);
-
-//     return JSON.stringify(reportList);
-// };
-
-/**
  * 惩罚指定对象
  */
 // #[rpc=rpcServer]
 export const punish = (arg: PunishArg): string => {
     if (!getSession('root')) return 'not login';
-    // const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
-    // const report = reportBucket.get<number, Report[]>(arg.report_id)[0];
-    // if (!report) return 'error report id';
-    // if (report.state !== 0) return 'error report state';
+    // 惩罚类型为0为不惩罚处理 只更新举报状态
+    if (arg.punish_type === 0) {
+        const punish_id = 0;
+        // 更新举报状态
+        updateReportInfo(arg.key, punish_id);
+
+        return punish_id.toString();
+    }
     let uid = 0;
     const report_type = parseInt(arg.key.split('%')[0], 10);
     if (arg.punish_type === CONSTANT.DELETE_CONTENT) { // 删除内容
@@ -319,6 +338,8 @@ export const punish = (arg: PunishArg): string => {
     }
     punishCount.now_publish = punish.id;
     punishCountBucket.put(punishCount.key, punishCount);
+    // 更新举报状态
+    updateReportInfo(arg.key, punish.id);
     // 好嗨客服通知
     const punishStr = getPunishStr(arg.punish_type);
     const timeStr = formatDuring(arg.time);
@@ -335,12 +356,12 @@ export const punish = (arg: PunishArg): string => {
 // #[rpc=rpcServer]
 export const reportHandled = (reportKey: string): string => {
     if (!getSession('root')) return 'not login';
-    // 更新举报状态
-    const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
-    const userReport = reportCountBucket.get<string, ReportCount[]>(reportKey)[0];
-    userReport.handled_reported = userReport.not_handled_reported.concat(userReport.handled_reported);
-    userReport.not_handled_reported = [];
-    reportCountBucket.put(reportKey, userReport);
+    // // 更新举报状态
+    // const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
+    // const userReport = reportCountBucket.get<string, ReportCount[]>(reportKey)[0];
+    // userReport.handled_reported = userReport.not_handled_reported.concat(userReport.handled_reported);
+    // userReport.not_handled_reported = [];
+    // reportCountBucket.put(reportKey, userReport);
 
     return reportKey;
 };
@@ -392,6 +413,19 @@ export const getPostList = (arg: PostListArg): string => {
     postList.total = managerPostList.list.length;
 
     return JSON.stringify(postList);
+};
+
+/**
+ * 获取指定类型的文章
+ */
+// #[rpc=rpcServer]
+export const getPostType = (arg: GetpostTypeArg): PostArrWithTotal => {
+    const iterPostArg = new IterPostArg();
+    iterPostArg.id = arg.id;
+    iterPostArg.count = arg.count;
+    iterPostArg.num = arg.num;
+    
+    return getUserPostHandle(iterPostArg, arg.post_type);
 };
 
 /**
@@ -608,6 +642,7 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
         const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
         officialUserInfo.user_info = userInfo;
         officialUserInfo.app_id = map.get(uid);
+        officialUserInfo.now_publish = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${uid}`, CONSTANT.BAN_ACCOUNT).list;
         list.list.push(officialUserInfo);
     } while (iter);
 
@@ -617,22 +652,31 @@ export const getOfficialAcc = (appid: string): OfficialAccList => {
 };
 
 /**
- * 获取官方账号绑定的应用
+ * 搜索用户
  */
-export const getUidAppMap = (): Map<number, string> => {
-    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
-    const iter = officialBucket.iter(null, true);
-    const map = new Map();
-    do {
-        const v = iter.next();
-        if (!v) break;
-        const officialUsers: OfficialUsers = v[1];
-        officialUsers.uids.forEach((uid) => {
-            map.set(uid, officialUsers.appId);
-        });
-    } while (iter);
-
-    return map;
+// #[rpc=rpcServer]
+export const findUser = (user: string): OfficialAccList => {
+    const userInfoBucket = new Bucket(CONSTANT.WARE_NAME, UserInfo._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    const list = new OfficialAccList();
+    list.list = [];
+    const officialUserInfo =  new OfficialUserInfo();
+    // 获取uid绑定的app
+    const map = getUidAppMap();
+    console.log('findUser!!!!!!!!!map:', JSON.stringify(map));
+    const uid = getRealUid(user);
+    if (uid < 0) return list;
+    const userInfo = userInfoBucket.get<number,UserInfo[]>(uid)[0];
+    // 获取社区注册时间
+    const communityBase = communityBaseBucket.get<string, CommunityBase[]>(userInfo.comm_num)[0];
+    officialUserInfo.create_time = communityBase.createtime;
+    officialUserInfo.app_id = map.get(uid);
+    officialUserInfo.user_info = userInfo;
+    officialUserInfo.now_publish = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${uid}`, CONSTANT.BAN_ACCOUNT).list;
+    list.list.push(officialUserInfo);
+    console.log('findUser!!!!!!!!!list:', JSON.stringify(list));
+    
+    return list;
 };
 
 /**
@@ -660,6 +704,20 @@ export const addApp = (arg: AddAppArg): number => {
     console.log('addApp!!!!!!!!!!!!!!arg:', arg);
     // if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
     const r = add_app(arg.appid, arg.name, arg.imgs, arg.desc, arg.url, arg.pk, arg.mch_id, arg.notify_url);
+    if (r) {
+        return CONSTANT.RESULT_SUCCESS;
+    } else {
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
+};
+
+/**
+ * 删除应用
+ */
+// #[rpc=rpcServer]
+export const delApp = (appid: string): number => {
+    // if (!getSession('root')) return ERROR_NUM.MGR_NOT_LOGIN;
+    const r = del_app(appid);
     if (r) {
         return CONSTANT.RESULT_SUCCESS;
     } else {
@@ -1156,6 +1214,23 @@ export const getPostInfoById = (postKey: PostKey): PostData => {
     return postData;
 };
 
+// 更新举报状态
+const updateReportInfo = (reportKey, punish_id) => {
+    const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
+    const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
+    const userReport = reportCountBucket.get<string, ReportCount[]>(reportKey)[0];
+    const now = Date.now().toString();
+    for (let i = 0; i < userReport.not_handled_reported.length; i++) {
+        const report = reportBucket.get<number, Report[]>(userReport.not_handled_reported[i])[0];
+        report.handle_time = now;
+        report.punish_id = punish_id;
+        reportBucket.put(userReport.not_handled_reported[i], report);
+    }
+    userReport.handled_reported = userReport.not_handled_reported.concat(userReport.handled_reported);
+    userReport.not_handled_reported = [];
+    reportCountBucket.put(reportKey, userReport);
+};
+
 const reportGetUserName = (reportType: number, report: Report): string => {
     let uid = 0;
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
@@ -1226,4 +1301,23 @@ export const formatDuring = (mss: number) => {
     const seconds = (mss % (1000 * 60)) / 1000;
     
     return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
+};
+
+/**
+ * 获取官方账号绑定的应用
+ */
+export const getUidAppMap = (): Map<number, string> => {
+    const officialBucket = new Bucket(CONSTANT.WARE_NAME, OfficialUsers._$info.name);
+    const iter = officialBucket.iter(null, true);
+    const map = new Map();
+    do {
+        const v = iter.next();
+        if (!v) break;
+        const officialUsers: OfficialUsers = v[1];
+        officialUsers.uids.forEach((uid) => {
+            map.set(uid, officialUsers.appId);
+        });
+    } while (iter);
+
+    return map;
 };

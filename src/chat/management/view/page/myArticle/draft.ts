@@ -6,7 +6,7 @@ interface Props {
     showDataList:DraftItem[];// 展示数据
     buildupImgPath:any;
     status:boolean; 
-    currenetData:{}; // 当前操作的数据
+    currenetData:any; // 当前操作的数据
 }
 
 interface DraftItem {

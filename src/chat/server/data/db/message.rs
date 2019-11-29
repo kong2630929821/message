@@ -127,6 +127,7 @@ struct Report {
     ruid: u32,           //举报人
     time: String,        //举报时间
     handle_time: String, //处理时间
+    punish_id: u32,      //惩罚id
 }
 
 /**
@@ -148,4 +149,13 @@ struct ReportCount {
 struct ReportListTab {
     report_type: u8,          //举报类型
     key_list: &[String],      //举报主键列表
+}
+
+/**
+* 用户关联被举报对象表
+*/
+#[primary=uid,db=file,dbMonitor=true]
+struct UserReportKeyTab {
+    uid: u32,          //用户id
+    key_list: &[u32],  //举报id
 }

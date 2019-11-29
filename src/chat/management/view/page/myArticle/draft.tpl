@@ -20,7 +20,7 @@
     {{else}}
     {{%==================查看详情===================}}
     <div ev-goBack="goBack">
-        <widget w-tag="chat-management-view-page-myArticle-newArticle">{data:{{it.currentData}} }</widget>
+        <widget w-tag="chat-management-view-page-myArticle-newArticle">{data:{{it.currenetData}} }</widget>
     </div>
     {{end}}
 </div>

@@ -4,7 +4,6 @@ import { createRootTest, getAllGameInfo, getAllGameList, getHotApp, getRecommend
 import { setStore } from '../../store/memstore';
 import { popNewMessage } from '../../utils/logic';
 import { rippleShow } from '../../utils/tools';
-
 /**
  * 登陆
  */
@@ -115,5 +114,4 @@ export class Login extends Widget {
         }
         
     }
-
 }

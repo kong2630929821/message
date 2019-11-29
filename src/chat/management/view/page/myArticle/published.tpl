@@ -3,7 +3,7 @@
     <div w-class="list">
         {{for i,v of it.showDataList}}
             <div w-class="draft" on-tap="goDataills({{i}})">
-                <img  src="{{v.banner}}" w-class="banner" />
+                <img  src="{{it.buildupImgPath(v.bannerImg)}}" w-class="banner" />
                 <div w-class="info">
                     <div w-class="title">{{v.title}}</div>
                     <div w-class="time">
@@ -26,7 +26,7 @@
     </div>
     {{else}}
     <div>
-        <widget w-tag ="chat-management-view-page-myArticle-articleInfo">{{it.currentData}}</widget>
+        <widget w-tag ="chat-management-view-page-myArticle-articleInfo">{data:{{it.currentData}} }</widget>
     </div>
     {{end}}
 </div>

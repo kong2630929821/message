@@ -95,6 +95,8 @@ export const WALLET_APPID = '10';
 export const WALLET_SERVER_KEY = '0a15c4dbca88fa93ccf43a49b3496208edff35a4185ac967389ffd9878d5c405';
 // 创建应用
 export const WALLET_API_ADD_APP = '/oAuth/add_app';
+// 删除应用
+export const WALLET_API_DEL_APP = '/oAuth/del_app';
 // 编辑推荐应用
 export const WALLET_API_SET_APP_CONFIG = '/oAuth/set_app_config';
 

@@ -10,7 +10,7 @@
                 <widget w-tag="chat-management-components-input">{itype:"number",placeHolder:"输入好嗨ID",input:{{it.haohaiId}},disabled:{{it.isHaveCus==1 && it.isHaveCus!==0?'true':''}} }</widget>
             </div>
             <div w-class="input" ev-input-change="inputChangePass" style="margin-right:10px;{{it.isHaveCus==1 && it.isHaveCus!==0?'':'border:1px solid rgba(24,134,217,1);'}}">
-                <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"输入登录密码",input:{{it.haoHaiPass}},disabled:{{it.isHaveCus==1 && it.isHaveCus!==0?'true':''}} }</widget>
+                <widget w-tag="chat-management-components-input">{itype:"password",placeHolder:"输入登录密码",input:{{it.haoHaiPass}},disabled:{{it.isHaveCus==1 && it.isHaveCus!==0?'true':''}} }</widget>
             </div>
 
             <div w-class="btnGroup">
