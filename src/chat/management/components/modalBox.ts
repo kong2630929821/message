@@ -4,13 +4,18 @@ import { popNewMessage } from '../utils/logic';
 import { rippleShow } from '../utils/tools';
 
 interface Props {
+    checkTypeList:any;// 处罚类型
+    reason:any;// 选择驳回原因
+    msg:string;// 客服回复的话
     title:string;// 标题
     avatar:string;// 头像
     name:string;// 名字
-    checked:boolean;// 选择 true发布 false驳回
-    typeTwo:any;// 驳回时的类型选择
-    checkedList:any;// 驳回时选中的类型
-    data:any;// 文章详情
+    checkedType:number;// 选择发布 驳回
+    currentReason:number;// 选中的驳回原因下标
+    key:{
+        id:number;
+        num:string;
+    };
 }
 
 /**
@@ -20,13 +25,18 @@ export class ModalBox extends Widget {
     public ok:() => void;
     public cancel:() => void;
     public props:Props = {
+        checkTypeList:['通过','驳回'],
+        reason:['垃圾营销','涉黄信息','人身攻击','有害信息','违法信息','诈骗信息'],
+        msg:'',
         title:'',
         avatar:'',
         name:'',
-        checked:true,
-        typeTwo:['垃圾营销','涉黄信息','人身攻击','有害信息','违法信息','诈骗信息'],
-        checkedList:[false,false,false,false,false,false],
-        data:{}
+        checkedType:0,
+        currentReason:0,
+        key:{
+            id:0,
+            num:'0'
+        }
     };
 
     public setProps(props:any) {
@@ -35,20 +45,27 @@ export class ModalBox extends Widget {
             ...props
         };
         super.setProps(this.props);
-        this.props.title = this.props.data.title;
-        this.props.name = this.props.data.name;
-        this.props.avatar = this.props.data.avatar;
+        const title = this.props.title.length > 9 ? `${this.props.title.substring(0,9)}···` :this.props.title;
+        this.props.msg = `您的文章“${title}”，通过了审核`;
     }
 
     // 选择类型
-    public check() {
-        this.props.checked = !this.props.checked;
+    public btnCheckType(index:number) {
+        this.props.checkedType = index;
+        const title = this.props.title.length > 9 ? `${this.props.title.substring(0,9)}···` :this.props.title;
+        if (index) {
+            this.props.msg = `您的文章“${title}”，因为包含“${this.props.reason[this.props.currentReason]}”信息，没有通过审核，请检查后重新提交`;
+        } else {
+            this.props.msg = `您的文章“${title}”，通过了审核`;
+        }
         this.paint();
     }
 
     // 选择驳回的理由
-    public checkList(index:number) {
-        this.props.checkedList[index] = !this.props.checkedList[index];
+    public btnCheck(index:number) {
+        this.props.currentReason = index;
+        const title = this.props.title.length > 9 ? `${this.props.title.substring(0,9)}···` :this.props.title;
+        this.props.msg = `您的文章“”，因为包含“${title}”信息，没有通过审核，请检查后重新提交` ;
         this.paint();
     }
 
@@ -61,24 +78,10 @@ export class ModalBox extends Widget {
     public okBtn() {
         let reason = '';
         // 判断选择的类型
-        if (!this.props.checked) {
-            // 驳回
-            const checkList = [];
-            let fg = true; 
-            this.props.checkedList.forEach((v,i) => {
-                if (v) {
-                    checkList.push(this.props.typeTwo[i]);
-                    fg = false;
-                }
-            });
-            if (fg) {
-                popNewMessage('请选择驳回的理由');
-
-                return;
-            }
-            reason = JSON.stringify(checkList);
+        if (this.props.checkedType) {
+            reason = this.props.reason[this.props.currentReason];
         }
-        getHandleArticle(this.props.checked,reason,this.props.data.key.id,this.props.data.key.num).then(r => {
+        getHandleArticle(this.props.checkedType ? false :true,reason,this.props.key.id,this.props.key.num).then(r => {
             if (r === 1) {
                 popNewMessage('审核成功');
                 this.ok && this.ok();
