@@ -27,7 +27,8 @@ interface Props {
 
 const title = [
     ['被举报人','类别','举报原因','被举报次数','举报时间','举报人'],
-    ['关联用户','类别','举报原因','被举报次数','举报时间','举报人']
+    ['关联用户','类别','举报原因','被举报次数','举报时间','举报人'],
+    ['被举报文章','类别','举报原因','被举报次数','举报时间','举报人']
 ];
 /**
  * 文章审核
@@ -46,7 +47,7 @@ export class ToBeProcessed extends Widget {
         reportDataListId:[],
         reportDataList:[],
         allId:[[],[]],
-        allList:[[],[]],
+        allList:[[],[],[]],
         currentDataId:[],
         returnDeel:0,
         allBtnGroup:[],
@@ -75,14 +76,23 @@ export class ToBeProcessed extends Widget {
                 // 动态
                 dataType = REPORT.REPORT_POST;
                 break;
+            case 2:
+                // 文章
+                dataType = REPORT.REPORT_ARTICLE;
+                break;
             default:
         }
         getAllReport(this.props.returnDeel,dataType).then((r:any) => {
             this.props.allList[i] = r[0];
             this.props.allId[i] = r[1];
             this.props.allBtnGroup[i] = r[2];
-            this.props.showTitleList = title[this.props.returnDeel];
             if (i === this.props.returnStatus) {
+                // 表格标题
+                if (this.props.returnStatus === 2) {
+                    this.props.showTitleList = title[2];
+                } else {
+                    this.props.showTitleList = title[this.props.returnDeel];
+                }
                 this.props.reportDataListId = this.props.allId[i];
                 this.props.reportDataList = this.props.allList[i];
                 this.props.btnGroup = this.props.allBtnGroup[i];
@@ -98,6 +108,11 @@ export class ToBeProcessed extends Widget {
     // 切换tab
     public checkType(index:number) {
         this.props.returnStatus = index;
+        if (index === 2) {
+            this.props.showTitleList = title[index];
+        } else {
+            this.props.showTitleList = title[this.props.returnDeel];
+        }
         this.props.reportDataList = this.props.allList[this.props.returnStatus];
         this.props.reportDataListId = this.props.allId[this.props.returnStatus];
         this.props.btnGroup = this.props.allBtnGroup[this.props.returnStatus];
@@ -112,6 +127,7 @@ export class ToBeProcessed extends Widget {
         this.props.allList.forEach((v,i) => {
             this.initData(i);
         });
+        this.paint();
     }
     // 表格查看详情
     public goDetail(e:any) {

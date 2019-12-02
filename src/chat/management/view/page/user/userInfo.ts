@@ -6,7 +6,7 @@ import { perPage } from '../../../components/pagination';
 import { HAOHAIAPPID } from '../../../config';
 import { getReportUserInfo, getUserDetail, modifyPunishTime, setCancelOfficial, setOfficial } from '../../../net/rpc';
 import { deepCopy, getStore, setStore } from '../../../store/memstore';
-import { popNewMessage } from '../../../utils/logic';
+import { popNewMessage, REPORT } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -161,10 +161,15 @@ export class UserInfo extends Widget {
         const id = JSON.parse(currentData.key.split('%')[0]);
 
         // 对应审核惩罚的列标下标
-        if (id === 1) {
+        if (id === REPORT.REPORT_PERSON) {
+            // 玩家
             this.props.reportType = 0;
-        } else if (id === 3) {
+        } else if (id === REPORT.REPORT_POST) {
+            // 动态
             this.props.reportType = 1;
+        } else if (id === REPORT.REPORT_ARTICLE) {
+            // 文章
+            this.props.reportType = 2;
         }
         this.paint();
     }

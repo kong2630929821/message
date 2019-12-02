@@ -138,6 +138,11 @@ export class ToBeProcessedInfo extends Widget {
             popNew('chat-management-components-confirmBox',{ title:'撤回动态',content:'撤回所有相关内容和评论',prompt:'处理结果将通过客服通知用户',invalid:0,key:this.props.key },() => {
                 notify(e.node,'ev-ok',null);
             });
+        } else if (this.props.state === 2) {
+            // 撤回文章
+            popNew('chat-management-components-confirmBox',{ title:'撤回文章',content:'撤回所有相关内容和评论',prompt:'处理结果将通过客服通知用户',invalid:0,key:this.props.key },() => {
+                notify(e.node,'ev-ok',null);
+            });
         }
         
     }

@@ -183,9 +183,10 @@ export const deelReportList = (r:any,report_type:number) => {
     const processResult = [];// 处理结果
     list.forEach((v,i) => {
         const reportType = JSON.parse(JSON.parse(v.last_resaon).type).join(',');
+        const title = JSON.parse(v.last_resaon).title;
         processResult.push((v.now_publish ? penaltyText([v.now_publish],'用户') :'不惩罚').split(' ')[0]);
         dataList.push([
-            v.user_name, // 被举报人
+            v.user_name ? v.user_name :title, // 被举报人
             REPORTTITLE[REPORT[report_type]],// 举报类型
             reportType,// 举报原因
             v.report_ids.length,// 举报次数
@@ -208,6 +209,8 @@ export const deelReportListInfo = (r:any,state:number) => {
     const reportInfo = [];// 举报信息
     const key = list[0].report_info.key;// 处罚的KEY
     let id = null;// 重置处罚
+
+    // 举报玩家
     if (state === 0) {
         // 被举报人信息处理
         userInfo = (deelReportedUser(list[0].reported_user));
@@ -216,12 +219,23 @@ export const deelReportListInfo = (r:any,state:number) => {
             reportInfo.push(deelUserReportInfo(v.report_info,v.report_user));
         });
         id = `${list[0].reported_user.punish_list.length ? list[0].reported_user.punish_list[0].id :0}%${list[0].reported_user.user_info.uid}`;
-        
+      
     } else if (state === 1) {
-        dynamic = deelDynamic(list[0].report_info,list.length)[0];
+    // 举报动态
+        dynamic = deelDynamic(list[0].report_info,list.length,state)[0];
         userInfo = (deelReportedUser(list[0].reported_user));
         list.forEach(v => {
             // 处理举报信息
+            reportInfo.push(deelDynamicReport(v.report_info,v.report_user));
+        });
+        id = `${JSON.parse(list[0].report_info.evidence).state === 1 ? 0 :1}%${JSON.stringify(JSON.parse(list[0].report_info.evidence).key)}`;
+        
+    } else if (state === 2) {
+    // 举报文章
+        dynamic = deelDynamic(list[0].report_info,list.length,state)[0];
+        userInfo = (deelReportedUser(list[0].reported_user));
+        list.forEach(v => {
+        // 处理举报信息
             reportInfo.push(deelDynamicReport(v.report_info,v.report_user));
         });
         id = `${JSON.parse(list[0].report_info.evidence).state === 1 ? 0 :1}%${JSON.stringify(JSON.parse(list[0].report_info.evidence).key)}`;
@@ -291,7 +305,7 @@ export const getUserAvatar = (avatar:string) => {
 };
 
 // 处理动态数据
-const deelDynamic = (reportInfo:any,count:number) => {
+const deelDynamic = (reportInfo:any,count:number,reportType:number) => {
     const evidence = JSON.parse(reportInfo.evidence);
     const like = evidence.likeCount;// 点赞数
     const commentCount = evidence.commentCount;// 评论数
@@ -300,10 +314,17 @@ const deelDynamic = (reportInfo:any,count:number) => {
     const userName = evidence.username;// 用户名
     const body = JSON.parse(evidence.body);
     const img = [];
-    body.imgs.forEach(v => {
-        img.push(buildupImgPath(v.originalImg));
-    });
-
+    let title = '';
+    if (reportType === 1) {
+        body.imgs.forEach(v => {
+            img.push(buildupImgPath(v.originalImg));
+        });
+        title = '';
+    } else {
+        img.push(buildupImgPath(body.imgs));
+        title = evidence.title;
+    }
+   
     return [
         {
             avatar,
@@ -312,8 +333,9 @@ const deelDynamic = (reportInfo:any,count:number) => {
             commentCount,
             time,
             count,
-            msg:parseManagementEmoji(body.msg),
-            imgs:img
+            msg:body.msg,
+            imgs:img,
+            title
         }
     ];
 
@@ -323,6 +345,7 @@ const deelDynamic = (reportInfo:any,count:number) => {
 const deelReportedUser = (reportedUser:any) => {
     const userPhone = reportedUser.user_info.tel ? reportedUser.user_info.tel :'无';
     const gruel = reportedUser.punish_list.length ? penaltyText(reportedUser.punish_list,'用户') :'无';
+
     return [
         { key:'好嗨ID',value:reportedUser.user_info.acc_id },
         { key:'用户昵称',value:reportedUser.user_info.name,fg:reportedUser.user_info.sex },
@@ -359,17 +382,9 @@ const deelUserReportInfo = (reportInfo:any,reportUser:any) => {
             time = timestampFormat(JSON.parse(v.time));
         }
     });
-    let sex = '';
-    if (reportUser.user_info.sex === 0) {
-        sex = 'chat/management/res/images/girl.png';
-    } else if (reportUser.user_info.sex === 1) {
-        sex = 'chat/management/res/images/boy.png';
-    } else {
-        sex = 'chat/management/res/images/neutral.png';
-    }
     const userInfo = [
         { key:'好嗨ID',value:reportUser.user_info.acc_id },
-        { key:'用户昵称',value:reportUser.user_info.name,fg:sex },
+        { key:'用户昵称',value:reportUser.user_info.name,fg:reportUser.user_info.sex },
         { key:'手机号',value:reportUser.user_info.tel ? reportUser.user_info.tel :'无' },
         { key:'举报时间',value:time },
         { key:'被举报次数总计',value:reportUser.reported_list.length },
