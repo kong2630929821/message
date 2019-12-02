@@ -2,7 +2,7 @@
  * 调用rpc接口
  */
 // ================================================ 导入
-import { erlangLogicIp, shareDownload } from '../../../../app/public/config';
+import { erlangLogicIp } from '../../../../app/public/config';
 import { piFetch } from '../../../../app/utils/pureUtils';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { CommentKey, PostKey } from '../../../server/data/db/community.s';
@@ -13,8 +13,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, ChangeCommunity, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, applyPublicC, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, ApplyPublicArg, ChangeCommunity, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GroupInfoList, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -27,7 +27,7 @@ import { SetOfficial, UserAgree, UserInfoList } from '../../../server/data/rpc/u
 import { genGroupHid, genGuid, genHIncId, genUserHid, getIndexFromHIncId } from '../../../utils/util';
 import { updateGroupMessage, updateUserMessage } from '../data/parse';
 import * as store from '../data/store';
-import { judgeFollowed, judgeLiked } from '../logic/logic';
+import { judgeFollowed, judgeLiked, timestampFormat, unicode2ReadStr } from '../logic/logic';
 import { parseEmoji } from '../logic/tools';
 import { clientRpcFunc } from './init';
 import { subscribeLaudPost } from './subscribedb';
@@ -612,7 +612,7 @@ export const showPost = (square_type:number, label:string= '',num:string = '', i
             const requestNum = num;
             const tagType = square_type;
             
-            return (r:PostArr) => {
+            return (r) => {
                 console.log(`showPost=============square_type: ${square_type}, label: ${label}, r: ${r}`);
                 // let postList = store.getStore('postList',[]);
                 if (r && r.list && r.list.length) {
@@ -742,7 +742,7 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
         clientRpcFunc(getUserPost,param,(r) => {
             console.log('getUserPost===========',r);
             if (r && r.list) {
-                const data:store.PostItem = r.list;
+                const data:store.PostItem[] = r.list;
                 
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;
@@ -972,14 +972,13 @@ export const searchAllArticle = (article:string) => {
 
 // 申请公众号
 export const openPublic = (name:string,desc:string,avatar:string) => {
-    const arg = new CreateCommunity();
+    const arg = new ApplyPublicArg();
     arg.name = name;
-    arg.comm_type = 2;
     arg.desc = desc;
     arg.avatar = avatar;
 
     return new Promise((res,rej) => {
-        clientRpcFunc(createCommunityNum,arg,(r:string) => {
+        clientRpcFunc(applyPublicC,arg,(r:string) => {
             res(r);
         });
     });
@@ -1001,12 +1000,13 @@ export const changePublic = (name:string,desc:string,avatar:string,num:string) =
 };
 
 // 举报
-export const complaintType = (key:string,status:number,reason:string) => {
+export const complaintType = (key:string,status:number,reason:string,uid:number) => {
     const arg = new ReportArg();
     arg.key = key;
     arg.evidence = '';
     arg.report_type = status;
     arg.reason = reason;
+    arg.reported_uid = uid;
 
     return new Promise((res,rej) => {
         clientRpcFunc(report,arg,(r:number) => {
@@ -1033,21 +1033,25 @@ export const getAllGameList = () => {
 
 // 获取全部游戏详情
 export const getAllGameInfo = (ids:string) => {
-    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(r => {
-        const res = r.app_details;
-        const gameList = [];
-        res.forEach(v => {
-            const name = v[0];
-            const img = JSON.parse(v[1]);
-            const desc = JSON.parse(v[2]);
-            const url = v[3];
-            gameList.push({
-                ...desc,
-                title:name,
-                desc:desc.desc,
-                img:[img.icon,img.bg],
-                url,
-                apkDownloadUrl:shareDownload
+    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
+        return res.json().then(r => {
+            const res = r.app_details;
+            const gameList = [];
+            res.forEach(v => {
+                const name = unicode2ReadStr(v[0]);
+                const img = JSON.parse(v[1]);
+                const desc = JSON.parse(v[2]);
+                const url = v[3];
+                desc.desc = unicode2ReadStr(desc.desc);
+                desc.subtitle = unicode2ReadStr(desc.subtitle);
+                gameList.push({
+                    ...desc,
+                    title:name,
+                    subtitle:desc.subtitle,
+                    img:[img.icon,img.rowImg,img.colImg,img.downLoadImg],
+                    url,
+                    time:timestampFormat(JSON.parse(desc.time))
+                });
             });
         });
 

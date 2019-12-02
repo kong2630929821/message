@@ -363,6 +363,10 @@ export class UserDetail extends Widget {
         switch (index) {
             case 0:
                 // 认证官方账号
+                popNew('chat-client-app-view-person-openPublic',{ chooseImage:false ,userInfo:this.props.userInfo },(r) => {
+                    this.props.pubNum = r;
+                    this.paint();
+                });
                 break;
             case 1:
                 // 修改备注
@@ -383,7 +387,7 @@ export class UserDetail extends Widget {
         const msg = this.props.userInfo.note ? this.props.userInfo.note :'没有简介';
         const avatar = this.props.userInfo.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
         const key = `${REPORT_PERSON}%${this.props.uid}`;
-        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg,REPORT_PERSON,key);
+        complaintUser(`${this.props.userInfo.name} 用户`,this.props.userInfo.sex,avatar,msg,REPORT_PERSON,key,this.props.userInfo.uid);
     }
 
     /**

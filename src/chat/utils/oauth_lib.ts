@@ -5,7 +5,7 @@
 import { ab2hex } from '../../../pi/util/util';
 import { digest, DigestAlgorithm } from '../../../pi_pt/rust/pi_crypto/digest';
 import { ECDSASecp256k1 } from '../../../pi_pt/rust/pi_crypto/signature';
-import { WALLET_API_ADD_APP, WALLET_API_SET_APP_CONFIG, WALLET_APPID, WALLET_SERVER_KEY, WALLET_SERVER_URL } from '../server/data/constant';
+import { WALLET_API_ADD_APP, WALLET_API_SET_APP_CONFIG, WALLET_APPID, WALLET_SERVER_KEY, WALLET_SERVER_URL, WALLET_API_DEL_APP } from '../server/data/constant';
 import * as http from './http_client';
 
 // 签名
@@ -87,12 +87,26 @@ export const oauth_send = (uri: string, body) => {
 };
 
 // 添加app
-export const add_app = (appid: string, name: string, imgs: string, desc: string, url: string, pk: string, mch_id: string, notify_url: string): Boolean => {
-    const r = oauth_send(WALLET_API_ADD_APP, { appid, name, imgs, desc, url, pk, mch_id, notify_url });
+export const add_app = (gid: string, name: string, imgs: string, desc: string, url: string, pk: string, mch_id: string, notify_url: string): Boolean => {
+    const r = oauth_send(WALLET_API_ADD_APP, { gid, name, imgs, desc, url, pk, mch_id, notify_url });
     console.log('add_app!!!!!!!!!!!r:', JSON.stringify(r));
     if (r.ok) {
         const json = JSON.parse(r.ok);
-        if (json.return_code === 1) {
+        if (json.result === 1) {
+            return true;
+        } 
+    }
+
+    return false;
+};
+
+// 删除app
+export const del_app = (gid: string): Boolean => {
+    const r = oauth_send(WALLET_API_DEL_APP, { gid });
+    console.log('add_app!!!!!!!!!!!r:', JSON.stringify(r));
+    if (r.ok) {
+        const json = JSON.parse(r.ok);
+        if (json.result === 1) {
             return true;
         } 
     }
@@ -101,12 +115,12 @@ export const add_app = (appid: string, name: string, imgs: string, desc: string,
 };
 
 // 编辑推荐游戏
-export const set_app_config = (type: number, app_ids: string): Boolean => {
-    const r = oauth_send(WALLET_API_SET_APP_CONFIG, { type, app_ids });
+export const set_app_config = (type1: number, app_ids: string): Boolean => {
+    const r = oauth_send(WALLET_API_SET_APP_CONFIG, { type: type1, app_ids });
     console.log('set_app_config!!!!!!!!!!!r:', JSON.stringify(r));
     if (r.ok) {
         const json = JSON.parse(r.ok);
-        if (json.return_code === 1) {
+        if (json.result === 1) {
             return true;
         } 
     }

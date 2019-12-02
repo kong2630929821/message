@@ -2,7 +2,7 @@
  * 聊天操作
  */
 // ================================================================= 导入
-import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, Report, ReportCount, ReportListTab, UserHistory, UserMsg } from '../db/message.s';
+import { AnnounceHistory, Announcement, GroupHistory, GroupHistoryCursor, GroupMsg, MSG_TYPE, MsgLock, Report, ReportCount, ReportListTab, UserHistory, UserMsg, UserReportKeyTab } from '../db/message.s';
 import { Result } from './basic.s';
 import { GroupSend, HistoryCursor, ReportArg, SendMsg, TempSend, UserSend } from './message.s';
 
@@ -17,6 +17,7 @@ import { AccountGenerator, Contact, OnlineUsers, UserInfo, VIP_LEVEL } from '../
 import { Env } from '../../../../pi/lang/env';
 import { genGroupHid, genGuid, genHIncId, genNextMessageIndex, genUserHid, genUuid } from '../../../utils/util';
 import { GROUP_STATE, GroupInfo } from '../db/group.s';
+import { MessageReply } from '../db/manager.s';
 import { NOT_GROUP_OWNNER, NOTIN_SAME_GROUP } from '../errorNum';
 import * as http from '../http_client';
 import { getUid } from './group.r';
@@ -502,6 +503,7 @@ export const report = (arg: ReportArg): number => {
     const reportBucket = new Bucket(CONSTANT.WARE_NAME, Report._$info.name);
     const reportCountBucket = new Bucket(CONSTANT.WARE_NAME, ReportCount._$info.name);
     const reportListTabBucket = new Bucket(CONSTANT.WARE_NAME, ReportListTab._$info.name);
+    const userReportKeyTabBucket = new Bucket(CONSTANT.WARE_NAME, UserReportKeyTab._$info.name);
     const uid = getUid();
     // 添加举报记录
     const report = new Report();
@@ -513,7 +515,7 @@ export const report = (arg: ReportArg): number => {
     report.ruid = uid;
     report.time = Date.now().toString(); 
     report.handle_time = '0';
-    report.state = 0;
+    report.punish_id = 0;
     reportBucket.put(report.id, report);
     // 添加被举报人统计信息
     let reportCount = reportCountBucket.get<string, ReportCount[]>(report.key)[0];
@@ -528,6 +530,14 @@ export const report = (arg: ReportArg): number => {
     reportCount.reported.unshift(report.id);
     reportCount.not_handled_reported.unshift(report.id);
     reportCountBucket.put(reportCount.key, reportCount);
+    let userReportKey = userReportKeyTabBucket.get<number, UserReportKeyTab[]>(arg.reported_uid)[0];
+    if (!userReportKey) {
+        userReportKey = new UserReportKeyTab();
+        userReportKey.uid = arg.reported_uid;
+        userReportKey.key_list = [];
+    }
+    userReportKey.key_list.push(report.id);
+    userReportKeyTabBucket.put(arg.reported_uid, userReportKey);
     // 添加举报人统计信息
     let reportCount1 = reportCountBucket.get<string, ReportCount[]>(`${CONSTANT.REPORT_PERSON}%${uid}`)[0];
     if (!reportCount1) {
@@ -620,7 +630,11 @@ export const sendMessage = (message: UserSend, userHistory: UserHistory, gid?: n
 
     // 举报用户
     if (message.mtype === MSG_TYPE.COMPLAINT) {
-        sendFirstWelcomeMessage('收到您的举报，好嗨将会尽快核实并给予处理',message.rid);
+        // 获取自动回复消息
+        const messageReplyBucket = new Bucket(CONSTANT.WARE_NAME, MessageReply._$info.name);
+        const msgReply = messageReplyBucket.get<string, MessageReply>(CONSTANT.MESSAGE_TYPE_NOTICE)[0];
+        const sendMsg = msgReply.msg ? msgReply.msg : '收到您的举报，好嗨将会尽快核实并给予处理';
+        sendFirstWelcomeMessage(sendMsg, message.rid);
     }
 };
 

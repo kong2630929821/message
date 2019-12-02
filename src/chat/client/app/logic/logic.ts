@@ -173,10 +173,10 @@ export const enum INFLAG  {
 }
 
 // 举报用户
-export const complaintUser = (name:string,sex:number,avatar:string,msg:string,status:number,reportKey:string) => {
+export const complaintUser = (name:string,sex:number,avatar:string,msg:string,status:number,reportKey:string,uid:number) => {
     const content = ['色情暴力','骚扰谩骂','广告欺诈','病毒木马','反动政治','其它'];
     popNew3('chat-client-app-widget-complaint-complaint'
-        ,{ title:name,content,sex,avatar,msg,status,reportKey }
+        ,{ title:name,content,sex,avatar,msg,status,reportKey,uid }
         ,(selected) => {
     
             let mess = `举报用户@${name}`;
@@ -335,4 +335,14 @@ export const getFriendsInfo = () => {
     }
 
     return { groups };
+};
+
+/**
+ * 将Unicode字符串转成可读字符串
+ */
+export const unicode2ReadStr = (item:string) => {
+    item = item.replace(/\\/g, '%'); 
+    
+    return unescape(item);  
+    
 };

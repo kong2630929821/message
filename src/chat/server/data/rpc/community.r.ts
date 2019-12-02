@@ -543,6 +543,14 @@ export const getSquarePost = (arg: IterSquarePostArg): PostArr => {
  */
 // #[rpc=rpcServer]
 export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
+    
+    return getUserPostHandle(arg, CONSTANT.NORMAL_STATE);
+};
+
+/**
+ * 获取指定社区编号的帖子
+ */
+export const getUserPostHandle = (arg: IterPostArg, postType: number): PostArrWithTotal => {
     // 获取的帖子id
     const postArrWithTotal = new PostArrWithTotal();
     postArrWithTotal.list = [];
@@ -560,7 +568,7 @@ export const getUserPost = (arg: IterPostArg): PostArrWithTotal => {
         postKey.id = communityPost.id_list[i];
         postKey.num = communityPost.num;
         const post = postBucket.get<PostKey, Post[]>(postKey)[0];
-        if (post.state !== CONSTANT.NORMAL_STATE) continue; // 帖子已删除
+        if (post.state !== postType) continue; // 排除非指定类型
         post_id_list.push(postKey);
         postArrWithTotal.total ++;
     }
@@ -622,6 +630,14 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
 // #[rpc=rpcServer]
 export const delCommentPost = (arg: CommentKey): number => {
     const uid = getUid();
+
+    return delComment(uid, arg, false);
+};
+
+/**
+ * 删除评论
+ */
+export const delComment = (uid: number, arg: CommentKey, mgr: Boolean): number => {
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
     const comment = commentBucket.get(arg)[0];
@@ -630,7 +646,7 @@ export const delCommentPost = (arg: CommentKey): number => {
         return COMMENT_NOT_EXIST;
     }
     // 不能删除其他人发的评论
-    if (uid !== comment.owner) { 
+    if (uid !== comment.owner && mgr !== true) { 
         return CANT_DETETE_OTHERS_COMMENT;
     }
     const postkey = new PostKey();

@@ -100,22 +100,6 @@ export class OpenPublic extends Widget {
         });
     }
 
-    /**
-     * 绑定手机号
-     */
-    public changePhone() {
-        // 修改公众号不需要绑定手机号码
-        if (this.props.changePublic) {
-            return ;
-        }
-        if (!this.state.phone) {  // 绑定
-            popNew('app-view-mine-setting-phone');
-        } else { // 重新绑定
-            popNew('app-view-mine-setting-unbindPhone');
-        }
-        
-    }
-
     // 公众号名字
     public publicNameChange(e:any) {
         this.props.publicName = e.value;
@@ -130,11 +114,6 @@ export class OpenPublic extends Widget {
 
     // 点击申请
     public createClick() {
-        if (!this.state.phone) {
-            popNewMessage('请绑定手机号码');
-            
-            return;
-        }
         if (!this.props.publicName) {
             popNewMessage('请输入名字');
 

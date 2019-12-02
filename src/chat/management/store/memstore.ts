@@ -1,4 +1,5 @@
 import { HandlerMap } from '../../../pi/util/event';
+import { ListItem } from '../view/page/application/thirdApplication';
 
 /**
  * 判断是否是对象
@@ -101,12 +102,24 @@ export const unregister = (keyName: string, cb: Function): void => {
  */
 const handlerMap: HandlerMap = new HandlerMap();
 
+// tslint:disable-next-line:no-single-line-block-comment
 /******************************store初始化**********************************/
-// 海龟一号store
+
+// store
 interface Store {
+    appList:ListItem[];// 全部游戏
+    hotApp:ListItem[];// 热门游戏
+    recommendApp:ListItem[];// 推荐游戏
     flags:any;
+    bindApp:string[];// 绑定的appid
+    officalList:any[];// 官方账号列表
 }
 // 全局内存数据库
 const store:Store = {
-    flags:{}
+    appList:[],
+    hotApp:[],
+    recommendApp:[],
+    flags:{},
+    bindApp:[],
+    officalList:[[],[]]
 };

@@ -68,7 +68,7 @@
 
     </div>
 
-    {{if it.auto==0}}
+    {{if it.auto==true}}
         <div w-class="bottom">
             {{if it.needCheckBox}}
             <div w-class="allCheck" on-tap="allChecked">

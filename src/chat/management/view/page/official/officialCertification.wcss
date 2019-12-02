@@ -1,0 +1,28 @@
+.page{
+    background: white;
+    padding: 20px 60px;
+    color:#354052;
+    height: 100%;
+    overflow: auto;
+}
+.tableTitle{
+    height:48px;
+    font-size: 18px;
+    color: #fff;
+    line-height: 48px;
+    padding-left: 20px;
+    background:rgba(140,159,183,1);
+}
+.table{
+    height: 850px;
+}
+.ctroller{
+    height: 48px;
+    display: flex;
+    position: relative;
+}
+.pagination{
+    position: absolute;
+    top: -9px;
+    right: 50px;
+}

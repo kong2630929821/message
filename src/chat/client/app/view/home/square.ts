@@ -5,8 +5,9 @@ import { gotoSquare } from '../../../../../app/view/base/app';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getStore,PostItem, register, setStore } from '../../data/store';
-import { gameLabelNum, showPost } from '../../net/rpc';
+import { getStore,PostItem, register } from '../../data/store';
+import { buildupImgPath } from '../../logic/logic';
+import { gameLabelNum, postLaud, showPost } from '../../net/rpc';
 
 export const forelet = new Forelet();
 export const WIDGET_NAME = module.id.replace(/\//g, '-');
@@ -25,6 +26,7 @@ interface Props  {
     follows:any[];
     dealData:any;
     gameLabel:any;
+    buildupImgPath:any;
 }
 
 // tslint:disable-next-line:completed-docs
@@ -40,7 +42,8 @@ export class Square extends Widget {
             icon:'',
             bg:'',
             num:0
-        }    
+        },
+        buildupImgPath:buildupImgPath    
     };    
 
     constructor() {

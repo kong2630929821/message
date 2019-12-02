@@ -1,6 +1,6 @@
 import { popNew } from '../../../pi/ui/root';
 import { Widget } from '../../../pi/widget/widget';
-import { setPunish, setReportHandled } from '../net/rpc';
+import { setPunish } from '../net/rpc';
 import { PENALTY, popNewMessage } from '../utils/logic';
 import { rippleShow } from '../utils/tools';
 
@@ -116,15 +116,8 @@ export class ReportBox extends Widget {
         const key = this.props.userInfo.key;
         setPunish(key,punish,time).then((r:any) => {
             if (!isNaN(r)) {
-                setReportHandled(key).then(res => {
-                    if (key === res) {
-                        popNewMessage('处理成功');
-                        this.ok && this.ok();
-                    } else {
-                        popNewMessage('处理失败');
-                        this.ok && this.ok();
-                    } 
-                });
+                popNewMessage('处理成功');
+                this.ok && this.ok();
             } else {
                 popNewMessage('处理失败');
                 this.ok && this.ok();

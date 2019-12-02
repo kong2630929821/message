@@ -95,6 +95,8 @@ export const WALLET_APPID = '10';
 export const WALLET_SERVER_KEY = '0a15c4dbca88fa93ccf43a49b3496208edff35a4185ac967389ffd9878d5c405';
 // 创建应用
 export const WALLET_API_ADD_APP = '/oAuth/add_app';
+// 删除应用
+export const WALLET_API_DEL_APP = '/oAuth/del_app';
 // 编辑推荐应用
 export const WALLET_API_SET_APP_CONFIG = '/oAuth/set_app_config';
 
@@ -136,3 +138,7 @@ export const PUNISH_END = 1; // 惩罚结束
 export const PUBLIC_APPLYING = 0;    // 申请中
 export const PUBLIC_APPLY_SUCCESS = 1; // 申请成功
 export const PUBLIC_APPLY_REFUSED = 2; // 申请驳回
+
+// 自动回复消息key
+export const MESSAGE_TYPE_WELCOME = 'welcome';    // 首次登陆客服回复
+export const MESSAGE_TYPE_NOTICE = 'notice'; // 举报内容回复

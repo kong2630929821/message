@@ -6,6 +6,7 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { PENALTY } from '../../../../management/utils/logic';
 import { getStore, register, setStore } from '../../data/store';
+import { buildupImgPath } from '../../logic/logic';
 import { openCamera, selectImage } from '../../logic/native';
 import { addPost } from '../../net/rpc';
 import { base64ToFile, imgResize, uploadFile } from '../../net/upload';
@@ -32,6 +33,7 @@ interface Props {
     showType:boolean[];// 0表情 1相册 2相机
     label:any;// 动态标签
     isShowSend:boolean;// 是否可以发送
+    buildupImgPath:any;
 }
 // const editorTextNum = 10;
 /**
@@ -59,7 +61,8 @@ export class EditPost extends Widget {
             name:'',
             icon:''
         },
-        isShowSend:false
+        isShowSend:false,
+        buildupImgPath:buildupImgPath
     };
     
     public setProps(props:any) {

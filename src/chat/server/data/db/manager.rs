@@ -11,6 +11,15 @@ struct RootUser {
 }
 
 /**
+*自动回复消息设置
+*/
+#[primary=key,db=file,dbMonitor=true]
+struct MessageReply {
+    key: String,
+    msg: String
+}
+
+/**
 *惩罚
 */
 #[primary=id,db=file,dbMonitor=true]
@@ -67,6 +76,25 @@ struct ReportIndex {
 */
 struct ReportIndexList {
     list: &[ReportIndex]
+}
+
+/**
+*被举报用户数据
+*/
+struct UserReportIndex {
+    key: String,                //根据举报类型定位到具体的人/公众号/帖子/评论
+    id: u32,                    //举报ID
+    user_name: String,          //用户名
+    reason: String,             //举报原因
+    handle_time: String,        //处理时间
+    now_publish: Option<Punish>,  //当前惩罚
+}
+
+/**
+*举报首页数据列表
+*/
+struct UserReportIndexList {
+    list: &[UserReportIndex]
 }
 
 /**
