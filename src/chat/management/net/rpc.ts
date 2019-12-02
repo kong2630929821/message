@@ -5,9 +5,9 @@ import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, 
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { commentLaudPost, delCommentPost, getCommentLaud, getFollowPublicPost, getPostInfoByIds, getUserPost, showCommentPort, showLaudLog } from '../../server/data/rpc/community.p';
-import { AddPostArg, CommentArr, CommType, IterCommentArg, IterLaudArg, IterPostArg, LaudLogArr, PostArr, PostKeyList } from '../../server/data/rpc/community.s';
-import { addApp, cancelGmAccount, createHighAcc, createRoot, delApp, findUser, getApplyPublicList, getMsgReply, getOfficialAcc, getPostList, getPostType, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
+import { commentLaudPost, getCommentLaud, getFollowPublicPost, getPostInfoByIds, getUserPost, showCommentPort, showLaudLog } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommType, IterCommentArg, IterLaudArg, IterPostArg, LaudLogArr, PostArr, PostKeyList } from '../../server/data/rpc/community.s';
+import { addApp, addCommentPost, cancelGmAccount, createHighAcc, createRoot, delApp, delCommentPost, findUser, getApplyPublicList, getMsgReply, getOfficialAcc, getPostList, getPostType, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
 import { AddAppArg, GetpostTypeArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { SetOfficial } from '../../server/data/rpc/user.s';
@@ -604,5 +604,47 @@ export const commentLaud = (num: string, post_id: number, id: number,fail?:any) 
 };
 
 /**
+ * 评论
+ */
+export const addComment = (num: string, post_id: number,  msg:string,  reply: number, comment_type: number) => {
+    const arg = new AddCommentArg();
+    arg.num = num;
+    arg.comment_type = comment_type;
+    arg.msg = msg;
+    arg.post_id = post_id;
+    arg.reply = reply;
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(addCommentPost,arg,(r:CommentKey) => {
+            console.log('addCommentPost==========',r);
+            if (r && r.num) {
+                resolve(r);
+            } else {
+                reject();
+            }
+        });
+    });
+    
+};
+
+/**
  *  删除评论
  */
+export const delComment = (num:string,post_id:number,id:number) => {
+    const arg = new CommentKey();
+    arg.num = num;
+    arg.post_id = post_id;
+    arg.id = id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(delCommentPost,arg,(r) => {
+            console.log('delCommentPost=============',r);
+            if (r === 1) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
+    });
+   
+};

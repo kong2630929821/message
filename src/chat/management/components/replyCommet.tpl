@@ -3,7 +3,7 @@
         <div>
             <span w-class ='title'>回复</span>
         </div>
-        <div w-class="newUserInput" ev-input-change="userChange" >
+        <div w-class="newUserInput">
             <div w-class="replyContent" ev-input-change="userChange" >
                 <widget w-tag="chat-management-components-textarea">{placeHolder:"内容", style:"max-height:none;min-height:157px;font-size:16px;line-height:20px"}</widget>
             </div>

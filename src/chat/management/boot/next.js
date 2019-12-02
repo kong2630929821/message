@@ -74,7 +74,8 @@ winit.initNext = function () {
 				"chat/management/components/",
 				"chat/management/res/css/",
 				"chat/client/app/view/info/",
-				"chat/client/app/widget1/imgShow/"
+				"chat/client/app/widget1/imgShow/",
+				"chat/client/app/widget/modalBox/"
 			];
 			util.loadDir(sourceList, flags, fm, suffixCfg, function (fileMap) {
 				console.log("first load dir time:", Date.now() - startTime, fileMap, Date.now());

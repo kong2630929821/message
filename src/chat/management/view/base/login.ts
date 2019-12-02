@@ -10,8 +10,8 @@ import { rippleShow } from '../../utils/tools';
  */
 export class Login extends Widget {
     public props:any = {
-        name:'10018@55',
-        pwd:'6UJVPN'
+        name:'10001@2',
+        pwd:'fXhmuD'
     };
 
     public nameChange(e:any) {

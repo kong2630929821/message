@@ -25,7 +25,7 @@
     {{if it.orgMess}}
     <div w-class="orgComment">
         <div w-class="content">
-            <span style="font-weight: 600;">{{it.orgName}}:&nbsp;</span>
+            <span style="font-weight: 600; font-size: 14px;">{{it.orgName}}:&nbsp;</span>
             <widget w-tag="pi-ui-html" style="display: inline-block;">{{it.orgMess}}</widget>
             {{if it.orgImg.length}}
                 <span w-class="lookBigImg" on-tap="lookBigImg">【查看图片】</span>
@@ -41,12 +41,9 @@
             </div>
         {{end}}
     </div>
-
-    <div w-class="utils" style="display:{{it.showUtils?'block':'none'}}">
+    <div w-class="utils" style="display:{{it.showUtils?'none':'block'}}">
+        
         <div w-class="option" on-tap="replyComment">回复</div>
-        {{if it.isMine}}
         <div w-class="option" on-tap="delComment">删除</div>
-        {{end}}
-        <div w-class="option" on-tap="copyComment">复制</div>
     </div>
 </div>

@@ -57,6 +57,7 @@
 .rightBox{
     flex: 1;
     height: 100%;
+    overflow: auto;
 }
 .tabar{
     width: 100%;
@@ -134,7 +135,7 @@
     font-family:SourceHanSansCN-Normal,SourceHanSansCN;
     font-weight:400;
     color:rgba(34,34,34,1);
-    margin: 0 10px;
+    
 }
 .btnGroup{
     display: flex;
@@ -151,4 +152,27 @@
     position: absolute;
     top: -9px;
     right: 50px;
+}
+.likeItem{
+    display: flex;
+    align-items: center;
+    padding:20px; 
+}
+.titleCenter{
+    border-bottom: 1px solid #F2F2F2;
+    margin: 0 20px;
+    font-size: 14px;
+}
+.username{
+    display: flex;
+    align-items: center;
+}
+.title{
+    font-size:36px;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+    line-height:44px;
+    background: #fff;
+    padding: 30px;
+    padding-bottom: 20px;
 }

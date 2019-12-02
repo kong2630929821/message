@@ -637,40 +637,6 @@ export const delCommentPost = (arg: CommentKey): number => {
     return delComment(uid, arg, false);
 };
 
-export const delComment = (uid: number, arg: CommentKey, mgr: Boolean = false): number => {
-    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
-    const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
-    const comment = commentBucket.get(arg)[0];
-    // 检查评论是否存在
-    if (!comment) {
-        return COMMENT_NOT_EXIST;
-    }
-    // 不能删除其他人发的评论
-    if (uid !== comment.owner && mgr !== true) { 
-        return CANT_DETETE_OTHERS_COMMENT;
-    }
-    const postkey = new PostKey();
-    postkey.id = arg.post_id;
-    postkey.num = arg.num;
-    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
-    // 从用户评论列表中删除uid
-    const index = postCount.commentList.indexOf(arg.id);
-    if (index >= 0) postCount.commentList.splice(index, 1);
-    // 添加评论计数
-    if (!postCountBucket.put(postkey, postCount)) {
-        
-        return DB_ERROR;
-    }
-    // 删除评论记录
-    // if (!commentBucket.delete(arg)) {
-       
-    //     return DB_ERROR;
-    // }
-    
-    return CONSTANT.RESULT_SUCCESS;
-};
-
-
 /**
  * 获取最新评论
  * 
@@ -840,6 +806,7 @@ export const getCommentLaud = (postKey: PostKey): CommentIDList => {
         }
     }
     console.log('6555555555555555555555555', commentIdList);
+    
     return commentIdList;
 };
 
@@ -1273,6 +1240,7 @@ export const postLaud = (uid: number, postKey: PostKey): boolean => {
  * 添加评论
  */
 export const addComment = (uid: number, arg: AddCommentArg): CommentKey => {
+    console.log(`!!!!!!!!!!!!!!!!!addComment22 uid:${uid}, arg:${JSON.stringify(arg)}`);
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
     const key = new CommentKey();
@@ -1795,4 +1763,40 @@ const getLable = (p, str: string):string[] =>  {
     } while (i > 0);
 
     return vList;
+};
+
+/**
+ * 删除评论
+ */
+export const delComment = (uid: number, arg: CommentKey, mgr: Boolean = false): number => {
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
+    const comment = commentBucket.get(arg)[0];
+    // 检查评论是否存在
+    if (!comment) {
+        return COMMENT_NOT_EXIST;
+    }
+    // 不能删除其他人发的评论
+    if (uid !== comment.owner && mgr !== true) { 
+        return CANT_DETETE_OTHERS_COMMENT;
+    }
+    const postkey = new PostKey();
+    postkey.id = arg.post_id;
+    postkey.num = arg.num;
+    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
+    // 从用户评论列表中删除uid
+    const index = postCount.commentList.indexOf(arg.id);
+    if (index >= 0) postCount.commentList.splice(index, 1);
+    // 添加评论计数
+    if (!postCountBucket.put(postkey, postCount)) {
+        
+        return DB_ERROR;
+    }
+    // 删除评论记录
+    // if (!commentBucket.delete(arg)) {
+       
+    //     return DB_ERROR;
+    // }
+    
+    return CONSTANT.RESULT_SUCCESS;
 };

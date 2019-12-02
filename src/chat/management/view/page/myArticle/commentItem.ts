@@ -4,7 +4,6 @@ import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
 import { buildupImgPath, complaintUser } from '../../../../client/app/logic/logic';
 import { parseEmoji } from '../../../../client/app/logic/tools';
-import { REPORT_COMMENT } from '../../../../server/data/constant';
 import { commentLaud, delComment } from '../../../net/rpc';
 import { getStore } from '../../../store/memstore';
 import { popNewMessage, timestampFormat } from '../../../utils/logic';
@@ -113,19 +112,21 @@ export class CommentItem extends Widget {
      */
     public replyComment(e:any) {
         this.closeUtils(e);
-        popNew('chat-management-components-replyCommet');
+        popNew('chat-management-components-replyCommet',{ ...this.props,title:'回复',orgId:true,key:this.props.key },(r) => {
+            notify(e.node,'ev-comment-reply',{ ...this.props,key:r.key, value:r.value });
+        });
     }
 
     /**
      * 删除评论
      */
     public delComment(e:any) {
-        // this.closeUtils(e);
-        // popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除评论',content:'删除评论后，评论下所有的回复都会被删除。' },() => {
-        //     delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
-        //         notify(e.node,'ev-comment-delete',{ key:this.props.key });
-        //     });
-        // });
+        this.closeUtils(e);
+        popModalBoxs('chat-management-components-confirmBox', { title:'删除评论',prompt:'删除评论后，评论下所有的回复都会被删除。',invalid: -1 },() => {
+            delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
+                notify(e.node,'ev-comment-delete',{ key:this.props.key });
+            });
+        });
         
     }
 

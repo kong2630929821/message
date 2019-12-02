@@ -7,6 +7,7 @@ interface Props {
     buildupImgPath:any;
     status:boolean; 
     currenetData:any; // 当前操作的数据
+    inEdit:boolean; // 是否进入编辑
 }
 
 interface DraftItem {
@@ -25,7 +26,8 @@ export class Draft extends Widget {
         ],
         buildupImgPath:buildupImgPath,
         status:false,
-        currenetData:{}
+        currenetData:{},
+        inEdit:false
     };
     // tslint:disable-next-line:no-unnecessary-override
     public create() {
@@ -35,7 +37,6 @@ export class Draft extends Widget {
 
     // 编辑草稿
     public editDraft(i:number) {
-        console.log('编辑草稿');
         this.props.currenetData = this.props.showDataList[i];
         this.props.status = !this.props.status;
         console.log(this.props.currenetData);
@@ -44,6 +45,12 @@ export class Draft extends Widget {
     public deleteDraft(k:number) {
         this.props.showDataList.splice(k,1);
         setStore('draft',this.props.showDataList);
+        this.paint();
+    }
+    // 返回
+    public goBack(e:any) {
+        // fg判斷是否需要刷新頁面數據
+        this.props.status = !this.props.status;
         this.paint();
     }
 }

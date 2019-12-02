@@ -1,5 +1,7 @@
 <div w-class="page">
+    <div w-class="goBack" on-tap="goBack(false,e)">返回上一页</div>
     <div w-class="addBox">
+        
         <div w-class="appName">标题</div>
         <div w-class="inputBox">
             <div w-class="input" ev-input-change="inputChangeName">

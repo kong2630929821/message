@@ -121,7 +121,6 @@ export class Published extends Widget {
         console.log('进入帖子详情');
         this.props.isDetail = !this.props.isDetail;
         this.props.currentData = deepCopy(this.props.resData[this.props.currentIndex * this.props.perPage + k]);
-        console.log(this.props.currentData);
         // this.props.currentData = this.props.dataList[k];
         this.paint();
 

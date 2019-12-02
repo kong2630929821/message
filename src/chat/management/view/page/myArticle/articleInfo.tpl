@@ -16,15 +16,15 @@
         </div>
         <div w-class="rightBox">
             <div w-class="tabar">
-                <div w-class="tab" on-tap ='changeTab'>评论&nbsp;{{it.dataList[0].commentCount}}</div>
-                <div w-class="tab activeTab" on-tap ='changeTab'>赞 &nbsp;{{it.dataList[0].likeCount}}</div>
+                <div w-class="tab {{it.active != 'comment' ? 'activeTab':'' }}" on-tap ='changeTab(1)'>评论&nbsp;{{it.dataList[0].commentCount}}</div>
+                <div w-class="tab {{it.active == 'comment' ? 'activeTab':'' }}" on-tap ='changeTab(2)'>赞 &nbsp;{{it.dataList[0].likeCount}}</div>
             </div>
             
             <div w-class="postBottom">
                     {{if it.active == 'comment'}}
-                    <div id="commentBox" on-tap="pageClick changeTab">
+                    <div id="commentBox" on-tap="pageClick" style="font-size: 14px;">
                         {{for i,v of it.commentList}}
-                        <div ev-comment-reply="replyComment" ev-comment-delete="deleteComment({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-close="pageClick">
+                        <div ev-comment-reply="rePaint" ev-comment-delete="rePaint" ev-tools-expand="expandTools(e,{{i}})" ev-close="pageClick">
                             <widget w-tag="chat-management-view-page-myArticle-commentItem">{{it.dealData(v,true)}}</widget>
                         </div>
                         {{end}}
@@ -33,7 +33,7 @@
                     <div on-tap="pageClick ">
                         {{for i,v of it.likeList}}
                         <div w-class="likeItem">
-                            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"80px;"}</widget>
+                            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"40px;height:40px;"}</widget>
                             <div w-class="titleCenter">
                                 <div w-class="username">
                                     <span>{{v.username}}&nbsp;</span>

@@ -1,6 +1,6 @@
+import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getFile, initFileStore, writeFile } from '../../../../client/app/data/lcstore';
 import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { uploadFile } from '../../../../client/app/net/upload';
 import { maxSize } from '../../../config';
@@ -168,7 +168,7 @@ export class NewArticle extends Widget {
         const value = {
             msg,
             imgs: this.props.bannerImg,
-            date: this.getDate()
+            date: new Date()
         };
         const num = getStore('flags',{}).num;
         sendActicle(num, 0, this.props.title,JSON.stringify(value)).then((res:any) => {
@@ -212,7 +212,7 @@ export class NewArticle extends Widget {
             title : this.props.title,
             msg: msg,
             bannerImg : this.props.bannerImg,
-            time: this.getDate()
+            time: new Date()
         };
         // 获取当前indexdb中的草稿内容
         const tempDraftArray = this.props.draftArry;
@@ -228,30 +228,8 @@ export class NewArticle extends Widget {
         editer.innerHTML = '';
         this.paint();
     }
-    public const getDate = () => {
-        const date = new Date();
-        
-        // 获取当前月份
-        const nowMonth = date.getMonth() + 1;
-
-        // 获取当前是几号
-        const strDate = date.getDate();
-
-        // 添加分隔符“-”
-        const seperator = '-';
-
-        // 对月份进行处理，1-9月在前面添加一个“0”
-        if (nowMonth >= 1 && nowMonth <= 9) {
-            nowMonth = '0' + nowMonth;
-        }
-
-        // 对月份进行处理，1-9号在前面添加一个“0”
-        if (strDate >= 0 && strDate <= 9) {
-            strDate = '0' + strDate;
-        }
-
-        // 最后拼接字符串，得到一个格式为(yyyy-MM-dd)的日期
-
-        return  date.getFullYear() + seperator + nowMonth + seperator + strDate;
+    // 返回
+    public goBack(fg:boolean,e:any) {
+        notify(e.node,'ev-goBack',{ fg });
     }
 }

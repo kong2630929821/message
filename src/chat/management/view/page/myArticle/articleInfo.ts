@@ -1,9 +1,8 @@
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getStore, setStore } from '../../../../client/app/data/store';
-import { buildupImgPath, judgeLiked } from '../../../../client/app/logic/logic';
+import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { perPage } from '../../../components/pagination';
-import { getCommentLaudList, getPostDetile, showComment, showLikeList } from '../../../net/rpc';
+import { showComment, showLikeList } from '../../../net/rpc';
 import { timestampFormat } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
@@ -74,48 +73,7 @@ export class ArticleInfo extends Widget {
         super.setProps(this.props);
         const currentData = this.props.data;
         console.log(currentData);
-        // getCommentLaudList(currentData.key.num,currentData.key.id).then((r:number[]) => {
-        //     console.log(r);
-        //     this.props.commentList = this.props.commentList.map(v => {
-        //         v.likeActive = r.indexOf(v.key.id) > -1;
-
-        //         return v;
-        //     });
-        //     this.props.commentLikeList = r;
-        //     this.paint();
-        // });
-        showComment(currentData.key.num, currentData.key.id).then((r: any) => {
-            console.log(r);
-            this.props.commentList = r.map(v => {
-                v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
-
-                return v;
-            });
-            console.log(this.props.commentList);
-            this.paint();
-        });
-        showLikeList(currentData.key.num,currentData.key.id).then((r: any) => {
-            console.log(r);
-            this.props.likeList = r.map(v => {
-                v.avatar = buildupImgPath(v.avatar);
-                
-                return v;
-            });
-            this.paint();
-        });
-        // getPostDetile(currentData.key.num,currentData.key.id).then((r:any) => {
-        //     currentData.likeCount = r[0].likeCount;
-        //     currentData.commentCount = r[0].commentCount;
-        //     this.paint();
-        //     // 刷新广场数据
-        //     const postlist = getStore('postReturn',[]);
-        //     const ind = postlist.postList.findIndex(r => r.key.num === currentData.key.num && r.key.id === currentData.key.id);
-        //     if (ind > -1) {
-        //         postlist.postList[ind].commentCount = currentData.commentCount;
-        //         postlist.postList[ind].likeCount = currentData.likeCount;
-        //         setStore('postReturn',postlist);
-        //     }
-        // });
+        
         this.initData(currentData);
     }
     // 初始化数据
@@ -140,8 +98,26 @@ export class ArticleInfo extends Widget {
                 likeCount: data ? data.likeCount :0
             }
         ];
-        console.log(this.props.articleData);
-        console.log(this.props.dataList);         
+        showComment(data.key.num, data.key.id).then((r: any) => {
+            console.log(r);
+            this.props.commentList = r.map(v => {
+                v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
+
+                return v;
+            });
+            console.log(this.props.commentList);
+            this.paint();
+        });
+        showLikeList(data.key.num,data.key.id).then((r: any) => {
+            console.log(r);
+            this.props.likeList = r.map(v => {
+                v.avatar = buildupImgPath(v.avatar);
+                
+                return v;
+            });
+            this.paint();
+        });      
+        
     }
     public create() {
         super.create();
@@ -160,7 +136,7 @@ export class ArticleInfo extends Widget {
         this.paint();
     }
     
-    // 返回
+    // 返回上一页
     public goBack(fg:boolean,e:any) {
         notify(e.node,'ev-goBack',{ fg });
     }
@@ -203,7 +179,17 @@ export class ArticleInfo extends Widget {
     }
     // 切换标签
     public changeTab(tab:any) {
-        this.props.active =  this.props.active === 'comment' ? '' :'comment';
+        if (tab === 1) {
+            this.props.active = '';
+        } else {
+            this.props.active = 'comment';
+        }
+        
         this.paint();
+    }
+
+    // 
+    public rePaint() {
+        this.initData(this.props.data);
     }
 }
