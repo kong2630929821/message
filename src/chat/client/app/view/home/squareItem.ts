@@ -90,9 +90,9 @@ export class SquareItem extends Widget {
         this.props.likeActive = judgeLiked(this.props.postItem.key.num,this.props.postItem.key.id);
         const gameList = getStore('gameList');
         if (props.postItem.label && gameList.length) {
-            const currentItem = gameList.find(item => item.title === this.props.postItem.label);
+            const currentItem = gameList.find(item => item.title === this.props.postItem.label) || { img:[] };
             this.props.gameLabel = {
-                name:currentItem.title,
+                name: this.props.postItem.label,
                 icon:currentItem.img[0]
             };
         } else {

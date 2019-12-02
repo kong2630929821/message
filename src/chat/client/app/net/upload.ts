@@ -1,4 +1,5 @@
 import { uploadFileUrl } from '../../../../app/public/config';
+import { piFetch } from '../../../../app/utils/pureUtils';
 import { resize } from '../../../../pi/widget/resize/resize';
 
 /**
@@ -9,20 +10,19 @@ export const uploadFile = async (file, successCb?:(imgUrlSuf:string) => void,fai
     const formData = new FormData();
     formData.append('upload',file);
     
-    return fetch(`${uploadFileUrl}?$forceServer=1`, {
+    return piFetch(`${uploadFileUrl}?$forceServer=1`, {
         body: formData, // must match 'Content-Type' header
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         mode: 'cors' // no-cors, cors, *same-origin
-    }).then(response => response.json())
-        .then(res => {
-            console.log('uploadFile success ',res);
-            if (res.result === 1) {
-                successCb && successCb(res.sid);
-            }
-        }).catch(err => {
-            console.log('uploadFile fail ',err);            
-            faileCb && faileCb(err);
-        });
+    }).then(res => {
+        console.log('uploadFile success ',res);
+        if (res.result === 1) {
+            successCb && successCb(res.sid);
+        }
+    }).catch(err => {
+        console.log('uploadFile fail ',err);            
+        faileCb && faileCb(err);
+    });
 };
 
 /**

@@ -92,6 +92,7 @@
         {{if !it.isOwner}}
         <div w-class="btn" on-tap="goChat">聊天</div>
         {{end}}
+
         {{if !it.followed}}
         <div w-class="btn" on-tap="followUser">关注</div>
         {{end}}

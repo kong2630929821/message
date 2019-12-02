@@ -3,7 +3,7 @@
  */
 import { GENERATOR_TYPE } from '../../../server/data/db/user.s';
 import { genGroupHid, genUserHid } from '../../../utils/util';
-import { getFile, getLocalStorage, initFileStore, setLocalStorage, writeFile } from './lcstore';
+import { getFile, getLocalStorage, initFileStore, object2Map, setLocalStorage, writeFile } from './lcstore';
 import * as store from './store';
 
 /**
@@ -37,38 +37,41 @@ export const initAccount = () => {
         // 单聊历史记录
         getFile(`${sid}-userChatMap`, (value) => {
             if (!value) return;
-            store.setStore('userHistoryMap', value.userHistoryMap || new Map(), false);
-            store.setStore('userChatMap', value.userChatMap || new Map(), false);
+            store.setStore('userHistoryMap', object2Map(value.userHistoryMap), false);
+            store.setStore('userChatMap', object2Map(value.userChatMap), false);
         },() => {
             console.log('read userChatMap error');
         });
         // 好友信息
         getFile(`${sid}-userInfoMap`, (value) => {
             if (!value) return;
-            store.setStore('userInfoMap', value.userInfoMap || new Map(), false);
-            const data  = value.userInfoMap;
-            const accIdToUid = store.getStore('accIdToUid',[]);
-            for (const [key,value] of data) {
-                accIdToUid.set(value.acc_id,JSON.parse(key));
-                store.setStore('accIdToUid',accIdToUid);
+            const userinfo  = object2Map(value.userInfoMap);
+
+            store.setStore('userInfoMap', userinfo, false);
+            store.setStore('friendLinkMap', object2Map(value.friendLinkMap), false);
+            const accIdToUid = store.getStore('accIdToUid',new Map());
+            
+            for (const key of Object.getOwnPropertyNames(userinfo)) {
+                accIdToUid.set(userinfo[key].acc_id, JSON.parse(key));
             }
+            store.setStore('accIdToUid',accIdToUid);
         },() => {
             console.log('read userInfoMap error');
         });
         // 群聊历史记录
         getFile(`${sid}-groupChatMap`, (value) => {
             if (!value) return;
-            store.setStore('groupHistoryMap', value.groupHistoryMap || new Map(), false);
-            store.setStore('groupChatMap', value.groupChatMap || new Map(), false);
-            store.setStore('announceHistoryMap', value.announceHistoryMap || new Map(), false);
+            store.setStore('groupHistoryMap', object2Map(value.groupHistoryMap), false);
+            store.setStore('groupChatMap', object2Map(value.groupChatMap), false);
+            store.setStore('announceHistoryMap', object2Map(value.announceHistoryMap), false);
         },() => {
             console.log('read groupChatMap error');
         });
         // 群成员信息
         getFile(`${sid}-groupUserLinkMap`, (value) => {
             if (!value) return;
-            store.setStore('groupUserLinkMap', value.groupUserLinkMap || new Map(), false);
-            store.setStore('groupInfoMap', value.groupInfoMap || new Map(), false);
+            store.setStore('groupUserLinkMap', object2Map(value.groupUserLinkMap), false);
+            store.setStore('groupInfoMap', object2Map(value.groupInfoMap), false);
         },() => {
             console.log('read groupUserLinkMap error');
         });
@@ -95,9 +98,8 @@ export const initAccount = () => {
         });
         
     }).catch(err => {
-        console.log('初始化本地数据失败',err);
+        console.log('初始化indexDB失败：',err);
     });
-    
     getLocalStorage(`${sid}-flags`,(value) => {
         if (!value) return;
         store.setStore('flags/noGroupRemind',value.noGroupRemind);
@@ -109,25 +111,16 @@ export const initAccount = () => {
  */
 export const userChatChange = () => {
     const sid = store.getStore('uid');
-    getFile(`${sid}-userChatMap`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        value.userHistoryMap = store.getStore('userHistoryMap'); // 单人聊天历史记录变化
-        value.userChatMap = store.getStore('userChatMap');  // 单人聊天历史记录索引变化
+    const value = {
+        userHistoryMap:store.getStore('userHistoryMap'), // 单人聊天历史记录变化
+        userChatMap:store.getStore('userChatMap')  // 单人聊天历史记录索引变化
+    };
 
-        setTimeout(() => {
-            writeFile(`${sid}-userChatMap`, value, () => {
-                console.log('write success');
-            }, () => {
-                console.log('fail!!!!!!!!!!');
-            });
-        }, 0);
-
+    writeFile(`${sid}-userChatMap`, value, () => {
+        console.log('write success');
     }, () => {
-        console.log('read error');
+        console.log('write userChatMapfail');
     });
-
 };
 
 /**
@@ -135,15 +128,12 @@ export const userChatChange = () => {
  */
 export const friendChange = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-userInfoMap`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        value.userInfoMap = store.getStore('userInfoMap');  // 用户信息
-        writeFile(`${id}-userInfoMap`, value);
-    }, () => {
-        console.log('read error');
-    });
+    const value = {
+        friendLinkMap: store.getStore('friendLinkMap'), // 好友链接
+        userInfoMap: store.getStore('userInfoMap');  // 用户信息
+    };
+    writeFile(`${id}-userInfoMap`, value);
+  
 };
 
 /**
@@ -151,25 +141,13 @@ export const friendChange = () => {
  */
 export const groupChatChange = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-groupChatMap`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        value.groupHistoryMap = store.getStore('groupHistoryMap'); // 群组聊天
-        value.groupChatMap = store.getStore('groupChatMap');
-        value.announceHistoryMap = store.getStore('announceHistoryMap'); // 群组公告
+    const value = {
+        groupHistoryMap: store.getStore('groupHistoryMap'), // 群组聊天
+        groupChatMap: store.getStore('groupChatMap'),
+        announceHistoryMap: store.getStore('announceHistoryMap') // 群组公告
+    };
 
-        setTimeout(() => {
-            writeFile(`${id}-groupChatMap`, value, () => {
-                console.log('write success');
-            }, () => {
-                console.log('fail!!!!!!!!!!');
-            });
-        }, 0);
-
-    }, () => {
-        console.log('read error');
-    });
+    writeFile(`${id}-groupChatMap`, value);
 };
 
 /**
@@ -177,16 +155,11 @@ export const groupChatChange = () => {
  */
 export const groupUserLinkChange = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-groupUserLinkMap`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        value.groupUserLinkMap = store.getStore('groupUserLinkMap'); // 群组用户
-        value.groupInfoMap = store.getStore('groupInfoMap'); // 群信息
-        writeFile(`${id}-groupUserLinkMap`, value);
-    }, () => {
-        console.log('read error');
-    });
+    const value = {
+        groupUserLinkMap:store.getStore('groupUserLinkMap'), // 群组用户
+        groupInfoMap:store.getStore('groupInfoMap') // 群信息
+    };
+    writeFile(`${id}-groupUserLinkMap`, value);
 };
 
 /**
@@ -194,17 +167,8 @@ export const groupUserLinkChange = () => {
  */
 export const lastReadChange = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-lastRead`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        setTimeout(() => {
-            value = store.getStore('lastRead');// 当前已读
-            writeFile(`${id}-lastRead`, value);
-        }, 0);
-    }, () => {
-        console.log('read error');
-    });
+    const value = store.getStore('lastRead');// 当前已读
+    writeFile(`${id}-lastRead`, value);
 
     updateUnReadFg();
 };
@@ -214,17 +178,8 @@ export const lastReadChange = () => {
  */
 export const lastChatChange = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-lastChat`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        setTimeout(() => {
-            value = store.getStore('lastChat');// 最近会话
-            writeFile(`${id}-lastChat`, value);
-        }, 0);
-    }, () => {
-        console.log('read error');
-    });
+    const value = store.getStore('lastChat');// 最近会话
+    writeFile(`${id}-lastChat`, value);
 
     updateUnReadFg();
 };
@@ -271,15 +226,8 @@ export const updateUnReadFg = () => {
  */
 export const settingChange = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-setting`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        value = store.getStore('setting'); // 群组用户
-        writeFile(`${id}-setting`, value);
-    }, () => {
-        console.log('read error');
-    });
+    const value = store.getStore('setting'); // 群组用户
+    writeFile(`${id}-setting`, value);
 };
 
 /**
@@ -295,47 +243,20 @@ export const flagsChange = () => {
  */
 export const lastReadNotice = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-lastReadNotice`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        setTimeout(() => {
-            value = store.getStore('lastReadNotice');// 当前已读
-            writeFile(`${id}-lastReadNotice`, value);
-        }, 0);
-    }, () => {
-        console.log('read error');
-    });
+    const value = store.getStore('lastReadNotice');// 当前已读
+    writeFile(`${id}-lastReadNotice`, value);
 };
 
 // 评论消息列表
 export const conmentListChange = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-conmentList`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        setTimeout(() => {
-            value = store.getStore('conmentList');
-            writeFile(`${id}-conmentList`, value);
-        }, 0);
-    }, () => {
-        console.log('read error');
-    });
+    const value = store.getStore('conmentList');
+    writeFile(`${id}-conmentList`, value);
 };
 
 // 点赞消息列表
 export const fabulousListChange = () => {
     const id = store.getStore('uid');
-    getFile(`${id}-conmentList`, (value) => {
-        if (!value) {
-            value = {};
-        }
-        setTimeout(() => {
-            value = store.getStore('fabulousList');
-            writeFile(`${id}-fabulousList`, value);
-        }, 0);
-    }, () => {
-        console.log('read error');
-    });
+    const value = store.getStore('fabulousList');
+    writeFile(`${id}-fabulousList`, value);
 };

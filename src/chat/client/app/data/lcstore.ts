@@ -61,3 +61,15 @@ export const setLocalStorage = (key: string, data: any) => {
 export const getLocalStorage = (key: string, defaultValue = undefined) => {
     return JSON.parse(localStorage.getItem(key)) || defaultValue;
 };
+
+/**
+ * object转map
+ */
+export const object2Map = (objData:Object) => {
+    const res = new Map();
+    for (const key of Object.getOwnPropertyNames(objData)) {
+        res.set(key,objData[key]);
+    }
+
+    return res;
+};

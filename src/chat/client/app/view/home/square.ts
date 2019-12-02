@@ -5,8 +5,8 @@ import { gotoSquare } from '../../../../../app/view/base/app';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getStore,PostItem, register } from '../../data/store';
-import { gameLabelNum, postLaud, showPost } from '../../net/rpc';
+import { getStore,PostItem, register, setStore } from '../../data/store';
+import { gameLabelNum, showPost } from '../../net/rpc';
 
 export const forelet = new Forelet();
 export const WIDGET_NAME = module.id.replace(/\//g, '-');
@@ -59,12 +59,14 @@ export class Square extends Widget {
         super.create();
         this.state = state;
     }
-
-    public setProps(props:any) {               
+    public setProps(props:any) {   
+        console.log('square props: ',props);            
         if (this.props.active !== props.active) {
             if (props.active >= 2) {
                 const label = getStore(`tagList`)[props.active];
                 const game = getStore(`gameList`);
+                
+                setStore('flags/nowSquareType',{ squareType:5,label });
                 showPost(5,label);
                 gameLabelNum(label).then(r => {
                     let index = null;
@@ -311,16 +313,20 @@ register('postReturn',r => {
 register('tagList',r => {   
     const w:any = forelet.getWidget(WIDGET_NAME);
     if (w) {
+        const oldData = w.props.postView;
+        w.props.postView = [];
+        // 需要根据taglist的顺序来调整postview的顺序
         r.forEach((tag) => {            
-            if (w.props.postView.findIndex(item => item[0] === tag) === -1) {
+            const index = oldData.findIndex((e) => e[0] === tag);
+            if (index < 0) {
                 w.props.postView.push([tag, {
                     expandItem:-1,
                     postList:[],
-                    // canRequest:true,
                     isLoading:false
-                    // isShowAnimation:false
                 }]);    
-            }            
+            } else {
+                w.props.postView.push([tag,oldData[index][1]]);
+            }          
         }); 
         w.paint(); 
     } 
