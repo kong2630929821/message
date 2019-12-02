@@ -634,7 +634,10 @@ export const delCommentPost = (arg: CommentKey): number => {
     return delComment(uid, arg, false);
 };
 
-export const delComment = (uid: number, arg: CommentKey, mgr: Boolean = false): number => {
+/**
+ * 删除评论
+ */
+export const delComment = (uid: number, arg: CommentKey, mgr: Boolean): number => {
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
     const comment = commentBucket.get(arg)[0];
@@ -666,7 +669,6 @@ export const delComment = (uid: number, arg: CommentKey, mgr: Boolean = false): 
     
     return CONSTANT.RESULT_SUCCESS;
 };
-
 
 /**
  * 获取最新评论

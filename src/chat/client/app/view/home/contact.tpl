@@ -12,13 +12,13 @@
         <div w-props="hello" style="background:#fff;width:100%;padding-bottom: 20px;position: absolute;top:0;">
             <div w-class="title">分类标签</div>
             <div w-class="tagList">
-                {{for i,v of it.tagList.slice(0,2)}}
+                {{for i,v of it1.tagList.slice(0,2)}}
                 <div w-class="tag" on-tap="changeTagItem({{i}},e)">{{v}}</div>
                 {{end}}
             </div>
             <div w-class="title">游戏标签</div>
             <div w-class="tagList">
-                {{for i,v of it.tagList.slice(2)}}
+                {{for i,v of it1.tagList.slice(2)}}
                 <div w-class="tag" on-tap="changeTagItem({{i+2}},e)">{{v}}</div>
                 {{end}}
             </div>

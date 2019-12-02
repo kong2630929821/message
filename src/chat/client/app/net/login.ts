@@ -40,6 +40,21 @@ export const checkAccount = async (cb:Function) => {
     if (conUid) {  // 已有账号执行授权
         chatLogin(cb);
     }
+
+    // // 获取全部游戏 无需账号也可以获取全部游戏列表
+    // getAllGameList().then(r => {
+    //     if (r.length) {
+    //         const appId = JSON.stringify(r);
+    //         getAllGameInfo(appId).then(r => {
+    //             store.setStore('gameList',r);
+    //             const tagList = store.tagListStore;
+    //             r.forEach(v => {
+    //                 tagList.push(v.title);
+    //             });
+    //             store.setStore('tagList',tagList);
+    //         });
+    //     }
+    // });
 };
 
 /**
