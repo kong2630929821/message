@@ -1,6 +1,6 @@
 <div w-class="page">
     <div w-class="cancle" on-tap="exit">返回上一页</div>
-    {{if it.state===1}}
+    {{if it.state==1 || it.state==2}}
     <div w-class="deelArtice">
         <div w-class="titleObj">
             <div style="line-height: 40px;margin-left: 20px;">被举报动态</div>
@@ -31,12 +31,26 @@
                         </div>
                     </div>
                 </div>
+
+                {{if it.dynamic.title}}
+                    <div w-class="artTitle">{{it.dynamic.title}}</div>
+                {{end}}
+
+                {{if it.state==2}}
+                    {{if it.dynamic.imgs.length}}
+                        {{for i,v of it.dynamic.imgs}}
+                            <img src="{{v}}" alt="" w-class="imgBig" on-tap="bigImg('{{v}}')"/>
+                        {{end}}
+                    {{end}}
+                {{end}}
                 <div w-class="content">
                     <widget w-tag="pi-ui-html">{{it.dynamic.msg}}</widget>
                 </div>
-                {{if it.dynamic.imgs.length}}
-                    {{for i,v of it.dynamic.imgs}}
-                        <img src="{{v}}" alt="" w-class="imgBig" on-tap="bigImg('{{v}}')"/>
+                {{if it.state==1}}
+                    {{if it.dynamic.imgs.length}}
+                        {{for i,v of it.dynamic.imgs}}
+                            <img src="{{v}}" alt="" w-class="imgBig" on-tap="bigImg('{{v}}')"/>
+                        {{end}}
                     {{end}}
                 {{end}}
             </div>
@@ -62,8 +76,12 @@
             {{for i,v of it.userName}}
                 <div w-class="item">
                     {{v.key}}：{{v.value}}
-                    {{if v.fg}}
-                    <img src="{{v.fg}}" alt="" w-class="sexImg"/>
+                    {{if v.fg||v.fg==0}}
+                        {{if v.fg!=2}}
+                            <img src="../../../res/images/{{v.fg===1?'girl.png':'boy.png'}}" w-class="sexImg"/>
+                        {{else}}
+                            <img src="../../../res/images/neutral.png" w-class="sexImg"/>
+                        {{end}}
                     {{end}}
                 </div>
             {{end}}
@@ -71,7 +89,7 @@
     </div>
 
 
-    {{if it.state==1}}
+    {{if it.state==1 || it.state==2}}
     <div>
         <div w-class="titleObj">
             <div style="line-height: 40px;margin-left: 20px;">举报人</div>
@@ -81,8 +99,12 @@
                 <div w-class="userItem">
                     {{for j,t of v}}
                     <div style="width: 245px;">{{t.key}}:&nbsp;&nbsp;{{t.value}}
-                        {{if t.fg}}
-                        <img src="{{t.fg}}" alt="" w-class="sexImg"/>
+                        {{if t.fg ||t.fg==0}}
+                            {{if t.fg!=2}}
+                                <img src="../../../res/images/{{t.fg===1?'girl.png':'boy.png'}}" w-class="sexImg"/>
+                            {{else}}
+                                <img src="../../../res/images/neutral.png" w-class="sexImg"/>
+                            {{end}}
                         {{end}}
                     </div>
                     {{end}}
@@ -118,8 +140,12 @@
                                 <div w-class="reportUserInfo">
                                     {{for j,t of v.value}}
                                         <div>{{t.key}}:&nbsp;&nbsp;{{t.value}}
-                                            {{if t.fg}}
-                                            <img src="{{t.fg}}" alt="" w-class="sexImg"/>
+                                            {{if t.fg || t.fg==0 }}
+                                                {{if t.fg!=2}}
+                                                    <img src="../../../res/images/{{t.fg===1?'girl.png':'boy.png'}}" w-class="sexImg"/>
+                                                {{else}}
+                                                    <img src="../../../res/images/neutral.png" w-class="sexImg"/>
+                                                {{end}}
                                             {{end}}
                                         </div>
                                     {{end}}

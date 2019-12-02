@@ -26,6 +26,7 @@ interface Props {
     reportKey:string;// 举报的key值
     uploadLoding:any;
     uid:number;
+    artTitle:string;// 文章标题
 }
 interface IMAGE {
     compressImg:string;
@@ -53,7 +54,8 @@ export class ModalBox extends Widget {
         status:0,
         reportKey:'',
         uploadLoding:[],
-        uid:0
+        uid:0,
+        artTitle:''
     };
     public ok: (selected:any) => void;
     public cancel: () => void;
@@ -114,7 +116,8 @@ export class ModalBox extends Widget {
         const evidence = {
             msg:this.props.contentInput,
             img:JSON.stringify(imgs),
-            type:JSON.stringify(reportList)
+            type:JSON.stringify(reportList),
+            title:this.props.artTitle
         };
         complaintType(this.props.reportKey,this.props.status,JSON.stringify(evidence),this.props.uid).then(r => {
             if (r > 0) {

@@ -37,7 +37,6 @@ interface Props {
     acTag:number;   // 当前活跃的广场标签下标
     showTag:boolean;  // 展示广场下拉
     tabBarList:any;
-    tagList:any;
     labelList:any;
     gameName:string;   // 从游戏跳到广场对应的标签
 }
@@ -78,13 +77,11 @@ export class Contact extends SpecialWidget {
                 components:'chat-client-app-view-home-contactNotice'
             }
         ],
-        tagList:[],
         labelList:[],
         gameName:''
     };
     constructor() {
         super();
-        this.props.tagList = store.getStore('tagList',[]);
         this.props.labelList = getStore('game/allGame',[]);
     }
 
@@ -92,26 +89,27 @@ export class Contact extends SpecialWidget {
         super.create();
         this.state = STATE;
         this.state.pubNum = store.getStore('pubNum',0);
-        this.initDate();
+        this.state.tagList = store.getStore('tagList',[]);
+        // this.initDate();
     }
 
     public setProps(props: Props) {
         if (props.gameName) {
-            let index:number =  this.props.tagList.indexOf(props.gameName);
+            let index:number =  this.state.tagList.indexOf(props.gameName);
             index = index >= 0 ? index :0;
             props.acTag = index;
-            console.log('tagList',this.props.tagList,'index',index);
+            console.log('tagList',this.state.tagList,'index',index);
         }
         this.props = {
             ...this.props,
             ...props
         };
+        this.initDate();
     }
 
     public initDate() {
         const uid = store.getStore('uid', 0);
         this.props.isLogin = !!uid;
-        this.props.activeTab = TAB.square;
         if (this.props.isLogin) {   // 聊天已登录成功
             this.changeUserinfo();
         }
@@ -174,9 +172,9 @@ export class Contact extends SpecialWidget {
                     icon:''
                 };
                 if (this.props.acTag >= 2) {
-                    const currentItem = this.props.labelList.find(item => item.title === this.props.tagList[this.props.acTag]);
+                    const currentItem = this.props.labelList.find(item => item.title === this.state.tagList[this.props.acTag]);
                     label = {
-                        name:this.props.tagList[this.props.acTag],
+                        name:this.state.tagList[this.props.acTag],
                         icon:currentItem.img[0]
                     };
                 }
@@ -184,7 +182,7 @@ export class Contact extends SpecialWidget {
                     if (this.props.acTag < 2) {
                         showPost(this.props.acTag + 1);
                     } else {
-                        showPost(5,store.getStore('tagList')[this.props.acTag]);
+                        showPost(5,this.state.tagList[this.props.acTag]);
                     }
                     
                 });
@@ -277,7 +275,8 @@ const STATE = {
     inviteUsers:[],
     convertUser:[],
     notice:[],
-    pubNum:0
+    pubNum:0,
+    tagList:[]
 };
 
 store.register('contactMap', (r) => {
@@ -374,5 +373,10 @@ store.register(`conmentList`, (r:any) => {
 // 监听公众号变化
 store.register(`pubNum`,(r:number) => {
     STATE.pubNum = r;
+    forelet.paint(STATE);
+});
+
+store.register('tagList',(r) => {
+    STATE.tagList = r;
     forelet.paint(STATE);
 });

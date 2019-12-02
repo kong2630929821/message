@@ -19,75 +19,19 @@ declare var env: Env;
  * 创建社区账号
  */
 // #[rpc=rpcServer]
-export const createCommunityNum = (arg:CreateCommunity):string => {
-    console.log('!!!!!!!!!!!!!!!!CreateCommunity',arg);
-    const uid = getUid();
-    const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
-    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
-    const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
-    // 获取社区账号索引
-    let publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
-    if (!publicAccIndex) {
-        publicAccIndex = new CommunityAccIndex();
-        publicAccIndex.uid = uid;
-        publicAccIndex.list = [];
-    }
-    // 生成社区账号
-    const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
-    const r = communityBaseBucket.get(num);
-    if (!r[0]) {
-        const communityBase = new CommunityBase();
-        // 创建公众号添加头像
-        if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
-            communityBase.avatar = arg.avatar;
-            // 判断是否已有公众号
-            if (publicAccIndex.list.length > 0) return 'already have public';
-            // 判断公众号名是否重复
-            let publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
-            if (publicNameIndex) return 'repeat name';
-            // 添加公众号名索引
-            publicNameIndex = new PublicNameIndex();
-            publicNameIndex.name = arg.name;
-            publicNameIndex.num = num;
-            publicNameIndexBucket.put(arg.name, publicNameIndex);
-            // 添加到公众号申请表
-            console.log('!!!!!!!!!!!!!!!!num',num);
-
-            return applyPublicComm(uid, num, arg.name, arg.avatar, arg.desc);
-        } else {
-            communityBase.avatar = '';
-        }
-        communityBase.num = num;
-        communityBase.name = arg.name;
-        communityBase.desc = arg.desc;
-        communityBase.owner = uid;
-        communityBase.property = '';
-        communityBase.createtime = Date.now().toString();
-        communityBase.comm_type = arg.comm_type;
-        console.log('!!!!!!!!!!!!!!!!CommunityBase',communityBase);
-
-        communityBaseBucket.put(num, communityBase);
-        // 添加用户社区账号索引
-        if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
-            publicAccIndex.num = num;
-        } else {
-            publicAccIndex.list.push(num);
-            publicAccIndexBucket.put(uid, publicAccIndex);
-        }
-        
-        // 创建成功自动关注公众号
-        // userFollow(num);
-
-        return num;
-    } 
-
-};
-
 // export const createCommunityNum = (arg:CreateCommunity):string => {
 //     console.log('!!!!!!!!!!!!!!!!CreateCommunity',arg);
 //     const uid = getUid();
 //     const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
 //     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+//     const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
+//     // 获取社区账号索引
+//     let publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
+//     if (!publicAccIndex) {
+//         publicAccIndex = new CommunityAccIndex();
+//         publicAccIndex.uid = uid;
+//         publicAccIndex.list = [];
+//     }
 //     // 生成社区账号
 //     const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
 //     const r = communityBaseBucket.get(num);
@@ -96,9 +40,20 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
 //         // 创建公众号添加头像
 //         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
 //             communityBase.avatar = arg.avatar;
+//             // 判断是否已有公众号
+//             if (publicAccIndex.list.length > 0) return 'already have public';
 //             // 判断公众号名是否重复
-//             const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
+//             let publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
 //             if (publicNameIndex) return 'repeat name';
+//             // 添加公众号名索引
+//             publicNameIndex = new PublicNameIndex();
+//             publicNameIndex.name = arg.name;
+//             publicNameIndex.num = num;
+//             publicNameIndexBucket.put(arg.name, publicNameIndex);
+//             // 添加到公众号申请表
+//             console.log('!!!!!!!!!!!!!!!!num',num);
+
+//             return applyPublicComm(uid, num, arg.name, arg.avatar, arg.desc);
 //         } else {
 //             communityBase.avatar = '';
 //         }
@@ -113,32 +68,76 @@ export const createCommunityNum = (arg:CreateCommunity):string => {
 
 //         communityBaseBucket.put(num, communityBase);
 //         // 添加用户社区账号索引
-//         const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
-//         let publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
-//         if (!publicAccIndex) {
-//             publicAccIndex = new CommunityAccIndex();
-//             publicAccIndex.uid = uid;
-//             publicAccIndex.list = [];
-//         }
 //         if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
 //             publicAccIndex.num = num;
 //         } else {
-//             // 添加公众号名索引
-//             const publicNameIndex = new PublicNameIndex();
-//             publicNameIndex.name = arg.name;
-//             publicNameIndex.num = num;
-//             publicNameIndexBucket.put(arg.name, publicNameIndex);
 //             publicAccIndex.list.push(num);
 //             publicAccIndexBucket.put(uid, publicAccIndex);
 //         }
         
 //         // 创建成功自动关注公众号
-//         userFollow(num);
+//         // userFollow(num);
 
 //         return num;
 //     } 
 
 // };
+export const createCommunityNum = (arg:CreateCommunity):string => {
+    console.log('!!!!!!!!!!!!!!!!CreateCommunity',arg);
+    const uid = getUid();
+    const publicNameIndexBucket = new Bucket(CONSTANT.WARE_NAME, PublicNameIndex._$info.name);
+    const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME, CommunityBase._$info.name);
+    // 生成社区账号
+    const num = getIndexID(CONSTANT.COMMUNITY_INDEX, 1).toString();
+    const r = communityBaseBucket.get(num);
+    if (!r[0]) {
+        const communityBase = new CommunityBase();
+        // 创建公众号添加头像
+        if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PUBLIC) {
+            communityBase.avatar = arg.avatar;
+            // 判断公众号名是否重复
+            const publicNameIndex = publicNameIndexBucket.get<string, PublicNameIndex[]>(arg.name)[0];
+            if (publicNameIndex) return 'repeat name';
+        } else {
+            communityBase.avatar = '';
+        }
+        communityBase.num = num;
+        communityBase.name = arg.name;
+        communityBase.desc = arg.desc;
+        communityBase.owner = uid;
+        communityBase.property = '';
+        communityBase.createtime = Date.now().toString();
+        communityBase.comm_type = arg.comm_type;
+        console.log('!!!!!!!!!!!!!!!!CommunityBase',communityBase);
+
+        communityBaseBucket.put(num, communityBase);
+        // 添加用户社区账号索引
+        const publicAccIndexBucket = new Bucket(CONSTANT.WARE_NAME, CommunityAccIndex._$info.name);
+        let publicAccIndex = publicAccIndexBucket.get<number, CommunityAccIndex[]>(uid)[0];
+        if (!publicAccIndex) {
+            publicAccIndex = new CommunityAccIndex();
+            publicAccIndex.uid = uid;
+            publicAccIndex.list = [];
+        }
+        if (arg.comm_type === CONSTANT.COMMUNITY_TYPE_PERSON) {
+            publicAccIndex.num = num;
+        } else {
+            // 添加公众号名索引
+            const publicNameIndex = new PublicNameIndex();
+            publicNameIndex.name = arg.name;
+            publicNameIndex.num = num;
+            publicNameIndexBucket.put(arg.name, publicNameIndex);
+            publicAccIndex.list.push(num);
+            publicAccIndexBucket.put(uid, publicAccIndex);
+        }
+        
+        // 创建成功自动关注公众号
+        userFollow(num);
+
+        return num;
+    } 
+
+};
 
 /**
  * 申请公众号
@@ -559,7 +558,6 @@ export const getUserPostHandle = (arg: IterPostArg, postType: number): PostArrWi
     const communityPostBucket = new Bucket(CONSTANT.WARE_NAME,CommunityPost._$info.name);
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const communityPost = communityPostBucket.get<string, CommunityPost[]>(arg.num)[0];
-    console.log('!!!!!!!!!!!!!getUserPostHandle!!!!!!communityPost:', JSON.stringify(communityPost));
     if (!communityPost) {
         return postArrWithTotal;
     }
@@ -574,7 +572,6 @@ export const getUserPostHandle = (arg: IterPostArg, postType: number): PostArrWi
         post_id_list.push(postKey);
         postArrWithTotal.total ++;
     }
-    console.log('!!!!!!!!!!!!!getUserPostHandle!!!!!!post_id_list:', JSON.stringify(post_id_list));
     postIdSort(post_id_list, 0, post_id_list.length - 1);
     let index = -1;
     for (let i = 0; i < post_id_list.length; i++) {
@@ -793,20 +790,15 @@ export const getCommentLaud = (postKey: PostKey): CommentIDList => {
     logKey.post_id = postKey.id;
     if (postCount) {
         console.log('!!!!!!!!!!!!postCount:', postCount);
-        console.log('111111111111111111111111111111',postCount.commentList);
         for (let i = 0; i < postCount.commentList.length; i++) {
-            console.log('22222222222222222222222222222222', postCount.commentList[i]);
             logKey.id = postCount.commentList[i];
             const logR = CommentLaudLogBucket.get(logKey)[0];
-            console.log('3333333333333333333333333333333333', logR);
             if (logR) {
                 commentIdList.list.push(postCount.commentList[i]);
-                console.log('444444444444444444444444444444', commentIdList.list);
             }
         }
     }
-    console.log('6555555555555555555555555', commentIdList);
-    
+
     return commentIdList;
 };
 
@@ -1240,7 +1232,6 @@ export const postLaud = (uid: number, postKey: PostKey): boolean => {
  * 添加评论
  */
 export const addComment = (uid: number, arg: AddCommentArg): CommentKey => {
-    console.log(`!!!!!!!!!!!!!!!!!addComment22 uid:${uid}, arg:${JSON.stringify(arg)}`);
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
     const key = new CommentKey();

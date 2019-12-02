@@ -115,16 +115,16 @@ interface Store {
     draft:ListItem[];
     uid: Number;
     bindApp:string[];// 绑定的appid
-    officalList:any[];// 官方账号列表
 }
 // 全局内存数据库
 const store:Store = {
     appList:[],
     hotApp:[],
     recommendApp:[],
-    flags:{}
+    flags:{},
     draft: [],
-    uid:-1
+    uid:-1,
+    bindApp:[]
 };
 
 const registerDataChange = () => {

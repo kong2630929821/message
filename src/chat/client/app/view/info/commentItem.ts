@@ -145,7 +145,7 @@ export class CommentItem extends Widget {
         this.closeUtils(e);
         const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
         const key = `${REPORT_COMMENT}%${JSON.stringify(this.props.key)}`;
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,JSON.parse(this.props.msg).msg,REPORT_COMMENT,key,this.props.owner);
+        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,JSON.parse(this.props.msg).msg,REPORT_COMMENT,key,this.props.owner,'');
     }
 
     // 关闭操作列表

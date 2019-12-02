@@ -2,7 +2,8 @@
  * 调用rpc接口
  */
 // ================================================ 导入
-import { erlangLogicIp, shareDownload } from '../../../../app/public/config';
+import { erlangLogicIp } from '../../../../app/public/config';
+import { piFetch } from '../../../../app/utils/pureUtils';
 import { DEFAULT_ERROR_STR } from '../../../server/data/constant';
 import { CommentKey, PostKey } from '../../../server/data/db/community.s';
 import { GroupInfo } from '../../../server/data/db/group.s';
@@ -611,8 +612,8 @@ export const showPost = (square_type:number, label:string= '',num:string = '', i
             const requestNum = num;
             const tagType = square_type;
             
-            return (r:PostArr) => {
-                console.log('showPost=============',r);
+            return (r) => {
+                console.log(`showPost=============square_type: ${square_type}, label: ${label}, r: ${r}`);
                 // let postList = store.getStore('postList',[]);
                 if (r && r.list && r.list.length) {
                     const data:store.PostItem[] = r.list;// TODO:
@@ -741,7 +742,7 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
         clientRpcFunc(getUserPost,param,(r) => {
             console.log('getUserPost===========',r);
             if (r && r.list) {
-                const data:store.PostItem = r.list;
+                const data:store.PostItem[] = r.list;
                 
                 data.forEach((res,i) => {
                     data[i].offcial = res.comm_type === CommType.official;
@@ -1025,19 +1026,14 @@ export const gameLabelNum = (label:string) => {
 
 // 获取全部游戏
 export const getAllGameList = () => {
-    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
-        return res.json().then(r => {
-            return r.app_ids;
-        }). catch (e => {
-            return [];
-        });
-      
+    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_all_app`).then(res => {
+        return res.app_ids || [];    
     });
 };
 
 // 获取全部游戏详情
 export const getAllGameInfo = (ids:string) => {
-    return fetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
+    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
         return res.json().then(r => {
             const res = r.app_details;
             const gameList = [];
@@ -1057,11 +1053,8 @@ export const getAllGameInfo = (ids:string) => {
                     time:timestampFormat(JSON.parse(desc.time))
                 });
             });
-
-            return gameList;
-        }). catch (e => {
-            return [];
         });
-      
+
+        return gameList;
     });
 };

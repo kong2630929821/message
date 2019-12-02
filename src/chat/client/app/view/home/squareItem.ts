@@ -92,9 +92,9 @@ export class SquareItem extends Widget {
         this.props.likeActive = judgeLiked(this.props.postItem.key.num,this.props.postItem.key.id);
         const gameList = getStore('gameList');
         if (props.postItem.label && gameList.length) {
-            const currentItem = gameList.find(item => item.title === this.props.postItem.label);
+            const currentItem = gameList.find(item => item.title === this.props.postItem.label) || { img:[] };
             this.props.gameLabel = {
-                name:currentItem.title,
+                name: this.props.postItem.label,
                 icon:buildupImgPath(currentItem.img[0])
             };
         } else {
@@ -205,7 +205,9 @@ export class SquareItem extends Widget {
         this.closeUtils(e);
         const avatar = this.props.postItem.avatar ? buildupImgPath(this.props.postItem.avatar) :'../../res/images/user_avatar.png';
         const key = `${this.props.postItem.isPublic ? REPORT_ARTICLE :REPORT_POST}%${JSON.stringify(this.props.postItem.key)}`;
-        complaintUser(`${this.props.postItem.username} 的内容`,this.props.postItem.gender,avatar,this.props.postItem.content,this.props.postItem.isPublic ? REPORT_ARTICLE :REPORT_POST,key,this.props.postItem.owner);
+        // 文章则传文章标题
+        const title = this.props.postItem.isPublic ? this.props.postItem.title :'';
+        complaintUser(`${this.props.postItem.username} 的内容`,this.props.postItem.gender,avatar,this.props.postItem.content,this.props.postItem.isPublic ? REPORT_ARTICLE :REPORT_POST,key,this.props.postItem.owner,title);
     }
 
     /**

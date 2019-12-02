@@ -9,6 +9,7 @@
         被举报类别：
         <div w-class="{{it.returnStatus==0?'activeTitle':'title1'}}" on-tap="checkType(0)" on-down="onShow">玩家</div>
         <div w-class="{{it.returnStatus==1?'activeTitle':'title1'}}" on-tap="checkType(1)" on-down="onShow">动态</div>
+        <div w-class="{{it.returnStatus==2?'activeTitle':'title1'}}" on-tap="checkType(2)" on-down="onShow">文章</div>
     </div>
     <div ev-table-detail="goDetail" style="margin-top:37px;">
         <div w-class="tableTitle">数据列表</div>
