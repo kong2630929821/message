@@ -633,6 +633,11 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
 // #[rpc=rpcServer]
 export const delCommentPost = (arg: CommentKey): number => {
     const uid = getUid();
+
+    return delComment(uid, arg, false);
+};
+
+export const delComment = (uid: number, arg: CommentKey, mgr: Boolean = false): number => {
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
     const comment = commentBucket.get(arg)[0];
@@ -641,7 +646,7 @@ export const delCommentPost = (arg: CommentKey): number => {
         return COMMENT_NOT_EXIST;
     }
     // 不能删除其他人发的评论
-    if (uid !== comment.owner) { 
+    if (uid !== comment.owner && mgr !== true) { 
         return CANT_DETETE_OTHERS_COMMENT;
     }
     const postkey = new PostKey();
@@ -664,6 +669,7 @@ export const delCommentPost = (arg: CommentKey): number => {
     
     return CONSTANT.RESULT_SUCCESS;
 };
+
 
 /**
  * 获取最新评论
