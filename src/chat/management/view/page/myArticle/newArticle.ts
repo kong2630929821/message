@@ -8,11 +8,11 @@ import { sendActicle } from '../../../net/rpc';
 import { getStore, setStore } from '../../../store/memstore';
 import { popNewMessage } from '../../../utils/logic';
 interface Props {
-    data: any;
+    data: object; // 保存父组件传递的数据
     title:string;// 文章标题
     bannerImg:string;// 文章banner
     upLoadIng:boolean;// 正在上传图片
-    buildupImgPath:any;// 图片路径
+    buildupImgPath:Function;// 图片路径
     draftArry:any[];// 草稿文章数组 
 }
 
@@ -168,7 +168,7 @@ export class NewArticle extends Widget {
         const value = {
             msg,
             imgs: this.props.bannerImg,
-            date: new Date()
+            date: new Date().getTime()
         };
         const num = getStore('flags',{}).num;
         sendActicle(num, 0, this.props.title,JSON.stringify(value)).then((res:any) => {
@@ -212,7 +212,7 @@ export class NewArticle extends Widget {
             title : this.props.title,
             msg: msg,
             bannerImg : this.props.bannerImg,
-            time: new Date()
+            time: new Date().getTime()
         };
         // 获取当前indexdb中的草稿内容
         const tempDraftArray = this.props.draftArry;

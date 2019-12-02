@@ -7,27 +7,27 @@ import { timestampFormat } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
-    likeList: any; // 点赞列表
+    likeList: string; // 点赞列表
     commentLikeList: number[]; // 评论中点赞的列表
-    likeActive: any;   // 是否点赞
     expandItemTop: boolean;
     expandItem: number;
     active: string; // 标签的激活状态
-    postItem: any; // 发布的项
-    commentList: any; // 评论列表
+    postItem: string; // 发布的项
+    commentList: any[]; // 评论列表
     showDataList:DraftItem[];// 展示数据
-    dataList:DraftItem[];
+    dataList:DraftItem[]; // 处理后的全部数据
     sum:number;// 数据条数
     perPage:number;// 每页显示多少条数据
     currentIndex:number;// 当前页数
     expandIndex:boolean;// 控制分页显示隐藏
     perPageIndex:number;// 每页显示多少个的下标
     status:boolean;// true列表 false详情
-    data: any;
-    articleConent: any; // 文章内容
-    dealData:any;  // 组装数据
-    timeFormat:any; // 时间处理,
-    articleData:any; // 经过处理后的详情内容
+    data: object;   // 接收父组件传递的数据
+    articleConent: string; // 文章内容
+    dealData:Function;  // 组装数据
+    timeFormat:Function; // 时间处理,
+    articleData:any[]; // 经过处理后的详情内容
+    buildupImgPath:Function; // 解析图片地址
 
 }
 
@@ -53,7 +53,6 @@ export class ArticleInfo extends Widget {
         status:false,
         likeList: '', // 点赞列表
         commentLikeList: [], // 评论中点赞的列表
-        likeActive: false,   // 是否点赞
         expandItemTop: false,
         expandItem: -1,
         active: 'comment', // 标签的激活状态
@@ -63,7 +62,8 @@ export class ArticleInfo extends Widget {
         articleConent : '', // 文章内容
         dealData:this.dealData,
         timeFormat:timestampFormat,
-        articleData: []
+        articleData: [],
+        buildupImgPath:buildupImgPath
     };
     public setProps(props:any) {
         this.props = {
@@ -100,12 +100,8 @@ export class ArticleInfo extends Widget {
         ];
         showComment(data.key.num, data.key.id).then((r: any) => {
             console.log(r);
-            this.props.commentList = r.map(v => {
-                v.likeActive = this.props.commentLikeList.indexOf(v.key.id) > -1;
-
-                return v;
-            });
-            console.log(this.props.commentList);
+            this.props.dataList = r;
+            this.props.showDataList = this.props.dataList.slice(0,this.props.perPage);
             this.paint();
         });
         showLikeList(data.key.num,data.key.id).then((r: any) => {
@@ -179,7 +175,7 @@ export class ArticleInfo extends Widget {
     }
     // 切换标签
     public changeTab(tab:any) {
-        if (tab === 1) {
+        if (tab !== 1) {
             this.props.active = '';
         } else {
             this.props.active = 'comment';

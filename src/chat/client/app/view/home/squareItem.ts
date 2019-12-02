@@ -28,6 +28,7 @@ interface Props {
     imgHeight:number;// 一张图片的高
     gameLabel:any;// 游戏标签
     isUserDetailPage:boolean;// 用户详情页面的postItem
+    parseContent: Function; // 解析文章内容
 }
 /**
  * 广场帖子
@@ -74,7 +75,8 @@ export class SquareItem extends Widget {
             name:'',
             icon:''
         },
-        isUserDetailPage:false
+        isUserDetailPage:false,
+        parseContent:this.parseContent
     };
 
     public setProps(props:any) {
@@ -336,5 +338,12 @@ export class SquareItem extends Widget {
         // 判断当前的标签页
         const index = tagList.indexOf(this.props.gameLabel.name);
         notify(e.node,'ev-change-tag',{ value:index });
+    }
+
+    /**
+     * 解析公众号文章内容
+     */
+    public parseContent(content:any) {
+        return JSON.parse(content);
     }
 }

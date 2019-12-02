@@ -7,9 +7,9 @@ import { timestampFormat } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
-    resData: any;
+    resData: any[]; // 保存获取到的帖子原始数据
     showDataList:DraftItem[];// 展示数据
-    dataList:DraftItem[];
+    dataList:DraftItem[]; // 处理后的全部帖子数据
     sum:number;// 数据条数
     perPage:number;// 每页显示多少条数据
     currentIndex:number;// 当前页数
@@ -19,7 +19,7 @@ interface Props {
     isDetail:boolean; // 是否进入详情页面
     currentData:{}; // 当前操作的数据
     tempData : DraftItem[]; // 临时存储返回后的值
-    buildupImgPath:any;
+    buildupImgPath:Function; // 解析图片地址
 }
 
 interface DraftItem {
@@ -48,7 +48,8 @@ export class Published extends Widget {
         isDetail:false,
         currentData:{},
         tempData:[],
-        buildupImgPath:buildupImgPath
+        buildupImgPath:buildupImgPath,
+        resData:[]
         
     };
 

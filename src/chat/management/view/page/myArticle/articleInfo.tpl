@@ -1,7 +1,7 @@
 <div w-class="page" on-tap="close">
     <div w-class="body">
         <div w-class="leftBox">
-                <div w-class="goBack" on-tap="goBack(false,e)">返回上一页</div>
+                <div w-class="goBack" on-tap="goBack(false,e)" style="color:rgba(34,34,34,1);;">返回上一页</div>
             <div w-class="title">{{ it.articleData[0].title }}</div>
             <div w-class="createTime">
                 <div>上次编辑时间：{{ it.articleData[0].time }}</div>
@@ -11,19 +11,20 @@
                 </div>
             </div>
             <div w-class="contentBox">
+                <img src="{{ it.buildupImgPath(it.articleData[0].banner) }}" style="margin: 0 auto;display: flex;"/>
                 <div w-class="content" id="articleBody">{{ it.articleData[0].body }}</div>
             </div>
         </div>
         <div w-class="rightBox">
             <div w-class="tabar">
-                <div w-class="tab {{it.active != 'comment' ? 'activeTab':'' }}" on-tap ='changeTab(1)'>评论&nbsp;{{it.dataList[0].commentCount}}</div>
-                <div w-class="tab {{it.active == 'comment' ? 'activeTab':'' }}" on-tap ='changeTab(2)'>赞 &nbsp;{{it.dataList[0].likeCount}}</div>
+                <div w-class="tab {{it.active == 'comment' ? 'activeTab':'' }}" on-tap ='changeTab(1)'>评论&nbsp;{{it.dataList[0].commentCount}}</div>
+                <div w-class="tab {{it.active != 'comment' ? 'activeTab':'' }}" on-tap ='changeTab(2)'>赞 &nbsp;{{it.dataList[0].likeCount}}</div>
             </div>
             
             <div w-class="postBottom">
                     {{if it.active == 'comment'}}
                     <div id="commentBox" on-tap="pageClick" style="font-size: 14px;">
-                        {{for i,v of it.commentList}}
+                        {{for i,v of it.showDataList}}
                         <div ev-comment-reply="rePaint" ev-comment-delete="rePaint" ev-tools-expand="expandTools(e,{{i}})" ev-close="pageClick">
                             <widget w-tag="chat-management-view-page-myArticle-commentItem">{{it.dealData(v,true)}}</widget>
                         </div>
@@ -33,7 +34,7 @@
                     <div on-tap="pageClick ">
                         {{for i,v of it.likeList}}
                         <div w-class="likeItem">
-                            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../res/images/user_avatar.png'}}, width:"40px;height:40px;"}</widget>
+                            <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="userHead">{imgURL:{{v.avatar || '../../../res/images/user_avatar.png'}}, width:"16px;height:16px;"}</widget>
                             <div w-class="titleCenter">
                                 <div w-class="username">
                                     <span>{{v.username}}&nbsp;</span>
@@ -41,9 +42,9 @@
                                     <div>官方</div>
                                     {{else}}
                                         {{if it.gender!=2}}
-                                            <img src="../../res/images/{{it.gender===1?'girl.png':'boy.png'}}"/>
+                                            <img src="../../../res/images/{{it.gender===1?'girl.png':'boy.png'}}"/>
                                         {{else}}
-                                            <img src="../../res/images/neutral.png"/>
+                                            <img src="../../../res/images/neutral.png"/>
                                         {{end}}
                                     {{end}}
                                 </div>

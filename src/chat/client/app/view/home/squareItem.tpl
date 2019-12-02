@@ -34,14 +34,16 @@
     {{% =================帖子详情展示全部内容=======================}}
         {{if it.postItem.content}}
         <div w-class="content1" id="minImg">
-            <widget w-tag="pi-ui-html">{{it.postItem.content}}</widget>
+            <img src="{{ it.buildupImgPath(it.parseContent(it.postItem.content).img) }}"/>
+            <widget w-tag="pi-ui-html" id="minImg">{{ it.parseContent(it.postItem.content).msg }}</widget>
         </div>
         {{end}}
     {{else}}
         {{% ======================广场展示部分内容===========================}}
         {{if it.postItem.content}}
         <div w-class="content" on-tap="goDetail" class="content">
-            <widget w-tag="pi-ui-html">{{it.postItem.content}}</widget>
+            <img src="{{ it.buildupImgPath(it.parseContent(it.postItem.content).img) }}"/>
+            <widget w-tag="pi-ui-html" id="minImg">{{ it.parseContent(it.postItem.content).msg }}</widget>
             <span w-class="allBtn">···<span style="color:#2A56C6">【全文】</span></span>
         </div>
         {{end}}

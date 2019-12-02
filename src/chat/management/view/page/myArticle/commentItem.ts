@@ -9,6 +9,7 @@ import { getStore } from '../../../store/memstore';
 import { popNewMessage, timestampFormat } from '../../../utils/logic';
 
 interface Props {
+    imgPc: string; // pc上的图片评论地址
     key:any;  // 帖子评论的key
     username:string;   // 评论用户
     avatar:string;
@@ -25,9 +26,10 @@ interface Props {
     gender: number;  // 性别 0 男 1 女
     owner:number; // 评论者的uid
     isMine:boolean;  // 是否本人
-    timeFormat:any; // 时间处理
+    timeFormat:Function; // 时间处理
     orgImg:string;// 原评论图片
     orgIcon:string;// 原评论图片缩略图
+    buildupImgPath:Function; // 解析图片地址
 }
 
 /**
@@ -57,7 +59,9 @@ export class CommentItem extends Widget {
         isMine:false,
         timeFormat:timestampFormat,
         orgImg:'',
-        orgIcon:''
+        orgIcon:'',
+        buildupImgPath:buildupImgPath,
+        imgPc:''
     };
 
     public setProps(props:any) {
@@ -68,7 +72,15 @@ export class CommentItem extends Widget {
         super.setProps(this.props);
         const val = props.msg ? JSON.parse(props.msg) :{ msg:'',img:'' };
         this.props.mess = parseEmoji(val.msg);
-        this.props.img = val.img.length ? buildupImgPath(val.img[0].originalImg) :'';
+        if (val.img instanceof Array) {
+            this.props.img = val.img.length ? buildupImgPath(val.img[0].compressImg) :'';
+        } else {
+            this.props.img = val.img;
+        }
+        
+        // this.props.img = val.img ? val.img :'';
+        // this.props.img = buildupImgPath(val.img);
+        console.log(this.props.img);
         this.props.imgIcon = val.img.length ? buildupImgPath(val.img[0].compressImg) :'';
         this.props.isMine = this.props.owner === getStore('uid',0);
         this.props.avatar = buildupImgPath(props.avatar);
@@ -112,7 +124,7 @@ export class CommentItem extends Widget {
      */
     public replyComment(e:any) {
         this.closeUtils(e);
-        popNew('chat-management-components-replyCommet',{ ...this.props,title:'回复',orgId:true,key:this.props.key },(r) => {
+        popNew('chat-management-components-replyCommet',{ ...this.props,title:JSON.parse(this.props.msg).msg,orgId:true,key:this.props.key },(r) => {
             notify(e.node,'ev-comment-reply',{ ...this.props,key:r.key, value:r.value });
         });
     }

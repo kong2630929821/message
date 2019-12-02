@@ -7,17 +7,17 @@ import { timestampFormat } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
-    resData: any[];
+    resData: any[]; // 保存返回帖子的原始数据
     showDataList:DraftItem[];// 展示数据
-    dataList:DraftItem[];
+    dataList:DraftItem[]; // 处理后帖子的全部数据
     sum:number;// 数据条数
     perPage:number;// 每页显示多少条数据
     currentIndex:number;// 当前页数
     expandIndex:boolean;// 控制分页显示隐藏
     perPageIndex:number;// 每页显示多少个的下标
     status:boolean;// true列表 false详情
-    buildupImgPath:any;
-    currentData:any; // 当前操作的对象,
+    buildupImgPath:Function; // 还原照片路径
+    currentData:object; // 当前操作的对象,
     reEdit:boolean; // 是否重新编辑
 }
 
@@ -127,6 +127,12 @@ export class NotReviewed extends Widget {
         this.props.currentData.body = this.props.resData[this.props.currentIndex * this.props.perPage + k].body;
         console.log(this.props.currentData);
         this.props.reEdit = true;
+        this.paint();
+    }
+    // 返回
+    public goBack(e:any) {
+        // fg判斷是否需要刷新頁面數據
+        this.props.reEdit = false;
         this.paint();
     }
 }

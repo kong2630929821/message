@@ -38,8 +38,8 @@
     word-break: break-all;
 }
 .btn{
-    width: 50px;
-    height: 50px;
+    width: 16px;
+    height: 16px;
 }
 .comment{
     padding: 20px;

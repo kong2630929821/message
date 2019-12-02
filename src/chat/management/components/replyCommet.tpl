@@ -1,7 +1,7 @@
 <div w-class="confirmBox">
     <div w-class="body">
-        <div>
-            <span w-class ='title'>回复</span>
+        <div w-class ='title'>
+            回复:{{it.mess}}
         </div>
         <div w-class="newUserInput">
             <div w-class="replyContent" ev-input-change="userChange" >
@@ -9,9 +9,9 @@
             </div>
         <div w-class="uploadImgBox">
             <div w-class="uploadImgTitle">
-                <img src="../../../res/images/addImg.png" alt="" w-class="addImg"/>
+                <img src="../../../../../res/images/addImg.png" alt="" w-class="addImg"/>
                 <div w-class="addImgDesc">图片评论</div>
-                <input type="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" w-class="inputFile" on-change="uploadImg(1,e)"/>
+                <input type="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" w-class="inputFile" on-change="uploadImg"/>
             </div>
         </div>
         </div>
