@@ -65,7 +65,7 @@ export class ModalBox extends Widget {
     public btnCheck(index:number) {
         this.props.currentReason = index;
         const title = this.props.title.length > 9 ? `${this.props.title.substring(0,9)}···` :this.props.title;
-        this.props.msg = `您的文章“”，因为包含“${title}”信息，没有通过审核，请检查后重新提交` ;
+        this.props.msg = `您的文章“${title}”，因为包含“${this.props.reason[index]}”信息，没有通过审核，请检查后重新提交` ;
         this.paint();
     }
 
