@@ -1,9 +1,11 @@
 <div w-class="page">
+    <div w-class="goBack" on-tap="goBack(false,e)">返回上一页</div>
     <div w-class="addBox">
+        
         <div w-class="appName">标题</div>
         <div w-class="inputBox">
             <div w-class="input" ev-input-change="inputChangeName">
-                <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"应用名称",maxLength:10}</widget>
+                <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"应用名称",input:{{it.title}},maxLength:10}</widget>
             </div>
             <div w-class="info">* 6-30字</div>
         </div>
@@ -46,7 +48,8 @@
     </div>
 
     <div w-class="btnGroup">
-        <div w-class="btn1">保存到草稿</div>
+        <div w-class="btn1" on-tap="saveAsDraft
+        ">保存到草稿</div>
         <div w-class="btn2" on-tap="send">提交审核</div>
     </div>
 </div>

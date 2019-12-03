@@ -17,7 +17,7 @@ import * as ERROR_NUM from '../errorNum';
 import { getIndexID } from '../util';
 import { getUserInfoById, getUsersInfo } from './basic.r';
 import { GetUserInfoReq, Result } from './basic.s';
-import { addComment, addPost, getUserPostHandle, delComment } from './community.r';
+import { addComment, addPost, delComment, getUserPostHandle } from './community.r';
 import { AddCommentArg, AddPostArg, IterPostArg, PostArrWithTotal, PostData } from './community.s';
 import { AddAppArg, GetpostTypeArg, MgrUserList, OfficialAccList, OfficialUserInfo, SetAppConfig } from './manager.s';
 import { getReportListR } from './message.s';
@@ -794,14 +794,24 @@ export const getCommmunityDetail = (uid: number, num: string): CommunityDetail =
 };
 
 /**
- * 评论
+ * 评论 
  */
 // #[rpc=rpcServer]
 export const addCommentPost = (arg: AddCommentArg): CommentKey => {
-    console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost', arg);
+    console.log('!!!!!!!!!!!!!!!!!!!!!!22222addCommentPost', arg);
     const uid = getMgrUid();
+    if (uid > 0) {
+        console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost uid:', uid);
+        
+        return addComment(uid, arg);
+    }
+    const key = new CommentKey();
+    key.id = -1;
+    key.num = '';
+    key.post_id = -1;
+    console.log('!!!!!!!!!!!!!!!!!!!!!!addCommentPost key:', key);
 
-    return addComment(uid, arg);
+    return key; 
 };
 
 /**
@@ -809,12 +819,12 @@ export const addCommentPost = (arg: AddCommentArg): CommentKey => {
  */
 // #[rpc=rpcServer]
 export const delCommentPost = (arg: CommentKey): number => {
+    console.log('!!!!!!!!!!!!!!!!!!!!!!delCommentPost', arg);
     const uid = getMgrUid();
-    
+    console.log('!!!!!!!!!!!!!!!!!!!!!!delCommentPost uid:', uid);
+
     return delComment(uid, arg, true);
 };
-
-
 
 // 获取公众号申请详情
 export const getPublicApplyData = (applyPublic: ApplyPublic): PublicApplyData => {
@@ -1326,6 +1336,21 @@ export const formatDuring = (mss: number) => {
     return `${days}天${hours}小时${minutes}分钟${seconds}秒`;
 };
 
+// 获取公众号管理员uid
+export const getMgrUid = ():number => {
+    const user = getSession('root');
+    console.log('!!!!!!!!!!!!getMgrUid user:', user);
+    const arr = user.split('@');
+    console.log('!!!!!!!!!!!!getMgrUid arr:', arr);
+    if (arr.length === 2) {
+        const uidStr:string = arr[0];
+
+        return parseInt(uidStr, 10);
+    }
+
+    return -1;
+};
+
 /**
  * 获取官方账号绑定的应用
  */
@@ -1343,14 +1368,4 @@ export const getUidAppMap = (): Map<number, string> => {
     } while (iter);
 
     return map;
-};
-
-// 获取公众号管理员uid
-export const getMgrUid = ():number => {
-    const user = getSession('root');
-    const arr = user.split('@');
-    if (arr.length === 2) {
-
-        return parseInt(arr[0]);
-    }
 };

@@ -1,0 +1,90 @@
+.item{
+    margin-top: 20px;
+    font-size: 14px;
+    color: #222;
+    background: #fff;
+    position: relative;
+}
+.title{
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    padding-bottom: 0;
+}
+.titleCenter{
+    flex: 1 0 0;
+    margin:0 20px;
+}
+.follow{
+    width:120px;
+    height:60px;
+    background:rgba(49,91,200,1);
+    border-radius:6px;
+    font-size:14px;
+    font-weight:500;
+    color:rgba(255,255,255,1);
+    line-height:60px;
+    text-align: center;
+}
+.time{
+    font-size: 12px;
+    color: #888888;
+}
+.content{
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    word-break: break-all;
+}
+.btn{
+    width: 16px;
+    height: 16px;
+}
+.comment{
+    padding: 20px;
+    padding-left: 120px;
+    word-break: break-all;
+}
+.orgComment{
+    background:rgba(240,249,255,1);
+    margin: 20px;
+    margin-left: 120px;
+    padding: 20px;
+}
+.utils{
+    width:200px;
+    background:rgba(255,255,255,1);
+    box-shadow:0px 0px 10px 0px rgba(34,34,34,0.2);
+    border-radius:6px;
+    position: absolute;
+    top: 0;
+    right: 175px;
+    height: 100px;
+    font-size: 14px;
+    z-index: 1;
+}
+.option{
+    font-size:14px;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+    line-height:50px;
+    border-bottom: 2px solid #F2F2F2;
+    text-align: center;
+}
+.imgContent{
+    width: 230px;
+}
+.lookBigImg{
+    font-size:14px;
+    font-family:PingFangSC;
+    font-weight:400;
+    color:rgba(42,86,198,1);
+}
+.firstImage{
+    max-width: 574px;
+    max-height: 574px;
+    min-width: 180px;
+    min-height: 180px;
+    border-radius: 12px;
+  }

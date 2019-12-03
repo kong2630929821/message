@@ -18,7 +18,7 @@
 }
 .leftBox{
     flex: 1;
-    height: 100%;
+    height: 900px;
     background:rgba(242,242,242,1);
     border-right:1px solid rgba(204,204,204,1);
     overflow: auto;
@@ -46,9 +46,9 @@
 }
 .contentBox{
     width: 100%;
-    height: 800px;
+    height: 900px;
     margin: 0 auto;
-    overflow: auto;
+
 }
 .content{
     width: 500px;
@@ -56,7 +56,8 @@
 }
 .rightBox{
     flex: 1;
-    height: 100%;
+    height: 900px;
+    overflow: auto;
 }
 .tabar{
     width: 100%;
@@ -92,4 +93,86 @@
     position: absolute;
     top: -9px;
     right: 50px;
+}
+
+.page{
+    background: white;
+    color:#354052;
+    height: 100%;
+    overflow: auto;
+}
+.list{
+    height: 850px;
+    overflow: auto;
+}
+.draft{
+    width:450px;
+    height:331px;
+    display: inline-block;
+    cursor: pointer;
+    background:rgba(255,255,255,1);
+    border:1px solid rgba(204,204,204,1);
+    margin: 40px 40px 0 0;
+}
+.banner{
+    width:450px;
+    height:220px;
+}
+.info{
+    height: 111px;
+}
+.title{
+    font-size:18px;
+    font-family:SourceHanSansCN-Medium,SourceHanSansCN;
+    font-weight:600;
+    color:rgba(34,34,34,1);
+    margin: 10px;
+}
+.time{
+    display: flex;
+    justify-content: space-between;
+    font-size:14px;
+    font-family:SourceHanSansCN-Normal,SourceHanSansCN;
+    font-weight:400;
+    color:rgba(34,34,34,1);
+    
+}
+.btnGroup{
+    display: flex;
+    cursor: pointer;
+}
+
+.ctroller{
+    height: 48px;
+    margin-top: 40px;
+    display: flex;
+    position: relative;
+}
+.pagination{
+    position: absolute;
+    top: -9px;
+    right: 50px;
+}
+.likeItem{
+    display: flex;
+    align-items: center;
+    padding:20px; 
+}
+.titleCenter{
+    border-bottom: 1px solid #F2F2F2;
+    margin: 0 20px;
+    font-size: 14px;
+}
+.username{
+    display: flex;
+    align-items: center;
+}
+.title{
+    font-size:36px;
+    font-weight:500;
+    color:rgba(34,34,34,1);
+    line-height:44px;
+    background: #fff;
+    padding: 30px;
+    padding-bottom: 20px;
 }

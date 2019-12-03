@@ -10,8 +10,8 @@ import { rippleShow } from '../../utils/tools';
  */
 export class Login extends Widget {
     public props:any = {
-        name:'10002@5',
-        pwd:'10fWdX'
+        name:'10001@2',
+        pwd:'fXhmuD'
     };
 
     public nameChange(e:any) {
@@ -84,9 +84,10 @@ export class Login extends Widget {
 
             // 官方账号
             setStore('flags/auth',OFFICIAL);
-
+            setStore('flags/num',account[1]);
+            setStore('uid',account[0]);
         } else {
-
+            setStore('flags/num',0);
             if (/^[0-9]+$/.test(account[0])) {
                 // 好嗨客服
                 setStore('flags/auth',HAOHAICUSTOMERSERVICE);
@@ -132,6 +133,6 @@ export class Login extends Widget {
 
         // 进入管理端
         popNew('chat-management-view-base-home');
-
+        
     }
 }
