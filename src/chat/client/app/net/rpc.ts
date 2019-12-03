@@ -1034,24 +1034,21 @@ export const getAllGameList = () => {
 // 获取全部游戏详情
 export const getAllGameInfo = (ids:string) => {
     return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
-        return res.json().then(r => {
-            const res = r.app_details;
-            const gameList = [];
-            res.forEach(v => {
-                const name = unicode2ReadStr(v[0]);
-                const img = JSON.parse(v[1]);
-                const desc = JSON.parse(v[2]);
-                const url = v[3];
-                desc.desc = unicode2ReadStr(desc.desc);
-                desc.subtitle = unicode2ReadStr(desc.subtitle);
-                gameList.push({
-                    ...desc,
-                    title:name,
-                    subtitle:desc.subtitle,
-                    img:[img.icon,img.rowImg,img.colImg,img.downLoadImg],
-                    url,
-                    time:timestampFormat(JSON.parse(desc.time))
-                });
+        const gameList = [];
+        res.app_details.forEach(v => {
+            const name = unicode2ReadStr(v[0]);
+            const img = JSON.parse(v[1]);
+            const desc = JSON.parse(v[2]);
+            const url = v[3];
+            desc.desc = unicode2ReadStr(desc.desc);
+            desc.subtitle = unicode2ReadStr(desc.subtitle);
+            gameList.push({
+                ...desc,
+                title:name,
+                subtitle:desc.subtitle,
+                img:[img.icon,img.rowImg,img.colImg,img.downLoadImg],
+                url,
+                time:timestampFormat(JSON.parse(desc.time))
             });
         });
 

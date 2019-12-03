@@ -48,7 +48,6 @@ export const initAccount = () => {
             const userinfo  = object2Map(value.userInfoMap);
 
             store.setStore('userInfoMap', userinfo, false);
-            store.setStore('friendLinkMap', object2Map(value.friendLinkMap), false);
             const accIdToUid = store.getStore('accIdToUid',new Map());
             
             for (const key of Object.getOwnPropertyNames(userinfo)) {
@@ -129,8 +128,7 @@ export const userChatChange = () => {
 export const friendChange = () => {
     const id = store.getStore('uid');
     const value = {
-        friendLinkMap: store.getStore('friendLinkMap'), // 好友链接
-        userInfoMap: store.getStore('userInfoMap');  // 用户信息
+        userInfoMap: store.getStore('userInfoMap')  // 用户信息
     };
     writeFile(`${id}-userInfoMap`, value);
   

@@ -5,7 +5,7 @@ import { gotoSquare } from '../../../../../app/view/base/app';
 import { openGame } from '../../../../../app/view/play/home/gameConfig';
 import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getStore,PostItem, register } from '../../data/store';
+import { getStore,PostItem, register, setStore } from '../../data/store';
 import { buildupImgPath } from '../../logic/logic';
 import { gameLabelNum, postLaud, showPost } from '../../net/rpc';
 
