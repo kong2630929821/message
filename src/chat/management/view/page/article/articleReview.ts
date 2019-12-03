@@ -1,5 +1,6 @@
 import { popNew } from '../../../../../pi/ui/root';
 import { Widget } from '../../../../../pi/widget/widget';
+import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { perPage } from '../../../components/pagination';
 import { getAllPostList } from '../../../net/rpc';
 import { rippleShow } from '../../../utils/tools';
@@ -14,6 +15,7 @@ interface Props {
     activeData:any;// 右侧选中的文章
     dataList:any;// 全部文章
     active:number;// 左侧选中
+    buildupImgPath:any;// 图片路径
 }
 
 /**
@@ -38,7 +40,8 @@ export class ArticleReview extends Widget {
             title: ''
         },
         dataList:[],
-        active:0
+        active:0,
+        buildupImgPath:buildupImgPath
     };
 
     public create() {
@@ -96,7 +99,7 @@ export class ArticleReview extends Widget {
     // 点击审核
     public review(index:number) {
         const data = this.props.showDataList[index];
-        popNew('chat-management-components-modalBox',{ data },() => {
+        popNew('chat-management-components-modalBox',{ key:data.key,name:data.name,avatar:data.avatar,title:data.title },() => {
             this.initData(0,'');
             this.paint();
         });

@@ -1,14 +1,15 @@
-import { popNew3 } from '../../../../../app/utils/tools';
+import { copyToClipboard, popNew3 } from '../../../../../app/utils/tools';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
-import { REPORT_COMMENT } from '../../../../server/data/constant';
-import { getStore } from '../../data/store';
-import { buildupImgPath, complaintUser, copyToClipboard, timestampFormat } from '../../logic/logic';
-import { parseEmoji, popNewMessage } from '../../logic/tools';
-import { commentLaud, delComment } from '../../net/rpc';
+import { buildupImgPath, complaintUser } from '../../../../client/app/logic/logic';
+import { parseEmoji } from '../../../../client/app/logic/tools';
+import { commentLaud, delComment } from '../../../net/rpc';
+import { getStore } from '../../../store/memstore';
+import { popNewMessage, timestampFormat } from '../../../utils/logic';
 
 interface Props {
+    imgPc: string; // pc上的图片评论地址
     key:any;  // 帖子评论的key
     username:string;   // 评论用户
     avatar:string;
@@ -25,9 +26,10 @@ interface Props {
     gender: number;  // 性别 0 男 1 女
     owner:number; // 评论者的uid
     isMine:boolean;  // 是否本人
-    timeFormat:any; // 时间处理
+    timeFormat:Function; // 时间处理
     orgImg:string;// 原评论图片
     orgIcon:string;// 原评论图片缩略图
+    buildupImgPath:Function; // 解析图片地址
 }
 
 /**
@@ -57,7 +59,9 @@ export class CommentItem extends Widget {
         isMine:false,
         timeFormat:timestampFormat,
         orgImg:'',
-        orgIcon:''
+        orgIcon:'',
+        buildupImgPath:buildupImgPath,
+        imgPc:''
     };
 
     public setProps(props:any) {
@@ -68,7 +72,15 @@ export class CommentItem extends Widget {
         super.setProps(this.props);
         const val = props.msg ? JSON.parse(props.msg) :{ msg:'',img:'' };
         this.props.mess = parseEmoji(val.msg);
-        this.props.img = val.img.length ? buildupImgPath(val.img[0].originalImg) :'';
+        if (val.img instanceof Array) {
+            this.props.img = val.img.length ? buildupImgPath(val.img[0].compressImg) :'';
+        } else {
+            this.props.img = val.img;
+        }
+        
+        // this.props.img = val.img ? val.img :'';
+        // this.props.img = buildupImgPath(val.img);
+        console.log(this.props.img);
         this.props.imgIcon = val.img.length ? buildupImgPath(val.img[0].compressImg) :'';
         this.props.isMine = this.props.owner === getStore('uid',0);
         this.props.avatar = buildupImgPath(props.avatar);
@@ -80,7 +92,10 @@ export class CommentItem extends Widget {
             this.props.orgIcon = val.img.length ? buildupImgPath(val.img[0].compressImg) :'';
         }
     }
-
+    public create() {
+        super.create();
+        this.props.showUtils = false;
+    }
     /**
      * 展示操作
      */
@@ -109,7 +124,7 @@ export class CommentItem extends Widget {
      */
     public replyComment(e:any) {
         this.closeUtils(e);
-        popNew('chat-client-app-view-info-editComment',{ ...this.props,title:'回复',orgId:true },(r) => {
+        popNew('chat-management-components-replyCommet',{ ...this.props,title:JSON.parse(this.props.msg).msg,orgId:true,key:this.props.key },(r) => {
             notify(e.node,'ev-comment-reply',{ ...this.props,key:r.key, value:r.value });
         });
     }
@@ -119,7 +134,7 @@ export class CommentItem extends Widget {
      */
     public delComment(e:any) {
         this.closeUtils(e);
-        popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title:'删除评论',content:'删除评论后，评论下所有的回复都会被删除。' },() => {
+        popModalBoxs('chat-management-components-confirmBox', { title:'删除评论',prompt:'删除评论后，评论下所有的回复都会被删除。',invalid: -1 },() => {
             delComment(this.props.key.num,this.props.key.post_id,this.props.key.id).then(r => {
                 notify(e.node,'ev-comment-delete',{ key:this.props.key });
             });
@@ -136,16 +151,6 @@ export class CommentItem extends Widget {
         const val = this.props.msg ? JSON.parse(this.props.msg) :{ msg:'',img:'' };  
         copyToClipboard(val.msg);
         popNewMessage('复制成功');
-    }
-
-    /**
-     * 举报
-     */
-    public complaint(e:any) {
-        this.closeUtils(e);
-        const avatar = this.props.avatar ? buildupImgPath(this.props.avatar) :'../../res/images/user_avatar.png';
-        const key = `${REPORT_COMMENT}%${JSON.stringify(this.props.key)}`;
-        complaintUser(`${this.props.username} 的内容`,this.props.gender,avatar,JSON.parse(this.props.msg).msg,REPORT_COMMENT,key,this.props.owner,'');
     }
 
     // 关闭操作列表

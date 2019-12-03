@@ -26,11 +26,11 @@
                         <div w-class="gameName">{{it.gameLabel.name}}</div>
                         <div w-class="postNum">帖子 {{it.gameLabel.num}}</div>
                         <div w-class="gotoGame">
-                            <div w-class="gameHaihai">
+                            <div w-class="gameHaihai" style="display: none; margin-left:30px;">
                                 官方嗨嗨号
                                 <img src="../../res/images/whiteRight.png" alt="" w-class="rightIcon"/>
                             </div>
-                            <div w-class="gameHaihai" style="margin-left:30px;" on-tap="goGame">
+                            <div w-class="gameHaihai" on-tap="goGame">
                                 玩游戏
                                 <img src="../../res/images/whiteRight.png" alt="" w-class="rightIcon"/>
                             </div>
@@ -43,7 +43,7 @@
         {{for i,v of it.postView[it.active][1].postList}}
         <div ev-goDetail="goDetail({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-closeTools="pageClick">
             {{if v.isPublic}}
-            <widget w-tag="chat-client-app-view-home-pubPostItem">{{v}}</widget>
+            <widget w-tag="chat-client-app-view-home-pubPostItem">{{it.dealData(v,it.postView[it.active][1].expandItem == i)}}</widget>
             {{else}}
             <div ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})" ev-delBtn="delPost({{i}})">
                 <widget w-tag="chat-client-app-view-home-squareItem">{{it.dealData(v,it.postView[it.active][1].expandItem == i)}}</widget>

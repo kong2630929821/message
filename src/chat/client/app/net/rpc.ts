@@ -1057,10 +1057,9 @@ export const getAllGameList = () => {
 
 // 获取全部游戏详情
 export const getAllGameInfo = (ids:string) => {
-    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(r => {
-        const res = r.app_details;
+    return piFetch(`http://${erlangLogicIp}:8099/oAuth/get_app_detail?app_ids=${ids}`).then(res => {
         const gameList = [];
-        res.forEach(v => {
+        res.app_details.forEach(v => {
             const name = unicode2ReadStr(v[0]);
             const img = JSON.parse(v[1]);
             const desc = JSON.parse(v[2]);
@@ -1079,5 +1078,4 @@ export const getAllGameInfo = (ids:string) => {
 
         return gameList;
     });
-
 };

@@ -517,7 +517,7 @@ export const getUserPostHandle = (arg: IterPostArg, postType: number): PostArrWi
     let count = 0;
     for (let i = 0; i < post_id_list.length; i++) {
         if (count >= arg.count) break;
-        const postData = getPostInfoById(post_id_list[i]);
+        const postData = getPostInfoById(post_id_list[i], false);
         if (!postData) continue;
         postArrWithTotal.list.push(postData);
         count ++;
@@ -561,42 +561,6 @@ export const delCommentPost = (arg: CommentKey): number => {
     const uid = getUid();
 
     return delComment(uid, arg, false);
-};
-
-/**
- * 删除评论
- */
-export const delComment = (uid: number, arg: CommentKey, mgr: Boolean): number => {
-    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
-    const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
-    const comment = commentBucket.get(arg)[0];
-    // 检查评论是否存在
-    if (!comment) {
-        return COMMENT_NOT_EXIST;
-    }
-    // 不能删除其他人发的评论
-    if (uid !== comment.owner && mgr !== true) { 
-        return CANT_DETETE_OTHERS_COMMENT;
-    }
-    const postkey = new PostKey();
-    postkey.id = arg.post_id;
-    postkey.num = arg.num;
-    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
-    // 从用户评论列表中删除uid
-    const index = postCount.commentList.indexOf(arg.id);
-    if (index >= 0) postCount.commentList.splice(index, 1);
-    // 添加评论计数
-    if (!postCountBucket.put(postkey, postCount)) {
-        
-        return DB_ERROR;
-    }
-    // 删除评论记录
-    // if (!commentBucket.delete(arg)) {
-       
-    //     return DB_ERROR;
-    // }
-    
-    return CONSTANT.RESULT_SUCCESS;
 };
 
 /**
@@ -1367,6 +1331,7 @@ export const getFollowUserPost = (arg: IterPostArg) :PostArr => {
 /**
  *  获取关注公众号的帖子
  */
+// #[rpc=rpcServer]
 export const getFollowPublicPost = (arg: IterPostArg) :PostArr => {
     const uid = getUid();
     // 获取关注的公众号
@@ -1570,13 +1535,13 @@ export const getPostInfo = (postKey: PostKey, post: Post): PostData => {
  * 获取指定社区账户帖子信息
  * @ param postKey
  */
-export const getPostInfoById = (postKey: PostKey): PostData => {
+export const getPostInfoById = (postKey: PostKey, fDel: Boolean = true): PostData => {
     const postBucket = new Bucket(CONSTANT.WARE_NAME, Post._$info.name);
     const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
     const communityBaseBucket = new Bucket(CONSTANT.WARE_NAME,CommunityBase._$info.name);
     const post = postBucket.get<PostKey, Post[]>(postKey)[0];
     if (!post) return;
-    if (post.state !== CONSTANT.NORMAL_STATE) return; // 帖子已删除
+    if (post.state !== CONSTANT.NORMAL_STATE && fDel) return; // 帖子已删除
     const user = new GetUserInfoReq();
     user.uids = [post.owner];
     const userinfo:UserInfo = getUsersInfo(user).arr[0];  // 用户信息
@@ -1722,4 +1687,40 @@ const getLable = (p, str: string):string[] =>  {
     } while (i > 0);
 
     return vList;
+};
+
+/**
+ * 删除评论
+ */
+export const delComment = (uid: number, arg: CommentKey, mgr: Boolean = false): number => {
+    const postCountBucket = new Bucket(CONSTANT.WARE_NAME, PostCount._$info.name);
+    const commentBucket = new Bucket(CONSTANT.WARE_NAME, Comment._$info.name);
+    const comment = commentBucket.get(arg)[0];
+    // 检查评论是否存在
+    if (!comment) {
+        return COMMENT_NOT_EXIST;
+    }
+    // 不能删除其他人发的评论
+    if (uid !== comment.owner && mgr !== true) { 
+        return CANT_DETETE_OTHERS_COMMENT;
+    }
+    const postkey = new PostKey();
+    postkey.id = arg.post_id;
+    postkey.num = arg.num;
+    const postCount:PostCount = postCountBucket.get<PostKey, PostCount>(postkey)[0];
+    // 从用户评论列表中删除uid
+    const index = postCount.commentList.indexOf(arg.id);
+    if (index >= 0) postCount.commentList.splice(index, 1);
+    // 添加评论计数
+    if (!postCountBucket.put(postkey, postCount)) {
+        
+        return DB_ERROR;
+    }
+    // 删除评论记录
+    // if (!commentBucket.delete(arg)) {
+       
+    //     return DB_ERROR;
+    // }
+    
+    return CONSTANT.RESULT_SUCCESS;
 };

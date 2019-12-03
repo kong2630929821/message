@@ -9,7 +9,7 @@
                     </div>
                     <div w-class="titleBox">
                         <div w-class="userInfo">
-                            <img src="{{v.avatar?v.avatar:'../../res/images/avatar1.png'}}" alt="" w-class="avatar"/>
+                            <img src="{{v.avatar?v.avatar:'../../../res/images/avatar1.png'}}" alt="" w-class="avatar"/>
                             <div w-class="userName">{{v.name}}</div>
                         </div>
                         <div w-class="userName">提交时间：{{v.createtime}}</div>
@@ -31,7 +31,7 @@
             </div>
             <div w-class="titleBox">
                 <div w-class="userInfo">
-                    <img src="{{it.activeData.avatar?it.activeData.avatar:'../../res/images/avatar1.png'}}" alt="" w-class="avatar"/>
+                    <img src="{{it.activeData.avatar?it.activeData.avatar:'../../../res/images/avatar1.png'}}" alt="" w-class="avatar"/>
                     <div w-class="userName">{{it.activeData.name}}</div>
                 </div>
                 <div w-class="userName">提交时间：{{it.activeData.createtime}}</div>
@@ -39,6 +39,7 @@
         </div>
         <div w-class="articleContent">
             <div>
+                <img src="{{it.buildupImgPath(it.activeData.banner)}}" alt=""/>
                 <widget w-tag="pi-ui-html">{{it.activeData.body}}</widget>
             </div>
         </div>
