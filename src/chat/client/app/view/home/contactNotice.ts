@@ -48,7 +48,8 @@ export class ContactNotice extends Widget {
     }
 }
 
-store.register(`lastChat`, (r: [number, number][]) => {
+store.register(`lastChat`, (r) => {
+    console.log('lastChat: ',r);
     STATE.lastChat = r;
     forelet.paint(STATE);
 });

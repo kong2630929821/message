@@ -69,7 +69,7 @@ export const json2Map = (data:JSON) => {
  * 获取关注用户的别名
  */
 export const getUserAlias = (rid:number) => {
-    const user = store.getStore(`userInfoMap/${rid}`,new UserInfo());    
+    const user = store.getStore(`userInfoMap/${rid}`,{ name:'' });    
 
     return user.name;
 };

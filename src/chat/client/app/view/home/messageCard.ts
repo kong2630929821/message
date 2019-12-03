@@ -8,9 +8,9 @@ import { GroupMsg, MSG_TYPE, UserMsg } from '../../../../server/data/db/message.
 import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
 import { setData } from '../../../../server/data/rpc/basic.p';
 import { UserArray } from '../../../../server/data/rpc/basic.s';
-import { depCopy, genGroupHid, genUserHid, genUuid, getIndexFromHIncId  } from '../../../../utils/util';
+import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId  } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getUserAlias, getGroupAvatar, getMessageIndex, getUserAvatar, NOTICESET, timestampFormat } from '../../logic/logic';
+import { getGroupAvatar, getMessageIndex, getUserAlias, getUserAvatar, NOTICESET, timestampFormat } from '../../logic/logic';
 import { clientRpcFunc } from '../../net/init';
 import { getUsersBasicInfo } from '../../net/rpc';
 // ================================================ 导出
@@ -80,7 +80,7 @@ export class MessageCard extends Widget {
                 this.props.lastMessage = hincId ? store.getStore(`groupHistoryMap/${hincId}`,'') : new GroupMsg();
     
             } else {// 单聊
-                this.props.name = getUserAlias(this.props.rid).name;
+                this.props.name = getUserAlias(this.props.rid);
                 if (!this.props.name) {  // 获取不到用户名
                     getUsersBasicInfo([this.props.rid]).then((r: UserArray) => {
                         this.props.name = r.arr[0].name;

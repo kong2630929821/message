@@ -13,27 +13,6 @@ export const initAccount = () => {
     const sid = store.getStore('uid');
     initFileStore().then(() => {
         if (!sid) return;
-        // 最近会话列表
-        getFile(`${sid}-lastChat`, (value) => {
-            if (!value) return;
-            store.setStore('lastChat', value || []);
-        },() => {
-            console.log('read lastChat error');
-        });
-        // 已读消息记录
-        getFile(`${sid}-lastRead`, (value) => {
-            if (!value) return;
-            store.setStore('lastRead', value || new Map());
-        },() => {
-            console.log('read lastRead error');
-        });
-        // 额外设置信息
-        getFile(`${sid}-setting`, (value) => {
-            if (!value) return;
-            store.setStore('setting', value || null);
-        }, () => {
-            console.log('read setting error');
-        });
         // 单聊历史记录
         getFile(`${sid}-userChatMap`, (value) => {
             if (!value) return;
@@ -48,7 +27,6 @@ export const initAccount = () => {
             const userinfo  = object2Map(value.userInfoMap);
 
             store.setStore('userInfoMap', userinfo, false);
-            store.setStore('friendLinkMap', object2Map(value.friendLinkMap), false);
             const accIdToUid = store.getStore('accIdToUid',new Map());
             
             for (const key of Object.getOwnPropertyNames(userinfo)) {
@@ -75,12 +53,34 @@ export const initAccount = () => {
         },() => {
             console.log('read groupUserLinkMap error');
         });
+
+        // 最近会话列表
+        getFile(`${sid}-lastChat`, (value) => {
+            if (!value) return;
+            store.setStore('lastChat', value || []);
+        },() => {
+            console.log('read lastChat error');
+        });
+        // 已读消息记录
+        getFile(`${sid}-lastRead`, (value) => {
+            if (!value) return;
+            store.setStore('lastRead', value || new Map());
+        },() => {
+            console.log('read lastRead error');
+        });
         // 已读消息通知
         getFile(`${sid}-lastReadNotice`, (value) => {
             if (!value) return;
             store.setStore('lastReadNotice', value);
         },() => {
             console.log('read lastReadNotice error');
+        });
+        // 额外设置信息
+        getFile(`${sid}-setting`, (value) => {
+            if (!value) return;
+            store.setStore('setting', value || null);
+        }, () => {
+            console.log('read setting error');
         });
         // 评论消息列表
         getFile(`${sid}-conmentList`, (value) => {
@@ -89,7 +89,7 @@ export const initAccount = () => {
         },() => {
             console.log('read conmentList error');
         });
-          // 点赞消息列表
+        // 点赞消息列表
         getFile(`${sid}-fabulousList`, (value) => {
             if (!value) return;
             store.setStore('fabulousList', value);
@@ -129,8 +129,7 @@ export const userChatChange = () => {
 export const friendChange = () => {
     const id = store.getStore('uid');
     const value = {
-        friendLinkMap: store.getStore('friendLinkMap'), // 好友链接
-        userInfoMap: store.getStore('userInfoMap');  // 用户信息
+        userInfoMap: store.getStore('userInfoMap')  // 用户信息
     };
     writeFile(`${id}-userInfoMap`, value);
   

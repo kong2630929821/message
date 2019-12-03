@@ -3,12 +3,10 @@
         <chat-client-app-widget1-topBar-topBar>{title:"群成员"}</chat-client-app-widget1-topBar-topBar>
     </div>
     <div w-class="content">
-        {{for i,v of it.groupInfo.memberids}}
-            {{if v !== it.groupInfo.ownerid && it.groupInfo.adminids.indexOf(v) === -1}}
-            <div on-tap="goDetail({{v}})">
-                <widget w-tag="chat-client-app-widget-userItem-userItem">{data:{{v}},status:1}</widget>
+        {{for i,v of it.groupUserData}}
+            <div ev-goDetail-user="goDetail" ev-remove-user="removeMember">
+                <widget w-tag="chat-client-app-view-person-followItem">{data:{{v}}, status:2 }</widget>
             </div>
-            {{end}}
         {{end}}
 
     </div>

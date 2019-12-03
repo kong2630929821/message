@@ -1,16 +1,22 @@
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { popNew } from '../../../../../pi/ui/root';
+import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
-import { getStore } from '../../data/store';
-import { getUserInfoByNum } from '../../net/rpc';
+import { CommUserInfo } from '../../../../server/data/rpc/community.s';
+import { removeFromBlackList } from '../../../../server/data/rpc/user.p';
+import { getStore, register } from '../../data/store';
+import { clientRpcFunc } from '../../net/init';
+import { getUserInfoByNum, getUserInfoByUid } from '../../net/rpc';
+
+export const forelet = new Forelet();
 
 interface Props {
     uid:number;
     num:string;
     activeTab:number;
     followData:any[];  // 关注用户信息
-    fansData:any[];   // 粉丝用户信息
-    groupList:string[]; // 群组
-    blackList:any[];// 黑名单
+    fansData:any[];    // 粉丝用户信息
+    blackList:any[];   // 黑名单
 }
 
 /**
@@ -18,13 +24,13 @@ interface Props {
  */
 export class AddressBook extends Widget {
     public ok:() => void;
+    public state:number[] = [];  // 群组列表
     public props:Props = {
         uid:0,
         num:'',
         activeTab:0,
         followData:[],
         fansData:[],
-        groupList:[],
         blackList:[]
     };
 
@@ -32,44 +38,35 @@ export class AddressBook extends Widget {
         super.create();
         const sid = getStore('uid');
         const userinfo = getStore(`userInfoMap/${sid}`, {});
-        const numsList = getStore(`followNumList/${sid}`,{ person_list:[],public_list:[]  });
+        const numsList = getStore(`followNumList/${sid}`,{ person_list:[] });
         const fansList = getStore(`fansNumList/${userinfo.comm_num}`,{ list:[] });
+        const contact = getStore(`contactMap/${sid}`,{ blackList:[],group:[] });
+        
+        // 群组列表
+        this.state = contact.group;
         
         // 获取关注列表
-        getUserInfoByNum(numsList.person_list).then((r:any[]) => {
-            this.props.followData = r.filter(v => v.comm_info.num !== userinfo.comm_num);
+        getUserInfoByNum(numsList.person_list).then((res:CommUserInfo[]) => {
+            this.props.followData = res;
             this.paint();
         }).catch(err => {
-            // 
+            console.log('获取关注列表失败：',err);
         });
 
         // 获取粉丝列表
-        getUserInfoByNum(fansList.list).then((res:string[]) => {
+        getUserInfoByNum(fansList.list).then((res:CommUserInfo[]) => {
             this.props.fansData = res;  // 粉丝
             this.paint();
         }).catch(err => {
-            // 
+            console.log('获取粉丝列表失败：',err);
         });
 
-        const contact = getStore(`contactMap/${sid}`,{ blackList:[],group:[] });
-        this.props.groupList = contact.group;
         // 获取黑名单数据
-        const blackList = contact.blackList;
-        blackList.forEach(v => {
-            const user = getStore(`userInfoMap/${v}`, {});
-            this.props.blackList.push({
-                user_info:{
-                    uid:user.uid,
-                    avatar:user.avatar,
-                    name:user.name,
-                    desc:user.note || '没有简介',
-                    sex:user.gender   // 性别 0男 1女
-                },
-                comm_info:{
-                    num:'',
-                    comm_type:1
-                }
-            });
+        getUserInfoByUid(contact.blackList).then((res:CommUserInfo[]) => {
+            this.props.blackList = res;  // 粉丝
+            this.paint();
+        }).catch(err => {
+            console.log('获取黑名单列表失败：',err);
         });
     }
 
@@ -86,4 +83,26 @@ export class AddressBook extends Widget {
         popNew('chat-client-app-view-group-setGroupChat');
     }
 
+    // 将用户移出黑名单
+    public removeUser(e:any) {
+        if (!e.value) return;
+        clientRpcFunc(removeFromBlackList, e.value, (res) => {
+            console.log('removeUser',res);
+            if (res && res.r === 1) {
+                const index = this.props.blackList.findIndex(v => v.user_info.uid === e.value);
+                if (index >= 0) {
+                    this.props.blackList.splice(index,1);
+                    this.paint();
+                }
+                popNewMessage('移出黑名单');
+            }
+        });
+    }
+    
 }
+
+register('contactMap', r => {
+    for (const value of r.values()) {
+        forelet.paint(value.group);
+    }
+});

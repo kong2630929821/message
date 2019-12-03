@@ -8,7 +8,7 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { genGuid } from '../../../../utils/util';
 import * as store from '../../data/store';
-import { getUserAlias, getGroupUserAvatar, getUserAvatar } from '../../logic/logic';
+import { getGroupUserAvatar, getUserAlias, getUserAvatar } from '../../logic/logic';
 
 // ================================================ 导出
 export class SelectUser extends Widget {
@@ -28,7 +28,7 @@ export class SelectUser extends Widget {
         this.props.chatType = props.chatType;
         if (this.props.chatType === GENERATOR_TYPE.USER) {
             // 好友别名
-            this.props.name = getUserAlias(this.props.id).name;
+            this.props.name = getUserAlias(this.props.id);
             this.props.avatar = getUserAvatar(this.props.id);
         }
         if (this.props.chatType === GENERATOR_TYPE.GROUP) {

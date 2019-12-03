@@ -7,13 +7,15 @@
         <chat-client-app-widget1-input-input>{placeHolder : "搜索成员",style : "font-size:32px;color:#ccc;padding-left:82px;"}</chat-client-app-widget1-input-input>
         <img w-class="searchIcon" src="../../res/images/search-gray.png" />
     </div>
-    <div w-class="a-part" ev-changeSelect="changeSelect">
-        <div w-class="a">a</div>
-        {{for index,item of normalPersons}}
-        <div ev-addMember="addAdminMember">
-            <chat-client-app-widget-selectUser-selectUser>{id:{{item}}, chatType: "group",gid:{{it.gid}} }</chat-client-app-widget-selectUser-selectUser>
+    <div w-class="userList">
+        <div w-class="a">
+            {{for index,item of normalPersons}}
+            <div ev-addMember="addAdminMember">
+                <chat-client-app-widget-selectUser-selectUser>{id:{{item}}, chatType: "group",gid:{{it.gid}} }</chat-client-app-widget-selectUser-selectUser>
+            </div>
+            {{end}}
         </div>
-        {{end}}
+
     </div>
 </div>
 

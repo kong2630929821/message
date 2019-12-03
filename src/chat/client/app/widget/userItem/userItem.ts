@@ -34,7 +34,7 @@ export class UserItem extends Widget {
         if (!this.props.text) {
             if (this.props.chatType === GENERATOR_TYPE.USER) {
                 if (this.props.id !== store.getStore('uid')) {
-                    this.props.name = getUserAlias(this.props.id).name;
+                    this.props.name = getUserAlias(this.props.id);
                     if (!this.props.name) { 
                         getUsersBasicInfo([this.props.id]).then((r:any) => {
                             store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);

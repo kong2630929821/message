@@ -3,7 +3,7 @@
  */
 
 // ================================================ 导入
-import { popNewMessage } from '../../../../../app/utils/tools';
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { Json } from '../../../../../pi/lang/type';
 import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { Forelet } from '../../../../../pi/widget/forelet';

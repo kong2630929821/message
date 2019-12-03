@@ -43,7 +43,7 @@ export const setStore = (path: string, data: any, notified = true) => {
         for (let i = 0; i < args[0].length; i++) {
             returnValue = returnValue[args[0][i]];
         }
-        
+
         return returnValue;
     };
     const keyArr = path.split('/');
@@ -66,19 +66,19 @@ export const setStore = (path: string, data: any, notified = true) => {
         parent.set(lastKey, data);
     } else {
         parent[lastKey] = data;
-    }    
+    }
     /**
      * 写的不好，只能支持普通json和最后一层为map的情况，不支持map嵌套
      */
     if (notified) {
         handlerMap.notify(path, data);
-        path = path.substring(0,path.lastIndexOf('/'));
+        path = path.substring(0, path.lastIndexOf('/'));
         while (path.length > 0) {
             handlerMap.notify(path, path2value(path.split('/')));
-            path = path.substring(0,path.lastIndexOf('/'));
-        }        
+            path = path.substring(0, path.lastIndexOf('/'));
+        }
     }
-    
+
 };
 
 /**
@@ -99,7 +99,7 @@ export const unregister = (keyName: string, cb: Function): void => {
     handlerMap.remove(keyName, <any>cb);
 };
 
-export const tagListStore = ['广场','关注'];
+export const tagListStore = ['广场', '关注'];
 const GameList = [{
     accId: '268828',
     apkDownloadUrl: 'http://39.98.200.23/browser/phoneRedEnvelope/download.html?0.11389282017378854',
@@ -114,7 +114,7 @@ const GameList = [{
     url: 'http://gcydzm.17youx.cn:6888/client/boot/haohai.html',
     usePi: true,
     webviewName: 'chairMan'
-},{
+}, {
     accId: '268828',
     apkDownloadUrl: 'http://39.98.200.23/browser/phoneRedEnvelope/download.html?0.11389282017378854',
     appid: '102',
@@ -140,46 +140,46 @@ const GameList = [{
 export const initStore = () => {
     registerDataChange();
     store = {
-        uid:0,
+        uid: 0,
         readGroupTimeMap: new Map(),
         groupInfoMap: new Map(),
         groupUserLinkMap: new Map(),
-        userHistoryMap:new Map(),
+        userHistoryMap: new Map(),
         groupHistoryMap: new Map(),
         announceHistoryMap: new Map(),
         userInfoMap: new Map(),
         contactMap: new Map(),
-        userChatMap:new Map(),
-        groupChatMap:new Map(),
-        lastRead:new Map(),
-        communityInfoMap:new Map(),
-        lastChat:[],
-        setting:{
-            msgTop:[],
-            msgAvoid:[]
+        userChatMap: new Map(),
+        groupChatMap: new Map(),
+        lastRead: new Map(),
+        communityInfoMap: new Map(),
+        lastChat: [],
+        setting: {
+            msgTop: [],
+            msgAvoid: []
         },
-        isLogin:true,
-        offLine:false,
-        flags:{},
+        isLogin: true,
+        offLine: false,
+        flags: {},
         postReturn: {
-            id:-1,
-            num:'',
-            tagType:-1,
-            postList:[]
+            id: -1,
+            num: '',
+            tagType: -1,
+            postList: []
         },
-        tagList: tagListStore.concat(['一代掌门','仙之侠道']),
-        followNumList:new Map(),
-        fansNumList:new Map(),
-        laudPostList:new Map(),
-        pubNum:0,
-        noticeList:[],
-        lastReadNotice:[],
-        conmentList:[],
-        fabulousList:[],
-        messageData: [[],[],[],[]],
-        accIdToUid:new Map(),
-        originalImage:new Map(),
-        gameList:GameList
+        tagList: tagListStore.concat(['一代掌门', '仙之侠道']),
+        followNumList: new Map(),
+        fansNumList: new Map(),
+        laudPostList: new Map(),
+        pubNum: 0,
+        noticeList: [],
+        lastReadNotice: [],
+        conmentList: [],
+        fabulousList: [],
+        messageData: [[], [], [], []],
+        accIdToUid: new Map(),
+        originalImage: new Map(),
+        gameList: GameList
     };
 };
 
@@ -187,60 +187,60 @@ export const initStore = () => {
  * 注册监听事件
  */
 const registerDataChange = () => {
-    register('uid',() => {
+    register('uid', () => {
         initAccount(); // 登陆成功后更新当前用户的历史数据
     });
 
-    register('userChatMap',() => {
+    register('userChatMap', () => {
         userChatChange();  // 新的聊天数据
     });
 
-    register('userHistoryMap',() => {
+    register('userHistoryMap', () => {
         userChatChange();  // 新的聊天数据
     });
-    
-    register('userInfoMap',() => {
+
+    register('userInfoMap', () => {
         friendChange();  // 好友数据更新
     });
 
-    register('groupChatMap',() => {
+    register('groupChatMap', () => {
         groupChatChange();  // 群组聊天数据更新
     });
 
-    register('groupHistoryMap',() => {
+    register('groupHistoryMap', () => {
         groupChatChange();  // 群组聊天数据更新
     });
 
-    register('groupUserLinkMap',() => {
+    register('groupUserLinkMap', () => {
         groupUserLinkChange();  // 群组用户数据更新
     });
 
-    register('groupInfoMap',() => {
+    register('groupInfoMap', () => {
         groupUserLinkChange();  // 群组信息更新
     });
 
-    register('lastChat',() => {
+    register('lastChat', () => {
         lastChatChange(); // 最近会话更新
     });
-    register('lastRead',() => {
+    register('lastRead', () => {
         lastReadChange(); // 已读消息游标更新
     });
-    register('setting',() => {
+    register('setting', () => {
         settingChange();  // 消息免打扰，消息置顶等设置
     });
-    register('flags/noGroupRemind',(r) => { // 不再提醒加群
+    register('flags/noGroupRemind', (r) => { // 不再提醒加群
         flagsChange();
     });
-    register('lastReadNotice',() => {
+    register('lastReadNotice', () => {
         lastReadNotice();// 已读通知游标更新
     });
-    register('conmentList',() => {
+    register('conmentList', () => {
         conmentListChange();// 评论消息更新
     });
-    register('fabulousList',() => {
+    register('fabulousList', () => {
         fabulousListChange();// 点赞消息更新
     });
-    
+
 };
 
 // enum POST_TYPE  {
@@ -249,8 +249,8 @@ const registerDataChange = () => {
 // }
 
 interface PostKey {
-    id:number;
-    num:string;
+    id: number;
+    num: string;
 }
 
 // 帖子内容
@@ -265,8 +265,8 @@ export interface PostItem {
     forwardCount: number;
     gender: number; // 性别 0 男 1 女
     imgs: {
-        compressImg:string;
-        originalImg:string;
+        compressImg: string;
+        originalImg: string;
     }[];// 图片列表
     isPublic: boolean;
     key: PostKey; // 帖子ID及社区编号
@@ -278,30 +278,30 @@ export interface PostItem {
     state: number;
     title: string;
     username: string;// 用户名
-    followed:boolean;// 是否关注
+    followed: boolean;// 是否关注
 }
 
 interface GameItem {
-    usePi:boolean;
-    title:string;// 游戏名
-    desc:string;// 游戏描述
-    img:string[];// 游戏图片
-    url:string;// 游戏路径
-    apkDownloadUrl:string;
-    webviewName:string;
-    buttonMod:number;   // 当前按钮模式
-    accId:string;
-    groupId:number;
-    appid:string;
-    screenMode:string;// 横屏
-    htmlUrl:string;
+    usePi: boolean;
+    title: string;// 游戏名
+    desc: string;// 游戏描述
+    img: string[];// 游戏图片
+    url: string;// 游戏路径
+    apkDownloadUrl: string;
+    webviewName: string;
+    buttonMod: number;   // 当前按钮模式
+    accId: string;
+    groupId: number;
+    appid: string;
+    screenMode: string;// 横屏
+    htmlUrl: string;
 }
 
 /**
  * Store的声明
  */
 export interface Store {
-    uid:number;
+    uid: number;
     readGroupTimeMap: Map<number, number>;// gid,time
     groupInfoMap: Map<number, GroupInfo>;// gid
     groupUserLinkMap: Map<string, GroupUserLink>;// guid
@@ -310,34 +310,34 @@ export interface Store {
     announceHistoryMap: Map<string, AnnounceHistory>;// aidinc
     userInfoMap: Map<number, UserInfo>;// uid
     contactMap: Map<number, Contact>;// uid
-    userChatMap:Map<string, string[]>;// hid,hidinc,递增存储
-    groupChatMap:Map<string, string[]>;// hid,hidinc
-    communityInfoMap:Map<string,CommunityBase>; // num 公众号信息
-    lastChat:[number,number,GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
-    lastRead:Map<string,LastReadMsgId>;// hid
-    setting:object; // 额外设置，免打扰|置顶
-    isLogin:boolean; // 是否登陆成功
-    offLine:boolean; // 是否离线
-    flags:object; // 标记信息
+    userChatMap: Map<string, string[]>;// hid,hidinc,递增存储
+    groupChatMap: Map<string, string[]>;// hid,hidinc
+    communityInfoMap: Map<string, CommunityBase>; // num 公众号信息
+    lastChat: [number, number, GENERATOR_TYPE][];// gid|uid,time,前端自己生产的数组，每条信息都需要更新该表
+    lastRead: Map<string, LastReadMsgId>;// hid
+    setting: object; // 额外设置，免打扰|置顶
+    isLogin: boolean; // 是否登陆成功
+    offLine: boolean; // 是否离线
+    flags: object; // 标记信息
     postReturn: {  // 广场帖子  
-        id:number;
-        num:string;
-        tagType:number;
-        postList:PostItem[];
-    };  
-    tagList:string[];// tag名字
-    followNumList:Map<number,AttentionIndex>; // uid 关注的社区账号
-    fansNumList:Map<string,FansIndex>; // num 粉丝社区账号
-    laudPostList:Map<number,LaudPostIndex>;  // 点赞帖子记录
-    noticeList:object;// 消息列表
-    lastReadNotice:object;// 已读消息
-    pubNum:number;  // 公众号ID
-    conmentList:object;// 评论消息列表
-    fabulousList:object;// 点赞消息列表
-    messageData:object;// 消息通知列表
-    accIdToUid:Map<string,number>;// accID转uid
-    originalImage:Map<number,boolean>;// 原图查看记录
-    gameList:GameItem[];// 游戏列表
+        id: number;
+        num: string;
+        tagType: number;
+        postList: PostItem[];
+    };
+    tagList: string[];// tag名字
+    followNumList: Map<number, AttentionIndex>; // uid 关注的社区账号
+    fansNumList: Map<string, FansIndex>; // num 粉丝社区账号
+    laudPostList: Map<number, LaudPostIndex>;  // 点赞帖子记录
+    noticeList: object;// 消息列表
+    lastReadNotice: object;// 已读消息
+    pubNum: number;  // 公众号ID
+    conmentList: object;// 评论消息列表
+    fabulousList: object;// 点赞消息列表
+    messageData: object;// 消息通知列表
+    accIdToUid: Map<string, number>;// accID转uid
+    originalImage: Map<number, boolean>;// 原图查看记录
+    gameList: GameItem[];// 游戏列表
 }
 
 /**
@@ -349,14 +349,14 @@ export interface LastReadMsgId {
 }
 // ============================================ 本地
 
-let store:Store;
+let store: Store;
 // ============================================ 可执行
 const handlerMap: HandlerMap = new HandlerMap();
 initStore();
 
 export enum GENERATORTYPE {
-    NOTICE_1= 'invite',
-    NOTICE_2= 'beInvited',
-    NOTICE_3= 'fabulous',
-    NOTICE_4= 'comment'
+    NOTICE_1 = 'invite',
+    NOTICE_2 = 'beInvited',
+    NOTICE_3 = 'fabulous',
+    NOTICE_4 = 'comment'
 }

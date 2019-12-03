@@ -10,7 +10,7 @@ import { FriendAlias } from '../../../../server/data/rpc/user.s';
 import { genUserHid } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
 import * as store from '../../data/store';
-import { buildupImgPath, complaintUser, getUserAlias,  getUserAvatar, NOTICESET } from '../../logic/logic';
+import { buildupImgPath, complaintUser, getUserAlias,  getUserAvatar, judgeFollowed, NOTICESET } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
 import { delFriend as delUserFriend, getUsersBasicInfo, sendUserMsg } from '../../net/rpc';
@@ -66,11 +66,11 @@ export class Setting extends Widget {
         if (this.props.noticeSet === 0) {
             this.props.userInfo = store.getStore(`userInfoMap/${this.props.uid}`, new UserInfo());
         
-            this.props.setList[0][2] = this.props.userAlias = getUserAlias(this.props.uid).name;            
+            this.props.setList[0][2] = this.props.userAlias = getUserAlias(this.props.uid);            
             if (!this.props.userAlias) {
                 this.getUserData(this.props.uid);
             }
-            if (getUserAlias(this.props.uid).isFollowed) {
+            if (judgeFollowed(this.props.userInfo.comm_num)) {
                 this.props.noticeSet = 2;
             }
             this.props.avatar = getUserAvatar(this.props.uid) || '../../res/images/user_avatar.png';

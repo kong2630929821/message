@@ -8,6 +8,13 @@
     {{end}}
 
     <div w-class="messageBox" on-tap="pageClick" ev-messItem-radio="playRadio" ev-delelte-user="goBack" id="chatMessageBox" on-scroll="scrollMessBox" ev-recall="openMessageRecall">
+        {{if it.notFollowed}}
+        <div w-class="notfollow">
+            <span>未关注用户，立即</span>
+            <span w-class="followBtn" on-tap="goDetail">关注对方</span>
+        </div>
+        {{end}}
+
         {{for i,v of it.showHincIdArray}}
             <chat-client-app-widget1-messageItem-messageItem>{hIncId: {{v}},name:{{it.name}},chatType:{{it.chatType}},playAudio: {{it.activeAudio && v == it.activeAudio.hIncId ? it.activeAudio.playAudio : false}}, recallBtn:{{it.activeMessId == v}} }</chat-client-app-widget1-messageItem-messageItem>
         {{end}} 

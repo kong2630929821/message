@@ -1,105 +1,74 @@
-/**
- * 创建群聊
- */
-
 // ================================================ 导入
-import { popNewLoading } from '../../../../../app/utils/pureUtils';
-import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GroupInfo } from '../../../../server/data/db/group.s';
-import { Contact, UserInfo } from '../../../../server/data/db/user.s';
 import { Result } from '../../../../server/data/rpc/basic.s';
+import { CommUserInfo } from '../../../../server/data/rpc/community.s';
 import { createGroup, inviteUsers } from '../../../../server/data/rpc/group.p';
 import { GroupCreate, Invite, InviteArray } from '../../../../server/data/rpc/group.s';
-import { Logger } from '../../../../utils/logger';
-import { delValueFromArray } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
-import { createGroup as createNPGroup, getFansList, getUserInfoByNum } from '../../net/rpc';
+import { getUserInfoByNum } from '../../net/rpc';
 // ================================================ 本地
 interface Props {
-    name:string;// 群组名
-    inputName:string; // 输入的群名称
-    inviteMembers:number[];// 被邀请的成员uid
-    inviteUserName:string[];// 被邀请的成员名字
-    isSelect:boolean;// 是否被选择
-    avatar:string; // 群头像展示
-    userInfos:UserInfo[];  // 客服账号
-    followData:any;// 关注列表
-    checkedList:any;// 选中的列表
-    id:number;// 用户id
-
+    followAndFans:CommUserInfo[];// 互关列表
+    checkedList:CommUserInfo[];// 选中的列表
 }
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
-export const forelet = new Forelet();
 
+/**
+ * 创建群聊
+ */
 export class SetGroupChat extends Widget {
     public props:Props;
     public ok:() => void;
     constructor() {
         super();
         this.props = {
-            name:'',
-            inviteMembers:[],
-            inviteUserName:[],
-            isSelect:false,
-            avatar:'',
-            userInfos:[],
-            inputName:'',
-            followData:[],
-            checkedList:[],
-            id:0
+            followAndFans:[],
+            checkedList:[]
         };
-        this.state = new Contact();
     }
     public create() {
         super.create();
-        const sid = store.getStore('uid').toString();
-        this.props.id = JSON.parse(sid);
-        this.state = store.getStore(`contactMap/${sid}`,new Contact());
-        this.props.userInfos = store.getStore('userInfoMap', new Map());
-        const numsList = store.getStore(`followNumList/${sid}`,{ person_list:[],public_list:[]  });
+        const sid = store.getStore('uid', 0);
         const userinfo = store.getStore(`userInfoMap/${sid}`, {});
-        this.props.avatar = userinfo.avatar;
+        const numsList = store.getStore(`followNumList/${sid}`,{ person_list:[] }).person_list;
+        const fansList = store.getStore(`fansNumList/${userinfo.comm_num}`,{ list:[] }).list;
         const ids = [];
-        getFansList(userinfo.comm_num).then((r:string[]) => {
-            numsList.person_list.forEach(v => {
-                if (r.indexOf(v) !== -1) {
-                    ids.push(v);
-                }
-            });
-            getUserInfoByNum(ids).then((r:any[]) => {
-                this.props.followData = r;
-                this.paint();
-            });
+        numsList.forEach(v => {
+            if (fansList.indexOf(v) >= 0) {
+                ids.push(v);
+            }
         });
-        
+        getUserInfoByNum(ids).then((r:any[]) => {
+            this.props.followAndFans = r;
+            this.paint();
+        }).catch(err => {
+            console.log('获取互关列表失败：',err);
+        });
     }
     
     // 返回上一页
     public back() {
-        this.ok();
+        this.ok && this.ok();
     }
 
     // 点击完成
-    public completeClick() {
-        const list  = this.props.checkedList.slice(0,3);
-        list.forEach(v => {
-            this.props.name += v.user_info.name;
-        });
+    public completeClick() {        
         if (this.props.checkedList.length === 0) {
             popNewMessage('请至少选择一位好友');
 
             return;
         }
-       
+
+        const groupName = [];
+        for (const v of this.props.checkedList) {
+            groupName.push(v.user_info.name);
+        }
+
         const groupInfo = new GroupCreate();
-        groupInfo.name = this.props.name;
+        groupInfo.name = groupName.join('、').slice(0,12);
         groupInfo.note = '';
         groupInfo.avatar = '';
         groupInfo.need_agree = true; // 入群需要同意
@@ -118,7 +87,7 @@ export class SetGroupChat extends Widget {
                 const invites = new InviteArray();
                 const invite = new Invite();
                 invite.gid = r.gid;
-                invite.rid = this.props.id;
+                invite.rid = store.getStore('uid', 0);
                 invites.arr = [invite];
 
                 this.props.checkedList.forEach((item) => {
@@ -138,31 +107,13 @@ export class SetGroupChat extends Widget {
         this.ok();
     }
 
-    /**
-     * 创建入群无需同意的群组
-     * 暂留接口
-     */
-    public createNPG() {
-        if (this.props.name) {
-            createNPGroup(this.props.name,'','',false);
-            this.ok();
-        } else {
-            popNewMessage('请输入群名');
-        }
-    }
-
-    public checked(e:any) {
+    // 添加群成员
+    public checked(e:any,index:number) {
         if (e.fg) {
-            this.props.checkedList.push(this.props.followData[e.value]);
+            this.props.checkedList.push(this.props.followAndFans[index]);
         } else {
-            this.props.checkedList.splice(e.value,1);
+            this.props.checkedList.splice(index,1);
         }
         this.paint();
     }
 }
-store.register('contactMap', (r: Map<number, Contact>) => {
-    // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
-    for (const value of r.values()) {
-        forelet.paint(value);
-    }    
-});

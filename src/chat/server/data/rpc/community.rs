@@ -178,7 +178,13 @@ struct CommentIDList{
 
 // 社区号列表
 struct CommunityNumList{
-    list: &[String]
+    list: &[String],   // 社区ID数组
+}
+
+// 社区ID或用户ID列表
+struct CommNumOrUidList{
+    commList: Option<&[String]>,   // 社区ID数组
+    uidList: Option<&[u32]>,       // uid数组
 }
 
 // 社区和用户信息

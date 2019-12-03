@@ -14,7 +14,7 @@ import { AttentionIndex, FansIndex } from '../../../server/data/db/community.s';
 import { GroupUserLink } from '../../../server/data/db/group.s';
 import { Contact, UserInfo } from '../../../server/data/db/user.s';
 import { getGroupsInfo } from '../../../server/data/rpc/basic.p';
-import { GetGroupInfoReq, GroupArray, GroupUserLinkArray } from '../../../server/data/rpc/basic.s';
+import { GetGroupInfoReq, GroupArray, GroupUserLinkArray, UserArray } from '../../../server/data/rpc/basic.s';
 import { getGroupUserLink } from '../../../server/data/rpc/group.p';
 import { SendMsg } from '../../../server/data/rpc/message.s';
 import { getGidFromGuid } from '../../../utils/util';
@@ -24,7 +24,7 @@ import { exitGroup, popNewMessage } from '../logic/tools';
 import * as subscribedb from '../net/subscribedb';
 import { walletSignIn } from './init_1';
 import { initPush } from './receive';
-import { getMyGroupHistory } from './rpc';
+import { getMyGroupHistory, getUsersBasicInfo } from './rpc';
 
 // ================================================ 导出
 
@@ -154,14 +154,14 @@ export const unSubscribe = (platerTopic: string) => {
 export const init = (uid: number,num:string) => {
     subscribedb.subscribeContact(uid, (r: Contact) => {
         if (r && r.uid === uid) {
-            updateUsers(r);
+            // updateUsers(r);
         }
     }, (r: Contact) => {
         if (r && r.uid === uid) {
             updateGroup(r, uid);
         }
     });
-    subscribedb.subscribeCommNum(uid,(r:AttentionIndex) => {
+    subscribedb.subscribeFollowNum(uid,(r:AttentionIndex) => {
         if (r && r.uid === uid) {
             // updatePubNum(r,uid);
         }
@@ -237,15 +237,20 @@ const updateGroup = (r: Contact, uid: number) => {
  * @param r 联系人列表
  * @param uid 当前用户id
  */
-const updateUsers = (r: Contact) => {
-    const uids = r.temp_chat.concat(r.blackList, r.applyUser);
-    if (uids.length > 0) {
-        uids.forEach(elem => {
-            subscribedb.subscribeUserInfo(elem, null);
-        });
-
-    }
-};
+// const updateUsers = (r: Contact) => {
+//     const uids = r.friends.concat(r.temp_chat,r.applyUser,r.blackList);
+//     if (uids.length > 0) {
+//         getUsersBasicInfo(uids).then((res:UserArray) => {
+//             const userinfoMap = store.getStore('userInfoMap',new Map())
+//             for (const v of res.arr) {
+//                 userinfoMap.set(v.uid,v);
+//             }
+//             store.setStore('userInfoMap', userinfoMap);
+//         }).catch(err => {
+//             console.log(err);
+//         });
+//     }
+// };
 
 /**
  * 更新公众号信息

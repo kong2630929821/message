@@ -1,6 +1,3 @@
-/**
- * 单聊
- */
 
 // ================================================ 导入
 import { inIOSApp } from '../../../../../app/public/config';
@@ -10,7 +7,7 @@ import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { GROUP_STATE, GroupInfo } from '../../../../server/data/db/group.s';
 import { UserHistory } from '../../../../server/data/db/message.s';
-import { GENERATOR_TYPE, VIP_LEVEL } from '../../../../server/data/db/user.s';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
 import { depCopy, genGroupHid, genUserHid, getIndexFromHIncId } from '../../../../utils/util';
 import { updateUserMessage } from '../../data/parse';
@@ -18,12 +15,39 @@ import * as store from '../../data/store';
 import { getUserAlias, getUserAvatar, INFLAG, timestampFormat } from '../../logic/logic';
 import { openNewActivity } from '../../logic/native';
 import { popNewMessage } from '../../logic/tools';
-import { applyToGroup, applyUserFriend, getChatUid, getUsersBasicInfo, sendGroupMsg, sendTempMsg, sendUserMsg } from '../../net/rpc';
+import { applyToGroup, applyUserFriend, getChatUid, getUsersBasicInfo, sendGroupMsg, sendUserMsg } from '../../net/rpc';
 import { parseMessage } from '../../widget1/messageItem/messageItem';
 
 // ================================================ 导出
 export const forelet = new Forelet();
 
+interface Props {
+    sid: number;  // 我的ID
+    id: number;  // 好友ID|群ID
+    hid:string;  // 好友hid|群hid
+    chatType:string; // 群聊|单聊
+    name:string;  // 群名或好友名
+    inputMessage:string;  // 输入框内容
+    hincIdArray: string[]; // 消息历史记录
+    showHincIdArray:string[]; // 当前显示的消息记录
+    isOnEmoji:boolean; // 是否打开表情选择区
+    lastAnnounce:string; // 最新一条公告，群聊
+    newMsg:any; // 我发布的一条新消息
+    isOnTools:boolean; // 是否打开更多功能
+    activeAudio:any; // 当前点击的语音消息
+    okCB:any;  // 游戏中进入携带的参数
+    avatar:string; // 头像
+    text:string;  // 群成员个数展示
+    activeMessId:string;  // 当前选中要撤回的消息ID
+    recallBtn:string; // 撤回按钮位置
+    isOnAudio:boolean;  // 是否打开语音录入
+    accId:string;    // acc_id
+    gid:number;    // gid
+    notFollowed:boolean;  // 未关注
+}
+/**
+ * 单聊 群聊
+ */
 export class Chat extends Widget {
     public props:Props;
     public bindCB: any;
@@ -75,28 +99,23 @@ export class Chat extends Widget {
      * 好友聊天初始化
      */
     public initUser() {
-        const level = store.getStore(`userInfoMap/${this.props.id}`,{ level:0 }).level;  // 对方的等级
-        const myLevel = store.getStore(`userInfoMap/${this.props.sid}`,{ level:0 }).level;  // 当前用户的等级
-        if (!this.props.temporary) { // 如果是临时聊天会传名字 不是临时聊天需要获取用户名
-            this.props.name = getUserAlias(this.props.id).name;
+        const userinfo = store.getStore(`userInfoMap/${this.props.id}`, null);
+        const numsList = store.getStore(`followNumList/${this.props.sid}`,{ person_list:[] }).person_list;
+        if (userinfo) {
+            this.props.name = getUserAlias(this.props.id);
             this.props.avatar = getUserAvatar(this.props.id) || '../../res/images/user_avatar.png';
-            this.props.temporary = level !== VIP_LEVEL.VIP5;  // 不是官方客服且不是好友则是临时聊天
-        } 
-        if (!this.props.name) {  // 获取不到用户名
+            this.props.notFollowed = numsList.indexOf(userinfo.comm_num) === -1;
+        } else {
             getUsersBasicInfo([this.props.id]).then((r: UserArray) => {
                 this.props.name = r.arr[0].name;
                 this.props.avatar = r.arr[0].avatar || '../../res/images/user_avatar.png';
                 store.setStore(`userInfoMap/${this.props.id}`,r.arr[0]);
-                this.props.temporary = r.arr[0].level !== VIP_LEVEL.VIP5;
+                this.props.notFollowed = numsList.indexOf(r.arr[0].comm_num) === -1;
                 this.paint();
             },(r) => {
                 console.error('获取用户信息失败', r);
             });
         }
-        // 当前用户自己是客服 都不需要提示加好友
-        if (myLevel === VIP_LEVEL.VIP5) {
-            this.props.temporary = false;
-        } 
 
         const hIncIdArr = store.getStore(`userChatMap/${this.props.hid}`, []);
         this.props.hincIdArray = hIncIdArr;
@@ -228,12 +247,12 @@ export class Chat extends Widget {
                 popNewMessage('发送失败');
             });
             
-        // 临时单聊
-        } else if (this.props.temporary || this.props.groupId) {
-            console.log('=========临时单聊信息发送',e);
-            sendTempMsg(this.props.id,this.props.groupId,this.props.inputMessage,e.msgType).then((r:UserHistory) => {
-                updateUserMessage(this.props.id, r, this.props.groupId);
-            });
+        // // 临时单聊
+        // } else if (this.props.temporary || this.props.groupId) {
+        //     console.log('=========临时单聊信息发送',e);
+        //     sendTempMsg(this.props.id,this.props.groupId,this.props.inputMessage,e.msgType).then((r:UserHistory) => {
+        //         updateUserMessage(this.props.id, r, this.props.groupId);
+        //     });
 
         // 单聊
         } else {
@@ -241,7 +260,7 @@ export class Chat extends Widget {
             sendUserMsg(this.props.id,this.props.inputMessage,e.msgType).then((r:UserHistory) => {
                 updateUserMessage(this.props.id, r);
             },() => {
-                this.notMyFriend();
+                popNewMessage('发送失败');
             });
            
         }
@@ -253,25 +272,10 @@ export class Chat extends Widget {
         }
     }
 
-    /**
-     * 对方不是当前用户的好友
-     */
-    public notMyFriend() {
-        const item = document.createElement('div');
-        item.setAttribute('style','font-size: 24px;text-align: center;color: #888;margin: 20px;');
-        item.innerText = `对方不是你的好友，立即`;
-        const innerItem = document.createElement('span');
-        innerItem.setAttribute('style','color:#3FA2F7;border:10px solid transparent;');
-        innerItem.innerText = '添加好友';
-        innerItem.addEventListener('click', () => {
-            const userinfo = store.getStore(`userInfoMap/${this.props.id}`,null);
-            if (userinfo) {
-                popNew3('chat-client-app-view-chat-addUser',{ rid: userinfo.acc_id });
-            }
-            this.goBack();
-        });
-        item.appendChild(innerItem);
-        document.getElementById('chatMessageBox').appendChild(item);
+    // 查看用户信息
+    public goDetail() {
+        popNew3('chat-client-app-view-info-userDetail',{ uid:this.props.id });
+        this.goBack();
     }
 
     /**
@@ -492,27 +496,3 @@ export class Chat extends Widget {
 }
 
 // ================================================ 本地
-interface Props {
-    sid: number;  // 我的ID
-    id: number;  // 好友ID|群ID
-    hid:string;  // 好友hid|群hid
-    chatType:string; // 群聊|单聊
-    name:string;  // 群名或好友名
-    inputMessage:string;  // 输入框内容
-    hincIdArray: string[]; // 消息历史记录
-    showHincIdArray:string[]; // 当前显示的消息记录
-    isOnEmoji:boolean; // 是否打开表情选择区
-    lastAnnounce:string; // 最新一条公告，群聊
-    newMsg:any; // 我发布的一条新消息
-    isOnTools:boolean; // 是否打开更多功能
-    activeAudio:any; // 当前点击的语音消息
-    groupId:number; // 当前群聊ID 群主可与成员私聊
-    okCB:any;  // 游戏中进入携带的参数
-    avatar:string; // 头像
-    text:string;  // 群成员个数展示
-    activeMessId:string;  // 当前选中要撤回的消息ID
-    recallBtn:string; // 撤回按钮位置
-    isOnAudio:boolean;  // 是否打开语音录入
-    accId:string;    // acc_id
-    gid:number;    // groupid
-}

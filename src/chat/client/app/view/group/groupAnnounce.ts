@@ -1,6 +1,3 @@
-/**
- * 群公告
- */
 
 // ================================================ 导入
 import { popNew } from '../../../../../pi/ui/root';
@@ -9,7 +6,6 @@ import { GroupInfo } from '../../../../server/data/db/group.s';
 import { MSG_TYPE } from '../../../../server/data/db/message.s';
 import { sendGroupMessage } from '../../../../server/data/rpc/message.p';
 import { GroupSend } from '../../../../server/data/rpc/message.s';
-import { Logger } from '../../../../utils/logger';
 import { depCopy } from '../../../../utils/util';
 import * as store from '../../data/store';
 import { timestampFormat } from '../../logic/logic';
@@ -17,15 +13,14 @@ import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
 
 // ================================================ 导出
-// tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
 
+/**
+ * 群公告
+ */
 export class GroupAnnounce extends Widget {
     public ok:() => void;
     public props:Props = {
-        gid:null,
+        gid:0,
         aIncIdArray:[],
         isOwner:false,
         createTime:''
@@ -35,8 +30,7 @@ export class GroupAnnounce extends Widget {
         const gInfo = store.getStore(`groupInfoMap/${this.props.gid}`,new GroupInfo());
         this.props.aIncIdArray = depCopy(gInfo.annoceids);
         const uid = store.getStore('uid');
-        const ownerid = gInfo.ownerid;
-        if (uid === ownerid) {
+        if (uid === gInfo.ownerid) {
             this.props.isOwner = true;
         }
         this.props.createTime = timestampFormat(gInfo.create_time,2);

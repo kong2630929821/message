@@ -1,101 +1,98 @@
+// ================================================ 导入
+import { popNewMessage } from '../../../../../app/utils/pureUtils';
+import { Widget } from '../../../../../pi/widget/widget';
+import { Result } from '../../../../server/data/rpc/basic.s';
+import { CommUserInfo } from '../../../../server/data/rpc/community.s';
+import { inviteUsers } from '../../../../server/data/rpc/group.p';
+import { Invite, InviteArray } from '../../../../server/data/rpc/group.s';
+import * as store from '../../data/store';
+import { clientRpcFunc } from '../../net/init';
+import { getUserInfoByNum } from '../../net/rpc';
+ 
+// ================================================ 导出
+
+interface Props {
+    gid:number;
+    followAndFans:CommUserInfo[];// 互关列表
+    checkedList:CommUserInfo[];// 选中的列表
+}
+
 /**
  * 邀请成员
  */
- // ================================================ 导入
-import { popNewMessage } from '../../../../../app/utils/tools';
-import { Json } from '../../../../../pi/lang/type';
-import { Forelet } from '../../../../../pi/widget/forelet';
-import { Widget } from '../../../../../pi/widget/widget';
-import { Contact, UserInfo } from '../../../../server/data/db/user.s';
-import { Result } from '../../../../server/data/rpc/basic.s';
-import { inviteUsers } from '../../../../server/data/rpc/group.p';
-import { Invite, InviteArray } from '../../../../server/data/rpc/group.s';
-import { Logger } from '../../../../utils/logger';
-import { delValueFromArray } from '../../../../utils/util';
-import * as store from '../../data/store';
-import { clientRpcFunc } from '../../net/init';
- 
-  // ================================================ 导出
-  // tslint:disable-next-line:no-reserved-keywords
-declare var module;
-const WIDGET_NAME = module.id.replace(/\//g, '-');
-const logger = new Logger(WIDGET_NAME);
-export const forelet = new Forelet();
- 
 export class InviteMember extends Widget {
     public ok:() => void;
     public props:Props = {
-        gid:null,
-        ginfo:{},
-        applyGroupMembers:[],
-        userInfos:[]
+        gid:0,
+        followAndFans:[],
+        checkedList:[]
     };
+
     public setProps(props:any) {
-        super.setProps(props);
-        this.props.gid = props.gid;
-        this.props.ginfo = this.getGroupInfo(this.props.gid);
-        this.props.applyGroupMembers = [];
-        const sid = store.getStore('uid').toString();
-        this.state = store.getStore('contactMap',new Contact()).get(sid);
-        this.props.userInfos = store.getStore('userInfoMap', []);
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+        const sid = store.getStore('uid', 0);
+        const userinfo = store.getStore(`userInfoMap/${sid}`, {});
+        const numsList = store.getStore(`followNumList/${sid}`,{ person_list:[] }).person_list;
+        const fansList = store.getStore(`fansNumList/${userinfo.comm_num}`,{ list:[] }).list;
+        const memberList = store.getStore(`groupInfoMap/${this.props.gid}`,{ memberids:[] }).memberids;
+        const ids = [];
+        numsList.forEach(v => {
+            if (fansList.indexOf(v) >= 0) {
+                ids.push(v);
+            }
+        });
+        getUserInfoByNum(ids).then((r:any[]) => {
+            this.props.followAndFans = r.filter(v => {
+                return memberList.indexOf(v.user_info.uid) === -1;
+            });
+            this.paint();
+        }).catch(err => {
+            console.log('获取互关列表失败：',err);
+        });
+
     }
     
     public goBack() {
-        this.ok();
+        this.ok && this.ok();
     }
-    public getGroupInfo(gid:number) {
-        const ginfo = store.getStore(`groupInfoMap/${gid}`);
-        logger.debug('============ginfo',ginfo);
- 
-        return ginfo;
-    }
-     // 添加群成员
-    public addGroupMember(e:any) {
-        const uid = e.value;
-        logger.debug('====邀请成员',uid);
-        if (this.props.applyGroupMembers.findIndex(item => item === uid) === -1) {
-            this.props.applyGroupMembers.push(uid);
+   
+    // 添加群成员
+    public checked(e:any,index:number) {
+        if (e.fg) {
+            this.props.checkedList.push(this.props.followAndFans[index]);
         } else {
-            this.props.applyGroupMembers = delValueFromArray(uid, this.props.applyGroupMembers);
+            this.props.checkedList.splice(index,1);
         }
-        logger.debug(`applyGroupMembers is : ${JSON.stringify(this.props.applyGroupMembers)}`);
+        this.paint();
     }
-     // 点击添加
-    public completeAddGroupMember() {
-        if (this.props.applyGroupMembers.length <= 0) {
-            popNewMessage('请至少选择一位邀请好友');
+
+    // 点击添加
+    public completeBtn() {
+        if (this.props.checkedList.length <= 0) {
+            popNewMessage('请至少邀请一位好友');
 
             return ;
         }
         const invites = new InviteArray();
         invites.arr = [];
-        this.props.applyGroupMembers.forEach((id) => {
+        this.props.checkedList.forEach((v) => {
             const invite = new Invite();
             invite.gid = this.props.gid;
-            invite.rid = id;
+            invite.rid = v.user_info.uid;
             invites.arr.push(invite);
         });
-        clientRpcFunc(inviteUsers, invites, (r: Result) => {
+        clientRpcFunc(inviteUsers, invites, (r: Result) => {            
             if (r.r !== 1) {
                 popNewMessage(`邀请好友入群失败`);
             }
-            popNewMessage('成功发送邀请好友信息');
-            this.ok();
         });
+
+        this.goBack();
     }
 }
  
-  // ================================================ 本地
-interface Props {
-    gid:number;
-    ginfo:Json;
-    applyGroupMembers:number[];
-    userInfos:UserInfo[];  // 客服账号
-}
-
-store.register('contactMap', (r: Map<number, Contact>) => {
-    // 这是一个特别的map，map里一定只有一个元素,只是为了和后端保持统一，才定义为map
-    for (const value of r.values()) {
-        forelet.paint(value);
-    }    
-});
+// ================================================ 本地

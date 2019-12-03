@@ -5,18 +5,19 @@ import { Widget } from '../../../../../pi/widget/widget';
 import { REPORT_PERSON } from '../../../../server/data/constant';
 import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { Result, UserArray } from '../../../../server/data/rpc/basic.s';
-import { changeFriendAlias } from '../../../../server/data/rpc/user.p';
+import { addToBlackList, changeFriendAlias, removeFromBlackList } from '../../../../server/data/rpc/user.p';
 import { FriendAlias } from '../../../../server/data/rpc/user.s';
+import { genUserHid } from '../../../../utils/util';
 import { getStore, register, setStore, unregister } from '../../data/store';
-import { buildupImgPath, complaintUser, getUserAlias, getUserAvatar } from '../../logic/logic';
+import { buildupImgPath, complaintUser, getUserAlias, getUserAvatar, judgeFollowed } from '../../logic/logic';
 import { popNewMessage } from '../../logic/tools';
 import { clientRpcFunc } from '../../net/init';
 import { applyUserFriend, follow, getFansList, getFollowList, getUserPostList, getUsersBasicInfo } from '../../net/rpc';
 
 interface Props {
-    uid: number;
+    uid: number;  // uid
     num:string;  // 社区账号
-    pubNum:string; // 社区公众号
+    pubNum:string; // 社区公众号id
     userInfo: any;  // 用户信息
     alias: string; // 好友别名
     avatar:string; // 头像
@@ -24,7 +25,7 @@ interface Props {
     isOwner:boolean;  // 当前用户
     followed:boolean;  // 是否关注
     medalList:any[];  // 勋章列表
-    postList:any[];  // 发布的帖子列表
+    postList:any[];   // 发布的帖子列表 传给下一个页面
     followList:string[];  // 关注列表
     fansList:string[];  // 粉丝列表
     gameList:string[]; // 最近玩过的游戏列表
@@ -32,6 +33,7 @@ interface Props {
     dealData:any;  // 组装数据
     refresh:boolean; // 是否可以请求更多数据
     showUtils:boolean;// 个人主页更多
+    blackPerson:boolean;  // 是否已被加入黑名单
 }
 
 /**
@@ -61,7 +63,8 @@ export class UserDetail extends Widget {
         expandItem:-1,
         dealData:this.dealData,
         refresh:true,
-        showUtils:false
+        showUtils:false,
+        blackPerson:false
     };
     public bindUpdate:any = this.updateData.bind(this);
 
@@ -92,63 +95,50 @@ export class UserDetail extends Widget {
                 this.props.num = this.props.userInfo.comm_num;
                 setStore(`userInfoMap/${this.props.uid}`,r.arr[0]);
                 this.init(sid);
+            }).catch(err => {
+                console.log(err);
             });
         }
 
     }
 
     public init(sid:number) {
-        const numsList = getStore(`followNumList/${sid}`,{ person_list:[],public_list:[]  });
-        const followList = numsList.person_list.concat(numsList.public_list);
+        const contact = getStore(`contactMap/${sid}`, { blackList:[] });
         this.props.avatar = getUserAvatar(this.props.uid);
-        this.props.followed = followList.indexOf(this.props.num) > -1;
-        
-        if (!this.props.isOwner) {
-            const v = getUserAlias(this.props.uid);
-            this.props.alias = v.name;
+        this.props.followed = judgeFollowed(this.props.num);
+        this.props.blackPerson = contact.blackList.indexOf(this.props.uid) >= 0;
+
+        if (this.props.isOwner) { // 当前用户
+            const followNumList = getStore(`followNumList/${sid}`,{ person_list:[] }).person_list;
+            this.props.followList = followNumList.filter(v => { // 关注列表除去自己
+                return v !== this.props.num && v !== this.props.pubNum;
+            });
+            const userinfo = getStore(`userInfoMap/${sid}`, {});
+            const fansNumList = getStore(`fansNumList/${userinfo.comm_num}`,{ list:[] }).list;
+            this.props.fansList = fansNumList.filter(v => { // 粉丝列表除去自己
+                return v !== this.props.num && v !== this.props.pubNum;
+            });
+            this.props.numList[1][0] = this.props.followList.length;
+            this.props.numList[2][0] = this.props.fansList.length;
+
+        } else {  // 其他用户
+            this.props.alias = getUserAlias(this.props.uid);
             getFollowList(this.props.uid).then((r:string[]) => {
                 this.props.followList = r;  // 关注
                 this.props.numList[1][0] = r.length;
                 this.paint();
+            }).catch(err => {
+                console.log(err);
             });
-        } else {
-            this.props.followList = followList.filter(v => { // 关注除去自己
-                return v !== this.props.num && v !== this.props.pubNum;
-            });
-            this.props.numList[1][0] = this.props.followList.length;
-        }
-        this.paint();
-
-        // 自己主页加载动态
-        if (this.props.isOwner) {
-            getUserPostList(this.props.num).then((r:any) => {
-                this.props.postList = r.list;  // 动态
-                this.props.numList[0][0] = r.total;
+            getFansList(this.props.num).then((r:string[]) => {
+                this.props.fansList = r;  // 粉丝
+                this.props.numList[2][0] = r.length;
                 this.paint();
+            }).catch(err => {
+                console.log(err);
             });
         }
        
-        getFansList(this.props.num).then((r:string[]) => {
-            this.props.fansList = r;  // 粉丝
-            this.props.numList[2][0] = r.length;
-            this.paint();
-        });
-        
-        // getMedalest([this.props.userInfo.acc_id]).then((r:any) => {
-        //     const ktNum = r.arr[0].resultNum;  // 勋章
-        //     const data = getMedalList(CoinType.KT, 'coinType');
-        //     const list = [];
-        //     data.forEach((element,i) => {
-        //         const medal = { img: `medal${element.id}`, id: element.id ,isHave:false };
-        //         if (element.coinNum <= ktNum) {
-        //             medal.isHave = true;
-        //             list.push(medal);
-        //         }
-        //     });
-        //     this.props.medalList = list.splice(-5);
-        //     this.paint();
-        // });
-
         // 获取全部勋章
         getAllMedal().then((r:any) => {
             if (r.medals) {
@@ -156,10 +146,25 @@ export class UserDetail extends Widget {
                 this.paint();
             }
            
+        }).catch(err => {
+            console.log(err);
         });
+
+        // 获取用户最近在玩的游戏
         getUserRecentGame(this.props.userInfo.acc_id,5).then(r => {
             this.props.gameList = r;   // 游戏
             this.paint();
+        }).catch(err => {
+            console.log(err);
+        });
+
+        // 获取用户发布的动态
+        getUserPostList(this.props.num).then((r:any) => {
+            this.props.postList = r.list;  // 动态
+            this.props.numList[0][0] = r.total;
+            this.paint();
+        }).catch(err => {
+            console.log(err);
         });
     }
 
@@ -168,6 +173,8 @@ export class UserDetail extends Widget {
         const sid = getStore(`uid`, 0);
         if (sid !== this.props.uid) {
             register(`followNumList/${sid}`,this.bindUpdate);
+            const userinfo = getStore(`userInfoMap/${sid}`, {});
+            register(`fansNumList/${userinfo.comm_num}`,this.bindUpdate);
         }
         
     }
@@ -184,16 +191,6 @@ export class UserDetail extends Widget {
     // 申请公众号 去我的公众号
     public goPublic() {
         if (!this.props.pubNum) {
-            // if (!this.props.userInfo.tel) {
-            //     popNewMessage('请绑定手机号码');
-                
-            //     return;
-            // }
-            // addCommunityNum('我的公众号',CommType.publicAcc,'').then((r:string) => {
-            //     this.props.pubNum = r;
-            //     setStore('pubNum',r);
-            //     this.paint();
-            // });
             popNew('chat-client-app-view-person-openPublic',{ chooseImage:false ,userInfo:this.props.userInfo },(r) => {
                 this.props.pubNum = r;
                 this.paint();
@@ -211,6 +208,8 @@ export class UserDetail extends Widget {
             } else {
                 popNewMessage('发送申请成功');
             }
+        }).catch(err => {
+            console.log(err);
         });
     }
     
@@ -309,24 +308,24 @@ export class UserDetail extends Widget {
         this.paint();
     }
 
-    /**
-     * 滚动加载更多帖子
-     */
-    public scrollPage() {
-        if (!this.props.isOwner) return;
-        const page = document.getElementById('userDetailPage');
-        const contain = document.getElementById('userDetailContain');
-        if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.props.postList.length % 20 === 0) {
-            this.props.refresh = false;
-            let list = this.props.postList;
-            getUserPostList(this.props.num,list[list.length - 1].key.id).then((r:any) => {
-                this.props.refresh = true;
-                list = list.concat(r.list);
-                this.props.postList = list;
-                this.paint();
-            });
-        }
-    }
+    // /**
+    //  * 滚动加载更多帖子
+    //  */
+    // public scrollPage() {
+    //     if (!this.props.isOwner) return;
+    //     const page = document.getElementById('userDetailPage');
+    //     const contain = document.getElementById('userDetailContain');
+    //     if (this.props.refresh && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150 && this.props.postList.length % 20 === 0) {
+    //         this.props.refresh = false;
+    //         let list = this.props.postList;
+    //         getUserPostList(this.props.num,list[list.length - 1].key.id).then((r:any) => {
+    //             this.props.refresh = true;
+    //             list = list.concat(r.list);
+    //             this.props.postList = list;
+    //             this.paint();
+    //         });
+    //     }
+    // }
     
     public destroy() {
         super.destroy();
@@ -376,6 +375,10 @@ export class UserDetail extends Widget {
                 // 举报玩家
                 this.complaint();
                 break;
+            case 3:
+                // 加入黑名单
+                this.blackList();
+                break;
             default:
         }
     }
@@ -408,6 +411,43 @@ export class UserDetail extends Widget {
                 }
             });
         });
+    }
+
+    /**
+     * 加入黑名单
+     */
+    public blackList() {
+        if (this.props.blackPerson) {
+            clientRpcFunc(removeFromBlackList, this.props.uid, (r) => {
+                if (r && r.r === 1) {
+                    this.props.blackPerson = false;
+                    popNewMessage('移出黑名单');
+                }
+            });
+        } else {
+            popModalBoxs('chat-client-app-widget-modalBox-modalBox', { title: '加入黑名单', content: '加入黑名单，您不再收到对方的消息。' },() => {
+                clientRpcFunc(addToBlackList, this.props.uid, (r) => {
+                    if (r && r.r === 1) {
+                        this.props.blackPerson = true;
+                        popNewMessage('加入黑名单成功');    
+
+                        const sid = getStore('uid');
+                        const uid = this.props.uid;
+                        const lastChat = getStore(`lastChat`, []);
+                        const index = lastChat.findIndex(item => item[0] === uid && item[2] === GENERATOR_TYPE.USER);
+                        if (index > -1) { // 删除最近对话记录
+                            lastChat.splice(index, 1);
+                            setStore('lastChat', lastChat);
+                        }
+
+                        const lastRead = getStore(`lastRead`, []);
+                        lastRead.delete(genUserHid(sid,uid));  // 删除已读消息记录
+                        setStore(`lastRead`, lastRead);
+                    }
+                    
+                });
+            });
+        }
     }
 }
 

@@ -4,9 +4,8 @@
         <chat-client-app-widget1-topBar-topBar>{title:"转让群主"}</chat-client-app-widget1-topBar-topBar>
     </div>
    
-    <div w-class="a-part" ev-changeSelect="changeSelect">
-        <div w-class="a">a</div>
-        <div w-class="user-wrap">
+    <div w-class="userList">
+        <div w-class="a">
             {{for index,item of membersButnoOwner}}
                 <widget w-tag="chat-client-app-widget-selectUser-selectUser" on-tap="openConfirmTranBox({{item}})">{id:{{item}},chatType:"group",gid:{{it.gid}},disabled:true }</widget>
             {{end}}
