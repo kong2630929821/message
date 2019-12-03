@@ -1,15 +1,19 @@
+import { notify } from '../../../../../pi/widget/event';
 import { getRealNode } from '../../../../../pi/widget/painter';
 import { Widget } from '../../../../../pi/widget/widget';
 import { buildupImgPath } from '../../../../client/app/logic/logic';
 import { uploadFile } from '../../../../client/app/net/upload';
 import { maxSize } from '../../../config';
+import { sendActicle } from '../../../net/rpc';
+import { getStore, setStore } from '../../../store/memstore';
 import { popNewMessage } from '../../../utils/logic';
-
 interface Props {
+    data: object; // 保存父组件传递的数据
     title:string;// 文章标题
     bannerImg:string;// 文章banner
     upLoadIng:boolean;// 正在上传图片
-    buildupImgPath:any;// 图片路径
+    buildupImgPath:Function;// 图片路径
+    draftArry:any[];// 草稿文章数组 
 }
 
 /**
@@ -21,9 +25,51 @@ export class NewArticle extends Widget {
         title:'',
         bannerImg:'',
         upLoadIng:false,
-        buildupImgPath:buildupImgPath
+        buildupImgPath:buildupImgPath,
+        draftArry:[],
+        data:{}
     };
-
+    public setProps(props:any) {
+        this.props = {
+            ...this.props,
+            ...props
+        };
+        super.setProps(this.props);
+        const currentData = this.props.data;
+        console.log(currentData);
+        this.init(currentData);
+        
+    }
+    // 初始化数据
+    public init (data?:any) {
+        this.props = {
+            title:data ? data.title : '',
+            bannerImg: data ? data.bannerImg : '',
+            upLoadIng:false,
+            buildupImgPath:buildupImgPath,
+            draftArry:[],
+            data:data
+        };
+        this.paint();
+        
+    }
+    public attach() {
+        const editer = document.querySelector('#editBox');
+        console.log(this.props.data);
+        // tslint:disable-next-line:no-inner-html
+        // tslint:disable-next-line:triple-equals
+        if (this.props.data.msg != null) {
+            // tslint:disable-next-line:no-inner-html
+            editer.innerHTML = this.props.data ? this.props.data.msg :'';
+            
+        }
+        // tslint:disable-next-line:triple-equals
+        if (this.props.data.body != null) {
+            // tslint:disable-next-line:no-inner-html
+            editer.innerHTML = this.props.data ? JSON.parse(this.props.data.body).msg :'';
+        }
+        
+    }
     /**
      * 文章标题
      */
@@ -92,7 +138,8 @@ export class NewArticle extends Widget {
         const editer = document.querySelector('#editBox');
         editer.focus();
         const filePath = src;
-        document.execCommand('insertHTML', false, `<img src ='${filePath}' />`);   
+        document.execCommand('insertHTML', false, `<div></div></div><img src ='${filePath}' />`);
+
     }
 
     /**
@@ -118,5 +165,71 @@ export class NewArticle extends Widget {
 
             return;
         }
+        const value = {
+            msg,
+            imgs: this.props.bannerImg,
+            date: new Date().getTime()
+        };
+        const num = getStore('flags',{}).num;
+        sendActicle(num, 0, this.props.title,JSON.stringify(value)).then((res:any) => {
+            if (res.num === num) {
+                popNewMessage('提交成功');
+                this.props.title = '';
+                this.props.bannerImg = '';
+                editer.innerHTML = '';
+                this.paint();
+            } else {
+                popNewMessage('提交失败');
+            }
+        });
+        
+    }
+    /**
+     * 保存草稿
+     */
+    public saveAsDraft() {
+
+        const editer = document.querySelector('#editBox');
+        const msg = editer.innerHTML;
+        if (!this.props.title) {
+            popNewMessage('标题不能为空');
+
+            return;
+        }
+
+        if (!this.props.bannerImg) {
+            popNewMessage('请上传banner图');
+
+            return;
+        }
+        
+        if (!msg) {
+            popNewMessage('内容不能为空');
+
+            return;
+        }
+        const draft = {
+            title : this.props.title,
+            msg: msg,
+            bannerImg : this.props.bannerImg,
+            time: new Date().getTime()
+        };
+        // 获取当前indexdb中的草稿内容
+        const tempDraftArray = this.props.draftArry;
+        // 控制数组长度为六
+        while (tempDraftArray.length > 5) {
+            tempDraftArray.pop;
+        }
+        // 放入当前草稿内容
+        tempDraftArray.push(draft);
+        setStore('draft',tempDraftArray);
+        this.props.title = '';
+        this.props.bannerImg = '';
+        editer.innerHTML = '';
+        this.paint();
+    }
+    // 返回
+    public goBack(fg:boolean,e:any) {
+        notify(e.node,'ev-goBack',{ fg });
     }
 }

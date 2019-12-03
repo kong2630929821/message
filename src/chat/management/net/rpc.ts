@@ -1,11 +1,14 @@
-import { buildupImgPath } from '../../client/app/logic/logic';
-import { PostKey } from '../../server/data/db/community.s';
+import { buildupImgPath, judgeFollowed, judgeLiked } from '../../client/app/logic/logic';
+import { parseEmoji } from '../../client/app/logic/tools';
+import { CommentKey, PostKey } from '../../server/data/db/community.s';
 import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, PostListArg, PublicApplyListArg, PunishArg, ReportDetailListArg, ReportListArg, RootUser } from '../../server/data/db/manager.s';
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { addApp, cancelGmAccount, createHighAcc, createRoot, delApp, findUser, getApplyPublicList, getMsgReply, getOfficialAcc, getPostList, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
-import { AddAppArg, SetAppConfig } from '../../server/data/rpc/manager.s';
+import { commentLaudPost, getCommentLaud, getFollowPublicPost, getPostInfoByIds, getUserPost, showCommentPort, showLaudLog } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommType, IterCommentArg, IterLaudArg, IterPostArg, LaudLogArr, PostArr, PostKeyList } from '../../server/data/rpc/community.s';
+import { addApp, addCommentPost, cancelGmAccount, createHighAcc, createRoot, delApp, delCommentPost, findUser, getApplyPublicList, getMsgReply, getOfficialAcc, getPostList, getPostType, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
+import { AddAppArg, GetpostTypeArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { SetOfficial } from '../../server/data/rpc/user.s';
 import { erlangLogicIp } from '../config';
@@ -73,6 +76,9 @@ export const getAllPostList = (count:number,id:number,num:string) => {
             data.list.forEach((v,i) => {
                 data.list[i].createtime = timestampFormat(JSON.parse(v.createtime));
                 data.list[i].avatar = data.list[i].avatar ? buildupImgPath(v.avatar) :'';
+                data.list[i].banner = JSON.parse(data.list[i].body).imgs;
+                data.list[i].body = JSON.parse(data.list[i].body).msg;
+
             });
             res(data);
         });
@@ -307,6 +313,15 @@ export const getOfficialList = (appid:string = '') => {
     });
 };
 
+// 获取用户信息
+export const getUserInfo = (uid:number) => {
+    return new Promise((res,rej) => {
+        clientRpcFunc(getReportDetail,uid,(r:any) => {
+            res(deelUserInfo(JSON.parse(r)));
+        });
+    });
+};
+
 /**
  * 设置好嗨客服
  */
@@ -386,6 +401,37 @@ export const getReportUserInfo = (uid:number) => {
     });
 };
 
+// 管理端发文章
+export const sendActicle = (num: string, postType: number, title: string, body: string) => {
+    const arg = new AddPostArg();
+    arg.num = num;
+    arg.post_type = postType;
+    arg.title = title;
+    arg.body = body;
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(sendPost,arg,(r:any) => {
+            res(r);
+        });
+    });
+};
+
+// 管理端获取当前用户所发文章
+export const getPubActicle = (count:number,id:number,num:string,postType:number) => {
+    const arg = new GetpostTypeArg();
+    arg.count = count;
+    arg.id = id;
+    arg.num = num;
+    arg.post_type = postType;
+    console.log(arg);
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(getPostType,arg,(r:any) => {
+            res(r);
+        };
+    });
+};
+
 /**
  * 用户详情 
  */
@@ -443,4 +489,165 @@ export const getMessageReply = (key:string) => {
             res(r);
         });
     });
+};
+
+/**
+ * 获取最新的评论
+ * id=0表示从最新的一条数据获取count条数据
+ */
+export const showComment = (num:string, post_id:number, id:number = 0, count:number = 20) => {
+    const arg = new IterCommentArg();
+    arg.count = count;
+    arg.id = id;
+    arg.num = num;
+    arg.post_id = post_id;
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(showCommentPort,arg,(r:CommentArr) => {
+            console.log('showComment===========',r);
+            if (r && r.list && r.list.length) {
+                resolve(r.list);
+            } else {
+                reject();
+            }
+        });
+    });
+};
+
+/**
+ * 获取最新点赞记录
+ */
+export const showLikeList = (num:string,post_id:number,uid:number= 0,count:number= 20) => {
+    const arg = new IterLaudArg();
+    arg.num = num;
+    arg.post_id = post_id;
+    arg.uid = uid;
+    arg.count = count;
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(showLaudLog,arg,((r:LaudLogArr) => {
+            console.log('showLikeList===========',r);
+            if (r && r.list) {
+                resolve(r.list);
+            } else {
+                reject();
+            }
+        }));
+    });
+};
+
+/**
+ * 获取某条帖子中评论点赞记录
+ */
+export const getCommentLaudList = (num:string,id:number) => {
+    const param = new PostKey();
+    param.id = id;
+    param.num = num;
+    
+    return new Promise((res,rej) => {
+        clientRpcFunc(getCommentLaud,param,r => {
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/** 
+ * 获取帖子详情
+ */
+export const getPostDetile = (num:string,id:number) => {
+    const arg = new PostKeyList();
+    const postKey1 = new PostKey();
+    postKey1.num = num;
+    postKey1.id = id;
+    arg.list = [postKey1];
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getPostInfoByIds,arg,(r:PostArr) => {
+            console.log('getPostInfoByIds=============',r);
+            if (r && r.list) {
+                const data:any = r.list;
+
+                data.forEach((res,i) => {
+                    data[i].offcial = res.comm_type === CommType.official;
+                    data[i].isPublic = res.comm_type === CommType.publicAcc;
+                    const body = JSON.parse(res.body);
+                    data[i].content = parseEmoji(body.msg);
+                    data[i].imgs = body.imgs;
+                    data[i].followed = judgeFollowed(res.key.num);
+                    data[i].likeActive = judgeLiked(res.key.num,res.key.id);
+                });
+                res(data);
+            } else {
+                rej();
+            }
+        });
+    });
+        
+};
+
+/**
+ * 评论点赞
+ */
+export const commentLaud = (num: string, post_id: number, id: number,fail?:any) => {
+    const arg = new CommentKey();
+    arg.num = num;
+    arg.id = id;
+    arg.post_id = post_id;
+    clientRpcFunc(commentLaudPost,arg,(r:boolean) => {
+        if (r) {
+            console.log('commentLaud============',r);
+        } else {
+            fail && fail();
+        }
+    });
+};
+
+/**
+ * 评论
+ */
+export const addComment = (num: string, post_id: number,  msg:string,  reply: number, comment_type: number) => {
+    const arg = new AddCommentArg();
+    arg.num = num;
+    arg.comment_type = comment_type;
+    arg.msg = msg;
+    arg.post_id = post_id;
+    arg.reply = reply;
+
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(addCommentPost,arg,(r:CommentKey) => {
+            console.log('addCommentPost==========',r);
+            if (r && r.num) {
+                resolve(r);
+            } else {
+                reject();
+            }
+        });
+    });
+    
+};
+
+/**
+ *  删除评论
+ */
+export const delComment = (num:string,post_id:number,id:number) => {
+    const arg = new CommentKey();
+    arg.num = num;
+    arg.post_id = post_id;
+    arg.id = id;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(delCommentPost,arg,(r) => {
+            console.log('delCommentPost=============',r);
+            if (r === 1) {
+                res(r);
+            } else {
+                rej();
+            }
+        });
+    });
+   
 };

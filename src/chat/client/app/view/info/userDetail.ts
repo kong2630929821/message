@@ -155,7 +155,6 @@ export class UserDetail extends Widget {
                 this.props.medalList = r.medals;
                 this.paint();
             }
-           
         });
         getUserRecentGame(this.props.userInfo.acc_id,5).then(r => {
             this.props.gameList = r;   // 游戏
