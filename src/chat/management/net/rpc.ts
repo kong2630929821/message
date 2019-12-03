@@ -5,14 +5,14 @@ import { HandleApplyPublicArg, handleArticleArg, MessageReply, ModifyPunishArg, 
 import { UserInfo } from '../../server/data/db/user.s';
 import { login as loginUser } from '../../server/data/rpc/basic.p';
 import { LoginReq, UserType, UserType_Enum } from '../../server/data/rpc/basic.s';
-import { commentLaudPost, getCommentLaud, getFollowPublicPost, getPostInfoByIds, getUserPost, showCommentPort, showLaudLog } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommType, IterCommentArg, IterLaudArg, IterPostArg, LaudLogArr, PostArr, PostKeyList } from '../../server/data/rpc/community.s';
+import { commentLaudPost, getCommentLaud, getPostInfoByIds, showCommentPort, showLaudLog } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommType, IterCommentArg, IterLaudArg, LaudLogArr, PostArr, PostKeyList } from '../../server/data/rpc/community.s';
 import { addApp, addCommentPost, cancelGmAccount, createHighAcc, createRoot, delApp, delCommentPost, findUser, getApplyPublicList, getMsgReply, getOfficialAcc, getPostList, getPostType, getReportDetail, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, mdfPwd, modifyPunish, punish, reportHandled, reversePost, rootLogin, sendPost, setAppConfig, setGmAccount, setMsgReply, showUsers } from '../../server/data/rpc/manager.p';
 import { AddAppArg, GetpostTypeArg, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { getReportListR } from '../../server/data/rpc/message.s';
 import { SetOfficial } from '../../server/data/rpc/user.s';
 import { erlangLogicIp } from '../config';
-import { deelGetOfficialList, deelGetUserDetail, deelReportList, deelReportListInfo, deelUserInfo, deelUserInfoReport, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
+import { deelGetOfficialList, deelGetUserDetail, deelReportList, deelReportListInfo, deelUserInfoReport, REPORT, timestampFormat, unicode2ReadStr } from '../utils/logic';
 import { clientRpcFunc } from './login';
 
 /**
@@ -313,15 +313,6 @@ export const getOfficialList = (appid:string = '') => {
     });
 };
 
-// 获取用户信息
-export const getUserInfo = (uid:number) => {
-    return new Promise((res,rej) => {
-        clientRpcFunc(getReportDetail,uid,(r:any) => {
-            res(deelUserInfo(JSON.parse(r)));
-        });
-    });
-};
-
 /**
  * 设置好嗨客服
  */
@@ -428,7 +419,7 @@ export const getPubActicle = (count:number,id:number,num:string,postType:number)
     return new Promise((res,rej) => {
         clientRpcFunc(getPostType,arg,(r:any) => {
             res(r);
-        };
+        });
     });
 };
 
