@@ -1,6 +1,6 @@
 import { Widget } from '../../../pi/widget/widget';
 import { buildupImgPath, rippleShow } from '../../client/app/logic/logic';
-import { deepCopy, getStore } from '../store/memstore';
+import { getStore } from '../store/memstore';
 import { popNewMessage } from '../utils/logic';
 import { ListItem } from '../view/page/application/thirdApplication';
 
@@ -22,7 +22,6 @@ export class AddApplicationModule extends Widget {
         title:'添加推荐应用',
         input:'',
         appItem:{
-            accId: '',
             appid: '',
             buttonMod: 1,
             desc: '',
@@ -38,7 +37,6 @@ export class AddApplicationModule extends Widget {
         checked:false,
         appList:[
             {
-                accId: '',
                 appid: '',
                 buttonMod: 1,
                 desc: '',

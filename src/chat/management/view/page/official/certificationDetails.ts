@@ -13,12 +13,12 @@ interface Props {
     currentIndex:number;// 当前页数
     expandIndex:boolean;// 控制分页显示隐藏
     perPageIndex:number;// 每页显示多少个的下标
-    showDataList:any;// 表格内容
-    showTitleList:any;// 表格标题
-    dataList:any;// 全部数据
-    currentData:any;// 一级页面传来的数据
-    userInfo:any;// 用户信息
-    buildupImgPath:any;  // 组装图片路径
+    showDataList:any[];// 表格内容
+    showTitleList:string[];// 表格标题
+    dataList:any[];// 全部数据
+    currentData:Object;// 一级页面传来的数据
+    userInfo:Object;// 用户信息
+    buildupImgPath:Function;  // 组装图片路径
 }
 
 /**

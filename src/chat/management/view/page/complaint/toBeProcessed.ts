@@ -1,7 +1,8 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
 import { getAllReport } from '../../../net/rpc';
-import { deepCopy, REPORT } from '../../../utils/logic';
+import { deepCopy } from '../../../store/memstore';
+import { REPORT } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
@@ -12,17 +13,17 @@ interface Props {
     perPageIndex:number;// 每页显示多少个的下标
     returnStatus:number;// 选择的类型
     showDataList:any;// 表格内容
-    showTitleList:any;// 表格标题
+    showTitleList:string[];// 表格标题
     status:boolean;// true列表页面 false详情页面
-    reportDataListId:any;// 表格原始数据
-    reportDataList:any;// 举报当前原始数据
-    allList:any;// 举报全部数据
-    allId:any;// 举报全部的ID
-    currentDataId:any;// 当前处理的数据ID
+    reportDataListId:[];// 表格原始数据
+    reportDataList:[];// 举报当前原始数据
+    allList:[[],[],[]];// 举报全部数据
+    allId:[[],[],[]];// 举报全部的ID
+    currentDataId:[];// 当前处理的数据ID
     returnDeel:number;// 0待处理  1已处理
-    allBtnGroup:any;// 按钮组全部
-    btnGroup:any;// 按钮组
-    showDataBtn:any;// 当前按钮组
+    allBtnGroup:[[],[],[]];// 按钮组全部
+    btnGroup:string[];// 按钮组
+    showDataBtn:string[];// 当前按钮组
 }
 
 const title = [
@@ -46,11 +47,11 @@ export class ToBeProcessed extends Widget {
         status:true,
         reportDataListId:[],
         reportDataList:[],
-        allId:[[],[]],
+        allId:[[],[],[]],
         allList:[[],[],[]],
         currentDataId:[],
         returnDeel:0,
-        allBtnGroup:[],
+        allBtnGroup:[[],[],[]],
         btnGroup:[],
         showDataBtn:[]
     };
@@ -83,8 +84,11 @@ export class ToBeProcessed extends Widget {
             default:
         }
         getAllReport(this.props.returnDeel,dataType).then((r:any) => {
+            // 举报全部数据 0玩家 1动态 2文章
             this.props.allList[i] = r[0];
+            // 举报全部数据的id 0玩家 1动态 2文章
             this.props.allId[i] = r[1];
+            // 举报全部数据的处理结果 0玩家 1动态 2文章
             this.props.allBtnGroup[i] = r[2];
             if (i === this.props.returnStatus) {
                 // 表格标题

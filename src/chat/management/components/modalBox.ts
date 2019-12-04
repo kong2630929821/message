@@ -4,8 +4,8 @@ import { popNewMessage } from '../utils/logic';
 import { rippleShow } from '../utils/tools';
 
 interface Props {
-    checkTypeList:any;// 处罚类型
-    reason:any;// 选择驳回原因
+    checkTypeList:string[];// 处罚类型
+    reason:string[];// 选择驳回原因
     msg:string;// 客服回复的话
     title:string;// 标题
     avatar:string;// 头像
@@ -81,6 +81,7 @@ export class ModalBox extends Widget {
         if (this.props.checkedType) {
             reason = this.props.reason[this.props.currentReason];
         }
+        // 审核通过传ture 
         getHandleArticle(this.props.checkedType ? false :true,reason,this.props.key.id,this.props.key.num).then(r => {
             if (r === 1) {
                 popNewMessage('审核成功');
