@@ -393,10 +393,10 @@ export const getReportUserInfo = (uid:number) => {
 };
 
 // 管理端发文章
-export const sendActicle = (num: string, postType: number, title: string, body: string) => {
+export const sendActicle = (num: string, title: string, body: string) => {
     const arg = new AddPostArg();
     arg.num = num;
-    arg.post_type = postType;
+    arg.post_type = CommType.official;
     arg.title = title;
     arg.body = body;
     

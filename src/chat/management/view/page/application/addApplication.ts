@@ -309,7 +309,7 @@ export class AddApplication extends Widget {
         const desc = {
             subtitle:encodeUnicode(this.props.subtitle),// 副标题
             webviewName:this.props.webViewName,
-            buttonMod:this.props.checkBubble ? 1 :2,// 气泡样式
+            buttonMod:this.props.checkBubble ? 1 : 2,// 气泡样式
             // accId:this.props.customer,
             groupId:'',
             appid:this.props.appId,

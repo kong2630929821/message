@@ -346,6 +346,8 @@ export class SquareItem extends Widget {
      * 解析公众号文章内容
      */
     public parseContent(content:any) {
+        console.log(content);
+        
         return JSON.parse(content);
     }
 }

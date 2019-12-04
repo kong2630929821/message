@@ -27,6 +27,7 @@ interface Props  {
     dealData:any;
     gameLabel:any;
     buildupImgPath:any;
+    parseContent: Function; // 解析文章内容
 }
 
 // tslint:disable-next-line:completed-docs
@@ -43,7 +44,9 @@ export class Square extends Widget {
             bg:'',
             num:0
         },
-        buildupImgPath:buildupImgPath    
+        buildupImgPath:buildupImgPath,
+        parseContent:this.parseContent
+
     };    
 
     constructor() {
@@ -255,6 +258,15 @@ export class Square extends Widget {
                 });
             }
         });
+    }
+
+    /**
+     * 解析公众号文章内容
+     */
+    public parseContent(content:any) {
+        console.log(content);
+        
+        return JSON.parse(content);
     }
 }
 

@@ -10,8 +10,8 @@ import { rippleShow } from '../../utils/tools';
  */
 export class Login extends Widget {
     public props:any = {
-        name:'10001@2',
-        pwd:'fXhmuD'
+        name:'',
+        pwd:''
     };
 
     public nameChange(e:any) {
@@ -80,6 +80,7 @@ export class Login extends Widget {
 
         // 判断权限
         const account = this.props.name.split('@');
+        // 存在@符号的账号则为官方账号 num为账号中@符号后的字段 uid为@符号前的字段
         if (account[1]) {
 
             // 官方账号
