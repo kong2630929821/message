@@ -7,22 +7,40 @@ import { popNewMessage } from '../../../utils/logic';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {
-    data:any;// 处理的数据
-    userName:any;// 被举报人
+    data:[];// 处理的数据
+    userName:UserName[];// 被举报人
     state:number;// 处理的类型
-    reportInfoList:any;// 举报信息列表
+    reportInfoList:[];// 举报信息列表
     sum:number;// 数据条数
     perPage:number;// 每页显示多少条数据
     currentIndex:number;// 当前页数
     expandIndex:boolean;// 控制分页显示隐藏
     perPageIndex:number;// 每页显示多少个的下标
     showDataList:any[];// 当前页展示的数据
-    dynamic:any;// 动态文章评论详情
+    dynamic:Dynamic;// 动态文章评论详情
     key:string;// 惩罚所需要key
     returnDeel:number;// 0待处理  1已处理
     id:string;// 处罚id%用户ID
     isShowBtn:boolean;// 是否显示处罚按钮
 
+}
+interface UserName {
+    key:string;
+    value:any;
+    fg?:number;
+}
+
+// 动态文章评论详情
+interface Dynamic {
+    avatar:string;// 头像
+    name:string;// 名字
+    like:number;// 点赞
+    commentCount:number;// 评论数
+    time:string;// 时间
+    count:number;
+    msg:string;// 内容
+    imgs:string[];// 图片
+    title:string;// 标题
 }
 
 /**
@@ -49,7 +67,8 @@ export class ToBeProcessedInfo extends Widget {
             time:'',
             count:0,
             msg:'',
-            imgs:[]
+            imgs:[],
+            title:''
         },
         key:'',
         returnDeel:0,
@@ -69,10 +88,15 @@ export class ToBeProcessedInfo extends Widget {
     // 初始化数据
     public initData() {
         getAllReportInfo(this.props.data,this.props.state).then(r => {
+            // 动态文章评论详情
             this.props.dynamic = r[0];
+            // 被举报人
             this.props.userName = r[1];
+            // 举报信息列表
             this.props.reportInfoList = r[2];
+            // 惩罚所需要key
             this.props.key = r[3];
+            // 处罚id%用户ID
             this.props.id = r[4];
             // 判断是否显示操作按钮
             if (JSON.parse(r[4].split('%')[0]) === 0 && this.props.returnDeel === 1) {

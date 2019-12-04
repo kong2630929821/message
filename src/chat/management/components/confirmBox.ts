@@ -9,7 +9,7 @@ interface Props {
     prompt:string;// 提示
     btn1:string;// 按钮1
     btn2:string;// 按钮2
-    invalid:number;// 投诉不成立
+    invalid:number;// 投诉不成立 -1表示二次确认框
     id:number;// 投诉的ID
     key:string;
 }
