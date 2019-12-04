@@ -70,20 +70,6 @@
                     {{end}}
                 </div>
 
-                {{%===================个人动态============================}}
-                {{if it.isOwner}}
-                <div w-class="title">
-                    <span w-class="mark"></span>
-                    <span style="flex:1 0 0;">个人动态</span>
-                </div>
-                <div ev-closeTools="pageClick" ev-change-tag="changeTag">
-                    {{for i,v of it.postList}}
-                    <div ev-goDetail="goDetail({{i}})" ev-tools-expand="expandTools(e,{{i}})" ev-likeBtn="likeBtn({{i}})" ev-commentBtn="commentBtn({{i}})" ev-delBtn="delPost({{i}})">
-                        <widget w-tag="chat-client-app-view-home-squareItem" style="margin-top:20px;">{{it.dealData(v,it.expandItem == i,it.followed)}}</widget>
-                    </div>
-                    {{end}}
-                </div>
-                {{end}}
             </div>
         </div>
     </div>
@@ -104,6 +90,7 @@
         {{else}}
         <div w-class="option" on-tap="toolOperation(1)">修改备注</div>
         <div w-class="option" on-tap="toolOperation(2)">举报玩家</div>
+        <div w-class="option" on-tap="toolOperation(3)">{{it.blackPerson ? "移出黑名单" :"加入黑名单"}}</div>
         {{end}}
     </div>
 </div>

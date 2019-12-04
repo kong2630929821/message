@@ -1,8 +1,7 @@
 import { Widget } from '../../../../../pi/widget/widget';
 import { perPage } from '../../../components/pagination';
 import { getAllGameInfo, getAllGameList } from '../../../net/rpc';
-import { getStore, setStore } from '../../../store/memstore';
-import { deepCopy } from '../../../utils/logic';
+import { deepCopy, getStore, setStore } from '../../../store/memstore';
 import { rippleShow } from '../../../utils/tools';
 
 interface Props {

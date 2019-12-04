@@ -1,6 +1,7 @@
-import { popModalBoxs } from '../../../../../pi/ui/root';
+import { popModalBoxs, popNew } from '../../../../../pi/ui/root';
 import { notify } from '../../../../../pi/widget/event';
 import { Widget } from '../../../../../pi/widget/widget';
+import { GENERATOR_TYPE } from '../../../../server/data/db/user.s';
 import { CommType } from '../../../../server/data/rpc/community.s';
 import { getStore } from '../../data/store';
 import { buildupImgPath, judgeFollowed } from '../../logic/logic';
@@ -12,10 +13,9 @@ interface Props {
     offical:boolean;  // 官方
     isPublic:boolean; // 公众号文章
     isMine:boolean;   // 是否本人
-    status:number;// 0 我的关注 1我的粉丝 2我的群组 3黑名单
-    data:any;
+    status:number; // 0 我的关注 1我的粉丝 2群成员 3黑名单 4创建群组选择用户
+    data:object;  // 用户信息
     checked:boolean;// 是否选中
-    index:number;// 当前下标
 }
 
 /**
@@ -33,7 +33,7 @@ export class FoolowItem extends Widget {
             },
             comm_info:{
                 num:'',
-                comm_type:1
+                comm_type:0
             }
         },
         avatar:'',
@@ -42,8 +42,7 @@ export class FoolowItem extends Widget {
         isPublic:false,
         isMine:false,
         status:-1,
-        checked:false,
-        index:-1
+        checked:false
     };
 
     public setProps(props:any) {
@@ -70,21 +69,40 @@ export class FoolowItem extends Widget {
                 follow(this.props.data.comm_info.num).then(r => {
                     this.props.followed = !this.props.followed;
                     this.paint();
+                }).catch(err => {
+                    console.log(err);
                 });
             });
         } else {
             follow(this.props.data.comm_info.num).then(r => {
                 this.props.followed = !this.props.followed;
                 this.paint();
+            }).catch(err => {
+                console.log(err);
             });
         }
         
     }
 
-    public check(e:any) {
-        if (this.props.isMine)return;
+    // 选择或取消
+    public checkOne(e:any) {
         this.props.checked = !this.props.checked; 
         this.paint();
-        notify(e.node,'ev-checked',{ value:this.props.index,fg:this.props.checked }); 
+        notify(e.node,'ev-checked',{ fg:this.props.checked }); 
+    }
+
+    // 去聊天
+    public goChat() {
+        popNew('chat-client-app-view-chat-chat', { id: this.props.data.user_info.uid, chatType: GENERATOR_TYPE.USER });
+    }
+
+    // 移出用户
+    public removeUser(e:any) {
+        notify(e.node,'ev-remove-user',{ value: this.props.data.user_info.uid }); 
+    }
+
+    // 查看详情
+    public goDetail(e:any) {
+        notify(e.node,'ev-goDetail-user',{ value: this.props.data.user_info.uid }); 
     }
 }

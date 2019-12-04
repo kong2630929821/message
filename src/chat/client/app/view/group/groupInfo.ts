@@ -113,6 +113,7 @@ export class GroupInfos extends Widget {
         store.register(`groupInfoMap/${this.props.gid}`,this.bindCB);
         store.register(`announceHistoryMap`,this.bindCB);
     }
+
     public goBack(fg:boolean = false) {
         this.ok && this.ok(fg);
     }
@@ -212,15 +213,12 @@ export class GroupInfos extends Widget {
         this.pageClick();
         popNew('chat-client-app-view-group-groupAnnounce',{ gid : this.props.gid });
     }
+
     // 打开群管理
     public openGroupManage() {
         this.props.showUtils = false;
         this.paint();
-        const ownerid = this.props.groupInfo.ownerid;
-        const adminids = this.props.groupInfo.adminids;
-        const uid = store.getStore('uid');
-        logger.debug('============openGroupManage',ownerid,adminids,uid);
-        if (ownerid === uid || adminids.indexOf(uid) > -1) {
+        if (this.props.isOwner || this.props.isAdmin) { // 群主或管理员
             popNew('chat-client-app-view-groupManage-groupManage',{ gid : this.props.gid });
         } else {
             popNewMessage('您没有权限执行此操作');
@@ -273,6 +271,7 @@ export class GroupInfos extends Widget {
             setting.msgAvoid.splice(index,1);
         }
         this.props.setting = setting;
+        this.refreshData();
         store.setStore('setting',setting);
         clientRpcFunc(setData,JSON.stringify(setting),(res) => {
             // TODO
@@ -303,6 +302,7 @@ export class GroupInfos extends Widget {
         });
     }
 
+    // 重新压入最近聊天记录
     public pushLastChat(fg:boolean,setting:any) {
         const lastChat = store.getStore(`lastChat`, []);
         const ind = lastChat.findIndex(item => item[0] === this.props.gid && item[2] === GENERATOR_TYPE.GROUP);
@@ -315,6 +315,15 @@ export class GroupInfos extends Widget {
         }
         store.setStore(`lastChat`,lastChat);
 
+    }
+
+    // 消息免打扰数据刷新
+    public refreshData() {
+        // 改变当前的时间 实现刷新
+        const lastChat = store.getStore(`lastChat`, []);
+        const ind = lastChat.findIndex(item => item[0] === this.props.gid && item[2] === GENERATOR_TYPE.GROUP);
+        ind > -1 && lastChat.splice(ind, 1, [this.props.gid, Date.now(), GENERATOR_TYPE.GROUP]); // 替换数据
+        store.setStore(`lastChat`,lastChat);
     }
 
     /**
@@ -356,6 +365,11 @@ export class GroupInfos extends Widget {
             });
         });
     }
+
+    // 邀请好友进群
+    public inviteUser() {
+        popNew('chat-client-app-view-group-inviteMember',{ gid:this.props.gid });
+    }
 }
 
 // ================================================ 本地
@@ -372,7 +386,7 @@ interface Props {
     editable:boolean; // 是否可编辑
     groupAlias:string; // 群别名
     isOwner:boolean; // 是否是群主
-    isAdmin:boolean;// 是否时管理员
+    isAdmin:boolean;// 是否是管理员
     scrollHeight:number; 
     setting:any; // 额外设置，免打扰|置顶
     msgTop:boolean; // 置顶

@@ -13,8 +13,8 @@ import { Contact, FrontStoreData, GENERATOR_TYPE, UserInfo } from '../../../serv
 import { getData, getFriendLinks, getGroupHistory, getGroupsInfo, getUserHistory, getUsersInfo, login as loginUser } from '../../../server/data/rpc/basic.p';
 // tslint:disable-next-line:max-line-length
 import { GetFriendLinksReq, GetGroupInfoReq, GetUserInfoReq, GroupArray, GroupHistoryArray, GroupHistoryFlag, LoginReq, Result, UserArray, UserHistoryArray, UserHistoryFlag, UserType, UserType_Enum, WalletLoginReq } from '../../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, applyPublicC, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoByComm, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, ApplyPublicArg, ChangeCommunity, CommentArr, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, applyPublicC, changeCommunity, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPostCount, getLaudPostList, getPostInfoByIds, getSquarePost, getUserInfoAndCommInfo, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, showUserFollowPort, userFollow } from '../../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, ApplyPublicArg, ChangeCommunity, CommentArr, CommNumOrUidList, CommType, CommunityNumList, CreateCommunity, IterCommentArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostKeyList } from '../../../server/data/rpc/community.s';
 // tslint:disable-next-line:max-line-length
 import { acceptUser, addAdmin, applyJoinGroup, createGroup as createNewGroup, delMember, dissolveGroup, searchGroup } from '../../../server/data/rpc/group.p';
 import { GroupAgree, GroupCreate, GroupInfoList, GuidsAdminArray } from '../../../server/data/rpc/group.s';
@@ -387,11 +387,16 @@ export const getGroupBasicInfo = (gids:number[]) => {
    
 };
 
-export const deleteGroupMember = () => {
-    const req = '11111:4';
-
-    clientRpcFunc(delMember, req, (r) => {
-        console.log(r);
+// 删除群成员
+export const deleteGroupMember = (guid:string) => {
+    return new Promise((resolve,reject) => {
+        clientRpcFunc(delMember, guid, (r) => {
+            if (r) {
+                resolve(r);
+            } else {
+                reject();
+            }
+        });
     });
 };
 
@@ -768,7 +773,7 @@ export const getUserPostList = (num:string,id:number = 0,count:number = 20) => {
  */
 export const getFollowList = (uid:number) => {
     return new Promise((res,rej) => {
-        clientRpcFunc(getFollowId,uid,r => {
+        clientRpcFunc(getFollowId,uid,(r:CommunityNumList) => {
             console.log('getFollowList=============',r);
             if (r && r.list) {
                 res(r.list);
@@ -784,7 +789,7 @@ export const getFollowList = (uid:number) => {
  */
 export const getFansList = (num:string) => {
     return new Promise((res,rej) => {
-        clientRpcFunc(getFansId,num,r => {
+        clientRpcFunc(getFansId,num,(r:CommunityNumList) => {
             console.log('getFansList=============',r);
             if (r && r.list) {
                 res(r.list);
@@ -812,15 +817,34 @@ export const getMyPublicNum = () => {
 };
 
 /**
- * 通过社区ID批量获取用户信息
+ * 通过社区ID批量获取用户信息及社区信息
  */
 export const getUserInfoByNum = (nums:string[]) => {
-    const param = new CommunityNumList();
-    param.list = nums;
+    const param = new CommNumOrUidList();
+    param.commList = nums;
 
     return new Promise((res,rej) => {
-        clientRpcFunc(getUserInfoByComm,param,(r) => {
-            console.log('getUserInfoByComm=============',r);
+        clientRpcFunc(getUserInfoAndCommInfo,param,(r) => {
+            console.log('getUserInfoByNum=============',r);
+            if (r && r.list) {
+                res(r.list);
+            } else {
+                rej();
+            }
+        });
+    });
+};
+
+/**
+ * 通过用户ID批量获取用户信息及社区信息
+ */
+export const getUserInfoByUid = (uids:number[]) => {
+    const param = new CommNumOrUidList();
+    param.uidList = uids;
+
+    return new Promise((res,rej) => {
+        clientRpcFunc(getUserInfoAndCommInfo,param,(r) => {
+            console.log('getUserInfoByUid=============',r);
             if (r && r.list) {
                 res(r.list);
             } else {

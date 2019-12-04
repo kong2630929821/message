@@ -7,7 +7,7 @@ import { Forelet } from '../../../../../pi/widget/forelet';
 import { Widget } from '../../../../../pi/widget/widget';
 import { getStore,PostItem, register, setStore } from '../../data/store';
 import { buildupImgPath } from '../../logic/logic';
-import { gameLabelNum, postLaud, showPost } from '../../net/rpc';
+import { gameLabelNum, showPost } from '../../net/rpc';
 
 export const forelet = new Forelet();
 export const WIDGET_NAME = module.id.replace(/\//g, '-');
@@ -225,7 +225,8 @@ export class Square extends Widget {
         this.props.postView[this.props.active][1].expandItem = -1;
         const page = document.getElementById('squarePage');
         const contain = document.getElementById('squareContain');
-        const fg = !this.props.postView[this.props.active][1].isLoading && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150;           
+        const fg = !this.props.postView[this.props.active][1].isLoading && (contain.offsetHeight - page.scrollTop - page.offsetHeight) < 150;      
+        console.log('square scrollpage fg: ',fg);     
         if (fg) {
             this.props.postView[this.props.active][1].isLoading = true;
             const list = this.props.postView[this.props.active][1].postList;

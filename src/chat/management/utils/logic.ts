@@ -444,34 +444,6 @@ export const penaltyText = (res:any,str:string) => {
 };
 
 /**
- * 判断是否是对象
- */
-const isObject = (value: any) => {
-    const vtype = typeof value;
-
-    return value !== null && (vtype === 'object' || vtype === 'function');
-};
-
-/**
- * 数据深拷贝
- */
-export const deepCopy = (v: any): any => {
-    if (!v || v instanceof Promise || !isObject(v)) return v;
-    if (v instanceof Map) {
-        return v;  // TODO 暂不对map做处理
-
-        // return new Map(JSON.parse(JSON.stringify(v)));
-    }
-
-    const newobj = v.constructor === Array ? [] : {};
-    for (const i in v) {
-        newobj[i] = isObject(v[i]) ? deepCopy(v[i]) : v[i];
-    }
-
-    return newobj;
-};
-
-/**
  * 处理官方账号列表
  */
 export const deelGetOfficialList = (r:any) => {

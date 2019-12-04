@@ -66,6 +66,10 @@ export const getLocalStorage = (key: string, defaultValue = undefined) => {
  * object转map
  */
 export const object2Map = (objData:Object) => {
+    if (objData instanceof Map) {
+        return objData;
+    }
+
     const res = new Map();
     for (const key of Object.getOwnPropertyNames(objData)) {
         res.set(key,objData[key]);

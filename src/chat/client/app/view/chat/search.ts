@@ -4,7 +4,7 @@ import { popNewMessage } from '../../../../../app/utils/pureUtils';
 import { deepCopy, popNew3 } from '../../../../../app/utils/tools';
 import { Widget } from '../../../../../pi/widget/widget';
 import * as store from '../../data/store';
-import { getUserAlias, getFriendsInfo, getUserAvatar, rippleShow, timestampFormat } from '../../logic/logic';
+import { getFriendsInfo, getUserAlias, getUserAvatar, rippleShow, timestampFormat } from '../../logic/logic';
 import { applyToGroup, applyUserFriend, follow, searchAllArticle, searchAllGroup, searchAllPost, searchAllUserInfo } from '../../net/rpc';
 
 interface Props {
@@ -251,7 +251,7 @@ export class Search extends Widget {
         // 搜索单聊
         for (const [key,value] of userHistory) {
             if (value.msg.indexOf(searchItem) !== -1) {
-                const name = getUserAlias(value.sid).name;
+                const name = getUserAlias(value.sid);
                 const avatar = getUserAvatar(value.sid) || '../../res/images/user_avatar.png';
                 const time = timestampFormat(value.time,1);
                 this.props.chatHistory.push({ text:name,img:avatar,msg:value.msg,sid:value.sid,time:time });                

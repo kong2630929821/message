@@ -111,6 +111,7 @@ export const login = (user: UserType): UserInfo => {
         // TODO 验证签名
         const userAccountBucket = new Bucket('file', CONSTANT.USER_ACCOUNT_TABLE);
         const v = userAccountBucket.get(openid)[0];
+        console.log('login userAccount v:',v);
         if (!v) {
             // 注册用户
             console.log('2222222222222222222222');

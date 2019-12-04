@@ -1,5 +1,5 @@
 <div class="new-page">
-    <div ev-back-click="goBack">
+    <div ev-back-click="goBack" style="background: #fff;">
         <chat-client-app-widget1-topBar-topBar3>{leftImg:"left_arrow_blue.png",title:"群管理",rightText:"" }</chat-client-app-widget1-topBar-topBar3>
     </div>
     <div w-class="group-manage-wrap" ev-openManageItem="openManageItem">

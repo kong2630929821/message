@@ -8,16 +8,18 @@
 
     <div w-class="group-info-wrap">
         {{for i,v of it.checkedList}}
-            <div style="margin-left:20px;">
-                <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar">{imgURL:{{v.user_info.avatar}}, width:"120px;"}</widget>
+            <div style="margin:20px 10px;">
+                <widget w-tag="chat-client-app-widget1-imgShow-imgShow" w-class="avatar">{imgURL:{{v.user_info.avatar}}, width:"80px;"}</widget>
             </div>
         {{end}}
     </div>
     
-    <div w-class="userList" ev-changeSelect="changeSelect">
-        <div w-class="a" ev-checked="checked">
-            {{for i,v of it.followData}}
-            <widget w-tag="chat-client-app-view-person-followItem">{data:{{v}},status:4,index:{{i}} }</widget>
+    <div w-class="userList">
+        <div w-class="a" >
+            {{for i,v of it.followAndFans}}
+            <div ev-checked="checked(e,{{i}})">
+                <widget w-tag="chat-client-app-view-person-followItem">{data:{{v}},status:4 }</widget>
+            </div>
             {{end}}
         </div>
     </div>

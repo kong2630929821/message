@@ -80,12 +80,12 @@
 .blackBtn{
     width:140px;
     height:60px;
-    background:rgba(204,204,204,1);
+    background:#4285F4;
     border-radius:6px;
     font-size:24px;
-    font-family:SourceHanSansCN-Normal,SourceHanSansCN;
     font-weight:400;
     color:rgba(255,255,255,1);
     text-align: center;
+    margin-right: 30px;
     line-height: 60px;
 }

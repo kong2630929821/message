@@ -99,7 +99,7 @@ export const subscribeLaudPost = (uid: number, cb) => {
  * 关注列表索引
  * @param uid uid
  */
-export const subscribeCommNum = (uid: number,cb) => {
+export const subscribeFollowNum = (uid: number,cb) => {
     subscribeTable(watchCommNum,'uid',uid,DEFAULT_ERROR_NUMBER,AttentionIndex,'followNumList',cb);    
 };
 

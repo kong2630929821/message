@@ -30,7 +30,7 @@
     {{elseif it.activeTab == 2}}
 
         {{% =================群====================}}
-        {{for i,v of it.groupList}}
+        {{for i,v of it1}}
         <widget w-tag="chat-client-app-widget-groupItem-groupItem">{gid:{{v}} }</widget>
         {{end}}
 
@@ -38,7 +38,9 @@
 
         {{% =================黑名单====================}}
         {{for i,v of it.blackList}}
-        <widget w-tag="chat-client-app-view-person-followItem">{blackList:{{v}},status:3}</widget>
+        <div ev-remove-user="removeUser">
+            <widget w-tag="chat-client-app-view-person-followItem">{data:{{v}},status:3}</widget>
+        </div>
         {{end}}
     {{end}}
     </div>

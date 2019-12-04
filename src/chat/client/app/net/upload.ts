@@ -12,6 +12,7 @@ export const uploadFile = async (file, successCb?:(imgUrlSuf:string) => void,fai
     return fetch(`${uploadFileUrl}?$forceServer=1`, {
         body: formData, // must match 'Content-Type' header
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers:{},   //
         mode: 'cors' // no-cors, cors, *same-origin
     }).then(res => {
         res.json().then(r => {

@@ -13,27 +13,6 @@ export const initAccount = () => {
     const sid = store.getStore('uid');
     initFileStore().then(() => {
         if (!sid) return;
-        // 最近会话列表
-        getFile(`${sid}-lastChat`, (value) => {
-            if (!value) return;
-            store.setStore('lastChat', value || []);
-        },() => {
-            console.log('read lastChat error');
-        });
-        // 已读消息记录
-        getFile(`${sid}-lastRead`, (value) => {
-            if (!value) return;
-            store.setStore('lastRead', value || new Map());
-        },() => {
-            console.log('read lastRead error');
-        });
-        // 额外设置信息
-        getFile(`${sid}-setting`, (value) => {
-            if (!value) return;
-            store.setStore('setting', value || null);
-        }, () => {
-            console.log('read setting error');
-        });
         // 单聊历史记录
         getFile(`${sid}-userChatMap`, (value) => {
             if (!value) return;
@@ -74,12 +53,34 @@ export const initAccount = () => {
         },() => {
             console.log('read groupUserLinkMap error');
         });
+
+        // 最近会话列表
+        getFile(`${sid}-lastChat`, (value) => {
+            if (!value) return;
+            store.setStore('lastChat', value || []);
+        },() => {
+            console.log('read lastChat error');
+        });
+        // 已读消息记录
+        getFile(`${sid}-lastRead`, (value) => {
+            if (!value) return;
+            store.setStore('lastRead', value || new Map());
+        },() => {
+            console.log('read lastRead error');
+        });
         // 已读消息通知
         getFile(`${sid}-lastReadNotice`, (value) => {
             if (!value) return;
             store.setStore('lastReadNotice', value);
         },() => {
             console.log('read lastReadNotice error');
+        });
+        // 额外设置信息
+        getFile(`${sid}-setting`, (value) => {
+            if (!value) return;
+            store.setStore('setting', value || null);
+        }, () => {
+            console.log('read setting error');
         });
         // 评论消息列表
         getFile(`${sid}-conmentList`, (value) => {
@@ -88,7 +89,7 @@ export const initAccount = () => {
         },() => {
             console.log('read conmentList error');
         });
-          // 点赞消息列表
+        // 点赞消息列表
         getFile(`${sid}-fabulousList`, (value) => {
             if (!value) return;
             store.setStore('fabulousList', value);
