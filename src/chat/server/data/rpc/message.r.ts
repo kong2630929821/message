@@ -329,6 +329,45 @@ export const moveGroupCursor = (gid: number, current: number) => {
 
 };
 
+
+/**
+ * 非好友发送单聊消息（关注用户发送消息）
+ * @param message user send
+ */
+// #[rpc=rpcServer]
+export const sendUserMessageAll = (message: UserSend): UserHistory => {
+    console.log('sendUserMessageAll!!!!!!!!!!!', message);
+    const sid = getUid();
+    const userHistory = new UserHistory();
+    // 过滤敏感词汇
+    if (message.mtype === MSG_TYPE.TXT) {
+        message.msg = filterWords(message.msg);
+    }
+
+    const userMsg = new UserMsg();
+    userMsg.cancel = false;
+    userMsg.msg = message.msg;
+    userMsg.mtype = message.mtype;
+    userMsg.read = false;
+    userMsg.send = true;
+    userMsg.sid = sid;
+    userMsg.time = Date.now();
+    userHistory.msg = userMsg;
+    
+    // 如果有禁言则不能发消息
+    const punishList = getUserPunishing(`${CONSTANT.REPORT_PERSON}%${sid}`, CONSTANT.BAN_MESAAGE);
+    if (punishList.list.length > 0) {
+        userHistory.hIncId = JSON.stringify(punishList);
+
+        return userHistory;
+    }
+
+    // 发送消息
+    sendMessage(message, userHistory);
+
+    return userHistory;
+};
+
 /**
  * 发送单聊消息
  * @param message user send

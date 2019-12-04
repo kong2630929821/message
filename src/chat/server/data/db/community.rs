@@ -196,3 +196,10 @@ struct PublicNameIndex{
     name: String,        // 公众号名
     num: String          // 社区编号
 }
+
+// 关注用户备注名
+#[primary=key,db=file,dbMonitor=true]
+struct FollowUserNote{
+    key: String,        // sUid:rUid
+    name: String          // 别名
+}

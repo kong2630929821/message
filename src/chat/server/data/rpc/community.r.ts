@@ -2,14 +2,14 @@ import { Env } from '../../../../pi/lang/env';
 import { Bucket } from '../../../utils/db';
 import { send } from '../../../utils/send';
 import * as CONSTANT from '../constant';
-import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LabelIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex } from '../db/community.s';
+import { AttentionIndex, Comment, CommentKey, CommentLaudLog, CommentLaudLogKey, CommunityAccIndex, CommunityBase, CommunityPost, CommunityUser, CommunityUserKey, FansIndex, LabelIndex, LaudPostIndex, Post, PostCount, PostKey, PostLaudLog, PostLaudLogKey, PublicNameIndex, FollowUserNote } from '../db/community.s';
 import { ApplyPublic, UserApplyPublic } from '../db/manager.s';
 import { UserInfo } from '../db/user.s';
 import { CANT_DETETE_OTHERS_COMMENT, CANT_DETETE_OTHERS_POST, COMMENT_NOT_EXIST, DB_ERROR, POST_NOT_EXIST } from '../errorNum';
 import { getIndexID } from '../util';
 import { getUsersInfo } from './basic.r';
-import { GetUserInfoReq } from './basic.s';
-import { AddCommentArg, AddPostArg,  ApplyPublicArg, ChangeCommunity, CommentArr, CommentData, CommentIDList, CommNumOrUidList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData } from './community.s';
+import { GetUserInfoReq, Result } from './basic.s';
+import { AddCommentArg, AddPostArg,  ApplyPublicArg, ChangeCommunity, CommentArr, CommentData, CommentIDList, CommNumOrUidList, CommunityNumList, CommUserInfo, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, LaudLogData, NumArr, PostArr, PostArrWithTotal, PostData, PostKeyList, ReplyData, SetUserNoteArg, ShowUserNoteArg } from './community.s';
 import { getUid } from './group.r';
 import { addManagerPostIndex, getUserPunishing } from './manager.r';
 import { getIndexId } from './message.r';
@@ -167,6 +167,45 @@ export const showUserFollowPort = (num_type:number):NumArr => {
     console.log('showUserFollowPort!!!!!', arr);
     
     return arr;
+};
+
+/**
+ * 设置关注用户别名
+ */
+// #[rpc=rpcServer]
+export const setUserNotePort = (arg: SetUserNoteArg): number => {
+    const uid = getUid();
+    const followUserNoteBucket = new Bucket(CONSTANT.WARE_NAME, FollowUserNote._$info.name);
+    const note = new FollowUserNote();
+    note.key = `${uid}:${arg.id}`;
+    note.name = arg.name;
+    if (followUserNoteBucket.put(note.key, note)) {
+
+        return CONSTANT.RESULT_SUCCESS;
+    } else {
+
+        return CONSTANT.DEFAULT_ERROR_NUMBER;
+    }
+};
+
+/**
+ * 批量获取用户别名
+ */
+// #[rpc=rpcServer]
+export const showUserNotePort = (arg: ShowUserNoteArg): ShowUserNoteArg => {
+    const uid = getUid();
+    const followUserNoteBucket = new Bucket(CONSTANT.WARE_NAME, FollowUserNote._$info.name);
+    const r = new ShowUserNoteArg();
+    r.ids = [];
+    arg.ids.forEach((id) =>{
+        const key = `${uid}:${id}`;
+        const note = followUserNoteBucket.get<string, FollowUserNote[]>(key)[0];
+        const name = note ? note.name : '';
+
+        r.ids.push(name);
+    });
+
+    return r;
 };
 
 /**
