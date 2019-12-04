@@ -208,3 +208,14 @@ struct ApplyPublicArg {
     avatar: Option<String>,  //头像
     desc: String,   //描述
 }
+
+// 设置别名
+struct SetUserNoteArg {
+    id: String,   // 社区ID或者用户ID
+    name: String,   //别名
+}
+
+// 获取别名
+struct ShowUserNoteArg {
+    ids: &[String],   // 社区ID或者用户ID
+}

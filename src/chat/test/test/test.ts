@@ -12,8 +12,8 @@ import { AddRobotArg, CommonComment, CommonCommentList, RobotActiveSet, RobotUse
 import { UserInfo } from '../../server/data/db/user.s';
 import { login } from '../../server/data/rpc/basic.p';
 import { Result, UserType, UserType_Enum, WalletLoginReq } from '../../server/data/rpc/basic.s';
-import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPost, getLabelPostCount, getPostInfoByIds, getSquarePost, getUserInfoAndCommInfo, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow } from '../../server/data/rpc/community.p';
-import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList } from '../../server/data/rpc/community.s';
+import { addCommentPost, addPostPort, commentLaudPost, createCommunityNum, delCommentPost, deletePost, getCommentLaud, getFansId, getFollowId, getLabelPost, getLabelPostCount, getPostInfoByIds, getSquarePost, getUserInfoAndCommInfo, getUserPost, getUserPublicAcc, postLaudPost, searchPost, searchPublic, showCommentPort, showLaudLog, userFollow, setUserNotePort, showUserNotePort } from '../../server/data/rpc/community.p';
+import { AddCommentArg, AddPostArg, CommentArr, CommunityNumList, CommUserInfoList, CreateCommunity, IterCommentArg, IterLabelPostArg, IterLaudArg, IterPostArg, IterSquarePostArg, LaudLogArr, NumArr, PostArr, PostArrWithTotal, PostKeyList, SetUserNoteArg, ShowUserNoteArg } from '../../server/data/rpc/community.s';
 import { addApp, cancelGmAccount, createRoot, getApplyPublicList, getOfficialAcc, getPostList, getReportDetailList, getReportList, getUserDetal, handleApplyPublic, handleArticle, modifyPunish, punish, reportHandled, rootLogin, setAppConfig, setGmAccount, getReportDetail } from '../../server/data/rpc/manager.p';
 import { AddAppArg, OfficialAccList, SetAppConfig } from '../../server/data/rpc/manager.s';
 import { report } from '../../server/data/rpc/message.p';
@@ -827,6 +827,28 @@ const props = {
             func: () => { 
                 const appid = '';
                 clientRpcFunc(getOfficialAcc, appid, (r: OfficialAccList) => {
+                    console.log(r);
+                }); 
+            }
+        },
+        {
+            name: '设置关注用户别名',
+            func: () => { 
+                const arg = new SetUserNoteArg();
+                arg.id = '1';
+                arg.name = '测试';
+                clientRpcFunc(setUserNotePort, arg, (r: number) => {
+                    console.log(r);
+                }); 
+            }
+        }
+        ,
+        {
+            name: '获取关注用户别名',
+            func: () => { 
+                const arg = new ShowUserNoteArg();
+                arg.ids = ['1']; // 批量获取用户别名，传入需要获取的ID
+                clientRpcFunc(showUserNotePort, arg, (r: ShowUserNoteArg) => {
                     console.log(r);
                 }); 
             }
