@@ -166,7 +166,7 @@ export class Contact extends SpecialWidget {
         // gotoGameService('fairyChivalry');
         // gotoOfficialGroupChat('fairyChivalry');
         if (this.props.isLogin) {
-            if (this.props.activeTab === TAB.square && !this.state.pubNum) {
+            if (this.props.activeTab === TAB.square) {
                 let label = {
                     name:'',
                     icon:''

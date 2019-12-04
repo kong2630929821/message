@@ -99,6 +99,7 @@ export class Home extends Widget {
             secondaryPage:false,
             auth:getStore('flags/auth')
         };
+        // 根据当前登录的用户不同来控制页面显示的项
         this.props.auth.forEach(v => {
             pages.forEach(t => {
                 if (RightsGroupsShow[RightsGroups[v]] === t.name) {

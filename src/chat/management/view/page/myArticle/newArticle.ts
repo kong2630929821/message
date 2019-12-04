@@ -8,12 +8,19 @@ import { sendActicle } from '../../../net/rpc';
 import { getStore, setStore } from '../../../store/memstore';
 import { popNewMessage } from '../../../utils/logic';
 interface Props {
-    data: object; // 保存父组件传递的数据
+    data: DataType; // 保存父组件传递的数据
     title:string;// 文章标题
     bannerImg:string;// 文章banner
     upLoadIng:boolean;// 正在上传图片
     buildupImgPath:Function;// 图片路径
     draftArry:any[];// 草稿文章数组 
+}
+interface DataType {
+    bannerImg: string;
+    msg: string;
+    time: number;
+    title: string;
+    body?: string;
 }
 
 /**
@@ -27,7 +34,13 @@ export class NewArticle extends Widget {
         upLoadIng:false,
         buildupImgPath:buildupImgPath,
         draftArry:[],
-        data:{}
+        data:{
+            bannerImg: '',
+            msg: '',
+            time: 0,
+            title: '',
+            body:''
+        }
     };
     public setProps(props:any) {
         this.props = {
@@ -81,6 +94,7 @@ export class NewArticle extends Widget {
      * 上传图片
      */
     public uploadImg(index:number,e:any) {
+        
         if (!(<any>getRealNode(e.node)).files) {
             return; 
         }
@@ -96,31 +110,28 @@ export class NewArticle extends Widget {
     
             // 正在上传动画
             this.props.upLoadIng = true;
-    
-            uploadFile(file,(imgurl:string) => {
-                console.log('上传图片成功',imgurl);
-                this.props.bannerImg = imgurl;
-                this.props.upLoadIng = false;
-                this.paint();
-            }).catch(err => {
-                console.log('上传图片失败',err);
-                this.props.upLoadIng = false;
-                popNewMessage('上传图片失败');
-                this.paint();
-            });
-            this.paint();
-        } else {
-            // 插入图片
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-
-            reader.onloadend = (ev:any) => {
-
-                this.addImg(ev.target.result);
-
-            };
         }
         
+        // 开始上传图片
+        uploadFile(file,(imgurl:string) => {
+            console.log('上传图片成功',imgurl);
+            if (index === 0) {
+                // banner图上传
+                this.props.bannerImg = imgurl;
+                this.props.upLoadIng = false;
+            } else {
+                // 文章正文图片上传
+                this.addImg(buildupImgPath(imgurl));
+            }
+            this.paint();
+        }).catch(err => {
+            console.log('上传图片失败',err);
+            if (index === 0) {
+                this.props.upLoadIng = false;
+            }
+            popNewMessage('上传图片失败');
+            this.paint();
+        });
     }
 
     /**
@@ -138,8 +149,14 @@ export class NewArticle extends Widget {
         const editer = document.querySelector('#editBox');
         editer.focus();
         const filePath = src;
-        document.execCommand('insertHTML', false, `<div></div></div><img src ='${filePath}' />`);
-
+        document.execCommand('insertHTML', false, `<img style="display: block;max-width: 100%;max-height: 100%;" src ='${filePath}' />`);
+        // 图片插入成功后置空input使其下次能触发onChange
+        document.querySelector('#bodyImg').value = '';
+        // 滚到底部
+        setTimeout(() => {
+            const editer = document.querySelector('#editBox');
+            editer.scrollTop = editer.scrollHeight;
+        },100);
     }
 
     /**
@@ -171,7 +188,7 @@ export class NewArticle extends Widget {
             date: new Date().getTime()
         };
         const num = getStore('flags',{}).num;
-        sendActicle(num, 0, this.props.title,JSON.stringify(value)).then((res:any) => {
+        sendActicle(num, this.props.title,JSON.stringify(value)).then((res:any) => {
             if (res.num === num) {
                 popNewMessage('提交成功');
                 this.props.title = '';

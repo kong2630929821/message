@@ -25,9 +25,9 @@ export interface ListItem {
     screenMode: string;
     subtitle: string;
     title: string;
-    url:string;
+    url: string;
     webviewName: string;
-    time:string;
+    time: string;
 }
 /**
  * 第三方应用列表
@@ -60,8 +60,7 @@ export class ThirdApplication extends Widget {
         // 获取全部游戏
         getAllGameList().then(r => {
             if (r.length) {
-                const appId = JSON.stringify(r);
-                getAllGameInfo(appId).then(r => {
+                getAllGameInfo(r).then(r => {
                     setStore('appList',r);
                     this.props.dataList = r;
                     this.props.showDataList = this.props.dataList.slice(this.props.currentIndex,this.props.perPage);

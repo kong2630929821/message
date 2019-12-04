@@ -88,7 +88,7 @@ export const REVIEW_PASS = 3;      // 审核通过
 export const REVIEW_REFUSE = 4;    // 审核驳回
 
 // 钱包服务器地址
-export const WALLET_SERVER_URL = 'http://127.0.0.1:8099';
+export const WALLET_SERVER_URL = 'http://39.98.48.66:8099';
 // appid
 export const WALLET_APPID = '10';
 // 私钥

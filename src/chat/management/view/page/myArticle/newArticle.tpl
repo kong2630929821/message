@@ -5,7 +5,7 @@
         <div w-class="appName">标题</div>
         <div w-class="inputBox">
             <div w-class="input" ev-input-change="inputChangeName">
-                <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"应用名称",input:{{it.title}},maxLength:10}</widget>
+                <widget w-tag="chat-management-components-input">{itype:"text",placeHolder:"应用名称",input:{{it.title}},maxLength:30}</widget>
             </div>
             <div w-class="info">* 6-30字</div>
         </div>
@@ -40,7 +40,7 @@
                 <div w-class="uploadImgTitle">
                     <img src="../../../res/images/addImg.png" alt="" w-class="addImg"/>
                     <div w-class="addImgDesc">插入图片</div>
-                    <input type="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" w-class="inputFile" on-change="uploadImg(1,e)"/>
+                    <input id = "bodyImg" type="file" accept="image/gif,image/jpeg,image/jpg,image/png,image/svg" w-class="inputFile" on-change="uploadImg(1,e)"/>
                 </div>
             </div>
             <div contenteditable="true" w-class="editBox" id="editBox" class="editor" on-input="editBoxChange" on-keydown="editorTap" on-paste="onpaste" ></div>
